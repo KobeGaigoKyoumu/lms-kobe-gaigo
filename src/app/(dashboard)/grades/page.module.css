@@ -1,0 +1,186 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-6);
+}
+
+.title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+}
+
+.statCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-5);
+    text-align: center;
+}
+
+.statValue {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.statValue.highlight {
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.statLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.empty {
+    text-align: center;
+    padding: var(--spacing-12);
+    color: var(--text-tertiary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.gradeList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.gradeCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-5);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    transition: all var(--transition-fast);
+}
+
+.gradeCard:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.gradeInfo h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.gradeInfo p {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.gradeScore {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-1);
+}
+
+.score {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-500);
+}
+
+.maxScore {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+}
+
+.percent {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-left: var(--spacing-2);
+}
+
+/* Teacher View */
+.courseList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.courseCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-5);
+}
+
+.courseCard h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.assignmentStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.assignmentRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2) 0;
+    font-size: var(--font-size-sm);
+}
+
+.assignmentRow span:first-child {
+    color: var(--text-primary);
+}
+
+.progressInfo {
+    display: flex;
+    gap: var(--spacing-4);
+    color: var(--text-secondary);
+}
+
+.noAssignments {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
+}
+
+@media (max-width: 640px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .gradeCard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-3);
+    }
+}

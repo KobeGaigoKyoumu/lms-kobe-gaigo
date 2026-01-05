@@ -1,0 +1,135 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-5);
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.form {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.formGroup label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.required {
+    color: var(--error-500);
+}
+
+.formGroup input,
+.formGroup textarea {
+    padding: var(--spacing-3);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.formGroup textarea {
+    resize: vertical;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.checkboxGroup input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-500);
+}
+
+.checkboxGroup label {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.cancelBtn,
+.submitBtn {
+    padding: var(--spacing-2) var(--spacing-5);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cancelBtn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.cancelBtn:hover {
+    background: var(--bg-tertiary);
+}
+
+.submitBtn {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border: none;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+}

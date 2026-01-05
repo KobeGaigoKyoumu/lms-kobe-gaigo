@@ -1,0 +1,230 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-6);
+}
+
+.title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.stats {
+    display: flex;
+    gap: var(--spacing-4);
+}
+
+.stat {
+    padding: var(--spacing-3) var(--spacing-5);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.statValue {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.statLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.error {
+    background: var(--error-50);
+    border: 1px solid var(--error-500);
+    color: var(--error-600);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-4);
+}
+
+.content {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    gap: var(--spacing-4);
+}
+
+.filters {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.filterBtn {
+    padding: var(--spacing-2) var(--spacing-3);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filterBtn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.filterBtn.active {
+    background: var(--primary-500);
+    border-color: var(--primary-500);
+    color: white;
+}
+
+.searchInput {
+    width: 300px;
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: var(--spacing-4);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background: var(--bg-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary-400), var(--secondary-400));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.roleSelect {
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+}
+
+.roleSelect:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.badgeAdmin {
+    background: linear-gradient(135deg, var(--error-500), #b91c1c);
+    color: white;
+}
+
+.badgeTeacher {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+}
+
+.badgeStudent {
+    background: linear-gradient(135deg, var(--success-500), var(--success-600));
+    color: white;
+}
+
+.empty {
+    padding: var(--spacing-10);
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-4);
+    }
+
+    .stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters {
+        overflow-x: auto;
+    }
+
+    .searchInput {
+        width: 100%;
+    }
+}
