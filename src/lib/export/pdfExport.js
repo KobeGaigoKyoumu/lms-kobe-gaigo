@@ -1,7 +1,7 @@
 'use client'
 
 import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 /**
  * 個人成績証明書をPDFとしてエクスポート
@@ -53,7 +53,7 @@ export function exportStudentGradeToPDF(student, yearTerm) {
         ['Grade / 評価', calculateGrade(student.report_card_total)]
     ]
 
-    doc.autoTable({
+    autoTable(doc, {
         startY: 85,
         head: [['項目 / Item', '結果 / Result']],
         body: summaryData,
@@ -87,7 +87,7 @@ export function exportStudentGradeToPDF(student, yearTerm) {
             doc.setFontSize(14)
             doc.text('Subject Details / 科目別詳細', 20, doc.lastAutoTable.finalY + 15)
 
-            doc.autoTable({
+            autoTable(doc, {
                 startY: doc.lastAutoTable.finalY + 20,
                 head: [['科目 / Subject', '基礎点', '出席', '参加', '合計']],
                 body: subjectData,
