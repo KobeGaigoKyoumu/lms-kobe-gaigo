@@ -176,12 +176,12 @@ export default function GradeUploader() {
 
                 // 1. 期末試験データ
                 const finalExam = {
-                    '文字・語彙': parseFloat(row[examColMap.vocab]) || 0,
-                    '聴解': parseFloat(row[examColMap.listening]) || 0,
-                    '読解': parseFloat(row[examColMap.reading]) || 0,
-                    '文法': parseFloat(row[examColMap.grammar]) || 0,
-                    '作文': parseFloat(row[examColMap.writing]) || 0,
-                    '会話': parseFloat(row[examColMap.conversation]) || 0,
+                    vocab: parseFloat(row[examColMap.vocab]) || 0,
+                    listening: parseFloat(row[examColMap.listening]) || 0,
+                    reading: parseFloat(row[examColMap.reading]) || 0,
+                    grammar: parseFloat(row[examColMap.grammar]) || 0,
+                    writing: parseFloat(row[examColMap.writing]) || 0,
+                    conversation: parseFloat(row[examColMap.conversation]) || 0,
                 }
 
                 // 期末試験の合計点 (600点満点)
@@ -190,7 +190,7 @@ export default function GradeUploader() {
 
                 // 2. 総合成績データ（Sheet 4から直接取得）
                 let reportCard = {
-                    '文字・語彙': 0, '聴解': 0, '読解': 0, '文法': 0, '作文': 0, '会話': 0
+                    vocab: 0, listening: 0, reading: 0, grammar: 0, writing: 0, conversation: 0
                 }
                 let reportTotal = 0
 
@@ -243,12 +243,12 @@ export default function GradeUploader() {
                     }
 
                     reportCard = {
-                        '文字・語彙': getVal(reportColMap.vocab),
-                        '聴解': getVal(reportColMap.listening),
-                        '読解': getVal(reportColMap.reading),
-                        '文法': getVal(reportColMap.grammar),
-                        '作文': getVal(reportColMap.writing),
-                        '会話': getVal(reportColMap.conversation),
+                        vocab: getVal(reportColMap.vocab),
+                        listening: getVal(reportColMap.listening),
+                        reading: getVal(reportColMap.reading),
+                        grammar: getVal(reportColMap.grammar),
+                        writing: getVal(reportColMap.writing),
+                        conversation: getVal(reportColMap.conversation),
                     }
 
                     // レポートカード（総合成績）データの取得 - シートの列定義に基づく
@@ -492,7 +492,7 @@ export default function GradeUploader() {
                                                 <div className={styles.chartContainer}>
                                                     <RadarChart
                                                         labels={categories}
-                                                        data={categories.map(c => student.finalExam[c])}
+                                                        data={['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => student.finalExam[k])}
                                                         title="期末試験"
                                                         color="blue"
                                                     />
@@ -509,7 +509,7 @@ export default function GradeUploader() {
                                                 <div className={styles.chartContainer}>
                                                     <RadarChart
                                                         labels={categories}
-                                                        data={categories.map(c => student.reportCard[c])}
+                                                        data={['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => student.reportCard[k])}
                                                         title="総合成績"
                                                         color="green"
                                                     />
@@ -560,12 +560,12 @@ export default function GradeUploader() {
                                                     <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                         <td style={{ padding: '8px' }}>出席点</td>
                                                         <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance}</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance?.toFixed(1)}</td>
                                                     </tr>
                                                     <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                         <td style={{ padding: '8px' }}>平常点</td>
                                                         <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.participation}</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.participation?.toFixed(1)}</td>
                                                     </tr>
 
                                                     {/* Subjects */}
@@ -575,8 +575,8 @@ export default function GradeUploader() {
                                                         return (
                                                             <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.base}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.total}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.base?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.total?.toFixed(1)}</td>
                                                             </tr>
                                                         )
                                                     })}
@@ -584,7 +584,7 @@ export default function GradeUploader() {
                                                     {/* Total */}
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
                                                         <td style={{ padding: '12px 8px' }}>総合</td>
-                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base}</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base?.toFixed(1)}</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.total.toFixed(1)}</td>
                                                     </tr>
                                                 </tbody>
