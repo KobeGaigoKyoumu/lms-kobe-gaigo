@@ -427,20 +427,36 @@ export default function GradeUploader() {
         setSaveMessage('')
 
         try {
-            // 現在の年月から学期を推定 (例: 2026-01)
-            // ファイル名から取得できればベストだが、一旦現在年月で
-            const now = new Date()
-            const year = now.getFullYear()
-            const month = String(now.getMonth() + 1).padStart(2, '0')
-            let yearTerm = `${year}-${month}`
+            // 学期判定ロジック
+            // ファイル名から年月を抽出 (例: 202502 -> 2025年 2月)
+            let year = new Date().getFullYear()
+            let month = new Date().getMonth() + 1
 
-            // ファイル名に日付っぽいものがあればそれを使う (例: 202502 -> 2025-02)
             if (file && file.name) {
                 const match = file.name.match(/(\d{4})(\d{2})/)
                 if (match) {
-                    yearTerm = `${match[1]}-${match[2]}`
+                    year = parseInt(match[1])
+                    month = parseInt(match[2])
                 }
             }
+
+            // 学期の決定
+            // 4月-9月: 前期 (同じ年)
+            // 10月-12月: 後期 (同じ年)
+            // 1月-3月: 後期 (前の年)
+            let academicYear = year
+            let term = ''
+
+            if (month >= 4 && month <= 9) {
+                term = '前期'
+            } else {
+                term = '後期'
+                if (month >= 1 && month <= 3) {
+                    academicYear = year - 1
+                }
+            }
+
+            const yearTerm = `${academicYear}年度 ${term}`
 
             let successCount = 0
 

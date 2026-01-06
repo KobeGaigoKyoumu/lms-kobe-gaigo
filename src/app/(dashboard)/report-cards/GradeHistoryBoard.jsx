@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import RadarChart from './RadarChart'
 
 export default function GradeHistoryBoard() {
     const supabase = createClient()
@@ -64,6 +67,42 @@ export default function GradeHistoryBoard() {
         return 'F'
     }
 
+    // Class Averages Calculation
+    const calculateAverages = () => {
+        if (filteredRecords.length === 0) return null
+
+        const sums = {
+            vocab: 0, listening: 0, reading: 0, grammar: 0, writing: 0, conversation: 0, total: 0
+        }
+
+        filteredRecords.forEach(r => {
+            // report_card_data might be stored slightly differently if saved earlier, ensure fallback
+            const data = r.report_card_data || {}
+            // report_card_data structure: { vocab: { base, total }, listening: { ... }, ... }
+            // We need the TOTAL score for each category
+            sums.vocab += data.vocab?.total || 0
+            sums.listening += data.listening?.total || 0
+            sums.reading += data.reading?.total || 0
+            sums.grammar += data.grammar?.total || 0
+            sums.writing += data.writing?.total || 0
+            sums.conversation += data.conversation?.total || 0
+            sums.total += r.report_card_total || 0
+        })
+
+        const count = filteredRecords.length
+        return {
+            vocab: sums.vocab / count,
+            listening: sums.listening / count,
+            reading: sums.reading / count,
+            grammar: sums.grammar / count,
+            writing: sums.writing / count,
+            conversation: sums.conversation / count,
+            total: sums.total / count
+        }
+    }
+
+    const averages = calculateAverages()
+
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
@@ -76,7 +115,7 @@ export default function GradeHistoryBoard() {
             {/* Filters */}
             <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '20px', display: 'flex', gap: '20px' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>学期 (Year-Month)</label>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>学期 (Year-Term)</label>
                     <select
                         value={selectedTerm}
                         onChange={(e) => setSelectedTerm(e.target.value)}
@@ -97,6 +136,73 @@ export default function GradeHistoryBoard() {
                     </select>
                 </div>
             </div>
+
+            {/* Class Average Section (Chart & Table) */}
+            {averages && (
+                <div style={{
+                    display: 'flex',
+                    gap: '40px',
+                    backgroundColor: '#fff',
+                    padding: '30px',
+                    borderRadius: '8px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    marginBottom: '30px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Radar Chart */}
+                    <div style={{ width: '300px', height: '300px' }}>
+                        <RadarChart
+                            labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
+                            data={[averages.vocab, averages.listening, averages.reading, averages.grammar, averages.writing, averages.conversation]}
+                            title="クラス平均成績"
+                            color="blue"
+                            min={50}
+                            stepSize={10}
+                        />
+                    </div>
+
+                    {/* Average Table */}
+                    <div style={{ flex: 1, minWidth: '300px' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '15px', color: '#374151' }}>
+                            クラス平均点 ({filteredRecords.length}名)
+                        </h3>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #e5e7eb' }}>
+                                    <th style={{ padding: '10px', textAlign: 'left' }}>科目</th>
+                                    <th style={{ padding: '10px', textAlign: 'center' }}>平均点</th>
+                                    <th style={{ padding: '10px', textAlign: 'center' }}>満点</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[
+                                    { label: '文字・語彙', key: 'vocab', max: 100 },
+                                    { label: '聴解', key: 'listening', max: 100 },
+                                    { label: '読解', key: 'reading', max: 100 },
+                                    { label: '文法', key: 'grammar', max: 100 },
+                                    { label: '作文', key: 'writing', max: 100 },
+                                    { label: '会話', key: 'conversation', max: 100 },
+                                ].map((item) => (
+                                    <tr key={item.key} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                        <td style={{ padding: '10px' }}>{item.label}</td>
+                                        <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold' }}>{averages[item.key]?.toFixed(1)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'center', color: '#6b7280' }}>{item.max}</td>
+                                    </tr>
+                                ))}
+                                <tr style={{ borderTop: '2px solid #e5e7eb', backgroundColor: '#eff6ff', fontWeight: 'bold' }}>
+                                    <td style={{ padding: '12px 10px' }}>総合平均</td>
+                                    <td style={{ padding: '12px 10px', textAlign: 'center', color: '#10b981', fontSize: '1.1rem' }}>
+                                        {averages.total?.toFixed(1)} <span style={{ fontSize: '0.8rem', color: '#374151' }}>/ 100</span>
+                                    </td>
+                                    <td style={{ padding: '12px 10px', textAlign: 'center' }}>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* Data Table */}
             <div style={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
