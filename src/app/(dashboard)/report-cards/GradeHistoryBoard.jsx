@@ -143,9 +143,19 @@ export default function GradeHistoryBoard() {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>成績履歴ボード</h1>
-                <Link href="/report-cards" style={{ textDecoration: 'none', color: '#2563eb', fontWeight: 'bold' }}>
-                    ← アップロード画面に戻る
-                </Link>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <Link href="/report-cards/analytics" style={{ textDecoration: 'none', color: '#8b5cf6', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        統計・分析
+                    </Link>
+                    <Link href="/report-cards" style={{ textDecoration: 'none', color: '#2563eb', fontWeight: 'bold' }}>
+                        ← アップロード画面に戻る
+                    </Link>
+                </div>
             </div>
 
             <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between' }}>
