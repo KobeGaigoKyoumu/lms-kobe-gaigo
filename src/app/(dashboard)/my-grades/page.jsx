@@ -135,11 +135,14 @@ export default async function MyGradesPage() {
                         {Object.entries(latestRecord.report_card_data).map(([subject, data]) => (
                             <div key={subject} className={styles.subjectCard}>
                                 <h3>{subject === 'vocab' ? '語彙' :
-                                    subject === 'listening' ? 'リスニング' :
+                                    subject === 'listening' ? '聴解' :
                                         subject === 'reading' ? '読解' :
                                             subject === 'grammar' ? '文法' :
-                                                subject === 'writing' ? 'ライティング' :
-                                                    subject === 'conversation' ? '会話' : subject}
+                                                subject === 'writing' ? '作文' :
+                                                    subject === 'conversation' ? '会話' :
+                                                        subject === 'overall' ? '総合' :
+                                                            subject === 'attendance' ? '出席' :
+                                                                subject === 'participation' ? '参加' : subject}
                                 </h3>
                                 <div className={styles.subjectScores}>
                                     <div className={styles.scoreItem}>
