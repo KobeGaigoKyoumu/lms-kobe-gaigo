@@ -200,7 +200,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         <th style={{ padding: '8px', textAlign: 'center' }}>基礎点 (70)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>出席点 (15)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>平常点 (15)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#e5e7eb' }}>合計 (100)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>合計 (100)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>評定</th>
                                     </tr>
                                 </thead>
