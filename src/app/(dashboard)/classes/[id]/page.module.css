@@ -1,0 +1,504 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-6);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-4);
+}
+
+.breadcrumb a {
+    color: var(--primary-500);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.headerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+}
+
+.headerMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.badge {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.year {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.description {
+    color: var(--text-secondary);
+}
+
+.editBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.editBtn:hover {
+    background: var(--bg-tertiary);
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--spacing-6);
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.sidebarCard {
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.sidebarCard h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-3);
+}
+
+.teacher {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.teacherAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.teacherAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.teacherName {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.teacherEmail {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.courseLink {
+    display: block;
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.courseLink:hover {
+    background: var(--bg-tertiary);
+}
+
+.courseLink h4 {
+    font-weight: 500;
+    color: var(--primary-600);
+    margin-bottom: var(--spacing-1);
+}
+
+.courseLink p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.infoList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.infoList div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.infoList dt {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.infoList dd {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.section {
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+}
+
+.section h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.addBtn {
+    padding: var(--spacing-1) var(--spacing-3);
+    background: var(--primary-500);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.addBtn:hover {
+    background: var(--primary-600);
+}
+
+.empty {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.syllabusContent {
+    padding: var(--spacing-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.syllabusContent pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.scheduleList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+}
+
+.scheduleCard {
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    min-width: 150px;
+}
+
+.scheduleDay {
+    font-weight: 600;
+    color: var(--primary-600);
+    margin-bottom: var(--spacing-1);
+}
+
+.scheduleTime {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.scheduleRoom {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-top: var(--spacing-1);
+}
+
+.assignmentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.assignmentCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.assignmentCard:hover {
+    background: var(--bg-tertiary);
+}
+
+.assignmentCard h4 {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.assignmentCard p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.dueDate {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.dueDate span {
+    margin-right: var(--spacing-1);
+}
+
+.memberList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-3);
+}
+
+.memberCard {
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.memberUser {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.userAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.userAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userName {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.userMeta {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+
+    .headerContent {
+        flex-direction: column;
+    }
+}
+
+/* Manager Components */
+.managerSection {
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.addMemberBtn {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: transparent;
+    color: var(--primary-500);
+    border: 1px dashed var(--primary-500);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.addMemberBtn:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.addForm,
+.scheduleForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.addForm input,
+.scheduleForm input,
+.scheduleForm select {
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+}
+
+.scheduleFormRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-3);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+}
+
+.formGroup label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.formActions {
+    display: flex;
+    gap: var(--spacing-2);
+    justify-content: flex-end;
+}
+
+.cancelBtn {
+    padding: var(--spacing-2) var(--spacing-3);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.submitBtn {
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--primary-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #ef4444;
+    font-size: var(--font-size-sm);
+}
+
+.memberActions,
+.scheduleActions {
+    margin-top: var(--spacing-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.memberAction,
+.scheduleAction {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.removeBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.removeBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}

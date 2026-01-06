@@ -1,0 +1,305 @@
+import { createClient } from '@/lib/supabase/server'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import styles from './page.module.css'
+import MemberManager from './MemberManager'
+import ScheduleManager from './ScheduleManager'
+
+export default async function ClassDetailPage({ params }) {
+    const { id } = await params
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // クラス詳細取得
+    const { data: classData, error } = await supabase
+        .from('classes')
+        .select(`
+            *,
+            teacher:profiles!teacher_id (
+                id,
+                full_name,
+                avatar_url,
+                email
+            ),
+            course:courses!course_id (
+                id,
+                title,
+                description,
+                syllabus
+            )
+        `)
+        .eq('id', id)
+        .single()
+
+    if (error || !classData) {
+        notFound()
+    }
+
+    // 現在のユーザーのプロファイル
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single()
+
+    const isOwner = classData.teacher_id === user?.id
+    const isAdmin = profile?.role === 'admin'
+    const canEdit = isOwner || isAdmin
+
+    // メンバー一覧取得
+    const { data: members } = await supabase
+        .from('class_members')
+        .select(`
+            id,
+            joined_at,
+            user:profiles!user_id (
+                id,
+                full_name,
+                email,
+                student_id,
+                avatar_url
+            )
+        `)
+        .eq('class_id', id)
+        .order('joined_at', { ascending: true })
+
+    // 時間割取得
+    const { data: schedules } = await supabase
+        .from('schedules')
+        .select(`
+            *,
+            course:courses!course_id (
+                id,
+                title
+            )
+        `)
+        .eq('class_id', id)
+        .order('day_of_week', { ascending: true })
+
+    // コースに紐づく課題取得
+    let assignments = []
+    if (classData.course_id) {
+        const { data } = await supabase
+            .from('assignments')
+            .select('*')
+            .eq('course_id', classData.course_id)
+            .eq('is_published', true)
+            .order('due_date', { ascending: true })
+        assignments = data || []
+    }
+
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土']
+
+    return (
+        <div className={styles.page}>
+            {/* ヘッダー */}
+            <header className={styles.header}>
+                <div className={styles.breadcrumb}>
+                    <Link href="/classes">クラス</Link>
+                    <span>/</span>
+                    <span>{classData.name}</span>
+                </div>
+
+                <div className={styles.headerContent}>
+                    <div>
+                        <div className={styles.headerMeta}>
+                            <span className={styles.badge}>{classData.grade_level || '未設定'}</span>
+                            <span className={styles.year}>{classData.academic_year}年度</span>
+                        </div>
+                        <h1 className={styles.title}>{classData.name}</h1>
+                        <p className={styles.description}>{classData.description || '説明なし'}</p>
+                    </div>
+
+                    {canEdit && (
+                        <Link href={`/classes/${id}/edit`} className={styles.editBtn}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z" />
+                            </svg>
+                            編集
+                        </Link>
+                    )}
+                </div>
+            </header>
+
+            <div className={styles.content}>
+                {/* サイドバー */}
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarCard}>
+                        <h3>担当教師</h3>
+                        <div className={styles.teacher}>
+                            <div className={styles.teacherAvatar}>
+                                {classData.teacher?.avatar_url ? (
+                                    <img src={classData.teacher.avatar_url} alt="" />
+                                ) : (
+                                    classData.teacher?.full_name?.[0] || '?'
+                                )}
+                            </div>
+                            <div>
+                                <p className={styles.teacherName}>{classData.teacher?.full_name}</p>
+                                <p className={styles.teacherEmail}>{classData.teacher?.email}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {classData.course && (
+                        <div className={styles.sidebarCard}>
+                            <h3>コース情報</h3>
+                            <Link href={`/courses/${classData.course.id}`} className={styles.courseLink}>
+                                <h4>{classData.course.title}</h4>
+                                <p>{classData.course.description || '説明なし'}</p>
+                            </Link>
+                        </div>
+                    )}
+
+                    <div className={styles.sidebarCard}>
+                        <h3>クラス情報</h3>
+                        <dl className={styles.infoList}>
+                            <div>
+                                <dt>在籍者数</dt>
+                                <dd>{members?.length || 0}名</dd>
+                            </div>
+                            <div>
+                                <dt>作成日</dt>
+                                <dd>{new Date(classData.created_at).toLocaleDateString('ja-JP')}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </aside>
+
+                {/* メインコンテンツ */}
+                <main className={styles.main}>
+                    {/* シラバス */}
+                    {classData.course?.syllabus && (
+                        <section className={styles.section}>
+                            <h2>シラバス</h2>
+                            <div className={styles.syllabusContent}>
+                                <pre>{classData.course.syllabus}</pre>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* 時間割 */}
+                    <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2>時間割</h2>
+                        </div>
+
+                        {schedules?.length === 0 ? (
+                            <p className={styles.empty}>時間割が登録されていません</p>
+                        ) : (
+                            <div className={styles.scheduleList}>
+                                {schedules?.map(schedule => (
+                                    <div key={schedule.id} className={styles.scheduleCard}>
+                                        <div className={styles.scheduleDay}>
+                                            {dayNames[schedule.day_of_week]}曜日
+                                        </div>
+                                        <div className={styles.scheduleTime}>
+                                            {schedule.start_time?.slice(0, 5)} - {schedule.end_time?.slice(0, 5)}
+                                        </div>
+                                        {schedule.room && (
+                                            <div className={styles.scheduleRoom}>
+                                                教室: {schedule.room}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {canEdit && (
+                            <ScheduleManager
+                                classId={id}
+                                schedules={schedules || []}
+                            />
+                        )}
+                    </section>
+
+                    {/* 課題 */}
+                    {classData.course_id && (
+                        <section className={styles.section}>
+                            <div className={styles.sectionHeader}>
+                                <h2>課題</h2>
+                                {canEdit && (
+                                    <Link href={`/courses/${classData.course_id}/assignments/new`} className={styles.addBtn}>
+                                        + 課題を追加
+                                    </Link>
+                                )}
+                            </div>
+
+                            {assignments.length === 0 ? (
+                                <p className={styles.empty}>課題がありません</p>
+                            ) : (
+                                <div className={styles.assignmentList}>
+                                    {assignments.map(assignment => (
+                                        <Link
+                                            href={`/assignments/${assignment.id}`}
+                                            key={assignment.id}
+                                            className={styles.assignmentCard}
+                                        >
+                                            <div>
+                                                <h4>{assignment.title}</h4>
+                                                <p>{assignment.description || '説明なし'}</p>
+                                            </div>
+                                            <div className={styles.dueDate}>
+                                                {assignment.due_date ? (
+                                                    <>
+                                                        <span>締切:</span>
+                                                        {new Date(assignment.due_date).toLocaleDateString('ja-JP')}
+                                                    </>
+                                                ) : (
+                                                    '締切なし'
+                                                )}
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* 在籍者一覧 */}
+                    <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2>在籍者一覧 ({members?.length || 0}名)</h2>
+                        </div>
+
+                        {members?.length === 0 ? (
+                            <p className={styles.empty}>在籍者がいません</p>
+                        ) : (
+                            <div className={styles.memberList}>
+                                {members?.map(member => (
+                                    <div key={member.id} className={styles.memberCard}>
+                                        <div className={styles.memberUser}>
+                                            <div className={styles.userAvatar}>
+                                                {member.user?.avatar_url ? (
+                                                    <img src={member.user.avatar_url} alt="" />
+                                                ) : (
+                                                    member.user?.full_name?.[0] || '?'
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className={styles.userName}>{member.user?.full_name}</p>
+                                                <p className={styles.userMeta}>
+                                                    {member.user?.student_id && (
+                                                        <span>学籍番号: {member.user.student_id}</span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {canEdit && (
+                            <MemberManager
+                                classId={id}
+                                members={members || []}
+                            />
+                        )}
+                    </section>
+                </main>
+            </div>
+        </div>
+    )
+}

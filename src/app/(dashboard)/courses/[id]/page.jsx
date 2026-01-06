@@ -80,6 +80,21 @@ export default async function CourseDetailPage({ params }) {
         isEnrolled = !!enrollment
     }
 
+    // このコースに紐付くクラス一覧取得
+    const { data: classes } = await supabase
+        .from('classes')
+        .select(`
+            id,
+            name,
+            grade_level,
+            academic_year,
+            teacher:profiles!teacher_id (
+                full_name
+            )
+        `)
+        .eq('course_id', id)
+        .order('created_at', { ascending: false })
+
     return (
         <div className={styles.page}>
             {/* ヘッダー */}
@@ -176,6 +191,38 @@ export default async function CourseDetailPage({ params }) {
                                 <p className={styles.empty}>シラバスが登録されていません</p>
                             )}
                         </div>
+                    </section>
+
+                    {/* 登録クラス一覧 */}
+                    <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2>登録クラス ({classes?.length || 0})</h2>
+                            {canEdit && (
+                                <Link href="/classes/new" className={styles.addBtn}>
+                                    + クラスを追加
+                                </Link>
+                            )}
+                        </div>
+
+                        {classes?.length === 0 ? (
+                            <p className={styles.empty}>このコースに紐付くクラスがありません</p>
+                        ) : (
+                            <div className={styles.classList}>
+                                {classes?.map(cls => (
+                                    <Link
+                                        href={`/classes/${cls.id}`}
+                                        key={cls.id}
+                                        className={styles.classCard}
+                                    >
+                                        <div>
+                                            <h4>{cls.name}</h4>
+                                            <p>{cls.grade_level || '未設定'} | {cls.academic_year}年度</p>
+                                        </div>
+                                        <span>{cls.teacher?.full_name}</span>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </section>
 
                     {/* 課題一覧 */}

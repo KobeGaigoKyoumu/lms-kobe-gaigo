@@ -28,6 +28,16 @@ const menuItems = [
         )
     },
     {
+        href: '/classes',
+        label: 'クラス',
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="10" cy="7" r="3" />
+                <path d="M4 17v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1" />
+            </svg>
+        )
+    },
+    {
         href: '/assignments',
         label: '課題',
         icon: (
