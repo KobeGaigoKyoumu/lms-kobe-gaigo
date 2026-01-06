@@ -13,7 +13,9 @@ export default async function ClassesPage() {
         .eq('id', user?.id)
         .single()
 
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    const isAdmin = profile?.role === 'admin'
+    const isTeacher = profile?.role === 'teacher'
+    const isTeacherOrAdmin = isTeacher || isAdmin
 
     // 全クラス一覧取得
     const { data: allClasses, error } = await supabase
@@ -38,9 +40,10 @@ export default async function ClassesPage() {
     // その他のクラス
     const otherClasses = allClasses?.filter(cls => cls.teacher_id !== user?.id) || []
 
-    const ClassCard = ({ cls, isMyClass = false }) => (
-        <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''}`}>
+    const ClassCard = ({ cls, isMyClass = false, showAdminBadge = false }) => (
+        <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''} ${showAdminBadge ? styles.adminCard : ''}`}>
             {isMyClass && <div className={styles.myClassBadge}>担任</div>}
+            {showAdminBadge && !isMyClass && <div className={styles.adminBadge}>管理</div>}
             <div className={styles.cardHeader}>
                 <span className={styles.cardBadge}>{cls.grade_level || '未設定'}</span>
                 <span className={styles.year}>{cls.academic_year}年度</span>
@@ -78,7 +81,8 @@ export default async function ClassesPage() {
                 <div>
                     <h1 className={styles.title}>クラス</h1>
                     <p className={styles.subtitle}>
-                        {isTeacherOrAdmin ? 'クラスを管理・作成できます' : '所属クラス一覧'}
+                        {isAdmin ? '管理者として全クラスを管理できます' :
+                            isTeacher ? 'クラスを管理・作成できます' : '所属クラス一覧'}
                     </p>
                 </div>
                 {isTeacherOrAdmin && (
@@ -97,36 +101,72 @@ export default async function ClassesPage() {
                 </div>
             )}
 
-            {/* 自分のクラス */}
-            {myClasses.length > 0 && (
-                <section className={styles.myClassesSection}>
+            {/* 管理者の場合：全クラスを表示 */}
+            {isAdmin && (
+                <section className={styles.adminSection}>
                     <h2 className={styles.sectionTitle}>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M10 12l-3-3m0 0l3-3m-3 3h6" />
-                            <circle cx="10" cy="10" r="8" />
+                            <path d="M10 2l2 4 4.5.5-3.3 3.2.8 4.3-4-2-4 2 .8-4.3L3.5 6.5 8 6z" />
                         </svg>
-                        担任クラス ({myClasses.length})
+                        全クラス ({allClasses?.length || 0})
                     </h2>
                     <div className={styles.grid}>
-                        {myClasses.map(cls => (
-                            <ClassCard key={cls.id} cls={cls} isMyClass={true} />
+                        {allClasses?.map(cls => (
+                            <ClassCard
+                                key={cls.id}
+                                cls={cls}
+                                isMyClass={cls.teacher_id === user?.id}
+                                showAdminBadge={true}
+                            />
                         ))}
                     </div>
                 </section>
             )}
 
-            {/* その他のクラス */}
-            {otherClasses.length > 0 && (
-                <section className={styles.otherClassesSection}>
+            {/* 教師の場合：担任クラスとその他を分けて表示 */}
+            {isTeacher && (
+                <>
+                    {/* 自分のクラス */}
                     {myClasses.length > 0 && (
-                        <h2 className={styles.sectionTitle}>その他のクラス ({otherClasses.length})</h2>
+                        <section className={styles.myClassesSection}>
+                            <h2 className={styles.sectionTitle}>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path d="M10 12l-3-3m0 0l3-3m-3 3h6" />
+                                    <circle cx="10" cy="10" r="8" />
+                                </svg>
+                                担任クラス ({myClasses.length})
+                            </h2>
+                            <div className={styles.grid}>
+                                {myClasses.map(cls => (
+                                    <ClassCard key={cls.id} cls={cls} isMyClass={true} />
+                                ))}
+                            </div>
+                        </section>
                     )}
-                    <div className={styles.grid}>
-                        {otherClasses.map(cls => (
-                            <ClassCard key={cls.id} cls={cls} />
-                        ))}
-                    </div>
-                </section>
+
+                    {/* その他のクラス */}
+                    {otherClasses.length > 0 && (
+                        <section className={styles.otherClassesSection}>
+                            {myClasses.length > 0 && (
+                                <h2 className={styles.sectionTitle}>その他のクラス ({otherClasses.length})</h2>
+                            )}
+                            <div className={styles.grid}>
+                                {otherClasses.map(cls => (
+                                    <ClassCard key={cls.id} cls={cls} />
+                                ))}
+                            </div>
+                        </section>
+                    )}
+                </>
+            )}
+
+            {/* 学生の場合 */}
+            {!isTeacherOrAdmin && allClasses?.length > 0 && (
+                <div className={styles.grid}>
+                    {allClasses.map(cls => (
+                        <ClassCard key={cls.id} cls={cls} />
+                    ))}
+                </div>
             )}
 
             {/* クラスがない場合 */}

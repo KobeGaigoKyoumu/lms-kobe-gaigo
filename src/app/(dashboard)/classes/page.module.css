@@ -246,3 +246,25 @@
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
 }
+
+/* Admin Styles */
+.adminSection {
+    margin-bottom: var(--spacing-8);
+}
+
+.adminCard {
+    position: relative;
+}
+
+.adminBadge {
+    position: absolute;
+    top: -8px;
+    right: var(--spacing-3);
+    padding: var(--spacing-1) var(--spacing-2);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
