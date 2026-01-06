@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 import styles from './page.module.css'
 import RadarChart from './RadarChart'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 export default function GradeUploader() {
     const [file, setFile] = useState(null)
@@ -528,6 +529,12 @@ export default function GradeUploader() {
 
                 {/* Debug Info: 開発完了に伴い非表示化、必要なら復活させる */}
                 {/* {debugInfo && ( ... )} */}
+
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <Link href="/report-cards/history" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                        保存済みデータの履歴を見る
+                    </Link>
+                </div>
             </div>
 
             {grades.length > 0 && (
