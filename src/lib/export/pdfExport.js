@@ -1,48 +1,15 @@
 'use client'
 
-import { generate } from '@pdfme/generator'
-
-// 日本語対応PDFテンプレート
-const createTemplate = (student, yearTerm, attendanceScore, participationScore, calculateGrade, subjectData) => ({
-    basePdf: { width: 210, height: 297, padding: [20, 20, 20, 20] },
-    schemas: [
-        [
-            // タイトル
-            { name: 'title', type: 'text', position: { x: 75, y: 15 }, width: 60, height: 10, fontSize: 18, fontColor: '#000000', alignment: 'center', fontName: 'NotoSansJP' },
-            { name: 'school', type: 'text', position: { x: 60, y: 27 }, width: 90, height: 8, fontSize: 11, fontColor: '#666666', alignment: 'center', fontName: 'NotoSansJP' },
-            { name: 'date', type: 'text', position: { x: 60, y: 35 }, width: 90, height: 6, fontSize: 9, fontColor: '#999999', alignment: 'center', fontName: 'NotoSansJP' },
-
-            // 学生情報ヘッダー
-            { name: 'infoHeader', type: 'text', position: { x: 20, y: 50 }, width: 50, height: 8, fontSize: 12, fontColor: '#333333', fontName: 'NotoSansJP' },
-
-            // 学生情報
-            { name: 'studentId', type: 'text', position: { x: 20, y: 60 }, width: 80, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'studentName', type: 'text', position: { x: 20, y: 68 }, width: 80, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'className', type: 'text', position: { x: 20, y: 76 }, width: 80, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'termInfo', type: 'text', position: { x: 20, y: 84 }, width: 80, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-
-            // 成績概要ヘッダー
-            { name: 'gradeHeader', type: 'text', position: { x: 20, y: 100 }, width: 50, height: 8, fontSize: 12, fontColor: '#333333', fontName: 'NotoSansJP' },
-
-            // 成績データ
-            { name: 'finalExam', type: 'text', position: { x: 20, y: 110 }, width: 170, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'reportCard', type: 'text', position: { x: 20, y: 118 }, width: 170, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'attendanceInfo', type: 'text', position: { x: 20, y: 126 }, width: 170, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'participationInfo', type: 'text', position: { x: 20, y: 134 }, width: 170, height: 6, fontSize: 10, fontColor: '#000000', fontName: 'NotoSansJP' },
-            { name: 'overallGrade', type: 'text', position: { x: 20, y: 142 }, width: 170, height: 8, fontSize: 12, fontColor: '#3b82f6', fontName: 'NotoSansJP' },
-
-            // フッター
-            { name: 'footer', type: 'text', position: { x: 30, y: 270 }, width: 150, height: 6, fontSize: 8, fontColor: '#999999', alignment: 'center', fontName: 'NotoSansJP' },
-        ]
-    ]
-})
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 /**
- * 個人成績証明書をPDF出力（日本語対応）
+ * 個人成績証明書をPDF出力
+ * ※日本語フォント非対応のため英語表記
  * @param {Object} student - 学生データ
  * @param {string} yearTerm - 学期
  */
-export async function exportStudentGradeToPDF(student, yearTerm) {
+export function exportStudentGradeToPDF(student, yearTerm) {
     if (!student) {
         alert('エクスポートするデータがありません')
         return
@@ -62,40 +29,125 @@ export async function exportStudentGradeToPDF(student, yearTerm) {
         const attendanceScore = student.report_card_data?.attendance || 0
         const participationScore = student.report_card_data?.participation || 0
 
-        // テンプレートを作成
-        const template = createTemplate(student, yearTerm, attendanceScore, participationScore, calculateGrade, null)
+        // 学期を安全な形式に変換
+        const formatTerm = (term) => {
+            if (!term) return '-'
+            const match = term.match(/(\d{4})/)
+            if (match) {
+                const year = match[1]
+                if (term.includes('前期')) return `${year} Spring`
+                if (term.includes('後期')) return `${year} Fall`
+                return year
+            }
+            return term.replace(/[^\x00-\x7F]/g, '')
+        }
 
-        // 入力データ
-        const inputs = [{
-            title: '成績証明書',
-            school: '神戸外語専門学校',
-            date: `発行日: ${new Date().toLocaleDateString('ja-JP')}`,
-            infoHeader: '■ 学生情報',
-            studentId: `学籍番号: ${student.student_id_text || '-'}`,
-            studentName: `氏名: ${student.student_name || '-'}`,
-            className: `クラス: ${student.class_name || '-'}`,
-            termInfo: `学期: ${yearTerm || '-'}`,
-            gradeHeader: '■ 成績概要',
-            finalExam: `期末試験: ${student.final_exam_total || 0} / 600`,
-            reportCard: `成績評価: ${student.report_card_total || 0} / 100`,
-            attendanceInfo: `出席点: ${typeof attendanceScore === 'number' ? attendanceScore.toFixed(1) : attendanceScore}`,
-            participationInfo: `参加点: ${typeof participationScore === 'number' ? participationScore.toFixed(1) : participationScore}`,
-            overallGrade: `総合評価: ${calculateGrade(student.report_card_total)}`,
-            footer: 'この書類は神戸外語LMSにより自動生成されました。'
-        }]
+        // PDFドキュメント作成
+        const doc = new jsPDF('p', 'mm', 'a4')
 
-        // PDF生成
-        const pdf = await generate({ template, inputs })
+        // ヘッダー
+        doc.setFontSize(22)
+        doc.setFont('helvetica', 'bold')
+        doc.text('GRADE REPORT', 105, 25, { align: 'center' })
 
-        // ダウンロード
-        const blob = new Blob([pdf.buffer], { type: 'application/pdf' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        const safeYearTerm = yearTerm ? yearTerm.replace(/\s/g, '_') : 'unknown'
-        link.download = `成績証明書_${student.student_id_text}_${safeYearTerm}.pdf`
-        link.click()
-        URL.revokeObjectURL(url)
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'normal')
+        doc.text('Kobe Gaigo Language School', 105, 33, { align: 'center' })
+
+        doc.setFontSize(10)
+        doc.text(`Issue Date: ${new Date().toLocaleDateString('en-US')}`, 105, 40, { align: 'center' })
+
+        doc.setDrawColor(200)
+        doc.line(20, 45, 190, 45)
+
+        // 学生情報
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('STUDENT INFORMATION', 20, 55)
+
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(11)
+        doc.text(`Student ID: ${student.student_id_text || '-'}`, 20, 65)
+        doc.text(`Name: ${student.student_name || '-'}`, 20, 72)
+        doc.text(`Class: ${student.class_name || '-'}`, 20, 79)
+        doc.text(`Term: ${formatTerm(yearTerm)}`, 20, 86)
+
+        // 成績概要
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('GRADE SUMMARY', 20, 100)
+
+        const summaryData = [
+            ['Final Exam Score', `${student.final_exam_total || 0} / 600`],
+            ['Report Card Score', `${student.report_card_total || 0} / 100`],
+            ['Attendance Score', `${typeof attendanceScore === 'number' ? attendanceScore.toFixed(1) : attendanceScore}`],
+            ['Participation Score', `${typeof participationScore === 'number' ? participationScore.toFixed(1) : participationScore}`],
+            ['Overall Grade', calculateGrade(student.report_card_total)]
+        ]
+
+        autoTable(doc, {
+            startY: 105,
+            head: [['Category', 'Result']],
+            body: summaryData,
+            theme: 'striped',
+            headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+            styles: { fontSize: 10 },
+            margin: { left: 20, right: 20 },
+            tableWidth: 170
+        })
+
+        // 科目別詳細
+        if (student.report_card_data) {
+            const subjectNames = {
+                'vocab': 'Vocabulary',
+                'grammar': 'Grammar',
+                'reading': 'Reading',
+                'listening': 'Listening',
+                'writing': 'Writing',
+                'conversation': 'Conversation'
+            }
+
+            const subjectData = Object.entries(student.report_card_data)
+                .filter(([key]) => subjectNames[key])
+                .map(([key, data]) => [
+                    subjectNames[key] || key,
+                    typeof data.base === 'number' ? data.base.toFixed(1) : '0',
+                    typeof data.total === 'number' ? data.total.toFixed(1) : '0'
+                ])
+
+            if (subjectData.length > 0) {
+                doc.setFontSize(13)
+                doc.setFont('helvetica', 'bold')
+                doc.text('SUBJECT DETAILS', 20, doc.lastAutoTable.finalY + 15)
+
+                autoTable(doc, {
+                    startY: doc.lastAutoTable.finalY + 20,
+                    head: [['Subject', 'Base Score', 'Total']],
+                    body: subjectData,
+                    theme: 'striped',
+                    headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+                    styles: { fontSize: 10 },
+                    margin: { left: 20, right: 20 },
+                    tableWidth: 170
+                })
+            }
+        }
+
+        // フッター
+        const pageHeight = doc.internal.pageSize.height
+        doc.setDrawColor(200)
+        doc.line(20, pageHeight - 25, 190, pageHeight - 25)
+
+        doc.setFontSize(8)
+        doc.setTextColor(128)
+        doc.text('This document is automatically generated by Kobe Gaigo LMS.', 105, pageHeight - 18, { align: 'center' })
+        doc.text('For official records, please contact the administration office.', 105, pageHeight - 13, { align: 'center' })
+
+        // ファイル名
+        const safeYearTerm = formatTerm(yearTerm).replace(/\s/g, '_')
+        const fileName = `Grade_Report_${student.student_id_text}_${safeYearTerm}.pdf`
+
+        doc.save(fileName)
 
     } catch (error) {
         console.error('PDF generation error:', error)
