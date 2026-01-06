@@ -22,20 +22,35 @@ ChartJS.register(
     Legend
 )
 
-export default function RadarChart({ labels, data, studentId }) {
+export default function RadarChart({ labels, data, title, color = 'blue' }) {
+    const colors = {
+        blue: {
+            bg: 'rgba(59, 130, 246, 0.2)',
+            border: 'rgba(59, 130, 246, 0.8)',
+            point: 'rgba(59, 130, 246, 1)'
+        },
+        green: {
+            bg: 'rgba(16, 185, 129, 0.2)',
+            border: 'rgba(16, 185, 129, 0.8)',
+            point: 'rgba(16, 185, 129, 1)'
+        }
+    }
+
+    const theme = colors[color] || colors.blue
+
     const chartData = {
         labels: labels,
         datasets: [
             {
-                label: '成績',
+                label: title || '成績',
                 data: data,
-                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                borderColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: theme.bg,
+                borderColor: theme.border,
                 borderWidth: 2,
-                pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                pointBackgroundColor: theme.point,
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
+                pointHoverBorderColor: theme.point,
                 pointRadius: 4,
             }
         ]
@@ -67,7 +82,8 @@ export default function RadarChart({ labels, data, studentId }) {
                 pointLabels: {
                     color: '#6b7280',
                     font: {
-                        size: 11
+                        size: 11,
+                        weight: 'bold'
                     }
                 },
                 suggestedMin: 0,
@@ -78,7 +94,8 @@ export default function RadarChart({ labels, data, studentId }) {
                     backdropColor: 'transparent',
                     font: {
                         size: 9
-                    }
+                    },
+                    z: 1
                 }
             }
         }
