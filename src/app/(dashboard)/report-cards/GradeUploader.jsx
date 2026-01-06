@@ -379,7 +379,7 @@ export default function GradeUploader() {
                         {grades.map((student, index) => (
                             <div key={index} className={styles.studentRow}>
                                 {/* 学生情報ヘッダー */}
-                                <div className={styles.studentHeader}>
+                                <div className={styles.studentHeader} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                                     <div>
                                         <h3 className={styles.studentName}>
                                             {student.name}
@@ -388,8 +388,8 @@ export default function GradeUploader() {
                                         <p className={styles.className}>{student.class}</p>
                                     </div>
 
-                                    {/* 期末試験バッジ（青） - 中央付近に配置 */}
-                                    <div className={styles.totalScoreBadge}>
+                                    {/* 期末試験バッジ（青） - 左寄り（名前から少し離す） */}
+                                    <div className={styles.totalScoreBadge} style={{ marginLeft: '80px' }}>
                                         <span className={styles.totalLabel}>期末試験（合計）</span>
                                         <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
                                             {calculateFinalExamGrade(student.finalExamSum / 6)}
@@ -399,8 +399,8 @@ export default function GradeUploader() {
                                         </span>
                                     </div>
 
-                                    {/* 総合成績バッジ（緑） - 右側に配置 */}
-                                    <div className={styles.totalScoreBadge}>
+                                    {/* 総合成績バッジ（緑） - 右端に固定 */}
+                                    <div className={styles.totalScoreBadge} style={{ marginLeft: 'auto' }}>
                                         <span className={styles.totalLabel}>総合成績（合計）</span>
                                         <span className={styles.totalValue} style={{ color: '#10b981' }}>
                                             {calculateGrade(student.reportCardTotal)}
