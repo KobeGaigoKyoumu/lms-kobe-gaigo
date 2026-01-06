@@ -66,58 +66,64 @@ export default function GradeUploader() {
 
             // ヘッダー行から列インデックスを特定
             const headerRow = inputData[headerRowIndex]
-            const colMap = {
-                id: -1,
-                class: -1,
-                name: -1,
-                grammar: -1,
-                reading: -1,
-                listening: -1,
-                writing: -1,
-                conversation: -1,
-                // 総合成績用（もし同じシートにある場合）
-                total_grammar: -1,
-                total_reading: -1,
-                total_listening: -1,
-                total_writing: -1,
-                total_conversation: -1,
-                total_score: -1
+
+            // 列探索ヘルパー関数
+            const findCol = (row, keywords, startIdx = 0) => {
+                for (let i = startIdx; i < row.length; i++) {
+                    const cell = row[i]
+                    if (!cell) continue
+                    const str = cell.toString().toLowerCase().trim()
+                    if (keywords.some(k => str.includes(k))) return i
+                }
+                return -1
             }
 
-            headerRow.forEach((cell, index) => {
-                if (!cell) return
-                const str = cell.toString().toLowerCase().trim()
+            // マッピング定義
+            const colMap = {
+                id: findCol(headerRow, ['学籍番号', 'student id']),
+                class: findCol(headerRow, ['クラス', 'class']),
+                name: findCol(headerRow, ['名前', 'name', '氏名']),
 
-                if (str.includes('学籍番号') || str.includes('student')) colMap.id = index
-                else if (str.includes('クラス') || str === 'class') colMap.class = index
-                else if (str.includes('名前') || str.includes('name')) colMap.name = index
-                else if (str.includes('文法') || str.includes('grammar')) colMap.grammar = index
-                else if (str.includes('読解') || str.includes('reading')) colMap.reading = index
-                else if (str.includes('聴解') || str.includes('listening')) colMap.listening = index
-                else if (str.includes('作文') || str.includes('writing')) colMap.writing = index
-                else if (str.includes('会話') || str.includes('conversation')) colMap.conversation = index
+                // 期末試験（左側の列を優先）
+                exam: {
+                    vocab: findCol(headerRow, ['文字', '語彙', 'vocabulary', 'vocab']),
+                    listening: findCol(headerRow, ['聴解', 'listening']),
+                    reading: findCol(headerRow, ['読解', 'reading']),
+                    grammar: findCol(headerRow, ['文法', 'grammar']),
+                    writing: findCol(headerRow, ['作文', 'writing']),
+                    conversation: findCol(headerRow, ['会話', 'conversation', 'oral'])
+                },
 
-                // 総合成績の列を探す（通常右側にある）
-                else if (str.includes('総合') || str.includes('total') || str.includes('sum')) colMap.total_score = index
-            })
+                // 総合成績（右側の列、あるいは「点」や「成績」などのキーワードを含む列を探す）
+                // 簡易的に、同じキーワードで2回目に出現する列を探す
+                report: {
+                    vocab: -1, listening: -1, reading: -1, grammar: -1, writing: -1, conversation: -1
+                },
+
+                // 総合点
+                total_score: findCol(headerRow, ['総合', 'total', 'sum'], 5) // 学籍番号より右側で探す
+            }
+
+            // 総合成績の列探索（期末試験の列の次から探す）
+            const searchStartIdx = Math.max(
+                colMap.exam.vocab, colMap.exam.listening, colMap.exam.reading,
+                colMap.exam.grammar, colMap.exam.writing, colMap.exam.conversation
+            ) + 1
+
+            if (searchStartIdx > 0) {
+                colMap.report.vocab = findCol(headerRow, ['文字', '語彙', 'vocabulary'], searchStartIdx)
+                colMap.report.listening = findCol(headerRow, ['聴解', 'listening'], searchStartIdx)
+                colMap.report.reading = findCol(headerRow, ['読解', 'reading'], searchStartIdx)
+                colMap.report.grammar = findCol(headerRow, ['文法', 'grammar'], searchStartIdx)
+                colMap.report.writing = findCol(headerRow, ['作文', 'writing'], searchStartIdx)
+                colMap.report.conversation = findCol(headerRow, ['会話', 'conversation'], searchStartIdx)
+            }
 
             // 名前が見つからない場合のフォールバック（学籍番号の右隣など）
             if (colMap.name === -1 && colMap.id !== -1) colMap.name = colMap.id + 2
 
-            // 科目が見つからない場合のフォールバック（順番決め打ち）
-            // 入力シート: 学籍番号(0), クラス(1), 名前(2), 文法(3), 読解(4), 聴解(5), 作文(6), 会話(7) ... と仮定
-            if (colMap.grammar === -1) colMap.grammar = 3
-            if (colMap.reading === -1) colMap.reading = 4
-            if (colMap.listening === -1) colMap.listening = 5
-            if (colMap.writing === -1) colMap.writing = 6
-            if (colMap.conversation === -1) colMap.conversation = 7
-
-            // 総合成績データの列推測（さらに右側にあると仮定、あるいは別のシート）
-            // 今回はユーザー要望により「成績通知書」シートを見るとのことだが、個票形式ならデータソースは入力シートの右側にある可能性が高い
-            // 簡易的に、期末試験の点数を使って総合チャートも描画し、タイトルを変える（データがなければ）
-            // ★重要：期末試験と総合成績が別データなら、本来は別の列を参照すべき。
-            // ここでは、入力シートの右側に「成績通知用」のデータがあると仮定して列を探す、
-            // なければ期末試験のデータを「成績通知」として代用する（ただし値は要確認）
+            // カテゴリ（文字・語彙を追加）
+            const categories = ['文字・語彙', '聴解', '読解', '文法', '作文', '会話']
 
             const students = []
 
@@ -132,30 +138,54 @@ export default function GradeUploader() {
                 // 2つのデータセットを作成
                 // 1. 期末試験
                 const finalExam = {
-                    '文法': parseFloat(row[colMap.grammar]) || 0,
-                    '読解': parseFloat(row[colMap.reading]) || 0,
-                    '聴解': parseFloat(row[colMap.listening]) || 0,
-                    '作文': parseFloat(row[colMap.writing]) || 0,
-                    '会話': parseFloat(row[colMap.conversation]) || 0,
+                    '文字・語彙': parseFloat(row[colMap.exam.vocab]) || 0,
+                    '聴解': parseFloat(row[colMap.exam.listening]) || 0,
+                    '読解': parseFloat(row[colMap.exam.reading]) || 0,
+                    '文法': parseFloat(row[colMap.exam.grammar]) || 0,
+                    '作文': parseFloat(row[colMap.exam.writing]) || 0,
+                    '会話': parseFloat(row[colMap.exam.conversation]) || 0,
                 }
 
-                // 2. 総合成績 (データ列が不明なため、当面は期末と同じスコアを使用するか、右側の列を探索)
-                // 実運用ではマッピング調整が必要
-                // 総合点は6科目の平均とあるが、入力データから計算する
-                const scores = Object.values(finalExam)
-                const sum = scores.reduce((a, b) => a + b, 0)
-                const totalScore = parseFloat(row[colMap.total_score]) || Math.round(sum / 5 * 10) / 10 // 列があれば使う、なければ平均計算
+                // 期末試験の総合点（6科目の平均）
+                const examScores = Object.values(finalExam)
+                const examSum = examScores.reduce((a, b) => a + b, 0)
+                const examAvg = Math.round(examSum / 6 * 10) / 10
+
+                // 2. 総合成績
+                // データ列が見つかっていればそれを使う、なければ空（または0）
+                // ユーザーが「違うシートを読み取っているはず」と言っているため、
+                // もし同じシートに列がなければ、Sheet 1 も確認してみるロジックを入れたいが、
+                // 複雑になるため、まずは同一シート内の2つ目のデータセットを探す
+                const reportCard = {
+                    '文字・語彙': parseFloat(row[colMap.report.vocab]) || 0,
+                    '聴解': parseFloat(row[colMap.report.listening]) || 0,
+                    '読解': parseFloat(row[colMap.report.reading]) || 0,
+                    '文法': parseFloat(row[colMap.report.grammar]) || 0,
+                    '作文': parseFloat(row[colMap.report.writing]) || 0,
+                    '会話': parseFloat(row[colMap.report.conversation]) || 0,
+                }
+
+                // 総合成績の総合点
+                const reportScores = Object.values(reportCard)
+                const reportSum = reportScores.reduce((a, b) => a + b, 0)
+                const reportAvg = Math.round(reportSum / 6 * 10) / 10
+
+                // 表示用の総合点（右上に表示するもの）
+                // 指定があればその列、なければ総合成績の平均
+                const totalScore = parseFloat(row[colMap.total_score]) || reportAvg
 
                 // 名前
                 let name = row[colMap.name]
-                if (!name && colMap.name !== -1) name = '氏名不明'
+                if (!name && colMap.name !== -1) name = '氏名なし'
 
                 students.push({
                     id: id,
                     name: name,
                     class: row[colMap.class],
                     finalExam,
-                    reportCard: finalExam, // 仮：同じデータを使用（後で列調整可能）
+                    finalExamTotal: examAvg,
+                    reportCard,
+                    reportCardTotal: reportAvg,
                     totalScore: totalScore
                 })
             }
@@ -174,7 +204,7 @@ export default function GradeUploader() {
         }
     }
 
-    const categories = ['文法', '読解', '聴解', '作文', '会話']
+    const categories = ['文字・語彙', '聴解', '読解', '文法', '作文', '会話']
 
     return (
         <div>
@@ -256,7 +286,12 @@ export default function GradeUploader() {
                                 <div className={styles.chartsGrid}>
                                     {/* 期末試験チャート */}
                                     <div className={styles.chartWrapper}>
-                                        <h4 className={styles.chartTitle}>期末試験結果</h4>
+                                        <h4 className={styles.chartTitle}>
+                                            期末試験結果
+                                            <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
+                                                (平均: {student.finalExamTotal})
+                                            </span>
+                                        </h4>
                                         <div className={styles.chartContainer}>
                                             <RadarChart
                                                 labels={categories}
@@ -269,7 +304,12 @@ export default function GradeUploader() {
 
                                     {/* 成績通知チャート */}
                                     <div className={styles.chartWrapper}>
-                                        <h4 className={styles.chartTitle}>成績通知表 (総合成績)</h4>
+                                        <h4 className={styles.chartTitle}>
+                                            成績通知表 (総合成績)
+                                            <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
+                                                (平均: {student.reportCardTotal})
+                                            </span>
+                                        </h4>
                                         <div className={styles.chartContainer}>
                                             <RadarChart
                                                 labels={categories}
