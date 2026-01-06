@@ -154,6 +154,7 @@ export default function GradeUploader() {
 
             const categories = ['文字・語彙', '聴解', '読解', '文法', '作文', '会話']
             const students = []
+            let firstStudentDebug = null
 
             // Sheet 0 のデータを主としてループ
             for (let i = headerRowIndex + 1; i < inputData.length; i++) {
@@ -185,6 +186,29 @@ export default function GradeUploader() {
 
                 // IDで行を特定
                 const reportRowIndex = reportDataMap.get(String(id).trim())
+
+                // Debug Capture Logic
+                if (!firstStudentDebug) {
+                    firstStudentDebug = {
+                        id: id,
+                        lookupId: String(id).trim(),
+                        foundRow: reportRowIndex,
+                        examScores: finalExam,
+                        sheet4Valid: !!reportSheet,
+                        sheet4Name: workbook.SheetNames[reportSheetIndex]
+                    }
+                    if (reportRowIndex && reportSheet) {
+                        const getCellVal = (c) => {
+                            const cell = reportSheet[XLSX.utils.encode_cell({ r: reportRowIndex, c: c })]
+                            return cell ? { v: cell.v, w: cell.w, t: cell.t } : 'empty'
+                        }
+                        firstStudentDebug.rawCells = {
+                            vocab: getCellVal(reportColMap.vocab),
+                            listening: getCellVal(reportColMap.listening),
+                            idCol: getCellVal(1)
+                        }
+                    }
+                }
 
                 if (reportRowIndex !== undefined && reportSheet) {
                     const getVal = (colIdx) => {
@@ -230,8 +254,13 @@ export default function GradeUploader() {
                 setError('有効な学生データが見つかりませんでした')
             } else {
                 setGrades(students)
+                setDebugInfo({
+                    sheet4Name: workbook.SheetNames[reportSheetIndex],
+                    sheetCount: workbook.SheetNames.length,
+                    idsInSheet4: Array.from(reportDataMap.entries()).slice(0, 5),
+                    firstStudentDebug: firstStudentDebug
+                })
             }
-
         } catch (err) {
             console.error(err)
             setError('解析エラー: ' + err.message)
@@ -291,6 +320,24 @@ export default function GradeUploader() {
                 </button>
 
                 {error && <div className={styles.error}>{error}</div>}
+
+                {debugInfo && (
+                    <div style={{ marginTop: '20px', padding: '15px', background: '#f3f4f6', borderRadius: '8px', fontSize: '12px', fontFamily: 'monospace' }}>
+                        <h4 style={{ fontWeight: 'bold', marginBottom: '10px' }}>Debug Information (開発者用)</h4>
+                        <p>Sheet4 Name: {debugInfo.sheet4Name}</p>
+                        <p>Total Sheets: {debugInfo.sheetCount}</p>
+                        <div style={{ margin: '10px 0' }}>
+                            <strong>First 5 IDs found in Sheet 4:</strong>
+                            <pre>{JSON.stringify(debugInfo.idsInSheet4, null, 2)}</pre>
+                        </div>
+                        {debugInfo.firstStudentDebug && (
+                            <div style={{ margin: '10px 0' }}>
+                                <strong>First Student Diagnostics:</strong>
+                                <pre>{JSON.stringify(debugInfo.firstStudentDebug, null, 2)}</pre>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {grades.length > 0 && (
