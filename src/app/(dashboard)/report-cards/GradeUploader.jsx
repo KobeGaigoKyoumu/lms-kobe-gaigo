@@ -220,11 +220,24 @@ export default function GradeUploader() {
 
                 if (reportRowIndex !== undefined && reportSheet) {
                     const getVal = (colIdx) => {
-                        const cell = reportSheet[XLSX.utils.encode_cell({ r: reportRowIndex, c: colIdx })]
-                        if (!cell) return 0
-                        // 値(.v) または 表示テキスト(.w) を取得して数値変換
-                        const val = cell.v !== undefined ? cell.v : cell.w
-                        return parseFloat(val) || 0
+                        // ターゲット列、その前後（-1, +1）をチェックして数値を探す（列ズレ対策）
+                        const indicesToCheck = [colIdx, colIdx - 1, colIdx + 1]
+
+                        for (const idx of indicesToCheck) {
+                            const cell = reportSheet[XLSX.utils.encode_cell({ r: reportRowIndex, c: idx })]
+                            if (!cell) continue
+                            const val = cell.v !== undefined ? cell.v : cell.w
+
+                            // 明示的に数値型であれば採用
+                            if (typeof val === 'number') return val
+
+                            // 文字列の場合、数値変換してチェック（"A"などはNaNになる）
+                            const num = parseFloat(val)
+                            // 0点もあり得るが、文字列"0"以外でパースして0になる（失敗）ケースを除外したい
+                            // ここでは単純に !isNaN で判定
+                            if (!isNaN(num)) return num
+                        }
+                        return 0
                     }
 
                     reportCard = {
