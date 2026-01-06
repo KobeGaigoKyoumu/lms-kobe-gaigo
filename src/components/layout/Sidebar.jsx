@@ -49,6 +49,16 @@ const menuItems = [
     },
     {
         href: '/grades',
+        label: '課題評価',
+        icon: (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                <path d="M7 12l2 2 4-4" />
+            </svg>
+        )
+    },
+    {
+        href: '/report-cards',
         label: '成績',
         icon: (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
