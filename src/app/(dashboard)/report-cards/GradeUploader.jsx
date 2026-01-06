@@ -90,9 +90,10 @@ export default function GradeUploader() {
                     }
                 }
 
-                // ヘッダーが見つからない場合のフォールバック（3行目と仮定）
-                // Excelの行番号は1始まり、ライブラリは0始まり。Row 3 -> Index 2
-                if (reportHeaderRowIndex === -1) reportHeaderRowIndex = 2
+                // ヘッダーが見つからない場合のフォールバック（2行目と仮定）
+                // Excelの行番号は1始まり、ライブラリは0始まり。Row 2 -> Index 1
+                // データはRow 3 (Index 2) から始まる
+                if (reportHeaderRowIndex === -1) reportHeaderRowIndex = 1
 
                 // IDと行番号のマッピングを作成
                 // IDカラムは基本 B列(Index 1) だが、念のため探す
