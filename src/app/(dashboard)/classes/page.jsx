@@ -15,8 +15,8 @@ export default async function ClassesPage() {
 
     const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
 
-    // クラス一覧取得
-    const { data: classes, error } = await supabase
+    // 全クラス一覧取得
+    const { data: allClasses, error } = await supabase
         .from('classes')
         .select(`
             *,
@@ -32,6 +32,45 @@ export default async function ClassesPage() {
             members:class_members (count)
         `)
         .order('created_at', { ascending: false })
+
+    // 自分が担任のクラス
+    const myClasses = allClasses?.filter(cls => cls.teacher_id === user?.id) || []
+    // その他のクラス
+    const otherClasses = allClasses?.filter(cls => cls.teacher_id !== user?.id) || []
+
+    const ClassCard = ({ cls, isMyClass = false }) => (
+        <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''}`}>
+            {isMyClass && <div className={styles.myClassBadge}>担任</div>}
+            <div className={styles.cardHeader}>
+                <span className={styles.cardBadge}>{cls.grade_level || '未設定'}</span>
+                <span className={styles.year}>{cls.academic_year}年度</span>
+            </div>
+            <h3 className={styles.cardTitle}>{cls.name}</h3>
+            <p className={styles.cardDescription}>
+                {cls.description || '説明なし'}
+            </p>
+            {cls.course && (
+                <div className={styles.cardCourse}>
+                    <span>コース:</span> {cls.course.title}
+                </div>
+            )}
+            <div className={styles.cardFooter}>
+                <div className={styles.teacher}>
+                    <div className={styles.teacherAvatar}>
+                        {cls.teacher?.avatar_url ? (
+                            <img src={cls.teacher.avatar_url} alt="" />
+                        ) : (
+                            cls.teacher?.full_name?.[0] || '?'
+                        )}
+                    </div>
+                    <span>{cls.teacher?.full_name || '担任未設定'}</span>
+                </div>
+                <span className={styles.memberCount}>
+                    {cls.members?.[0]?.count || 0}名
+                </span>
+            </div>
+        </Link>
+    )
 
     return (
         <div className={styles.page}>
@@ -58,56 +97,54 @@ export default async function ClassesPage() {
                 </div>
             )}
 
-            <div className={styles.grid}>
-                {classes?.length === 0 && (
-                    <div className={styles.empty}>
-                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
-                            <rect x="8" y="12" width="48" height="40" rx="4" />
-                            <path d="M8 24h48" />
-                            <circle cx="32" cy="36" r="8" />
+            {/* 自分のクラス */}
+            {myClasses.length > 0 && (
+                <section className={styles.myClassesSection}>
+                    <h2 className={styles.sectionTitle}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M10 12l-3-3m0 0l3-3m-3 3h6" />
+                            <circle cx="10" cy="10" r="8" />
                         </svg>
-                        <p>クラスがありません</p>
-                        {isTeacherOrAdmin && (
-                            <Link href="/classes/new" className={styles.emptyBtn}>
-                                最初のクラスを作成
-                            </Link>
-                        )}
+                        担任クラス ({myClasses.length})
+                    </h2>
+                    <div className={styles.grid}>
+                        {myClasses.map(cls => (
+                            <ClassCard key={cls.id} cls={cls} isMyClass={true} />
+                        ))}
                     </div>
-                )}
+                </section>
+            )}
 
-                {classes?.map(cls => (
-                    <Link href={`/classes/${cls.id}`} key={cls.id} className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <span className={styles.cardBadge}>{cls.grade_level || '未設定'}</span>
-                            <span className={styles.year}>{cls.academic_year}年度</span>
-                        </div>
-                        <h3 className={styles.cardTitle}>{cls.name}</h3>
-                        <p className={styles.cardDescription}>
-                            {cls.description || '説明なし'}
-                        </p>
-                        {cls.course && (
-                            <div className={styles.cardCourse}>
-                                <span>コース:</span> {cls.course.title}
-                            </div>
-                        )}
-                        <div className={styles.cardFooter}>
-                            <div className={styles.teacher}>
-                                <div className={styles.teacherAvatar}>
-                                    {cls.teacher?.avatar_url ? (
-                                        <img src={cls.teacher.avatar_url} alt="" />
-                                    ) : (
-                                        cls.teacher?.full_name?.[0] || '?'
-                                    )}
-                                </div>
-                                <span>{cls.teacher?.full_name || '担当者未設定'}</span>
-                            </div>
-                            <span className={styles.memberCount}>
-                                {cls.members?.[0]?.count || 0}名
-                            </span>
-                        </div>
-                    </Link>
-                ))}
-            </div>
+            {/* その他のクラス */}
+            {otherClasses.length > 0 && (
+                <section className={styles.otherClassesSection}>
+                    {myClasses.length > 0 && (
+                        <h2 className={styles.sectionTitle}>その他のクラス ({otherClasses.length})</h2>
+                    )}
+                    <div className={styles.grid}>
+                        {otherClasses.map(cls => (
+                            <ClassCard key={cls.id} cls={cls} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* クラスがない場合 */}
+            {allClasses?.length === 0 && (
+                <div className={styles.empty}>
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
+                        <rect x="8" y="12" width="48" height="40" rx="4" />
+                        <path d="M8 24h48" />
+                        <circle cx="32" cy="36" r="8" />
+                    </svg>
+                    <p>クラスがありません</p>
+                    {isTeacherOrAdmin && (
+                        <Link href="/classes/new" className={styles.emptyBtn}>
+                            最初のクラスを作成
+                        </Link>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
