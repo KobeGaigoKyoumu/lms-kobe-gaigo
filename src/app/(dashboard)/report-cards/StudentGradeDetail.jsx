@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import RadarChart from './RadarChart'
 import styles from './page.module.css'
 
@@ -215,7 +216,8 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                     </>
                 )}
             </div>
-            )
-    }
+        </div>
+    )
+}
 
-            export default StudentGradeDetail
+export default StudentGradeDetail
