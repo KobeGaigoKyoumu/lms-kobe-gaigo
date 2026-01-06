@@ -56,25 +56,7 @@ export default function GradeHistoryBoard() {
         }
     }
 
-    const deleteRecord = async (id) => {
-        if (!confirm('このデータを削除してもよろしいですか？')) return
 
-        try {
-            const { error } = await supabase
-                .from('grade_records')
-                .delete()
-                .eq('id', id)
-
-            if (error) throw error
-
-            // Update local state
-            setRecords(records.filter(r => r.id !== id))
-            alert('削除しました')
-        } catch (err) {
-            console.error('Error deleting record:', err)
-            alert('削除に失敗しました')
-        }
-    }
 
     const deleteClassRecords = async () => {
         if (!selectedTerm || !selectedClass || selectedClass === 'ALL') return
@@ -180,31 +162,32 @@ export default function GradeHistoryBoard() {
                 </div>
 
                 {/* Class Delete Button */}
-                {selectedClass && selectedClass !== 'ALL' && filteredRecords.length > 0 && (
-                    <button
-                        onClick={deleteClassRecords}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#fff1f2',
-                            color: '#be123c',
-                            border: '1px solid #fda4af',
-                            borderRadius: '6px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                        クラス「{selectedClass}」の全データを削除
-                    </button>
-                )}
+                <button
+                    onClick={deleteClassRecords}
+                    disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
+                        color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
+                        border: '1px solid',
+                        borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
+                        borderRadius: '6px',
+                        fontWeight: 'bold',
+                        cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s'
+                    }}
+                    title={(!selectedClass || selectedClass === 'ALL') ? "クラスを選択すると一括削除できます" : ""}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                    {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
+                </button>
             </div>
 
             {/* PRIMARY TABS: List vs Details */}
@@ -286,7 +269,6 @@ export default function GradeHistoryBoard() {
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody style={{ divideY: '1px solid #e5e7eb' }}>
@@ -314,22 +296,6 @@ export default function GradeHistoryBoard() {
                                             </td>
                                             <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: '0.875rem' }}>
                                                 {new Date(record.created_at).toLocaleString('ja-JP')}
-                                            </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <button
-                                                    onClick={() => deleteRecord(record.id)}
-                                                    style={{
-                                                        padding: '4px 8px',
-                                                        backgroundColor: '#fee2e2',
-                                                        color: '#991b1b',
-                                                        border: '1px solid #fca5a5',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '0.75rem'
-                                                    }}
-                                                >
-                                                    削除
-                                                </button>
                                             </td>
                                         </tr>
                                     ))}
