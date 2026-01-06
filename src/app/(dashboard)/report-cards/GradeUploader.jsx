@@ -64,16 +64,48 @@ export default function GradeUploader() {
                 throw new Error('期末試験シートのヘッダーが見つかりませんでした')
             }
 
-            // Sheet 4: 総合成績評価データ（ユーザー指定の5枚目）
-            // シートが存在するか確認
+            // Sheet 4: 総合成績評価データ（5枚目）
+            // sheet_to_jsonを使わず、直接セル値(.v)を取得する（関数対策）
             const reportSheetIndex = 4
-            let reportData = []
+            let reportSheet = null
             let reportHeaderRowIndex = -1
+            let reportDataMap = new Map() // ID -> Row Index Map
 
             if (workbook.SheetNames.length > reportSheetIndex) {
-                const reportSheet = workbook.Sheets[workbook.SheetNames[reportSheetIndex]]
-                reportData = XLSX.utils.sheet_to_json(reportSheet, { header: 1 })
-                reportHeaderRowIndex = findHeaderRow(reportData)
+                reportSheet = workbook.Sheets[workbook.SheetNames[reportSheetIndex]]
+
+                // データ範囲を取得
+                const range = XLSX.utils.decode_range(reportSheet['!ref'])
+
+                // ヘッダー行を探す（最初の20行くらい）
+                for (let r = range.s.r; r <= Math.min(range.e.r, 20); r++) {
+                    let rowText = ''
+                    for (let c = range.s.c; c <= Math.min(range.e.c, 25); c++) {
+                        const cell = reportSheet[XLSX.utils.encode_cell({ r, c })]
+                        if (cell && cell.v) rowText += cell.v + ' '
+                    }
+                    if (rowText.includes('語彙') && rowText.includes('文法')) {
+                        reportHeaderRowIndex = r
+                        break
+                    }
+                }
+
+                // ヘッダーが見つからない場合のフォールバック（3行目と仮定）
+                // Excelの行番号は1始まり、ライブラリは0始まり。Row 3 -> Index 2
+                if (reportHeaderRowIndex === -1) reportHeaderRowIndex = 2
+
+                // IDと行番号のマッピングを作成
+                // IDカラムは基本 B列(Index 1) だが、念のため探す
+                // 固定列: B列(1)
+                const idColIdx = 1
+
+                for (let r = reportHeaderRowIndex + 1; r <= range.e.r; r++) {
+                    const cell = reportSheet[XLSX.utils.encode_cell({ r, c: idColIdx })]
+                    if (cell && cell.v) {
+                        const idStr = String(cell.v).trim()
+                        if (idStr) reportDataMap.set(idStr, r)
+                    }
+                }
             } else {
                 console.warn('総合成績評価シート（5枚目）が見つかりませんでした')
             }
@@ -104,46 +136,16 @@ export default function GradeUploader() {
                 conversation: findCol(headerRow, ['会話', 'conversation', 'oral'])
             }
 
-            // 総合成績シートのマッピング（もしシートがあれば）
+            // 総合成績シートのマッピング（固定列インデックス）
+            // P列(15)-U列(20): 成績, V列(21): 合計
             const reportColMap = {
-                id: -1, vocab: -1, listening: -1, reading: -1, grammar: -1, writing: -1, conversation: -1, total: -1
-            }
-
-            if (reportHeaderRowIndex !== -1) {
-                const reportHeader = reportData[reportHeaderRowIndex]
-                reportColMap.id = findCol(reportHeader, ['学籍番号', 'student id'])
-
-                // 画像2を見ると、黄色のヘッダー部分にある
-                // 語彙、聴解、読解、文法、作文、会話 の順序か確認
-                reportColMap.vocab = findCol(reportHeader, ['語彙', 'vocabulary'], 5)
-                reportColMap.listening = findCol(reportHeader, ['聴解', 'listening'], 5)
-                reportColMap.reading = findCol(reportHeader, ['読解', 'reading'], 5)
-                reportColMap.grammar = findCol(reportHeader, ['文法', 'grammar'], 5)
-                reportColMap.writing = findCol(reportHeader, ['作文', 'writing'], 5)
-                reportColMap.conversation = findCol(reportHeader, ['会話', 'conversation'], 5)
-                reportColMap.total = findCol(reportHeader, ['合計', 'total', 'sum'], 5)
-
-                // フォールバック（文字化け対策）：固定列インデックスを使用（画像解析より）
-                // B列(1): 学籍番号, P列(15)-U列(20): 成績, V列(21): 合計
-                if (reportColMap.id === -1) reportColMap.id = 1
-                if (reportColMap.vocab === -1) reportColMap.vocab = 15
-                if (reportColMap.listening === -1) reportColMap.listening = 16
-                if (reportColMap.reading === -1) reportColMap.reading = 17
-                if (reportColMap.grammar === -1) reportColMap.grammar = 18
-                if (reportColMap.writing === -1) reportColMap.writing = 19
-                if (reportColMap.conversation === -1) reportColMap.conversation = 20
-                if (reportColMap.total === -1) reportColMap.total = 21
-            } else if (reportData.length > 5) {
-                // ヘッダー行すら見つからない場合（文字化けが酷い場合）、強制的にRow 3 (Header) と仮定して固定列適用
-                // データはRow 4から始まると仮定
-                reportColMap.id = 1
-                reportColMap.vocab = 15
-                reportColMap.listening = 16
-                reportColMap.reading = 17
-                reportColMap.grammar = 18
-                reportColMap.writing = 19
-                reportColMap.conversation = 20
-                reportColMap.total = 21
+                vocab: 15,
+                listening: 16,
+                reading: 17,
+                grammar: 18,
+                writing: 19,
+                conversation: 20,
+                total: 21
             }
 
             // 名前が見つからない場合のフォールバック
@@ -173,43 +175,38 @@ export default function GradeUploader() {
                 // 期末試験の合計点 (600点満点)
                 const examScores = Object.values(finalExam)
                 const examSum = examScores.reduce((a, b) => a + b, 0)
-                // const examAvg = Math.round(examSum / 6 * 10) / 10
 
-                // 2. 総合成績データ（Sheet 4から検索）
+                // 2. 総合成績データ（Sheet 4から直接取得）
                 let reportCard = {
                     '文字・語彙': 0, '聴解': 0, '読解': 0, '文法': 0, '作文': 0, '会話': 0
                 }
                 let reportTotal = 0
 
-                // 学籍番号（数値または文字列）で緩やかにマッチング
-                if (reportData.length > 0) {
-                    const idStr = String(id).trim()
+                // IDで行を特定
+                const reportRowIndex = reportDataMap.get(String(id).trim())
 
-                    // 行データ検索 (列1がIDであると仮定して検索)
-                    const reportRow = reportData.find(r => {
-                        if (!r || !r[reportColMap.id]) return false
-                        return String(r[reportColMap.id]).trim() === idStr
-                    })
+                if (reportRowIndex !== undefined && reportSheet) {
+                    const getVal = (colIdx) => {
+                        const cell = reportSheet[XLSX.utils.encode_cell({ r: reportRowIndex, c: colIdx })]
+                        if (!cell) return 0
+                        // 値(.v) または 表示テキスト(.w) を取得して数値変換
+                        const val = cell.v !== undefined ? cell.v : cell.w
+                        return parseFloat(val) || 0
+                    }
 
-                    if (reportRow) {
-                        reportCard = {
-                            '文字・語彙': parseFloat(reportRow[reportColMap.vocab]) || 0,
-                            '聴解': parseFloat(reportRow[reportColMap.listening]) || 0,
-                            '読解': parseFloat(reportRow[reportColMap.reading]) || 0,
-                            '文法': parseFloat(reportRow[reportColMap.grammar]) || 0,
-                            '作文': parseFloat(reportRow[reportColMap.writing]) || 0,
-                            '会話': parseFloat(reportRow[reportColMap.conversation]) || 0,
-                        }
+                    reportCard = {
+                        '文字・語彙': getVal(reportColMap.vocab),
+                        '聴解': getVal(reportColMap.listening),
+                        '読解': getVal(reportColMap.reading),
+                        '文法': getVal(reportColMap.grammar),
+                        '作文': getVal(reportColMap.writing),
+                        '会話': getVal(reportColMap.conversation),
+                    }
 
-                        // シート内の合計列があればそれを使う、なければ計算
-                        reportTotal = parseFloat(reportRow[reportColMap.total])
-                        if (isNaN(reportTotal)) {
-                            const scores = Object.values(reportCard)
-                            reportTotal = Math.round(scores.reduce((a, b) => a + b, 0) * 10) / 10
-                        }
-                    } else {
-                        // データが見つからない場合、デバッグ用にログ出力（開発時のみ有効）
-                        // console.log(`Report data not found for ID: ${idStr}`)
+                    reportTotal = getVal(reportColMap.total)
+                    if (reportTotal === 0) {
+                        const scores = Object.values(reportCard)
+                        reportTotal = Math.round(scores.reduce((a, b) => a + b, 0) * 10) / 10
                     }
                 }
 
