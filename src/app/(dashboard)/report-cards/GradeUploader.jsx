@@ -265,7 +265,9 @@ export default function GradeUploader() {
 
                     // Helper to build subject detail with calculation
                     const buildSubjectDetail = (baseColIdx) => {
-                        const base = getReportVal(baseColIdx)
+                        // User Request: Base Score in Report Card should be multiplied by 0.7
+                        const rawBase = getReportVal(baseColIdx)
+                        const base = rawBase * 0.7
                         // User Request: Calculate Total = Base + Attendance + Participation
                         // Base is usually out of 70, Att 15, Part 15 -> Total 100
                         const total = base + attendanceScore + participationScore
@@ -526,13 +528,13 @@ export default function GradeUploader() {
                                                 <h4 className={styles.chartTitle}>
                                                     成績通知表 (総合成績)
                                                     <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                        (合計: {student.reportCardTotal.toFixed(1)})
+                                                        (合計: {student.reportDetails.overall.total.toFixed(1)})
                                                     </span>
                                                 </h4>
                                                 <div className={styles.chartContainer}>
                                                     <RadarChart
                                                         labels={categories}
-                                                        data={['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => student.reportCard[k])}
+                                                        data={['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => student.reportDetails[k].total)}
                                                         title="総合成績"
                                                         color="green"
                                                     />
