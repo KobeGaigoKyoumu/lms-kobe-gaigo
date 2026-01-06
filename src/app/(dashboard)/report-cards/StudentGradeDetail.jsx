@@ -154,14 +154,10 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 <thead>
                                     <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #e5e7eb' }}>
                                         <th style={{ padding: '8px', textAlign: 'left', minWidth: '80px' }}>科目</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>素点 (100)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>出席 (100)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>参加 (100)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center', color: '#6b7280' }}>|</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>素点評価 (70%)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>出席評価 (20%)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center' }}>参加評価 (10%)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#ecfdf5' }}>計 (100)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center' }}>基礎点 (70)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center' }}>出席点 (15)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center' }}>平常点 (15)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#ecfdf5' }}>合計 (100)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>評定</th>
                                     </tr>
                                 </thead>
@@ -178,22 +174,19 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         return (
                                             <tr key={cat.key} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                 <td style={{ padding: '8px' }}>{cat.label}</td>
-                                                {/* Raw Scores */}
-                                                <td style={{ padding: '8px', textAlign: 'center', color: '#6b7280' }}>
-                                                    {d.base === 0 ? '-' : Math.round(d.base / 0.7)}
+                                                {/* Weighted Scores (Corrected View) */}
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    {d.base?.toFixed(1)}
                                                 </td>
-                                                <td style={{ padding: '8px', textAlign: 'center', color: '#6b7280' }}>100</td>
-                                                <td style={{ padding: '8px', textAlign: 'center', color: '#6b7280' }}>
-                                                    {reportDetails.participation === 0 ? '-' : Math.round(reportDetails.participation / 0.1)}
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    {reportDetails.attendance?.toFixed(1)}
                                                 </td>
-
-                                                <td style={{ padding: '8px', textAlign: 'center', color: '#d1d5db' }}>|</td>
-
-                                                {/* Weighted Scores */}
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>{d.base}</td>
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>{reportDetails.attendance}</td>
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>{reportDetails.participation}</td>
-                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4' }}>{d.total}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    {reportDetails.participation?.toFixed(1)}
+                                                </td>
+                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4' }}>
+                                                    {d.total?.toFixed(1)}
+                                                </td>
                                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#059669' }}>
                                                     {calculateGrade(d.total)}
                                                 </td>
@@ -202,9 +195,13 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                     })}
                                     <tr style={{ borderTop: '2px solid #10b981', backgroundColor: '#f0fdf4' }}>
                                         <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>総合評価</td>
-                                        <td colSpan={7} style={{ textAlign: 'right', paddingRight: '20px' }}>（全科目の平均）</td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                                            {reportDetails.overall?.base?.toFixed(1)}
+                                        </td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#047857' }}>
-                                            {reportCardTotal} <span style={{ fontSize: '0.8rem' }}>/ 100</span>
+                                            {reportCardTotal.toFixed(1)} <span style={{ fontSize: '0.8rem' }}>/ 100</span>
                                         </td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#047857' }}>
                                             {calculateGrade(reportCardTotal)}

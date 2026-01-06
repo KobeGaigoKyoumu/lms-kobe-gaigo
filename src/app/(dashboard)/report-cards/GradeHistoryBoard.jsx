@@ -76,6 +76,40 @@ export default function GradeHistoryBoard() {
         }
     }
 
+    const deleteClassRecords = async () => {
+        if (!selectedTerm || !selectedClass || selectedClass === 'ALL') return
+
+        const targetCount = filteredRecords.length
+        if (targetCount === 0) return
+
+        if (!confirm(`【警告】\n${selectedTerm} のクラス「${selectedClass}」の全データ（${targetCount}件）を削除しようとしています。\n\nこの操作は取り消せません。\n本当に削除してもよろしいですか？`)) return
+
+        try {
+            setLoading(true)
+            const { error } = await supabase
+                .from('grade_records')
+                .delete()
+                .eq('year_term', selectedTerm)
+                .eq('class_name', selectedClass)
+
+            if (error) throw error
+
+            // Update local state by removing deleted records
+            setRecords(records.filter(r => !(r.year_term === selectedTerm && r.class_name === selectedClass)))
+
+            // Allow state to update and re-render
+            alert(`${targetCount}件のデータを削除しました`)
+
+            // Reset selection to ALL if needed, or keep as is (now empty)
+            // setSelectedClass('ALL') 
+        } catch (err) {
+            console.error('Error deleting class records:', err)
+            alert('一括削除に失敗しました')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const filteredRecords = records.filter(r => {
         const matchTerm = selectedTerm ? r.year_term === selectedTerm : true
         const matchClass = selectedClass && selectedClass !== 'ALL' ? r.class_name === selectedClass : true
@@ -119,30 +153,58 @@ export default function GradeHistoryBoard() {
                 </Link>
             </div>
 
-            {/* Filters */}
-            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>学期 (Year-Term)</label>
-                    <select
-                        value={selectedTerm}
-                        onChange={(e) => setSelectedTerm(e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
-                    >
-                        {yearTerms.length === 0 && <option>データなし</option>}
-                        {yearTerms.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>学期 (Year-Term)</label>
+                        <select
+                            value={selectedTerm}
+                            onChange={(e) => setSelectedTerm(e.target.value)}
+                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
+                        >
+                            {yearTerms.length === 0 && <option>データなし</option>}
+                            {yearTerms.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>クラス</label>
+                        <select
+                            value={selectedClass}
+                            onChange={(e) => setSelectedClass(e.target.value)}
+                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
+                        >
+                            <option value="ALL">全クラス</option>
+                            {classes.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.875rem', color: '#4b5563' }}>クラス</label>
-                    <select
-                        value={selectedClass}
-                        onChange={(e) => setSelectedClass(e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
+
+                {/* Class Delete Button */}
+                {selectedClass && selectedClass !== 'ALL' && filteredRecords.length > 0 && (
+                    <button
+                        onClick={deleteClassRecords}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#fff1f2',
+                            color: '#be123c',
+                            border: '1px solid #fda4af',
+                            borderRadius: '6px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s'
+                        }}
                     >
-                        <option value="ALL">全クラス</option>
-                        {classes.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                        クラス「{selectedClass}」の全データを削除
+                    </button>
+                )}
             </div>
 
             {/* PRIMARY TABS: List vs Details */}
