@@ -259,19 +259,32 @@ export default function GradeUploader() {
                         return typeof cell.v === 'number' ? cell.v : (parseFloat(cell.v) || 0)
                     }
 
-                    const reportDetails = {
-                        attendance: getReportVal(12),
-                        participation: getReportVal(13),
-                        vocab: { base: getReportVal(14), total: getReportVal(15) },
-                        listening: { base: getReportVal(16), total: getReportVal(17) },
-                        reading: { base: getReportVal(18), total: getReportVal(19) },
-                        grammar: { base: getReportVal(20), total: getReportVal(21) },
-                        writing: { base: getReportVal(22), total: getReportVal(23) },
-                        conversation: { base: getReportVal(24), total: getReportVal(25) },
-                        overall: { total: getReportVal(26) } // Base might be sum of bases?
+                    // Common values for all subjects
+                    const attendanceScore = getReportVal(12)
+                    const participationScore = getReportVal(13)
+
+                    // Helper to build subject detail with calculation
+                    const buildSubjectDetail = (baseColIdx) => {
+                        const base = getReportVal(baseColIdx)
+                        // User Request: Calculate Total = Base + Attendance + Participation
+                        // Base is usually out of 70, Att 15, Part 15 -> Total 100
+                        const total = base + attendanceScore + participationScore
+                        return { base, total }
                     }
 
-                    // Calculate Overall Base (Generic sum of sub-bases)
+                    const reportDetails = {
+                        attendance: attendanceScore,
+                        participation: participationScore,
+                        vocab: buildSubjectDetail(14),      // 14: Base
+                        listening: buildSubjectDetail(16),  // 16: Base
+                        reading: buildSubjectDetail(18),    // 18: Base
+                        grammar: buildSubjectDetail(20),    // 20: Base
+                        writing: buildSubjectDetail(22),    // 22: Base
+                        conversation: buildSubjectDetail(24), // 24: Base
+                        overall: { total: getReportVal(26) } // Overall Total from Col 26
+                    }
+
+                    // Calculate Overall Base (Sum of subject bases)
                     reportDetails.overall.base =
                         reportDetails.vocab.base +
                         reportDetails.listening.base +
@@ -280,11 +293,21 @@ export default function GradeUploader() {
                         reportDetails.writing.base +
                         reportDetails.conversation.base
 
-                    // Report Total (Use existing logic or new explicit col)
+                    // Report Total used for Chart can be the Overall Total or sum of Subject Totals / 6 ?
+                    // Usually Report Total is the "Overall" score.
                     reportTotal = reportDetails.overall.total
                     if (reportTotal === 0) {
-                        // Fallback
-                        reportTotal = getVal(reportColMap.total)
+                        // Fallback: Average of the 6 calculated totals?
+                        // Or sum? The overall is usually ~90, so likely average or 100-scale score.
+                        // Let's rely on the Column 26 as primary. If 0, use average of calculated.
+                        const sumTotals =
+                            reportDetails.vocab.total +
+                            reportDetails.listening.total +
+                            reportDetails.reading.total +
+                            reportDetails.grammar.total +
+                            reportDetails.writing.total +
+                            reportDetails.conversation.total
+                        reportTotal = sumTotals / 6
                     }
                     // Determine grade for report (already used logic, keep consistent)
 
