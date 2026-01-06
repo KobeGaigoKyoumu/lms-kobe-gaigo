@@ -380,28 +380,26 @@ export default function GradeUploader() {
                             <div key={index} className={styles.studentRow}>
                                 {/* 学生情報ヘッダー */}
                                 <div className={styles.studentHeader}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                        <div>
-                                            <h3 className={styles.studentName}>
-                                                {student.name}
-                                                <span className={styles.studentId}>({student.id})</span>
-                                            </h3>
-                                            <p className={styles.className}>{student.class}</p>
-                                        </div>
-
-                                        {/* 期末試験バッジ（青） - 名前横に移動、左ボーダー削除 */}
-                                        <div className={styles.totalScoreBadge}>
-                                            <span className={styles.totalLabel}>期末試験（合計）</span>
-                                            <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
-                                                {calculateFinalExamGrade(student.finalExamSum / 6)}
-                                                <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8, color: '#1f2937' }}>
-                                                    ({student.finalExamSum})
-                                                </span>
-                                            </span>
-                                        </div>
+                                    <div>
+                                        <h3 className={styles.studentName}>
+                                            {student.name}
+                                            <span className={styles.studentId}>({student.id})</span>
+                                        </h3>
+                                        <p className={styles.className}>{student.class}</p>
                                     </div>
 
-                                    {/* 総合成績バッジ（緑） - 右側に配置、左ボーダー削除 */}
+                                    {/* 期末試験バッジ（青） - 中央付近に配置 */}
+                                    <div className={styles.totalScoreBadge}>
+                                        <span className={styles.totalLabel}>期末試験（合計）</span>
+                                        <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
+                                            {calculateFinalExamGrade(student.finalExamSum / 6)}
+                                            <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8, color: '#1f2937' }}>
+                                                ({student.finalExamSum})
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    {/* 総合成績バッジ（緑） - 右側に配置 */}
                                     <div className={styles.totalScoreBadge}>
                                         <span className={styles.totalLabel}>総合成績（合計）</span>
                                         <span className={styles.totalValue} style={{ color: '#10b981' }}>
