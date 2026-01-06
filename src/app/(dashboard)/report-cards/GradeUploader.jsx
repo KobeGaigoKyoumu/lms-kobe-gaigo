@@ -304,6 +304,16 @@ export default function GradeUploader() {
         return 'F'
     }
 
+    // 期末試験用の評価基準
+    // A: 80%以上, B: 60%以上, C: 40%以上, D: 20%以上, F: 20%未満
+    const calculateFinalExamGrade = (score) => {
+        if (score >= 80) return 'A'
+        if (score >= 60) return 'B'
+        if (score >= 40) return 'C'
+        if (score >= 20) return 'D'
+        return 'F'
+    }
+
     return (
         <div>
             <div className={styles.uploadSection}>
@@ -383,7 +393,7 @@ export default function GradeUploader() {
                                         <div className={styles.totalScoreBadge}>
                                             <span className={styles.totalLabel}>期末試験（合計）</span>
                                             <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
-                                                {calculateGrade(student.finalExamSum / 6)}
+                                                {calculateFinalExamGrade(student.finalExamSum / 6)}
                                                 <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8, color: '#1f2937' }}>
                                                     ({student.finalExamSum})
                                                 </span>
