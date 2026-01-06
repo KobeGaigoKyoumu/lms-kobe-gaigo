@@ -47,7 +47,8 @@ export default function GradeHistoryBoard() {
 
             // Set defaults
             if (terms.length > 0) setSelectedTerm(terms[0])
-            if (cls.length > 0) setSelectedClass('ALL')
+            // Default class remains empty to force selection
+            // if (cls.length > 0) setSelectedClass('ALL')
 
         } catch (err) {
             console.error('Error fetching history:', err)
@@ -93,8 +94,10 @@ export default function GradeHistoryBoard() {
     }
 
     const filteredRecords = records.filter(r => {
+        if (!selectedClass || selectedClass === 'ALL') return false // Hide if no class selected (or if strict 'ALL' check is preferred, but user wants 'Select Class')
         const matchTerm = selectedTerm ? r.year_term === selectedTerm : true
-        const matchClass = selectedClass && selectedClass !== 'ALL' ? r.class_name === selectedClass : true
+        // const matchClass = selectedClass && selectedClass !== 'ALL' ? r.class_name === selectedClass : true
+        const matchClass = r.class_name === selectedClass
         return matchTerm && matchClass
     })
 
@@ -105,6 +108,12 @@ export default function GradeHistoryBoard() {
         if (score >= 40) return 'C'
         if (score >= 20) return 'D'
         return 'F'
+    }
+
+    // Helper for Final Exam Grade (Score / 6)
+    const calculateFinalExamGrade = (score) => {
+        const normalized = score / 6
+        return calculateGrade(normalized)
     }
 
     // Convert record to student object format expected by StudentGradeDetail
@@ -155,39 +164,45 @@ export default function GradeHistoryBoard() {
                             onChange={(e) => setSelectedClass(e.target.value)}
                             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
                         >
-                            <option value="ALL">全クラス</option>
+                            <option value="">クラスを選択してください</option>
                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                 </div>
 
-                {/* Class Delete Button */}
-                <button
-                    onClick={deleteClassRecords}
-                    disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
-                    style={{
-                        padding: '8px 16px',
-                        backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
-                        color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
-                        border: '1px solid',
-                        borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
-                        borderRadius: '6px',
-                        fontWeight: 'bold',
-                        cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        transition: 'all 0.2s'
-                    }}
-                    title={(!selectedClass || selectedClass === 'ALL') ? "クラスを選択すると一括削除できます" : ""}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                    {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
-                </button>
+                {/* Class Delete Button (Accordion) */}
+                <details style={{ marginTop: '10px' }}>
+                    <summary style={{ cursor: 'pointer', color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', listStyle: 'none' }}>
+                        開発者メニュー（クラス一括削除）
+                    </summary>
+                    <div style={{ marginTop: '10px' }}>
+                        <button
+                            onClick={deleteClassRecords}
+                            disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
+                                color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
+                                border: '1px solid',
+                                borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                            {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
+                        </button>
+                    </div>
+                </details>
             </div>
 
             {/* PRIMARY TABS: List vs Details */}
@@ -266,6 +281,7 @@ export default function GradeHistoryBoard() {
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>氏名</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>クラス</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>期末試験(600)</th>
+                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>期末評価</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
@@ -278,6 +294,21 @@ export default function GradeHistoryBoard() {
                                             <td style={{ padding: '12px 16px' }}>{record.student_name}</td>
                                             <td style={{ padding: '12px 16px' }}>{record.class_name}</td>
                                             <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
+                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    lineHeight: '24px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#eff6ff',
+                                                    color: '#1d4ed8',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {calculateFinalExamGrade(record.final_exam_total)}
+                                                </span>
+                                            </td>
                                             <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
                                             <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                                                 <span style={{
