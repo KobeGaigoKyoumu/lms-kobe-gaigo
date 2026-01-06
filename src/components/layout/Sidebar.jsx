@@ -227,16 +227,6 @@ export default function Sidebar({ user }) {
                 )
             },
             {
-                href: '/calendar',
-                label: 'カレンダー',
-                icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="3" y="4" width="14" height="13" rx="2" />
-                        <path d="M3 8h14M7 2v4M13 2v4" />
-                    </svg>
-                )
-            },
-            {
                 href: '/report-cards/analytics',
                 label: '統計・分析',
                 icon: (
@@ -244,6 +234,16 @@ export default function Sidebar({ user }) {
                         <path d="M18 20V10" />
                         <path d="M12 20V4" />
                         <path d="M6 20V14" />
+                    </svg>
+                )
+            },
+            {
+                href: '/calendar',
+                label: 'カレンダー',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="4" width="14" height="13" rx="2" />
+                        <path d="M3 8h14M7 2v4M13 2v4" />
                     </svg>
                 )
             },
