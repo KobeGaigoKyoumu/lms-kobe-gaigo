@@ -1,8 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import styles from './page.module.css'
+import AnnouncementCard from './AnnouncementCard'
 
 export default async function AnnouncementsPage() {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // 現在のユーザーのプロファイル
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single()
+
+    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
 
     // お知らせ一覧取得（ピン留め優先、新しい順）
     const { data: announcements, error } = await supabase
@@ -10,10 +22,12 @@ export default async function AnnouncementsPage() {
         .select(`
       *,
       author:profiles!author_id (
+        id,
         full_name,
         avatar_url
       ),
       course:courses (
+        id,
         title
       )
     `)
@@ -23,8 +37,18 @@ export default async function AnnouncementsPage() {
     return (
         <div className={styles.page}>
             <header className={styles.header}>
-                <h1 className={styles.title}>お知らせ</h1>
-                <p className={styles.subtitle}>学校からの重要なお知らせ</p>
+                <div>
+                    <h1 className={styles.title}>お知らせ</h1>
+                    <p className={styles.subtitle}>学校からの重要なお知らせ</p>
+                </div>
+                {isTeacherOrAdmin && (
+                    <Link href="/announcements/new" className={styles.createBtn}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M10 4v12M4 10h12" />
+                        </svg>
+                        新規作成
+                    </Link>
+                )}
             </header>
 
             {error && (
@@ -39,50 +63,20 @@ export default async function AnnouncementsPage() {
                         <path d="M32 28v12" />
                     </svg>
                     <p>お知らせはありません</p>
+                    {isTeacherOrAdmin && (
+                        <Link href="/announcements/new" className={styles.emptyBtn}>
+                            最初のお知らせを作成
+                        </Link>
+                    )}
                 </div>
             ) : (
                 <div className={styles.list}>
                     {announcements?.map(announcement => (
-                        <article key={announcement.id} className={styles.card}>
-                            <div className={styles.cardHeader}>
-                                {announcement.is_pinned && (
-                                    <span className={styles.pinBadge}>
-                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-                                            <path d="M9.5 1L13 4.5L9.5 8L8.5 7L10.5 5H4a2.5 2.5 0 0 0 0 5h1v1.5H4a4 4 0 0 1 0-8h6.5L8.5 1.5 9.5 1z" />
-                                        </svg>
-                                        ピン留め
-                                    </span>
-                                )}
-                                {announcement.course && (
-                                    <span className={styles.courseBadge}>
-                                        {announcement.course.title}
-                                    </span>
-                                )}
-                                <span className={styles.date}>
-                                    {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}
-                                </span>
-                            </div>
-
-                            <h2 className={styles.cardTitle}>{announcement.title}</h2>
-                            <p className={styles.cardContent}>{announcement.content}</p>
-
-                            <div className={styles.cardFooter}>
-                                <div className={styles.author}>
-                                    <div className={styles.authorAvatar}>
-                                        {announcement.author?.avatar_url ? (
-                                            <img src={announcement.author.avatar_url} alt="" />
-                                        ) : (
-                                            announcement.author?.full_name?.[0] || '?'
-                                        )}
-                                    </div>
-                                    <span>{announcement.author?.full_name || '不明'}</span>
-                                </div>
-                            </div>
-                        </article>
+                        <AnnouncementCard
+                            key={announcement.id}
+                            announcement={announcement}
+                            canEdit={isTeacherOrAdmin && (announcement.author?.id === user?.id || profile?.role === 'admin')}
+                        />
                     ))}
                 </div>
             )}

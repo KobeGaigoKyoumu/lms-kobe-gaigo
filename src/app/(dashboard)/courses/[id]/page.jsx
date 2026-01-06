@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
+import EnrollmentManager from './EnrollmentManager'
 
 export default async function CourseDetailPage({ params }) {
     const { id } = await params
@@ -37,6 +38,7 @@ export default async function CourseDetailPage({ params }) {
     const isOwner = course.teacher_id === user?.id
     const isAdmin = profile?.role === 'admin'
     const canEdit = isOwner || isAdmin
+    const isStudent = profile?.role === 'student'
 
     // 課題一覧取得
     const { data: assignments } = await supabase
@@ -44,6 +46,39 @@ export default async function CourseDetailPage({ params }) {
         .select('*')
         .eq('course_id', id)
         .order('due_date', { ascending: true })
+
+    // 登録者一覧取得（教師・管理者のみ表示）
+    let enrollments = []
+    if (canEdit) {
+        const { data } = await supabase
+            .from('course_enrollments')
+            .select(`
+                id,
+                enrolled_at,
+                user:profiles!user_id (
+                    id,
+                    full_name,
+                    email,
+                    student_id,
+                    avatar_url
+                )
+            `)
+            .eq('course_id', id)
+            .order('enrolled_at', { ascending: false })
+        enrollments = data || []
+    }
+
+    // 学生の場合：登録状況を確認
+    let isEnrolled = false
+    if (isStudent) {
+        const { data: enrollment } = await supabase
+            .from('course_enrollments')
+            .select('id')
+            .eq('course_id', id)
+            .eq('user_id', user?.id)
+            .single()
+        isEnrolled = !!enrollment
+    }
 
     return (
         <div className={styles.page}>
@@ -112,8 +147,21 @@ export default async function CourseDetailPage({ params }) {
                                 <dt>課題数</dt>
                                 <dd>{assignments?.length || 0}件</dd>
                             </div>
+                            <div>
+                                <dt>登録者数</dt>
+                                <dd>{enrollments?.length || 0}名</dd>
+                            </div>
                         </dl>
                     </div>
+
+                    {/* 学生用：登録ボタン */}
+                    {isStudent && course.is_published && (
+                        <EnrollmentManager
+                            courseId={id}
+                            userId={user?.id}
+                            isEnrolled={isEnrolled}
+                        />
+                    )}
                 </aside>
 
                 {/* メインコンテンツ */}
@@ -170,6 +218,47 @@ export default async function CourseDetailPage({ params }) {
                             </div>
                         )}
                     </section>
+
+                    {/* 登録者一覧（教師・管理者のみ） */}
+                    {canEdit && (
+                        <section className={styles.section}>
+                            <h2>登録者一覧 ({enrollments?.length || 0}名)</h2>
+
+                            {enrollments?.length === 0 ? (
+                                <p className={styles.empty}>登録者がいません</p>
+                            ) : (
+                                <div className={styles.enrollmentList}>
+                                    {enrollments?.map(enrollment => (
+                                        <div key={enrollment.id} className={styles.enrollmentCard}>
+                                            <div className={styles.enrollmentUser}>
+                                                <div className={styles.userAvatar}>
+                                                    {enrollment.user?.avatar_url ? (
+                                                        <img src={enrollment.user.avatar_url} alt="" />
+                                                    ) : (
+                                                        enrollment.user?.full_name?.[0] || '?'
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className={styles.userName}>{enrollment.user?.full_name}</p>
+                                                    <p className={styles.userMeta}>
+                                                        {enrollment.user?.student_id && (
+                                                            <span>学籍番号: {enrollment.user.student_id}</span>
+                                                        )}
+                                                        {enrollment.user?.email && (
+                                                            <span>{enrollment.user.email}</span>
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span className={styles.enrolledAt}>
+                                                {new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP')}登録
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
                 </main>
             </div>
         </div>

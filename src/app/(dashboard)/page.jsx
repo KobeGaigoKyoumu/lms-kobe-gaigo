@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import styles from './page.module.css'
 
 export default async function DashboardPage() {
@@ -6,6 +7,154 @@ export default async function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'ユーザー'
+
+    // プロファイル取得
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single()
+
+    const isStudent = profile?.role === 'student'
+    const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
+
+    // === 統計データの取得 ===
+
+    // 登録コース数
+    let enrolledCoursesCount = 0
+    if (isStudent) {
+        const { count } = await supabase
+            .from('course_enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user?.id)
+        enrolledCoursesCount = count || 0
+    } else if (isTeacher) {
+        const { count } = await supabase
+            .from('courses')
+            .select('*', { count: 'exact', head: true })
+            .eq('teacher_id', user?.id)
+        enrolledCoursesCount = count || 0
+    }
+
+    // 課題データ取得（学生の場合）
+    let pendingAssignmentsCount = 0
+    let completedAssignmentsCount = 0
+    let recentAssignments = []
+
+    if (isStudent) {
+        // 全課題取得（登録コースに関連するもの）
+        const { data: enrollments } = await supabase
+            .from('course_enrollments')
+            .select('course_id')
+            .eq('user_id', user?.id)
+
+        const enrolledCourseIds = enrollments?.map(e => e.course_id) || []
+
+        if (enrolledCourseIds.length > 0) {
+            // 課題取得
+            const { data: assignments } = await supabase
+                .from('assignments')
+                .select(`
+                    id,
+                    title,
+                    due_date,
+                    max_score,
+                    course:courses (id, title)
+                `)
+                .in('course_id', enrolledCourseIds)
+                .order('due_date', { ascending: true })
+                .limit(10)
+
+            recentAssignments = assignments || []
+
+            // 提出済み課題ID取得
+            const { data: submissions } = await supabase
+                .from('submissions')
+                .select('assignment_id')
+                .eq('student_id', user?.id)
+
+            const submittedAssignmentIds = submissions?.map(s => s.assignment_id) || []
+
+            // 未提出（締切前）
+            const now = new Date()
+            pendingAssignmentsCount = recentAssignments.filter(a =>
+                !submittedAssignmentIds.includes(a.id) &&
+                (!a.due_date || new Date(a.due_date) >= now)
+            ).length
+
+            // 完了（提出済み）
+            completedAssignmentsCount = submittedAssignmentIds.length
+        }
+    } else if (isTeacher) {
+        // 教師の場合：未採点の提出物数
+        const { data: teacherCourses } = await supabase
+            .from('courses')
+            .select('id')
+            .eq('teacher_id', user?.id)
+
+        const teacherCourseIds = teacherCourses?.map(c => c.id) || []
+
+        if (teacherCourseIds.length > 0) {
+            const { count } = await supabase
+                .from('submissions')
+                .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                .eq('status', 'submitted')
+                .in('assignment.course_id', teacherCourseIds)
+            pendingAssignmentsCount = count || 0
+
+            // 採点済み
+            const { count: gradedCount } = await supabase
+                .from('submissions')
+                .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                .eq('status', 'graded')
+                .in('assignment.course_id', teacherCourseIds)
+            completedAssignmentsCount = gradedCount || 0
+        }
+
+        // 教師用：最近の課題
+        const { data: assignments } = await supabase
+            .from('assignments')
+            .select(`
+                id,
+                title,
+                due_date,
+                max_score,
+                course:courses (id, title)
+            `)
+            .in('course_id', teacherCourseIds)
+            .order('created_at', { ascending: false })
+            .limit(5)
+
+        recentAssignments = assignments || []
+    }
+
+    // 今週の予定（課題締切）
+    const now = new Date()
+    const nextWeek = new Date(now)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+
+    const { count: upcomingCount } = await supabase
+        .from('assignments')
+        .select('*', { count: 'exact', head: true })
+        .gte('due_date', now.toISOString())
+        .lte('due_date', nextWeek.toISOString())
+
+    const upcomingEventsCount = upcomingCount || 0
+
+    // 最新のお知らせ取得
+    const { data: announcements } = await supabase
+        .from('announcements')
+        .select(`
+            id,
+            title,
+            content,
+            is_pinned,
+            created_at,
+            author:profiles!author_id (full_name)
+        `)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(5)
 
     return (
         <div className={styles.page}>
@@ -34,8 +183,8 @@ export default async function DashboardPage() {
                         </svg>
                     </div>
                     <div className={styles.statContent}>
-                        <p className={styles.statLabel}>登録コース</p>
-                        <p className={styles.statValue}>0</p>
+                        <p className={styles.statLabel}>{isTeacher ? '担当コース' : '登録コース'}</p>
+                        <p className={styles.statValue}>{enrolledCoursesCount}</p>
                     </div>
                 </div>
 
@@ -47,8 +196,8 @@ export default async function DashboardPage() {
                         </svg>
                     </div>
                     <div className={styles.statContent}>
-                        <p className={styles.statLabel}>未提出課題</p>
-                        <p className={styles.statValue}>0</p>
+                        <p className={styles.statLabel}>{isTeacher ? '未採点' : '未提出課題'}</p>
+                        <p className={styles.statValue}>{pendingAssignmentsCount}</p>
                     </div>
                 </div>
 
@@ -60,8 +209,8 @@ export default async function DashboardPage() {
                         </svg>
                     </div>
                     <div className={styles.statContent}>
-                        <p className={styles.statLabel}>完了課題</p>
-                        <p className={styles.statValue}>0</p>
+                        <p className={styles.statLabel}>{isTeacher ? '採点済み' : '完了課題'}</p>
+                        <p className={styles.statValue}>{completedAssignmentsCount}</p>
                     </div>
                 </div>
 
@@ -74,7 +223,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>今週の予定</p>
-                        <p className={styles.statValue}>0</p>
+                        <p className={styles.statValue}>{upcomingEventsCount}</p>
                     </div>
                 </div>
             </div>
@@ -90,13 +239,38 @@ export default async function DashboardPage() {
                         </svg>
                         最近の課題
                     </h2>
-                    <div className={styles.emptyState}>
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
-                            <path d="M18 10H14a4 4 0 0 0-4 4v24a4 4 0 0 0 4 4h20a4 4 0 0 0 4-4V14a4 4 0 0 0-4-4h-4" />
-                            <rect x="16" y="4" width="16" height="8" rx="2" />
-                        </svg>
-                        <p>課題がありません</p>
-                    </div>
+                    {recentAssignments.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
+                                <path d="M18 10H14a4 4 0 0 0-4 4v24a4 4 0 0 0 4 4h20a4 4 0 0 0 4-4V14a4 4 0 0 0-4-4h-4" />
+                                <rect x="16" y="4" width="16" height="8" rx="2" />
+                            </svg>
+                            <p>課題がありません</p>
+                        </div>
+                    ) : (
+                        <div className={styles.assignmentList}>
+                            {recentAssignments.map(assignment => (
+                                <Link
+                                    href={`/assignments/${assignment.id}`}
+                                    key={assignment.id}
+                                    className={styles.assignmentItem}
+                                >
+                                    <div className={styles.assignmentInfo}>
+                                        <h4>{assignment.title}</h4>
+                                        <p>{assignment.course?.title}</p>
+                                    </div>
+                                    {assignment.due_date && (
+                                        <span className={styles.dueDate}>
+                                            {new Date(assignment.due_date).toLocaleDateString('ja-JP', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
                 {/* お知らせ */}
@@ -109,14 +283,36 @@ export default async function DashboardPage() {
                         </svg>
                         お知らせ
                     </h2>
-                    <div className={styles.emptyState}>
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
-                            <path d="M36 14v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V14" />
-                            <path d="M8 14l16-10 16 10" />
-                            <path d="M24 22v10" />
-                        </svg>
-                        <p>お知らせはありません</p>
-                    </div>
+                    {!announcements || announcements.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
+                                <path d="M36 14v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V14" />
+                                <path d="M8 14l16-10 16 10" />
+                                <path d="M24 22v10" />
+                            </svg>
+                            <p>お知らせはありません</p>
+                        </div>
+                    ) : (
+                        <div className={styles.announcementList}>
+                            {announcements.map(announcement => (
+                                <div key={announcement.id} className={styles.announcementItem}>
+                                    <div className={styles.announcementHeader}>
+                                        {announcement.is_pinned && (
+                                            <span className={styles.pinBadge}>📌</span>
+                                        )}
+                                        <span className={styles.announcementDate}>
+                                            {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <h4>{announcement.title}</h4>
+                                    <p>{announcement.content?.slice(0, 60)}...</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
             </div>
         </div>

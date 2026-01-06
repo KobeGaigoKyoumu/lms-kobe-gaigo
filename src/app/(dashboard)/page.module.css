@@ -122,6 +122,101 @@
     font-size: var(--font-size-sm);
 }
 
+/* Assignment List */
+.assignmentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.assignmentItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all var(--transition-base);
+}
+
+.assignmentItem:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    transform: translateX(4px);
+}
+
+.assignmentInfo h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.assignmentInfo p {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.dueDate {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+}
+
+/* Announcement List */
+.announcementList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.announcementItem {
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+}
+
+.announcementItem:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+}
+
+.announcementHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.pinBadge {
+    font-size: var(--font-size-xs);
+}
+
+.announcementDate {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.announcementItem h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.announcementItem p {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .statsGrid {

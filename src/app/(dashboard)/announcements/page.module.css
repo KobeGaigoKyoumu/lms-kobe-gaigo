@@ -145,3 +145,146 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* Header with create button */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-6);
+}
+
+.createBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.createBtn:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    transform: translateY(-1px);
+}
+
+.emptyBtn {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--primary-500);
+    color: white;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.emptyBtn:hover {
+    background: var(--primary-600);
+}
+
+/* Card Footer with actions */
+.cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-3);
+    border-top: 1px solid var(--border-color);
+}
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.pinBtn {
+    padding: var(--spacing-1);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    transition: transform var(--transition-fast);
+}
+
+.pinBtn:hover {
+    transform: scale(1.1);
+}
+
+.editBtn,
+.deleteBtn {
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.editBtn {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+}
+
+.editBtn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.deleteBtn {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid transparent;
+}
+
+.deleteBtn:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.deleteConfirm {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+    background: #fef2f2;
+    border-radius: var(--radius-lg);
+}
+
+.deleteConfirm span {
+    font-size: var(--font-size-sm);
+    color: #991b1b;
+}
+
+.cancelBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.confirmDeleteBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.confirmDeleteBtn:hover {
+    background: #b91c1c;
+}
+
+.confirmDeleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

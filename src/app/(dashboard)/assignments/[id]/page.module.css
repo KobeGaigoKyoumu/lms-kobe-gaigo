@@ -364,6 +364,198 @@
     background: var(--primary-600);
 }
 
+/* File Upload Styles */
+.fileUploader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    flex-wrap: wrap;
+}
+
+.fileInput {
+    display: none;
+}
+
+.fileSelectBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.fileSelectBtn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-500);
+    color: var(--primary-500);
+}
+
+.fileHint {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.fileList {
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+}
+
+.fileList h5 {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fileItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-2);
+}
+
+.fileItem:last-child {
+    margin-bottom: 0;
+}
+
+.fileName {
+    flex: 1;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fileSize {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.removeFileBtn {
+    padding: var(--spacing-1);
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.removeFileBtn:hover {
+    color: #dc2626;
+}
+
+.uploadProgress {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-3);
+}
+
+.progressBar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+    transition: width var(--transition-base);
+}
+
+.uploadProgress span {
+    font-size: var(--font-size-sm);
+    color: var(--primary-500);
+    font-weight: 500;
+    min-width: 40px;
+}
+
+/* Attached Files Display */
+.attachedFiles {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+}
+
+.attachedFiles h4 {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.attachedFiles ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.attachedFiles li {
+    padding: var(--spacing-2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.attachedFiles li:last-child {
+    border-bottom: none;
+}
+
+.attachedFiles a {
+    color: var(--primary-500);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.attachedFiles a:hover {
+    color: var(--primary-600);
+    text-decoration: underline;
+}
+
+/* Resubmit Section */
+.resubmitSection {
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px dashed var(--border-color);
+}
+
+.resubmitHint {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-2);
+}
+
+.resubmitBtn {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: transparent;
+    color: var(--primary-500);
+    border: 1px solid var(--primary-500);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.resubmitBtn:hover {
+    background: var(--primary-50);
+    color: var(--primary-600);
+}
+
 @media (max-width: 768px) {
     .headerContent {
         flex-direction: column;
