@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
 
     // 1. Grade Distribution (A/B/C/D/F)
     const gradeDistribution = {
-        labels: ['A (80-100)', 'B (60-79)', 'C (40-59)', 'D (20-39)', 'F (0-19)'],
+        labels: ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'F (0-49)'],
         datasets: [
             {
                 label: 'Number of Students',
@@ -102,9 +102,9 @@ export default function AnalyticsPage() {
     filteredGrades.forEach(g => {
         const score = g.report_card_total || 0
         if (score >= 80) gradeDistribution.datasets[0].data[0]++
-        else if (score >= 60) gradeDistribution.datasets[0].data[1]++
-        else if (score >= 40) gradeDistribution.datasets[0].data[2]++
-        else if (score >= 20) gradeDistribution.datasets[0].data[3]++
+        else if (score >= 70) gradeDistribution.datasets[0].data[1]++
+        else if (score >= 60) gradeDistribution.datasets[0].data[2]++
+        else if (score >= 50) gradeDistribution.datasets[0].data[3]++
         else gradeDistribution.datasets[0].data[4]++
     })
 
