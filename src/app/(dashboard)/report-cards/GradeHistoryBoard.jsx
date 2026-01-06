@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import StudentGradeDetail from './StudentGradeDetail'
+import { exportGradesToExcel } from '@/lib/export/excelExport'
 
 export default function GradeHistoryBoard() {
     const supabase = createClient()
@@ -170,6 +171,32 @@ export default function GradeHistoryBoard() {
                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
+
+                    {/* Excel Export Button */}
+                    {selectedClass && filteredRecords.length > 0 && (
+                        <button
+                            onClick={() => exportGradesToExcel(filteredRecords, selectedClass, selectedTerm)}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Excel出力
+                        </button>
+                    )}
                 </div>
 
                 {/* Class Delete Button (Accordion) */}
