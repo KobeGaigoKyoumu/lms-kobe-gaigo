@@ -250,9 +250,13 @@ export default function GradeUploader() {
                     }
 
                     reportTotal = getVal(reportColMap.total)
+                    // 合計点が0の場合、または少数が多すぎる場合は再計算・整形
                     if (reportTotal === 0) {
                         const scores = Object.values(reportCard)
                         reportTotal = Math.round(scores.reduce((a, b) => a + b, 0) * 10) / 10
+                    } else {
+                        // 既に値がある場合も小数点第1位に丸める
+                        reportTotal = Math.round(reportTotal * 10) / 10
                     }
                 }
 
@@ -291,6 +295,14 @@ export default function GradeUploader() {
     }
 
     const categories = ['文字・語彙', '聴解', '読解', '文法', '作文', '会話']
+
+    const calculateGrade = (score) => {
+        if (score >= 90) return 'A' // ユーザ要望のABCDEFに合わせて調整
+        if (score >= 80) return 'B'
+        if (score >= 70) return 'C'
+        if (score >= 60) return 'D'
+        return 'F'
+    }
 
     return (
         <div>
@@ -342,23 +354,8 @@ export default function GradeUploader() {
 
                 {error && <div className={styles.error}>{error}</div>}
 
-                {debugInfo && (
-                    <div style={{ marginTop: '20px', padding: '15px', background: '#f3f4f6', borderRadius: '8px', fontSize: '12px', fontFamily: 'monospace' }}>
-                        <h4 style={{ fontWeight: 'bold', marginBottom: '10px' }}>Debug Information (開発者用)</h4>
-                        <p>Sheet4 Name: {debugInfo.sheet4Name}</p>
-                        <p>Total Sheets: {debugInfo.sheetCount}</p>
-                        <div style={{ margin: '10px 0' }}>
-                            <strong>First 5 IDs found in Sheet 4:</strong>
-                            <pre>{JSON.stringify(debugInfo.idsInSheet4, null, 2)}</pre>
-                        </div>
-                        {debugInfo.firstStudentDebug && (
-                            <div style={{ margin: '10px 0' }}>
-                                <strong>First Student Diagnostics:</strong>
-                                <pre>{JSON.stringify(debugInfo.firstStudentDebug, null, 2)}</pre>
-                            </div>
-                        )}
-                    </div>
-                )}
+                {/* Debug Info: 開発完了に伴い非表示化、必要なら復活させる */}
+                {/* {debugInfo && ( ... )} */}
             </div>
 
             {grades.length > 0 && (
@@ -377,12 +374,29 @@ export default function GradeUploader() {
                                         <h3 className={styles.studentName}>
                                             {student.name}
                                             <span className={styles.studentId}>({student.id})</span>
+                                            {/* Header Grade Display */}
+                                            <span style={{
+                                                marginLeft: '15px',
+                                                padding: '4px 12px',
+                                                backgroundColor: '#e0e7ff',
+                                                color: '#4338ca',
+                                                borderRadius: '20px',
+                                                fontSize: '0.9em',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                評価: {calculateGrade(student.reportCardTotal)}
+                                            </span>
                                         </h3>
                                         <p className={styles.className}>{student.class}</p>
                                     </div>
                                     <div className={styles.totalScoreBadge}>
                                         <span className={styles.totalLabel}>総合成績（合計）</span>
-                                        <span className={styles.totalValue}>{student.reportCardTotal}</span>
+                                        <span className={styles.totalValue}>
+                                            {calculateGrade(student.reportCardTotal)}
+                                            <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8 }}>
+                                                ({student.reportCardTotal.toFixed(1)})
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
 
@@ -396,6 +410,7 @@ export default function GradeUploader() {
                                                 (合計: {student.finalExamSum}/600)
                                             </span>
                                         </h4>
+
                                         <div className={styles.chartContainer}>
                                             <RadarChart
                                                 labels={categories}
@@ -411,7 +426,7 @@ export default function GradeUploader() {
                                         <h4 className={styles.chartTitle}>
                                             成績通知表 (総合成績)
                                             <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                (合計: {student.reportCardTotal})
+                                                (合計: {student.reportCardTotal.toFixed(1)})
                                             </span>
                                         </h4>
                                         <div className={styles.chartContainer}>
