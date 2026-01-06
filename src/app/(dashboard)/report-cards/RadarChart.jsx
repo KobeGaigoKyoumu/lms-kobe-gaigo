@@ -102,6 +102,6 @@ export default function RadarChart({ labels, data, title, color = 'blue' }) {
     }
 
     return (
-        <Radar data={chartData} options={options} key={studentId} />
+        <Radar data={chartData} options={options} />
     )
 }
