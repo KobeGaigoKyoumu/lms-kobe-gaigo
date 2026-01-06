@@ -22,7 +22,7 @@ ChartJS.register(
     Legend
 )
 
-export default function RadarChart({ labels, data, title, color = 'blue' }) {
+export default function RadarChart({ labels, data, title, color = 'blue', ...props }) {
     const colors = {
         blue: {
             bg: 'rgba(59, 130, 246, 0.2)',
@@ -86,10 +86,10 @@ export default function RadarChart({ labels, data, title, color = 'blue' }) {
                         weight: 'bold'
                     }
                 },
-                suggestedMin: 0,
-                suggestedMax: 100,
+                suggestedMin: props.min !== undefined ? props.min : 0,
+                suggestedMax: props.max !== undefined ? props.max : 100,
                 ticks: {
-                    stepSize: 20,
+                    stepSize: props.stepSize || 20,
                     color: '#9ca3af',
                     backdropColor: 'transparent',
                     font: {
