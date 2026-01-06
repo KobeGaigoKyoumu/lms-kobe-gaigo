@@ -1,12 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import styles from './login.module.css'
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [isInAppBrowser, setIsInAppBrowser] = useState(false)
+
+    useEffect(() => {
+        const ua = navigator.userAgent || navigator.vendor || window.opera
+        // Detect LINE, Instagram, Facebook, or generic WebView (Android)
+        const isInApp = /Line\//i.test(ua) ||
+            /Instagram/i.test(ua) ||
+            /FBAN|FBAV/i.test(ua) ||
+            /; wv/.test(ua)
+
+        setIsInAppBrowser(isInApp)
+    }, [])
+
+    const copyCurrentUrl = () => {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('URLをコピーしました。ChromeやSafariで開いてください。'))
+            .catch(() => alert('コピーに失敗しました。手動でURLをコピーしてください。'))
+    }
 
     const handleGoogleLogin = async () => {
         setLoading(true)
@@ -54,6 +72,41 @@ export default function LoginPage() {
                 {error && (
                     <div className={styles.error}>
                         {error}
+                    </div>
+                )}
+
+                {/* アプリ内ブラウザ警告 */}
+                {isInAppBrowser && (
+                    <div style={{
+                        backgroundColor: '#fff7ed',
+                        border: '1px solid #ffedd5',
+                        color: '#c2410c',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.5'
+                    }}>
+                        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>⚠️ アプリ内ブラウザを検知しました</p>
+                        <p style={{ marginBottom: '12px' }}>
+                            LINEやInstagramなどのアプリ内ブラウザではGoogleログインが正常に動作しない場合があります。
+                        </p>
+                        <button
+                            onClick={copyCurrentUrl}
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                backgroundColor: '#fff',
+                                border: '1px solid #fdba74',
+                                color: '#c2410c',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            🔗 URLをコピーしてブラウザで開く
+                        </button>
                     </div>
                 )}
 
