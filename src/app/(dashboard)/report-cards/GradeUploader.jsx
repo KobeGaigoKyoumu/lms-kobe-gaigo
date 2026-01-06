@@ -261,15 +261,7 @@ export default function GradeUploader() {
                         return 0
                     }
 
-                    // Populate reportCard object for chart (using Calculated Totals)
-                    reportCard = {
-                        vocab: reportDetails.vocab.total,
-                        listening: reportDetails.listening.total,
-                        reading: reportDetails.reading.total,
-                        grammar: reportDetails.grammar.total,
-                        writing: reportDetails.writing.total,
-                        conversation: reportDetails.conversation.total,
-                    }
+
 
                     // レポートカード（総合成績）データの取得 - シートの列定義に基づく
                     // 12:出席, 13:平常, 14:語彙(基), 15:(合), 16:聴解...
@@ -319,6 +311,7 @@ export default function GradeUploader() {
                         overall: { total: getReportVal(26) } // Overall Total from Col 26
                     }
 
+
                     // Calculate Overall Base (Sum of subject bases)
                     reportDetails.overall.base =
                         reportDetails.vocab.base +
@@ -327,6 +320,17 @@ export default function GradeUploader() {
                         reportDetails.grammar.base +
                         reportDetails.writing.base +
                         reportDetails.conversation.base
+
+                    // Populate reportCard object for chart (using Calculated Totals)
+                    reportCard = {
+                        vocab: reportDetails.vocab.total,
+                        listening: reportDetails.listening.total,
+                        reading: reportDetails.reading.total,
+                        grammar: reportDetails.grammar.total,
+                        writing: reportDetails.writing.total,
+                        conversation: reportDetails.conversation.total,
+                    }
+
 
                     // Report Total used for Chart can be the Overall Total or sum of Subject Totals / 6 ?
                     // Usually Report Total is the "Overall" score.
