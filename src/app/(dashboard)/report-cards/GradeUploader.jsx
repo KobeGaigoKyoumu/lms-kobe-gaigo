@@ -12,6 +12,8 @@ export default function GradeUploader() {
     const [error, setError] = useState('')
     const [debugInfo, setDebugInfo] = useState(null)
     const fileInputRef = useRef(null)
+    // State for View Mode ('exam' | 'report')
+    const [viewMode, setViewMode] = useState('report') // Default to report as it's the main detailed view
 
     const handleDrop = (e) => {
         e.preventDefault()
@@ -249,7 +251,43 @@ export default function GradeUploader() {
                         '会話': getVal(reportColMap.conversation),
                     }
 
-                    reportTotal = getVal(reportColMap.total)
+                    // レポートカード（総合成績）データの取得 - シートの列定義に基づく
+                    // 12:出席, 13:平常, 14:語彙(基), 15:(合), 16:聴解...
+                    const getReportVal = (c) => {
+                        const cell = reportSheet[XLSX.utils.encode_cell({ r: reportRowIndex, c: c })]
+                        if (!cell) return 0
+                        return typeof cell.v === 'number' ? cell.v : (parseFloat(cell.v) || 0)
+                    }
+
+                    const reportDetails = {
+                        attendance: getReportVal(12),
+                        participation: getReportVal(13),
+                        vocab: { base: getReportVal(14), total: getReportVal(15) },
+                        listening: { base: getReportVal(16), total: getReportVal(17) },
+                        reading: { base: getReportVal(18), total: getReportVal(19) },
+                        grammar: { base: getReportVal(20), total: getReportVal(21) },
+                        writing: { base: getReportVal(22), total: getReportVal(23) },
+                        conversation: { base: getReportVal(24), total: getReportVal(25) },
+                        overall: { total: getReportVal(26) } // Base might be sum of bases?
+                    }
+
+                    // Calculate Overall Base (Generic sum of sub-bases)
+                    reportDetails.overall.base =
+                        reportDetails.vocab.base +
+                        reportDetails.listening.base +
+                        reportDetails.reading.base +
+                        reportDetails.grammar.base +
+                        reportDetails.writing.base +
+                        reportDetails.conversation.base
+
+                    // Report Total (Use existing logic or new explicit col)
+                    reportTotal = reportDetails.overall.total
+                    if (reportTotal === 0) {
+                        // Fallback
+                        reportTotal = getVal(reportColMap.total)
+                    }
+                    // Determine grade for report (already used logic, keep consistent)
+
                     // 合計点が0の場合、または少数が多すぎる場合は再計算・整形
                     if (reportTotal === 0) {
                         const scores = Object.values(reportCard)
@@ -258,21 +296,22 @@ export default function GradeUploader() {
                         // 既に値がある場合も小数点第1位に丸める
                         reportTotal = Math.round(reportTotal * 10) / 10
                     }
+
+                    // 名前
+                    let name = row[examColMap.name]
+                    if (!name && examColMap.name !== -1) name = '氏名なし'
+
+                    students.push({
+                        id: id,
+                        name: name,
+                        class: row[examColMap.class],
+                        finalExam,
+                        finalExamSum: examSum,
+                        reportCard, // Keep for chart
+                        reportDetails, // NEW: Detailed data
+                        reportCardTotal: reportTotal
+                    })
                 }
-
-                // 名前
-                let name = row[examColMap.name]
-                if (!name && examColMap.name !== -1) name = '氏名なし'
-
-                students.push({
-                    id: id,
-                    name: name,
-                    class: row[examColMap.class],
-                    finalExam,
-                    finalExamSum: examSum,
-                    reportCard,
-                    reportCardTotal: reportTotal
-                })
             }
 
             if (students.length === 0) {
@@ -375,10 +414,38 @@ export default function GradeUploader() {
                         <span className={styles.studentCount}>{grades.length}名</span>
                     </div>
 
+                    {/* VIEW MODE TABS */}
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+                        <button
+                            onClick={() => setViewMode('exam')}
+                            style={{
+                                padding: '10px 20px',
+                                borderBottom: viewMode === 'exam' ? '2px solid #3b82f6' : 'none',
+                                color: viewMode === 'exam' ? '#3b82f6' : '#6b7280',
+                                fontWeight: viewMode === 'exam' ? 'bold' : 'normal',
+                                background: 'none', border: 'none', cursor: 'pointer'
+                            }}
+                        >
+                            期末試験結果
+                        </button>
+                        <button
+                            onClick={() => setViewMode('report')}
+                            style={{
+                                padding: '10px 20px',
+                                borderBottom: viewMode === 'report' ? '2px solid #10b981' : 'none',
+                                color: viewMode === 'report' ? '#10b981' : '#6b7280',
+                                fontWeight: viewMode === 'report' ? 'bold' : 'normal',
+                                background: 'none', border: 'none', cursor: 'pointer'
+                            }}
+                        >
+                            成績通知表 (総合成績)
+                        </button>
+                    </div>
+
                     <div className={styles.studentList}>
                         {grades.map((student, index) => (
                             <div key={index} className={styles.studentRow}>
-                                {/* 学生情報ヘッダー */}
+                                {/* Header (Keep existing tweaked layout) */}
                                 <div className={styles.studentHeader} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                                     <div>
                                         <h3 className={styles.studentName}>
@@ -388,7 +455,6 @@ export default function GradeUploader() {
                                         <p className={styles.className}>{student.class}</p>
                                     </div>
 
-                                    {/* 期末試験バッジ（青） - 左寄り（名前から少し離す） */}
                                     <div className={styles.totalScoreBadge} style={{ marginLeft: '80px' }}>
                                         <span className={styles.totalLabel}>期末試験（合計）</span>
                                         <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
@@ -399,7 +465,6 @@ export default function GradeUploader() {
                                         </span>
                                     </div>
 
-                                    {/* 総合成績バッジ（緑） - 右端に固定 */}
                                     <div className={styles.totalScoreBadge} style={{ marginLeft: 'auto' }}>
                                         <span className={styles.totalLabel}>総合成績（合計）</span>
                                         <span className={styles.totalValue} style={{ color: '#10b981' }}>
@@ -411,43 +476,120 @@ export default function GradeUploader() {
                                     </div>
                                 </div>
 
-                                {/* チャートエリア */}
-                                <div className={styles.chartsGrid}>
-                                    {/* 期末試験チャート */}
-                                    <div className={styles.chartWrapper}>
-                                        <h4 className={styles.chartTitle}>
-                                            期末試験結果
-                                            <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                (合計: {student.finalExamSum}/600)
-                                            </span>
-                                        </h4>
+                                {/* CONTENT AREA BASED ON TAB */}
+                                <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', padding: '20px 0' }}>
 
-                                        <div className={styles.chartContainer}>
-                                            <RadarChart
-                                                labels={categories}
-                                                data={categories.map(c => student.finalExam[c])}
-                                                title="期末試験"
-                                                color="blue"
-                                            />
-                                        </div>
+                                    {/* CHART */}
+                                    <div style={{ flex: '1', maxWidth: '500px' }}>
+                                        {viewMode === 'exam' ? (
+                                            <div className={styles.chartWrapper}>
+                                                <h4 className={styles.chartTitle}>
+                                                    期末試験結果
+                                                    <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
+                                                        (合計: {student.finalExamSum}/600)
+                                                    </span>
+                                                </h4>
+                                                <div className={styles.chartContainer}>
+                                                    <RadarChart
+                                                        labels={categories}
+                                                        data={categories.map(c => student.finalExam[c])}
+                                                        title="期末試験"
+                                                        color="blue"
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className={styles.chartWrapper}>
+                                                <h4 className={styles.chartTitle}>
+                                                    成績通知表 (総合成績)
+                                                    <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
+                                                        (合計: {student.reportCardTotal.toFixed(1)})
+                                                    </span>
+                                                </h4>
+                                                <div className={styles.chartContainer}>
+                                                    <RadarChart
+                                                        labels={categories}
+                                                        data={categories.map(c => student.reportCard[c])}
+                                                        title="総合成績"
+                                                        color="green"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* 成績通知チャート */}
-                                    <div className={styles.chartWrapper}>
-                                        <h4 className={styles.chartTitle}>
-                                            成績通知表 (総合成績)
-                                            <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                (合計: {student.reportCardTotal.toFixed(1)})
-                                            </span>
-                                        </h4>
-                                        <div className={styles.chartContainer}>
-                                            <RadarChart
-                                                labels={categories}
-                                                data={categories.map(c => student.reportCard[c])}
-                                                title="総合成績"
-                                                color="green"
-                                            />
-                                        </div>
+                                    {/* TABLE */}
+                                    <div style={{ flex: '1', paddingTop: '40px' }}>
+                                        {viewMode === 'exam' ? (
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
+                                                        <th style={{ padding: '8px' }}>科目</th>
+                                                        <th style={{ padding: '8px', textAlign: 'right' }}>点数 (100点満点)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {categories.map((cat, i) => {
+                                                        // Map category name to key
+                                                        const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
+                                                        const val = student.finalExam[keyMap[i]] || 0
+                                                        return (
+                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                                                <td style={{ padding: '8px' }}>{cat}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'right' }}>{val}</td>
+                                                            </tr>
+                                                        )
+                                                    })}
+                                                    <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb' }}>
+                                                        <td style={{ padding: '12px 8px' }}>合計</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'right' }}>{student.finalExamSum} / 600</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        ) : (
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'center', backgroundColor: '#f9fafb' }}>
+                                                        <th style={{ padding: '8px', textAlign: 'left' }}>項目</th>
+                                                        <th style={{ padding: '8px' }}>基礎点</th>
+                                                        <th style={{ padding: '8px' }}>合計点</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {/* Special Rows: Attendance / Participation */}
+                                                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                                        <td style={{ padding: '8px' }}>出席点</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance}</td>
+                                                    </tr>
+                                                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                                        <td style={{ padding: '8px' }}>平常点</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.participation}</td>
+                                                    </tr>
+
+                                                    {/* Subjects */}
+                                                    {categories.map((cat, i) => {
+                                                        const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
+                                                        const details = student.reportDetails[keyMap[i]]
+                                                        return (
+                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                                                <td style={{ padding: '8px' }}>{cat}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.base}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.total}</td>
+                                                            </tr>
+                                                        )
+                                                    })}
+
+                                                    {/* Total */}
+                                                    <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
+                                                        <td style={{ padding: '12px 8px' }}>総合</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base}</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.total.toFixed(1)}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -457,4 +599,5 @@ export default function GradeUploader() {
             )}
         </div>
     )
+
 }
