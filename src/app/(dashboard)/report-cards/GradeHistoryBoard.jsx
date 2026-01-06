@@ -69,25 +69,27 @@ export default function GradeHistoryBoard() {
 
         try {
             setLoading(true)
-            const { error } = await supabase
+            const { error, count } = await supabase
                 .from('grade_records')
-                .delete()
+                .delete({ count: 'exact' })
                 .eq('year_term', selectedTerm)
                 .eq('class_name', selectedClass)
 
             if (error) throw error
 
-            // Update local state by removing deleted records
-            setRecords(records.filter(r => !(r.year_term === selectedTerm && r.class_name === selectedClass)))
-
-            // Allow state to update and re-render
-            alert(`${targetCount}件のデータを削除しました`)
-
-            // Reset selection to ALL if needed, or keep as is (now empty)
-            // setSelectedClass('ALL') 
+            if (count === 0) {
+                console.warn('Deletion attempted but 0 rows deleted. Term:', selectedTerm, 'Class:', selectedClass);
+                alert('削除できませんでした。\n権限不足の可能性があります。管理者に連絡するか、権限を確認してください。');
+                // Refresh to make sure UI is in sync
+                fetchRecords();
+            } else {
+                alert(`${count}件のデータを削除しました`);
+                // Use fetchRecords to ensure local state perfectly matches DB state
+                fetchRecords();
+            }
         } catch (err) {
             console.error('Error deleting class records:', err)
-            alert('一括削除に失敗しました')
+            alert('一括削除に失敗しました: ' + err.message)
         } finally {
             setLoading(false)
         }
