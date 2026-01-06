@@ -163,6 +163,25 @@ export default function GradeUploader() {
             if (examColMap.name === -1 && examColMap.id !== -1) examColMap.name = examColMap.id + 2
 
             const categories = ['文字・語彙', '聴解', '読解', '文法', '作文', '会話']
+            const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
+
+            // Pre-calculate Max Scores for each category from Sheet 0
+            const maxScores = {
+                vocab: 0, listening: 0, reading: 0, grammar: 0, writing: 0, conversation: 0
+            }
+
+            for (let i = headerRowIndex + 1; i < inputData.length; i++) {
+                const row = inputData[i]
+                if (!row || row.length < 3) continue
+                const id = row[examColMap.id]
+                if (!id) continue
+
+                keyMap.forEach(key => {
+                    const val = parseFloat(row[examColMap[key]]) || 0
+                    if (val > maxScores[key]) maxScores[key] = val
+                })
+            }
+
             const students = []
             let firstStudentDebug = null
 
@@ -242,13 +261,14 @@ export default function GradeUploader() {
                         return 0
                     }
 
+                    // Populate reportCard object for chart (using Calculated Totals)
                     reportCard = {
-                        vocab: getVal(reportColMap.vocab),
-                        listening: getVal(reportColMap.listening),
-                        reading: getVal(reportColMap.reading),
-                        grammar: getVal(reportColMap.grammar),
-                        writing: getVal(reportColMap.writing),
-                        conversation: getVal(reportColMap.conversation),
+                        vocab: reportDetails.vocab.total,
+                        listening: reportDetails.listening.total,
+                        reading: reportDetails.reading.total,
+                        grammar: reportDetails.grammar.total,
+                        writing: reportDetails.writing.total,
+                        conversation: reportDetails.conversation.total,
                     }
 
                     // レポートカード（総合成績）データの取得 - シートの列定義に基づく
@@ -264,12 +284,25 @@ export default function GradeUploader() {
                     const participationScore = getReportVal(13)
 
                     // Helper to build subject detail with calculation
-                    const buildSubjectDetail = (baseColIdx) => {
-                        // User Request: Base Score in Report Card should be multiplied by 0.7
-                        const rawBase = getReportVal(baseColIdx)
-                        const base = rawBase * 0.7
+                    const buildSubjectDetail = (subjectKey) => {
+                        // User Request: Calculate Base Score using Curve Formula
+                        // Formula: 0.5 * (sqrt(140*Y - Y^2) + Y)
+                        // Where Y = 70 * (Score / MaxScore)
+
+                        const score = finalExam[subjectKey]
+                        const max = maxScores[subjectKey] || 100 // Avoid divide by zero
+
+                        let base = 0
+                        if (max > 0) {
+                            const Y = 70 * (score / max)
+                            // Apply formula: 0.5 * (sqrt(140Y - Y^2) + Y)
+                            // Make sure term inside sqrt is non-negative. 140Y - Y^2 = Y(140-Y). Since Y <= 70, this is positive.
+                            const insideSqrt = (140 * Y) - (Y * Y)
+                            const term1 = Math.sqrt(Math.max(0, insideSqrt))
+                            base = 0.5 * (term1 + Y)
+                        }
+
                         // User Request: Calculate Total = Base + Attendance + Participation
-                        // Base is usually out of 70, Att 15, Part 15 -> Total 100
                         const total = base + attendanceScore + participationScore
                         return { base, total }
                     }
@@ -277,12 +310,12 @@ export default function GradeUploader() {
                     const reportDetails = {
                         attendance: attendanceScore,
                         participation: participationScore,
-                        vocab: buildSubjectDetail(14),      // 14: Base
-                        listening: buildSubjectDetail(16),  // 16: Base
-                        reading: buildSubjectDetail(18),    // 18: Base
-                        grammar: buildSubjectDetail(20),    // 20: Base
-                        writing: buildSubjectDetail(22),    // 22: Base
-                        conversation: buildSubjectDetail(24), // 24: Base
+                        vocab: buildSubjectDetail('vocab'),
+                        listening: buildSubjectDetail('listening'),
+                        reading: buildSubjectDetail('reading'),
+                        grammar: buildSubjectDetail('grammar'),
+                        writing: buildSubjectDetail('writing'),
+                        conversation: buildSubjectDetail('conversation'),
                         overall: { total: getReportVal(26) } // Overall Total from Col 26
                     }
 
