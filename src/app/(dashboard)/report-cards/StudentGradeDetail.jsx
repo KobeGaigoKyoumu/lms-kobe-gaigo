@@ -3,6 +3,7 @@
 import React from 'react'
 import RadarChart from './RadarChart'
 import styles from './page.module.css'
+import { exportStudentGradeToPDF } from '@/lib/export/pdfExport'
 
 const StudentGradeDetail = ({ student, viewMode }) => {
     // Helper used in GradeUploader
@@ -63,6 +64,37 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                         {calculateFinalExamGrade(finalExamSum / 6)} <span style={{ fontSize: '1rem', color: '#6b7280' }}>({finalExamSum})</span>
                     </div>
                 </div>
+
+                {/* PDF Export Button */}
+                <button
+                    onClick={() => exportStudentGradeToPDF({
+                        student_id_text: student.id,
+                        student_name: student.name,
+                        class_name: student.class,
+                        final_exam_total: finalExamSum,
+                        report_card_total: reportCardTotal,
+                        report_card_data: reportDetails
+                    }, student.yearTerm || '')}
+                    style={{
+                        padding: '8px 12px',
+                        backgroundColor: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.85rem'
+                    }}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    PDF
+                </button>
             </div>
 
             {/* Content Body */}
