@@ -1,0 +1,270 @@
+.page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+/* Notice for missing student_id */
+.notice {
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.notice h2 {
+    color: #92400e;
+    margin-bottom: 1rem;
+}
+
+.notice p {
+    color: #78350f;
+}
+
+/* Summary Cards */
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.summaryCard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.summaryCard .label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.summaryCard .value {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.summaryCard .grade {
+    font-size: 2.5rem;
+}
+
+/* History Section */
+.historySection {
+    margin-bottom: 3rem;
+}
+
+.historySection h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+.empty {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table td {
+    padding: 1rem;
+    color: #1f2937;
+}
+
+.examScore {
+    color: #3b82f6;
+    font-weight: 500;
+}
+
+.reportScore {
+    font-weight: 600;
+}
+
+.date {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.gradeBadge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.gradeA {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.gradeB {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.gradeC {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.gradeD {
+    background-color: #fed7aa;
+    color: #9a3412;
+}
+
+.gradeF {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Subject Details */
+.subjectSection {
+    margin-bottom: 3rem;
+}
+
+.subjectSection h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+.subjectGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.subjectCard {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.subjectCard h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.subjectScores {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.scoreItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scoreItem.total {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+    font-weight: 600;
+}
+
+.scoreLabel {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.scoreValue {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.scoreItem.total .scoreValue {
+    font-size: 1.125rem;
+    color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .table {
+        overflow-x: auto;
+    }
+
+    .table table {
+        min-width: 600px;
+    }
+
+    .subjectGrid {
+        grid-template-columns: 1fr;
+    }
+}

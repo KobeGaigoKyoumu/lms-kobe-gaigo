@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -103,6 +104,161 @@ const menuItems = [
 export default function Sidebar({ user }) {
     const pathname = usePathname()
     const supabase = createClient()
+    const [userRole, setUserRole] = useState(null)
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            const { data } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user?.id)
+                .single()
+            setUserRole(data?.role)
+        }
+        if (user) {
+            fetchUserRole()
+        }
+    }, [user])
+
+    // Build menu items based on role
+    const getMenuItems = () => {
+        const baseItems = [
+            {
+                href: '/',
+                label: 'ダッシュボード',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="3" width="6" height="6" rx="1" />
+                        <rect x="11" y="3" width="6" height="6" rx="1" />
+                        <rect x="3" y="11" width="6" height="6" rx="1" />
+                        <rect x="11" y="11" width="6" height="6" rx="1" />
+                    </svg>
+                )
+            }
+        ]
+
+        // Student-specific items
+        if (userRole === 'student') {
+            return [
+                ...baseItems,
+                {
+                    href: '/my-grades',
+                    label: '成績確認',
+                    icon: (
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                            <path d="M7 12l2 2 4-4" />
+                        </svg>
+                    )
+                },
+                {
+                    href: '/calendar',
+                    label: 'カレンダー',
+                    icon: (
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <rect x="3" y="4" width="14" height="13" rx="2" />
+                            <path d="M3 8h14M7 2v4M13 2v4" />
+                        </svg>
+                    )
+                },
+                {
+                    href: '/settings',
+                    label: '設定',
+                    icon: (
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="10" cy="10" r="3" />
+                            <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41" />
+                        </svg>
+                    )
+                }
+            ]
+        }
+
+        // Teacher/Admin items (default)
+        return [
+            ...baseItems,
+            {
+                href: '/courses',
+                label: 'コース',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M4 5h12M4 10h12M4 15h8" />
+                    </svg>
+                )
+            },
+            {
+                href: '/classes',
+                label: 'クラス',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="10" cy="7" r="3" />
+                        <path d="M4 17v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1" />
+                    </svg>
+                )
+            },
+            {
+                href: '/assignments',
+                label: '課題',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <rect x="7" y="2" width="6" height="4" rx="1" />
+                    </svg>
+                )
+            },
+            {
+                href: '/grades',
+                label: '課題評価',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <path d="M7 12l2 2 4-4" />
+                    </svg>
+                )
+            },
+            {
+                href: '/report-cards',
+                label: '成績管理',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M3 17V7l7-5 7 5v10" />
+                        <path d="M7 17v-6h6v6" />
+                    </svg>
+                )
+            },
+            {
+                href: '/calendar',
+                label: 'カレンダー',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="4" width="14" height="13" rx="2" />
+                        <path d="M3 8h14M7 2v4M13 2v4" />
+                    </svg>
+                )
+            },
+            {
+                href: '/announcements',
+                label: 'お知らせ',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M15 6v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                        <path d="M3 6l7-4 7 4" />
+                        <path d="M10 10v4" />
+                    </svg>
+                )
+            },
+            {
+                href: '/settings',
+                label: '設定',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="10" cy="10" r="3" />
+                        <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41" />
+                    </svg>
+                )
+            }
+        ]
+    }
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
@@ -135,7 +291,7 @@ export default function Sidebar({ user }) {
 
             {/* ナビゲーション */}
             <nav className={styles.nav}>
-                {menuItems.map((item) => (
+                {getMenuItems().map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
