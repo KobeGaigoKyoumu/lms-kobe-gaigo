@@ -526,6 +526,7 @@ export default function GradeUploader() {
                                                     <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
                                                         <th style={{ padding: '8px' }}>科目</th>
                                                         <th style={{ padding: '8px', textAlign: 'right' }}>点数 (100点満点)</th>
+                                                        <th style={{ padding: '8px', textAlign: 'center' }}>判定</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -536,17 +537,15 @@ export default function GradeUploader() {
                                                         return (
                                                             <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'right' }}>
-                                                                    {val} <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateFinalExamGrade(val)})</span>
-                                                                </td>
+                                                                <td style={{ padding: '8px', textAlign: 'right' }}>{val}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>{calculateFinalExamGrade(val)}</td>
                                                             </tr>
                                                         )
                                                     })}
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb' }}>
                                                         <td style={{ padding: '12px 8px' }}>合計</td>
-                                                        <td style={{ padding: '12px 8px', textAlign: 'right' }}>
-                                                            {student.finalExamSum} / 600 <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateFinalExamGrade(student.finalExamSum / 6)})</span>
-                                                        </td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'right' }}>{student.finalExamSum} / 600</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{calculateFinalExamGrade(student.finalExamSum / 6)}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -554,24 +553,15 @@ export default function GradeUploader() {
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                                 <thead>
                                                     <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'center', backgroundColor: '#f9fafb' }}>
-                                                        <th style={{ padding: '8px', textAlign: 'left' }}>項目</th>
-                                                        <th style={{ padding: '8px' }}>基礎点</th>
-                                                        <th style={{ padding: '8px' }}>合計点</th>
+                                                        <th style={{ padding: '8px', textAlign: 'left' }}>科目</th>
+                                                        <th style={{ padding: '8px' }}>基礎点(70)</th>
+                                                        <th style={{ padding: '8px' }}>出席点(15)</th>
+                                                        <th style={{ padding: '8px' }}>平常点(15)</th>
+                                                        <th style={{ padding: '8px', fontWeight: 'bold' }}>合計(100)</th>
+                                                        <th style={{ padding: '8px' }}>判定</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {/* Special Rows: Attendance / Participation */}
-                                                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                                        <td style={{ padding: '8px' }}>出席点</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance?.toFixed(1)}</td>
-                                                    </tr>
-                                                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                                        <td style={{ padding: '8px' }}>平常点</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>-</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.participation?.toFixed(1)}</td>
-                                                    </tr>
-
                                                     {/* Subjects */}
                                                     {categories.map((cat, i) => {
                                                         const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
@@ -579,10 +569,11 @@ export default function GradeUploader() {
                                                         return (
                                                             <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                                    {details.base?.toFixed(1)} <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateGrade(details.base)})</span>
-                                                                </td>
-                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.total?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.base?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.participation?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>{details.total?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>{calculateGrade(details.total)}</td>
                                                             </tr>
                                                         )
                                                     })}
@@ -591,9 +582,10 @@ export default function GradeUploader() {
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
                                                         <td style={{ padding: '12px 8px' }}>総合</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base?.toFixed(1)}</td>
-                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                                                            {student.reportDetails.overall.total.toFixed(1)} / 100 <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateGrade(student.reportDetails.overall.total)})</span>
-                                                        </td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.total.toFixed(1)} / 100</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{calculateGrade(student.reportDetails.overall.total)}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
