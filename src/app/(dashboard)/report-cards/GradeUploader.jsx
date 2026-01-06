@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import * as XLSX from 'xlsx'
 import styles from './page.module.css'
 import RadarChart from './RadarChart'
+import { createClient } from '@/lib/supabase/client'
 
 export default function GradeUploader() {
     const [file, setFile] = useState(null)
@@ -12,8 +13,11 @@ export default function GradeUploader() {
     const [error, setError] = useState('')
     const [debugInfo, setDebugInfo] = useState(null)
     const fileInputRef = useRef(null)
+    const supabase = createClient()
     // State for View Mode ('exam' | 'report')
     const [viewMode, setViewMode] = useState('report') // Default to report as it's the main detailed view
+    const [saving, setSaving] = useState(false)
+    const [saveMessage, setSaveMessage] = useState('')
 
     const handleDrop = (e) => {
         e.preventDefault()
@@ -415,6 +419,63 @@ export default function GradeUploader() {
         return 'F'
     }
 
+    const saveToDatabase = async () => {
+        if (!grades || grades.length === 0) return
+
+        setSaving(true)
+        setSaveMessage('')
+
+        try {
+            // 現在の年月から学期を推定 (例: 2026-01)
+            // ファイル名から取得できればベストだが、一旦現在年月で
+            const now = new Date()
+            const year = now.getFullYear()
+            const month = String(now.getMonth() + 1).padStart(2, '0')
+            let yearTerm = `${year}-${month}`
+
+            // ファイル名に日付っぽいものがあればそれを使う (例: 202502 -> 2025-02)
+            if (file && file.name) {
+                const match = file.name.match(/(\d{4})(\d{2})/)
+                if (match) {
+                    yearTerm = `${match[1]}-${match[2]}`
+                }
+            }
+
+            let successCount = 0
+
+            for (const student of grades) {
+                const { error } = await supabase
+                    .from('grade_records')
+                    .upsert({
+                        student_id_text: String(student.id),
+                        student_name: student.name,
+                        class_name: student.class,
+                        year_term: yearTerm,
+                        final_exam_data: student.finalExam,
+                        report_card_data: student.reportDetails, // 詳細データ保存
+                        final_exam_total: student.finalExamSum,
+                        report_card_total: student.reportCardTotal,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'student_id_text, year_term'
+                    })
+
+                if (error) {
+                    console.error('Save error for:', student.id, error)
+                } else {
+                    successCount++
+                }
+            }
+
+            setSaveMessage(`${successCount}件のデータを保存しました (学期: ${yearTerm})`)
+        } catch (err) {
+            console.error(err)
+            setSaveMessage('保存中にエラーが発生しました')
+        } finally {
+            setSaving(false)
+        }
+    }
+
     return (
         <div>
             <div className={styles.uploadSection}>
@@ -473,7 +534,26 @@ export default function GradeUploader() {
                 <div className={styles.resultsSection}>
                     <div className={styles.resultsHeader}>
                         <h2>成績処理結果</h2>
-                        <span className={styles.studentCount}>{grades.length}名</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span className={styles.studentCount}>{grades.length}名</span>
+                            <button
+                                onClick={saveToDatabase}
+                                disabled={saving}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: saving ? '#ccc' : '#2563eb',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: saving ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                {saving ? '保存中...' : 'DBに保存'}
+                            </button>
+                            {saveMessage && <span style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>{saveMessage}</span>}
+                        </div>
                     </div>
 
                     {/* VIEW MODE TABS */}

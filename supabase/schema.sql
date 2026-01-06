@@ -334,3 +334,49 @@ CREATE INDEX IF NOT EXISTS idx_assignments_course ON public.assignments(course_i
 CREATE INDEX IF NOT EXISTS idx_submissions_assignment ON public.submissions(assignment_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_student ON public.submissions(student_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_class_date ON public.attendance(class_id, date);
+
+-- =====================================================
+-- 12. 成績データ保存テーブル
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.grade_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id_text TEXT NOT NULL, -- 学籍番号（Excel由来）
+  student_name TEXT,
+  class_name TEXT,
+  year_term TEXT, -- 学期情報（例: '2025-02'）
+  final_exam_data JSONB, -- 期末試験詳細
+  report_card_data JSONB, -- 成績通知表詳細
+  final_exam_total INTEGER,
+  report_card_total NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(student_id_text, year_term)
+);
+
+-- RLS設定
+ALTER TABLE public.grade_records ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "教師と管理者は成績を追加可能" ON public.grade_records
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() AND role IN ('teacher', 'admin')
+    )
+  );
+
+CREATE POLICY "教師と管理者は成績を更新可能" ON public.grade_records
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() AND role IN ('teacher', 'admin')
+    )
+  );
+
+CREATE POLICY "成績データは教師管理者が閲覧可能" ON public.grade_records
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() AND role IN ('teacher', 'admin')
+    )
+  );
+
