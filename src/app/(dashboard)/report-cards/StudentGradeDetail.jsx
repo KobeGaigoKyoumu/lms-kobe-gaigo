@@ -1,8 +1,7 @@
 'use client'
 
-import React from 'react'
 import RadarChart from './RadarChart'
-import styles from './page.module.css' // We can reuse the CSS or inline styles for simplicity if needed
+import styles from './page.module.css'
 
 const StudentGradeDetail = ({ student, viewMode }) => {
     // Helper used in GradeUploader
@@ -216,8 +215,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                     </>
                 )}
             </div>
-        </div>
-    )
-}
+            )
+    }
 
-export default StudentGradeDetail
+            export default StudentGradeDetail
