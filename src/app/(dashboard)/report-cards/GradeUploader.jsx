@@ -536,13 +536,17 @@ export default function GradeUploader() {
                                                         return (
                                                             <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'right' }}>{val}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'right' }}>
+                                                                    {val} <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateFinalExamGrade(val)})</span>
+                                                                </td>
                                                             </tr>
                                                         )
                                                     })}
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb' }}>
                                                         <td style={{ padding: '12px 8px' }}>合計</td>
-                                                        <td style={{ padding: '12px 8px', textAlign: 'right' }}>{student.finalExamSum} / 600</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'right' }}>
+                                                            {student.finalExamSum} / 600 <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateFinalExamGrade(student.finalExamSum / 6)})</span>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -575,7 +579,9 @@ export default function GradeUploader() {
                                                         return (
                                                             <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
-                                                                <td style={{ padding: '8px', textAlign: 'center' }}>{details.base?.toFixed(1)}</td>
+                                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                                    {details.base?.toFixed(1)} <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateGrade(details.base)})</span>
+                                                                </td>
                                                                 <td style={{ padding: '8px', textAlign: 'center' }}>{details.total?.toFixed(1)}</td>
                                                             </tr>
                                                         )
@@ -585,7 +591,9 @@ export default function GradeUploader() {
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
                                                         <td style={{ padding: '12px 8px' }}>総合</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base?.toFixed(1)}</td>
-                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.total.toFixed(1)} / 100</td>
+                                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                                                            {student.reportDetails.overall.total.toFixed(1)} / 100 <span style={{ color: '#6b7280', fontSize: '0.9em' }}>({calculateGrade(student.reportDetails.overall.total)})</span>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
