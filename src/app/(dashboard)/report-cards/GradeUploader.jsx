@@ -647,7 +647,7 @@ export default function GradeUploader() {
                                                     })}
 
                                                     {/* Total */}
-                                                    <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#eff6ff' }}>
+                                                    <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
                                                         <td style={{ padding: '12px 8px' }}>総合</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>{student.reportDetails.overall.base?.toFixed(1)}</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
