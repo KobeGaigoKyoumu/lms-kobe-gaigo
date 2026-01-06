@@ -237,6 +237,17 @@ export default function Sidebar({ user }) {
                 )
             },
             {
+                href: '/report-cards/analytics',
+                label: '統計・分析',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M18 20V10" />
+                        <path d="M12 20V4" />
+                        <path d="M6 20V14" />
+                    </svg>
+                )
+            },
+            {
                 href: '/announcements',
                 label: 'お知らせ',
                 icon: (

@@ -124,11 +124,18 @@ export default function AnalyticsPage() {
     })
 
     const subjectAverages = {
-        labels: ['Vocab', 'Reading', 'Listening', 'Grammar', 'Writing', 'Conversation'],
+        labels: ['文字・語彙', '読解', '聴解', '文法', '作文', '会話'],
         datasets: [
             {
                 label: 'Average Score',
-                data: Object.keys(subjectTotals).map(k => subjectCounts[k] ? (subjectTotals[k] / subjectCounts[k]).toFixed(1) : 0),
+                data: [
+                    subjectCounts.vocab ? (subjectTotals.vocab / subjectCounts.vocab).toFixed(1) : 0,
+                    subjectCounts.reading ? (subjectTotals.reading / subjectCounts.reading).toFixed(1) : 0,
+                    subjectCounts.listening ? (subjectTotals.listening / subjectCounts.listening).toFixed(1) : 0,
+                    subjectCounts.grammar ? (subjectTotals.grammar / subjectCounts.grammar).toFixed(1) : 0,
+                    subjectCounts.writing ? (subjectTotals.writing / subjectCounts.writing).toFixed(1) : 0,
+                    subjectCounts.conversation ? (subjectTotals.conversation / subjectCounts.conversation).toFixed(1) : 0,
+                ],
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
             }
         ]
@@ -222,7 +229,7 @@ export default function AnalyticsPage() {
 
                 {/* 1. Grade Distribution */}
                 <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>成績分布 (Grade Distribution)</h3>
+                    <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>成績分布</h3>
                     <div style={{ height: '300px' }}>
                         <Bar
                             data={gradeDistribution}
@@ -238,7 +245,7 @@ export default function AnalyticsPage() {
 
                 {/* 2. Subject Averages */}
                 <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>科目別平均点 (Subject Averages)</h3>
+                    <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>科目別平均点</h3>
                     <div style={{ height: '300px' }}>
                         <Bar
                             data={subjectAverages} // Using Bar instead of Radar for simpler comparison
@@ -255,7 +262,7 @@ export default function AnalyticsPage() {
                 {/* 3. Class Comparison (Visible when no specific class selected) */}
                 {!selectedClass && (
                     <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                        <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>クラス別平均比較 (Class Comparison)</h3>
+                        <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>クラス別平均比較</h3>
                         <div style={{ height: '300px' }}>
                             <Bar
                                 data={classComparisonData}
@@ -273,7 +280,7 @@ export default function AnalyticsPage() {
                 {/* 4. Trend (Visible when multiple terms exist) */}
                 {Object.keys(termStats).length > 1 && (
                     <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                        <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>学期間の推移 (Trend)</h3>
+                        <h3 style={{ fontSize: '18px', marginBottom: '15px' }}>学期間の推移</h3>
                         <div style={{ height: '300px' }}>
                             <Line
                                 data={termTrendData}

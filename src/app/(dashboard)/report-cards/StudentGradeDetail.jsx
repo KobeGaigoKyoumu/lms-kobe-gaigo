@@ -216,7 +216,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         const d = reportDetails[cat.key]
                                         return (
                                             <tr key={cat.key} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                                <td style={{ padding: '8px' }}>{cat.label}</td>
+                                                <td style={{ padding: '8px', backgroundColor: '#f9fafb' }}>{cat.label}</td>
                                                 {/* Weighted Scores (Corrected View) */}
                                                 <td style={{ padding: '8px', textAlign: 'center' }}>
                                                     {d.base?.toFixed(1)}
