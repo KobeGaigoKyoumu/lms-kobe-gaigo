@@ -591,7 +591,7 @@ export default function GradeUploader() {
                                         {viewMode === 'exam' ? (
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                                 <thead>
-                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
+                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left', backgroundColor: '#f3f4f6' }}>
                                                         <th style={{ padding: '8px' }}>科目</th>
                                                         <th style={{ padding: '8px', textAlign: 'right' }}>点数 (100点満点)</th>
                                                         <th style={{ padding: '8px', textAlign: 'center' }}>判定</th>
@@ -603,7 +603,7 @@ export default function GradeUploader() {
                                                         const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
                                                         const val = student.finalExam[keyMap[i]] || 0
                                                         return (
-                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
+                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
                                                                 <td style={{ padding: '8px', textAlign: 'right' }}>{val}</td>
                                                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>{calculateFinalExamGrade(val)}</td>
@@ -620,7 +620,7 @@ export default function GradeUploader() {
                                         ) : (
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                                 <thead>
-                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'center', backgroundColor: '#f9fafb' }}>
+                                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'center', backgroundColor: '#f3f4f6' }}>
                                                         <th style={{ padding: '8px', textAlign: 'left' }}>科目</th>
                                                         <th style={{ padding: '8px' }}>基礎点(70)</th>
                                                         <th style={{ padding: '8px' }}>出席点(15)</th>
@@ -635,7 +635,7 @@ export default function GradeUploader() {
                                                         const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
                                                         const details = student.reportDetails[keyMap[i]]
                                                         return (
-                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
+                                                            <tr key={cat} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                                 <td style={{ padding: '8px' }}>{cat}</td>
                                                                 <td style={{ padding: '8px', textAlign: 'center' }}>{details.base?.toFixed(1)}</td>
                                                                 <td style={{ padding: '8px', textAlign: 'center' }}>{student.reportDetails.attendance?.toFixed(1)}</td>
