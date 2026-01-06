@@ -58,43 +58,54 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                     </div>
                 </div>
 
-                <div style={{ textAlign: 'center', padding: '10px 15px', border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: '#fff' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '2px' }}>期末試験 (合計)</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                        {calculateFinalExamGrade(finalExamSum / 6)} <span style={{ fontSize: '1rem', color: '#6b7280' }}>({finalExamSum})</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ textAlign: 'center', padding: '5px 15px', border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: '#fff' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '2px' }}>
+                            {viewMode === 'exam' ? '期末試験 (合計)' : '総合評価 (合計)'}
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: viewMode === 'exam' ? '#3b82f6' : '#059669' }}>
+                            {viewMode === 'exam'
+                                ? calculateFinalExamGrade(finalExamSum / 6)
+                                : calculateGrade(reportCardTotal)
+                            }
+                            <span style={{ fontSize: '1rem', color: '#6b7280', marginLeft: '4px' }}>
+                                ({viewMode === 'exam' ? finalExamSum : reportCardTotal.toFixed(1)})
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                {/* PDF Export Button */}
-                <button
-                    onClick={() => exportStudentGradeToPDF({
-                        student_id_text: student.id,
-                        student_name: student.name,
-                        class_name: student.class,
-                        final_exam_total: finalExamSum,
-                        report_card_total: reportCardTotal,
-                        report_card_data: reportDetails
-                    }, student.yearTerm || '')}
-                    style={{
-                        padding: '8px 12px',
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontSize: '0.85rem'
-                    }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
-                    PDF
-                </button>
+                    {/* PDF Export Button */}
+                    <button
+                        onClick={() => exportStudentGradeToPDF({
+                            student_id_text: student.id,
+                            student_name: student.name,
+                            class_name: student.class,
+                            final_exam_total: finalExamSum,
+                            report_card_total: reportCardTotal,
+                            report_card_data: reportDetails
+                        }, student.yearTerm || '')}
+                        style={{
+                            padding: '8px 12px',
+                            backgroundColor: '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.85rem',
+                            height: '100%'
+                        }}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        PDF
+                    </button>
+                </div>
             </div>
 
             {/* Content Body */}
@@ -189,7 +200,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         <th style={{ padding: '8px', textAlign: 'center' }}>基礎点 (70)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>出席点 (15)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>平常点 (15)</th>
-                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#ecfdf5' }}>合計 (100)</th>
+                                        <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#e5e7eb' }}>合計 (100)</th>
                                         <th style={{ padding: '8px', textAlign: 'center' }}>評定</th>
                                     </tr>
                                 </thead>
@@ -216,7 +227,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                                 <td style={{ padding: '8px', textAlign: 'center' }}>
                                                     {reportDetails.participation?.toFixed(1)}
                                                 </td>
-                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4' }}>
+                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
                                                     {d.total?.toFixed(1)}
                                                 </td>
                                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#059669' }}>
