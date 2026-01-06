@@ -10,6 +10,7 @@ export default function GradeUploader() {
     const [grades, setGrades] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [debugInfo, setDebugInfo] = useState(null)
     const fileInputRef = useRef(null)
 
     const handleDrop = (e) => {
