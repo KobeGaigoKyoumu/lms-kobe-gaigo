@@ -1,15 +1,4 @@
 import { NextResponse } from 'next/server'
-import PdfPrinter from 'pdfmake'
-
-// 日本語フォント用のダミーフォント設定（実際のフォントはクライアントで処理）
-const fonts = {
-    Roboto: {
-        normal: 'Helvetica',
-        bold: 'Helvetica-Bold',
-        italics: 'Helvetica-Oblique',
-        bolditalics: 'Helvetica-BoldOblique'
-    }
-}
 
 export async function POST(request) {
     try {
@@ -18,6 +7,12 @@ export async function POST(request) {
         if (!student) {
             return NextResponse.json({ error: 'データがありません' }, { status: 400 })
         }
+
+        // 動的にpdfmakeをインポート
+        const pdfMakePrinter = (await import('pdfmake/build/pdfmake')).default
+        const pdfFonts = (await import('pdfmake/build/vfs_fonts')).default
+
+        pdfMakePrinter.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs
 
         // 評価計算
         const calculateGrade = (score) => {
@@ -154,24 +149,19 @@ export async function POST(request) {
         }
 
         // PDF生成
-        const printer = new PdfPrinter(fonts)
-        const pdfDoc = printer.createPdfKitDocument(docDefinition)
+        return new Promise((resolve, reject) => {
+            const pdfDocGenerator = pdfMakePrinter.createPdf(docDefinition)
 
-        // バッファに変換
-        const chunks = []
-        pdfDoc.on('data', chunk => chunks.push(chunk))
+            pdfDocGenerator.getBuffer((buffer) => {
+                const fileName = `Grade_Report_${student.student_id_text}_${formatTerm(yearTerm).replace(/\s/g, '_')}.pdf`
 
-        return new Promise((resolve) => {
-            pdfDoc.on('end', () => {
-                const pdfBuffer = Buffer.concat(chunks)
-                resolve(new NextResponse(pdfBuffer, {
+                resolve(new NextResponse(buffer, {
                     headers: {
                         'Content-Type': 'application/pdf',
-                        'Content-Disposition': `attachment; filename="Grade_Report_${student.student_id_text}_${formatTerm(yearTerm).replace(/\s/g, '_')}.pdf"`
+                        'Content-Disposition': `attachment; filename="${fileName}"`
                     }
                 }))
             })
-            pdfDoc.end()
         })
 
     } catch (error) {
