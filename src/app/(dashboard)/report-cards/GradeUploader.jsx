@@ -389,14 +389,28 @@ export default function GradeUploader() {
                                         </h3>
                                         <p className={styles.className}>{student.class}</p>
                                     </div>
-                                    <div className={styles.totalScoreBadge}>
-                                        <span className={styles.totalLabel}>総合成績（合計）</span>
-                                        <span className={styles.totalValue}>
-                                            {calculateGrade(student.reportCardTotal)}
-                                            <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8 }}>
-                                                ({student.reportCardTotal.toFixed(1)})
+                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                        {/* 期末試験バッジ（青） */}
+                                        <div className={styles.totalScoreBadge} style={{ borderLeft: '4px solid #3b82f6' }}>
+                                            <span className={styles.totalLabel}>期末試験（合計）</span>
+                                            <span className={styles.totalValue} style={{ color: '#3b82f6' }}>
+                                                {calculateGrade(student.finalExamSum / 6)}
+                                                <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8, color: '#1f2937' }}>
+                                                    ({student.finalExamSum})
+                                                </span>
                                             </span>
-                                        </span>
+                                        </div>
+
+                                        {/* 総合成績バッジ（緑） */}
+                                        <div className={styles.totalScoreBadge} style={{ borderLeft: '4px solid #10b981' }}>
+                                            <span className={styles.totalLabel}>総合成績（合計）</span>
+                                            <span className={styles.totalValue} style={{ color: '#10b981' }}>
+                                                {calculateGrade(student.reportCardTotal)}
+                                                <span style={{ fontSize: '0.6em', marginLeft: '6px', opacity: 0.8, color: '#1f2937' }}>
+                                                    ({student.reportCardTotal.toFixed(1)})
+                                                </span>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
