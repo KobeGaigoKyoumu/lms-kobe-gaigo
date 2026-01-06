@@ -122,6 +122,28 @@ export default function GradeUploader() {
                 reportColMap.writing = findCol(reportHeader, ['作文', 'writing'], 5)
                 reportColMap.conversation = findCol(reportHeader, ['会話', 'conversation'], 5)
                 reportColMap.total = findCol(reportHeader, ['合計', 'total', 'sum'], 5)
+
+                // フォールバック（文字化け対策）：固定列インデックスを使用（画像解析より）
+                // B列(1): 学籍番号, P列(15)-U列(20): 成績, V列(21): 合計
+                if (reportColMap.id === -1) reportColMap.id = 1
+                if (reportColMap.vocab === -1) reportColMap.vocab = 15
+                if (reportColMap.listening === -1) reportColMap.listening = 16
+                if (reportColMap.reading === -1) reportColMap.reading = 17
+                if (reportColMap.grammar === -1) reportColMap.grammar = 18
+                if (reportColMap.writing === -1) reportColMap.writing = 19
+                if (reportColMap.conversation === -1) reportColMap.conversation = 20
+                if (reportColMap.total === -1) reportColMap.total = 21
+            } else if (reportData.length > 5) {
+                // ヘッダー行すら見つからない場合（文字化けが酷い場合）、強制的にRow 3 (Header) と仮定して固定列適用
+                // データはRow 4から始まると仮定
+                reportColMap.id = 1
+                reportColMap.vocab = 15
+                reportColMap.listening = 16
+                reportColMap.reading = 17
+                reportColMap.grammar = 18
+                reportColMap.writing = 19
+                reportColMap.conversation = 20
+                reportColMap.total = 21
             }
 
             // 名前が見つからない場合のフォールバック
@@ -159,10 +181,15 @@ export default function GradeUploader() {
                 }
                 let reportTotal = 0
 
-                if (reportHeaderRowIndex !== -1 && reportColMap.id !== -1) {
-                    // 同じ学籍番号の行を探す
-                    // パフォーマンス向上のためMapを使うべきだが、データ量が少ないので線形探索で十分
-                    const reportRow = reportData.find(r => r[reportColMap.id] === id)
+                // 学籍番号（数値または文字列）で緩やかにマッチング
+                if (reportData.length > 0) {
+                    const idStr = String(id).trim()
+
+                    // 行データ検索 (列1がIDであると仮定して検索)
+                    const reportRow = reportData.find(r => {
+                        if (!r || !r[reportColMap.id]) return false
+                        return String(r[reportColMap.id]).trim() === idStr
+                    })
 
                     if (reportRow) {
                         reportCard = {
@@ -180,6 +207,9 @@ export default function GradeUploader() {
                             const scores = Object.values(reportCard)
                             reportTotal = Math.round(scores.reduce((a, b) => a + b, 0) * 10) / 10
                         }
+                    } else {
+                        // データが見つからない場合、デバッグ用にログ出力（開発時のみ有効）
+                        // console.log(`Report data not found for ID: ${idStr}`)
                     }
                 }
 
