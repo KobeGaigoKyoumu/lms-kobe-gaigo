@@ -65,9 +65,16 @@ export default function GradeUploader() {
                 throw new Error('期末試験シートのヘッダーが見つかりませんでした')
             }
 
-            // Sheet 4: 総合成績評価データ（5枚目）
-            // sheet_to_jsonを使わず、直接セル値(.v)を取得する（関数対策）
-            const reportSheetIndex = 4
+            // Sheet 4: 総合成績評価データ（通常は左から4番目、Index 3）
+            // "成績通知書" (Index 4) は印刷用レイアウトの可能性があるため、その手前のシートを探す
+            let reportSheetIndex = 3
+
+            // シート名で検索（"総合成績" または "評価" を含むシートを優先）
+            const targetSheetIdx = workbook.SheetNames.findIndex(name => name.includes('総合成績') || (name.includes('評価') && !name.includes('シート')))
+            if (targetSheetIdx !== -1) {
+                reportSheetIndex = targetSheetIdx
+            }
+
             let reportSheet = null
             let reportHeaderRowIndex = -1
             let reportDataMap = new Map() // ID -> Row Index Map
