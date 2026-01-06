@@ -124,6 +124,7 @@ export default function GradeHistoryBoard() {
         id: r.student_id_text,
         name: r.student_name,
         class: r.class_name,
+        yearTerm: r.year_term,
         finalExam: r.final_exam_data,
         reportDetails: r.report_card_data,
         reportCard: { // Reconstruct reportCard summary for chart if needed, or use report_card_data structure if it matches

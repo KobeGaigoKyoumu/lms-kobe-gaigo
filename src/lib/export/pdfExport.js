@@ -60,9 +60,15 @@ export function exportStudentGradeToPDF(student, yearTerm) {
     doc.setFont('helvetica', 'bold')
     doc.text('GRADE SUMMARY', 20, 100)
 
+    // Get attendance and participation from report_card_data
+    const attendanceScore = student.report_card_data?.attendance || 0
+    const participationScore = student.report_card_data?.participation || 0
+
     const summaryData = [
         ['Final Exam Score', `${student.final_exam_total || 0} / 600`],
         ['Report Card Score', `${student.report_card_total || 0} / 100`],
+        ['Attendance Bonus', `${typeof attendanceScore === 'number' ? attendanceScore.toFixed(1) : attendanceScore}`],
+        ['Participation Bonus', `${typeof participationScore === 'number' ? participationScore.toFixed(1) : participationScore}`],
         ['Overall Grade', calculateGrade(student.report_card_total)]
     ]
 
@@ -92,10 +98,8 @@ export function exportStudentGradeToPDF(student, yearTerm) {
             .filter(([key]) => subjectNames[key])
             .map(([key, data]) => [
                 subjectNames[key] || key,
-                data.base?.toFixed(1) || '0',
-                data.attendance || '0',
-                data.participation || '0',
-                data.total?.toFixed(1) || '0'
+                typeof data.base === 'number' ? data.base.toFixed(1) : '0',
+                typeof data.total === 'number' ? data.total.toFixed(1) : '0'
             ])
 
         if (subjectData.length > 0) {
@@ -105,7 +109,7 @@ export function exportStudentGradeToPDF(student, yearTerm) {
 
             autoTable(doc, {
                 startY: doc.lastAutoTable.finalY + 20,
-                head: [['Subject', 'Base', 'Attend.', 'Partic.', 'Total']],
+                head: [['Subject', 'Base Score', 'Total']],
                 body: subjectData,
                 theme: 'striped',
                 headStyles: { fillColor: [59, 130, 246], textColor: 255 },
@@ -127,7 +131,8 @@ export function exportStudentGradeToPDF(student, yearTerm) {
     doc.text('For official records, please contact the administration office.', 105, pageHeight - 13, { align: 'center' })
 
     // Generate filename
-    const fileName = `Grade_Report_${student.student_id_text}_${yearTerm.replace(/\s/g, '_')}.pdf`
+    const safeYearTerm = yearTerm ? yearTerm.replace(/\s/g, '_') : 'unknown'
+    const fileName = `Grade_Report_${student.student_id_text}_${safeYearTerm}.pdf`
 
     // Save PDF
     doc.save(fileName)
