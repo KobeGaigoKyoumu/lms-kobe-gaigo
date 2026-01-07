@@ -295,6 +295,7 @@ export default async function ClassDetailPage({ params }) {
                             <MemberManager
                                 classId={id}
                                 members={members || []}
+                                className={classData.name}
                             />
                         )}
                     </section>
