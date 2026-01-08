@@ -41,9 +41,6 @@ export default function StudentList({ students: initialStudents, classes }) {
             const sheet = workbook.Sheets[workbook.SheetNames[0]]
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
-            // ヘッダー行をスキップ
-            const dataRows = rows.slice(1).filter(row => row[2]) // 学籍番号がある行のみ
-
             // 在籍者.xlsxのカラム構造:
             // 列2: 学籍番号, 列3: 氏名, 列17: 現クラス, 列20: コース
             // 既存テンプレートのカラム構造:
@@ -51,9 +48,11 @@ export default function StudentList({ students: initialStudents, classes }) {
 
             // カラム位置を自動検出（ヘッダーから判定）
             const headers = rows[0] || []
+            console.log('Excel headers:', headers)
+
             let colStudentId = headers.findIndex(h => h && String(h).includes('学籍番号'))
             let colName = headers.findIndex(h => h && String(h).includes('氏名'))
-            let colClass = headers.findIndex(h => h && (String(h).includes('クラス') || String(h).includes('現')))
+            let colClass = headers.findIndex(h => h && (String(h).includes('クラス') || String(h).replace(/\r?\n/g, '').includes('現')))
             let colEmail = headers.findIndex(h => h && String(h).includes('メール'))
             let colYear = headers.findIndex(h => h && (String(h).includes('年度') || String(h).includes('コース')))
 
@@ -71,6 +70,15 @@ export default function StudentList({ students: initialStudents, classes }) {
                 colEmail = 2
                 colClass = 3
                 colYear = 4
+            }
+
+            console.log('Column positions:', { colStudentId, colName, colClass, colEmail, colYear })
+
+            // ヘッダー行をスキップ、学籍番号カラムにデータがある行のみ
+            const dataRows = rows.slice(1).filter(row => row[colStudentId])
+            console.log('Data rows count:', dataRows.length)
+            if (dataRows.length > 0) {
+                console.log('First data row:', dataRows[0])
             }
 
             // ユニークなクラス名を抽出
@@ -124,6 +132,20 @@ export default function StudentList({ students: initialStudents, classes }) {
             // 在籍者.xlsx形式かどうかを判定
             const isZaisekiFormat = headers.some(h => h && String(h).includes('カタカナ'))
 
+            // 拡張カラムがデータベースに存在するかチェック
+            let hasExtendedColumns = false
+            try {
+                const { data: testData, error: testError } = await supabase
+                    .from('students')
+                    .select('name_kana')
+                    .limit(1)
+                if (!testError) {
+                    hasExtendedColumns = true
+                }
+            } catch (e) {
+                // カラムが存在しない場合はfalseのまま
+            }
+
             // 学生データを作成（在籍者.xlsxの全カラムに対応）
             const studentsToInsert = dataRows.map(row => {
                 const studentData = {
@@ -135,8 +157,8 @@ export default function StudentList({ students: initialStudents, classes }) {
                     status: 'active'
                 }
 
-                // 在籍者.xlsx形式の場合、追加の個人データを読み取る
-                if (isZaisekiFormat) {
+                // 在籍者.xlsx形式で拡張カラムがDBに存在する場合、追加の個人データを読み取る
+                if (isZaisekiFormat && hasExtendedColumns) {
                     // カラム位置（在籍者.xlsx）:
                     // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
                     // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
