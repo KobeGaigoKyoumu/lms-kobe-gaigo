@@ -42,16 +42,126 @@ export default function StudentList({ students: initialStudents, classes }) {
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
             // ヘッダー行をスキップ
-            const dataRows = rows.slice(1).filter(row => row[0])
+            const dataRows = rows.slice(1).filter(row => row[2]) // 学籍番号がある行のみ
 
-            const studentsToInsert = dataRows.map(row => ({
-                student_id_text: String(row[0]).trim(),
-                full_name: String(row[1] || '').trim(),
-                email: String(row[2] || '').trim() || null,
-                class_name: String(row[3] || '').trim() || null,
-                academic_year: parseInt(row[4]) || new Date().getFullYear(),
-                status: 'active'
-            }))
+            // 在籍者.xlsxのカラム構造:
+            // 列2: 学籍番号, 列3: 氏名, 列17: 現クラス, 列20: コース
+            // 既存テンプレートのカラム構造:
+            // 列0: 学籍番号, 列1: 氏名, 列2: メール, 列3: クラス, 列4: 年度
+
+            // カラム位置を自動検出（ヘッダーから判定）
+            const headers = rows[0] || []
+            let colStudentId = headers.findIndex(h => h && String(h).includes('学籍番号'))
+            let colName = headers.findIndex(h => h && String(h).includes('氏名'))
+            let colClass = headers.findIndex(h => h && (String(h).includes('クラス') || String(h).includes('現')))
+            let colEmail = headers.findIndex(h => h && String(h).includes('メール'))
+            let colYear = headers.findIndex(h => h && (String(h).includes('年度') || String(h).includes('コース')))
+
+            // デフォルト値（在籍者.xlsx形式）
+            if (colStudentId === -1) colStudentId = 2
+            if (colName === -1) colName = 3
+            if (colClass === -1) colClass = 17
+            if (colYear === -1) colYear = 20
+
+            // フォールバック（テンプレート形式）
+            const isTemplateFormat = headers[0] && String(headers[0]).includes('学籍番号')
+            if (isTemplateFormat) {
+                colStudentId = 0
+                colName = 1
+                colEmail = 2
+                colClass = 3
+                colYear = 4
+            }
+
+            // ユニークなクラス名を抽出
+            const uniqueClasses = [...new Set(
+                dataRows
+                    .map(row => String(row[colClass] || '').trim())
+                    .filter(cls => cls && /^\d+-\d+$/.test(cls)) // "1-1", "2-11" 形式のみ
+            )]
+
+            // 既存のクラスを取得
+            const { data: existingClasses } = await supabase
+                .from('classes')
+                .select('name')
+
+            const existingClassNames = new Set((existingClasses || []).map(c => c.name))
+
+            // 新規クラスを作成
+            const newClasses = uniqueClasses.filter(cls => !existingClassNames.has(cls))
+            let classesCreated = 0
+
+            if (newClasses.length > 0) {
+                const classesToInsert = newClasses.map(className => {
+                    const gradeLevel = className.startsWith('1-') ? '1年' : className.startsWith('2-') ? '2年' : null
+                    return {
+                        name: className,
+                        grade_level: gradeLevel,
+                        academic_year: new Date().getFullYear(),
+                        description: `${className}クラス`
+                    }
+                })
+
+                const { error: classError, count } = await supabase
+                    .from('classes')
+                    .insert(classesToInsert)
+
+                if (!classError) {
+                    classesCreated = newClasses.length
+                } else {
+                    console.error('Class creation error:', classError)
+                }
+            }
+
+            // Excel日付シリアル値をISO日付文字列に変換するヘルパー
+            const excelDateToIso = (serial) => {
+                if (!serial || typeof serial !== 'number') return null
+                // Excelの日付シリアル（1900年1月1日を1とする）
+                const date = new Date((serial - 25569) * 86400 * 1000)
+                return date.toISOString().split('T')[0]
+            }
+
+            // 在籍者.xlsx形式かどうかを判定
+            const isZaisekiFormat = headers.some(h => h && String(h).includes('カタカナ'))
+
+            // 学生データを作成（在籍者.xlsxの全カラムに対応）
+            const studentsToInsert = dataRows.map(row => {
+                const studentData = {
+                    student_id_text: String(row[colStudentId]).trim(),
+                    full_name: String(row[colName] || '').trim(),
+                    email: colEmail >= 0 && row[colEmail] ? String(row[colEmail]).trim() : null,
+                    class_name: String(row[colClass] || '').trim() || null,
+                    academic_year: parseInt(row[colYear]) || new Date().getFullYear(),
+                    status: 'active'
+                }
+
+                // 在籍者.xlsx形式の場合、追加の個人データを読み取る
+                if (isZaisekiFormat) {
+                    // カラム位置（在籍者.xlsx）:
+                    // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
+                    // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
+                    // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
+                    // 18:入学年月日, 19:卒業年月, 20:コース
+                    studentData.name_kana = row[4] ? String(row[4]).trim() : null
+                    studentData.name_romaji = row[5] ? String(row[5]).trim() : null
+                    studentData.nationality = row[6] ? String(row[6]).trim() : null
+                    studentData.gender = row[7] ? String(row[7]).trim() : null
+                    studentData.birth_date = excelDateToIso(row[8])
+                    studentData.visa_status = row[9] ? String(row[9]).trim() : null
+                    studentData.entry_date = excelDateToIso(row[10])
+                    studentData.visa_expiry = excelDateToIso(row[11])
+                    studentData.passport_number = row[12] ? String(row[12]).trim() : null
+                    studentData.residence_card_number = row[13] ? String(row[13]).trim() : null
+                    studentData.address = row[14] ? String(row[14]).trim() : null
+                    studentData.phone = row[15] ? String(row[15]).trim() : null
+                    studentData.enrollment_period = row[16] ? String(row[16]).trim() : null
+                    studentData.enrollment_date = excelDateToIso(row[18])
+                    studentData.graduation_date = excelDateToIso(row[19])
+                    studentData.course = row[20] ? String(row[20]).trim() : null
+                }
+
+                return studentData
+            }).filter(s => s.student_id_text)
 
             if (studentsToInsert.length === 0) {
                 setUploadResult({ success: false, message: 'データが見つかりません' })
@@ -69,9 +179,14 @@ export default function StudentList({ students: initialStudents, classes }) {
 
             if (error) throw error
 
+            let message = `${studentsToInsert.length}件の学生データを登録/更新しました`
+            if (classesCreated > 0) {
+                message += `。${classesCreated}個のクラスを新規作成しました`
+            }
+
             setUploadResult({
                 success: true,
-                message: `${studentsToInsert.length}件のデータを登録/更新しました`
+                message
             })
 
             router.refresh()
