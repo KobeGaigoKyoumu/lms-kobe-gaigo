@@ -185,7 +185,19 @@ export default function StudentList({ students: initialStudents, classes }) {
                 return studentData
             }).filter(s => s.student_id_text)
 
-            if (studentsToInsert.length === 0) {
+            // 重複学籍番号を除去（同じ学籍番号の場合、最後の行を採用）
+            const uniqueStudents = []
+            const seenIds = new Set()
+            for (let i = studentsToInsert.length - 1; i >= 0; i--) {
+                const student = studentsToInsert[i]
+                if (!seenIds.has(student.student_id_text)) {
+                    seenIds.add(student.student_id_text)
+                    uniqueStudents.unshift(student)
+                }
+            }
+            console.log(`Unique students: ${uniqueStudents.length} (removed ${studentsToInsert.length - uniqueStudents.length} duplicates)`)
+
+            if (uniqueStudents.length === 0) {
                 setUploadResult({ success: false, message: 'データが見つかりません' })
                 setUploading(false)
                 return
@@ -194,14 +206,14 @@ export default function StudentList({ students: initialStudents, classes }) {
             // Upsert (学籍番号で重複時は更新)
             const { error, count } = await supabase
                 .from('students')
-                .upsert(studentsToInsert, {
+                .upsert(uniqueStudents, {
                     onConflict: 'student_id_text',
                     count: 'exact'
                 })
 
             if (error) throw error
 
-            let message = `${studentsToInsert.length}件の学生データを登録/更新しました`
+            let message = `${uniqueStudents.length}件の学生データを登録/更新しました`
             if (classesCreated > 0) {
                 message += `。${classesCreated}個のクラスを新規作成しました`
             }
