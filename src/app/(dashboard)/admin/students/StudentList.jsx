@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import * as XLSX from 'xlsx'
 import styles from './page.module.css'
+import StudentDetailModal from './StudentDetailModal'
 
 export default function StudentList({ students: initialStudents, classes }) {
     const router = useRouter()
@@ -15,6 +16,7 @@ export default function StudentList({ students: initialStudents, classes }) {
     const [search, setSearch] = useState('')
     const [uploading, setUploading] = useState(false)
     const [uploadResult, setUploadResult] = useState(null)
+    const [selectedStudent, setSelectedStudent] = useState(null)
 
     const supabase = createClient()
 
@@ -213,9 +215,50 @@ export default function StudentList({ students: initialStudents, classes }) {
 
             if (error) throw error
 
+            // ===== クラスメンバー自動登録 =====
+            // 既存のクラス一覧を取得（新規作成分も含む）
+            const { data: allClasses } = await supabase
+                .from('classes')
+                .select('id, name')
+
+            const classMap = new Map((allClasses || []).map(c => [c.name, c.id]))
+
+            // profilesテーブルからstudent_idが一致するユーザーを検索し、class_membersに登録
+            let membersRegistered = 0
+            for (const student of uniqueStudents) {
+                if (!student.class_name) continue
+
+                const classId = classMap.get(student.class_name)
+                if (!classId) continue
+
+                // profilesからユーザーIDを取得（student_idで照合）
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('student_id', student.student_id_text)
+                    .single()
+
+                if (profile) {
+                    const { error: memberError } = await supabase
+                        .from('class_members')
+                        .upsert({
+                            class_id: classId,
+                            user_id: profile.id
+                        }, { onConflict: 'class_id,user_id' })
+
+                    if (!memberError) {
+                        membersRegistered++
+                    }
+                }
+            }
+            // ===== クラスメンバー自動登録 終了 =====
+
             let message = `${uniqueStudents.length}件の学生データを登録/更新しました`
             if (classesCreated > 0) {
                 message += `。${classesCreated}個のクラスを新規作成しました`
+            }
+            if (membersRegistered > 0) {
+                message += `。${membersRegistered}名をクラスに登録しました`
             }
 
             setUploadResult({
@@ -380,7 +423,13 @@ export default function StudentList({ students: initialStudents, classes }) {
                                         <option value="inactive">休学</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td className={styles.actionCell}>
+                                    <button
+                                        onClick={() => setSelectedStudent(student)}
+                                        className={styles.detailBtn}
+                                    >
+                                        詳細
+                                    </button>
                                     <button
                                         onClick={() => handleDelete(student.student_id_text)}
                                         className={styles.deleteBtn}
@@ -403,6 +452,14 @@ export default function StudentList({ students: initialStudents, classes }) {
             <div className={styles.footer}>
                 表示中: {filteredStudents.length} / {students.length} 件
             </div>
+
+            {/* 学生詳細モーダル */}
+            {selectedStudent && (
+                <StudentDetailModal
+                    student={selectedStudent}
+                    onClose={() => setSelectedStudent(null)}
+                />
+            )}
         </div>
     )
 }
