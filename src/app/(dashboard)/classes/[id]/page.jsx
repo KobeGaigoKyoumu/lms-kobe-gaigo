@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import ScheduleManager from './ScheduleManager'
+import StudentList from './StudentList'
 
 export default async function ClassDetailPage({ params }) {
     const { id } = await params
@@ -269,28 +270,7 @@ export default async function ClassDetailPage({ params }) {
                         <div className={styles.sectionHeader}>
                             <h2>在籍者一覧 ({students?.length || 0}名)</h2>
                         </div>
-
-                        {students?.length === 0 ? (
-                            <p className={styles.empty}>在籍者がいません</p>
-                        ) : (
-                            <div className={styles.memberList}>
-                                {students?.map(student => (
-                                    <div key={student.student_id_text} className={styles.memberCard}>
-                                        <div className={styles.memberUser}>
-                                            <div className={styles.userAvatar}>
-                                                {student.full_name?.[0] || '?'}
-                                            </div>
-                                            <div>
-                                                <p className={styles.userName}>{student.full_name}</p>
-                                                <p className={styles.userMeta}>
-                                                    <span>学籍番号: {student.student_id_text}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <StudentList students={students} />
                     </section>
                 </main>
             </div>
