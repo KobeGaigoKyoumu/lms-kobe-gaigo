@@ -134,19 +134,9 @@ export default function StudentList({ students: initialStudents, classes }) {
             // 在籍者.xlsx形式かどうかを判定
             const isZaisekiFormat = headers.some(h => h && String(h).includes('カタカナ'))
 
-            // 拡張カラムがデータベースに存在するかチェック
-            let hasExtendedColumns = false
-            try {
-                const { data: testData, error: testError } = await supabase
-                    .from('students')
-                    .select('name_kana')
-                    .limit(1)
-                if (!testError) {
-                    hasExtendedColumns = true
-                }
-            } catch (e) {
-                // カラムが存在しない場合はfalseのまま
-            }
+            // 拡張カラムは常に保存を試みる（存在しないカラムは無視される）
+            const hasExtendedColumns = true
+            console.log('isZaisekiFormat:', isZaisekiFormat, 'hasExtendedColumns:', hasExtendedColumns)
 
             // 学生データを作成（在籍者.xlsxの全カラムに対応）
             const studentsToInsert = dataRows.map(row => {
@@ -223,31 +213,39 @@ export default function StudentList({ students: initialStudents, classes }) {
 
             const classMap = new Map((allClasses || []).map(c => [c.name, c.id]))
 
-            // profilesテーブルからstudent_idが一致するユーザーを検索し、class_membersに登録
+            // 一括でprofilesを取得（student_idで照合）
+            const studentIds = uniqueStudents
+                .filter(s => s.class_name && classMap.has(s.class_name))
+                .map(s => s.student_id_text)
+
             let membersRegistered = 0
-            for (const student of uniqueStudents) {
-                if (!student.class_name) continue
 
-                const classId = classMap.get(student.class_name)
-                if (!classId) continue
-
-                // profilesからユーザーIDを取得（student_idで照合）
-                const { data: profile } = await supabase
+            if (studentIds.length > 0) {
+                const { data: profiles } = await supabase
                     .from('profiles')
-                    .select('id')
-                    .eq('student_id', student.student_id_text)
-                    .single()
+                    .select('id, student_id')
+                    .in('student_id', studentIds)
 
-                if (profile) {
-                    const { error: memberError } = await supabase
-                        .from('class_members')
-                        .upsert({
-                            class_id: classId,
-                            user_id: profile.id
-                        }, { onConflict: 'class_id,user_id' })
+                if (profiles && profiles.length > 0) {
+                    const profileMap = new Map(profiles.map(p => [p.student_id, p.id]))
 
-                    if (!memberError) {
-                        membersRegistered++
+                    // class_membersに登録するデータを作成
+                    const membersToInsert = uniqueStudents
+                        .filter(s => s.class_name && profileMap.has(s.student_id_text))
+                        .map(s => ({
+                            class_id: classMap.get(s.class_name),
+                            user_id: profileMap.get(s.student_id_text)
+                        }))
+                        .filter(m => m.class_id && m.user_id)
+
+                    if (membersToInsert.length > 0) {
+                        const { error: memberError } = await supabase
+                            .from('class_members')
+                            .upsert(membersToInsert, { onConflict: 'class_id,user_id' })
+
+                        if (!memberError) {
+                            membersRegistered = membersToInsert.length
+                        }
                     }
                 }
             }

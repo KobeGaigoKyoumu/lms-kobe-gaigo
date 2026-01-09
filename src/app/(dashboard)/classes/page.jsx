@@ -35,10 +35,33 @@ export default async function ClassesPage() {
         `)
         .order('created_at', { ascending: false })
 
+    // 学生マスターからクラスごとの学生数を取得
+    const { data: studentCounts } = await supabase
+        .from('students')
+        .select('class_name')
+        .eq('status', 'active')
+
+    // クラス名ごとの学生数をカウント
+    const studentCountMap = new Map()
+    if (studentCounts) {
+        for (const student of studentCounts) {
+            if (student.class_name) {
+                const count = studentCountMap.get(student.class_name) || 0
+                studentCountMap.set(student.class_name, count + 1)
+            }
+        }
+    }
+
+    // クラスに学生数を追加
+    const classesWithStudentCount = allClasses?.map(cls => ({
+        ...cls,
+        studentCount: studentCountMap.get(cls.name) || 0
+    })) || []
+
     // 自分が担任のクラス
-    const myClasses = allClasses?.filter(cls => cls.teacher_id === user?.id) || []
+    const myClasses = classesWithStudentCount.filter(cls => cls.teacher_id === user?.id) || []
     // その他のクラス
-    const otherClasses = allClasses?.filter(cls => cls.teacher_id !== user?.id) || []
+    const otherClasses = classesWithStudentCount.filter(cls => cls.teacher_id !== user?.id) || []
 
     const ClassCard = ({ cls, isMyClass = false, showAdminBadge = false }) => (
         <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''} ${showAdminBadge ? styles.adminCard : ''}`}>
@@ -69,7 +92,7 @@ export default async function ClassesPage() {
                     <span>{cls.teacher?.full_name || '担任未設定'}</span>
                 </div>
                 <span className={styles.memberCount}>
-                    {cls.members?.[0]?.count || 0}名
+                    {cls.studentCount}名
                 </span>
             </div>
         </Link>
@@ -108,10 +131,10 @@ export default async function ClassesPage() {
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M10 2l2 4 4.5.5-3.3 3.2.8 4.3-4-2-4 2 .8-4.3L3.5 6.5 8 6z" />
                         </svg>
-                        全クラス ({allClasses?.length || 0})
+                        全クラス ({classesWithStudentCount.length})
                     </h2>
                     <div className={styles.grid}>
-                        {allClasses?.map(cls => (
+                        {classesWithStudentCount.map(cls => (
                             <ClassCard
                                 key={cls.id}
                                 cls={cls}
@@ -161,16 +184,16 @@ export default async function ClassesPage() {
             )}
 
             {/* 学生の場合 */}
-            {!isTeacherOrAdmin && allClasses?.length > 0 && (
+            {!isTeacherOrAdmin && classesWithStudentCount.length > 0 && (
                 <div className={styles.grid}>
-                    {allClasses.map(cls => (
+                    {classesWithStudentCount.map(cls => (
                         <ClassCard key={cls.id} cls={cls} />
                     ))}
                 </div>
             )}
 
             {/* クラスがない場合 */}
-            {allClasses?.length === 0 && (
+            {classesWithStudentCount.length === 0 && (
                 <div className={styles.empty}>
                     <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
                         <rect x="8" y="12" width="48" height="40" rx="4" />
