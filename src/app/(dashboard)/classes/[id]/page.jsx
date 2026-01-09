@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
-import MemberManager from './MemberManager'
 import ScheduleManager from './ScheduleManager'
 
 export default async function ClassDetailPage({ params }) {
@@ -46,7 +45,15 @@ export default async function ClassDetailPage({ params }) {
     const isAdmin = profile?.role === 'admin'
     const canEdit = isOwner || isAdmin
 
-    // メンバー一覧取得
+    // 学生マスターから該当クラスの学生を取得
+    const { data: students } = await supabase
+        .from('students')
+        .select('*')
+        .eq('class_name', classData.name)
+        .eq('status', 'active')
+        .order('student_id_text', { ascending: true })
+
+    // メンバー一覧取得（ログイン済みユーザー用、互換性のため維持）
     const { data: members } = await supabase
         .from('class_members')
         .select(`
@@ -156,7 +163,7 @@ export default async function ClassDetailPage({ params }) {
                         <dl className={styles.infoList}>
                             <div>
                                 <dt>在籍者数</dt>
-                                <dd>{members?.length || 0}名</dd>
+                                <dd>{students?.length || 0}名</dd>
                             </div>
                             <div>
                                 <dt>作成日</dt>
@@ -260,43 +267,29 @@ export default async function ClassDetailPage({ params }) {
                     {/* 在籍者一覧 */}
                     <section className={styles.section}>
                         <div className={styles.sectionHeader}>
-                            <h2>在籍者一覧 ({members?.length || 0}名)</h2>
+                            <h2>在籍者一覧 ({students?.length || 0}名)</h2>
                         </div>
 
-                        {members?.length === 0 ? (
+                        {students?.length === 0 ? (
                             <p className={styles.empty}>在籍者がいません</p>
                         ) : (
                             <div className={styles.memberList}>
-                                {members?.map(member => (
-                                    <div key={member.id} className={styles.memberCard}>
+                                {students?.map(student => (
+                                    <div key={student.student_id_text} className={styles.memberCard}>
                                         <div className={styles.memberUser}>
                                             <div className={styles.userAvatar}>
-                                                {member.user?.avatar_url ? (
-                                                    <img src={member.user.avatar_url} alt="" />
-                                                ) : (
-                                                    member.user?.full_name?.[0] || '?'
-                                                )}
+                                                {student.full_name?.[0] || '?'}
                                             </div>
                                             <div>
-                                                <p className={styles.userName}>{member.user?.full_name}</p>
+                                                <p className={styles.userName}>{student.full_name}</p>
                                                 <p className={styles.userMeta}>
-                                                    {member.user?.student_id && (
-                                                        <span>学籍番号: {member.user.student_id}</span>
-                                                    )}
+                                                    <span>学籍番号: {student.student_id_text}</span>
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        )}
-
-                        {canEdit && (
-                            <MemberManager
-                                classId={id}
-                                members={members || []}
-                                className={classData.name}
-                            />
                         )}
                     </section>
                 </main>

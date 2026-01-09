@@ -149,30 +149,28 @@ export default function StudentList({ students: initialStudents, classes }) {
                     status: 'active'
                 }
 
-                // 在籍者.xlsx形式で拡張カラムがDBに存在する場合、追加の個人データを読み取る
-                if (isZaisekiFormat && hasExtendedColumns) {
-                    // カラム位置（在籍者.xlsx）:
-                    // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
-                    // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
-                    // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
-                    // 18:入学年月日, 19:卒業年月, 20:コース
-                    studentData.name_kana = row[4] ? String(row[4]).trim() : null
-                    studentData.name_romaji = row[5] ? String(row[5]).trim() : null
-                    studentData.nationality = row[6] ? String(row[6]).trim() : null
-                    studentData.gender = row[7] ? String(row[7]).trim() : null
-                    studentData.birth_date = excelDateToIso(row[8])
-                    studentData.visa_status = row[9] ? String(row[9]).trim() : null
-                    studentData.entry_date = excelDateToIso(row[10])
-                    studentData.visa_expiry = excelDateToIso(row[11])
-                    studentData.passport_number = row[12] ? String(row[12]).trim() : null
-                    studentData.residence_card_number = row[13] ? String(row[13]).trim() : null
-                    studentData.address = row[14] ? String(row[14]).trim() : null
-                    studentData.phone = row[15] ? String(row[15]).trim() : null
-                    studentData.enrollment_period = row[16] ? String(row[16]).trim() : null
-                    studentData.enrollment_date = excelDateToIso(row[18])
-                    studentData.graduation_date = excelDateToIso(row[19])
-                    studentData.course = row[20] ? String(row[20]).trim() : null
-                }
+                // 拡張カラムのデータを読み込む（在籍者.xlsx形式）
+                // カラム位置（在籍者.xlsx）:
+                // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
+                // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
+                // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
+                // 18:入学年月日, 19:卒業年月, 20:コース
+                if (row[4]) studentData.name_kana = String(row[4]).trim()
+                if (row[5]) studentData.name_romaji = String(row[5]).trim()
+                if (row[6]) studentData.nationality = String(row[6]).trim()
+                if (row[7]) studentData.gender = String(row[7]).trim()
+                if (row[8]) studentData.birth_date = excelDateToIso(row[8])
+                if (row[9]) studentData.visa_status = String(row[9]).trim()
+                if (row[10]) studentData.entry_date = excelDateToIso(row[10])
+                if (row[11]) studentData.visa_expiry = excelDateToIso(row[11])
+                if (row[12]) studentData.passport_number = String(row[12]).trim()
+                if (row[13]) studentData.residence_card_number = String(row[13]).trim()
+                if (row[14]) studentData.address = String(row[14]).trim()
+                if (row[15]) studentData.phone = String(row[15]).trim()
+                if (row[16]) studentData.enrollment_period = String(row[16]).trim()
+                if (row[18]) studentData.enrollment_date = excelDateToIso(row[18])
+                if (row[19]) studentData.graduation_date = excelDateToIso(row[19])
+                if (row[20]) studentData.course = String(row[20]).trim()
 
                 return studentData
             }).filter(s => s.student_id_text)
