@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
 
+// 60秒間キャッシュ
+export const revalidate = 60
 export default async function ClassesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
