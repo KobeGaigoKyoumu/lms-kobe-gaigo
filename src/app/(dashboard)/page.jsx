@@ -8,50 +8,71 @@ export default async function DashboardPage() {
 
     const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'ユーザー'
 
-    // プロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    // プロファイルとお知らせを並列取得
+    const [profileResult, announcementsResult] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user?.id)
+            .single(),
+        supabase
+            .from('announcements')
+            .select(`
+                id,
+                title,
+                content,
+                is_pinned,
+                created_at,
+                author:profiles!author_id (full_name)
+            `)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(5)
+    ])
+
+    const profile = profileResult.data
+    const announcements = announcementsResult.data
 
     const isStudent = profile?.role === 'student'
     const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
 
-    // === 統計データの取得 ===
+    // === 統計データの並列取得 ===
+    const now = new Date()
+    const nextWeek = new Date(now)
+    nextWeek.setDate(nextWeek.getDate() + 7)
 
-    // 登録コース数
     let enrolledCoursesCount = 0
-    if (isStudent) {
-        const { count } = await supabase
-            .from('course_enrollments')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user?.id)
-        enrolledCoursesCount = count || 0
-    } else if (isTeacher) {
-        const { count } = await supabase
-            .from('courses')
-            .select('*', { count: 'exact', head: true })
-            .eq('teacher_id', user?.id)
-        enrolledCoursesCount = count || 0
-    }
-
-    // 課題データ取得（学生の場合）
     let pendingAssignmentsCount = 0
     let completedAssignmentsCount = 0
     let recentAssignments = []
+    let upcomingEventsCount = 0
 
     if (isStudent) {
-        // 全課題取得（登録コースに関連するもの）
-        const { data: enrollments } = await supabase
-            .from('course_enrollments')
-            .select('course_id')
-            .eq('user_id', user?.id)
+        // 学生用データを並列取得
+        const [enrollmentsResult, submissionsResult, upcomingResult] = await Promise.all([
+            supabase
+                .from('course_enrollments')
+                .select('course_id')
+                .eq('user_id', user?.id),
+            supabase
+                .from('submissions')
+                .select('assignment_id')
+                .eq('student_id', user?.id),
+            supabase
+                .from('assignments')
+                .select('*', { count: 'exact', head: true })
+                .gte('due_date', now.toISOString())
+                .lte('due_date', nextWeek.toISOString())
+        ])
 
-        const enrolledCourseIds = enrollments?.map(e => e.course_id) || []
+        const enrollments = enrollmentsResult.data || []
+        const submittedAssignmentIds = (submissionsResult.data || []).map(s => s.assignment_id)
+        enrolledCoursesCount = enrollments.length
+        upcomingEventsCount = upcomingResult.count || 0
+
+        const enrolledCourseIds = enrollments.map(e => e.course_id)
 
         if (enrolledCourseIds.length > 0) {
-            // 課題取得
             const { data: assignments } = await supabase
                 .from('assignments')
                 .select(`
@@ -67,94 +88,73 @@ export default async function DashboardPage() {
 
             recentAssignments = assignments || []
 
-            // 提出済み課題ID取得
-            const { data: submissions } = await supabase
-                .from('submissions')
-                .select('assignment_id')
-                .eq('student_id', user?.id)
-
-            const submittedAssignmentIds = submissions?.map(s => s.assignment_id) || []
-
-            // 未提出（締切前）
-            const now = new Date()
             pendingAssignmentsCount = recentAssignments.filter(a =>
                 !submittedAssignmentIds.includes(a.id) &&
                 (!a.due_date || new Date(a.due_date) >= now)
             ).length
 
-            // 完了（提出済み）
             completedAssignmentsCount = submittedAssignmentIds.length
         }
     } else if (isTeacher) {
-        // 教師の場合：未採点の提出物数
-        const { data: teacherCourses } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('teacher_id', user?.id)
+        // 教師用データを並列取得
+        const [coursesResult, upcomingResult] = await Promise.all([
+            supabase
+                .from('courses')
+                .select('id')
+                .eq('teacher_id', user?.id),
+            supabase
+                .from('assignments')
+                .select('*', { count: 'exact', head: true })
+                .gte('due_date', now.toISOString())
+                .lte('due_date', nextWeek.toISOString())
+        ])
 
-        const teacherCourseIds = teacherCourses?.map(c => c.id) || []
+        const teacherCourses = coursesResult.data || []
+        enrolledCoursesCount = teacherCourses.length
+        upcomingEventsCount = upcomingResult.count || 0
+
+        const teacherCourseIds = teacherCourses.map(c => c.id)
 
         if (teacherCourseIds.length > 0) {
-            const { count } = await supabase
-                .from('submissions')
-                .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
-                .eq('status', 'submitted')
-                .in('assignment.course_id', teacherCourseIds)
-            pendingAssignmentsCount = count || 0
+            // 未採点・採点済み・課題一覧を並列取得
+            const [pendingResult, gradedResult, assignmentsResult] = await Promise.all([
+                supabase
+                    .from('submissions')
+                    .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                    .eq('status', 'submitted')
+                    .in('assignment.course_id', teacherCourseIds),
+                supabase
+                    .from('submissions')
+                    .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                    .eq('status', 'graded')
+                    .in('assignment.course_id', teacherCourseIds),
+                supabase
+                    .from('assignments')
+                    .select(`
+                        id,
+                        title,
+                        due_date,
+                        max_score,
+                        course:courses (id, title)
+                    `)
+                    .in('course_id', teacherCourseIds)
+                    .order('created_at', { ascending: false })
+                    .limit(5)
+            ])
 
-            // 採点済み
-            const { count: gradedCount } = await supabase
-                .from('submissions')
-                .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
-                .eq('status', 'graded')
-                .in('assignment.course_id', teacherCourseIds)
-            completedAssignmentsCount = gradedCount || 0
+            pendingAssignmentsCount = pendingResult.count || 0
+            completedAssignmentsCount = gradedResult.count || 0
+            recentAssignments = assignmentsResult.data || []
         }
-
-        // 教師用：最近の課題
-        const { data: assignments } = await supabase
+    } else {
+        // ゲスト/その他の場合
+        const { count } = await supabase
             .from('assignments')
-            .select(`
-                id,
-                title,
-                due_date,
-                max_score,
-                course:courses (id, title)
-            `)
-            .in('course_id', teacherCourseIds)
-            .order('created_at', { ascending: false })
-            .limit(5)
-
-        recentAssignments = assignments || []
+            .select('*', { count: 'exact', head: true })
+            .gte('due_date', now.toISOString())
+            .lte('due_date', nextWeek.toISOString())
+        upcomingEventsCount = count || 0
     }
-
-    // 今週の予定（課題締切）
-    const now = new Date()
-    const nextWeek = new Date(now)
-    nextWeek.setDate(nextWeek.getDate() + 7)
-
-    const { count: upcomingCount } = await supabase
-        .from('assignments')
-        .select('*', { count: 'exact', head: true })
-        .gte('due_date', now.toISOString())
-        .lte('due_date', nextWeek.toISOString())
-
-    const upcomingEventsCount = upcomingCount || 0
-
-    // 最新のお知らせ取得
-    const { data: announcements } = await supabase
-        .from('announcements')
-        .select(`
-            id,
-            title,
-            content,
-            is_pinned,
-            created_at,
-            author:profiles!author_id (full_name)
-        `)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(5)
 
     return (
         <div className={styles.page}>

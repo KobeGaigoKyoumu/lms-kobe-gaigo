@@ -6,34 +6,38 @@ export default async function ClassesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // 現在のユーザーのプロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    // プロファイルとクラス一覧を並列取得
+    const [profileResult, classesResult] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user?.id)
+            .single(),
+        supabase
+            .from('classes')
+            .select(`
+                *,
+                teacher:profiles!teacher_id (
+                    id,
+                    full_name,
+                    avatar_url
+                ),
+                course:courses!course_id (
+                    id,
+                    title
+                ),
+                members:class_members (count)
+            `)
+            .order('created_at', { ascending: false })
+    ])
+
+    const profile = profileResult.data
+    const allClasses = classesResult.data
+    const error = classesResult.error
 
     const isAdmin = profile?.role === 'admin'
     const isTeacher = profile?.role === 'teacher'
     const isTeacherOrAdmin = isTeacher || isAdmin
-
-    // 全クラス一覧取得
-    const { data: allClasses, error } = await supabase
-        .from('classes')
-        .select(`
-            *,
-            teacher:profiles!teacher_id (
-                id,
-                full_name,
-                avatar_url
-            ),
-            course:courses!course_id (
-                id,
-                title
-            ),
-            members:class_members (count)
-        `)
-        .order('created_at', { ascending: false })
 
     // 自分が担任のクラス
     const myClasses = allClasses?.filter(cls => cls.teacher_id === user?.id) || []
