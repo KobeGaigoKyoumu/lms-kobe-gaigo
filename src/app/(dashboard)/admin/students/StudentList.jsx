@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import * as XLSX from 'xlsx'
 import styles from './page.module.css'
+import StudentDetailModal from './StudentDetailModal'
 
 export default function StudentList({ students: initialStudents, classes }) {
     const router = useRouter()
@@ -15,6 +16,7 @@ export default function StudentList({ students: initialStudents, classes }) {
     const [search, setSearch] = useState('')
     const [uploading, setUploading] = useState(false)
     const [uploadResult, setUploadResult] = useState(null)
+    const [selectedStudent, setSelectedStudent] = useState(null)
 
     const supabase = createClient()
 
@@ -132,19 +134,9 @@ export default function StudentList({ students: initialStudents, classes }) {
             // 在籍者.xlsx形式かどうかを判定
             const isZaisekiFormat = headers.some(h => h && String(h).includes('カタカナ'))
 
-            // 拡張カラムがデータベースに存在するかチェック
-            let hasExtendedColumns = false
-            try {
-                const { data: testData, error: testError } = await supabase
-                    .from('students')
-                    .select('name_kana')
-                    .limit(1)
-                if (!testError) {
-                    hasExtendedColumns = true
-                }
-            } catch (e) {
-                // カラムが存在しない場合はfalseのまま
-            }
+            // 拡張カラムは常に保存を試みる（存在しないカラムは無視される）
+            const hasExtendedColumns = true
+            console.log('isZaisekiFormat:', isZaisekiFormat, 'hasExtendedColumns:', hasExtendedColumns)
 
             // 学生データを作成（在籍者.xlsxの全カラムに対応）
             const studentsToInsert = dataRows.map(row => {
@@ -157,30 +149,28 @@ export default function StudentList({ students: initialStudents, classes }) {
                     status: 'active'
                 }
 
-                // 在籍者.xlsx形式で拡張カラムがDBに存在する場合、追加の個人データを読み取る
-                if (isZaisekiFormat && hasExtendedColumns) {
-                    // カラム位置（在籍者.xlsx）:
-                    // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
-                    // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
-                    // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
-                    // 18:入学年月日, 19:卒業年月, 20:コース
-                    studentData.name_kana = row[4] ? String(row[4]).trim() : null
-                    studentData.name_romaji = row[5] ? String(row[5]).trim() : null
-                    studentData.nationality = row[6] ? String(row[6]).trim() : null
-                    studentData.gender = row[7] ? String(row[7]).trim() : null
-                    studentData.birth_date = excelDateToIso(row[8])
-                    studentData.visa_status = row[9] ? String(row[9]).trim() : null
-                    studentData.entry_date = excelDateToIso(row[10])
-                    studentData.visa_expiry = excelDateToIso(row[11])
-                    studentData.passport_number = row[12] ? String(row[12]).trim() : null
-                    studentData.residence_card_number = row[13] ? String(row[13]).trim() : null
-                    studentData.address = row[14] ? String(row[14]).trim() : null
-                    studentData.phone = row[15] ? String(row[15]).trim() : null
-                    studentData.enrollment_period = row[16] ? String(row[16]).trim() : null
-                    studentData.enrollment_date = excelDateToIso(row[18])
-                    studentData.graduation_date = excelDateToIso(row[19])
-                    studentData.course = row[20] ? String(row[20]).trim() : null
-                }
+                // 拡張カラムのデータを読み込む（在籍者.xlsx形式）
+                // カラム位置（在籍者.xlsx）:
+                // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
+                // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
+                // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
+                // 18:入学年月日, 19:卒業年月, 20:コース
+                if (row[4]) studentData.name_kana = String(row[4]).trim()
+                if (row[5]) studentData.name_romaji = String(row[5]).trim()
+                if (row[6]) studentData.nationality = String(row[6]).trim()
+                if (row[7]) studentData.gender = String(row[7]).trim()
+                if (row[8]) studentData.birth_date = excelDateToIso(row[8])
+                if (row[9]) studentData.visa_status = String(row[9]).trim()
+                if (row[10]) studentData.entry_date = excelDateToIso(row[10])
+                if (row[11]) studentData.visa_expiry = excelDateToIso(row[11])
+                if (row[12]) studentData.passport_number = String(row[12]).trim()
+                if (row[13]) studentData.residence_card_number = String(row[13]).trim()
+                if (row[14]) studentData.address = String(row[14]).trim()
+                if (row[15]) studentData.phone = String(row[15]).trim()
+                if (row[16]) studentData.enrollment_period = String(row[16]).trim()
+                if (row[18]) studentData.enrollment_date = excelDateToIso(row[18])
+                if (row[19]) studentData.graduation_date = excelDateToIso(row[19])
+                if (row[20]) studentData.course = String(row[20]).trim()
 
                 return studentData
             }).filter(s => s.student_id_text)
@@ -213,9 +203,58 @@ export default function StudentList({ students: initialStudents, classes }) {
 
             if (error) throw error
 
+            // ===== クラスメンバー自動登録 =====
+            // 既存のクラス一覧を取得（新規作成分も含む）
+            const { data: allClasses } = await supabase
+                .from('classes')
+                .select('id, name')
+
+            const classMap = new Map((allClasses || []).map(c => [c.name, c.id]))
+
+            // 一括でprofilesを取得（student_idで照合）
+            const studentIds = uniqueStudents
+                .filter(s => s.class_name && classMap.has(s.class_name))
+                .map(s => s.student_id_text)
+
+            let membersRegistered = 0
+
+            if (studentIds.length > 0) {
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, student_id')
+                    .in('student_id', studentIds)
+
+                if (profiles && profiles.length > 0) {
+                    const profileMap = new Map(profiles.map(p => [p.student_id, p.id]))
+
+                    // class_membersに登録するデータを作成
+                    const membersToInsert = uniqueStudents
+                        .filter(s => s.class_name && profileMap.has(s.student_id_text))
+                        .map(s => ({
+                            class_id: classMap.get(s.class_name),
+                            user_id: profileMap.get(s.student_id_text)
+                        }))
+                        .filter(m => m.class_id && m.user_id)
+
+                    if (membersToInsert.length > 0) {
+                        const { error: memberError } = await supabase
+                            .from('class_members')
+                            .upsert(membersToInsert, { onConflict: 'class_id,user_id' })
+
+                        if (!memberError) {
+                            membersRegistered = membersToInsert.length
+                        }
+                    }
+                }
+            }
+            // ===== クラスメンバー自動登録 終了 =====
+
             let message = `${uniqueStudents.length}件の学生データを登録/更新しました`
             if (classesCreated > 0) {
                 message += `。${classesCreated}個のクラスを新規作成しました`
+            }
+            if (membersRegistered > 0) {
+                message += `。${membersRegistered}名をクラスに登録しました`
             }
 
             setUploadResult({
@@ -380,7 +419,13 @@ export default function StudentList({ students: initialStudents, classes }) {
                                         <option value="inactive">休学</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td className={styles.actionCell}>
+                                    <button
+                                        onClick={() => setSelectedStudent(student)}
+                                        className={styles.detailBtn}
+                                    >
+                                        詳細
+                                    </button>
                                     <button
                                         onClick={() => handleDelete(student.student_id_text)}
                                         className={styles.deleteBtn}
@@ -403,6 +448,14 @@ export default function StudentList({ students: initialStudents, classes }) {
             <div className={styles.footer}>
                 表示中: {filteredStudents.length} / {students.length} 件
             </div>
+
+            {/* 学生詳細モーダル */}
+            {selectedStudent && (
+                <StudentDetailModal
+                    student={selectedStudent}
+                    onClose={() => setSelectedStudent(null)}
+                />
+            )}
         </div>
     )
 }
