@@ -8,8 +8,8 @@ export default async function ClassesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // プロファイルとクラス一覧を並列取得
-    const [profileResult, classesResult] = await Promise.all([
+    // プロファイルとクラス一覧と学生マスターを並列取得
+    const [profileResult, classesResult, studentsResult] = await Promise.all([
         supabase
             .from('profiles')
             .select('role')
@@ -27,15 +27,33 @@ export default async function ClassesPage() {
                 course:courses!course_id (
                     id,
                     title
-                ),
-                members:class_members (count)
+                )
             `)
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: false }),
+        supabase
+            .from('students')
+            .select('class_name')
+            .eq('status', 'active')
     ])
 
     const profile = profileResult.data
-    const allClasses = classesResult.data
+    const allClassesRaw = classesResult.data || []
+    const students = studentsResult.data || []
     const error = classesResult.error
+
+    // クラスごとの学生数をカウント
+    const studentCountByClass = {}
+    students.forEach(s => {
+        if (s.class_name) {
+            studentCountByClass[s.class_name] = (studentCountByClass[s.class_name] || 0) + 1
+        }
+    })
+
+    // 学生数を各クラスに追加
+    const allClasses = allClassesRaw.map(cls => ({
+        ...cls,
+        studentCount: studentCountByClass[cls.name] || 0
+    }))
 
     const isAdmin = profile?.role === 'admin'
     const isTeacher = profile?.role === 'teacher'
@@ -75,7 +93,7 @@ export default async function ClassesPage() {
                     <span>{cls.teacher?.full_name || '担任未設定'}</span>
                 </div>
                 <span className={styles.memberCount}>
-                    {cls.members?.[0]?.count || 0}名
+                    {cls.studentCount}名
                 </span>
             </div>
         </Link>
