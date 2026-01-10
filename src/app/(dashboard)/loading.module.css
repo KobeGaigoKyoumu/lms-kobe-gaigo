@@ -1,0 +1,283 @@
+.loadingContainer {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-6);
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+/* メインローダー */
+.loaderWrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-6);
+}
+
+.loader {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.loaderRing {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+
+.loaderRing:nth-child(1) {
+    border-top-color: #3b82f6;
+    animation: spin 1.2s linear infinite;
+}
+
+.loaderRing:nth-child(2) {
+    inset: 8px;
+    border-right-color: #8b5cf6;
+    animation: spin 1.5s linear infinite reverse;
+}
+
+.loaderRing:nth-child(3) {
+    inset: 16px;
+    border-bottom-color: #22c55e;
+    animation: spin 1s linear infinite;
+}
+
+.loaderCore {
+    position: absolute;
+    inset: 24px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loaderText {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.dots span {
+    animation: dotBounce 1.4s ease-in-out infinite;
+}
+
+.dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* 背景スケルトン */
+.skeletonBackground {
+    position: absolute;
+    inset: 0;
+    padding: var(--spacing-6);
+    max-width: 1400px;
+    margin: 0 auto;
+    opacity: 0.3;
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.skeletonHeader {
+    margin-bottom: var(--spacing-8);
+}
+
+.skeletonTitle {
+    width: 300px;
+    height: 40px;
+    background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-hover) 50%, var(--bg-elevated) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-2);
+}
+
+.skeletonSubtitle {
+    width: 180px;
+    height: 20px;
+    background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-hover) 50%, var(--bg-elevated) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+.skeletonCards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-8);
+}
+
+.skeletonCard {
+    height: 100px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-5);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.skeletonCardIcon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+    border-radius: var(--radius-lg);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.skeletonCardContent {
+    flex: 1;
+}
+
+.skeletonCardLabel {
+    width: 60%;
+    height: 14px;
+    background: linear-gradient(90deg, var(--bg-hover) 0%, var(--border-color) 50%, var(--bg-hover) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-2);
+}
+
+.skeletonCardValue {
+    width: 40%;
+    height: 28px;
+    background: linear-gradient(90deg, var(--bg-hover) 0%, var(--border-color) 50%, var(--bg-hover) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeletonSections {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-6);
+}
+
+.skeletonSection {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-5);
+}
+
+.skeletonSectionHeader {
+    width: 120px;
+    height: 24px;
+    background: linear-gradient(90deg, var(--bg-hover) 0%, var(--border-color) 50%, var(--bg-hover) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-4);
+}
+
+.skeletonRow {
+    height: 56px;
+    background: linear-gradient(90deg, var(--bg-primary) 0%, var(--bg-hover) 50%, var(--bg-primary) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite, fadeInUp 0.5s ease-out backwards;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-2);
+}
+
+/* アニメーション */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes dotBounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .skeletonCards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .skeletonCards {
+        grid-template-columns: 1fr;
+    }
+
+    .skeletonSections {
+        grid-template-columns: 1fr;
+    }
+
+    .loader {
+        width: 60px;
+        height: 60px;
+    }
+}
