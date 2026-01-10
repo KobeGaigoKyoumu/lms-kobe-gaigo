@@ -18,41 +18,6 @@ export default function DashboardLoading() {
                     </span>
                 </div>
             </div>
-
-            {/* 背景のスケルトン（ぼかし効果付き） */}
-            <div className={styles.skeletonBackground}>
-                <div className={styles.skeletonHeader}>
-                    <div className={styles.skeletonTitle}></div>
-                    <div className={styles.skeletonSubtitle}></div>
-                </div>
-
-                <div className={styles.skeletonCards}>
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className={styles.skeletonCard} style={{ animationDelay: `${i * 0.1}s` }}>
-                            <div className={styles.skeletonCardIcon}></div>
-                            <div className={styles.skeletonCardContent}>
-                                <div className={styles.skeletonCardLabel}></div>
-                                <div className={styles.skeletonCardValue}></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.skeletonSections}>
-                    <div className={styles.skeletonSection}>
-                        <div className={styles.skeletonSectionHeader}></div>
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className={styles.skeletonRow} style={{ animationDelay: `${i * 0.15}s` }}></div>
-                        ))}
-                    </div>
-                    <div className={styles.skeletonSection}>
-                        <div className={styles.skeletonSectionHeader}></div>
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className={styles.skeletonRow} style={{ animationDelay: `${i * 0.15}s` }}></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     )
 }
