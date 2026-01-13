@@ -6,7 +6,7 @@ const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const fs = require('fs');
 const path = require('path');
-const { applyNameScaling } = require('./wordStyleApplicator');
+const { applyNameScaling, applyGraduationCircle } = require('./wordStyleApplicator');
 
 // 修復済みのテンプレートを使用 (これにはフォントスタイルが適用済み)
 // Vercel互換: process.cwd() を使用
@@ -67,6 +67,9 @@ async function generateFromTemplate(data, issueDate) {
 
     // スタイル後処理 (長い名前の縮小)
     buffer = applyNameScaling(buffer, templateData.name);
+
+    // 卒業状態に応じた〇マーク
+    buffer = applyGraduationCircle(buffer, data.graduationStatus);
 
     return buffer;
 }

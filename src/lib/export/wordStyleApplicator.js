@@ -124,4 +124,69 @@ function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-module.exports = { applyNameScaling };
+/**
+ * 卒業状態に応じて「卒業」または「卒業見込み」に楕円の枠線を追加
+ * @param {Buffer} docxBuffer - Wordファイルバッファ
+ * @param {string} graduationStatus - 'graduated' or 'expected'
+ * @returns {Buffer} 処理後のバッファ
+ */
+function applyGraduationCircle(docxBuffer, graduationStatus) {
+    if (!graduationStatus) return docxBuffer;
+
+    // 対象テキストを決定
+    const targetText = graduationStatus === 'graduated' ? '卒業' : '卒業見込み';
+    console.log(`[GradCircle] Applying circle to: ${targetText}`);
+
+    const zip = new PizZip(docxBuffer);
+    let xml = zip.file('word/document.xml').asText();
+
+    const escapedTarget = escapeXml(targetText);
+
+    // 対象テキストを含むRunを探す
+    // 注意: "卒業見込み" と "卒業" の両方がある場合、正確な一致が必要
+    // "卒業" の場合、"卒業見込み" が誤ってマッチしないように注意
+
+    // 正規表現でRunを探す
+    const regex = new RegExp(`(<w:r(?:\\s[^>]*)?>)(.*?<w:t[^>]*>${escapeRegex(escapedTarget)}</w:t>.*?)(</w:r>)`, 'g');
+
+    let matchCount = 0;
+    xml = xml.replace(regex, (match, openTag, content, closeTag) => {
+        matchCount++;
+
+        // 既に枠線がある場合はスキップ (w:bdr)
+        if (content.includes('<w:bdr')) {
+            console.log(`    [GradCircle] Already has border, skipping.`);
+            return match;
+        }
+
+        let newContent = content;
+
+        // rPrがない場合は作る
+        if (!newContent.includes('<w:rPr>') && !newContent.includes('<w:rPr ')) {
+            // <w:t> の前に <w:rPr></w:rPr> を挿入
+            newContent = newContent.replace(/(<w:t)/, '<w:rPr></w:rPr>$1');
+        }
+
+        // rPrブロックに楕円枠線を追加
+        // w:bdr (文字の枠線)を追加: single線、細い枠
+        const borderTag = '<w:bdr w:val="single" w:sz="4" w:space="1" w:color="000000"/>';
+
+        newContent = newContent.replace(/(<w:rPr[^>]*>)(.*?)(<\/w:rPr>)/, (m, start, body, end) => {
+            // 既に枠線がないか確認
+            if (body.includes('<w:bdr')) return m;
+            return `${start}${body}${borderTag}${end}`;
+        });
+
+        console.log(`    [GradCircle] Added border to run #${matchCount}`);
+        return `${openTag}${newContent}${closeTag}`;
+    });
+
+    if (matchCount === 0) {
+        console.warn(`[GradCircle] Target text "${targetText}" not found in document.`);
+    }
+
+    zip.file('word/document.xml', xml);
+    return zip.generate({ type: 'nodebuffer' });
+}
+
+module.exports = { applyNameScaling, applyGraduationCircle };
