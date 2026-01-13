@@ -8,7 +8,7 @@ export async function POST(request) {
     const supabase = await createClient();
 
     try {
-        const { studentIds, format, issueDate } = await request.json();
+        const { studentIds, format, issueDate, mode } = await request.json();
         const dateStr = issueDate || new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
         if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
@@ -37,8 +37,8 @@ export async function POST(request) {
 
         if (gradesError) throw gradesError;
 
-        // Process each student
-        const files = [];
+        // Process each student and prepare data
+        const processedData = [];
 
         for (const id of studentIds) {
             const student = studentsData.find(s => s.student_id_text === id);
@@ -94,12 +94,27 @@ export async function POST(request) {
                 grades['総合'] = calculateGrade(gradeData.overall.total);
             }
 
-            const data = {
+            processedData.push({
                 ...mergedInit,
                 grades
-            };
+            });
+        }
 
-            // Generate File
+        if (processedData.length === 0) {
+            return new Response(JSON.stringify({ error: 'No valid student data found' }), { status: 404 });
+        }
+
+        // DATA ONLY MODE
+        if (mode === 'data') {
+            return new Response(JSON.stringify({ data: processedData }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // --- File Generation Logic (Server Side) ---
+        // Only if mode !== 'data'
+        const files = [];
+        for (const data of processedData) {
             let buffer;
             let ext;
             if (format === 'pdf') {
@@ -110,7 +125,7 @@ export async function POST(request) {
                 ext = 'docx';
             }
 
-            files.push({ name: `${id}_${data.name.replace(/\s+/g, '_')}_成績証明書.${ext}`, buffer });
+            files.push({ name: `${data.studentId}_${data.name.replace(/\s+/g, '_')}_成績証明書.${ext}`, buffer });
         }
 
         if (files.length === 0) {
@@ -149,9 +164,9 @@ export async function POST(request) {
 // Helpers
 function calculateGrade(score) {
     if (score >= 80) return 'A';
-    if (score >= 60) return 'B';
-    if (score >= 40) return 'C';
-    if (score >= 20) return 'D';
+    if (score >= 70) return 'B';
+    if (score >= 60) return 'C';
+    if (score >= 50) return 'D';
     return 'F';
 }
 

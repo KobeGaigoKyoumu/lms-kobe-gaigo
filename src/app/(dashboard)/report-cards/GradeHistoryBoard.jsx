@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import StudentGradeDetail from './StudentGradeDetail'
 import { exportGradesToExcel } from '@/lib/export/excelExport'
+import PizZip from 'pizzip'
+import { saveAs } from 'file-saver'
+import { loadCertificateTemplate, generateClientCertificateBlob } from '@/lib/export/clientWordGenerator'
 
 export default function GradeHistoryBoard() {
     const supabase = createClient()
@@ -43,12 +46,15 @@ export default function GradeHistoryBoard() {
         }
     }
 
-    // Certificate Export Handler
+    // Certificate Export Handler (Server-Side Generation)
     const handleCertificateExport = async (format) => {
         if (selectedIds.length === 0) return
 
         setGenerating(true)
         try {
+            // Use Server-Side Generation for both PDF and Word
+            // Word uses docxtemplater (pure JS) - works on Vercel
+            // PDF uses Puppeteer - may fail on Vercel
             const response = await fetch('/api/certificates/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -59,16 +65,19 @@ export default function GradeHistoryBoard() {
                 })
             })
 
-            if (!response.ok) throw new Error('Generation failed')
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.error || 'Generation failed')
+            }
 
+            // Download the generated file
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
 
             const disposition = response.headers.get('Content-Disposition')
-            let filename = `certificates.${format === 'pdf' ? 'zip' : 'zip'}`
-            if (selectedIds.length === 1) filename = `certificate.${format === 'pdf' ? 'pdf' : 'docx'}`
+            let filename = selectedIds.length > 1 ? 'certificates.zip' : `certificate.${format === 'pdf' ? 'pdf' : 'docx'}`
 
             if (disposition && disposition.indexOf('filename=') !== -1) {
                 const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);

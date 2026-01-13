@@ -9,8 +9,8 @@ const path = require('path');
 const { applyNameScaling } = require('./wordStyleApplicator');
 
 // 修復済みのテンプレートを使用 (これにはフォントスタイルが適用済み)
-// 注意: fix_template_safe.js を一度実行しておく必要があります。
-const TEMPLATE_PATH = path.join(__dirname, '..', '..', '..', 'public', 'templates', '成績証明書_テンプレート_fixed_safe.docx');
+// Vercel互換: process.cwd() を使用
+const TEMPLATE_PATH = path.join(process.cwd(), 'public', 'templates', '成績証明書_テンプレート_fixed_safe.docx');
 
 /**
  * Wordテンプレートにデータを差し込み
@@ -20,8 +20,14 @@ const TEMPLATE_PATH = path.join(__dirname, '..', '..', '..', 'public', 'template
  */
 async function generateFromTemplate(data, issueDate) {
     // テンプレート読み込み
+    console.log('[WordGen] Template path:', TEMPLATE_PATH);
     if (!fs.existsSync(TEMPLATE_PATH)) {
-        throw new Error(`Template not found at ${TEMPLATE_PATH}. Please run fix_template_safe.js first.`);
+        console.error('[WordGen] Template not found! Listing public/templates...');
+        const templatesDir = path.join(process.cwd(), 'public', 'templates');
+        if (fs.existsSync(templatesDir)) {
+            console.log('[WordGen] Available files:', fs.readdirSync(templatesDir));
+        }
+        throw new Error(`Template not found at ${TEMPLATE_PATH}`);
     }
     const content = fs.readFileSync(TEMPLATE_PATH, 'binary');
 
