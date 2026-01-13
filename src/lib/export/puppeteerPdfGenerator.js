@@ -17,13 +17,11 @@ async function getBrowser() {
     const puppeteerCore = require('puppeteer-core');
 
     // Setup for Japanese fonts
-    // Load from local public folder via URL (required for @sparticuz/chromium)
+    // IPAmjMincho (45MB) is too heavy and local loading is fragile on Vercel.
+    // Switching to Noto Serif JP (Regular) via direct GitHub Raw link.
+    // This is a standard, reliable, and lighter Mincho-style font.
     try {
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000';
-      const fontUrl = `${baseUrl}/fonts/ipamjm.ttf`;
-      await chromium.font(fontUrl);
+      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Serif/OTF/Japanese/NotoSerifCJKjp-Regular.otf');
     } catch (e) {
       console.error('Font loading failed:', e);
     }
