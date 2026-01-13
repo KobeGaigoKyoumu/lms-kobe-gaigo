@@ -15,8 +15,11 @@ async function getBrowser() {
     const chromium = require('@sparticuz/chromium');
     const puppeteerCore = require('puppeteer-core');
 
-    // Setup for Japanese fonts if needed (optional for now, focusing on crash fix)
-    // await chromium.font('https://.../NotoSansJP.ttf'); 
+    // Setup for Japanese fonts
+    // User requested IPAmjMincho.
+    // Using a raw GitHub link for IPAmjMincho (ipamjm.ttf).
+    // Source: https://github.com/ken1row/IPSJ-techrep-xelatex/raw/master/ipamjm.ttf
+    await chromium.font('https://github.com/ken1row/IPSJ-techrep-xelatex/raw/master/ipamjm.ttf');
 
     return await puppeteerCore.launch({
       args: chromium.args,
