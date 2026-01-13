@@ -17,10 +17,16 @@ async function getBrowser() {
     const puppeteerCore = require('puppeteer-core');
 
     // Setup for Japanese fonts
-    // User requested IPAmjMincho.
-    // Using a raw GitHub link for IPAmjMincho (ipamjm.ttf).
-    // Source: https://github.com/ken1row/IPSJ-techrep-xelatex/raw/master/ipamjm.ttf
-    await chromium.font('https://github.com/ken1row/IPSJ-techrep-xelatex/raw/master/ipamjm.ttf');
+    // Load from local public folder via URL (required for @sparticuz/chromium)
+    try {
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000';
+      const fontUrl = `${baseUrl}/fonts/ipamjm.ttf`;
+      await chromium.font(fontUrl);
+    } catch (e) {
+      console.error('Font loading failed:', e);
+    }
 
     return await puppeteerCore.launch({
       args: chromium.args,
