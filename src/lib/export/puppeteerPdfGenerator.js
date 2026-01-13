@@ -3,9 +3,37 @@
  * オリジナルPDFを完璧に再現
  */
 
-const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+async function getBrowser() {
+  if (isProduction) {
+    // Vercel / Production environment
+    const chromium = require('@sparticuz/chromium');
+    const puppeteerCore = require('puppeteer-core');
+
+    // Setup for Japanese fonts if needed (optional for now, focusing on crash fix)
+    // await chromium.font('https://.../NotoSansJP.ttf'); 
+
+    return await puppeteerCore.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
+  } else {
+    // Local environment
+    const puppeteer = require('puppeteer');
+    return await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+  }
+}
 
 /**
  * 成績証明書HTMLを生成 v2
@@ -329,10 +357,7 @@ function countLength(str) {
  * @returns {Promise<Buffer>} PDF Buffer
  */
 async function htmlToPdf(html, outputPath = null) {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const browser = await getBrowser();
 
   try {
     const page = await browser.newPage();
