@@ -7,7 +7,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Determine environment
-const isProduction = process.env.NODE_ENV === 'production';
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
 
 async function getBrowser() {
   if (isProduction) {
