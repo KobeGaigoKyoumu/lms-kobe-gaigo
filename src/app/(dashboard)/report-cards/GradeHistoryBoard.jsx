@@ -23,6 +23,75 @@ export default function GradeHistoryBoard() {
     // Sub View Mode for Details (Exam vs Report - passed to detail component)
     const [detailSubMode, setDetailSubMode] = useState('report') // 'exam' | 'report'
 
+    // Selection State
+    const [selectedIds, setSelectedIds] = useState([])
+    const [generating, setGenerating] = useState(false)
+
+    // Selection Handlers
+    const toggleSelect = (id) => {
+        setSelectedIds(prev => {
+            if (prev.includes(id)) return prev.filter(p => p !== id)
+            return [...prev, id]
+        })
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredRecords.length) {
+            setSelectedIds([])
+        } else {
+            setSelectedIds(filteredRecords.map(r => r.student_id_text))
+        }
+    }
+
+    // Certificate Export Handler
+    const handleCertificateExport = async (format) => {
+        if (selectedIds.length === 0) return
+
+        setGenerating(true)
+        try {
+            const response = await fetch('/api/certificates/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentIds: selectedIds,
+                    format: format,
+                    issueDate: new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                })
+            })
+
+            if (!response.ok) throw new Error('Generation failed')
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+
+            const disposition = response.headers.get('Content-Disposition')
+            let filename = `certificates.${format === 'pdf' ? 'zip' : 'zip'}`
+            if (selectedIds.length === 1) filename = `certificate.${format === 'pdf' ? 'pdf' : 'docx'}`
+
+            if (disposition && disposition.indexOf('filename=') !== -1) {
+                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                    try { filename = decodeURIComponent(filename) } catch (e) { }
+                }
+            }
+
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+
+        } catch (err) {
+            console.error(err)
+            alert('証明書の発行に失敗しました: ' + err.message)
+        } finally {
+            setGenerating(false)
+        }
+    }
+
     useEffect(() => {
         fetchRecords()
     }, [])
@@ -175,65 +244,116 @@ export default function GradeHistoryBoard() {
 
                     {/* Excel Export Button */}
                     {selectedClass && filteredRecords.length > 0 && (
-                        <button
-                            onClick={() => exportGradesToExcel(filteredRecords, selectedClass, selectedTerm)}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#10b981',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px'
-                            }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Excel出力
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={() => exportGradesToExcel(filteredRecords, selectedClass, selectedTerm)}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Excel出力
+                            </button>
+                        </div>
                     )}
                 </div>
 
-                {/* Class Delete Button (Accordion) */}
-                <details style={{ marginTop: '10px' }}>
-                    <summary style={{ cursor: 'pointer', color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', listStyle: 'none' }}>
-                        開発者メニュー（クラス一括削除）
-                    </summary>
-                    <div style={{ marginTop: '10px' }}>
-                        <button
-                            onClick={deleteClassRecords}
-                            disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
-                                color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
-                                border: '1px solid',
-                                borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
-                                borderRadius: '6px',
-                                fontWeight: 'bold',
-                                cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                            </svg>
-                            {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
-                        </button>
-                    </div>
-                </details>
+                {/* Certificate Buttons */}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    {selectedIds.length > 0 && (
+                        <>
+                            <span style={{ fontSize: '0.9rem', color: '#4b5563', marginRight: '5px' }}>
+                                {selectedIds.length}件選択中
+                            </span>
+                            <button
+                                onClick={() => handleCertificateExport('pdf')}
+                                disabled={generating}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: 'bold',
+                                    cursor: generating ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    opacity: generating ? 0.7 : 1
+                                }}
+                            >
+                                {generating ? '生成中...' : '証明書 (PDF)'}
+                            </button>
+                            <button
+                                onClick={() => handleCertificateExport('docx')}
+                                disabled={generating}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#2563eb',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: 'bold',
+                                    cursor: generating ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    opacity: generating ? 0.7 : 1
+                                }}
+                            >
+                                {generating ? '生成中...' : '証明書 (Word)'}
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
+
+            {/* Class Delete Button (Accordion) - Restored */}
+            <details style={{ marginTop: '10px', marginBottom: '20px' }}>
+                <summary style={{ cursor: 'pointer', color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', listStyle: 'none' }}>
+                    開発者メニュー（クラス一括削除）
+                </summary>
+                <div style={{ marginTop: '10px' }}>
+                    <button
+                        onClick={deleteClassRecords}
+                        disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
+                            color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
+                            border: '1px solid',
+                            borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
+                            borderRadius: '6px',
+                            fontWeight: 'bold',
+                            cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                        {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
+                    </button>
+                </div>
+            </details>
 
             {/* PRIMARY TABS: List vs Details */}
             <div style={{ marginBottom: '20px', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '20px' }}>
@@ -264,36 +384,38 @@ export default function GradeHistoryBoard() {
             </div>
 
             {/* SECONDARY TABS: (Only visible in Details mode) - Exam vs Report */}
-            {historyViewMode === 'details' && (
-                <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-                    <button
-                        onClick={() => setDetailSubMode('exam')}
-                        style={{
-                            padding: '6px 14px',
-                            backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
-                            color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
-                            borderRadius: '20px', border: '1px solid',
-                            borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
-                            cursor: 'pointer', fontSize: '0.85rem'
-                        }}
-                    >
-                        期末試験結果を表示
-                    </button>
-                    <button
-                        onClick={() => setDetailSubMode('report')}
-                        style={{
-                            padding: '6px 14px',
-                            backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
-                            color: detailSubMode === 'report' ? '#047857' : '#4b5563',
-                            borderRadius: '20px', border: '1px solid',
-                            borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
-                            cursor: 'pointer', fontSize: '0.85rem'
-                        }}
-                    >
-                        成績通知表を表示
-                    </button>
-                </div>
-            )}
+            {
+                historyViewMode === 'details' && (
+                    <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                        <button
+                            onClick={() => setDetailSubMode('exam')}
+                            style={{
+                                padding: '6px 14px',
+                                backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
+                                color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
+                                borderRadius: '20px', border: '1px solid',
+                                borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
+                                cursor: 'pointer', fontSize: '0.85rem'
+                            }}
+                        >
+                            期末試験結果を表示
+                        </button>
+                        <button
+                            onClick={() => setDetailSubMode('report')}
+                            style={{
+                                padding: '6px 14px',
+                                backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
+                                color: detailSubMode === 'report' ? '#047857' : '#4b5563',
+                                borderRadius: '20px', border: '1px solid',
+                                borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
+                                cursor: 'pointer', fontSize: '0.85rem'
+                            }}
+                        >
+                            成績通知表を表示
+                        </button>
+                    </div>
+                )
+            }
 
             {/* Content Area */}
             <div style={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden', padding: historyViewMode === 'details' ? '20px' : '0' }}>
@@ -307,6 +429,14 @@ export default function GradeHistoryBoard() {
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                 <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                                     <tr>
+                                        {/* Checkbox Header */}
+                                        <th style={{ padding: '12px 16px', width: '40px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.length === filteredRecords.length && filteredRecords.length > 0}
+                                                onChange={toggleSelectAll}
+                                            />
+                                        </th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>学籍番号</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>氏名</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>クラス</th>
@@ -319,7 +449,20 @@ export default function GradeHistoryBoard() {
                                 </thead>
                                 <tbody style={{ divideY: '1px solid #e5e7eb' }}>
                                     {filteredRecords.map((record) => (
-                                        <tr key={record.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                        <tr
+                                            key={record.id}
+                                            style={{
+                                                borderBottom: '1px solid #e5e7eb',
+                                                backgroundColor: selectedIds.includes(record.student_id_text) ? '#f0f9ff' : 'transparent'
+                                            }}
+                                        >
+                                            <td style={{ padding: '12px 16px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(record.student_id_text)}
+                                                    onChange={() => toggleSelect(record.student_id_text)}
+                                                />
+                                            </td>
                                             <td style={{ padding: '12px 16px', fontWeight: '500' }}>{record.student_id_text}</td>
                                             <td style={{ padding: '12px 16px' }}>{record.student_name}</td>
                                             <td style={{ padding: '12px 16px' }}>{record.class_name}</td>
@@ -380,6 +523,6 @@ export default function GradeHistoryBoard() {
             <div style={{ marginTop: '10px', textAlign: 'right', fontSize: '0.8rem', color: '#9ca3af' }}>
                 合計 {filteredRecords.length} 件表示中
             </div>
-        </div>
+        </div >
     )
 }

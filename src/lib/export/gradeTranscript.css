@@ -1,0 +1,200 @@
+/* 成績証明書 PDF スタイル */
+@page {
+    size: A4 portrait;
+    margin: 18mm 20mm 18mm 20mm;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+.transcript-container {
+    font-family: "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", "ヒラギノ明朝 ProN", "Hiragino Mincho ProN", serif;
+    font-size: 10pt;
+    line-height: 1.25;
+    color: #000;
+    background-color: #fff;
+}
+
+.transcript-container {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 14mm 20mm;
+    background: #fff;
+}
+
+/* タイトル: 成績証明書 */
+.transcript-title {
+    text-align: center;
+    font-size: 20pt;
+    font-weight: bold;
+    letter-spacing: 0.3em;
+    margin-bottom: 14px;
+    font-family: "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
+}
+
+/* 個人情報テーブル */
+.student-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    table-layout: fixed;
+    border: 2px solid #000;
+}
+
+.student-info-table td {
+    border: 1px solid #000;
+    padding: 1px 4px;
+    vertical-align: middle;
+    font-size: 8.5pt;
+    height: 20px;
+}
+
+.student-info-table .label-cell {
+    background-color: #fff;
+    font-weight: normal;
+    text-align: center;
+    width: 11%;
+    font-size: 7.5pt;
+}
+
+.student-info-table .value-cell {
+    background-color: #fff;
+    text-align: center;
+    width: 39%;
+    font-size: 8.5pt;
+}
+
+/* 入学年月日・卒業年月日の行 */
+.student-info-table .full-row .label-cell {
+    width: 11%;
+}
+
+.student-info-table .full-row .value-cell {
+    width: 89%;
+    text-align: left;
+    padding-left: 8px;
+}
+
+/* 卒業見込みの楕円 */
+.graduation-circle {
+    display: inline-block;
+    border: 1px solid #000;
+    border-radius: 50%;
+    padding: 0 4px;
+}
+
+/* 証明文 */
+.certification-text {
+    text-align: left;
+    margin: 10px 0;
+    font-size: 8.5pt;
+}
+
+/* 成績テーブル */
+.grade-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 2px solid #000;
+}
+
+.grade-table th,
+.grade-table td {
+    border: 1px solid #000;
+    padding: 1px 1px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 8.5pt;
+    height: 18px;
+}
+
+.grade-table th {
+    background-color: #fff;
+    font-weight: normal;
+}
+
+.grade-table .subject-header {
+    width: 14%;
+    border-right: 1px solid #000;
+}
+
+.grade-table .grade-header {
+    width: 86%;
+}
+
+.grade-table .subject-cell {
+    text-align: center;
+    font-weight: normal;
+    border-right: 1px solid #000;
+}
+
+.grade-table .grade-section td {
+    width: 17.2%;
+}
+
+.grade-table .grade-section td:first-child {
+    width: 14%;
+}
+
+.grade-table td.selected {
+    font-weight: bold;
+}
+
+/* 特記事項 */
+.grade-table .notes-label-row td {
+    text-align: left;
+    padding: 1px 5px;
+    font-weight: normal;
+    height: 18px;
+}
+
+.grade-table .notes-content-row td {
+    height: 38px;
+    text-align: left;
+    padding: 3px 5px;
+    vertical-align: top;
+}
+
+/* 評価基準 */
+.evaluation-criteria {
+    margin-top: 14px;
+    font-size: 7.5pt;
+    line-height: 1.3;
+    text-align: left;
+}
+
+.evaluation-criteria .criteria-title {
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.evaluation-criteria .criteria-item {
+    display: block;
+    margin-left: 0.2em;
+}
+
+/* 発行元情報 */
+.issuer-info {
+    margin-top: 24px;
+    text-align: right;
+    font-size: 8.5pt;
+    line-height: 1.3;
+}
+
+/* 印刷用スタイル */
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .transcript-container {
+        width: 100%;
+        padding: 0;
+        page-break-after: always;
+    }
+}
