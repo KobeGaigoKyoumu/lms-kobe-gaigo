@@ -139,69 +139,70 @@ function escapeRegex(string) {
 function applyGraduationCircle(docxBuffer, graduationStatus) {
     if (!graduationStatus) return docxBuffer;
 
-    // 対象テキストを決定
-    const targetText = graduationStatus === 'graduated' ? '卒業' : '卒業見込み';
-    console.log(`[GradCircle] Applying VML circle to: ${targetText}`);
+    const isGraduated = graduationStatus === 'graduated';
+    console.log(`[GradCircle] Status: ${graduationStatus}, isGraduated: ${isGraduated}`);
 
     const zip = new PizZip(docxBuffer);
     let xml = zip.file('word/document.xml').asText();
 
-    const escapedTarget = escapeXml(targetText);
-
-    // VMLを使用するための名前空間宣言を確認・追加
+    // VML名前空間を追加
     if (!xml.includes('xmlns:v="urn:schemas-microsoft-com:vml"')) {
         xml = xml.replace(/<w:document/, '<w:document xmlns:v="urn:schemas-microsoft-com:vml"');
         console.log('[GradCircle] Injected VML namespace.');
     }
 
-    // 正規表現でRunを探す
-    // <w:t>target</w:t> を含む Run (<w:r>) を特定
-    const regex = new RegExp(`(<w:r(?:\\s[^>]*)?>)([\\s\\S]*?<w:t[^>]*>${escapeRegex(escapedTarget)}<\\/w:t>[\\s\\S]*?)(<\\/w:r>)`, 'g');
+    // 全ての<w:r>...</w:r>を抽出して処理
+    const runRegex = /<w:r(?:\s[^>]*)?>[\s\S]*?<\/w:r>/g;
+    let runs = xml.match(runRegex);
 
-    let matchCount = 0;
-    xml = xml.replace(regex, (match, openTag, content, closeTag) => {
-        matchCount++;
-
-        if (content.includes('<v:oval')) {
-            console.log(`    [GradCircle] Already has oval, skipping.`);
-            return match;
-        }
-
-        // 図形サイズの調整
-        // フォントサイズが概ね 10.5pt (約14px) と仮定
-        // "卒業" (2文字) -> 幅 30pt くらい
-        // "卒業見込み" (5文字) -> 幅 75pt くらい
-        // 高さ -> 25pt くらい
-        // 位置調整: margin-left で微調整
-
-        const isLong = targetText.length > 3;
-        const width = isLong ? "80pt" : "35pt";
-        const height = "25pt";
-        const marginLeft = isLong ? "-5pt" : "-5pt"; // 文字の開始位置より少し左から
-        const marginTop = "-5pt"; // 文字より少し上から
-
-        // VML Oval Tag
-        // z-index: -1 で文字の後ろ... にしたいが、WordのVMLは前面に来がち。
-        // filled="f" (塗りつぶしなし) なので文字は見えます。
-        // strokeColor="black"
-
-        const vmlXml = `
-            <w:r>
-                <w:pict>
-                    <v:oval style="position:absolute;margin-left:${marginLeft};margin-top:${marginTop};width:${width};height:${height};z-index:1" filled="f" strokeweight="1pt" strokecolor="black"/>
-                </w:pict>
-            </w:r>
-        `;
-
-        // Runの直前に図形Runを挿入
-        return `${vmlXml}${openTag}${content}${closeTag}`;
-    });
-
-    if (matchCount === 0) {
-        console.warn(`[GradCircle] Target text "${targetText}" not found in document.`);
+    if (!runs) {
+        console.warn('[GradCircle] No runs found.');
+        return docxBuffer;
     }
 
-    zip.file('word/document.xml', xml);
+    let matchCount = 0;
+    let modifiedXml = xml;
+
+    for (const run of runs) {
+        // このRunのテキスト内容を取得
+        const textMatches = run.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
+        if (!textMatches) continue;
+
+        const fullText = textMatches.map(t => t.replace(/<w:t[^>]*>/, '').replace(/<\/w:t>/, '')).join('');
+
+        let shouldCircle = false;
+        let width = '45pt';
+
+        if (isGraduated) {
+            // 「卒業」を含むが「見込み」「年月日」を含まない
+            if (fullText.includes('卒業') && !fullText.includes('見込み') && !fullText.includes('年月日')) {
+                shouldCircle = true;
+                width = '48pt';
+            }
+        } else {
+            // 「卒業見込み」を含む
+            if (fullText.includes('卒業見込み')) {
+                shouldCircle = true;
+                width = '95pt';
+            }
+        }
+
+        if (shouldCircle && matchCount === 0) { // 最初の一致のみ処理
+            matchCount++;
+            console.log(`[GradCircle] Found: "${fullText.trim()}"`);
+
+            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:-3pt;margin-top:-3pt;width:${width};height:22pt;z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
+            modifiedXml = modifiedXml.replace(run, vmlXml + run);
+        }
+    }
+
+    if (matchCount === 0) {
+        console.warn(`[GradCircle] No match found for: ${graduationStatus}`);
+    } else {
+        console.log(`[GradCircle] Inserted ${matchCount} oval(s).`);
+    }
+
+    zip.file('word/document.xml', modifiedXml);
     return zip.generate({ type: 'nodebuffer' });
 }
 
