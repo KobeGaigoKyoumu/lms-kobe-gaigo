@@ -199,12 +199,12 @@ function applyGraduationCircle(docxBuffer, graduationStatus) {
                 circleHeight = '25pt';
                 marginLeft = '108pt';
             } else {
-                circleWidth = '58pt';
-                circleHeight = '22pt';
-                marginLeft = '218pt';
+                circleWidth = '20pt';
+                circleHeight = '20pt';
+                marginLeft = '223pt';
             }
 
-            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:${marginLeft};margin-top:0pt;width:${circleWidth};height:${circleHeight};z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
+            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:${marginLeft};margin-top:1pt;width:${circleWidth};height:${circleHeight};z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
             modifiedXml = modifiedXml.replace(run, vmlXml + run);
         }
     }
