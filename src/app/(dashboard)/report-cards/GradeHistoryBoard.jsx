@@ -61,7 +61,7 @@ export default function GradeHistoryBoard() {
                 body: JSON.stringify({
                     studentIds: selectedIds,
                     format: format,
-                    issueDate: new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                    issueDate: new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
                 })
             })
 

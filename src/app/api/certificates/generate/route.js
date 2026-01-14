@@ -9,7 +9,7 @@ export async function POST(request) {
 
     try {
         const { studentIds, format, issueDate, mode } = await request.json();
-        const dateStr = issueDate || new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const dateStr = issueDate || new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
         if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
             return new Response(JSON.stringify({ error: 'No student IDs provided' }), { status: 400 });
