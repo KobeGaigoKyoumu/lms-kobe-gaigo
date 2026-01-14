@@ -191,21 +191,21 @@ function applyGraduationCircle(docxBuffer, graduationStatus) {
             matchCount++;
             console.log(`[GradCircle] Found: "${fullText.trim()}"`);
 
-            // VMLをテキストの後ろではなく、テキストを囲むようにするため
-            // position:relative を使用し、負のマージンで戻す
-            // または、テキストRunの直前に配置して正のmargin-leftで右にずらす
+            // テンプレートのレイアウト:
+            // 「{graduationDate}（　 卒業　 ・　 卒業見込み　 ）」
+            // 卒業年月日のセルの幅 ≒ 4インチ (288pt)
+            // 日付部分 ≒ 100pt
+            // 「（　 卒業　 ・　」 ≒ 80pt
+            // 「卒業見込み」 ≒ 段落の終わり近く
 
-            // アプローチ変更: VMLを対象Runの直前ではなく、
-            // 対象Runの内容を囲む形で配置
-            // しかし、VMLはインラインでは表示されにくいため、
-            // テキストボックス的なアプローチを使う
+            // 卒業の場合: margin-left ≒ 100pt (日付の後)
+            // 卒業見込みの場合: margin-left ≒ 185pt (・の後)
+            const marginLeft = isGraduated ? '100pt' : '185pt';
+            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:${marginLeft};margin-top:-2pt;width:${width};height:20pt;z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
 
-            // シンプルに: VMLを対象Runの「後」に配置し、負のmargin-leftで左に戻す
-            const marginBack = isGraduated ? '-48pt' : '-95pt';
-            const vmlXml = `<w:r><w:pict><v:oval style="position:relative;margin-left:${marginBack};margin-top:-3pt;width:${width};height:22pt;z-index:-1" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
-
-            // 対象Runの後に挿入 (runsの後ろに)
-            modifiedXml = modifiedXml.replace(run, run + vmlXml);
+            // 対象段落の先頭（最初のRun）の前に挿入するため、
+            // 現在のRunの前に挿入
+            modifiedXml = modifiedXml.replace(run, vmlXml + run);
         }
     }
 
