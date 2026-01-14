@@ -191,20 +191,20 @@ function applyGraduationCircle(docxBuffer, graduationStatus) {
             matchCount++;
             console.log(`[GradCircle] Found: "${fullText.trim()}"`);
 
-            // テンプレートのレイアウト:
-            // 「{graduationDate}（　 卒業　 ・　 卒業見込み　 ）」
-            // 卒業年月日のセルの幅 ≒ 4インチ (288pt)
-            // 日付部分 ≒ 100pt
-            // 「（　 卒業　 ・　」 ≒ 80pt
-            // 「卒業見込み」 ≒ 段落の終わり近く
+            // 座標微調整と正円化
+            let circleWidth, circleHeight, marginLeft;
 
-            // 卒業の場合: margin-left ≒ 100pt (日付の後)
-            // 卒業見込みの場合: margin-left ≒ 185pt (・の後)
-            const marginLeft = isGraduated ? '100pt' : '185pt';
-            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:${marginLeft};margin-top:-2pt;width:${width};height:20pt;z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
+            if (isGraduated) {
+                circleWidth = '35pt';
+                circleHeight = '25pt';
+                marginLeft = '108pt';
+            } else {
+                circleWidth = '70pt';
+                circleHeight = '25pt';
+                marginLeft = '210pt';
+            }
 
-            // 対象段落の先頭（最初のRun）の前に挿入するため、
-            // 現在のRunの前に挿入
+            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:${marginLeft};margin-top:-2pt;width:${circleWidth};height:${circleHeight};z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
             modifiedXml = modifiedXml.replace(run, vmlXml + run);
         }
     }
