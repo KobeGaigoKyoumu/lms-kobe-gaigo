@@ -130,55 +130,68 @@ function escapeRegex(string) {
  * @param {string} graduationStatus - 'graduated' or 'expected'
  * @returns {Buffer} 処理後のバッファ
  */
+/**
+ * 卒業状態に応じて「卒業」または「卒業見込み」に楕円の図形(VML)を追加
+ * @param {Buffer} docxBuffer - Wordファイルバッファ
+ * @param {string} graduationStatus - 'graduated' or 'expected'
+ * @returns {Buffer} 処理後のバッファ
+ */
 function applyGraduationCircle(docxBuffer, graduationStatus) {
     if (!graduationStatus) return docxBuffer;
 
     // 対象テキストを決定
     const targetText = graduationStatus === 'graduated' ? '卒業' : '卒業見込み';
-    console.log(`[GradCircle] Applying circle to: ${targetText}`);
+    console.log(`[GradCircle] Applying VML circle to: ${targetText}`);
 
     const zip = new PizZip(docxBuffer);
     let xml = zip.file('word/document.xml').asText();
 
     const escapedTarget = escapeXml(targetText);
 
-    // 対象テキストを含むRunを探す
-    // 注意: "卒業見込み" と "卒業" の両方がある場合、正確な一致が必要
-    // "卒業" の場合、"卒業見込み" が誤ってマッチしないように注意
+    // VMLを使用するための名前空間宣言を確認・追加 (通常はデフォルトで入っているが念のためチェックは難しいので、単純にタグを挿入する)
+    // w:pict タグ内であればWordはVMLを解釈する
 
     // 正規表現でRunを探す
-    const regex = new RegExp(`(<w:r(?:\\s[^>]*)?>)(.*?<w:t[^>]*>${escapeRegex(escapedTarget)}</w:t>.*?)(</w:r>)`, 'g');
+    // <w:t>target</w:t> を含む Run (<w:r>) を特定
+    const regex = new RegExp(`(<w:r(?:\\s[^>]*)?>)([\\s\\S]*?<w:t[^>]*>${escapeRegex(escapedTarget)}<\\/w:t>[\\s\\S]*?)(<\\/w:r>)`, 'g');
 
     let matchCount = 0;
     xml = xml.replace(regex, (match, openTag, content, closeTag) => {
         matchCount++;
 
-        // 既に枠線がある場合はスキップ (w:bdr)
-        if (content.includes('<w:bdr')) {
-            console.log(`    [GradCircle] Already has border, skipping.`);
+        if (content.includes('<v:oval')) {
+            console.log(`    [GradCircle] Already has oval, skipping.`);
             return match;
         }
 
-        let newContent = content;
+        // 図形サイズの調整
+        // フォントサイズが概ね 10.5pt (約14px) と仮定
+        // "卒業" (2文字) -> 幅 30pt くらい
+        // "卒業見込み" (5文字) -> 幅 75pt くらい
+        // 高さ -> 25pt くらい
+        // 位置調整: margin-left で微調整
 
-        // rPrがない場合は作る
-        if (!newContent.includes('<w:rPr>') && !newContent.includes('<w:rPr ')) {
-            // <w:t> の前に <w:rPr></w:rPr> を挿入
-            newContent = newContent.replace(/(<w:t)/, '<w:rPr></w:rPr>$1');
-        }
+        const isLong = targetText.length > 3;
+        const width = isLong ? "80pt" : "35pt";
+        const height = "25pt";
+        const marginLeft = isLong ? "-5pt" : "-5pt"; // 文字の開始位置より少し左から
+        const marginTop = "-5pt"; // 文字より少し上から
 
-        // rPrブロックに楕円枠線を追加
-        // w:bdr (文字の枠線)を追加: single線、細い枠
-        const borderTag = '<w:bdr w:val="single" w:sz="4" w:space="1" w:color="000000"/>';
+        // VML Oval Tag
+        // z-index: -1 で文字の後ろ... にしたいが、WordのVMLは前面に来がち。
+        // filled="f" (塗りつぶしなし) なので文字は見えます。
+        // strokeColor="black"
 
-        newContent = newContent.replace(/(<w:rPr[^>]*>)(.*?)(<\/w:rPr>)/, (m, start, body, end) => {
-            // 既に枠線がないか確認
-            if (body.includes('<w:bdr')) return m;
-            return `${start}${body}${borderTag}${end}`;
-        });
+        const vmlXml = `
+            <w:r>
+                <w:pict>
+                    <v:oval style="position:absolute;margin-left:${marginLeft};margin-top:${marginTop};width:${width};height:${height};z-index:1" filled="f" strokeweight="1pt" strokecolor="black"/>
+                </w:pict>
+            </w:r>
+        `;
 
-        console.log(`    [GradCircle] Added border to run #${matchCount}`);
-        return `${openTag}${newContent}${closeTag}`;
+        // Runの直前に図形Runを挿入
+        return `${vmlXml}${openTag}${content}${closeTag}`;
     });
 
     if (matchCount === 0) {
