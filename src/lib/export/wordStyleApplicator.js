@@ -148,8 +148,11 @@ function applyGraduationCircle(docxBuffer, graduationStatus) {
 
     const escapedTarget = escapeXml(targetText);
 
-    // VMLを使用するための名前空間宣言を確認・追加 (通常はデフォルトで入っているが念のためチェックは難しいので、単純にタグを挿入する)
-    // w:pict タグ内であればWordはVMLを解釈する
+    // VMLを使用するための名前空間宣言を確認・追加
+    if (!xml.includes('xmlns:v="urn:schemas-microsoft-com:vml"')) {
+        xml = xml.replace(/<w:document/, '<w:document xmlns:v="urn:schemas-microsoft-com:vml"');
+        console.log('[GradCircle] Injected VML namespace.');
+    }
 
     // 正規表現でRunを探す
     // <w:t>target</w:t> を含む Run (<w:r>) を特定
