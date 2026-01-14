@@ -191,8 +191,21 @@ function applyGraduationCircle(docxBuffer, graduationStatus) {
             matchCount++;
             console.log(`[GradCircle] Found: "${fullText.trim()}"`);
 
-            const vmlXml = `<w:r><w:pict><v:oval style="position:absolute;margin-left:-3pt;margin-top:-3pt;width:${width};height:22pt;z-index:251658240" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
-            modifiedXml = modifiedXml.replace(run, vmlXml + run);
+            // VMLをテキストの後ろではなく、テキストを囲むようにするため
+            // position:relative を使用し、負のマージンで戻す
+            // または、テキストRunの直前に配置して正のmargin-leftで右にずらす
+
+            // アプローチ変更: VMLを対象Runの直前ではなく、
+            // 対象Runの内容を囲む形で配置
+            // しかし、VMLはインラインでは表示されにくいため、
+            // テキストボックス的なアプローチを使う
+
+            // シンプルに: VMLを対象Runの「後」に配置し、負のmargin-leftで左に戻す
+            const marginBack = isGraduated ? '-48pt' : '-95pt';
+            const vmlXml = `<w:r><w:pict><v:oval style="position:relative;margin-left:${marginBack};margin-top:-3pt;width:${width};height:22pt;z-index:-1" filled="f" strokeweight="0.75pt" strokecolor="black"/></w:pict></w:r>`;
+
+            // 対象Runの後に挿入 (runsの後ろに)
+            modifiedXml = modifiedXml.replace(run, run + vmlXml);
         }
     }
 
