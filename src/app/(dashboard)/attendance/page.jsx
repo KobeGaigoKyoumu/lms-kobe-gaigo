@@ -402,22 +402,24 @@ export default function AttendancePage() {
                                                 <th>クラス</th>
                                                 <th>人数</th>
                                                 <th>平均出席率</th>
+                                                <th>操作</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {classData.classes?.map(c => (
-                                                <tr
-                                                    key={`${c.grade}-${c.classCode}`}
-                                                    onClick={() => fetchClassMembers(c.classCode)}
-                                                    style={{ cursor: 'pointer', backgroundColor: 'transparent' }}
-                                                    className={styles.clickableRow}
-                                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
-                                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                                >
+                                                <tr key={`${c.grade}-${c.classCode}`}>
                                                     <td className={styles.classNumber}>{c.className}</td>
                                                     <td>{c.studentCount}名</td>
                                                     <td className={getRateColor(c.averageRate)}>
                                                         {formatRate(c.averageRate)}
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            className={styles.detailBtn}
+                                                            onClick={() => fetchClassMembers(c.classCode)}
+                                                        >
+                                                            学生一覧
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             ))}
