@@ -467,11 +467,14 @@ function generateAttendanceHTML(data) {
 <head>
   <meta charset="UTF-8">
   <title>出席表</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
     @page { size: A4; margin: 0; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif;
+      font-family: "Noto Sans JP", "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif;
       font-size: 10pt;
       color: #333;
       padding: 15mm 20mm;

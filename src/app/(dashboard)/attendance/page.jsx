@@ -408,7 +408,7 @@ export default function AttendancePage() {
                                         <tbody>
                                             {classData.classes?.map(c => (
                                                 <tr key={`${c.grade}-${c.classCode}`}>
-                                                    <td className={styles.classNumber}>{c.className}</td>
+                                                    <td>{c.className}</td>
                                                     <td>{c.studentCount}名</td>
                                                     <td className={getRateColor(c.averageRate)}>
                                                         {formatRate(c.averageRate)}
