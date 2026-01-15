@@ -10,6 +10,7 @@ export default function AttendancePage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [userRole, setUserRole] = useState(null)
+    const [isPdfGenerating, setIsPdfGenerating] = useState(false)
 
     // データ
     const [availableFiles, setAvailableFiles] = useState({ monthlyFiles: [], cumulativeFiles: [] })
@@ -123,6 +124,61 @@ export default function AttendancePage() {
         }
     }
 
+    const [isPdfGenerating, setIsPdfGenerating] = useState(false)
+
+    const handleDownloadPDF = async () => {
+        if (!selectedStudent || !studentHistory) return
+        setIsPdfGenerating(true)
+        try {
+            // 学生情報 (APIから取得した詳細情報、なければ一覧の情報)
+            const sMaster = studentHistory.studentInfo
+            const sList = individualData?.students?.find(s => s.student_id === selectedStudent)
+
+            const name = sMaster?.full_name || sMaster?.name || sList?.student_name || '不明'
+            const className = sMaster?.class_name || sList?.class_name || '未設定'
+
+            // 最新の累計出席率
+            const latestCumulative = studentHistory.cumulativeData?.length > 0
+                ? studentHistory.cumulativeData[studentHistory.cumulativeData.length - 1]
+                : { attendance_rate: 0 }
+
+            const payload = {
+                student: {
+                    id: selectedStudent,
+                    name: name,
+                    className: className
+                },
+                history: studentHistory,
+                currentStats: {
+                    rate: latestCumulative.attendance_rate
+                }
+            }
+
+            const res = await fetch('/api/attendance/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+
+            if (!res.ok) throw new Error('PDF generation failed')
+
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'attendance_' + selectedStudent + '.pdf'
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (err) {
+            console.error(err)
+            alert('PDF生成に失敗しました: ' + err.message)
+        } finally {
+            setIsPdfGenerating(false)
+        }
+    }
+
     const handleImport = async () => {
         if (!importFile) return
 
@@ -152,6 +208,69 @@ export default function AttendancePage() {
         } finally {
             setImporting(false)
             setImportFile(null)
+        }
+    }
+
+    const handleDownloadPDF = async () => {
+        if (!selectedStudent || !studentHistory) return
+        setIsPdfGenerating(true)
+        try {
+            // 現在の学生情報を検索
+            const studentInfo = individualData?.students?.find(s => s.student_id === selectedStudent)
+
+            // 現在の累積出席率（最新月のもの、あるいはindividualDataにあるもの）
+            // individualDataのattendance_rateは現在選択中の年月のもの。
+            // 累計モードで見ているならそれが「現在の累計」
+            // しかしユーザーは「入学から現在まで」の表を求めているので、
+            // currentStatsには「最新の累積出席率」を入れるべき。
+            // studentHistory.cumulativeData の最後の要素が最新のはず（時系列昇順なら。APIは降順で返しているはずだが...）
+            // API (route.js) の individual 取得部分を見ると order('year', { ascending: true }) になってる。
+            // なので studentHistory.cumulativeData は [古い -> 新しい] の順。
+            // 最新は末尾。
+
+            const latestCumulative = studentHistory.cumulativeData && studentHistory.cumulativeData.length > 0
+                ? studentHistory.cumulativeData[studentHistory.cumulativeData.length - 1]
+                : { attendance_rate: 0 }
+
+            const payload = {
+                student: {
+                    id: selectedStudent,
+                    name: studentInfo?.student_name || '不明',
+                    className: studentInfo?.class_name || '未設定' // individualDataにはclass_nameはないかも？API確認要
+                    // APIのindividual検索では select('*') してるのでカラムがあれば取れてる。
+                    // しかしmasterDataからのマッピングはAPI内で行われていない（class=school, classのときだけ）。
+                    // individual検索時は student_id, student_name, attendance_rate ... 
+                    // DBにclass_nameが保存されていれば出るが、計算されたclassはここにはないかも。
+                    // まあ、とりあえずある情報で出す。
+                },
+                history: studentHistory,
+                currentStats: {
+                    rate: latestCumulative.attendance_rate
+                }
+            }
+
+            const res = await fetch('/api/attendance/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+
+            if (!res.ok) throw new Error('PDF generation failed')
+
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `attendance_${selectedStudent}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (err) {
+            console.error(err)
+            alert('PDF生成に失敗しました')
+        } finally {
+            setIsPdfGenerating(false)
         }
     }
 
@@ -377,12 +496,21 @@ export default function AttendancePage() {
                                     </table>
                                 ) : (
                                     <div className={styles.studentDetail}>
-                                        <button
-                                            onClick={() => { setSelectedStudent(null); setStudentHistory(null); }}
-                                            className={styles.backBtn}
-                                        >
-                                            ← 一覧に戻る
-                                        </button>
+                                        <div className={styles.detailHeader}>
+                                            <button
+                                                onClick={() => { setSelectedStudent(null); setStudentHistory(null); }}
+                                                className={styles.backBtn}
+                                            >
+                                                ← 一覧に戻る
+                                            </button>
+                                            <button
+                                                onClick={handleDownloadPDF}
+                                                disabled={isPdfGenerating}
+                                                className={styles.pdfBtn}
+                                            >
+                                                {isPdfGenerating ? '生成中...' : '📄 PDF出力'}
+                                            </button>
+                                        </div>
 
                                         {studentHistory && (
                                             <>

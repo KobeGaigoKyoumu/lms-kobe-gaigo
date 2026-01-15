@@ -314,6 +314,12 @@ export async function GET(request) {
         if (type === 'individual') {
             // 特定の学生の全期間データ
             if (studentId) {
+                // 学生基本情報を取得（PDF出力用）
+                const { data: studentInfo } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('student_id_text', studentId)
+                    .single()
                 const { data: monthlyData, error: monthlyError } = await supabase
                     .from('attendance_records')
                     .select('*')
@@ -334,7 +340,8 @@ export async function GET(request) {
 
                 return NextResponse.json({
                     monthlyData: monthlyData || [],
-                    cumulativeData: cumulativeData || []
+                    cumulativeData: cumulativeData || [],
+                    studentInfo
                 })
             }
 

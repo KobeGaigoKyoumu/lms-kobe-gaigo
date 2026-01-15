@@ -393,17 +393,182 @@ async function htmlToPdf(html, outputPath = null) {
   }
 }
 
+
 /**
- * 成績証明書PDFを生成
- * @returns {Promise<string|Buffer>} Output path or Buffer
+ * 出席状況個票HTMLを生成
  */
-async function generateTranscriptPDF(data, issueDate, outputPath = null) {
-  const html = generateTranscriptHTML(data, issueDate);
+function generateAttendanceHTML(data) {
+  const { student, history, currentStats } = data;
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+  const ratePercent = (currentStats.rate * 100).toFixed(1);
+
+  // 評価ボックスの色
+  let rateClass = 'rate-normal';
+  if (currentStats.rate <= 0.80) rateClass = 'rate-danger';
+  else if (currentStats.rate <= 0.85) rateClass = 'rate-warning';
+  else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
+  else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
+
+  // 月別データの行生成
+  // 最新順になっているはずだが、表は時系列（古い順）の方が見やすいかもしれない。
+  // ここでは受け取った順序（Frontendで表示されている順序）に従うが、
+  // 通常履歴は「新しい順」か「古い順」か。個票なら時系列（昇順）が自然。
+  // history.monthlyData は通常新しい順で来ているなら、reverse() する。
+  const rows = [...(history.monthlyData || [])].reverse().map(row => {
+    const rate = row.attendance_rate;
+    let rowClass = '';
+    if (rate <= 0.80) rowClass = 'bg-danger';
+    else if (rate <= 0.85) rowClass = 'bg-warning';
+    else if (rate <= 0.90) rowClass = 'bg-caution';
+    else if (rate <= 0.95) rowClass = 'bg-notice';
+
+    return `
+      <tr class="${rowClass}">
+        <td>${row.year}年 ${row.month}月</td>
+        <td>${row.attendance_days}</td>
+        <td>${row.absence_days}</td>
+        <td>${(rate * 100).toFixed(1)}%</td>
+      </tr>
+    `;
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出席状況個票</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif; /* ゴシック系優先 */
+      font-size: 11pt;
+      color: #333;
+      padding: 20mm;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24pt;
+      margin-bottom: 10mm;
+      border-bottom: 2px solid #333;
+      padding-bottom: 5mm;
+    }
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10mm;
+    }
+    .student-info {
+      width: 60%;
+    }
+    .student-info table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .student-info th, .student-info td {
+      text-align: left;
+      padding: 5px;
+      font-size: 12pt;
+    }
+    .student-info th { width: 30%; font-weight: normal; color: #666; }
+    .student-info td { font-weight: bold; font-size: 14pt; }
+
+    .summary-box {
+      width: 35%;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+    .summary-label { font-size: 10pt; margin-bottom: 5px; color: #555; }
+    .summary-value { font-size: 28pt; font-weight: bold; }
+    
+    .rate-danger { color: #d32f2f; }
+    .rate-warning { color: #f57c00; }
+    .rate-caution { color: #fbc02d; }
+    .rate-notice { color: #0288d1; }
+    .rate-normal { color: #2e7d32; }
+
+    table.history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10mm;
+    }
+    .history-table th, .history-table td {
+      border: 1px solid #999;
+      padding: 10px;
+      text-align: center;
+    }
+    .history-table th {
+      background-color: #eee;
+      font-weight: bold;
+    }
+
+    /* Conditional Formatting Backgrounds */
+    .bg-danger { background-color: #ffcdd2; } /* <= 80% */
+    .bg-warning { background-color: #ffe0b2; } /* <= 85% */
+    .bg-caution { background-color: #fff9c4; } /* <= 90% */
+    .bg-notice { background-color: #e1f5fe; } /* <= 95% */
+
+    .footer {
+      margin-top: 20mm;
+      text-align: right;
+      font-size: 10pt;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>出席状況個票</h1>
+
+  <div class="header-info">
+    <div class="student-info">
+      <table>
+        <tr><th>学籍番号</th><td>${student.id}</td></tr>
+        <tr><th>氏名</th><td>${student.name}</td></tr>
+        <tr><th>クラス</th><td>${student.className || '未設定'}</td></tr>
+      </table>
+    </div>
+    <div class="summary-box">
+      <div class="summary-label">現在の累計出席率</div>
+      <div class="summary-value ${rateClass}">${ratePercent}%</div>
+    </div>
+  </div>
+
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>年月</th>
+        <th>出席日数</th>
+        <th>欠席日数</th>
+        <th>出席率</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    発行日: ${today}
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * 出席個票PDFを生成
+ */
+async function generateAttendancePDF(data, outputPath = null) {
+  const html = generateAttendanceHTML(data);
   return await htmlToPdf(html, outputPath);
 }
 
 module.exports = {
   generateTranscriptHTML,
   htmlToPdf,
-  generateTranscriptPDF
+  generateTranscriptPDF,
+  generateAttendanceHTML,
+  generateAttendancePDF
 };

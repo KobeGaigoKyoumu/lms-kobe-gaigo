@@ -306,6 +306,26 @@
 /* 学生詳細 */
 .studentDetail {
     padding: 1rem 0;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.detailHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
 }
 
 .backBtn {
@@ -316,12 +336,40 @@
     border-radius: 8px;
     font-size: 0.9rem;
     cursor: pointer;
-    margin-bottom: 1.5rem;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .backBtn:hover {
     background: #e2e8f0;
+}
+
+.pdfBtn {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.pdfBtn:hover {
+    opacity: 0.9;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.pdfBtn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .historySection {
@@ -404,20 +452,20 @@
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .tabs {
         flex-wrap: wrap;
     }
-    
+
     .tab {
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
     }
-    
+
     .statCards {
         grid-template-columns: 1fr 1fr;
     }
-    
+
     .statValue {
         font-size: 1.5rem;
     }
