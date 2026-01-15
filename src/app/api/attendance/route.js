@@ -60,7 +60,7 @@ export async function GET(request) {
             }
         })
 
-        // デバッグ用: 生データ確認
+        // デバッグ用: 生データ確認 (後で削除可)
         if (type === 'raw_dump') {
             const { data, error } = await supabase
                 .from('attendance_records')
@@ -78,49 +78,66 @@ export async function GET(request) {
 
         // 利用可能な年月データを取得
         if (type === 'files') {
-            // 月別データの年月を取得（Supabaseのデフォルト1000行制限を回避 + 最新順）
-            const { data: monthlyRaw, error: monthlyError } = await supabase
-                .from('attendance_records')
-                .select('year, month')
-                .eq('is_cumulative', false)
-                .order('year', { ascending: false })
-                .order('month', { ascending: false })
-                .range(0, 49999)
-
-            // 累計データの年月を取得
-            const { data: cumulativeRaw, error: cumulativeError } = await supabase
-                .from('attendance_records')
-                .select('year, month')
-                .eq('is_cumulative', true)
-                .order('year', { ascending: false })
-                .order('month', { ascending: false })
-                .range(0, 49999)
-
-            if (monthlyError || cumulativeError) throw monthlyError || cumulativeError
-
-            // ユニークな組み合わせを抽出しソート
             const monthlySet = new Set()
             const cumulativeSet = new Set()
 
-            monthlyRaw?.forEach(item => {
-                monthlySet.add(`${item.year}-${item.month}`)
-            })
+            // データを一括で全て取得するのは制限があるため、ループで全件取得する
+            let hasMore = true
+            let page = 0
+            const pageSize = 1000
+            // 最大ループ数 (50000件 / 1000 = 50 + 安全マージン)
+            const MAX_LOOPS = 100
 
-            cumulativeRaw?.forEach(item => {
-                cumulativeSet.add(`${item.year}-${item.month}`)
-            })
+            try {
+                while (hasMore) {
+                    // 全データ取得 (year, month, is_cumulative)
+                    const { data, error } = await supabase
+                        .from('attendance_records')
+                        .select('year, month, is_cumulative')
+                        .range(page * pageSize, (page + 1) * pageSize - 1)
+                        // ページングの安定性のためIDなどでソートしたいが、負荷軽減のためデフォルト順(通常は挿入順)でも今回は許容
+                        // ただしorder指定しないとランダムになる可能性もあるので、念のため student_id でソート
+                        .order('student_id', { ascending: true })
 
+                    if (error) throw error
+
+                    if (!data || data.length === 0) {
+                        hasMore = false
+                        break
+                    }
+
+                    // セットに追加して重複排除
+                    data.forEach(item => {
+                        const key = `${item.year}-${item.month}`
+                        if (item.is_cumulative) {
+                            cumulativeSet.add(key)
+                        } else {
+                            monthlySet.add(key)
+                        }
+                    })
+
+                    if (data.length < pageSize) hasMore = false
+
+                    page++
+                    if (page >= MAX_LOOPS) hasMore = false
+                }
+            } catch (err) {
+                console.error('Error fetching file list:', err)
+                return NextResponse.json({ error: err.message }, { status: 500 })
+            }
+
+            // 配列に変換・降順ソート
             const monthlyFiles = Array.from(monthlySet).map(key => {
-                const [year, month] = key.split('-')
-                return { year: parseInt(year), month: parseInt(month) }
-            }).sort((a, b) => {
+                const [year, month] = key.split('-').map(Number)
+                return { year, month }
+            }).sort((a, b) => { // 降順
                 if (a.year !== b.year) return b.year - a.year
                 return b.month - a.month
             })
 
             const cumulativeFiles = Array.from(cumulativeSet).map(key => {
-                const [year, month] = key.split('-')
-                return { year: parseInt(year), month: parseInt(month) }
+                const [year, month] = key.split('-').map(Number)
+                return { year, month }
             }).sort((a, b) => {
                 if (a.year !== b.year) return b.year - a.year
                 return b.month - a.month
@@ -131,7 +148,8 @@ export async function GET(request) {
                 cumulativeFiles,
                 debug: {
                     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    scan_pages: page
                 }
             })
         }
@@ -366,4 +384,3 @@ export async function GET(request) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
-
