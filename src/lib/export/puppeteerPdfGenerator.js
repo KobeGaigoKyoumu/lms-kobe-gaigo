@@ -410,14 +410,12 @@ function generateAttendanceHTML(data) {
   const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.'); // 2026.01.15形式
 
   // データの準備（月別と累計を結合）
-  // history.monthlyData, history.cumulativeData は時系列（古い順）と仮定して、
-  // 表示用に新しい順（降順）に並べ替える。
-  const monthlyReversed = [...(history.monthlyData || [])].reverse();
-  const cumulativeReversed = [...(history.cumulativeData || [])].reverse();
+  const monthlyData = [...(history.monthlyData || [])];
+  const cumulativeData = [...(history.cumulativeData || [])];
 
   // マージデータの作成
-  const combinedRows = monthlyReversed.map(m => {
-    const c = cumulativeReversed.find(cum => cum.year === m.year && cum.month === m.month) || {};
+  let combinedRows = monthlyData.map(m => {
+    const c = cumulativeData.find(cum => cum.year === m.year && cum.month === m.month) || {};
     return {
       year: m.year,
       month: m.month,
@@ -428,8 +426,11 @@ function generateAttendanceHTML(data) {
     };
   });
 
+  // 降順ソート（新しい順）
+  combinedRows.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
+
   // 最新データの年月取得（ボックス表示用）
-  const latestData = cumulativeReversed.length > 0 ? cumulativeReversed[0] : (monthlyReversed.length > 0 ? monthlyReversed[0] : { year: '----', month: '--' });
+  const latestData = combinedRows.length > 0 ? combinedRows[0] : { year: '----', month: '--' };
   const latestRatePercent = (currentStats.rate * 100).toFixed(1);
 
   // 評価ボックスの色判定
@@ -463,6 +464,262 @@ function generateAttendanceHTML(data) {
   }).join('\n');
 
   return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出席表</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif;
+      font-size: 10pt;
+      color: #333;
+      padding: 15mm 20mm;
+    }
+    
+    .title-container {
+      text-align: center;
+      margin-bottom: 5mm;
+      padding-top: 10mm;
+    }
+    h1 {
+      display: inline-block;
+      font-size: 28pt;
+      color: #333;
+      font-weight: bold;
+      margin: 0;
+      letter-spacing: 2px;
+    }
+
+    .header-layout {
+      position: relative;
+      height: 35mm;
+      margin-bottom: 5mm;
+      border-bottom: 2px solid #333;
+    }
+
+    .student-info {
+      position: absolute;
+      bottom: 2mm;
+      left: 0;
+      width: 60%;
+    }
+    .student-info div {
+      margin-bottom: 5px;
+      font-size: 11pt;
+    }
+    .student-id { font-weight: bold; font-size: 12pt; margin-bottom: 2px !important; }
+    .student-name { font-weight: bold; font-size: 16pt; margin-bottom: 5px !important; }
+    .student-class { font-weight: bold; font-size: 12pt; }
+
+    .summary-box {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60mm;
+      height: 25mm;
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .summary-header {
+      height: 8mm;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #333;
+      font-size: 8pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.1;
+      color: #555;
+    }
+    .summary-content {
+      height: 17mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .summary-value {
+      font-size: 22pt;
+      font-weight: bold;
+    }
+
+    /* Colors */
+    .rate-danger { color: #d32f2f; }
+    .rate-warning { color: #f57c00; }
+    .rate-caution { color: #fbc02d; }
+    .rate-notice { color: #0288d1; }
+    .rate-normal { color: #2e7d32; }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5mm;
+      font-size: 9.5pt;
+    }
+    
+    .data-table th {
+      background-color: #f0f0f0;
+      border: 1px solid #999;
+      padding: 8px 4px;
+      font-weight: normal;
+      color: #555;
+    }
+    
+    .data-table td {
+      border: 1px solid #ddd;
+      border-left: 1px solid #999;
+      border-right: 1px solid #999;
+      border-bottom: 1px solid #999;
+      padding: 6px 4px;
+      text-align: center;
+      height: 8mm;
+    }
+
+    .col-cumulative {
+      background-color: #f9fbfd;
+      font-weight: bold;
+    }
+
+    /* Backgrounds */
+    .bg-danger { background-color: #ffebee !important; }
+    .bg-warning { background-color: #fff3e0 !important; }
+    .bg-caution { background-color: #fffde7 !important; }
+    .bg-notice { background-color: #e1f5fe !important; }
+
+    /* Legend */
+    .legend {
+      margin-top: 5mm;
+      display: flex;
+      justify-content: flex-end;
+      font-size: 8pt;
+      gap: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      margin-right: 4px;
+      border: 1px solid #ccc;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="title-container">
+    <h1>神戸外語教育学院</h1>
+  </div>
+
+  <div class="header-layout">
+    <div class="student-info">
+      <div class="student-id">${student.id}</div>
+      <div class="student-name">${student.name}</div>
+      <div class="student-class">${student.className || ''}</div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-header">
+        ${latestData.year}年${latestData.month}月出席率<br>${today}
+      </div>
+      <div class="summary-content">
+        <span class="summary-value ${rateClass}">${latestRatePercent}%</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th width="20%">年月</th>
+        <th width="15%">出席日数</th>
+        <th width="15%">欠席日数</th>
+        <th width="25%">出席率</th>
+        <th width="25%">累計出席率</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color bg-notice"></div>
+      95%以下
+    </div>
+    <div class="legend-item">
+      <div class="legend-color bg-caution"></div>
+      90%以下
+    </div>
+    <div class="legend-item">
+      <div class="legend-color bg-warning"></div>
+      85%以下
+    </div>
+    <div class="legend-item">
+      <div class="legend-color bg-danger"></div>
+      80%以下
+    </div>
+  </div>
+
+</body>
+</html>`;
+}
+
+// マージデータの作成
+const combinedRows = monthlyReversed.map(m => {
+  const c = cumulativeReversed.find(cum => cum.year === m.year && cum.month === m.month) || {};
+  return {
+    year: m.year,
+    month: m.month,
+    attendance_days: m.attendance_days,
+    absence_days: m.absence_days,
+    monthly_rate: m.attendance_rate,
+    cumulative_rate: c.attendance_rate // 未定義ならundefined
+  };
+});
+
+// 最新データの年月取得（ボックス表示用）
+const latestData = cumulativeReversed.length > 0 ? cumulativeReversed[0] : (monthlyReversed.length > 0 ? monthlyReversed[0] : { year: '----', month: '--' });
+const latestRatePercent = (currentStats.rate * 100).toFixed(1);
+
+// 評価ボックスの色判定
+let rateClass = 'rate-normal';
+if (currentStats.rate <= 0.80) rateClass = 'rate-danger';
+else if (currentStats.rate <= 0.85) rateClass = 'rate-warning';
+else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
+else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
+
+// 行HTML生成
+const rowsHtml = combinedRows.map(row => {
+  const mRate = row.monthly_rate;
+  const cRate = row.cumulative_rate;
+
+  // 条件付き書式（月別出席率に基づく）
+  let rowClass = '';
+  if (mRate <= 0.80) rowClass = 'bg-danger';
+  else if (mRate <= 0.85) rowClass = 'bg-warning';
+  else if (mRate <= 0.90) rowClass = 'bg-caution';
+  else if (mRate <= 0.95) rowClass = 'bg-notice';
+
+  return `
+      <tr class="${rowClass}">
+        <td>${row.year} ${row.month}</td>
+        <td>${row.attendance_days}</td>
+        <td>${row.absence_days}</td>
+        <td>${(mRate * 100).toFixed(1)}%</td>
+        <td class="col-cumulative">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+      </tr>
+    `;
+}).join('\n');
+
+return `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
