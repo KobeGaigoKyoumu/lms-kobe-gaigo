@@ -291,7 +291,7 @@ export default function AttendancePage() {
                                 <div className={styles.gradeCards}>
                                     {gradeData.grades?.map(g => (
                                         <div key={g.grade} className={styles.gradeCard}>
-                                            <div className={styles.gradeTitle}>{g.grade}年生</div>
+                                            <div className={styles.gradeTitle}>{g.gradeName || `${g.grade}年生`}</div>
                                             <div className={`${styles.gradeRate} ${getRateColor(g.averageRate)}`}>
                                                 {formatRate(g.averageRate)}
                                             </div>
@@ -359,7 +359,7 @@ export default function AttendancePage() {
                                                 <tr key={s.student_id}>
                                                     <td>{s.student_id}</td>
                                                     <td>{s.student_name}</td>
-                                                    <td>{s.grade}年</td>
+                                                    <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
                                                     <td className={getRateColor(s.attendance_rate)}>
                                                         {formatRate(s.attendance_rate)}
                                                     </td>

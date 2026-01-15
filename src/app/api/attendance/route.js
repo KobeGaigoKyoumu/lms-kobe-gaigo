@@ -131,13 +131,20 @@ export async function GET(request) {
             })
 
             const grades = Object.keys(gradeGroups).map(grade => {
+                const gradeNum = parseInt(grade)
                 const rates = gradeGroups[grade]
                 return {
-                    grade: parseInt(grade),
+                    grade: gradeNum,
+                    gradeName: gradeNum === 0 ? '非在籍者' : `${gradeNum}年生`,
                     studentCount: rates.length,
                     averageRate: rates.reduce((sum, r) => sum + r, 0) / rates.length
                 }
-            }).sort((a, b) => a.grade - b.grade)
+            }).sort((a, b) => {
+                // 非在籍者（grade=0）は最後に
+                if (a.grade === 0) return 1
+                if (b.grade === 0) return -1
+                return a.grade - b.grade
+            })
 
             return NextResponse.json({
                 grades,
