@@ -1,6 +1,28 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// Grade Calculation Logic (Synced with import_attendance.js but with '23' fix)
+function calculateGrade(studentId, year, month) {
+    if (!studentId || studentId.length < 2) return 0
+
+    // Force '23' series to be Non-enrolled (Grade 0) as per user request
+    if (studentId.startsWith('23')) return 0
+
+    const enrollmentYearShort = parseInt(studentId.substring(0, 2), 10)
+    const enrollmentYear = 2000 + enrollmentYearShort
+
+    // Academic Year Calculation (Starts in April)
+    const academicYear = month >= 4 ? year : year - 1
+
+    let grade = academicYear - enrollmentYear + 1
+
+    // If grade > 2, treat as graduated (0)
+    if (grade > 2) grade = 0
+    if (grade < 0) grade = 0 // Safety for future IDs
+
+    return grade
+}
+
 export async function GET(request) {
     try {
         const supabase = await createClient()
@@ -12,6 +34,18 @@ export async function GET(request) {
         const cumulative = searchParams.get('cumulative') === 'true'
         const studentId = searchParams.get('studentId')
         const search = searchParams.get('search')
+
+        // Fetch Student Master for Class mapping (Used across multiple types)
+        const { data: masterData } = await supabase
+            .from('students')
+            .select('student_id_text, class_name')
+
+        const studentClassMap = new Map()
+        masterData?.forEach(s => {
+            if (s.student_id_text && s.class_name) {
+                studentClassMap.set(s.student_id_text, s.class_name)
+            }
+        })
 
         // 利用可能な年月データを取得
         if (type === 'files') {
@@ -86,10 +120,11 @@ export async function GET(request) {
         if (type === 'school') {
             const { data: students, error } = await supabase
                 .from('attendance_records')
-                .select('attendance_rate')
+                .select('student_id, attendance_rate') // Fetch student_id
                 .eq('year', targetYear)
                 .eq('month', targetMonth)
                 .eq('is_cumulative', cumulative)
+                .range(0, 49999)
 
             if (error) throw error
 
@@ -114,22 +149,27 @@ export async function GET(request) {
 
         // 学年別の統計
         if (type === 'grade') {
+            // Fetch student_id to recalculate grade dynamically because DB grade might be stale/incorrect
             const { data: students, error } = await supabase
                 .from('attendance_records')
-                .select('grade, attendance_rate')
+                .select('student_id, attendance_rate')
                 .eq('year', targetYear)
                 .eq('month', targetMonth)
                 .eq('is_cumulative', cumulative)
+                .range(0, 49999)
 
             if (error) throw error
 
             // 学年ごとに集計
             const gradeGroups = {}
             students?.forEach(s => {
-                if (!gradeGroups[s.grade]) {
-                    gradeGroups[s.grade] = []
+                // Calculate grade dynamically
+                const grade = calculateGrade(s.student_id, targetYear, targetMonth)
+
+                if (!gradeGroups[grade]) {
+                    gradeGroups[grade] = []
                 }
-                gradeGroups[s.grade].push(parseFloat(s.attendance_rate))
+                gradeGroups[grade].push(parseFloat(s.attendance_rate))
             })
 
             const grades = Object.keys(gradeGroups).map(grade => {
@@ -158,23 +198,33 @@ export async function GET(request) {
 
         // クラス別の統計
         if (type === 'class') {
+            // Fetch student_id to map class from masterData
             const { data: students, error } = await supabase
                 .from('attendance_records')
-                .select('grade, class_code, attendance_rate')
+                .select('student_id, attendance_rate')
                 .eq('year', targetYear)
                 .eq('month', targetMonth)
                 .eq('is_cumulative', cumulative)
+                .range(0, 49999)
 
             if (error) throw error
 
             // クラスごとに集計
             const classGroups = {}
             students?.forEach(s => {
-                const key = `${s.grade}-${s.class_code}`
+                // Determine Class from Master, fallback to DB (not fetched here) or '未設定'
+                // Note: DB class_code is skipped in favor of Master data to fix "Unset" issue for 1st years
+                const masterClass = studentClassMap.get(s.student_id)
+                const className = masterClass || '未設定'
+
+                // Also need Grade for sorting/grouping context
+                const grade = calculateGrade(s.student_id, targetYear, targetMonth)
+
+                const key = `${grade}-${className}`
                 if (!classGroups[key]) {
                     classGroups[key] = {
-                        grade: s.grade,
-                        classCode: s.class_code,
+                        grade: grade,
+                        classCode: className,
                         rates: []
                     }
                 }
@@ -185,7 +235,7 @@ export async function GET(request) {
                 return {
                     grade: cls.grade,
                     classCode: cls.classCode,
-                    className: cls.classCode || '未設定',  // class_codeをそのまま表示
+                    className: cls.classCode,
                     studentCount: cls.rates.length,
                     averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
                 }
@@ -233,10 +283,11 @@ export async function GET(request) {
             // 学生検索
             let query = supabase
                 .from('attendance_records')
-                .select('*')
+                .select('*') // We fetch all to override grade/class locally
                 .eq('year', targetYear)
                 .eq('month', targetMonth)
                 .eq('is_cumulative', cumulative)
+                .range(0, 49999)
 
             if (search) {
                 query = query.or(`student_id.ilike.%${search}%,student_name.ilike.%${search}%`)
@@ -248,8 +299,20 @@ export async function GET(request) {
 
             if (error) throw error
 
+            // Process students to override Grade and Class
+            const processedStudents = students?.map(s => {
+                const realGrade = calculateGrade(s.student_id, targetYear, targetMonth)
+                return {
+                    ...s,
+                    grade: realGrade, // Override grade
+                    // Not overriding class_code here as it's not primary display in individual search list 
+                    // (Table usually shows ID, Name, Grade, Rate). 
+                    // But if class is needed, could use studentClassMap.
+                }
+            }) || []
+
             return NextResponse.json({
-                students: students || [],
+                students: processedStudents,
                 year: targetYear,
                 month: targetMonth,
                 isCumulative: cumulative
@@ -263,3 +326,4 @@ export async function GET(request) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
+

@@ -68,10 +68,14 @@ function calculateGrade(studentId, dataYear, dataMonth) {
 async function getStudentClassMap() {
     console.log('学生マスターからクラス名を取得中...')
 
+    // 全件取得するためにループが必要かもしれないが、一旦デフォルトの1000件制限を解除してみる
+    // Supabase JS clientのデフォルトは1000件だが、rangeを指定しないと全部取れない場合がある
+    // ここでは安全のため 0-9999 を指定
     const { data, error } = await supabase
         .from('students')
         .select('student_id_text, class_name')
         .not('class_name', 'is', null)
+        .range(0, 9999)
 
     if (error) {
         console.error('学生マスター取得エラー:', error.message)
@@ -151,84 +155,96 @@ function readExcelFile(filepath, year, month, isCumulative, studentClassMap) {
 
 // メイン処理
 async function main() {
-    console.log('出席率データ一括インポート（学生マスター対応版）を開始します...\n')
+    console.log('出席率データ一括インポート（学生マスター対応版・UTF-8版）を開始します...\n')
     console.log('ロジック:')
     console.log('  - 学年: 学籍番号から計算（先頭2桁＝入学年度）')
     console.log('  - クラス名: 学生マスターのclass_nameから取得')
     console.log('')
 
-    // 学生マスターからクラス情報を取得
-    const studentClassMap = await getStudentClassMap()
+    try {
+        // 学生マスターからクラス情報を取得
+        const studentClassMap = await getStudentClassMap()
 
-    // ファイル一覧を取得
-    const files = fs.readdirSync(ATTENDANCE_DIR).filter(f => f.endsWith('.xlsx'))
-    console.log(`\n${files.length}個のExcelファイルを検出しました\n`)
+        // ファイル一覧を取得
+        const files = fs.readdirSync(ATTENDANCE_DIR).filter(f => f.endsWith('.xlsx'))
+        console.log(`\n${files.length}個のExcelファイルを検出しました\n`)
 
-    let successCount = 0
-    let errorCount = 0
-    let totalRecords = 0
+        let successCount = 0
+        let errorCount = 0
+        let totalRecords = 0
 
-    for (const filename of files) {
-        const meta = parseFilename(filename)
-        if (!meta) {
-            console.log(`スキップ: ${filename} (ファイル名が不正)`)
-            continue
-        }
-
-        const filepath = path.join(ATTENDANCE_DIR, filename)
-        const typeStr = meta.isCumulative ? '累計' : '月別'
-
-        try {
-            // ファイル読み込み
-            const records = readExcelFile(filepath, meta.year, meta.month, meta.isCumulative, studentClassMap)
-
-            if (records.length === 0) {
-                console.log(`スキップ: ${filename} (データなし)`)
+        for (const filename of files) {
+            console.log(`処理中: ${filename}...`)
+            const meta = parseFilename(filename)
+            if (!meta) {
+                console.log(`  -> スキップ: ファイル名が不正`)
                 continue
             }
 
-            // 既存データを削除
-            const { error: deleteError } = await supabase
-                .from('attendance_records')
-                .delete()
-                .eq('year', meta.year)
-                .eq('month', meta.month)
-                .eq('is_cumulative', meta.isCumulative)
+            const filepath = path.join(ATTENDANCE_DIR, filename)
+            const typeStr = meta.isCumulative ? '累計' : '月別'
 
-            if (deleteError) {
-                throw new Error(`削除エラー: ${deleteError.message}`)
-            }
+            try {
+                // ファイル読み込み
+                const records = readExcelFile(filepath, meta.year, meta.month, meta.isCumulative, studentClassMap)
+                console.log(`  -> ${records.length}件のレコードを読み込みました`)
 
-            // データを挿入（バッチサイズ500）
-            const batchSize = 500
-            for (let i = 0; i < records.length; i += batchSize) {
-                const batch = records.slice(i, i + batchSize)
-                const { error: insertError } = await supabase
-                    .from('attendance_records')
-                    .insert(batch)
-
-                if (insertError) {
-                    throw new Error(`挿入エラー: ${insertError.message}`)
+                if (records.length === 0) {
+                    console.log(`  -> スキップ: データなし`)
+                    continue
                 }
+
+                // 既存データを削除
+                console.log(`  -> 既存データを削除中...`)
+                const { error: deleteError } = await supabase
+                    .from('attendance_records')
+                    .delete()
+                    .eq('year', meta.year)
+                    .eq('month', meta.month)
+                    .eq('is_cumulative', meta.isCumulative)
+
+                if (deleteError) {
+                    throw new Error(`削除エラー: ${deleteError.message}`)
+                }
+
+                // データを挿入（バッチサイズ500）
+                const batchSize = 500
+                console.log(`  -> データを挿入中（${Math.ceil(records.length / batchSize)}バッチ）...`)
+
+                for (let i = 0; i < records.length; i += batchSize) {
+                    const batch = records.slice(i, i + batchSize)
+                    const { error: insertError } = await supabase
+                        .from('attendance_records')
+                        .insert(batch)
+
+                    if (insertError) {
+                        throw new Error(`挿入エラー (Batch ${i}): ${insertError.message}`)
+                    }
+                    process.stdout.write('.') // 進行状況を表示
+                }
+                process.stdout.write('\n') // 改行
+
+                // 統計
+                const withClass = records.filter(r => r.class_code).length
+                console.log(`  -> 完了! クラス割り当て: ${withClass}/${records.length}`)
+                successCount++
+                totalRecords += records.length
+
+            } catch (err) {
+                console.error(`  -> 失敗: ${err.message}`)
+                errorCount++
             }
-
-            // 統計
-            const withClass = records.filter(r => r.class_code).length
-            console.log(`✓ ${meta.year}年${meta.month}月${typeStr}: ${records.length}件 (クラスあり: ${withClass})`)
-            successCount++
-            totalRecords += records.length
-
-        } catch (err) {
-            console.error(`✗ ${filename}: ${err.message}`)
-            errorCount++
         }
-    }
 
-    console.log('\n========================================')
-    console.log(`インポート完了`)
-    console.log(`成功: ${successCount}ファイル (${totalRecords}件)`)
-    console.log(`エラー: ${errorCount}ファイル`)
-    console.log('========================================')
+        console.log('\n========================================')
+        console.log(`インポート完了`)
+        console.log(`成功: ${successCount}ファイル (${totalRecords}件)`)
+        console.log(`エラー: ${errorCount}ファイル`)
+        console.log('========================================')
+
+    } catch (error) {
+        console.error('Fatal Error:', error)
+    }
 }
 
 main().catch(console.error)
