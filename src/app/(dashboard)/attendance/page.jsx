@@ -452,7 +452,15 @@ export default function AttendancePage() {
 
                                         {studentHistory && (
                                             <>
-                                                <h3>学籍番号: {selectedStudent}</h3>
+                                                <h3>
+                                                    学籍番号: {selectedStudent}
+                                                    <span style={{ marginLeft: '1.5em', fontSize: '0.9em' }}>
+                                                        クラス: {studentHistory.studentInfo?.class_name || individualData?.students?.find(s => s.student_id === selectedStudent)?.class_name || '未設定'}
+                                                    </span>
+                                                    <span style={{ marginLeft: '1.5em', fontSize: '0.9em' }}>
+                                                        氏名: {studentHistory.studentInfo?.full_name || studentHistory.studentInfo?.name || individualData?.students?.find(s => s.student_id === selectedStudent)?.student_name || '不明'}
+                                                    </span>
+                                                </h3>
 
                                                 <div className={styles.historySection}>
                                                     <h4>累計出席率推移</h4>
@@ -466,7 +474,7 @@ export default function AttendancePage() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {studentHistory.cumulativeData?.map(d => (
+                                                            {studentHistory.cumulativeData?.slice().reverse().map(d => (
                                                                 <tr key={`${d.year}-${d.month}`}>
                                                                     <td>{d.year}年{d.month}月</td>
                                                                     <td>{d.attendance_days}</td>
@@ -492,7 +500,7 @@ export default function AttendancePage() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {studentHistory.monthlyData?.map(d => (
+                                                            {studentHistory.monthlyData?.slice().reverse().map(d => (
                                                                 <tr key={`${d.year}-${d.month}`}>
                                                                     <td>{d.year}年{d.month}月</td>
                                                                     <td>{d.attendance_days}</td>

@@ -20,7 +20,7 @@ async function getBrowser() {
     // Switching to Noto Serif JP (Regular) via direct GitHub Raw link.
     // This is a standard, reliable, and lighter Mincho-style font.
     try {
-      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Serif/OTF/Japanese/NotoSerifCJKjp-Regular.otf');
+      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf');
     } catch (e) {
       console.error('Font loading failed:', e);
     }
