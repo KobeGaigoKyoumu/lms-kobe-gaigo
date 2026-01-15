@@ -828,6 +828,9 @@ export default function AttendancePage() {
                                 }
                             </div>
                         )}
-                    </div>
-                )
+                    </>
+                )}
+            </div>
+        </div>
+    )
 }
