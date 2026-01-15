@@ -357,7 +357,7 @@ export default function AttendancePage() {
                                         <div className={styles.statLabel}>総学生数</div>
                                         <div className={styles.statValue}>{schoolData.totalStudents}名</div>
                                     </div>
-                                    <div className={`${styles.statCard} ${styles.mainStat}`}>
+                                    <div className={styles.statCard}>
                                         <div className={styles.statLabel}>平均出席率</div>
                                         <div className={`${styles.statValue} ${getRateColor(schoolData.averageRate)}`}>
                                             {formatRate(schoolData.averageRate)}
@@ -414,7 +414,7 @@ export default function AttendancePage() {
                                                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
                                                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                                 >
-                                                    <td style={{ color: '#2563eb', fontWeight: 'bold' }}>{c.className}</td>
+                                                    <td className={styles.classNumber}>{c.className}</td>
                                                     <td>{c.studentCount}名</td>
                                                     <td className={getRateColor(c.averageRate)}>
                                                         {formatRate(c.averageRate)}
