@@ -78,11 +78,13 @@ export async function GET(request) {
 
         // 利用可能な年月データを取得
         if (type === 'files') {
-            // 月別データの年月を取得（Supabaseのデフォルト1000行制限を回避）
+            // 月別データの年月を取得（Supabaseのデフォルト1000行制限を回避 + 最新順）
             const { data: monthlyRaw, error: monthlyError } = await supabase
                 .from('attendance_records')
                 .select('year, month')
                 .eq('is_cumulative', false)
+                .order('year', { ascending: false })
+                .order('month', { ascending: false })
                 .range(0, 49999)
 
             // 累計データの年月を取得
@@ -90,6 +92,8 @@ export async function GET(request) {
                 .from('attendance_records')
                 .select('year, month')
                 .eq('is_cumulative', true)
+                .order('year', { ascending: false })
+                .order('month', { ascending: false })
                 .range(0, 49999)
 
             if (monthlyError || cumulativeError) throw monthlyError || cumulativeError
