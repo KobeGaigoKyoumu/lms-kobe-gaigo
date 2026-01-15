@@ -771,8 +771,7 @@ export default function AttendancePage() {
                                             </>
                                         )}
                                     </div>
-                                )
-                                                        )}
+                                )}
 
                                 {/* 管理者用インポート機能 */}
                                 {
