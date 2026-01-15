@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
+import * as XLSX from 'xlsx'
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 import styles from './page.module.css'
 
 export default function AttendancePage() {
@@ -18,12 +22,18 @@ export default function AttendancePage() {
     const [selectedMonth, setSelectedMonth] = useState(null)
     const [isCumulative, setIsCumulative] = useState(true)
 
+    const [originalData, setOriginalData] = useState(null) // Stores raw fetched data before filtering
+    const [attendanceData, setAttendanceData] = useState(null) // Stores filtered data for display
+
     const [schoolData, setSchoolData] = useState(null)
     const [gradeData, setGradeData] = useState(null)
     const [classData, setClassData] = useState(null)
     const [individualData, setIndividualData] = useState(null)
     const [studentSearch, setStudentSearch] = useState('')
-    const [selectedStudent, setSelectedStudent] = useState(null)
+    const [selectedStudent, setSelectedStudent] = useState(null) // For Individual View Modal? or just data?
+    const [selectedStudents, setSelectedStudents] = useState(new Set()) // For Bulk Export
+    const [exporting, setExporting] = useState(false)
+    const [rateFilter, setRateFilter] = useState({ type: 'none', value: 0 }) // { type: 'monthly'|'cumulative'|'none', value: 0.95 }
     const [studentHistory, setStudentHistory] = useState(null)
 
     // クラス詳細用
@@ -48,6 +58,37 @@ export default function AttendancePage() {
         }
     }, [selectedYear, selectedMonth, isCumulative, activeTab])
 
+    useEffect(() => {
+        if (!originalData) return
+
+        let filtered = { ...originalData }
+
+        // 1. Filter by Rate (if active)
+        if (rateFilter.type !== 'none') {
+            const threshold = rateFilter.value
+            const isMonthly = rateFilter.type.startsWith('monthly')
+
+            // Function to check if student meets criteria
+            const checkStudent = (s) => {
+                let rate = 0
+                if (isMonthly) rate = s.attendance_rate || 0
+                else rate = s.cumulative_attendance_rate || 0 // Assuming cumulative_attendance_rate exists for cumulative filter
+
+                return rate <= threshold
+            }
+
+            if (activeTab === 'individual' && filtered.students) {
+                filtered.students = filtered.students.filter(checkStudent)
+            }
+            // Apply to class members if viewing class detail
+            if (activeTab === 'class' && classMembers) {
+                setClassMembers(classMembers.filter(checkStudent))
+            }
+        }
+
+        setAttendanceData(filtered)
+    }, [originalData, activeTab, rateFilter, classMembers]) // Added classMembers to dependencies for class view filtering
+
     const fetchUserRole = async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
@@ -67,7 +108,7 @@ export default function AttendancePage() {
             setAvailableFiles(data)
 
             // 最新の年月を選択
-            const files = data.cumulativeFiles || data.monthlyFiles
+            const files = isCumulative ? data.cumulativeFiles : data.monthlyFiles
             if (files.length > 0) {
                 setSelectedYear(files[0].year)
                 setSelectedMonth(files[0].month)
@@ -95,6 +136,9 @@ export default function AttendancePage() {
 
             const res = await fetch(`/api/attendance?${params}`, { cache: 'no-store' })
             const data = await res.json()
+
+            setOriginalData(data) // Store original data
+            setAttendanceData(data) // Initialize filtered data
 
             switch (activeTab) {
                 case 'school':
@@ -199,6 +243,78 @@ export default function AttendancePage() {
         }
     }
 
+    // --- Bulk Export Logic ---
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = attendanceData.students?.map(s => s.student_id) || []
+            setSelectedStudents(new Set(allIds))
+        } else {
+            setSelectedStudents(new Set())
+        }
+    }
+
+    const handleSelectStudent = (id) => {
+        const newSet = new Set(selectedStudents)
+        if (newSet.has(id)) newSet.delete(id)
+        else newSet.add(id)
+        setSelectedStudents(newSet)
+    }
+
+    const handleBulkDownload = async () => {
+        if (selectedStudents.size === 0) return
+        setExporting(true)
+        try {
+            const zip = new JSZip()
+            const folder = zip.folder(`attendance_pdfs_${new Date().toISOString().slice(0, 10)}`)
+
+            const studentsToExport = attendanceData.students.filter(s => selectedStudents.has(s.student_id))
+
+            for (const student of studentsToExport) {
+                // Fetch student history for detailed PDF generation
+                const historyRes = await fetch(`/api/attendance?type=individual&studentId=${student.student_id}`, { cache: 'no-store' })
+                const studentHistoryData = await historyRes.json()
+
+                // Latest cumulative rate from history
+                const latestCumulative = studentHistoryData.cumulativeData?.length > 0
+                    ? studentHistoryData.cumulativeData[studentHistoryData.cumulativeData.length - 1]
+                    : { attendance_rate: 0 }
+
+                // Fetch PDF blob
+                const pdfRes = await fetch('/api/attendance/pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student: {
+                            id: student.student_id,
+                            name: student.full_name || student.student_name || student.name,
+                            className: student.class_name
+                        },
+                        history: studentHistoryData,
+                        currentStats: {
+                            rate: latestCumulative.attendance_rate
+                        }
+                    })
+                })
+
+                if (pdfRes.ok) {
+                    const blob = await pdfRes.blob()
+                    folder.file(`${student.student_id}_${student.full_name || student.student_name || student.name}.pdf`, blob)
+                } else {
+                    console.warn(`Failed to generate PDF for student ${student.student_id}: ${pdfRes.statusText}`)
+                }
+            }
+
+            const content = await zip.generateAsync({ type: 'blob' })
+            saveAs(content, 'attendance_bulk_export.zip')
+
+        } catch (error) {
+            console.error('Bulk export failed', error)
+            alert('一括出力に失敗しました')
+        } finally {
+            setExporting(false)
+        }
+    }
+
     const handleImport = async () => {
         if (!importFile) return
 
@@ -295,9 +411,9 @@ export default function AttendancePage() {
 
                 <div className={styles.filterGroup}>
                     <label>データ種別:</label>
-                    <div className={styles.toggleButtons}>
+                    <div className={styles.buttonGroup}>
                         <button
-                            className={`${styles.toggleBtn} ${!isCumulative ? styles.active : ''}`}
+                            className={`${styles.filterBtn} ${!isCumulative ? styles.active : ''}`}
                             onClick={() => {
                                 setIsCumulative(false)
                                 // 月別ファイルリストの最初の年月を選択
@@ -311,7 +427,7 @@ export default function AttendancePage() {
                             月別
                         </button>
                         <button
-                            className={`${styles.toggleBtn} ${isCumulative ? styles.active : ''}`}
+                            className={`${styles.filterBtn} ${isCumulative ? styles.active : ''}`}
                             onClick={() => {
                                 setIsCumulative(true)
                                 // 累計ファイルリストの最初の年月を選択
@@ -325,6 +441,28 @@ export default function AttendancePage() {
                             累計
                         </button>
                     </div>
+                </div>
+
+                <div className={styles.filterGroup}>
+                    <label>出席率フィルタ:</label>
+                    <select
+                        className={styles.select}
+                        value={`${rateFilter.type}-${rateFilter.value}`}
+                        onChange={(e) => {
+                            const [type, val] = e.target.value.split('-')
+                            setRateFilter({ type, value: parseFloat(val) })
+                        }}
+                    >
+                        <option value="none-0">指定なし</option>
+                        <option value="monthly-0.95">月別 95%以下</option>
+                        <option value="monthly-0.90">月別 90%以下</option>
+                        <option value="monthly-0.85">月別 85%以下</option>
+                        <option value="monthly-0.80">月別 80%以下</option>
+                        <option value="cumulative-0.95">累計 95%以下</option>
+                        <option value="cumulative-0.90">累計 90%以下</option>
+                        <option value="cumulative-0.85">累計 85%以下</option>
+                        <option value="cumulative-0.80">累計 80%以下</option>
+                    </select>
                 </div>
             </div>
 
@@ -490,37 +628,65 @@ export default function AttendancePage() {
                                 </div>
 
                                 {!selectedStudent ? (
-                                    <table className={styles.table}>
-                                        <thead>
-                                            <tr>
-                                                <th>学籍番号</th>
-                                                <th>氏名</th>
-                                                <th>学年</th>
-                                                <th>出席率</th>
-                                                <th>操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {individualData?.students?.map(s => (
-                                                <tr key={s.student_id}>
-                                                    <td>{s.student_id}</td>
-                                                    <td>{formatStudentName(s)}</td>
-                                                    <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
-                                                    <td className={getRateColor(s.attendance_rate)}>
-                                                        {formatRate(s.attendance_rate)}
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            onClick={() => fetchStudentHistory(s.student_id)}
-                                                            className={styles.detailBtn}
-                                                        >
-                                                            詳細
-                                                        </button>
-                                                    </td>
+                                    <>
+                                        {attendanceData?.students?.length > 0 && (
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <button
+                                                    className={styles.importBtn}
+                                                    onClick={handleBulkDownload}
+                                                    disabled={selectedStudents.size === 0 || exporting}
+                                                    style={{ backgroundColor: selectedStudents.size === 0 ? '#ccc' : '#10b981' }}
+                                                >
+                                                    {exporting ? '出力中...' : `PDF一括出力 (${selectedStudents.size}件)`}
+                                                </button>
+                                            </div>
+                                        )}
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th style={{ width: '50px', textAlign: 'center' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={attendanceData?.students?.length > 0 && selectedStudents.size === attendanceData.students.length}
+                                                            onChange={handleSelectAll}
+                                                        />
+                                                    </th>
+                                                    <th>学籍番号</th>
+                                                    <th>氏名</th>
+                                                    <th>学年</th>
+                                                    <th>出席率</th>
+                                                    <th>操作</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {attendanceData?.students?.map(s => (
+                                                    <tr key={s.student_id}>
+                                                        <td style={{ textAlign: 'center' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedStudents.has(s.student_id)}
+                                                                onChange={() => handleSelectStudent(s.student_id)}
+                                                            />
+                                                        </td>
+                                                        <td>{s.student_id}</td>
+                                                        <td>{formatStudentName(s)}</td>
+                                                        <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
+                                                        <td className={getRateColor(s.attendance_rate)}>
+                                                            {formatRate(s.attendance_rate)}
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                onClick={() => fetchStudentHistory(s.student_id)}
+                                                                className={styles.detailBtn}
+                                                            >
+                                                                詳細
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </>
                                 ) : (
                                     <div className={styles.studentDetail}>
                                         <div className={styles.detailHeader}>
@@ -544,10 +710,10 @@ export default function AttendancePage() {
                                                 <h3>
                                                     学籍番号: {selectedStudent}
                                                     <span style={{ marginLeft: '1.5em', fontSize: '0.9em' }}>
-                                                        クラス: {studentHistory.studentInfo?.class_name || individualData?.students?.find(s => s.student_id === selectedStudent)?.class_name || '未設定'}
+                                                        クラス: {studentHistory.studentInfo?.class_name || attendanceData?.students?.find(s => s.student_id === selectedStudent)?.class_name || '未設定'}
                                                     </span>
                                                     <span style={{ marginLeft: '1.5em', fontSize: '0.9em' }}>
-                                                        氏名: {formatStudentName(studentHistory.studentInfo || individualData?.students?.find(s => s.student_id === selectedStudent))}
+                                                        氏名: {formatStudentName(studentHistory.studentInfo || attendanceData?.students?.find(s => s.student_id === selectedStudent))}
                                                     </span>
                                                 </h3>
 
@@ -605,64 +771,64 @@ export default function AttendancePage() {
                                             </>
                                         )}
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                )
+                                                        )}
 
-                        {/* 管理者用インポート機能 */}
-                        {userRole === 'admin' && (
-                            <div className={styles.importSection}>
-                                <h3>データインポート</h3>
-                                <div className={styles.importForm}>
-                                    <div className={styles.importRow}>
-                                        <input
-                                            type="file"
-                                            accept=".xlsx,.xls"
-                                            onChange={(e) => setImportFile(e.target.files[0])}
-                                            className={styles.fileInput}
-                                        />
-                                    </div>
-                                    <div className={styles.importRow}>
-                                        <select
-                                            value={importYear}
-                                            onChange={(e) => setImportYear(parseInt(e.target.value))}
-                                            className={styles.select}
-                                        >
-                                            {[2024, 2025, 2026].map(y => (
-                                                <option key={y} value={y}>{y}年</option>
-                                            ))}
-                                        </select>
-                                        <select
-                                            value={importMonth}
-                                            onChange={(e) => setImportMonth(parseInt(e.target.value))}
-                                            className={styles.select}
-                                        >
-                                            {[...Array(12)].map((_, i) => (
-                                                <option key={i + 1} value={i + 1}>{i + 1}月</option>
-                                            ))}
-                                        </select>
-                                        <label className={styles.checkboxLabel}>
-                                            <input
-                                                type="checkbox"
-                                                checked={importCumulative}
-                                                onChange={(e) => setImportCumulative(e.target.checked)}
-                                            />
-                                            累計
-                                        </label>
-                                    </div>
-                                    <button
-                                        onClick={handleImport}
-                                        disabled={!importFile || importing}
-                                        className={styles.importBtn}
-                                    >
-                                        {importing ? 'インポート中...' : 'インポート'}
-                                    </button>
-                                </div>
+                                {/* 管理者用インポート機能 */}
+                                {
+                                    userRole === 'admin' && (
+                                        <div className={styles.importSection}>
+                                            <h3>データインポート</h3>
+                                            <div className={styles.importForm}>
+                                                <div className={styles.importRow}>
+                                                    <input
+                                                        type="file"
+                                                        accept=".xlsx,.xls"
+                                                        onChange={(e) => setImportFile(e.target.files[0])}
+                                                        className={styles.fileInput}
+                                                    />
+                                                </div>
+                                                <div className={styles.importRow}>
+                                                    <select
+                                                        value={importYear}
+                                                        onChange={(e) => setImportYear(parseInt(e.target.value))}
+                                                        className={styles.select}
+                                                    >
+                                                        {[2024, 2025, 2026].map(y => (
+                                                            <option key={y} value={y}>{y}年</option>
+                                                        ))}
+                                                    </select>
+                                                    <select
+                                                        value={importMonth}
+                                                        onChange={(e) => setImportMonth(parseInt(e.target.value))}
+                                                        className={styles.select}
+                                                    >
+                                                        {[...Array(12)].map((_, i) => (
+                                                            <option key={i + 1} value={i + 1}>{i + 1}月</option>
+                                                        ))}
+                                                    </select>
+                                                    <label className={styles.checkboxLabel}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={importCumulative}
+                                                            onChange={(e) => setImportCumulative(e.target.checked)}
+                                                        />
+                                                        累計
+                                                    </label>
+                                                </div>
+                                                <button
+                                                    onClick={handleImport}
+                                                    disabled={!importFile || importing}
+                                                    className={styles.importBtn}
+                                                >
+                                                    {importing ? 'インポート中...' : 'インポート'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )
+                                }
                             </div>
                         )}
-                    </>
-                )}
-            </div>
-        </div>
-    )
+                    </div>
+                )
 }

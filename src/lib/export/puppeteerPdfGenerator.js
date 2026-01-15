@@ -511,13 +511,20 @@ function generateAttendanceHTML(data) {
       margin-bottom: 5px;
       font-size: 11pt;
     }
+    .issue-date {
+      position: absolute;
+      top: -5mm;
+      right: 0;
+      font-size: 10pt;
+      text-align: right;
+    }
     .student-id { font-weight: bold; font-size: 12pt; margin-bottom: 2px !important; }
     .student-name { font-weight: bold; font-size: 16pt; margin-bottom: 5px !important; }
     .student-class { font-weight: bold; font-size: 12pt; }
 
     .summary-box {
       position: absolute;
-      top: 0;
+      top: 5mm; /* Lowered from 0 */
       right: 0;
       width: 60mm;
       height: 25mm;
@@ -620,6 +627,7 @@ function generateAttendanceHTML(data) {
   </div>
 
   <div class="header-layout">
+    <div class="issue-date">発行日：${today}</div>
     <div class="student-info">
       <div class="student-id">学籍番号：${student.id}</div>
       <div class="student-name">名前：${student.name}</div>
@@ -628,7 +636,7 @@ function generateAttendanceHTML(data) {
 
     <div class="summary-box">
       <div class="summary-header">
-        ${latestData.year}年${latestData.month}月出席率<br>発行日：${today}
+        ${latestData.year}年${latestData.month}月出席率
       </div>
       <div class="summary-content">
         <span class="summary-value ${rateClass}">${latestRatePercent}%</span>
