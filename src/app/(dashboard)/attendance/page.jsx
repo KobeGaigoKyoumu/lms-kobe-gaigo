@@ -208,13 +208,29 @@ export default function AttendancePage() {
                     <div className={styles.toggleButtons}>
                         <button
                             className={`${styles.toggleBtn} ${!isCumulative ? styles.active : ''}`}
-                            onClick={() => setIsCumulative(false)}
+                            onClick={() => {
+                                setIsCumulative(false)
+                                // 月別ファイルリストの最初の年月を選択
+                                const files = availableFiles.monthlyFiles
+                                if (files && files.length > 0) {
+                                    setSelectedYear(files[0].year)
+                                    setSelectedMonth(files[0].month)
+                                }
+                            }}
                         >
                             月別
                         </button>
                         <button
                             className={`${styles.toggleBtn} ${isCumulative ? styles.active : ''}`}
-                            onClick={() => setIsCumulative(true)}
+                            onClick={() => {
+                                setIsCumulative(true)
+                                // 累計ファイルリストの最初の年月を選択
+                                const files = availableFiles.cumulativeFiles
+                                if (files && files.length > 0) {
+                                    setSelectedYear(files[0].year)
+                                    setSelectedMonth(files[0].month)
+                                }
+                            }}
                         >
                             累計
                         </button>

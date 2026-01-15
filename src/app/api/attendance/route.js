@@ -15,29 +15,46 @@ export async function GET(request) {
 
         // 利用可能な年月データを取得
         if (type === 'files') {
-            const { data: availableData, error } = await supabase
+            // 月別データの年月を取得
+            const { data: monthlyRaw, error: monthlyError } = await supabase
                 .from('attendance_records')
-                .select('year, month, is_cumulative')
-                .order('year', { ascending: false })
-                .order('month', { ascending: false })
+                .select('year, month')
+                .eq('is_cumulative', false)
 
-            if (error) throw error
+            // 累計データの年月を取得
+            const { data: cumulativeRaw, error: cumulativeError } = await supabase
+                .from('attendance_records')
+                .select('year, month')
+                .eq('is_cumulative', true)
 
-            // ユニークな組み合わせを抽出
-            const monthlyFiles = []
-            const cumulativeFiles = []
-            const seen = new Set()
+            if (monthlyError || cumulativeError) throw monthlyError || cumulativeError
 
-            availableData?.forEach(item => {
-                const key = `${item.year}-${item.month}-${item.is_cumulative}`
-                if (!seen.has(key)) {
-                    seen.add(key)
-                    if (item.is_cumulative) {
-                        cumulativeFiles.push({ year: item.year, month: item.month })
-                    } else {
-                        monthlyFiles.push({ year: item.year, month: item.month })
-                    }
-                }
+            // ユニークな組み合わせを抽出しソート
+            const monthlySet = new Set()
+            const cumulativeSet = new Set()
+
+            monthlyRaw?.forEach(item => {
+                monthlySet.add(`${item.year}-${item.month}`)
+            })
+
+            cumulativeRaw?.forEach(item => {
+                cumulativeSet.add(`${item.year}-${item.month}`)
+            })
+
+            const monthlyFiles = Array.from(monthlySet).map(key => {
+                const [year, month] = key.split('-')
+                return { year: parseInt(year), month: parseInt(month) }
+            }).sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year
+                return b.month - a.month
+            })
+
+            const cumulativeFiles = Array.from(cumulativeSet).map(key => {
+                const [year, month] = key.split('-')
+                return { year: parseInt(year), month: parseInt(month) }
+            }).sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year
+                return b.month - a.month
             })
 
             return NextResponse.json({ monthlyFiles, cumulativeFiles })
@@ -155,13 +172,17 @@ export async function GET(request) {
                 classGroups[key].rates.push(parseFloat(s.attendance_rate))
             })
 
-            const classes = Object.values(classGroups).map(cls => ({
-                grade: cls.grade,
-                classCode: cls.classCode,
-                className: `${cls.grade}年${cls.classCode}組`,
-                studentCount: cls.rates.length,
-                averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
-            })).sort((a, b) => {
+            const classes = Object.values(classGroups).map(cls => {
+                // クラスコードを数字に変換して表示（04 -> 4）
+                const classNum = parseInt(cls.classCode, 10) || cls.classCode
+                return {
+                    grade: cls.grade,
+                    classCode: cls.classCode,
+                    className: `${cls.grade}-${classNum}`,
+                    studentCount: cls.rates.length,
+                    averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
+                }
+            }).sort((a, b) => {
                 if (a.grade !== b.grade) return a.grade - b.grade
                 return a.classCode.localeCompare(b.classCode)
             })
