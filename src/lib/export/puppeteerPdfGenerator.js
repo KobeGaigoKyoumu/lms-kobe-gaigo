@@ -618,6 +618,14 @@ function generateAttendanceHTML(data) {
       border: 1px solid #ccc;
     }
 
+    /* Footer Notes */
+    .footer-notes {
+      margin-top: 10mm;
+      font-size: 8pt;
+      line-height: 1.5;
+      color: #333;
+    }
+
   </style>
 </head>
 <body>
@@ -676,6 +684,12 @@ function generateAttendanceHTML(data) {
       <div class="legend-color bg-danger"></div>
       80%以下
     </div>
+  </div>
+
+  <div class="footer-notes">
+    <p>※：累計出席率が90%以下の場合は次のビザの更新に影響が出る可能性があります。</p>
+    <p>※：本校では累計出席率95%以下の者に指定校推薦書および学校推薦書を発行しない。</p>
+    <p>※：本書は出席証明書ではありません。</p>
   </div>
 
 </body>
