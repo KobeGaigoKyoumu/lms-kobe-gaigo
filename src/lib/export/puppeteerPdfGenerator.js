@@ -407,30 +407,266 @@ async function htmlToPdf(html, outputPath = null) {
  */
 function generateAttendanceHTML(data) {
   const { student, history, currentStats } = data;
-  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-  const ratePercent = (currentStats.rate * 100).toFixed(1);
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.'); // 2026.01.15形式
 
-  // 評価ボックスの色
+  // データの準備（月別と累計を結合）
+  // history.monthlyData, history.cumulativeData は時系列（古い順）と仮定して、
+  // 表示用に新しい順（降順）に並べ替える。
+  const monthlyReversed = [...(history.monthlyData || [])].reverse();
+  const cumulativeReversed = [...(history.cumulativeData || [])].reverse();
+
+  // マージデータの作成
+  const combinedRows = monthlyReversed.map(m => {
+    const c = cumulativeReversed.find(cum => cum.year === m.year && cum.month === m.month) || {};
+    return {
+      year: m.year,
+      month: m.month,
+      attendance_days: m.attendance_days,
+      absence_days: m.absence_days,
+      monthly_rate: m.attendance_rate,
+      cumulative_rate: c.attendance_rate // 未定義ならundefined
+    };
+  });
+
+  // 最新データの年月取得（ボックス表示用）
+  const latestData = cumulativeReversed.length > 0 ? cumulativeReversed[0] : (monthlyReversed.length > 0 ? monthlyReversed[0] : { year: '----', month: '--' });
+  const latestRatePercent = (currentStats.rate * 100).toFixed(1);
+
+  // 評価ボックスの色判定
   let rateClass = 'rate-normal';
   if (currentStats.rate <= 0.80) rateClass = 'rate-danger';
   else if (currentStats.rate <= 0.85) rateClass = 'rate-warning';
   else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
   else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
 
-  // 月別データの行生成
-  // 最新順になっているはずだが、表は時系列（古い順）の方が見やすいかもしれない。
-  // ここでは受け取った順序（Frontendで表示されている順序）に従うが、
-  // 通常履歴は「新しい順」か「古い順」か。個票なら時系列（昇順）が自然。
-  // history.monthlyData は通常新しい順で来ているなら、reverse() する。
-  const rows = [...(history.monthlyData || [])].reverse().map(row => {
-    const rate = row.attendance_rate;
+  // 行HTML生成
+  const rowsHtml = combinedRows.map(row => {
+    const mRate = row.monthly_rate;
+    const cRate = row.cumulative_rate;
+
+    // 条件付き書式（月別出席率に基づく）
     let rowClass = '';
-    if (rate <= 0.80) rowClass = 'bg-danger';
-    else if (rate <= 0.85) rowClass = 'bg-warning';
-    else if (rate <= 0.90) rowClass = 'bg-caution';
-    else if (rate <= 0.95) rowClass = 'bg-notice';
+    if (mRate <= 0.80) rowClass = 'bg-danger';
+    else if (mRate <= 0.85) rowClass = 'bg-warning';
+    else if (mRate <= 0.90) rowClass = 'bg-caution';
+    else if (mRate <= 0.95) rowClass = 'bg-notice';
 
     return `
+      <tr class="${rowClass}">
+        <td>${row.year} ${row.month}</td>
+        <td>${row.attendance_days}</td>
+        <td>${row.absence_days}</td>
+        <td>${(mRate * 100).toFixed(1)}%</td>
+        <td class="col-cumulative">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+      </tr>
+    `;
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出席表</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif;
+      font-size: 10pt; /* 少し小さくして収まりよくする */
+      color: #333;
+      padding: 15mm 20mm; /* 余白調整 */
+    }
+    
+    /* タイトル：赤枠で囲って大きく */
+    .title-container {
+      text-align: center;
+      margin-bottom: 5mm;
+      padding-top: 10mm;
+    }
+    h1 {
+      display: inline-block;
+      font-size: 28pt;
+      color: #333; /* 赤枠の中の文字は黒？ユーザーは「赤で囲った部分に」と言っているが枠線か？文字色か？文脈的に「重要なタイトルエリア」 */
+      /* 「赤で囲った部分に大きい文字で」 => 文字も赤にする？いや、学校名は通常黒。枠線を描く？ */
+      /* 普通の感覚では目立つタイトルにする。ここでは文字を大きく太く。 */
+      /* ユーザー添付画像が見えないので推測。学校名をタイトルにする。 */
+      font-weight: bold;
+      margin: 0;
+      letter-spacing: 2px;
+    }
+
+    /* ヘッダー情報レイアウト */
+    .header-layout {
+      position: relative; /* ボックスを絶対配置するための基準 */
+      height: 35mm; /* 高さ確保 */
+      margin-bottom: 5mm;
+      border-bottom: 2px solid #333; /* 区切り線 */
+    }
+
+    /* 学生情報 */
+    .student-info {
+      position: absolute;
+      bottom: 2mm;
+      left: 0;
+      width: 60%;
+    }
+    .student-info div {
+      margin-bottom: 5px;
+      font-size: 11pt;
+    }
+    .student-id { font-weight: bold; font-size: 12pt; margin-bottom: 2px !important; }
+    .student-name { font-weight: bold; font-size: 16pt; margin-bottom: 5px !important; }
+    .student-class { font-weight: bold; font-size: 12pt; }
+
+    /* サマリーボックス（右上） */
+    .summary-box {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60mm; /* 幅 */
+      height: 25mm; /* 高さ */
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden; /* 角丸用 */
+      background: #fff;
+    }
+    .summary-header {
+      height: 8mm;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #333;
+      font-size: 8pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.1;
+      color: #555;
+    }
+    .summary-content {
+      height: 17mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .summary-value {
+      font-size: 22pt;
+      font-weight: bold;
+    }
+
+    /* カラー定義 */
+    .rate-danger { color: #d32f2f; }
+    .rate-warning { color: #f57c00; }
+    .rate-caution { color: #fbc02d; }
+    .rate-notice { color: #0288d1; }
+    .rate-normal { color: #2e7d32; }
+
+    /* データテーブル */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5mm;
+      font-size: 9.5pt;
+    }
+    
+    /* ヘッダー装飾 */
+    .data-table th {
+      background-color: #f0f0f0;
+      border: 1px solid #999;
+      padding: 8px 4px;
+      font-weight: normal; /* 画像では太字でないかも */
+      color: #555;
+    }
+    
+    .data-table td {
+      border: 1px solid #ddd; /* 縦線は薄く？ */
+      border-left: 1px solid #999;
+      border-right: 1px solid #999;
+      border-bottom: 1px solid #999;
+      padding: 6px 4px;
+      text-align: center;
+      height: 8mm; /* 行の高さ確保 */
+    }
+
+    /* 累計列の強調 */
+    .col-cumulative {
+      background-color: #f9fbfd;
+      font-weight: bold;
+    }
+
+    /* 背景色（条件付き） */
+    .bg-danger { background-color: #ffebee !important; }
+    .bg-warning { background-color: #fff3e0 !important; }
+    .bg-caution { background-color: #fffde7 !important; }
+    .bg-notice { background-color: #e1f5fe !important; }
+
+  </style>
+</head>
+<body>
+
+  <div class="title-container">
+    <h1>神戸外語教育学院</h1>
+  </div>
+
+  <div class="header-layout">
+    <div class="student-info">
+      <div class="student-id">${student.id}</div>
+      <div class="student-name">${student.name}</div>
+      <div class="student-class">${student.className || ''}</div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-header">
+        ${latestData.year}年${latestData.month}月出席率<br>${today}
+      </div>
+      <div class="summary-content">
+        <span class="summary-value ${rateClass}">${latestRatePercent}%</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th width="20%">年月</th>
+        <th width="15%">出席日数</th>
+        <th width="15%">欠席日数</th>
+        <th width="25%">出席率</th>
+        <th width="25%">累計出席率</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+
+</body>
+</html>`;
+}
+const { student, history, currentStats } = data;
+const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+const ratePercent = (currentStats.rate * 100).toFixed(1);
+
+// 評価ボックスの色
+let rateClass = 'rate-normal';
+if (currentStats.rate <= 0.80) rateClass = 'rate-danger';
+else if (currentStats.rate <= 0.85) rateClass = 'rate-warning';
+else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
+else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
+
+// 月別データの行生成
+// 最新順になっているはずだが、表は時系列（古い順）の方が見やすいかもしれない。
+// ここでは受け取った順序（Frontendで表示されている順序）に従うが、
+// 通常履歴は「新しい順」か「古い順」か。個票なら時系列（昇順）が自然。
+// history.monthlyData は通常新しい順で来ているなら、reverse() する。
+const rows = [...(history.monthlyData || [])].reverse().map(row => {
+  const rate = row.attendance_rate;
+  let rowClass = '';
+  if (rate <= 0.80) rowClass = 'bg-danger';
+  else if (rate <= 0.85) rowClass = 'bg-warning';
+  else if (rate <= 0.90) rowClass = 'bg-caution';
+  else if (rate <= 0.95) rowClass = 'bg-notice';
+
+  return `
       <tr class="${rowClass}">
         <td>${row.year}年 ${row.month}月</td>
         <td>${row.attendance_days}</td>
@@ -438,9 +674,9 @@ function generateAttendanceHTML(data) {
         <td>${(rate * 100).toFixed(1)}%</td>
       </tr>
     `;
-  }).join('\n');
+}).join('\n');
 
-  return `<!DOCTYPE html>
+return `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
