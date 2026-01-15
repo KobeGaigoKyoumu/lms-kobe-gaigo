@@ -173,18 +173,16 @@ export async function GET(request) {
             })
 
             const classes = Object.values(classGroups).map(cls => {
-                // クラスコードを数字に変換して表示（04 -> 4）
-                const classNum = parseInt(cls.classCode, 10) || cls.classCode
                 return {
                     grade: cls.grade,
                     classCode: cls.classCode,
-                    className: `${cls.grade}-${classNum}`,
+                    className: cls.classCode || '未設定',  // class_codeをそのまま表示
                     studentCount: cls.rates.length,
                     averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
                 }
             }).sort((a, b) => {
                 if (a.grade !== b.grade) return a.grade - b.grade
-                return a.classCode.localeCompare(b.classCode)
+                return (a.classCode || '').localeCompare(b.classCode || '')
             })
 
             return NextResponse.json({
