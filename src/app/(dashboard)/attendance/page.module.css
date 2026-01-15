@@ -1,0 +1,424 @@
+.page {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* フィルター */
+.filters {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filterGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.filterGroup label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    color: #1a1a2e;
+}
+
+.toggleButtons {
+    display: flex;
+    gap: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toggleBtn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggleBtn:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+.toggleBtn.active {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+}
+
+/* タブ */
+.tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tab:hover {
+    color: #3b82f6;
+}
+
+.activeTab {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+/* コンテンツ */
+.content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    min-height: 400px;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #64748b;
+}
+
+.error {
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+}
+
+/* 学校全体 */
+.schoolStats {
+    padding: 1rem 0;
+}
+
+.statCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.statCard {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.mainStat {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #93c5fd;
+}
+
+.statLabel {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+/* 出席率の色分け */
+.rateExcellent {
+    color: #059669 !important;
+}
+
+.rateGood {
+    color: #3b82f6 !important;
+}
+
+.rateWarning {
+    color: #f59e0b !important;
+}
+
+.rateDanger {
+    color: #dc2626 !important;
+}
+
+/* 学年別 */
+.gradeStats {
+    padding: 1rem 0;
+}
+
+.gradeCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.gradeCard {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gradeCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.gradeTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.gradeRate {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.gradeCount {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* テーブル */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* 個別検索 */
+.searchBox {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.searchBtn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.searchBtn:hover {
+    opacity: 0.9;
+}
+
+.detailBtn {
+    padding: 0.4rem 0.75rem;
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.detailBtn:hover {
+    background: #dbeafe;
+}
+
+/* 学生詳細 */
+.studentDetail {
+    padding: 1rem 0;
+}
+
+.backBtn {
+    padding: 0.5rem 1rem;
+    background: #f1f5f9;
+    color: #374151;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: #e2e8f0;
+}
+
+.historySection {
+    margin-top: 2rem;
+}
+
+.historySection h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* インポートセクション */
+.importSection {
+    margin-top: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.importSection h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 1rem 0;
+}
+
+.importForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.importRow {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.fileInput {
+    flex: 1;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.importBtn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    align-self: flex-start;
+}
+
+.importBtn:hover {
+    opacity: 0.9;
+}
+
+.importBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .statCards {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .statValue {
+        font-size: 1.5rem;
+    }
+}
