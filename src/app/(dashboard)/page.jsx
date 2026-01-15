@@ -10,30 +10,33 @@ export default async function DashboardPage() {
 
     const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'ユーザー'
 
-    // プロファイルとお知らせを並列取得
-    const [profileResult, announcementsResult] = await Promise.all([
-        supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user?.id)
-            .single(),
-        supabase
-            .from('announcements')
-            .select(`
-                id,
-                title,
-                content,
-                is_pinned,
-                created_at,
-                author:profiles!author_id (full_name)
-            `)
-            .order('is_pinned', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(5)
-    ])
+    // === データ取得の開始 (Waterfallの最小化) ===
+    // 1. プロファイルとお知らせの取得を開始
+    const profilePromise = supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single()
 
+    const announcementsPromise = supabase
+        .from('announcements')
+        .select(`
+            id,
+            title,
+            content,
+            is_pinned,
+            created_at,
+            author:profiles!author_id (full_name)
+        `)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    // 2. プロファイルのみ先に待機 (これがロール判定に必要)
+    const profileResult = await profilePromise
     const profile = profileResult.data
-    const announcements = announcementsResult.data
+
+    // お知らせはまだ待たない (バックグラウンドで進行中)
 
     const isStudent = profile?.role === 'student'
     const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
@@ -49,9 +52,12 @@ export default async function DashboardPage() {
     let recentAssignments = []
     let upcomingEventsCount = 0
 
+    // ロール別データのPromiseを格納する変数を準備
+    let roleDataPromise = Promise.resolve(null)
+
     if (isStudent) {
-        // 学生用データを並列取得
-        const [enrollmentsResult, submissionsResult, upcomingResult] = await Promise.all([
+        // 学生用データを並列取得開始
+        roleDataPromise = Promise.all([
             supabase
                 .from('course_enrollments')
                 .select('course_id')
@@ -65,41 +71,43 @@ export default async function DashboardPage() {
                 .select('*', { count: 'exact', head: true })
                 .gte('due_date', now.toISOString())
                 .lte('due_date', nextWeek.toISOString())
-        ])
+        ]).then(async ([enrollmentsResult, submissionsResult, upcomingResult]) => {
+            const enrollments = enrollmentsResult.data || []
+            const submittedAssignmentIds = (submissionsResult.data || []).map(s => s.assignment_id)
 
-        const enrollments = enrollmentsResult.data || []
-        const submittedAssignmentIds = (submissionsResult.data || []).map(s => s.assignment_id)
-        enrolledCoursesCount = enrollments.length
-        upcomingEventsCount = upcomingResult.count || 0
+            let recentAssignmentsData = []
+            if (enrollments.length > 0) {
+                const enrolledCourseIds = enrollments.map(e => e.course_id)
+                const { data } = await supabase
+                    .from('assignments')
+                    .select(`
+                        id,
+                        title,
+                        due_date,
+                        max_score,
+                        course:courses (id, title)
+                    `)
+                    .in('course_id', enrolledCourseIds)
+                    .order('due_date', { ascending: true })
+                    .limit(10)
+                recentAssignmentsData = data || []
+            }
 
-        const enrolledCourseIds = enrollments.map(e => e.course_id)
+            return {
+                enrolledCoursesCount: enrollments.length,
+                upcomingEventsCount: upcomingResult.count || 0,
+                pendingAssignmentsCount: recentAssignmentsData.filter(a =>
+                    !submittedAssignmentIds.includes(a.id) &&
+                    (!a.due_date || new Date(a.due_date) >= now)
+                ).length,
+                completedAssignmentsCount: submittedAssignmentIds.length,
+                recentAssignments: recentAssignmentsData
+            }
+        })
 
-        if (enrolledCourseIds.length > 0) {
-            const { data: assignments } = await supabase
-                .from('assignments')
-                .select(`
-                    id,
-                    title,
-                    due_date,
-                    max_score,
-                    course:courses (id, title)
-                `)
-                .in('course_id', enrolledCourseIds)
-                .order('due_date', { ascending: true })
-                .limit(10)
-
-            recentAssignments = assignments || []
-
-            pendingAssignmentsCount = recentAssignments.filter(a =>
-                !submittedAssignmentIds.includes(a.id) &&
-                (!a.due_date || new Date(a.due_date) >= now)
-            ).length
-
-            completedAssignmentsCount = submittedAssignmentIds.length
-        }
     } else if (isTeacher) {
-        // 教師用データを並列取得
-        const [coursesResult, upcomingResult] = await Promise.all([
+        // 教師用データを並列取得開始
+        roleDataPromise = Promise.all([
             supabase
                 .from('courses')
                 .select('id')
@@ -109,53 +117,79 @@ export default async function DashboardPage() {
                 .select('*', { count: 'exact', head: true })
                 .gte('due_date', now.toISOString())
                 .lte('due_date', nextWeek.toISOString())
-        ])
+        ]).then(async ([coursesResult, upcomingResult]) => {
+            const teacherCourses = coursesResult.data || []
+            const teacherCourseIds = teacherCourses.map(c => c.id)
 
-        const teacherCourses = coursesResult.data || []
-        enrolledCoursesCount = teacherCourses.length
-        upcomingEventsCount = upcomingResult.count || 0
+            let pendingCount = 0
+            let gradedCount = 0
+            let assignmentsData = []
 
-        const teacherCourseIds = teacherCourses.map(c => c.id)
+            if (teacherCourseIds.length > 0) {
+                const [pendingResult, gradedResult, assignmentsResult] = await Promise.all([
+                    supabase
+                        .from('submissions')
+                        .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                        .eq('status', 'submitted')
+                        .in('assignment.course_id', teacherCourseIds),
+                    supabase
+                        .from('submissions')
+                        .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                        .eq('status', 'graded')
+                        .in('assignment.course_id', teacherCourseIds),
+                    supabase
+                        .from('assignments')
+                        .select(`
+                            id,
+                            title,
+                            due_date,
+                            max_score,
+                            course:courses (id, title)
+                        `)
+                        .in('course_id', teacherCourseIds)
+                        .order('created_at', { ascending: false })
+                        .limit(5)
+                ])
+                pendingCount = pendingResult.count || 0
+                gradedCount = gradedResult.count || 0
+                assignmentsData = assignmentsResult.data || []
+            }
 
-        if (teacherCourseIds.length > 0) {
-            // 未採点・採点済み・課題一覧を並列取得
-            const [pendingResult, gradedResult, assignmentsResult] = await Promise.all([
-                supabase
-                    .from('submissions')
-                    .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
-                    .eq('status', 'submitted')
-                    .in('assignment.course_id', teacherCourseIds),
-                supabase
-                    .from('submissions')
-                    .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
-                    .eq('status', 'graded')
-                    .in('assignment.course_id', teacherCourseIds),
-                supabase
-                    .from('assignments')
-                    .select(`
-                        id,
-                        title,
-                        due_date,
-                        max_score,
-                        course:courses (id, title)
-                    `)
-                    .in('course_id', teacherCourseIds)
-                    .order('created_at', { ascending: false })
-                    .limit(5)
-            ])
-
-            pendingAssignmentsCount = pendingResult.count || 0
-            completedAssignmentsCount = gradedResult.count || 0
-            recentAssignments = assignmentsResult.data || []
-        }
+            return {
+                enrolledCoursesCount: teacherCourses.length,
+                upcomingEventsCount: upcomingResult.count || 0,
+                pendingAssignmentsCount: pendingCount,
+                completedAssignmentsCount: gradedCount,
+                recentAssignments: assignmentsData
+            }
+        })
     } else {
-        // ゲスト/その他の場合
-        const { count } = await supabase
+        // その他
+        roleDataPromise = supabase
             .from('assignments')
             .select('*', { count: 'exact', head: true })
             .gte('due_date', now.toISOString())
             .lte('due_date', nextWeek.toISOString())
-        upcomingEventsCount = count || 0
+            .then(res => ({
+                upcomingEventsCount: res.count || 0
+            }))
+    }
+
+    // 3. ここで初めて「お知らせ」と「ロール別データ」の完了を待つ
+    const [announcementsResult, roleData] = await Promise.all([
+        announcementsPromise,
+        roleDataPromise
+    ])
+
+    const announcements = announcementsResult.data
+
+    // データ展開
+    if (roleData) {
+        enrolledCoursesCount = roleData.enrolledCoursesCount || 0
+        upcomingEventsCount = roleData.upcomingEventsCount || 0
+        pendingAssignmentsCount = roleData.pendingAssignmentsCount || 0
+        completedAssignmentsCount = roleData.completedAssignmentsCount || 0
+        recentAssignments = roleData.recentAssignments || []
     }
 
     return (
