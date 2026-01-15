@@ -453,7 +453,7 @@ function generateAttendanceHTML(data) {
 
     return `
       <tr class="${rowClass}">
-        <td>${row.year} ${row.month}</td>
+        <td>${row.year}年${row.month}月</td>
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
         <td>${(mRate * 100).toFixed(1)}%</td>
@@ -483,7 +483,7 @@ function generateAttendanceHTML(data) {
     .title-container {
       text-align: center;
       margin-bottom: 5mm;
-      padding-top: 10mm;
+      padding-top: 5mm; /* Changed from 10mm to move title higher */
     }
     h1 {
       display: inline-block;
@@ -621,9 +621,9 @@ function generateAttendanceHTML(data) {
 
   <div class="header-layout">
     <div class="student-info">
-      <div class="student-id">${student.id}</div>
-      <div class="student-name">${student.name}</div>
-      <div class="student-class">${student.className || ''}</div>
+      <div class="student-id">学籍番号：${student.id}</div>
+      <div class="student-name">名前：${student.name}</div>
+      <div class="student-class">クラス：${student.className || ''}</div>
     </div>
 
     <div class="summary-box">
