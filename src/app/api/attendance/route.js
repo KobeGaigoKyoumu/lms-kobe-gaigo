@@ -97,7 +97,14 @@ export async function GET(request) {
                 return b.month - a.month
             })
 
-            return NextResponse.json({ monthlyFiles, cumulativeFiles })
+            return NextResponse.json({
+                monthlyFiles,
+                cumulativeFiles,
+                debug: {
+                    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+                    timestamp: new Date().toISOString()
+                }
+            })
         }
 
         // 最新の年月を取得
