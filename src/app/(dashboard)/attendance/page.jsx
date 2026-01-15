@@ -124,7 +124,6 @@ export default function AttendancePage() {
         }
     }
 
-    const [isPdfGenerating, setIsPdfGenerating] = useState(false)
 
     const handleDownloadPDF = async () => {
         if (!selectedStudent || !studentHistory) return
@@ -211,68 +210,7 @@ export default function AttendancePage() {
         }
     }
 
-    const handleDownloadPDF = async () => {
-        if (!selectedStudent || !studentHistory) return
-        setIsPdfGenerating(true)
-        try {
-            // 現在の学生情報を検索
-            const studentInfo = individualData?.students?.find(s => s.student_id === selectedStudent)
 
-            // 現在の累積出席率（最新月のもの、あるいはindividualDataにあるもの）
-            // individualDataのattendance_rateは現在選択中の年月のもの。
-            // 累計モードで見ているならそれが「現在の累計」
-            // しかしユーザーは「入学から現在まで」の表を求めているので、
-            // currentStatsには「最新の累積出席率」を入れるべき。
-            // studentHistory.cumulativeData の最後の要素が最新のはず（時系列昇順なら。APIは降順で返しているはずだが...）
-            // API (route.js) の individual 取得部分を見ると order('year', { ascending: true }) になってる。
-            // なので studentHistory.cumulativeData は [古い -> 新しい] の順。
-            // 最新は末尾。
-
-            const latestCumulative = studentHistory.cumulativeData && studentHistory.cumulativeData.length > 0
-                ? studentHistory.cumulativeData[studentHistory.cumulativeData.length - 1]
-                : { attendance_rate: 0 }
-
-            const payload = {
-                student: {
-                    id: selectedStudent,
-                    name: studentInfo?.student_name || '不明',
-                    className: studentInfo?.class_name || '未設定' // individualDataにはclass_nameはないかも？API確認要
-                    // APIのindividual検索では select('*') してるのでカラムがあれば取れてる。
-                    // しかしmasterDataからのマッピングはAPI内で行われていない（class=school, classのときだけ）。
-                    // individual検索時は student_id, student_name, attendance_rate ... 
-                    // DBにclass_nameが保存されていれば出るが、計算されたclassはここにはないかも。
-                    // まあ、とりあえずある情報で出す。
-                },
-                history: studentHistory,
-                currentStats: {
-                    rate: latestCumulative.attendance_rate
-                }
-            }
-
-            const res = await fetch('/api/attendance/pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-
-            if (!res.ok) throw new Error('PDF generation failed')
-
-            const blob = await res.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `attendance_${selectedStudent}.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
-        } catch (err) {
-            console.error(err)
-            alert('PDF生成に失敗しました')
-        } finally {
-            setIsPdfGenerating(false)
-        }
-    }
 
     const formatRate = (rate) => {
         return (rate * 100).toFixed(1) + '%'
