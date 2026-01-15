@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic' // Disable caching
+
+
 // Grade Calculation Logic (Synced with import_attendance.js but with '23' fix)
 function calculateGrade(studentId, year, month) {
     if (!studentId || studentId.length < 2) return 0

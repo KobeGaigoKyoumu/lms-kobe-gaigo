@@ -57,7 +57,7 @@ export default function AttendancePage() {
 
     const fetchAvailableFiles = async () => {
         try {
-            const res = await fetch('/api/attendance?type=files')
+            const res = await fetch('/api/attendance?type=files', { cache: 'no-store' })
             const data = await res.json()
             setAvailableFiles(data)
 
@@ -88,7 +88,7 @@ export default function AttendancePage() {
                 params.append('search', studentSearch)
             }
 
-            const res = await fetch(`/api/attendance?${params}`)
+            const res = await fetch(`/api/attendance?${params}`, { cache: 'no-store' })
             const data = await res.json()
 
             switch (activeTab) {
@@ -115,7 +115,7 @@ export default function AttendancePage() {
     const fetchStudentHistory = async (studentId) => {
         setSelectedStudent(studentId)
         try {
-            const res = await fetch(`/api/attendance?type=individual&studentId=${studentId}`)
+            const res = await fetch(`/api/attendance?type=individual&studentId=${studentId}`, { cache: 'no-store' })
             const data = await res.json()
             setStudentHistory(data)
         } catch (err) {
