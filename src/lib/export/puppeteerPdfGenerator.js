@@ -489,18 +489,133 @@ function generateAttendanceHTML(data) {
 
     .header-layout {
       position: relative;
-      height: 35mm;
-      margin-bottom: 5mm;
+      height: 30mm; /* Reduced from 35mm */
+      margin-bottom: 3mm; /* Reduced from 5mm */
       border-bottom: 2px solid #333;
     }
 
-/* ... existing code ... */
+    .student-info {
+      position: absolute;
+      bottom: 1mm; /* Reduced from 2mm */
+      left: 0;
+      width: 60%;
+    }
+    .student-info div {
+      margin-bottom: 3px; /* Reduced from 5px */
+      font-size: 11pt;
+    }
+
+    .issue-date-top {
+      text-align: right;
+      font-size: 10pt;
+      margin-bottom: 2mm;
+    }
+
+    .student-id { font-weight: bold; font-size: 11pt; margin-bottom: 2px !important; }
+    .student-name { font-weight: bold; font-size: 14pt; margin-bottom: 3px !important; } /* Reduced form 16pt */
+    .student-class { font-weight: bold; font-size: 11pt; }
+
+    .summary-box {
+      position: absolute;
+      top: 2mm; /* Reduced from 5mm */
+      right: 0;
+      width: 55mm; /* Reduced from 60mm */
+      height: 22mm; /* Reduced from 25mm */
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .summary-header {
+      height: 7mm; /* Reduced from 8mm */
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #333;
+      font-size: 8pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.1;
+      color: #555;
+    }
+    .summary-content {
+      height: 15mm; /* Reduced from 17mm */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .summary-value {
+      font-size: 20pt; /* Reduced from 22pt */
+      font-weight: bold;
+    }
+
+    /* Colors */
+    .rate-danger { color: #d32f2f; }
+    .rate-warning { color: #f57c00; }
+    .rate-caution { color: #fbc02d; }
+    .rate-notice { color: #0288d1; }
+    .rate-normal { color: #2e7d32; }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 3mm; /* Reduced from 5mm */
+      font-size: 9pt; /* Reduced from 9.5pt */
+    }
+    
+    .data-table th {
+      background-color: #f0f0f0;
+      border: 1px solid #999;
+      padding: 6px 4px; /* Reduced from 8px */
+      font-weight: normal;
+      color: #555;
+    }
+    
+    .data-table td {
+      border: 1px solid #ddd;
+      border-left: 1px solid #999;
+      border-right: 1px solid #999;
+      border-bottom: 1px solid #999;
+      padding: 4px 4px; /* Reduced from 6px */
+      text-align: center;
+      height: 6mm; /* Reduced from 8mm */
+    }
+
+    .col-cumulative {
+      background-color: #f9fbfd;
+      font-weight: bold;
+    }
+
+    /* Backgrounds */
+    .bg-danger { background-color: #ffebee !important; }
+    .bg-warning { background-color: #fff3e0 !important; }
+    .bg-caution { background-color: #fffde7 !important; }
+    .bg-notice { background-color: #e1f5fe !important; }
+
+    /* Legend */
+    .legend {
+      margin-top: 3mm; /* Reduced from 5mm */
+      display: flex;
+      justify-content: flex-end;
+      font-size: 8pt;
+      gap: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      margin-right: 4px;
+      border: 1px solid #ccc;
+    }
 
     /* Footer Notes */
     .footer-notes {
-      margin-top: 5mm;
-      font-size: 8pt;
-      line-height: 1.4;
+      margin-top: 4mm; /* Reduced from 5mm */
+      font-size: 7.5pt; /* Reduced from 8pt */
+      line-height: 1.3;
       color: #333;
     }
 
@@ -508,12 +623,13 @@ function generateAttendanceHTML(data) {
 </head>
 <body>
 
+  <div class="issue-date-top">発行日：${today}</div>
+
   <div class="title-container">
     <h1>神戸外語教育学院</h1>
   </div>
 
   <div class="header-layout">
-    <div class="issue-date">発行日：${today}</div>
     <div class="student-info">
       <div class="student-id">学籍番号：${student.id}</div>
       <div class="student-name">名前：${student.name}</div>
