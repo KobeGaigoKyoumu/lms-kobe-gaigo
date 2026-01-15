@@ -47,16 +47,22 @@ export async function GET(request) {
         const studentId = searchParams.get('studentId')
         const search = searchParams.get('search')
 
+        const classCodeParam = searchParams.get('class')
+
         // Fetch Student Master for Class mapping (Used across multiple types)
         const { data: masterData } = await supabase
             .from('students')
-            .select('student_id_text, class_name')
-            .range(0, 49999) // Fix: Fetch all students to avoid "Unset" class for new students
+            .select('student_id_text, class_name, name_kana, nationality')
+            .range(0, 49999)
 
-        const studentClassMap = new Map()
+        const studentInfoMap = new Map()
         masterData?.forEach(s => {
-            if (s.student_id_text && s.class_name) {
-                studentClassMap.set(s.student_id_text, s.class_name)
+            if (s.student_id_text) {
+                studentInfoMap.set(s.student_id_text, {
+                    className: s.class_name,
+                    nameKana: s.name_kana,
+                    nationality: s.nationality
+                })
             }
         })
 
@@ -95,8 +101,6 @@ export async function GET(request) {
                         .from('attendance_records')
                         .select('year, month, is_cumulative')
                         .range(page * pageSize, (page + 1) * pageSize - 1)
-                        // ページングの安定性のためIDなどでソートしたいが、負荷軽減のためデフォルト順(通常は挿入順)でも今回は許容
-                        // ただしorder指定しないとランダムになる可能性もあるので、念のため student_id でソート
                         .order('student_id', { ascending: true })
 
                     if (error) throw error
@@ -256,7 +260,6 @@ export async function GET(request) {
 
         // クラス別の統計
         if (type === 'class') {
-            // Fetch student_id to map class from masterData
             const { data: students, error } = await supabase
                 .from('attendance_records')
                 .select('student_id, attendance_rate')
@@ -270,23 +273,23 @@ export async function GET(request) {
             // クラスごとに集計
             const classGroups = {}
             students?.forEach(s => {
-                // Determine Class from Master, fallback to DB (not fetched here) or '未設定'
-                // Note: DB class_code is skipped in favor of Master data to fix "Unset" issue for 1st years
-                const masterClass = studentClassMap.get(s.student_id)
-                const className = masterClass || '未設定'
-
-                // Also need Grade for sorting/grouping context
+                const info = studentInfoMap.get(s.student_id)
+                const className = info?.className || '未設定'
                 const grade = calculateGrade(s.student_id, targetYear, targetMonth)
 
-                const key = `${grade}-${className}`
+                // クラス名だけでグルーピング (重複回避)
+                const key = className
                 if (!classGroups[key]) {
                     classGroups[key] = {
-                        grade: grade,
+                        grade: grade, // 代表値として最初のgradeを使う（厳密ではないが表示用には十分）
                         classCode: className,
                         rates: []
                     }
                 }
                 classGroups[key].rates.push(parseFloat(s.attendance_rate))
+
+                // gradeが未設定(0)で、新しいメンバーが正規の学年なら更新する等のロジックも本当はあり得るが
+                // 現状はシンプルに。
             })
 
             const classes = Object.values(classGroups).map(cls => {
@@ -298,8 +301,8 @@ export async function GET(request) {
                     averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
                 }
             }).sort((a, b) => {
-                if (a.grade !== b.grade) return a.grade - b.grade
-                return (a.classCode || '').localeCompare(b.classCode || '')
+                // クラス名でソート
+                return (a.classCode || '').localeCompare(b.classCode || '', undefined, { numeric: true })
             })
 
             return NextResponse.json({
@@ -345,10 +348,10 @@ export async function GET(request) {
                 })
             }
 
-            // 学生検索
+            // 学生検索またはクラス指定一覧
             let query = supabase
                 .from('attendance_records')
-                .select('*') // We fetch all to override grade/class locally
+                .select('*')
                 .eq('year', targetYear)
                 .eq('month', targetMonth)
                 .eq('is_cumulative', cumulative)
@@ -360,21 +363,28 @@ export async function GET(request) {
 
             const { data: students, error } = await query
                 .order('student_id', { ascending: true })
-                .limit(100)
+                // クラスフィルタがある場合は全件取得してJSでフィルタする必要があるので制限を緩和
+                // なければsearchのみなので100件制限OK...だがあまり複雑にしない
+                .limit(classCodeParam ? 2000 : 100)
 
             if (error) throw error
 
-            // Process students to override Grade and Class
-            const processedStudents = students?.map(s => {
+            let processedStudents = students?.map(s => {
+                const info = studentInfoMap.get(s.student_id) || {}
                 const realGrade = calculateGrade(s.student_id, targetYear, targetMonth)
                 return {
                     ...s,
-                    grade: realGrade, // Override grade
-                    // Not overriding class_code here as it's not primary display in individual search list 
-                    // (Table usually shows ID, Name, Grade, Rate). 
-                    // But if class is needed, could use studentClassMap.
+                    grade: realGrade,
+                    class_name: info.className, // マスタから結合
+                    name_kana: info.nameKana,
+                    nationality: info.nationality
                 }
             }) || []
+
+            // クラスフィルタ適用
+            if (classCodeParam) {
+                processedStudents = processedStudents.filter(s => s.class_name === classCodeParam)
+            }
 
             return NextResponse.json({
                 students: processedStudents,
