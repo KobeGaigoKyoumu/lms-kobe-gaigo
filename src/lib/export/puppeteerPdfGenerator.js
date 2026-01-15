@@ -147,13 +147,6 @@ function generateTranscriptHTML(data, issueDate) {
       text-align: center;
       font-size: 8pt;
     }
-    
-    .info-table .value {
-      width: 37%;
-      text-align: center;
-      white-space: nowrap; /* 改行禁止 */
-      overflow: hidden; /* はみ出し防止 (万が一) */
-    }
 
     /* Scaling Classes (Transformを利用して幅縮小をシミュレート) */
     .scale-wrapper {
@@ -482,12 +475,12 @@ function generateAttendanceHTML(data) {
     
     .title-container {
       text-align: center;
-      margin-bottom: 5mm;
-      padding-top: 5mm; /* Changed from 10mm to move title higher */
+      margin-bottom: 2mm;
+      padding-top: 0;
     }
     h1 {
       display: inline-block;
-      font-size: 28pt;
+      font-size: 26pt;
       color: #333;
       font-weight: bold;
       margin: 0;
@@ -501,128 +494,13 @@ function generateAttendanceHTML(data) {
       border-bottom: 2px solid #333;
     }
 
-    .student-info {
-      position: absolute;
-      bottom: 2mm;
-      left: 0;
-      width: 60%;
-    }
-    .student-info div {
-      margin-bottom: 5px;
-      font-size: 11pt;
-    }
-    .issue-date {
-      position: absolute;
-      top: -5mm;
-      right: 0;
-      font-size: 10pt;
-      text-align: right;
-    }
-    .student-id { font-weight: bold; font-size: 12pt; margin-bottom: 2px !important; }
-    .student-name { font-weight: bold; font-size: 16pt; margin-bottom: 5px !important; }
-    .student-class { font-weight: bold; font-size: 12pt; }
-
-    .summary-box {
-      position: absolute;
-      top: 5mm; /* Lowered from 0 */
-      right: 0;
-      width: 60mm;
-      height: 25mm;
-      border: 2px solid #333;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-    }
-    .summary-header {
-      height: 8mm;
-      background-color: #f5f5f5;
-      border-bottom: 1px solid #333;
-      font-size: 8pt;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.1;
-      color: #555;
-    }
-    .summary-content {
-      height: 17mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .summary-value {
-      font-size: 22pt;
-      font-weight: bold;
-    }
-
-    /* Colors */
-    .rate-danger { color: #d32f2f; }
-    .rate-warning { color: #f57c00; }
-    .rate-caution { color: #fbc02d; }
-    .rate-notice { color: #0288d1; }
-    .rate-normal { color: #2e7d32; }
-
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 5mm;
-      font-size: 9.5pt;
-    }
-    
-    .data-table th {
-      background-color: #f0f0f0;
-      border: 1px solid #999;
-      padding: 8px 4px;
-      font-weight: normal;
-      color: #555;
-    }
-    
-    .data-table td {
-      border: 1px solid #ddd;
-      border-left: 1px solid #999;
-      border-right: 1px solid #999;
-      border-bottom: 1px solid #999;
-      padding: 6px 4px;
-      text-align: center;
-      height: 8mm;
-    }
-
-    .col-cumulative {
-      background-color: #f9fbfd;
-      font-weight: bold;
-    }
-
-    /* Backgrounds */
-    .bg-danger { background-color: #ffebee !important; }
-    .bg-warning { background-color: #fff3e0 !important; }
-    .bg-caution { background-color: #fffde7 !important; }
-    .bg-notice { background-color: #e1f5fe !important; }
-
-    /* Legend */
-    .legend {
-      margin-top: 5mm;
-      display: flex;
-      justify-content: flex-end;
-      font-size: 8pt;
-      gap: 10px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-    }
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      margin-right: 4px;
-      border: 1px solid #ccc;
-    }
+/* ... existing code ... */
 
     /* Footer Notes */
     .footer-notes {
-      margin-top: 10mm;
+      margin-top: 5mm;
       font-size: 8pt;
-      line-height: 1.5;
+      line-height: 1.4;
       color: #333;
     }
 

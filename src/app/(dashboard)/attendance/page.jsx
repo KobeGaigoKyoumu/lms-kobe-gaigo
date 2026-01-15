@@ -411,9 +411,9 @@ export default function AttendancePage() {
 
                 <div className={styles.filterGroup}>
                     <label>データ種別:</label>
-                    <div className={styles.buttonGroup}>
+                    <div className={styles.toggleButtons}>
                         <button
-                            className={`${styles.filterBtn} ${!isCumulative ? styles.active : ''}`}
+                            className={`${styles.toggleBtn} ${!isCumulative ? styles.active : ''}`}
                             onClick={() => {
                                 setIsCumulative(false)
                                 // 月別ファイルリストの最初の年月を選択
@@ -427,7 +427,7 @@ export default function AttendancePage() {
                             月別
                         </button>
                         <button
-                            className={`${styles.filterBtn} ${isCumulative ? styles.active : ''}`}
+                            className={`${styles.toggleBtn} ${isCumulative ? styles.active : ''}`}
                             onClick={() => {
                                 setIsCumulative(true)
                                 // 累計ファイルリストの最初の年月を選択
@@ -773,64 +773,66 @@ export default function AttendancePage() {
                                     </div>
                                 )}
 
-                                {/* 管理者用インポート機能 */}
-                                {
-                                    userRole === 'admin' && (
-                                        <div className={styles.importSection}>
-                                            <h3>データインポート</h3>
-                                            <div className={styles.importForm}>
-                                                <div className={styles.importRow}>
-                                                    <input
-                                                        type="file"
-                                                        accept=".xlsx,.xls"
-                                                        onChange={(e) => setImportFile(e.target.files[0])}
-                                                        className={styles.fileInput}
-                                                    />
-                                                </div>
-                                                <div className={styles.importRow}>
-                                                    <select
-                                                        value={importYear}
-                                                        onChange={(e) => setImportYear(parseInt(e.target.value))}
-                                                        className={styles.select}
-                                                    >
-                                                        {[2024, 2025, 2026].map(y => (
-                                                            <option key={y} value={y}>{y}年</option>
-                                                        ))}
-                                                    </select>
-                                                    <select
-                                                        value={importMonth}
-                                                        onChange={(e) => setImportMonth(parseInt(e.target.value))}
-                                                        className={styles.select}
-                                                    >
-                                                        {[...Array(12)].map((_, i) => (
-                                                            <option key={i + 1} value={i + 1}>{i + 1}月</option>
-                                                        ))}
-                                                    </select>
-                                                    <label className={styles.checkboxLabel}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={importCumulative}
-                                                            onChange={(e) => setImportCumulative(e.target.checked)}
-                                                        />
-                                                        累計
-                                                    </label>
-                                                </div>
-                                                <button
-                                                    onClick={handleImport}
-                                                    disabled={!importFile || importing}
-                                                    className={styles.importBtn}
-                                                >
-                                                    {importing ? 'インポート中...' : 'インポート'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )
-                                }
+
                             </div>
                         )}
                     </>
                 )}
             </div>
+
+            {/* 管理者用インポート機能 */}
+            {
+                userRole === 'admin' && (
+                    <div className={styles.importSection}>
+                        <h3>データインポート</h3>
+                        <div className={styles.importForm}>
+                            <div className={styles.importRow}>
+                                <input
+                                    type="file"
+                                    accept=".xlsx,.xls"
+                                    onChange={(e) => setImportFile(e.target.files[0])}
+                                    className={styles.fileInput}
+                                />
+                            </div>
+                            <div className={styles.importRow}>
+                                <select
+                                    value={importYear}
+                                    onChange={(e) => setImportYear(parseInt(e.target.value))}
+                                    className={styles.select}
+                                >
+                                    {[2024, 2025, 2026].map(y => (
+                                        <option key={y} value={y}>{y}年</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={importMonth}
+                                    onChange={(e) => setImportMonth(parseInt(e.target.value))}
+                                    className={styles.select}
+                                >
+                                    {[...Array(12)].map((_, i) => (
+                                        <option key={i + 1} value={i + 1}>{i + 1}月</option>
+                                    ))}
+                                </select>
+                                <label className={styles.checkboxLabel}>
+                                    <input
+                                        type="checkbox"
+                                        checked={importCumulative}
+                                        onChange={(e) => setImportCumulative(e.target.checked)}
+                                    />
+                                    累計
+                                </label>
+                            </div>
+                            <button
+                                onClick={handleImport}
+                                disabled={!importFile || importing}
+                                className={styles.importBtn}
+                            >
+                                {importing ? 'インポート中...' : 'インポート'}
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }
