@@ -359,6 +359,14 @@ function countLength(str) {
 }
 
 /**
+ * 成績証明書PDFを生成
+ */
+async function generateTranscriptPDF(data, issueDate, outputPath = null) {
+  const html = generateTranscriptHTML(data, issueDate);
+  return await htmlToPdf(html, outputPath);
+}
+
+/**
  * PuppeteerでHTMLをPDFに変換
  * @param {string} html
  * @param {string|null} outputPath - Path to save PDF (optional)
