@@ -406,7 +406,7 @@ async function htmlToPdf(html, outputPath = null) {
  */
 function generateAttendanceHTML(data) {
   const { student, history, currentStats } = data;
-  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.'); // 2026.01.15形式
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }); // 2026年1月15日
 
   // データの準備（月別と累計を結合）
   const monthlyData = [...(history.monthlyData || [])];
@@ -628,7 +628,7 @@ function generateAttendanceHTML(data) {
 
     <div class="summary-box">
       <div class="summary-header">
-        ${latestData.year}年${latestData.month}月出席率<br>${today}
+        ${latestData.year}年${latestData.month}月出席率<br>発行日：${today}
       </div>
       <div class="summary-content">
         <span class="summary-value ${rateClass}">${latestRatePercent}%</span>
