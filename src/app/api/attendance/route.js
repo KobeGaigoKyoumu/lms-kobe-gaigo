@@ -60,6 +60,22 @@ export async function GET(request) {
             }
         })
 
+        // デバッグ用: 生データ確認
+        if (type === 'raw_dump') {
+            const { data, error } = await supabase
+                .from('attendance_records')
+                .select('*')
+                .order('year', { ascending: false })
+                .order('month', { ascending: false })
+                .limit(50)
+
+            return NextResponse.json({
+                count: data?.length,
+                records: data,
+                error: error
+            })
+        }
+
         // 利用可能な年月データを取得
         if (type === 'files') {
             // 月別データの年月を取得（Supabaseのデフォルト1000行制限を回避）
