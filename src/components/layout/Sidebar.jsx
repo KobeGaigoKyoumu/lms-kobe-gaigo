@@ -101,11 +101,12 @@ const menuItems = [
     },
 ]
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, role: userRole }) {
     const pathname = usePathname()
     const supabase = createClient()
-    const [userRole, setUserRole] = useState(null)
+    // const [userRole, setUserRole] = useState(null) // Removed: logic moved to server
 
+    /* Removed: Client-side fetch is no longer needed
     useEffect(() => {
         const fetchUserRole = async () => {
             const { data } = await supabase
@@ -119,6 +120,7 @@ export default function Sidebar({ user }) {
             fetchUserRole()
         }
     }, [user])
+    */
 
     // Build menu items based on role
     const getMenuItems = () => {

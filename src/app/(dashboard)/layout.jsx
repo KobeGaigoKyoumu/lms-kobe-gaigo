@@ -12,9 +12,18 @@ export default async function DashboardLayout({ children }) {
         redirect('/login')
     }
 
+    // Fetch user role server-side for performance
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    const userRole = profile?.role
+
     return (
         <div className={styles.wrapper}>
-            <Sidebar user={user} />
+            <Sidebar user={user} role={userRole} />
             <main className={styles.main}>
                 {children}
             </main>
