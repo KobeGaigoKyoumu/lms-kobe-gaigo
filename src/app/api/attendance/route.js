@@ -39,6 +39,7 @@ export async function GET(request) {
         const { data: masterData } = await supabase
             .from('students')
             .select('student_id_text, class_name')
+            .range(0, 49999) // Fix: Fetch all students to avoid "Unset" class for new students
 
         const studentClassMap = new Map()
         masterData?.forEach(s => {
