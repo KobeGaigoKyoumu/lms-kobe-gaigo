@@ -1,9 +1,13 @@
 'use client'
 
 import styles from './page.module.css'
+import { parseStudentId } from '@/lib/utils/studentId'
 
 export default function StudentDetailModal({ student, onClose }) {
     if (!student) return null
+
+    // 学籍番号から学年・クラス情報を計算
+    const studentInfo = parseStudentId(student.student_id_text)
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '-'
@@ -47,16 +51,24 @@ export default function StudentDetailModal({ student, onClose }) {
                                 <span className={styles.detailValue}>{student.name_romaji || '-'}</span>
                             </div>
                             <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>メール</span>
-                                <span className={styles.detailValue}>{student.email || '-'}</span>
+                                <span className={styles.detailLabel}>学年</span>
+                                <span className={styles.detailValue}>{studentInfo.gradeName || '-'}</span>
                             </div>
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>クラス</span>
                                 <span className={styles.detailValue}>{student.class_name || '-'}</span>
                             </div>
                             <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>年度</span>
-                                <span className={styles.detailValue}>{student.academic_year || '-'}</span>
+                                <span className={styles.detailLabel}>入学年度</span>
+                                <span className={styles.detailValue}>{studentInfo.enrollmentYear || student.academic_year || '-'}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>入学時期</span>
+                                <span className={styles.detailValue}>{studentInfo.enrollmentPeriod || '-'}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>メール</span>
+                                <span className={styles.detailValue}>{student.email || '-'}</span>
                             </div>
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>ステータス</span>

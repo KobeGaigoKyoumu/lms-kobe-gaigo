@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation'
 import * as XLSX from 'xlsx'
 import styles from './page.module.css'
 import StudentDetailModal from './StudentDetailModal'
+import { parseStudentId } from '@/lib/utils/studentId'
 
 export default function StudentList({ students: initialStudents, classes }) {
     const router = useRouter()
     const fileInputRef = useRef(null)
     const [students, setStudents] = useState(initialStudents)
     const [filter, setFilter] = useState('all')
+    const [gradeFilter, setGradeFilter] = useState('')
     const [classFilter, setClassFilter] = useState('')
     const [search, setSearch] = useState('')
     const [uploading, setUploading] = useState(false)
@@ -21,13 +23,16 @@ export default function StudentList({ students: initialStudents, classes }) {
     const supabase = createClient()
 
     const filteredStudents = students.filter(student => {
+        const studentInfo = parseStudentId(student.student_id_text)
         const matchesStatus = filter === 'all' || student.status === filter
+        const matchesGrade = !gradeFilter || String(studentInfo.grade) === gradeFilter
+        // クラスフィルターは学生マスターのclass_nameを使用
         const matchesClass = !classFilter || student.class_name === classFilter
         const matchesSearch =
             student.full_name?.toLowerCase().includes(search.toLowerCase()) ||
             student.student_id_text?.includes(search) ||
             student.email?.toLowerCase().includes(search.toLowerCase())
-        return matchesStatus && matchesClass && matchesSearch
+        return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
 
     const handleFileUpload = async (e) => {
@@ -367,6 +372,16 @@ export default function StudentList({ students: initialStudents, classes }) {
                         <option value="inactive">休学</option>
                     </select>
                     <select
+                        value={gradeFilter}
+                        onChange={(e) => setGradeFilter(e.target.value)}
+                        className={styles.filterSelect}
+                    >
+                        <option value="">すべての学年</option>
+                        <option value="1">1年生</option>
+                        <option value="2">2年生</option>
+                        <option value="0">非在籍者</option>
+                    </select>
+                    <select
                         value={classFilter}
                         onChange={(e) => setClassFilter(e.target.value)}
                         className={styles.filterSelect}
@@ -393,48 +408,49 @@ export default function StudentList({ students: initialStudents, classes }) {
                         <tr>
                             <th>学籍番号</th>
                             <th>氏名</th>
-                            <th>メール</th>
+                            <th>学年</th>
                             <th>クラス</th>
-                            <th>年度</th>
                             <th>ステータス</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredStudents.map(student => (
-                            <tr key={student.student_id_text}>
-                                <td className={styles.idCell}>{student.student_id_text}</td>
-                                <td>{student.full_name}</td>
-                                <td>{student.email || '-'}</td>
-                                <td>{student.class_name || '-'}</td>
-                                <td>{student.academic_year}</td>
-                                <td>
-                                    <select
-                                        value={student.status}
-                                        onChange={(e) => handleStatusChange(student.student_id_text, e.target.value)}
-                                        className={`${styles.statusSelect} ${styles[student.status]}`}
-                                    >
-                                        <option value="active">在籍中</option>
-                                        <option value="graduated">卒業</option>
-                                        <option value="inactive">休学</option>
-                                    </select>
-                                </td>
-                                <td className={styles.actionCell}>
-                                    <button
-                                        onClick={() => setSelectedStudent(student)}
-                                        className={styles.detailBtn}
-                                    >
-                                        詳細
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(student.student_id_text)}
-                                        className={styles.deleteBtn}
-                                    >
-                                        削除
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredStudents.map(student => {
+                            const studentInfo = parseStudentId(student.student_id_text)
+                            return (
+                                <tr key={student.student_id_text}>
+                                    <td className={styles.idCell}>{student.student_id_text}</td>
+                                    <td>{student.full_name}</td>
+                                    <td>{studentInfo.gradeName || '-'}</td>
+                                    <td>{student.class_name || '-'}</td>
+                                    <td>
+                                        <select
+                                            value={student.status}
+                                            onChange={(e) => handleStatusChange(student.student_id_text, e.target.value)}
+                                            className={`${styles.statusSelect} ${styles[student.status]}`}
+                                        >
+                                            <option value="active">在籍中</option>
+                                            <option value="graduated">卒業</option>
+                                            <option value="inactive">休学</option>
+                                        </select>
+                                    </td>
+                                    <td className={styles.actionCell}>
+                                        <button
+                                            onClick={() => setSelectedStudent(student)}
+                                            className={styles.detailBtn}
+                                        >
+                                            詳細
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(student.student_id_text)}
+                                            className={styles.deleteBtn}
+                                        >
+                                            削除
+                                        </button>
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
 
