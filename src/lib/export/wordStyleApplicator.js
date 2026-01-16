@@ -125,12 +125,6 @@ function escapeRegex(string) {
 }
 
 /**
- * 卒業状態に応じて「卒業」または「卒業見込み」に楕円の枠線を追加
- * @param {Buffer} docxBuffer - Wordファイルバッファ
- * @param {string} graduationStatus - 'graduated' or 'expected'
- * @returns {Buffer} 処理後のバッファ
- */
-/**
  * 卒業状態に応じて「卒業」または「卒業見込み」に楕円の図形(VML)を追加
  * @param {Buffer} docxBuffer - Wordファイルバッファ
  * @param {string} graduationStatus - 'graduated' or 'expected'

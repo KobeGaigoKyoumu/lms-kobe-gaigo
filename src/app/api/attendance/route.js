@@ -49,22 +49,7 @@ export async function GET(request) {
 
         const classCodeParam = searchParams.get('class')
 
-        // Fetch Student Master for Class mapping (Used across multiple types)
-        const { data: masterData } = await supabase
-            .from('students')
-            .select('student_id_text, class_name, name_kana, nationality')
-            .range(0, 49999)
 
-        const studentInfoMap = new Map()
-        masterData?.forEach(s => {
-            if (s.student_id_text) {
-                studentInfoMap.set(s.student_id_text, {
-                    className: s.class_name,
-                    nameKana: s.name_kana,
-                    nationality: s.nationality
-                })
-            }
-        })
 
         // デバッグ用: 生データ確認 (後で削除可)
         if (type === 'raw_dump') {
@@ -260,6 +245,21 @@ export async function GET(request) {
 
         // クラス別の統計
         if (type === 'class') {
+            // Fetch Student Master for Class mapping
+            const { data: masterData } = await supabase
+                .from('students')
+                .select('student_id_text, class_name')
+                .range(0, 49999)
+
+            const studentInfoMap = new Map()
+            masterData?.forEach(s => {
+                if (s.student_id_text) {
+                    studentInfoMap.set(s.student_id_text, {
+                        className: s.class_name
+                    })
+                }
+            })
+
             const { data: students, error } = await supabase
                 .from('attendance_records')
                 .select('student_id, attendance_rate')
@@ -368,6 +368,23 @@ export async function GET(request) {
                 .limit(classCodeParam ? 2000 : 100)
 
             if (error) throw error
+
+            // Fetch Student Master for Class mapping within Individual View
+            const { data: masterData } = await supabase
+                .from('students')
+                .select('student_id_text, class_name, name_kana, nationality')
+                .range(0, 49999)
+
+            const studentInfoMap = new Map()
+            masterData?.forEach(s => {
+                if (s.student_id_text) {
+                    studentInfoMap.set(s.student_id_text, {
+                        className: s.class_name,
+                        nameKana: s.name_kana,
+                        nationality: s.nationality
+                    })
+                }
+            })
 
             let processedStudents = students?.map(s => {
                 const info = studentInfoMap.get(s.student_id) || {}
