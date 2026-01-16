@@ -477,22 +477,7 @@ export default function AttendancePage() {
                     </select>
                 </div>
 
-                {activeTab === 'individual' && (
-                    <div className={styles.filterGroup}>
-                        <label>並び替え:</label>
-                        <select
-                            value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="asc">出席率が低い順</option>
-                            <option value="desc">出席率が高い順</option>
-                        </select>
-                    </div>
-                )}
             </div>
-
-            {/* タブ */}
             <div className={styles.tabs}>
                 {tabs.map(tab => (
                     <button
@@ -656,7 +641,7 @@ export default function AttendancePage() {
                                 {!selectedStudent ? (
                                     <>
                                         {attendanceData?.students?.length > 0 && (
-                                            <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <button
                                                     className={styles.importBtn}
                                                     onClick={handleBulkDownload}
@@ -665,6 +650,18 @@ export default function AttendancePage() {
                                                 >
                                                     {exporting ? '出力中...' : `PDF一括出力 (${selectedStudents.size}件)`}
                                                 </button>
+
+                                                <div className={styles.filterGroup} style={{ marginBottom: 0 }}>
+                                                    <label style={{ marginRight: '0.5rem' }}>並び替え:</label>
+                                                    <select
+                                                        value={sortOrder}
+                                                        onChange={(e) => setSortOrder(e.target.value)}
+                                                        className={styles.select}
+                                                    >
+                                                        <option value="asc">出席率が低い順</option>
+                                                        <option value="desc">出席率が高い順</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         )}
                                         <table className={styles.table}>
@@ -859,6 +856,6 @@ export default function AttendancePage() {
                     </div>
                 )
             }
-        </div>
+        </div >
     )
 }
