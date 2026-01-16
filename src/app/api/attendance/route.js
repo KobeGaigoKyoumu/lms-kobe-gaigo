@@ -363,9 +363,7 @@ export async function GET(request) {
 
             const { data: students, error } = await query
                 .order('student_id', { ascending: true })
-                // クラスフィルタがある場合は全件取得してJSでフィルタする必要があるので制限を緩和
-                // なければsearchのみなので100件制限OK...だがあまり複雑にしない
-                .limit(classCodeParam ? 2000 : 100)
+                .limit(5000)
 
             if (error) throw error
 
