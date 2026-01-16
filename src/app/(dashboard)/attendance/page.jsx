@@ -25,6 +25,7 @@ export default function AttendancePage() {
     const [studentSearch, setStudentSearch] = useState('')
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [studentHistory, setStudentHistory] = useState(null)
+    const [sortOrder, setSortOrder] = useState('asc')
 
     // クラス詳細用
     const [selectedClass, setSelectedClass] = useState(null)
@@ -263,6 +264,17 @@ export default function AttendancePage() {
         { id: 'individual', label: '個別' }
     ]
 
+    const getSortedStudents = (students) => {
+        if (!students) return []
+        return [...students].sort((a, b) => {
+            if (sortOrder === 'asc') {
+                return a.attendance_rate - b.attendance_rate
+            } else {
+                return b.attendance_rate - a.attendance_rate
+            }
+        })
+    }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -326,6 +338,20 @@ export default function AttendancePage() {
                         </button>
                     </div>
                 </div>
+
+                {activeTab === 'individual' && (
+                    <div className={styles.filterGroup}>
+                        <label>並び替え:</label>
+                        <select
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className={styles.select}
+                        >
+                            <option value="asc">出席率が低い順</option>
+                            <option value="desc">出席率が高い順</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             {/* タブ */}
@@ -499,7 +525,7 @@ export default function AttendancePage() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {individualData?.students?.map(s => (
+                                            {getSortedStudents(individualData?.students)?.map(s => (
                                                 <tr key={s.student_id}>
                                                     <td>{s.student_id}</td>
                                                     <td>{formatStudentName(s)}</td>
