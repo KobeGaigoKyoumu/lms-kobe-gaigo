@@ -138,3 +138,100 @@
     background: var(--error-50);
     color: var(--error-500);
 }
+
+/* Collapsed State */
+.sidebar.collapsed .logo span,
+.sidebar.collapsed .userName,
+.sidebar.collapsed .userEmail {
+    display: none;
+}
+
+.sidebar.collapsed .navItem span {
+    display: none;
+}
+
+.sidebar.collapsed .nav {
+    overflow: visible;
+}
+
+.sidebar.collapsed .logo {
+    justify-content: center;
+    padding: var(--spacing-4) 0;
+}
+
+.sidebar.collapsed .logo svg {
+    margin: 0;
+}
+
+.sidebar.collapsed .navItem {
+    justify-content: center;
+    padding: var(--spacing-3);
+    position: relative;
+}
+
+/* Tooltip on Hover */
+.sidebar.collapsed .navItem:hover span {
+    display: block;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Triangle for Tooltip */
+.sidebar.collapsed .navItem:hover span::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-right: 4px solid rgba(0, 0, 0, 0.8);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Collapse Button */
+.collapseBtn {
+    position: absolute;
+    right: -12px;
+    top: 24px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 101;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.collapseBtn:hover {
+    color: var(--primary-500);
+    border-color: var(--primary-500);
+}

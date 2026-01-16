@@ -104,7 +104,11 @@ const menuItems = [
 export default function Sidebar({ user, role: userRole }) {
     const pathname = usePathname()
     const supabase = createClient()
-    // const [userRole, setUserRole] = useState(null) // Removed: logic moved to server
+    const [isCollapsed, setIsCollapsed] = useState(false)
+
+    useEffect(() => {
+        document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')
+    }, [isCollapsed])
 
     /* Removed: Client-side fetch is no longer needed
     useEffect(() => {
@@ -310,7 +314,7 @@ export default function Sidebar({ user, role: userRole }) {
     }
 
     return (
-        <aside className={styles.sidebar}>
+        <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
             {/* ロゴ */}
             <div className={styles.logo}>
                 <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
@@ -326,6 +330,22 @@ export default function Sidebar({ user, role: userRole }) {
                 </svg>
                 <span>神戸外語 LMS</span>
             </div>
+
+            <button
+                className={styles.collapseBtn}
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                title={isCollapsed ? "メニューを展開" : "メニューを折りたたむ"}
+            >
+                {isCollapsed ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                )}
+            </button>
 
             {/* ナビゲーション */}
             <nav className={styles.nav}>
