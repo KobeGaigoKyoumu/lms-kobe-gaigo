@@ -675,6 +675,7 @@ export default function AttendancePage() {
                                                         />
                                                     </th>
                                                     <th>学籍番号</th>
+                                                    <th>クラス</th>
                                                     <th>氏名</th>
                                                     <th>学年</th>
                                                     <th>出席率</th>
@@ -692,6 +693,7 @@ export default function AttendancePage() {
                                                             />
                                                         </td>
                                                         <td>{s.student_id}</td>
+                                                        <td>{s.class_name || '-'}</td>
                                                         <td>{formatStudentName(s)}</td>
                                                         <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
                                                         <td className={getRateColor(s.attendance_rate)}>
