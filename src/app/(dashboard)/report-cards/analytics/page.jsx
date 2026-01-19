@@ -402,6 +402,19 @@ export default function AnalyticsPage() {
                                                     borderColor: 'rgb(34, 197, 94)',
                                                     backgroundColor: 'rgba(34, 197, 94, 0.5)',
                                                     tension: 0.3,
+                                                }, {
+                                                    label: '3年移動平均',
+                                                    data: enhancedJlptStats.yearlyTrend.map((s, i, arr) => {
+                                                        if (i < 2) return null;
+                                                        const sum = parseFloat(arr[i].passRate) + parseFloat(arr[i - 1].passRate) + parseFloat(arr[i - 2].passRate);
+                                                        return (sum / 3).toFixed(1);
+                                                    }),
+                                                    borderColor: 'rgba(251, 146, 60, 0.8)', // Orange-400
+                                                    backgroundColor: 'transparent',
+                                                    borderDash: [5, 5],
+                                                    tension: 0.4,
+                                                    pointRadius: 0,
+                                                    borderWidth: 2
                                                 }]
                                             }}
                                             options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
