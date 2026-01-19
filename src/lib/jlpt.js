@@ -5,6 +5,44 @@ import iconv from 'iconv-lite';
 // Define the base path for JLPT results
 // Using process.cwd() to correctly locate the data directory in Vercel environment
 const JLPT_BASE_DIR = path.join(process.cwd(), 'data', 'JLPT結果');
+const JLPT_HISTORICAL_JSON = path.join(process.cwd(), 'data', 'jlpt_historical.json');
+
+/**
+ * Loads historical JLPT data from the JSON file (歴代受験結果データベース)
+ * This contains student IDs which are not available in the CSV files
+ */
+function loadHistoricalJlptData() {
+    try {
+        if (!fs.existsSync(JLPT_HISTORICAL_JSON)) {
+            console.log('Historical JLPT JSON not found, skipping...');
+            return [];
+        }
+
+        const content = fs.readFileSync(JLPT_HISTORICAL_JSON, 'utf-8');
+        const data = JSON.parse(content);
+
+        if (!data.records || !Array.isArray(data.records)) {
+            return [];
+        }
+
+        // Convert to same format as CSV parsing
+        return data.records.map(record => ({
+            session: record.session,
+            examName: `${record.session}日本語能力試験`,
+            level: record.level,
+            id: record.studentId, // Student ID from Excel
+            name: record.name,
+            country: record.country,
+            result: record.result,
+            totalScore: `${record.score}/180`, // Format like CSV
+            studentId: record.studentId, // Keep as separate field for matching
+            source: 'historical' // Mark as from historical database
+        }));
+    } catch (error) {
+        console.error('Error loading historical JLPT data:', error);
+        return [];
+    }
+}
 
 /**
  * Parses a single CSV line into a structured object.
@@ -152,44 +190,64 @@ function processStatistics(rawData) {
 
 /**
  * Get all raw JLPT data (for enhanced statistics)
+ * Combines data from historical JSON (with student IDs) and CSV files
+ * Priority: JSON data is preferred as it has complete student ID information
  */
 export async function getAllRawJlptData() {
     try {
-        if (!fs.existsSync(JLPT_BASE_DIR)) {
-            return [];
-        }
+        // First, load historical data from JSON (has student IDs)
+        const historicalData = loadHistoricalJlptData();
+        console.log(`Loaded ${historicalData.length} records from historical JSON`);
 
-        const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
-            .filter(dirent => dirent.isDirectory())
-            .map(dirent => dirent.name);
+        // Create a set to track seen records (avoid duplicates)
+        const seenRecords = new Set();
+        historicalData.forEach(record => {
+            // Create unique key: session + name (normalized)
+            const key = `${record.session}|${record.name?.toLowerCase()?.trim()}|${record.level}`;
+            seenRecords.add(key);
+        });
 
-        const allData = [];
+        const allData = [...historicalData];
 
-        for (const session of sessions) {
-            const sessionDir = path.join(JLPT_BASE_DIR, session);
-            const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
+        // Then load CSV data (may not have student IDs)
+        if (fs.existsSync(JLPT_BASE_DIR)) {
+            const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name);
 
-            for (const file of files) {
-                const filePath = path.join(sessionDir, file);
-                const buffer = fs.readFileSync(filePath);
-                const content = iconv.decode(buffer, 'Shift_JIS');
-                const lines = content.split(/\r?\n/).slice(1).filter(l => l.trim().length > 0);
+            for (const session of sessions) {
+                const sessionDir = path.join(JLPT_BASE_DIR, session);
+                const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
 
-                for (const line of lines) {
-                    const parsed = parseLine(line);
-                    if (parsed) {
-                        allData.push({ session, ...parsed });
+                for (const file of files) {
+                    const filePath = path.join(sessionDir, file);
+                    const buffer = fs.readFileSync(filePath);
+                    const content = iconv.decode(buffer, 'Shift_JIS');
+                    const lines = content.split(/\r?\n/).slice(1).filter(l => l.trim().length > 0);
+
+                    for (const line of lines) {
+                        const parsed = parseLine(line);
+                        if (parsed) {
+                            // Check if this record already exists in historical data
+                            const key = `${session}|${parsed.name?.toLowerCase()?.trim()}|${parsed.level}`;
+                            if (!seenRecords.has(key)) {
+                                allData.push({ session, ...parsed, source: 'csv' });
+                                seenRecords.add(key);
+                            }
+                        }
                     }
                 }
             }
         }
 
+        console.log(`Total JLPT records: ${allData.length}`);
         return allData;
     } catch (error) {
         console.error("Error reading raw JLPT data:", error);
         return [];
     }
 }
+
 
 /**
  * Get JLPT history for a specific student by name
@@ -226,7 +284,46 @@ export async function getJlptByStudentName(studentName, enrollmentDate = null) {
         level: r.level,
         result: r.result,
         score: r.totalScore,
-        country: r.country
+        country: r.country,
+        studentId: r.studentId || null
+    }));
+}
+
+/**
+ * Get JLPT history for a specific student by student ID (学籍番号)
+ * @param {string} studentId - Student's ID number
+ * @param {string} enrollmentDate - Optional enrollment date (YYYY-MM-DD) to filter records after this date
+ */
+export async function getJlptByStudentId(studentId, enrollmentDate = null) {
+    const allData = await getAllRawJlptData();
+
+    // Filter by student ID (from historical data)
+    let studentRecords = allData.filter(record =>
+        record.studentId && record.studentId === String(studentId).trim()
+    );
+
+    // If enrollment date provided, filter to only show exams after enrollment
+    if (enrollmentDate) {
+        const enrollDate = new Date(enrollmentDate);
+        studentRecords = studentRecords.filter(record => {
+            const year = parseInt(record.session.substring(0, 4));
+            const isFirstRound = record.session.includes('第1回');
+            const examMonth = isFirstRound ? 6 : 11;
+            const examDate = new Date(year, examMonth, 1);
+            return examDate >= enrollDate;
+        });
+    }
+
+    // Sort by session (newest first)
+    studentRecords.sort((a, b) => b.session.localeCompare(a.session));
+
+    return studentRecords.map(r => ({
+        session: r.session,
+        level: r.level,
+        result: r.result,
+        score: r.totalScore,
+        country: r.country,
+        name: r.name
     }));
 }
 
