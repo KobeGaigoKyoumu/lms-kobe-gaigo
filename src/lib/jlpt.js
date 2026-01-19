@@ -282,10 +282,68 @@ export async function getEnhancedJlptStats() {
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 
+    // 4. N3+ Certification Rate (unique students who passed N1, N2, or N3)
+    // This represents students who achieved N3 or higher at any point
+    const passedRecords = rawData.filter(r => r.result === '合格');
+
+    // Group by student name to get unique students
+    const studentBestLevel = {};
+    passedRecords.forEach(record => {
+        const name = record.name;
+        if (!name) return;
+
+        const level = record.level;
+        const levelNum = parseInt(level.replace('N', ''));
+
+        // Lower number = higher level (N1 > N2 > N3)
+        if (!studentBestLevel[name] || levelNum < studentBestLevel[name]) {
+            studentBestLevel[name] = levelNum;
+        }
+    });
+
+    // Count students with N3 or higher (N1, N2, N3 = level 1, 2, 3)
+    const n3PlusStudents = Object.values(studentBestLevel).filter(level => level <= 3).length;
+    const totalUniqueStudents = Object.keys(studentBestLevel).length;
+
+    // Calculate by graduation year (approximate using session data)
+    const graduationStats = {};
+    rawData.forEach(record => {
+        if (record.result !== '合格') return;
+        const year = record.session.substring(0, 4);
+        const level = record.level;
+        const levelNum = parseInt(level.replace('N', ''));
+        const name = record.name;
+        if (!name) return;
+
+        if (!graduationStats[year]) {
+            graduationStats[year] = { students: new Set(), n3Plus: new Set() };
+        }
+        graduationStats[year].students.add(name);
+        if (levelNum <= 3) {
+            graduationStats[year].n3Plus.add(name);
+        }
+    });
+
+    const graduationN3PlusRates = Object.entries(graduationStats)
+        .map(([year, stats]) => ({
+            year,
+            totalStudents: stats.students.size,
+            n3PlusStudents: stats.n3Plus.size,
+            rate: stats.students.size > 0 ? ((stats.n3Plus.size / stats.students.size) * 100).toFixed(1) : 0
+        }))
+        .sort((a, b) => a.year.localeCompare(b.year));
+
     return {
         nationalityStats,
         levelStats,
-        yearlyTrend
+        yearlyTrend,
+        graduationN3PlusRates,
+        overallN3PlusRate: {
+            totalUniqueStudents,
+            n3PlusStudents,
+            rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
+        }
     };
 }
+
 
