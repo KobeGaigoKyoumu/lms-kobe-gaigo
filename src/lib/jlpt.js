@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import iconv from 'iconv-lite';
 
 // Define the base path for JLPT results
 // Using process.cwd() to correctly locate the data directory in Vercel environment
@@ -64,7 +65,8 @@ export async function getJlptData() {
 
             for (const file of files) {
                 const filePath = path.join(sessionDir, file);
-                const content = fs.readFileSync(filePath, 'utf-8');
+                const buffer = fs.readFileSync(filePath);
+                const content = iconv.decode(buffer, 'Shift_JIS');
                 const lines = content.split(/\r?\n/);
 
                 // Skip header usually, check first line content if unsure. 
