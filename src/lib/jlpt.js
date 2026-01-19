@@ -112,14 +112,18 @@ function processStatistics(rawData) {
             };
         }
 
-        statsBySession[key].total++;
-        if (record.result === '合格') {
-            statsBySession[key].passed++;
+        // Only count valid results (合格 or 不合格), exclude 欠席 (absent) and other invalid values
+        const result = record.result;
+        if (result === '合格' || result === '不合格') {
+            statsBySession[key].total++;
+            if (result === '合格') {
+                statsBySession[key].passed++;
+            }
         }
 
         // Parse score "100/180" -> 100
         const scoreVal = parseInt(record.totalScore.split('/')[0]);
-        if (!isNaN(scoreVal)) {
+        if (!isNaN(scoreVal) && scoreVal > 0) {
             statsBySession[key].totalScoreSum += scoreVal;
             statsBySession[key].countCheck++;
         }
