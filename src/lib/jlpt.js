@@ -327,43 +327,66 @@ export async function getEnhancedJlptStats() {
     const n3PlusStudents = n3PlusAchievers.size;
     const totalUniqueStudents = allExaminees.size;
 
-    // Calculate by graduation year
-    // JLPT Schedule: 第1回 = July, 第2回 = December
-    // Students graduate in March, so exam year X → graduation year X+1 (March)
-    // N3+ Rate = students who PASSED N1/N2/N3 / ALL unique examinees (including failures)
-    const graduationStats = {};
+    // Calculate by graduation year cohort
+    // For a 2-year school: student's graduation year = last exam year + 1
+    // First, determine each student's graduation year based on their LAST exam session
+    // Then group by graduation year and count unique students
 
-    // First pass: count ALL examinees (including failures) to get total student count
+    // Step 1: Build student records with their exam history
+    const studentExamHistory = {};
+
     rawData.forEach(record => {
         const result = record.result;
-        if (result !== '合格' && result !== '不合格') return; // Skip absent/invalid
+        if (result !== '合格' && result !== '不合格') return; // Skip absent
 
-        const examYear = parseInt(record.session.substring(0, 4));
-        const graduationYear = examYear + 1;
         const name = record.name;
         if (!name) return;
 
-        if (!graduationStats[graduationYear]) {
-            graduationStats[graduationYear] = { allStudents: new Set(), n3Plus: new Set() };
-        }
-        graduationStats[graduationYear].allStudents.add(name);
+        const examYear = parseInt(record.session.substring(0, 4));
 
-        // Only add to N3+ if they PASSED an N1/N2/N3 exam
+        if (!studentExamHistory[name]) {
+            studentExamHistory[name] = {
+                lastExamYear: examYear,
+                hasN3Plus: false
+            };
+        }
+
+        // Track the latest exam year for this student
+        if (examYear > studentExamHistory[name].lastExamYear) {
+            studentExamHistory[name].lastExamYear = examYear;
+        }
+
+        // Track if they ever passed N3+
         if (result === '合格') {
-            const level = record.level;
-            const levelNum = parseInt(level.replace('N', ''));
+            const levelNum = parseInt(record.level.replace('N', ''));
             if (levelNum <= 3) {
-                graduationStats[graduationYear].n3Plus.add(name);
+                studentExamHistory[name].hasN3Plus = true;
             }
         }
     });
 
-    const graduationN3PlusRates = Object.entries(graduationStats)
+    // Step 2: Group students by graduation year (lastExamYear + 1)
+    const graduationCohorts = {};
+
+    Object.entries(studentExamHistory).forEach(([name, data]) => {
+        const gradYear = data.lastExamYear + 1;
+
+        if (!graduationCohorts[gradYear]) {
+            graduationCohorts[gradYear] = { total: 0, n3Plus: 0 };
+        }
+
+        graduationCohorts[gradYear].total++;
+        if (data.hasN3Plus) {
+            graduationCohorts[gradYear].n3Plus++;
+        }
+    });
+
+    const graduationN3PlusRates = Object.entries(graduationCohorts)
         .map(([year, stats]) => ({
             year: year + '年3月卒',
-            totalStudents: stats.allStudents.size,
-            n3PlusStudents: stats.n3Plus.size,
-            rate: stats.allStudents.size > 0 ? ((stats.n3Plus.size / stats.allStudents.size) * 100).toFixed(1) : 0
+            totalStudents: stats.total,
+            n3PlusStudents: stats.n3Plus,
+            rate: stats.total > 0 ? ((stats.n3Plus / stats.total) * 100).toFixed(1) : 0
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 
