@@ -199,9 +199,9 @@ export async function getAllRawJlptData() {
 export async function getJlptByStudentName(studentName, enrollmentDate = null) {
     const allData = await getAllRawJlptData();
 
-    // Filter by student name (case-insensitive partial match)
+    // Filter by student name (exact match, case-insensitive)
     let studentRecords = allData.filter(record =>
-        record.name && record.name.toLowerCase().includes(studentName.toLowerCase())
+        record.name && record.name.toLowerCase() === studentName.toLowerCase()
     );
 
     // If enrollment date provided, filter to only show exams after enrollment
