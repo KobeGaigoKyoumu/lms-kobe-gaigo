@@ -341,8 +341,8 @@ export default function AnalyticsPage() {
                             <span className={styles.statUnit}>平均</span>
                         </div>
                         {enhancedJlptStats?.overallN3PlusRate && (
-                            <div className={styles.statCard} style={{ borderLeft: '3px solid #22c55e' }}>
-                                <span className={styles.statLabel}>N3以上保有率 (卒業時)</span>
+                            <div className={styles.statCard}>
+                                <span className={styles.statLabel}>卒業時N3以上保有率</span>
                                 <span className={styles.statValue}>{enhancedJlptStats.overallN3PlusRate.rate}%</span>
                                 <span className={styles.statUnit}>{enhancedJlptStats.overallN3PlusRate.n3PlusStudents}/{enhancedJlptStats.overallN3PlusRate.totalUniqueStudents}名</span>
                             </div>
