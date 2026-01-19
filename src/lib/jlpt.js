@@ -397,9 +397,11 @@ export async function getEnhancedJlptStats(students = []) {
         if (isFirstYearData) return; // SKIP
 
         if (!studentExamHistory[name]) {
+            const isKanjiCountry = ['中国', '台湾', '韓国'].includes(record.country);
             studentExamHistory[name] = {
                 graduationYear: gradYear,
-                hasN3Plus: false
+                hasN3Plus: false,
+                isKanjiCountry
             };
         } else {
             if (studentMap.has(name.toLowerCase())) {
@@ -423,12 +425,30 @@ export async function getEnhancedJlptStats(students = []) {
         const gradYear = data.graduationYear;
 
         if (!graduationCohorts[gradYear]) {
-            graduationCohorts[gradYear] = { total: 0, n3Plus: 0 };
+            graduationCohorts[gradYear] = {
+                total: 0,
+                n3Plus: 0,
+                kanjiTotal: 0,
+                kanjiN3Plus: 0,
+                nonKanjiTotal: 0,
+                nonKanjiN3Plus: 0
+            };
         }
 
         graduationCohorts[gradYear].total++;
+        if (data.isKanjiCountry) {
+            graduationCohorts[gradYear].kanjiTotal++;
+        } else {
+            graduationCohorts[gradYear].nonKanjiTotal++;
+        }
+
         if (data.hasN3Plus) {
             graduationCohorts[gradYear].n3Plus++;
+            if (data.isKanjiCountry) {
+                graduationCohorts[gradYear].kanjiN3Plus++;
+            } else {
+                graduationCohorts[gradYear].nonKanjiN3Plus++;
+            }
         }
     });
 
@@ -437,7 +457,9 @@ export async function getEnhancedJlptStats(students = []) {
             year: year + '年3月卒',
             totalStudents: stats.total,
             n3PlusStudents: stats.n3Plus,
-            rate: stats.total > 0 ? ((stats.n3Plus / stats.total) * 100).toFixed(1) : 0
+            rate: stats.total > 0 ? ((stats.n3Plus / stats.total) * 100).toFixed(1) : 0,
+            kanjiRate: stats.kanjiTotal > 0 ? ((stats.kanjiN3Plus / stats.kanjiTotal) * 100).toFixed(1) : '-',
+            nonKanjiRate: stats.nonKanjiTotal > 0 ? ((stats.nonKanjiN3Plus / stats.nonKanjiTotal) * 100).toFixed(1) : '-'
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 
