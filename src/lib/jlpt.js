@@ -300,26 +300,32 @@ export async function getEnhancedJlptStats() {
 
     // 4. N3+ Certification Rate (unique students who passed N1, N2, or N3)
     // This represents students who achieved N3 or higher at any point
-    const passedRecords = rawData.filter(r => r.result === '合格');
+    // IMPORTANT: Denominator is ALL examinees (passers + failures), not just passers
 
-    // Group by student name to get unique students
-    const studentBestLevel = {};
-    passedRecords.forEach(record => {
+    // First, get all unique examinees (excluding absent)
+    const allExaminees = new Set();
+    const n3PlusAchievers = new Set();
+
+    rawData.forEach(record => {
+        const result = record.result;
+        if (result !== '合格' && result !== '不合格') return; // Skip absent
+
         const name = record.name;
         if (!name) return;
 
-        const level = record.level;
-        const levelNum = parseInt(level.replace('N', ''));
+        allExaminees.add(name);
 
-        // Lower number = higher level (N1 > N2 > N3)
-        if (!studentBestLevel[name] || levelNum < studentBestLevel[name]) {
-            studentBestLevel[name] = levelNum;
+        // Track N3+ achievers (students who passed N1, N2, or N3 at any point)
+        if (result === '合格') {
+            const levelNum = parseInt(record.level.replace('N', ''));
+            if (levelNum <= 3) {
+                n3PlusAchievers.add(name);
+            }
         }
     });
 
-    // Count students with N3 or higher (N1, N2, N3 = level 1, 2, 3)
-    const n3PlusStudents = Object.values(studentBestLevel).filter(level => level <= 3).length;
-    const totalUniqueStudents = Object.keys(studentBestLevel).length;
+    const n3PlusStudents = n3PlusAchievers.size;
+    const totalUniqueStudents = allExaminees.size;
 
     // Calculate by graduation year
     // JLPT Schedule: 第1回 = July, 第2回 = December
