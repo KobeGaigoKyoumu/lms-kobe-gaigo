@@ -35,6 +35,7 @@ export default function AttendancePage() {
     const [exporting, setExporting] = useState(false)
     const [rateFilter, setRateFilter] = useState({ type: 'none', value: 0 }) // { type: 'monthly'|'cumulative'|'none', value: 0.95 }
     const [studentHistory, setStudentHistory] = useState(null)
+    const [historyLoading, setHistoryLoading] = useState(false)
     const [sortOrder, setSortOrder] = useState('asc')
 
     // クラス詳細用
@@ -163,6 +164,7 @@ export default function AttendancePage() {
     }
 
     const fetchStudentHistory = async (studentId) => {
+        setHistoryLoading(true)
         setSelectedStudent(studentId)
         try {
             const res = await fetch(`/api/attendance?type=individual&studentId=${studentId}`, { cache: 'no-store' })
@@ -170,6 +172,8 @@ export default function AttendancePage() {
             setStudentHistory(data)
         } catch (err) {
             console.error('Failed to fetch student history:', err)
+        } finally {
+            setHistoryLoading(false)
         }
     }
 
@@ -730,7 +734,9 @@ export default function AttendancePage() {
                                             </button>
                                         </div>
 
-                                        {studentHistory && (
+                                        {historyLoading ? (
+                                            <div className={styles.loading}>読み込み中...</div>
+                                        ) : studentHistory && (
                                             <>
                                                 <h3>
                                                     学籍番号: {selectedStudent}
