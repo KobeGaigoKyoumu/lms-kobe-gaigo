@@ -10,13 +10,17 @@ export default function StudentDetailModal({ student, onClose }) {
 
     useEffect(() => {
         if (student?.full_name) {
-            fetchJlptHistory(student.full_name)
+            fetchJlptHistory(student.full_name, student.enrollment_date)
         }
-    }, [student?.full_name])
+    }, [student?.full_name, student?.enrollment_date])
 
-    const fetchJlptHistory = async (name) => {
+    const fetchJlptHistory = async (name, enrollmentDate) => {
         try {
-            const res = await fetch(`/api/jlpt/student?name=${encodeURIComponent(name)}`)
+            let url = `/api/jlpt/student?name=${encodeURIComponent(name)}`
+            if (enrollmentDate) {
+                url += `&enrollmentDate=${encodeURIComponent(enrollmentDate)}`
+            }
+            const res = await fetch(url)
             const data = await res.json()
             setJlptHistory(Array.isArray(data) ? data : [])
         } catch (error) {

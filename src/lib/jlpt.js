@@ -193,14 +193,30 @@ export async function getAllRawJlptData() {
 
 /**
  * Get JLPT history for a specific student by name
+ * @param {string} studentName - Student's full name
+ * @param {string} enrollmentDate - Optional enrollment date (YYYY-MM-DD) to filter records after this date
  */
-export async function getJlptByStudentName(studentName) {
+export async function getJlptByStudentName(studentName, enrollmentDate = null) {
     const allData = await getAllRawJlptData();
 
     // Filter by student name (case-insensitive partial match)
-    const studentRecords = allData.filter(record =>
+    let studentRecords = allData.filter(record =>
         record.name && record.name.toLowerCase().includes(studentName.toLowerCase())
     );
+
+    // If enrollment date provided, filter to only show exams after enrollment
+    if (enrollmentDate) {
+        const enrollDate = new Date(enrollmentDate);
+        studentRecords = studentRecords.filter(record => {
+            // Parse session like "2024年第1回" -> July 2024, "2024年第2回" -> December 2024
+            const year = parseInt(record.session.substring(0, 4));
+            const isFirstRound = record.session.includes('第1回');
+            // 第1回 = July, 第2回 = December
+            const examMonth = isFirstRound ? 6 : 11; // 0-indexed (July=6, December=11)
+            const examDate = new Date(year, examMonth, 1);
+            return examDate >= enrollDate;
+        });
+    }
 
     // Sort by session (newest first)
     studentRecords.sort((a, b) => b.session.localeCompare(a.session));
@@ -308,31 +324,40 @@ export async function getEnhancedJlptStats() {
     // Calculate by graduation year
     // JLPT Schedule: 第1回 = July, 第2回 = December
     // Students graduate in March, so exam year X → graduation year X+1 (March)
+    // N3+ Rate = students who PASSED N1/N2/N3 / ALL unique examinees (including failures)
     const graduationStats = {};
+
+    // First pass: count ALL examinees (including failures) to get total student count
     rawData.forEach(record => {
-        if (record.result !== '合格') return;
+        const result = record.result;
+        if (result !== '合格' && result !== '不合格') return; // Skip absent/invalid
+
         const examYear = parseInt(record.session.substring(0, 4));
-        const graduationYear = examYear + 1; // Exams taken in year X → Graduate March (X+1)
-        const level = record.level;
-        const levelNum = parseInt(level.replace('N', ''));
+        const graduationYear = examYear + 1;
         const name = record.name;
         if (!name) return;
 
         if (!graduationStats[graduationYear]) {
-            graduationStats[graduationYear] = { students: new Set(), n3Plus: new Set() };
+            graduationStats[graduationYear] = { allStudents: new Set(), n3Plus: new Set() };
         }
-        graduationStats[graduationYear].students.add(name);
-        if (levelNum <= 3) {
-            graduationStats[graduationYear].n3Plus.add(name);
+        graduationStats[graduationYear].allStudents.add(name);
+
+        // Only add to N3+ if they PASSED an N1/N2/N3 exam
+        if (result === '合格') {
+            const level = record.level;
+            const levelNum = parseInt(level.replace('N', ''));
+            if (levelNum <= 3) {
+                graduationStats[graduationYear].n3Plus.add(name);
+            }
         }
     });
 
     const graduationN3PlusRates = Object.entries(graduationStats)
         .map(([year, stats]) => ({
             year: year + '年3月卒',
-            totalStudents: stats.students.size,
+            totalStudents: stats.allStudents.size,
             n3PlusStudents: stats.n3Plus.size,
-            rate: stats.students.size > 0 ? ((stats.n3Plus.size / stats.students.size) * 100).toFixed(1) : 0
+            rate: stats.allStudents.size > 0 ? ((stats.n3Plus.size / stats.allStudents.size) * 100).toFixed(1) : 0
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 

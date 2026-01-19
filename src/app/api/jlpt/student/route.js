@@ -5,14 +5,16 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const name = searchParams.get('name');
+        const enrollmentDate = searchParams.get('enrollmentDate');
 
         if (!name) {
             return NextResponse.json({ error: 'Name parameter is required' }, { status: 400 });
         }
 
-        const data = await getJlptByStudentName(name);
+        const data = await getJlptByStudentName(name, enrollmentDate);
         return NextResponse.json(data);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch student JLPT data' }, { status: 500 });
     }
 }
+

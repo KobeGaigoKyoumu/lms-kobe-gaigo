@@ -1,10 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './page.module.css'
 
 export default function StudentList({ students }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
+    const [jlptHistory, setJlptHistory] = useState([])
+    const [loadingJlpt, setLoadingJlpt] = useState(false)
+
+    // Fetch JLPT history when student is selected
+    useEffect(() => {
+        if (selectedStudent?.full_name) {
+            fetchJlptHistory(selectedStudent.full_name, selectedStudent.enrollment_date)
+        } else {
+            setJlptHistory([])
+        }
+    }, [selectedStudent?.full_name, selectedStudent?.enrollment_date])
+
+    const fetchJlptHistory = async (name, enrollmentDate) => {
+        setLoadingJlpt(true)
+        try {
+            let url = `/api/jlpt/student?name=${encodeURIComponent(name)}`
+            if (enrollmentDate) {
+                url += `&enrollmentDate=${encodeURIComponent(enrollmentDate)}`
+            }
+            const res = await fetch(url)
+            const data = await res.json()
+            setJlptHistory(Array.isArray(data) ? data : [])
+        } catch (error) {
+            console.error('Error fetching JLPT history:', error)
+            setJlptHistory([])
+        } finally {
+            setLoadingJlpt(false)
+        }
+    }
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '-'
@@ -175,6 +204,43 @@ export default function StudentList({ students }) {
                                     </div>
                                 </div>
                             </section>
+
+                            {/* JLPT受験履歴 */}
+                            <section className={styles.detailSection}>
+                                <h3>JLPT受験履歴</h3>
+                                {loadingJlpt ? (
+                                    <p className={styles.loadingText}>読み込み中...</p>
+                                ) : jlptHistory.length === 0 ? (
+                                    <p className={styles.noData}>受験記録がありません</p>
+                                ) : (
+                                    <div className={styles.jlptTable}>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>実施回</th>
+                                                    <th>レベル</th>
+                                                    <th>結果</th>
+                                                    <th>スコア</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {jlptHistory.map((record, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{record.session}</td>
+                                                        <td><span className={styles.levelBadge}>{record.level}</span></td>
+                                                        <td>
+                                                            <span className={`${styles.resultBadge} ${record.result === '合格' ? styles.resultPass : styles.resultFail}`}>
+                                                                {record.result}
+                                                            </span>
+                                                        </td>
+                                                        <td>{record.score || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </section>
                         </div>
                     </div>
                 </div>
@@ -182,3 +248,4 @@ export default function StudentList({ students }) {
         </>
     )
 }
+
