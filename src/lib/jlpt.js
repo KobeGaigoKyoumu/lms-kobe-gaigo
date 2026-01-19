@@ -408,6 +408,9 @@ export async function getEnhancedJlptStats(students = []) {
             if (studentMap.has(name.toLowerCase())) {
                 const enrollDate = studentMap.get(name.toLowerCase());
                 studentExamHistory[name].graduationYear = enrollDate.getFullYear() + 2;
+            } else {
+                // For unmatched, assume latest exam is 2nd year -> Max Grad Year
+                studentExamHistory[name].graduationYear = Math.max(studentExamHistory[name].graduationYear, examYear + 1);
             }
         }
 
