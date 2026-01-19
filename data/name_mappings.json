@@ -1,0 +1,275 @@
+{
+  "description": "Mapping between kanji and romanized names for Chinese students",
+  "mappings": [
+    {
+      "studentId": "2904004",
+      "kanjiName": "徐 煜尚",
+      "romanName": "XU YUSHANG"
+    },
+    {
+      "studentId": "2904007",
+      "kanjiName": "李 子宸",
+      "romanName": "LI ZICHEN"
+    },
+    {
+      "studentId": "2904005",
+      "kanjiName": "付 迪",
+      "romanName": "FU DI"
+    },
+    {
+      "studentId": "2904002",
+      "kanjiName": "劉 楊",
+      "romanName": "LIU YANG"
+    },
+    {
+      "studentId": "2907004",
+      "kanjiName": "于 歌",
+      "romanName": "YU GE"
+    },
+    {
+      "studentId": "2907003",
+      "kanjiName": "厳 子晗",
+      "romanName": "YAN ZIHAN"
+    },
+    {
+      "studentId": "2004007",
+      "kanjiName": "唐 成軒",
+      "romanName": "TANG CHENGXUAN"
+    },
+    {
+      "studentId": "2007004",
+      "kanjiName": "張 梓業",
+      "romanName": "ZHANG ZIYE"
+    },
+    {
+      "studentId": "2010019",
+      "kanjiName": "郭 斌",
+      "romanName": "GUO BIN"
+    },
+    {
+      "studentId": "2004009",
+      "kanjiName": "王 鵬恵",
+      "romanName": "WANG PENGHUI"
+    },
+    {
+      "studentId": "2004013",
+      "kanjiName": "趙 翔",
+      "romanName": "ZHAO XIANG"
+    },
+    {
+      "studentId": "2007008",
+      "kanjiName": "王 天宇",
+      "romanName": "WANG TIANYU"
+    },
+    {
+      "studentId": "2007009",
+      "kanjiName": "呉 琦",
+      "romanName": "WU QI"
+    },
+    {
+      "studentId": "2010007",
+      "kanjiName": "高 冉",
+      "romanName": "GAO RAN"
+    },
+    {
+      "studentId": "2007005",
+      "kanjiName": "黄 盈",
+      "romanName": "HUANG YING"
+    },
+    {
+      "studentId": "2004017",
+      "kanjiName": "郭 蔧遠",
+      "romanName": "GUO HUIYUAN"
+    },
+    {
+      "studentId": "2004016",
+      "kanjiName": "劉 威源",
+      "romanName": "LIU WEIYUAN"
+    },
+    {
+      "studentId": "2004038",
+      "kanjiName": "郇 子譚",
+      "romanName": "HUAN ZITAN"
+    },
+    {
+      "studentId": "2201001",
+      "kanjiName": "肖 明怡",
+      "romanName": "XIAO MINGYI"
+    },
+    {
+      "studentId": "2207004",
+      "kanjiName": "林 強",
+      "romanName": "LIN QIANG"
+    },
+    {
+      "studentId": "2107007",
+      "kanjiName": "王 帥",
+      "romanName": "WANG SHUAI"
+    },
+    {
+      "studentId": "2004004",
+      "kanjiName": "朴 光日",
+      "romanName": "PIAO GUANGRI"
+    },
+    {
+      "studentId": "2107001",
+      "kanjiName": "石 昱",
+      "romanName": "SHI YU"
+    },
+    {
+      "studentId": "2207003",
+      "kanjiName": "宋 一凡",
+      "romanName": "SONG YIFAN"
+    },
+    {
+      "studentId": "2104004",
+      "kanjiName": "陳 紀璨",
+      "romanName": "CHEN JICAN"
+    },
+    {
+      "studentId": "2107006",
+      "kanjiName": "孫 鳴",
+      "romanName": "SUN MING"
+    },
+    {
+      "studentId": "2104007",
+      "kanjiName": "王 晨夏",
+      "romanName": "WANG CHENXIA"
+    },
+    {
+      "studentId": "2004005",
+      "kanjiName": "趙 聖潔",
+      "romanName": "ZHAO SHENGJIE"
+    },
+    {
+      "studentId": "2207005",
+      "kanjiName": "章 佳美",
+      "romanName": "ZHANG JIAMEI"
+    },
+    {
+      "studentId": "2204038",
+      "kanjiName": "安 泉",
+      "romanName": "AN QUAN"
+    },
+    {
+      "studentId": "2301003",
+      "kanjiName": "張 玉傑",
+      "romanName": "ZHANG YUJIE"
+    },
+    {
+      "studentId": "2301002",
+      "kanjiName": "柳 幸延",
+      "romanName": "LIU XINGYAN"
+    },
+    {
+      "studentId": "2204007",
+      "kanjiName": "叶 瀚林",
+      "romanName": "YE HANLIN"
+    },
+    {
+      "studentId": "2304007",
+      "kanjiName": "李 双",
+      "romanName": "LI SHUANG"
+    },
+    {
+      "studentId": "2204035",
+      "kanjiName": "申 暁俊",
+      "romanName": "SHEN XIAOJUN"
+    },
+    {
+      "studentId": "2210004",
+      "kanjiName": "趙 瀟尹",
+      "romanName": "ZHAO XIAOYIN"
+    },
+    {
+      "studentId": "2204037",
+      "kanjiName": "徐 涵盛",
+      "romanName": "XU HANSHENG"
+    },
+    {
+      "studentId": "2004036",
+      "kanjiName": "張 華欣",
+      "romanName": "ZHANG HUAXIN"
+    },
+    {
+      "studentId": "2204033",
+      "kanjiName": "紀 宜宏",
+      "romanName": "JI YIHONG"
+    },
+    {
+      "studentId": "2204028",
+      "kanjiName": "修 鵬飛",
+      "romanName": "XIU PENGFEI"
+    },
+    {
+      "studentId": "2104029",
+      "kanjiName": "祝 振宇",
+      "romanName": "ZHU ZHENYU"
+    },
+    {
+      "studentId": "2107008",
+      "kanjiName": "張 志澎",
+      "romanName": "ZHANG ZHIPENG"
+    },
+    {
+      "studentId": "2304010",
+      "kanjiName": "尹 麗",
+      "romanName": "YIN LI"
+    },
+    {
+      "studentId": "2304001",
+      "kanjiName": "任 一蕊",
+      "romanName": "REN YIRUI"
+    },
+    {
+      "studentId": "2304017",
+      "kanjiName": "李 宗燊",
+      "romanName": "LI ZONGSHEN"
+    },
+    {
+      "studentId": "2304002",
+      "kanjiName": "瞿 萌",
+      "romanName": "QU MENG"
+    },
+    {
+      "studentId": "2304015",
+      "kanjiName": "矯 欣茹",
+      "romanName": "JIAO XINRU"
+    },
+    {
+      "studentId": "2307003",
+      "kanjiName": "郭 銘敖",
+      "romanName": "GUO MINGAO"
+    },
+    {
+      "studentId": "2404006",
+      "kanjiName": "谷 侃浠",
+      "romanName": "GU KAN XI"
+    },
+    {
+      "studentId": "2304005",
+      "kanjiName": "呉 妍",
+      "romanName": "WU YAN"
+    },
+    {
+      "studentId": "2304014",
+      "kanjiName": "孫 小冉",
+      "romanName": "SUN XIAORAN"
+    },
+    {
+      "studentId": "2310001",
+      "kanjiName": "邱 継森",
+      "romanName": "QIU JISEN"
+    },
+    {
+      "studentId": "2310007",
+      "kanjiName": "付 佳順",
+      "romanName": "FU JIASHUN"
+    },
+    {
+      "studentId": "2310002",
+      "kanjiName": "胡 文成",
+      "romanName": "HU WENCHENG"
+    }
+  ]
+}

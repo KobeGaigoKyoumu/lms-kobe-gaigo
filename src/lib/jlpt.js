@@ -6,6 +6,78 @@ import iconv from 'iconv-lite';
 // Using process.cwd() to correctly locate the data directory in Vercel environment
 const JLPT_BASE_DIR = path.join(process.cwd(), 'data', 'JLPT結果');
 const JLPT_HISTORICAL_JSON = path.join(process.cwd(), 'data', 'jlpt_historical.json');
+const NAME_MAPPINGS_JSON = path.join(process.cwd(), 'data', 'name_mappings.json');
+
+// Cache for name mappings (kanji <-> romanized)
+let nameMappingsCache = null;
+
+/**
+ * Loads name mappings for Chinese students (kanji <-> romanized names)
+ * Returns a Map where each name variant points to all equivalent names
+ */
+function loadNameMappings() {
+    if (nameMappingsCache) return nameMappingsCache;
+
+    try {
+        if (!fs.existsSync(NAME_MAPPINGS_JSON)) {
+            nameMappingsCache = new Map();
+            return nameMappingsCache;
+        }
+
+        const content = fs.readFileSync(NAME_MAPPINGS_JSON, 'utf-8');
+        const data = JSON.parse(content);
+
+        nameMappingsCache = new Map();
+
+        if (data.mappings && Array.isArray(data.mappings)) {
+            for (const mapping of data.mappings) {
+                const kanjiLower = mapping.kanjiName?.toLowerCase()?.trim();
+                const romanLower = mapping.romanName?.toLowerCase()?.trim();
+
+                if (kanjiLower && romanLower) {
+                    // Map both directions
+                    if (!nameMappingsCache.has(kanjiLower)) {
+                        nameMappingsCache.set(kanjiLower, new Set([kanjiLower]));
+                    }
+                    nameMappingsCache.get(kanjiLower).add(romanLower);
+
+                    if (!nameMappingsCache.has(romanLower)) {
+                        nameMappingsCache.set(romanLower, new Set([romanLower]));
+                    }
+                    nameMappingsCache.get(romanLower).add(kanjiLower);
+                }
+            }
+        }
+
+        console.log(`Loaded ${nameMappingsCache.size} name mappings for Chinese students`);
+        return nameMappingsCache;
+    } catch (error) {
+        console.error('Error loading name mappings:', error);
+        nameMappingsCache = new Map();
+        return nameMappingsCache;
+    }
+}
+
+/**
+ * Gets all equivalent name variants for a given name
+ * @param {string} name - The name to look up
+ * @returns {Set<string>} - Set of all equivalent names (including original)
+ */
+function getAllNameVariants(name) {
+    const nameMappings = loadNameMappings();
+    const nameLower = name?.toLowerCase()?.trim();
+
+    if (!nameLower) return new Set();
+
+    const variants = nameMappings.get(nameLower);
+    if (variants) {
+        return variants;
+    }
+
+    // Return just the original name if no mapping found
+    return new Set([nameLower]);
+}
+
 
 /**
  * Loads historical JLPT data from the JSON file (歴代受験結果データベース)
@@ -251,16 +323,22 @@ export async function getAllRawJlptData() {
 
 /**
  * Get JLPT history for a specific student by name
+ * Supports Chinese students with both kanji and romanized names
  * @param {string} studentName - Student's full name
  * @param {string} enrollmentDate - Optional enrollment date (YYYY-MM-DD) to filter records after this date
  */
 export async function getJlptByStudentName(studentName, enrollmentDate = null) {
     const allData = await getAllRawJlptData();
 
-    // Filter by student name (exact match, case-insensitive)
-    let studentRecords = allData.filter(record =>
-        record.name && record.name.toLowerCase() === studentName.toLowerCase()
-    );
+    // Get all name variants (for Chinese students with kanji/romanized names)
+    const nameVariants = getAllNameVariants(studentName);
+
+    // Filter by student name (matches any name variant)
+    let studentRecords = allData.filter(record => {
+        if (!record.name) return false;
+        const recordNameLower = record.name.toLowerCase().trim();
+        return nameVariants.has(recordNameLower);
+    });
 
     // If enrollment date provided, filter to only show exams after enrollment
     if (enrollmentDate) {
