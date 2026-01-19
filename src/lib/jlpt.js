@@ -232,12 +232,23 @@ export async function getJlptByStudentName(studentName, enrollmentDate = null) {
 
 /**
  * Get enhanced statistics (nationality breakdown, level comparison)
+ * @param {Array} students - Optional list of students with enrollment info for filtering
  */
-export async function getEnhancedJlptStats() {
+export async function getEnhancedJlptStats(students = []) {
     const rawData = await getAllRawJlptData();
 
     // Filter valid results only
     const validData = rawData.filter(r => r.result === '合格' || r.result === '不合格');
+
+    // Create map of student name -> enrollment date
+    const studentMap = new Map();
+    if (students && students.length > 0) {
+        students.forEach(s => {
+            if (s.full_name && s.enrollment_date) {
+                studentMap.set(s.full_name.toLowerCase(), new Date(s.enrollment_date));
+            }
+        });
+    }
 
     // 1. Nationality breakdown
     const byNationality = {};
@@ -258,9 +269,9 @@ export async function getEnhancedJlptStats() {
             passRate: ((stats.passed / stats.total) * 100).toFixed(1)
         }))
         .sort((a, b) => b.total - a.total)
-        .slice(0, 10); // Top 10 countries
+        .slice(0, 10);
 
-    // 2. Level comparison (overall)
+    // 2. Level breakdown
     const byLevel = {};
     validData.forEach(record => {
         const level = record.level;
@@ -271,14 +282,14 @@ export async function getEnhancedJlptStats() {
         if (record.result === '合格') byLevel[level].passed++;
     });
 
-    const levelStats = ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => ({
-        level,
-        total: byLevel[level]?.total || 0,
-        passed: byLevel[level]?.passed || 0,
-        passRate: byLevel[level] ? ((byLevel[level].passed / byLevel[level].total) * 100).toFixed(1) : 0
-    }));
+    const levelStats = Object.entries(byLevel)
+        .map(([level, stats]) => ({
+            level,
+            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+        }))
+        .sort((a, b) => a.level.localeCompare(b.level));
 
-    // 3. Year-over-year trend
+    // 3. Yearly Trend (Pass Rate)
     const byYear = {};
     validData.forEach(record => {
         const year = record.session.substring(0, 4);
@@ -292,8 +303,6 @@ export async function getEnhancedJlptStats() {
     const yearlyTrend = Object.entries(byYear)
         .map(([year, stats]) => ({
             year,
-            total: stats.total,
-            passed: stats.passed,
             passRate: ((stats.passed / stats.total) * 100).toFixed(1)
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
@@ -313,6 +322,29 @@ export async function getEnhancedJlptStats() {
         const name = record.name;
         if (!name) return;
 
+        // Check if student exists and if this exam is in their 1st year
+        let isFirstYearData = false;
+
+        if (studentMap.has(name.toLowerCase())) {
+            const enrollDate = studentMap.get(name.toLowerCase());
+            const examYear = parseInt(record.session.substring(0, 4));
+            const isFirstRound = record.session.includes('第1回');
+            // 第1回 = July (6), 第2回 = December (11)
+            const examMonth = isFirstRound ? 6 : 11;
+            const examDate = new Date(examYear, examMonth, 1);
+
+            // Calculate delta days
+            const diffTime = examDate - enrollDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // If < 365 days (approx 1 year), treat as 1st year data -> SKIP
+            if (diffDays < 365) {
+                isFirstYearData = true;
+            }
+        }
+
+        if (isFirstYearData) return; // SKIP 1st year data
+
         allExaminees.add(name);
 
         // Track N3+ achievers (students who passed N1, N2, or N3 at any point)
@@ -328,11 +360,9 @@ export async function getEnhancedJlptStats() {
     const totalUniqueStudents = allExaminees.size;
 
     // Calculate by graduation year cohort
-    // For a 2-year school: student's graduation year = last exam year + 1
-    // First, determine each student's graduation year based on their LAST exam session
-    // Then group by graduation year and count unique students
+    // For a 2-year school: student's graduation year = enrollment year + 2
+    // We group students by Graduation Year.
 
-    // Step 1: Build student records with their exam history
     const studentExamHistory = {};
 
     rawData.forEach(record => {
@@ -342,21 +372,42 @@ export async function getEnhancedJlptStats() {
         const name = record.name;
         if (!name) return;
 
+        let gradYear = 0;
         const examYear = parseInt(record.session.substring(0, 4));
+        let isFirstYearData = false;
+
+        if (studentMap.has(name.toLowerCase())) {
+            const enrollDate = studentMap.get(name.toLowerCase());
+            gradYear = enrollDate.getFullYear() + 2;
+
+            // Check if 1st year data
+            const isFirstRound = record.session.includes('第1回');
+            const examMonth = isFirstRound ? 6 : 11;
+            const examDate = new Date(examYear, examMonth, 1);
+
+            const diffTime = examDate - enrollDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 365) isFirstYearData = true;
+        } else {
+            // Fallback for unmatched
+            gradYear = examYear + 1;
+        }
+
+        if (isFirstYearData) return; // SKIP
 
         if (!studentExamHistory[name]) {
             studentExamHistory[name] = {
-                lastExamYear: examYear,
+                graduationYear: gradYear,
                 hasN3Plus: false
             };
+        } else {
+            if (studentMap.has(name.toLowerCase())) {
+                const enrollDate = studentMap.get(name.toLowerCase());
+                studentExamHistory[name].graduationYear = enrollDate.getFullYear() + 2;
+            }
         }
 
-        // Track the latest exam year for this student
-        if (examYear > studentExamHistory[name].lastExamYear) {
-            studentExamHistory[name].lastExamYear = examYear;
-        }
-
-        // Track if they ever passed N3+
         if (result === '合格') {
             const levelNum = parseInt(record.level.replace('N', ''));
             if (levelNum <= 3) {
@@ -365,11 +416,11 @@ export async function getEnhancedJlptStats() {
         }
     });
 
-    // Step 2: Group students by graduation year (lastExamYear + 1)
+    // Group stats
     const graduationCohorts = {};
 
     Object.entries(studentExamHistory).forEach(([name, data]) => {
-        const gradYear = data.lastExamYear + 1;
+        const gradYear = data.graduationYear;
 
         if (!graduationCohorts[gradYear]) {
             graduationCohorts[gradYear] = { total: 0, n3Plus: 0 };
@@ -402,5 +453,3 @@ export async function getEnhancedJlptStats() {
         }
     };
 }
-
-
