@@ -305,28 +305,31 @@ export async function getEnhancedJlptStats() {
     const n3PlusStudents = Object.values(studentBestLevel).filter(level => level <= 3).length;
     const totalUniqueStudents = Object.keys(studentBestLevel).length;
 
-    // Calculate by graduation year (approximate using session data)
+    // Calculate by graduation year
+    // JLPT Schedule: 第1回 = July, 第2回 = December
+    // Students graduate in March, so exam year X → graduation year X+1 (March)
     const graduationStats = {};
     rawData.forEach(record => {
         if (record.result !== '合格') return;
-        const year = record.session.substring(0, 4);
+        const examYear = parseInt(record.session.substring(0, 4));
+        const graduationYear = examYear + 1; // Exams taken in year X → Graduate March (X+1)
         const level = record.level;
         const levelNum = parseInt(level.replace('N', ''));
         const name = record.name;
         if (!name) return;
 
-        if (!graduationStats[year]) {
-            graduationStats[year] = { students: new Set(), n3Plus: new Set() };
+        if (!graduationStats[graduationYear]) {
+            graduationStats[graduationYear] = { students: new Set(), n3Plus: new Set() };
         }
-        graduationStats[year].students.add(name);
+        graduationStats[graduationYear].students.add(name);
         if (levelNum <= 3) {
-            graduationStats[year].n3Plus.add(name);
+            graduationStats[graduationYear].n3Plus.add(name);
         }
     });
 
     const graduationN3PlusRates = Object.entries(graduationStats)
         .map(([year, stats]) => ({
-            year,
+            year: year + '年3月卒',
             totalStudents: stats.students.size,
             n3PlusStudents: stats.n3Plus.size,
             rate: stats.students.size > 0 ? ((stats.n3Plus.size / stats.students.size) * 100).toFixed(1) : 0

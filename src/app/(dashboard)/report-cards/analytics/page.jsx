@@ -445,7 +445,7 @@ export default function AnalyticsPage() {
                                         <table className={styles.table}>
                                             <thead>
                                                 <tr>
-                                                    <th>年度</th>
+                                                    <th>卒業時期</th>
                                                     <th>合格者数</th>
                                                     <th>N3以上取得者</th>
                                                     <th>N3以上保有率</th>
@@ -454,7 +454,7 @@ export default function AnalyticsPage() {
                                             <tbody>
                                                 {enhancedJlptStats.graduationN3PlusRates.map((row, idx) => (
                                                     <tr key={idx}>
-                                                        <td>{row.year}年度</td>
+                                                        <td>{row.year}</td>
                                                         <td>{row.totalStudents}名</td>
                                                         <td>{row.n3PlusStudents}名</td>
                                                         <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
