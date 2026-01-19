@@ -337,13 +337,14 @@ export async function getEnhancedJlptStats(students = []) {
             const diffTime = examDate - enrollDate;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            // If < 365 days (approx 1 year), treat as 1st year data -> SKIP
-            if (diffDays < 365) {
+            // If < 0 days (pre-enrollment), skip.
+            // Previously filtered < 365 days, but this hides valid 1st year passes involved in graduation stats.
+            if (diffDays < 0) {
                 isFirstYearData = true;
             }
         }
 
-        if (isFirstYearData) return; // SKIP 1st year data
+        if (isFirstYearData) return; // SKIP pre-enrollment data
 
         allExaminees.add(name);
 
@@ -388,7 +389,7 @@ export async function getEnhancedJlptStats(students = []) {
             const diffTime = examDate - enrollDate;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays < 365) isFirstYearData = true;
+            if (diffDays < 0) isFirstYearData = true;
         } else {
             // Fallback for unmatched
             gradYear = examYear + 1;

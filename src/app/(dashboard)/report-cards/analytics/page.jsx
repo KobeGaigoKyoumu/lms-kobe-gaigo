@@ -185,6 +185,29 @@ export default function AnalyticsPage() {
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.5)',
             tension: 0.3,
+        }, {
+            label: '近似曲線',
+            data: (() => {
+                const yValues = uniqueSessions.map(session => {
+                    const s = sessionGroups[session];
+                    return s.total > 0 ? (s.passed / s.total) * 100 : 0;
+                });
+                const n = yValues.length;
+                if (n === 0) return [];
+                const xValues = Array.from({ length: n }, (_, i) => i);
+                const sumX = xValues.reduce((a, b) => a + b, 0);
+                const sumY = yValues.reduce((a, b) => a + b, 0);
+                const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+                const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
+                const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                return xValues.map(x => (slope * x + intercept).toFixed(1));
+            })(),
+            borderColor: 'rgba(59, 130, 246, 0.4)',
+            borderDash: [5, 5],
+            pointRadius: 0,
+            borderWidth: 2,
+            tension: 0
         }],
     }
 
@@ -402,19 +425,6 @@ export default function AnalyticsPage() {
                                                     borderColor: 'rgb(34, 197, 94)',
                                                     backgroundColor: 'rgba(34, 197, 94, 0.5)',
                                                     tension: 0.3,
-                                                }, {
-                                                    label: '3年移動平均',
-                                                    data: enhancedJlptStats.yearlyTrend.map((s, i, arr) => {
-                                                        if (i < 2) return null;
-                                                        const sum = parseFloat(arr[i].passRate) + parseFloat(arr[i - 1].passRate) + parseFloat(arr[i - 2].passRate);
-                                                        return (sum / 3).toFixed(1);
-                                                    }),
-                                                    borderColor: 'rgba(251, 146, 60, 0.8)', // Orange-400
-                                                    backgroundColor: 'transparent',
-                                                    borderDash: [5, 5],
-                                                    tension: 0.4,
-                                                    pointRadius: 0,
-                                                    borderWidth: 2
                                                 }]
                                             }}
                                             options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
