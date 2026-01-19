@@ -136,7 +136,8 @@
     font-size: var(--font-size-2xl);
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: -0.025em;
+    /* letter-spacing: -0.025em; Remove negative spacing */
+    margin: 0 var(--spacing-2);
 }
 
 .statUnit {
@@ -178,6 +179,7 @@
 .sectionTitle {
     font-size: var(--font-size-lg);
     font-weight: 600;
+    margin-top: var(--spacing-8);
     margin-bottom: var(--spacing-4);
     color: var(--text-primary);
 }

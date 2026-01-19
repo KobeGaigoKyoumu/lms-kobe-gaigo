@@ -440,13 +440,13 @@ export default function AnalyticsPage() {
                             {/* N3+ Certification by Graduation Year Table */}
                             {enhancedJlptStats.graduationN3PlusRates && (
                                 <div>
-                                    <h2 className={styles.sectionTitle}>年度別 N3以上保有率 (2年終了時)</h2>
+                                    <h2 className={styles.sectionTitle}>年度別卒業時N3以上保有率</h2>
                                     <div className={styles.tableContainer}>
                                         <table className={styles.table}>
                                             <thead>
                                                 <tr>
                                                     <th>卒業時期</th>
-                                                    <th>合格者数</th>
+                                                    <th>受験者数</th>
                                                     <th>N3以上取得者</th>
                                                     <th>N3以上保有率</th>
                                                 </tr>
