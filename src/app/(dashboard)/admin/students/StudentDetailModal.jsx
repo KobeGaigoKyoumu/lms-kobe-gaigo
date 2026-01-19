@@ -1,9 +1,32 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import styles from './page.module.css'
 import { parseStudentId } from '@/lib/utils/studentId'
 
 export default function StudentDetailModal({ student, onClose }) {
+    const [jlptHistory, setJlptHistory] = useState([])
+    const [loadingJlpt, setLoadingJlpt] = useState(true)
+
+    useEffect(() => {
+        if (student?.full_name) {
+            fetchJlptHistory(student.full_name)
+        }
+    }, [student?.full_name])
+
+    const fetchJlptHistory = async (name) => {
+        try {
+            const res = await fetch(`/api/jlpt/student?name=${encodeURIComponent(name)}`)
+            const data = await res.json()
+            setJlptHistory(Array.isArray(data) ? data : [])
+        } catch (error) {
+            console.error('Error fetching JLPT history:', error)
+            setJlptHistory([])
+        } finally {
+            setLoadingJlpt(false)
+        }
+    }
+
     if (!student) return null
 
     // 学籍番号から学年・クラス情報を計算
@@ -19,6 +42,12 @@ export default function StudentDetailModal({ student, onClose }) {
         active: '在籍中',
         graduated: '卒業',
         inactive: '休学'
+    }
+
+    const getResultBadgeClass = (result) => {
+        if (result === '合格') return styles.resultPass
+        if (result === '不合格') return styles.resultFail
+        return ''
     }
 
     return (
@@ -155,8 +184,46 @@ export default function StudentDetailModal({ student, onClose }) {
                             </div>
                         </div>
                     </section>
+
+                    {/* JLPT受験履歴 */}
+                    <section className={styles.detailSection}>
+                        <h3>JLPT受験履歴</h3>
+                        {loadingJlpt ? (
+                            <p className={styles.loadingText}>読み込み中...</p>
+                        ) : jlptHistory.length > 0 ? (
+                            <div className={styles.jlptTable}>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>実施回</th>
+                                            <th>レベル</th>
+                                            <th>結果</th>
+                                            <th>スコア</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {jlptHistory.map((record, idx) => (
+                                            <tr key={idx}>
+                                                <td>{record.session}</td>
+                                                <td><span className={styles.levelBadge}>{record.level}</span></td>
+                                                <td>
+                                                    <span className={`${styles.resultBadge} ${getResultBadgeClass(record.result)}`}>
+                                                        {record.result}
+                                                    </span>
+                                                </td>
+                                                <td>{record.score}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className={styles.noData}>JLPT受験記録がありません</p>
+                        )}
+                    </section>
                 </div>
             </div>
         </div>
     )
 }
+

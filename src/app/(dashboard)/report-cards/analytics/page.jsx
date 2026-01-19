@@ -48,6 +48,7 @@ export default function AnalyticsPage() {
 
     // JLPT analytics state
     const [jlptData, setJlptData] = useState([])
+    const [enhancedJlptStats, setEnhancedJlptStats] = useState(null)
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
     useEffect(() => {
@@ -82,9 +83,14 @@ export default function AnalyticsPage() {
 
     const fetchJlptData = async () => {
         try {
-            const res = await fetch('/api/jlpt/stats')
-            const data = await res.json()
-            setJlptData(data)
+            const [statsRes, enhancedRes] = await Promise.all([
+                fetch('/api/jlpt/stats'),
+                fetch('/api/jlpt/enhanced')
+            ])
+            const statsData = await statsRes.json()
+            const enhancedData = await enhancedRes.json()
+            setJlptData(statsData)
+            setEnhancedJlptStats(enhancedData)
         } catch (error) {
             console.error('Error fetching JLPT data:', error)
         } finally {
@@ -350,6 +356,81 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Enhanced Statistics */}
+                    {enhancedJlptStats && (
+                        <>
+                            <div className={styles.chartsRow}>
+                                <div className={styles.chartCard}>
+                                    <h3 className={styles.chartTitle}>レベル別 合格率</h3>
+                                    <div className={styles.chartContainer}>
+                                        <Bar
+                                            data={{
+                                                labels: enhancedJlptStats.levelStats.map(s => s.level),
+                                                datasets: [{
+                                                    label: '合格率 (%)',
+                                                    data: enhancedJlptStats.levelStats.map(s => s.passRate),
+                                                    backgroundColor: [
+                                                        'rgba(239, 68, 68, 0.6)',
+                                                        'rgba(249, 115, 22, 0.6)',
+                                                        'rgba(245, 158, 11, 0.6)',
+                                                        'rgba(132, 204, 22, 0.6)',
+                                                        'rgba(59, 130, 246, 0.6)',
+                                                    ],
+                                                }]
+                                            }}
+                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className={styles.chartCard}>
+                                    <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
+                                    <div className={styles.chartContainer}>
+                                        <Line
+                                            data={{
+                                                labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
+                                                datasets: [{
+                                                    label: '合格率 (%)',
+                                                    data: enhancedJlptStats.yearlyTrend.map(s => s.passRate),
+                                                    borderColor: 'rgb(34, 197, 94)',
+                                                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                                    tension: 0.3,
+                                                }]
+                                            }}
+                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nationality Statistics Table */}
+                            <div>
+                                <h2 className={styles.sectionTitle}>国籍別 合格率 (上位10カ国)</h2>
+                                <div className={styles.tableContainer}>
+                                    <table className={styles.table}>
+                                        <thead>
+                                            <tr>
+                                                <th>国籍</th>
+                                                <th>受験者数</th>
+                                                <th>合格者数</th>
+                                                <th>合格率</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {enhancedJlptStats.nationalityStats.map((row, idx) => (
+                                                <tr key={idx}>
+                                                    <td>{row.country}</td>
+                                                    <td>{row.total}</td>
+                                                    <td>{row.passed}</td>
+                                                    <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <div>
                         <h2 className={styles.sectionTitle}>詳細データ</h2>

@@ -149,3 +149,143 @@ function processStatistics(rawData) {
 
     return structuredStats;
 }
+
+/**
+ * Get all raw JLPT data (for enhanced statistics)
+ */
+export async function getAllRawJlptData() {
+    try {
+        if (!fs.existsSync(JLPT_BASE_DIR)) {
+            return [];
+        }
+
+        const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
+
+        const allData = [];
+
+        for (const session of sessions) {
+            const sessionDir = path.join(JLPT_BASE_DIR, session);
+            const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
+
+            for (const file of files) {
+                const filePath = path.join(sessionDir, file);
+                const buffer = fs.readFileSync(filePath);
+                const content = iconv.decode(buffer, 'Shift_JIS');
+                const lines = content.split(/\r?\n/).slice(1).filter(l => l.trim().length > 0);
+
+                for (const line of lines) {
+                    const parsed = parseLine(line);
+                    if (parsed) {
+                        allData.push({ session, ...parsed });
+                    }
+                }
+            }
+        }
+
+        return allData;
+    } catch (error) {
+        console.error("Error reading raw JLPT data:", error);
+        return [];
+    }
+}
+
+/**
+ * Get JLPT history for a specific student by name
+ */
+export async function getJlptByStudentName(studentName) {
+    const allData = await getAllRawJlptData();
+
+    // Filter by student name (case-insensitive partial match)
+    const studentRecords = allData.filter(record =>
+        record.name && record.name.toLowerCase().includes(studentName.toLowerCase())
+    );
+
+    // Sort by session (newest first)
+    studentRecords.sort((a, b) => b.session.localeCompare(a.session));
+
+    return studentRecords.map(r => ({
+        session: r.session,
+        level: r.level,
+        result: r.result,
+        score: r.totalScore,
+        country: r.country
+    }));
+}
+
+/**
+ * Get enhanced statistics (nationality breakdown, level comparison)
+ */
+export async function getEnhancedJlptStats() {
+    const rawData = await getAllRawJlptData();
+
+    // Filter valid results only
+    const validData = rawData.filter(r => r.result === '合格' || r.result === '不合格');
+
+    // 1. Nationality breakdown
+    const byNationality = {};
+    validData.forEach(record => {
+        const country = record.country || 'Unknown';
+        if (!byNationality[country]) {
+            byNationality[country] = { total: 0, passed: 0 };
+        }
+        byNationality[country].total++;
+        if (record.result === '合格') byNationality[country].passed++;
+    });
+
+    const nationalityStats = Object.entries(byNationality)
+        .map(([country, stats]) => ({
+            country,
+            total: stats.total,
+            passed: stats.passed,
+            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+        }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10); // Top 10 countries
+
+    // 2. Level comparison (overall)
+    const byLevel = {};
+    validData.forEach(record => {
+        const level = record.level;
+        if (!byLevel[level]) {
+            byLevel[level] = { total: 0, passed: 0 };
+        }
+        byLevel[level].total++;
+        if (record.result === '合格') byLevel[level].passed++;
+    });
+
+    const levelStats = ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => ({
+        level,
+        total: byLevel[level]?.total || 0,
+        passed: byLevel[level]?.passed || 0,
+        passRate: byLevel[level] ? ((byLevel[level].passed / byLevel[level].total) * 100).toFixed(1) : 0
+    }));
+
+    // 3. Year-over-year trend
+    const byYear = {};
+    validData.forEach(record => {
+        const year = record.session.substring(0, 4);
+        if (!byYear[year]) {
+            byYear[year] = { total: 0, passed: 0 };
+        }
+        byYear[year].total++;
+        if (record.result === '合格') byYear[year].passed++;
+    });
+
+    const yearlyTrend = Object.entries(byYear)
+        .map(([year, stats]) => ({
+            year,
+            total: stats.total,
+            passed: stats.passed,
+            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+        }))
+        .sort((a, b) => a.year.localeCompare(b.year));
+
+    return {
+        nationalityStats,
+        levelStats,
+        yearlyTrend
+    };
+}
+
