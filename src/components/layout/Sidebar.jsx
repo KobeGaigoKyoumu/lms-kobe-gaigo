@@ -290,16 +290,6 @@ export default function Sidebar({ user, role: userRole }) {
                 )
             },
             {
-                href: '/admin/jlpt',
-                label: 'JLPT分析',
-                icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M3 3v18h18" />
-                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-                    </svg>
-                )
-            },
-            {
                 href: '/settings',
                 label: '設定',
                 icon: (
