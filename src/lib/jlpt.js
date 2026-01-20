@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import iconv from 'iconv-lite';
-import staticEnrollmentStats from './enrollment_stats.json';
 
 // Define the base path for JLPT results
 // Using process.cwd() to correctly locate the data directory in Vercel environment
@@ -9,7 +8,9 @@ const JLPT_BASE_DIR = path.join(process.cwd(), 'data', 'JLPT結果');
 const JLPT_HISTORICAL_JSON = path.join(process.cwd(), 'data', 'jlpt_historical.json');
 const NAME_MAPPINGS_JSON = path.join(process.cwd(), 'data', 'name_mappings.json');
 const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_students.json');
+
 const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
+const ENROLLMENT_STATS_JSON = path.join(process.cwd(), 'data', 'enrollment_stats.json');
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;
@@ -644,6 +645,17 @@ export async function getEnhancedJlptStats(students = []) {
     // Calculate enrollment by year for Exam Rate
     const enrollmentByYear = {};
     const dynamicEnrollment = {};
+
+    // Load static data safely
+    let staticEnrollmentStats = {};
+    try {
+        if (fs.existsSync(ENROLLMENT_STATS_JSON)) {
+            staticEnrollmentStats = JSON.parse(fs.readFileSync(ENROLLMENT_STATS_JSON, 'utf8'));
+        }
+    } catch (e) {
+        console.error('Failed to load enrollment stats:', e);
+    }
+
     const processedStudentIds = new Set();
 
     const addEnrollment = (enrollYear) => {
