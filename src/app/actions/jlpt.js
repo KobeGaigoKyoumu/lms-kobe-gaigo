@@ -11,12 +11,23 @@ export async function fetchJlptAnalyticsData() {
     let dataSource = 'cookie'
     let statusDistribution = {}
     let totalFetched = 0
+    let authDebug = {}
+    let envDebug = {}
 
     try {
         // 1. Try with authenticated client via cookies (same as Server Components)
         let supabase = await createClient()
 
         console.log('Server Action: Init Supabase with Cookie Session');
+
+        // Check Auth Status
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        authDebug = {
+            hasUser: !!user,
+            userId: user?.id,
+            error: authError ? authError.message : null
+        }
+        console.log('Server Action: Auth Status:', authDebug);
 
         // Fetch specific fields needed for filtering and class info
         // We fetch ALL students initially to debug status issues if any
@@ -25,6 +36,8 @@ export async function fetchJlptAnalyticsData() {
             .select('full_name, enrollment_date, student_id, student_id_text, class_name, status');
 
         // 2. Fallback: If cookie auth returned no data (likely RLS issue), try Service Role Key
+        envDebug = { hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY };
+
         if ((!data || data.length === 0) && process.env.SUPABASE_SERVICE_ROLE_KEY) {
             console.log('Server Action: Cookie session yielded 0 results. Switching to Service Role Key...');
             try {
@@ -45,6 +58,7 @@ export async function fetchJlptAnalyticsData() {
                 }
             } catch (adminErr) {
                 console.error('Server Action: Service Role Fallback failed', adminErr);
+                envDebug.fallbackError = adminErr.message;
             }
         }
 
@@ -92,7 +106,9 @@ export async function fetchJlptAnalyticsData() {
             studentsFound: students.length,
             totalFetched,
             statusDistribution,
-            dataSource
+            dataSource,
+            auth: authDebug,
+            env: envDebug
         }
     }
 
