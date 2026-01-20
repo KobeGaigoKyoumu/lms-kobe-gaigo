@@ -866,10 +866,13 @@ export default function AnalyticsPage() {
                                             <div className={styles.statValueRow}>
                                                 <span className={styles.statValue} style={{
                                                     color: (() => {
-                                                        // 本校の有効データのみで平均を計算
+                                                        // 本校の有効データのみで平均を計算（passRateは文字列なのでparseFloat）
                                                         const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => enhancedJlptStats.levelStats.find(s => s.level === level)?.passRate)
-                                                            .filter(rate => rate !== undefined && rate !== null && !isNaN(rate));
+                                                            .map(level => {
+                                                                const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                                return stat ? parseFloat(stat.passRate) : null;
+                                                            })
+                                                            .filter(rate => rate !== null && !isNaN(rate));
                                                         const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
                                                             .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
                                                             .filter(rate => rate > 0);
@@ -883,8 +886,11 @@ export default function AnalyticsPage() {
                                                 }}>
                                                     {(() => {
                                                         const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => enhancedJlptStats.levelStats.find(s => s.level === level)?.passRate)
-                                                            .filter(rate => rate !== undefined && rate !== null && !isNaN(rate));
+                                                            .map(level => {
+                                                                const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                                return stat ? parseFloat(stat.passRate) : null;
+                                                            })
+                                                            .filter(rate => rate !== null && !isNaN(rate));
                                                         const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
                                                             .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
                                                             .filter(rate => rate > 0);
@@ -936,7 +942,7 @@ export default function AnalyticsPage() {
                                                                 label: '本校',
                                                                 data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
                                                                     const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                                    return stat?.passRate || 0;
+                                                                    return stat ? parseFloat(stat.passRate) || 0 : 0;
                                                                 }),
                                                                 backgroundColor: 'rgba(59, 130, 246, 0.7)',
                                                                 borderColor: 'rgb(59, 130, 246)',
