@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 import { Bar, Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -32,10 +32,7 @@ ChartJS.register(
     ArcElement
 )
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+
 
 function JlptSessionRow({ sessionData }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -93,6 +90,7 @@ function JlptSessionRow({ sessionData }) {
 }
 
 export default function AnalyticsPage() {
+    const supabase = createClient()
     const [activeTab, setActiveTab] = useState('grades') // 'grades' or 'jlpt'
 
     // Grade analytics state
@@ -722,7 +720,7 @@ export default function AnalyticsPage() {
                         <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
                             <p>表示できるクラスデータがありません。</p>
                             <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                                学生データの読み込みに失敗したか、条件に一致するデータがありません。
+                                学生データの読み込みに失敗したか、条件に一致するデータがありません。（対象: {enhancedJlptStats?.students?.length || 0}名）
                             </p>
                         </div>
                     )}
