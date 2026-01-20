@@ -866,16 +866,33 @@ export default function AnalyticsPage() {
                                             <div className={styles.statValueRow}>
                                                 <span className={styles.statValue} style={{
                                                     color: (() => {
-                                                        const schoolAvg = enhancedJlptStats.levelStats.reduce((sum, s) => sum + (s.passRate || 0), 0) / 5;
-                                                        const nationalAvg = ['N1', 'N2', 'N3', 'N4', 'N5'].reduce((sum, level) =>
-                                                            sum + parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0), 0) / 5;
+                                                        // 本校の有効データのみで平均を計算
+                                                        const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                            .map(level => enhancedJlptStats.levelStats.find(s => s.level === level)?.passRate)
+                                                            .filter(rate => rate !== undefined && rate !== null && !isNaN(rate));
+                                                        const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                            .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
+                                                            .filter(rate => rate > 0);
+
+                                                        if (schoolRates.length === 0 || nationalRates.length === 0) return '#6b7280';
+
+                                                        const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
+                                                        const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
                                                         return schoolAvg >= nationalAvg ? '#22c55e' : '#f59e0b';
                                                     })()
                                                 }}>
                                                     {(() => {
-                                                        const schoolAvg = enhancedJlptStats.levelStats.reduce((sum, s) => sum + (s.passRate || 0), 0) / 5;
-                                                        const nationalAvg = ['N1', 'N2', 'N3', 'N4', 'N5'].reduce((sum, level) =>
-                                                            sum + parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0), 0) / 5;
+                                                        const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                            .map(level => enhancedJlptStats.levelStats.find(s => s.level === level)?.passRate)
+                                                            .filter(rate => rate !== undefined && rate !== null && !isNaN(rate));
+                                                        const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                            .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
+                                                            .filter(rate => rate > 0);
+
+                                                        if (schoolRates.length === 0 || nationalRates.length === 0) return '-';
+
+                                                        const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
+                                                        const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
                                                         const diff = schoolAvg - nationalAvg;
                                                         return diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
                                                     })()}%
