@@ -1177,7 +1177,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.chartGrid}>
                                         <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
                                             <h3 className={styles.chartTitle}>本校 受験率の推移 (対全在籍者)</h3>
-                                            <div className={styles.chartContainer}>
+                                            <div className={styles.tableContainer}>
                                                 <table className={styles.table}>
                                                     <thead>
                                                         <tr>

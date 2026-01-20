@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import iconv from 'iconv-lite';
+import staticEnrollmentStats from './enrollment_stats.json';
 
 // Define the base path for JLPT results
 // Using process.cwd() to correctly locate the data directory in Vercel environment
@@ -641,8 +642,8 @@ export async function getEnhancedJlptStats(students = []) {
     });
 
     // Calculate enrollment by year for Exam Rate
-    // Calculate enrollment by year for Exam Rate
     const enrollmentByYear = {};
+    const dynamicEnrollment = {};
     const processedStudentIds = new Set();
 
     const addEnrollment = (enrollYear) => {
@@ -650,8 +651,8 @@ export async function getEnhancedJlptStats(students = []) {
             // Assume 2 year course
             const y1 = enrollYear;
             const y2 = enrollYear + 1;
-            enrollmentByYear[y1] = (enrollmentByYear[y1] || 0) + 1;
-            enrollmentByYear[y2] = (enrollmentByYear[y2] || 0) + 1;
+            dynamicEnrollment[y1] = (dynamicEnrollment[y1] || 0) + 1;
+            dynamicEnrollment[y2] = (dynamicEnrollment[y2] || 0) + 1;
         }
     };
 
@@ -683,6 +684,14 @@ export async function getEnhancedJlptStats(students = []) {
                 addEnrollment(parsed.enrollmentYear);
             }
         }
+    });
+
+    // Merge static and dynamic enrollment stats
+    const allYears = new Set([...Object.keys(staticEnrollmentStats), ...Object.keys(dynamicEnrollment)]);
+    allYears.forEach(year => {
+        const staticCount = staticEnrollmentStats[year] || 0;
+        const dynamicCount = dynamicEnrollment[year] || 0;
+        enrollmentByYear[year] = Math.max(staticCount, dynamicCount);
     });
 
     const yearlyTrend = Object.entries(byYear)
