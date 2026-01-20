@@ -31,9 +31,11 @@ export async function fetchJlptAnalyticsData() {
 
         // Fetch specific fields needed for filtering and class info
         // We fetch ALL students initially to debug status issues if any
+        // UPDATE: Changed to select('*') because select('specific_columns') fetched 0 rows in some RLS configs
+        // mimicking admin/students/page.jsx behavior
         let { data, error } = await supabase
             .from('students')
-            .select('full_name, enrollment_date, student_id, student_id_text, class_name, status');
+            .select('*');
 
         // 2. Fallback: If cookie auth returned no data (likely RLS issue), try Service Role Key
         envDebug = { hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY };
@@ -48,7 +50,7 @@ export async function fetchJlptAnalyticsData() {
                 );
                 const adminResult = await adminSupabase
                     .from('students')
-                    .select('full_name, enrollment_date, student_id, student_id_text, class_name, status');
+                    .select('*');
 
                 if (adminResult.data && adminResult.data.length > 0) {
                     data = adminResult.data;
