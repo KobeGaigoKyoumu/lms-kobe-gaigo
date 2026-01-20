@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
             const n3 = students.filter(s => s.levels.N3.status === '合格').length
 
             return { className, total, n3Plus, n3PlusRate, n1, n2, n3, students }
-        }).sort((a, b) => a.className.localeCompare(b.className))
+        }).sort((a, b) => parseFloat(b.n3PlusRate) - parseFloat(a.n3PlusRate))
     }, [enhancedJlptStats])
 
     const currentClassStats = useMemo(() => {
@@ -816,15 +816,19 @@ export default function AnalyticsPage() {
                                                                             stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
                                                                         // 点数形式で表示（例: 120/180）
                                                                         const scoreDisplay = stat.score ? stat.score : '-';
+                                                                        const tooltipText = stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : '';
+
                                                                         return (
-                                                                            <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
-                                                                                {stat.status === '未受験' ? (
-                                                                                    <span className={`${styles.badge} ${styles.badgeNone}`}>-</span>
-                                                                                ) : (
-                                                                                    <span className={`${styles.badge} ${badgeClass}`}>
-                                                                                        {scoreDisplay}
-                                                                                    </span>
-                                                                                )}
+                                                                            <td key={level} style={{ position: 'relative' }}>
+                                                                                <div className={styles.tooltipContainer} data-tooltip={tooltipText || null}>
+                                                                                    {stat.status === '未受験' ? (
+                                                                                        <span className={`${styles.badge} ${styles.badgeNone} ${styles.badgeTextBlack}`}>-</span>
+                                                                                    ) : (
+                                                                                        <span className={`${styles.badge} ${badgeClass} ${styles.badgeTextBlack}`}>
+                                                                                            {scoreDisplay}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
                                                                             </td>
                                                                         );
                                                                     })}
