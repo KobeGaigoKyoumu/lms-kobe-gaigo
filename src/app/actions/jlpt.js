@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createClientJs } from '@supabase/supabase-js'
-import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData } from '@/lib/jlpt'
+import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData, getJlptSectionScoreStats } from '@/lib/jlpt'
 
 export async function fetchJlptAnalyticsData() {
     console.log('Server Action: Fetching JLPT Analytics Data...');
@@ -107,6 +107,7 @@ export async function fetchJlptAnalyticsData() {
             graduationN3PlusRates: null,
             graduationDataSource: 'none'
         },
+        sectionScores: null, // 科目別得点データ
         error: fetchError,
         debug: {
             studentsFound: students.length,
@@ -159,6 +160,10 @@ export async function fetchJlptAnalyticsData() {
         }
 
         result.enhanced = enhancedStats;
+
+        // 5. Section Scores (科目別得点)
+        const sectionScores = await getJlptSectionScoreStats();
+        result.sectionScores = sectionScores;
 
     } catch (calcError) {
         console.error('Server Action: Calculation Error', calcError);

@@ -1193,3 +1193,254 @@ export async function getStudentsJlptSummary(students) {
 
     return studentSummaries;
 }
+
+/**
+ * Get JLPT Section (科目別) Score Analysis from CSV data
+ * CSVには以下の科目別得点が含まれる:
+ * - 言語知識（文字・語彙・文法）: 60点満点
+ * - 読解: 60点満点
+ * - 聴解: 60点満点
+ */
+export async function getJlptSectionScoreStats() {
+    try {
+        const sectionData = {
+            byLevel: {},      // レベル別平均点
+            byNationality: {}, // 国籍別平均点
+            bySection: {},    // 科目別平均点
+            bySectionLevel: [], // 科目×レベル別詳細
+            overall: {}       // 全体統計
+        };
+
+        const sectionStats = {};  // { section: { level: { total: [], passed: [], failed: [] } } }
+        const nationalitySectionStats = {}; // { country: { section: { scores: [] } } }
+
+        if (!fs.existsSync(JLPT_BASE_DIR)) {
+            console.log('JLPT結果フォルダが見つかりません:', JLPT_BASE_DIR);
+            return sectionData;
+        }
+
+        const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
+
+        for (const session of sessions) {
+            const sessionDir = path.join(JLPT_BASE_DIR, session);
+            const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
+
+            for (const file of files) {
+                const filePath = path.join(sessionDir, file);
+                const level = file.replace('.csv', '');
+
+                let content;
+                try {
+                    const buffer = fs.readFileSync(filePath);
+                    content = iconv.decode(buffer, 'Shift_JIS');
+                } catch {
+                    content = fs.readFileSync(filePath, 'utf-8');
+                }
+
+                const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
+                if (lines.length < 2) continue;
+
+                // Skip header
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+                    const parts = parseCSVLine(line);
+
+                    if (parts.length < 17) continue;
+
+                    const result = parts[8];
+                    const country = parts[5];
+
+                    // 欠席を除外
+                    if (result !== '合格' && result !== '不合格') continue;
+
+                    // 科目別得点を抽出 (インデックス: 11=得点区分名1, 12=得点区分別得点1, ...)
+                    const sections = [
+                        { name: '言語知識', scoreIdx: 12 },
+                        { name: '読解', scoreIdx: 14 },
+                        { name: '聴解', scoreIdx: 16 }
+                    ];
+
+                    for (const sec of sections) {
+                        const scoreStr = parts[sec.scoreIdx] || '';
+                        if (!scoreStr || !scoreStr.includes('/') || scoreStr.includes('**')) continue;
+
+                        const score = parseInt(scoreStr.split('/')[0], 10);
+                        if (isNaN(score) || score <= 0) continue;
+
+                        // セクション別統計
+                        if (!sectionStats[sec.name]) {
+                            sectionStats[sec.name] = {};
+                        }
+                        if (!sectionStats[sec.name][level]) {
+                            sectionStats[sec.name][level] = { total: [], passed: [], failed: [] };
+                        }
+
+                        sectionStats[sec.name][level].total.push(score);
+                        if (result === '合格') {
+                            sectionStats[sec.name][level].passed.push(score);
+                        } else {
+                            sectionStats[sec.name][level].failed.push(score);
+                        }
+
+                        // 国籍別統計
+                        if (country) {
+                            if (!nationalitySectionStats[country]) {
+                                nationalitySectionStats[country] = {};
+                            }
+                            if (!nationalitySectionStats[country][sec.name]) {
+                                nationalitySectionStats[country][sec.name] = [];
+                            }
+                            nationalitySectionStats[country][sec.name].push(score);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 集計結果を整形
+        // 1. 科目×レベル別詳細
+        const sectionLevelData = [];
+        for (const section of ['言語知識', '読解', '聴解']) {
+            const levelData = sectionStats[section] || {};
+            for (const level of ['N1', 'N2', 'N3', 'N4', 'N5']) {
+                const data = levelData[level];
+                if (!data || data.total.length === 0) continue;
+
+                const avg = (arr) => arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 10) / 10 : null;
+
+                sectionLevelData.push({
+                    section,
+                    level,
+                    count: data.total.length,
+                    avgScore: avg(data.total),
+                    maxScore: Math.max(...data.total),
+                    minScore: Math.min(...data.total),
+                    passedAvg: avg(data.passed),
+                    failedAvg: avg(data.failed)
+                });
+            }
+        }
+        sectionData.bySectionLevel = sectionLevelData;
+
+        // 2. レベル別平均点（全科目合計）
+        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+        const levelAvgData = {};
+        for (const level of levels) {
+            const allScores = [];
+            for (const section of ['言語知識', '読解', '聴解']) {
+                const data = sectionStats[section]?.[level];
+                if (data) allScores.push(...data.total);
+            }
+            if (allScores.length > 0) {
+                levelAvgData[level] = {
+                    count: allScores.length,
+                    avgScore: Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length * 10) / 10
+                };
+            }
+        }
+        sectionData.byLevel = levelAvgData;
+
+        // 3. 科目別平均点
+        for (const section of ['言語知識', '読解', '聴解']) {
+            const allScores = [];
+            const levelData = sectionStats[section] || {};
+            for (const level of levels) {
+                if (levelData[level]) {
+                    allScores.push(...levelData[level].total);
+                }
+            }
+            if (allScores.length > 0) {
+                sectionData.bySection[section] = {
+                    count: allScores.length,
+                    avgScore: Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length * 10) / 10
+                };
+            }
+        }
+
+        // 4. 国籍別科目別平均点（上位10国）
+        const nationalityData = [];
+        for (const [country, sections] of Object.entries(nationalitySectionStats)) {
+            let totalScores = 0;
+            let scoreCount = 0;
+            const sectionAvgs = {};
+
+            for (const [section, scores] of Object.entries(sections)) {
+                if (scores.length > 0) {
+                    sectionAvgs[section] = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10;
+                    totalScores += scores.reduce((a, b) => a + b, 0);
+                    scoreCount += scores.length;
+                }
+            }
+
+            if (scoreCount > 10) { // 10件以上のデータがある国のみ
+                nationalityData.push({
+                    country,
+                    totalRecords: scoreCount,
+                    avgScore: Math.round(totalScores / scoreCount * 10) / 10,
+                    ...sectionAvgs
+                });
+            }
+        }
+        sectionData.byNationality = nationalityData.sort((a, b) => b.totalRecords - a.totalRecords).slice(0, 10);
+
+        // 5. 全体統計
+        let grandTotalScores = [];
+        for (const section of ['言語知識', '読解', '聴解']) {
+            const levelData = sectionStats[section] || {};
+            for (const level of levels) {
+                if (levelData[level]) {
+                    grandTotalScores.push(...levelData[level].total);
+                }
+            }
+        }
+
+        if (grandTotalScores.length > 0) {
+            sectionData.overall = {
+                totalRecords: grandTotalScores.length,
+                avgScore: Math.round(grandTotalScores.reduce((a, b) => a + b, 0) / grandTotalScores.length * 10) / 10,
+                maxScore: Math.max(...grandTotalScores),
+                minScore: Math.min(...grandTotalScores)
+            };
+        }
+
+        console.log(`Section Score Stats: ${sectionData.bySectionLevel.length} records`);
+        return sectionData;
+
+    } catch (error) {
+        console.error('Error getting section score stats:', error);
+        return {
+            byLevel: {},
+            byNationality: [],
+            bySection: {},
+            bySectionLevel: [],
+            overall: {}
+        };
+    }
+}
+
+/**
+ * Helper function to parse CSV line with proper quote handling
+ */
+function parseCSVLine(line) {
+    const parts = [];
+    let current = '';
+    let inQuote = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuote = !inQuote;
+        } else if (char === ',' && !inQuote) {
+            parts.push(current.replace(/^"|"$/g, '').trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    parts.push(current.replace(/^"|"$/g, '').trim());
+
+    return parts;
+}
+

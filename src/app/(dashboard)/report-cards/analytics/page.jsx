@@ -105,11 +105,12 @@ export default function AnalyticsPage() {
     // JLPT analytics state
     const [jlptData, setJlptData] = useState([])
     const [enhancedJlptStats, setEnhancedJlptStats] = useState(null)
+    const [sectionScoreStats, setSectionScoreStats] = useState(null) // 科目別得点データ
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
-    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', or 'compare'
+    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', 'compare', or 'section'
     const [nationalStats, setNationalStats] = useState(null)
     const [loadingNational, setLoadingNational] = useState(false)
     const [debugInfo, setDebugInfo] = useState(null)
@@ -196,6 +197,10 @@ export default function AnalyticsPage() {
 
             if (result.enhanced) {
                 setEnhancedJlptStats(result.enhanced)
+            }
+
+            if (result.sectionScores) {
+                setSectionScoreStats(result.sectionScores)
             }
         } catch (error) {
             console.error('Error fetching JLPT data:', error)
@@ -510,6 +515,12 @@ export default function AnalyticsPage() {
                             }}
                         >
                             全国比較
+                        </button>
+                        <button
+                            className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.active : ''}`}
+                            onClick={() => setJlptSubTab('section')}
+                        >
+                            科目別得点
                         </button>
                     </div>
 
@@ -1281,6 +1292,183 @@ export default function AnalyticsPage() {
                             {!loadingNational && !nationalStats && (
                                 <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
                                     全国統計データの読み込みに失敗しました。
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* Section Scores (科目別得点) Tab */}
+                    {jlptSubTab === 'section' && (
+                        <>
+                            {sectionScoreStats ? (
+                                <>
+                                    {/* Summary Stats */}
+                                    <div className={styles.statsGrid}>
+                                        <div className={styles.statCard}>
+                                            <span className={styles.statLabel}>科目別データ件数</span>
+                                            <div className={styles.statValueRow}>
+                                                <span className={styles.statValue}>{sectionScoreStats.overall?.totalRecords?.toLocaleString() || 0}</span>
+                                                <span className={styles.statUnit}>件</span>
+                                            </div>
+                                        </div>
+                                        <div className={styles.statCard}>
+                                            <span className={styles.statLabel}>全科目平均点</span>
+                                            <div className={styles.statValueRow}>
+                                                <span className={styles.statValue}>{sectionScoreStats.overall?.avgScore || 0}</span>
+                                                <span className={styles.statUnit}>点</span>
+                                            </div>
+                                        </div>
+                                        {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
+                                            <div className={styles.statCard} key={section}>
+                                                <span className={styles.statLabel}>{section}</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{data.avgScore}</span>
+                                                    <span className={styles.statUnit}>点平均</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Section Score Charts */}
+                                    <div className={styles.chartsRow}>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>科目別平均点</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Bar
+                                                    data={{
+                                                        labels: Object.keys(sectionScoreStats.bySection || {}),
+                                                        datasets: [{
+                                                            label: '平均点',
+                                                            data: Object.values(sectionScoreStats.bySection || {}).map(s => s.avgScore),
+                                                            backgroundColor: [
+                                                                'rgba(239, 68, 68, 0.6)',
+                                                                'rgba(59, 130, 246, 0.6)',
+                                                                'rgba(34, 197, 94, 0.6)',
+                                                            ],
+                                                        }]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>レベル別科目平均点</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Bar
+                                                    data={{
+                                                        labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
+                                                        datasets: [
+                                                            {
+                                                                label: '言語知識',
+                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '言語知識' && s.level === level);
+                                                                    return item?.avgScore || 0;
+                                                                }),
+                                                                backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                                                            },
+                                                            {
+                                                                label: '読解',
+                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '読解' && s.level === level);
+                                                                    return item?.avgScore || 0;
+                                                                }),
+                                                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                                            },
+                                                            {
+                                                                label: '聴解',
+                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '聴解' && s.level === level);
+                                                                    return item?.avgScore || 0;
+                                                                }),
+                                                                backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                                                            }
+                                                        ]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Section Score Details Table */}
+                                    <div>
+                                        <h2 className={styles.sectionTitle}>科目×レベル別詳細</h2>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>科目</th>
+                                                        <th>レベル</th>
+                                                        <th>データ数</th>
+                                                        <th>平均点</th>
+                                                        <th>最高点</th>
+                                                        <th>最低点</th>
+                                                        <th>合格者平均</th>
+                                                        <th>不合格者平均</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {(sectionScoreStats.bySectionLevel || []).map((row, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ fontWeight: 600 }}>{row.section}</td>
+                                                            <td>
+                                                                <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                                    {row.level}
+                                                                </span>
+                                                            </td>
+                                                            <td>{row.count}</td>
+                                                            <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                            <td>{row.maxScore}点</td>
+                                                            <td>{row.minScore}点</td>
+                                                            <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                                {row.passedAvg ? `${row.passedAvg}点` : '-'}
+                                                            </td>
+                                                            <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                                {row.failedAvg ? `${row.failedAvg}点` : '-'}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* Nationality Section Scores */}
+                                    {sectionScoreStats.byNationality && sectionScoreStats.byNationality.length > 0 && (
+                                        <div>
+                                            <h2 className={styles.sectionTitle}>国籍別科目得点</h2>
+                                            <div className={styles.tableContainer}>
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>国籍</th>
+                                                            <th>データ数</th>
+                                                            <th>全体平均</th>
+                                                            <th>言語知識</th>
+                                                            <th>読解</th>
+                                                            <th>聴解</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {sectionScoreStats.byNationality.map((row, idx) => (
+                                                            <tr key={idx}>
+                                                                <td style={{ fontWeight: 600 }}>{row.country}</td>
+                                                                <td>{row.totalRecords}</td>
+                                                                <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                                <td>{row['言語知識'] || '-'}</td>
+                                                                <td>{row['読解'] || '-'}</td>
+                                                                <td>{row['聴解'] || '-'}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                    科目別得点データを読み込み中...
                                 </div>
                             )}
                         </>
