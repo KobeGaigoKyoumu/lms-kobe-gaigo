@@ -859,10 +859,57 @@ export default function AnalyticsPage() {
 
                             {!loadingNational && nationalStats && enhancedJlptStats?.levelStats && (
                                 <>
+                                    {/* Summary Stats Cards */}
+                                    <div className={styles.statsGrid}>
+                                        <div className={styles.statCard}>
+                                            <span className={styles.statLabel}>全国平均との比較</span>
+                                            <div className={styles.statValueRow}>
+                                                <span className={styles.statValue} style={{
+                                                    color: (() => {
+                                                        const schoolAvg = enhancedJlptStats.levelStats.reduce((sum, s) => sum + (s.passRate || 0), 0) / 5;
+                                                        const nationalAvg = ['N1', 'N2', 'N3', 'N4', 'N5'].reduce((sum, level) =>
+                                                            sum + parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0), 0) / 5;
+                                                        return schoolAvg >= nationalAvg ? '#22c55e' : '#f59e0b';
+                                                    })()
+                                                }}>
+                                                    {(() => {
+                                                        const schoolAvg = enhancedJlptStats.levelStats.reduce((sum, s) => sum + (s.passRate || 0), 0) / 5;
+                                                        const nationalAvg = ['N1', 'N2', 'N3', 'N4', 'N5'].reduce((sum, level) =>
+                                                            sum + parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0), 0) / 5;
+                                                        const diff = schoolAvg - nationalAvg;
+                                                        return diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+                                                    })()}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className={styles.statCard}>
+                                            <span className={styles.statLabel}>全国平均以上のレベル数</span>
+                                            <div className={styles.statValueRow}>
+                                                <span className={styles.statValue}>
+                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].filter(level => {
+                                                        const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                        const schoolRate = schoolStat?.passRate || 0;
+                                                        const nationalRate = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                        return schoolRate > nationalRate;
+                                                    }).length}
+                                                </span>
+                                                <span className={styles.statUnit}>/ 5レベル</span>
+                                            </div>
+                                        </div>
+                                        <div className={styles.statCard}>
+                                            <span className={styles.statLabel}>データ収集期間</span>
+                                            <div className={styles.statValueRow}>
+                                                <span className={styles.statValue}>{nationalStats.totalSessions}</span>
+                                                <span className={styles.statUnit}>回分</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Comparison Bar Chart */}
+                                    <h3 className={styles.sectionTitle}>レベル別合格率比較</h3>
                                     <div className={styles.chartGrid}>
                                         <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>レベル別合格率比較</h3>
+                                            <h3 className={styles.chartTitle}>本校 vs 全国平均（日本国内）</h3>
                                             <div className={styles.chartContainer}>
                                                 <Bar
                                                     data={{
@@ -906,16 +953,60 @@ export default function AnalyticsPage() {
                                                 />
                                             </div>
                                         </div>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>全国平均の推移（N3）</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Line
+                                                    data={{
+                                                        labels: nationalStats.sessions
+                                                            .filter(s => s.japan?.N3?.pass_rate)
+                                                            .map(s => s.session_name),
+                                                        datasets: [
+                                                            {
+                                                                label: '全国N3合格率',
+                                                                data: nationalStats.sessions
+                                                                    .filter(s => s.japan?.N3?.pass_rate)
+                                                                    .map(s => s.japan.N3.pass_rate),
+                                                                borderColor: 'rgb(245, 158, 11)',
+                                                                backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                                                                tension: 0.3,
+                                                            }
+                                                        ]
+                                                    }}
+                                                    options={{
+                                                        responsive: true,
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            legend: { position: 'top' },
+                                                        },
+                                                        scales: {
+                                                            y: {
+                                                                beginAtZero: true,
+                                                                max: 100,
+                                                                title: { display: true, text: '合格率 (%)' }
+                                                            },
+                                                            x: {
+                                                                ticks: { maxRotation: 45, minRotation: 45 }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Comparison Table */}
-                                    <div className={styles.tableContainer} style={{ marginTop: '2rem' }}>
+                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>レベル別詳細比較</h3>
+                                    <div className={styles.tableContainer}>
                                         <table className={styles.table}>
                                             <thead>
                                                 <tr>
                                                     <th>レベル</th>
                                                     <th>本校合格率</th>
-                                                    <th>全国平均（日本国内）</th>
+                                                    <th>本校受験者数</th>
+                                                    <th>全国平均</th>
+                                                    <th>全国最低</th>
+                                                    <th>全国最高</th>
                                                     <th>差分</th>
                                                     <th>評価</th>
                                                 </tr>
@@ -924,8 +1015,11 @@ export default function AnalyticsPage() {
                                                 {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
                                                     const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
                                                     const schoolRate = schoolStat?.passRate || 0;
-                                                    const nationalRate = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
-                                                    const diff = (schoolRate - nationalRate).toFixed(1);
+                                                    const schoolExaminees = schoolStat?.total || 0;
+                                                    const nationalAvg = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                    const nationalMin = parseFloat(nationalStats.averageRates?.japan?.[level]?.min || 0);
+                                                    const nationalMax = parseFloat(nationalStats.averageRates?.japan?.[level]?.max || 0);
+                                                    const diff = (schoolRate - nationalAvg).toFixed(1);
                                                     const isPositive = parseFloat(diff) > 0;
                                                     const isNegative = parseFloat(diff) < 0;
 
@@ -937,7 +1031,10 @@ export default function AnalyticsPage() {
                                                                 </span>
                                                             </td>
                                                             <td style={{ fontWeight: 600 }}>{schoolRate}%</td>
-                                                            <td>{nationalRate}%</td>
+                                                            <td>{schoolExaminees}名</td>
+                                                            <td>{nationalAvg}%</td>
+                                                            <td style={{ color: '#6b7280' }}>{nationalMin}%</td>
+                                                            <td style={{ color: '#6b7280' }}>{nationalMax}%</td>
                                                             <td style={{
                                                                 fontWeight: 600,
                                                                 color: isPositive ? '#22c55e' : isNegative ? '#ef4444' : '#6b7280'
@@ -945,13 +1042,46 @@ export default function AnalyticsPage() {
                                                                 {isPositive ? '+' : ''}{diff}%
                                                             </td>
                                                             <td>
-                                                                {isPositive && <span style={{ color: '#22c55e', fontWeight: 600 }}>全国平均以上</span>}
-                                                                {isNegative && <span style={{ color: '#f59e0b', fontWeight: 600 }}>要改善</span>}
-                                                                {!isPositive && !isNegative && <span style={{ color: '#6b7280' }}>同等</span>}
+                                                                {isPositive && <span style={{ color: '#22c55e', fontWeight: 600 }}>◎ 優秀</span>}
+                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: '#ef4444', fontWeight: 600 }}>△ 要改善</span>}
+                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: '#f59e0b', fontWeight: 600 }}>○ 標準</span>}
+                                                                {!isPositive && !isNegative && <span style={{ color: '#6b7280' }}>○ 同等</span>}
                                                             </td>
                                                         </tr>
                                                     );
                                                 })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Recent Sessions Table */}
+                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近の全国試験データ</h3>
+                                    <div className={styles.tableContainer}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>試験回</th>
+                                                    <th>N1</th>
+                                                    <th>N2</th>
+                                                    <th>N3</th>
+                                                    <th>N4</th>
+                                                    <th>N5</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {nationalStats.recentSessions?.slice(0, 6).map((session, idx) => (
+                                                    <tr key={idx}>
+                                                        <td style={{ fontWeight: 600 }}>{session.session_name}</td>
+                                                        {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => (
+                                                            <td key={level}>
+                                                                {session.japan?.[level]?.pass_rate
+                                                                    ? `${session.japan[level].pass_rate}%`
+                                                                    : '-'
+                                                                }
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
                                             </tbody>
                                         </table>
                                     </div>
@@ -961,7 +1091,7 @@ export default function AnalyticsPage() {
                                         <p><strong>データソース:</strong> {nationalStats.source}</p>
                                         <p><strong>集計期間:</strong> {nationalStats.totalSessions}回分のJLPT試験データ（2017年〜2025年）</p>
                                         <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
-                                            ※ 全国平均は日本国内受験者のデータを集計しています。
+                                            ※ 全国平均は日本国内受験者のデータを集計しています。海外受験者データも別途保有しています。
                                         </p>
                                     </div>
                                 </>
