@@ -10,20 +10,30 @@ export default function StudentList({ students }) {
 
     // Fetch JLPT history when student is selected
     useEffect(() => {
-        if (selectedStudent?.full_name) {
-            fetchJlptHistory(selectedStudent.full_name, selectedStudent.enrollment_date)
+        if (selectedStudent?.full_name || selectedStudent?.student_id_text) {
+            fetchJlptHistory(selectedStudent.full_name, selectedStudent.student_id_text, selectedStudent.enrollment_date)
         } else {
             setJlptHistory([])
         }
-    }, [selectedStudent?.full_name, selectedStudent?.enrollment_date])
+    }, [selectedStudent?.full_name, selectedStudent?.student_id_text, selectedStudent?.enrollment_date])
 
-    const fetchJlptHistory = async (name, enrollmentDate) => {
+    const fetchJlptHistory = async (name, studentId, enrollmentDate) => {
         setLoadingJlpt(true)
         try {
-            let url = `/api/jlpt/student?name=${encodeURIComponent(name)}`
-            if (enrollmentDate) {
-                url += `&enrollmentDate=${encodeURIComponent(enrollmentDate)}`
+            // Build URL with available parameters (studentId takes priority on server)
+            let url = `/api/jlpt/student?`
+            const params = []
+            if (studentId) {
+                params.push(`studentId=${encodeURIComponent(studentId)}`)
             }
+            if (name) {
+                params.push(`name=${encodeURIComponent(name)}`)
+            }
+            if (enrollmentDate) {
+                params.push(`enrollmentDate=${encodeURIComponent(enrollmentDate)}`)
+            }
+            url += params.join('&')
+
             const res = await fetch(url)
             const data = await res.json()
             setJlptHistory(Array.isArray(data) ? data : [])

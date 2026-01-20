@@ -9,17 +9,27 @@ export default function StudentDetailModal({ student, onClose }) {
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
     useEffect(() => {
-        if (student?.full_name) {
-            fetchJlptHistory(student.full_name, student.enrollment_date)
+        if (student?.full_name || student?.student_id_text) {
+            fetchJlptHistory(student.full_name, student.student_id_text, student.enrollment_date)
         }
-    }, [student?.full_name, student?.enrollment_date])
+    }, [student?.full_name, student?.student_id_text, student?.enrollment_date])
 
-    const fetchJlptHistory = async (name, enrollmentDate) => {
+    const fetchJlptHistory = async (name, studentId, enrollmentDate) => {
         try {
-            let url = `/api/jlpt/student?name=${encodeURIComponent(name)}`
-            if (enrollmentDate) {
-                url += `&enrollmentDate=${encodeURIComponent(enrollmentDate)}`
+            // Build URL with available parameters (studentId takes priority on server)
+            let url = `/api/jlpt/student?`
+            const params = []
+            if (studentId) {
+                params.push(`studentId=${encodeURIComponent(studentId)}`)
             }
+            if (name) {
+                params.push(`name=${encodeURIComponent(name)}`)
+            }
+            if (enrollmentDate) {
+                params.push(`enrollmentDate=${encodeURIComponent(enrollmentDate)}`)
+            }
+            url += params.join('&')
+
             const res = await fetch(url)
             const data = await res.json()
             setJlptHistory(Array.isArray(data) ? data : [])

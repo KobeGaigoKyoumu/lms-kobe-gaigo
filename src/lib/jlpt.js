@@ -406,7 +406,36 @@ export async function getJlptByStudentId(studentId, enrollmentDate = null) {
 }
 
 /**
+ * Parse student ID to get enrollment year
+ * Format: YYMMXXX (e.g., 2404001 = 2024年4月入学)
+ * @param {string} studentId 
+ * @returns {{ enrollmentYear: number, enrollmentMonth: number, graduationYear: number } | null}
+ */
+function parseStudentIdForEnrollment(studentId) {
+    if (!studentId || String(studentId).length < 4) return null;
+
+    const idStr = String(studentId);
+    const yearShort = parseInt(idStr.substring(0, 2), 10);
+    const month = parseInt(idStr.substring(2, 4), 10);
+
+    // Validate
+    if (isNaN(yearShort) || isNaN(month)) return null;
+    if (month < 1 || month > 12) return null;
+
+    const enrollmentYear = 2000 + yearShort;
+    // 2-year school: graduation = enrollment year + 2 (March)
+    const graduationYear = enrollmentYear + 2;
+
+    return {
+        enrollmentYear,
+        enrollmentMonth: month,
+        graduationYear
+    };
+}
+
+/**
  * Get enhanced statistics (nationality breakdown, level comparison)
+ * Uses student IDs for accurate enrollment/graduation year calculation
  * @param {Array} students - Optional list of students with enrollment info for filtering
  */
 export async function getEnhancedJlptStats(students = []) {
@@ -415,15 +444,57 @@ export async function getEnhancedJlptStats(students = []) {
     // Filter valid results only
     const validData = rawData.filter(r => r.result === '合格' || r.result === '不合格');
 
-    // Create map of student name -> enrollment date
+    // Create map of student name -> enrollment info
+    // Also create studentId -> enrollment info map
     const studentMap = new Map();
+    const studentIdMap = new Map();
+
     if (students && students.length > 0) {
         students.forEach(s => {
             if (s.full_name && s.enrollment_date) {
-                studentMap.set(s.full_name.toLowerCase(), new Date(s.enrollment_date));
+                const enrollDate = new Date(s.enrollment_date);
+                studentMap.set(s.full_name.toLowerCase(), enrollDate);
+
+                // Also add name variants (for Chinese students)
+                const variants = getAllNameVariants(s.full_name);
+                variants.forEach(variant => {
+                    if (!studentMap.has(variant)) {
+                        studentMap.set(variant, enrollDate);
+                    }
+                });
+            }
+            // Store by student ID if available
+            if (s.student_id) {
+                const parsed = parseStudentIdForEnrollment(s.student_id);
+                if (parsed) {
+                    studentIdMap.set(String(s.student_id), {
+                        enrollmentYear: parsed.enrollmentYear,
+                        enrollmentMonth: parsed.enrollmentMonth,
+                        graduationYear: parsed.graduationYear,
+                        name: s.full_name
+                    });
+                }
             }
         });
     }
+
+    // Build studentId -> enrollment info from historical data (for students not in Supabase)
+    rawData.forEach(record => {
+        if (record.studentId && !studentIdMap.has(String(record.studentId))) {
+            const parsed = parseStudentIdForEnrollment(record.studentId);
+            if (parsed) {
+                studentIdMap.set(String(record.studentId), {
+                    enrollmentYear: parsed.enrollmentYear,
+                    enrollmentMonth: parsed.enrollmentMonth,
+                    graduationYear: parsed.graduationYear,
+                    name: record.name
+                });
+            }
+        }
+    });
+
+    console.log(`Student map size: ${studentMap.size}, StudentId map size: ${studentIdMap.size}`);
+
 
     // 1. Nationality breakdown
     const byNationality = {};
@@ -497,29 +568,40 @@ export async function getEnhancedJlptStats(students = []) {
         const name = record.name;
         if (!name) return;
 
-        // Check if student exists and if this exam is in their 1st year
-        let isFirstYearData = false;
+        // Check if student exists and if this exam is before their enrollment
+        let isPreEnrollmentData = false;
+        const examYear = parseInt(record.session.substring(0, 4));
+        const isFirstRound = record.session.includes('第1回');
+        const examMonth = isFirstRound ? 6 : 11;
+        const examDate = new Date(examYear, examMonth, 1);
 
-        if (studentMap.has(name.toLowerCase())) {
-            const enrollDate = studentMap.get(name.toLowerCase());
-            const examYear = parseInt(record.session.substring(0, 4));
-            const isFirstRound = record.session.includes('第1回');
-            // 第1回 = July (6), 第2回 = December (11)
-            const examMonth = isFirstRound ? 6 : 11;
-            const examDate = new Date(examYear, examMonth, 1);
+        // Priority 1: Use student ID for accurate enrollment check
+        if (record.studentId && studentIdMap.has(String(record.studentId))) {
+            const idInfo = studentIdMap.get(String(record.studentId));
+            const enrollDate = new Date(idInfo.enrollmentYear, idInfo.enrollmentMonth - 1, 1);
 
-            // Calculate delta days
-            const diffTime = examDate - enrollDate;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (examDate < enrollDate) {
+                isPreEnrollmentData = true;
+            }
+        }
+        // Priority 2: Use name matching (with variants for Chinese students)
+        else {
+            const nameVariants = getAllNameVariants(name);
+            for (const variant of nameVariants) {
+                if (studentMap.has(variant)) {
+                    const enrollDate = studentMap.get(variant);
+                    const diffTime = examDate - enrollDate;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            // If < 0 days (pre-enrollment), skip.
-            // Previously filtered < 365 days, but this hides valid 1st year passes involved in graduation stats.
-            if (diffDays < 0) {
-                isFirstYearData = true;
+                    if (diffDays < 0) {
+                        isPreEnrollmentData = true;
+                    }
+                    break;
+                }
             }
         }
 
-        if (isFirstYearData) return; // SKIP pre-enrollment data
+        if (isPreEnrollmentData) return; // SKIP pre-enrollment data
 
         allExaminees.add(name);
 
@@ -551,41 +633,80 @@ export async function getEnhancedJlptStats(students = []) {
         let gradYear = 0;
         const examYear = parseInt(record.session.substring(0, 4));
         let isFirstYearData = false;
+        let foundEnrollment = false;
 
-        if (studentMap.has(name.toLowerCase())) {
-            const enrollDate = studentMap.get(name.toLowerCase());
-            gradYear = enrollDate.getFullYear() + 2;
+        // Priority 1: Use student ID to get accurate enrollment/graduation year
+        if (record.studentId && studentIdMap.has(String(record.studentId))) {
+            const idInfo = studentIdMap.get(String(record.studentId));
+            gradYear = idInfo.graduationYear;
+            foundEnrollment = true;
 
-            // Check if 1st year data
+            // Check if exam is before enrollment
             const isFirstRound = record.session.includes('第1回');
             const examMonth = isFirstRound ? 6 : 11;
             const examDate = new Date(examYear, examMonth, 1);
+            const enrollDate = new Date(idInfo.enrollmentYear, idInfo.enrollmentMonth - 1, 1);
 
-            const diffTime = examDate - enrollDate;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (examDate < enrollDate) {
+                isFirstYearData = true;
+            }
+        }
 
-            if (diffDays < 0) isFirstYearData = true;
-        } else {
-            // Fallback for unmatched
+        // Priority 2: Use name matching (with variants for Chinese students)
+        if (!foundEnrollment) {
+            const nameVariants = getAllNameVariants(name);
+            for (const variant of nameVariants) {
+                if (studentMap.has(variant)) {
+                    const enrollDate = studentMap.get(variant);
+                    gradYear = enrollDate.getFullYear() + 2;
+                    foundEnrollment = true;
+
+                    // Check if 1st year data
+                    const isFirstRound = record.session.includes('第1回');
+                    const examMonth = isFirstRound ? 6 : 11;
+                    const examDate = new Date(examYear, examMonth, 1);
+
+                    const diffTime = examDate - enrollDate;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) isFirstYearData = true;
+                    break;
+                }
+            }
+        }
+
+        // Priority 3: Fallback - derive from student ID in historical data
+        if (!foundEnrollment && record.studentId) {
+            const parsed = parseStudentIdForEnrollment(record.studentId);
+            if (parsed) {
+                gradYear = parsed.graduationYear;
+                foundEnrollment = true;
+            }
+        }
+
+        // Priority 4: Last resort - estimate from exam year
+        if (!foundEnrollment) {
             gradYear = examYear + 1;
         }
 
-        if (isFirstYearData) return; // SKIP
+        if (isFirstYearData) return; // SKIP pre-enrollment data
 
         if (!studentExamHistory[name]) {
             const isKanjiCountry = ['中国', '台湾', '韓国'].includes(record.country);
             studentExamHistory[name] = {
                 graduationYear: gradYear,
                 hasN3Plus: false,
-                isKanjiCountry
+                isKanjiCountry,
+                studentId: record.studentId || null
             };
         } else {
-            if (studentMap.has(name.toLowerCase())) {
-                const enrollDate = studentMap.get(name.toLowerCase());
-                studentExamHistory[name].graduationYear = enrollDate.getFullYear() + 2;
-            } else {
-                // For unmatched, assume latest exam is 2nd year -> Max Grad Year
-                studentExamHistory[name].graduationYear = Math.max(studentExamHistory[name].graduationYear, examYear + 1);
+            // Update graduation year if we found better info
+            if (foundEnrollment && record.studentId) {
+                studentExamHistory[name].graduationYear = gradYear;
+                studentExamHistory[name].studentId = record.studentId;
+            } else if (!studentExamHistory[name].studentId) {
+                // Keep max grad year for unmatched
+                studentExamHistory[name].graduationYear = Math.max(studentExamHistory[name].graduationYear, gradYear);
             }
         }
 
