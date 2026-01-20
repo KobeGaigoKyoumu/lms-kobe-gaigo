@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
-    const [jlptViewMode, setJlptViewMode] = useState('summary') // 'summary' or 'detail'
+    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly' or 'class'
 
     useEffect(() => {
         fetchGrades()
@@ -383,13 +383,7 @@ export default function AnalyticsPage() {
                     className={`${styles.tab} ${activeTab === 'jlpt' ? styles.active : ''}`}
                     onClick={() => setActiveTab('jlpt')}
                 >
-                    年度別分析
-                </button>
-                <button
-                    className={`${styles.tab} ${activeTab === 'class_analysis' ? styles.active : ''}`}
-                    onClick={() => setActiveTab('class_analysis')}
-                >
-                    クラス別分析
+                    JLPT分析
                 </button>
             </div>
 
@@ -441,324 +435,264 @@ export default function AnalyticsPage() {
             {/* JLPT Analytics Tab */}
             {activeTab === 'jlpt' && (
                 <>
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <span className={styles.statLabel}>総受験者数 (延べ人数)</span>
-                            <div className={styles.statValueRow}>
-                                <span className={styles.statValue}>{totalJlptExaminees.toLocaleString()}</span>
-                                <span className={styles.statUnit}>名</span>
-                            </div>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statLabel}>総合格者数</span>
-                            <div className={styles.statValueRow}>
-                                <span className={styles.statValue}>{totalJlptPassers.toLocaleString()}</span>
-                                <span className={styles.statUnit}>名</span>
-                            </div>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statLabel}>全体合格率</span>
-                            <div className={styles.statValueRow}>
-                                <span className={styles.statValue}>{overallJlptPassRate}%</span>
-                                <span className={styles.statUnit}>平均</span>
-                            </div>
-                        </div>
-                        {enhancedJlptStats?.overallN3PlusRate && (
-                            <div className={styles.statCard}>
-                                <span className={styles.statLabel}>卒業時N3以上保有率</span>
-                                <div className={styles.statValueRow}>
-                                    <span className={styles.statValue}>{enhancedJlptStats.overallN3PlusRate.rate}%</span>
-                                    <span className={styles.statUnit}>{enhancedJlptStats.overallN3PlusRate.n3PlusStudents}/{enhancedJlptStats.overallN3PlusRate.totalUniqueStudents}名</span>
-                                </div>
-                            </div>
-                        )}
+                    {/* Sub Tabs */}
+                    <div className={styles.subTabs}>
+                        <button
+                            className={`${styles.subTab} ${jlptSubTab === 'yearly' ? styles.active : ''}`}
+                            onClick={() => setJlptSubTab('yearly')}
+                        >
+                            年度別分析
+                        </button>
+                        <button
+                            className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.active : ''}`}
+                            onClick={() => setJlptSubTab('class')}
+                        >
+                            クラス別分析
+                        </button>
                     </div>
 
-                    <div className={styles.chartsRow}>
-                        <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>合格率の推移</h3>
-                            <div className={styles.chartContainer}>
-                                <Line data={jlptTrendData} options={chartOptions} />
-                            </div>
-                        </div>
-                        <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>レベル別 平均点</h3>
-                            <div className={styles.chartContainer}>
-                                <Bar data={jlptScoreData} options={chartOptions} />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Enhanced Statistics */}
-                    {enhancedJlptStats && (
+                    {/* Yearly Analysis Content */}
+                    {jlptSubTab === 'yearly' && (
                         <>
+                            <div className={styles.statsGrid}>
+                                <div className={styles.statCard}>
+                                    <span className={styles.statLabel}>総受験者数 (延べ人数)</span>
+                                    <div className={styles.statValueRow}>
+                                        <span className={styles.statValue}>{totalJlptExaminees.toLocaleString()}</span>
+                                        <span className={styles.statUnit}>名</span>
+                                    </div>
+                                </div>
+                                <div className={styles.statCard}>
+                                    <span className={styles.statLabel}>総合格者数</span>
+                                    <div className={styles.statValueRow}>
+                                        <span className={styles.statValue}>{totalJlptPassers.toLocaleString()}</span>
+                                        <span className={styles.statUnit}>名</span>
+                                    </div>
+                                </div>
+                                <div className={styles.statCard}>
+                                    <span className={styles.statLabel}>全体合格率</span>
+                                    <div className={styles.statValueRow}>
+                                        <span className={styles.statValue}>{overallJlptPassRate}%</span>
+                                        <span className={styles.statUnit}>平均</span>
+                                    </div>
+                                </div>
+                                {enhancedJlptStats?.overallN3PlusRate && (
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>卒業時N3以上保有率</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>{enhancedJlptStats.overallN3PlusRate.rate}%</span>
+                                            <span className={styles.statUnit}>{enhancedJlptStats.overallN3PlusRate.n3PlusStudents}/{enhancedJlptStats.overallN3PlusRate.totalUniqueStudents}名</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className={styles.chartsRow}>
                                 <div className={styles.chartCard}>
-                                    <h3 className={styles.chartTitle}>レベル別 合格率</h3>
+                                    <h3 className={styles.chartTitle}>合格率の推移</h3>
                                     <div className={styles.chartContainer}>
-                                        <Bar
-                                            data={{
-                                                labels: enhancedJlptStats.levelStats.map(s => s.level),
-                                                datasets: [{
-                                                    label: '合格率 (%)',
-                                                    data: enhancedJlptStats.levelStats.map(s => s.passRate),
-                                                    backgroundColor: [
-                                                        'rgba(239, 68, 68, 0.6)',
-                                                        'rgba(249, 115, 22, 0.6)',
-                                                        'rgba(245, 158, 11, 0.6)',
-                                                        'rgba(132, 204, 22, 0.6)',
-                                                        'rgba(59, 130, 246, 0.6)',
-                                                    ],
-                                                }]
-                                            }}
-                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                        />
+                                        <Line data={jlptTrendData} options={chartOptions} />
                                     </div>
                                 </div>
                                 <div className={styles.chartCard}>
-                                    <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
+                                    <h3 className={styles.chartTitle}>レベル別 平均点</h3>
                                     <div className={styles.chartContainer}>
-                                        <Line
-                                            data={{
-                                                labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
-                                                datasets: [{
-                                                    label: '合格率 (%)',
-                                                    data: enhancedJlptStats.yearlyTrend.map(s => s.passRate),
-                                                    borderColor: 'rgb(34, 197, 94)',
-                                                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                                                    tension: 0.3,
-                                                }]
-                                            }}
-                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                        />
+                                        <Bar data={jlptScoreData} options={chartOptions} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Nationality Statistics Table */}
-                            <div>
-                                <h2 className={styles.sectionTitle}>国籍別 合格率 (上位10カ国)</h2>
-                                <div className={styles.tableContainer}>
-                                    <table className={styles.table}>
-                                        <thead>
-                                            <tr>
-                                                <th>国籍</th>
-                                                <th>受験者数</th>
-                                                <th>合格者数</th>
-                                                <th>合格率</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {enhancedJlptStats.nationalityStats.map((row, idx) => (
-                                                <tr key={idx}>
-                                                    <td>{row.country}</td>
-                                                    <td>{row.total}</td>
-                                                    <td>{row.passed}</td>
-                                                    <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            {/* Enhanced Statistics */}
+                            {enhancedJlptStats && (
+                                <>
+                                    <div className={styles.chartsRow}>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>レベル別 合格率</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Bar
+                                                    data={{
+                                                        labels: enhancedJlptStats.levelStats.map(s => s.level),
+                                                        datasets: [{
+                                                            label: '合格率 (%)',
+                                                            data: enhancedJlptStats.levelStats.map(s => s.passRate),
+                                                            backgroundColor: [
+                                                                'rgba(239, 68, 68, 0.6)',
+                                                                'rgba(249, 115, 22, 0.6)',
+                                                                'rgba(245, 158, 11, 0.6)',
+                                                                'rgba(132, 204, 22, 0.6)',
+                                                                'rgba(59, 130, 246, 0.6)',
+                                                            ],
+                                                        }]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Line
+                                                    data={{
+                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
+                                                        datasets: [{
+                                                            label: '合格率 (%)',
+                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.passRate),
+                                                            borderColor: 'rgb(34, 197, 94)',
+                                                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                                            tension: 0.3,
+                                                        }]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            {/* N3+ Certification by Graduation Year Table */}
-                            {enhancedJlptStats.graduationN3PlusRates && (
-                                <div>
-                                    <h2 className={styles.sectionTitle}>年度別卒業時N3以上保有率</h2>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>卒業時期</th>
-                                                    <th>卒業者数</th>
-                                                    <th>漢字圏N3以上保有率</th>
-                                                    <th>非漢字圏N3以上保有率</th>
-                                                    <th>全体N3以上取得者</th>
-                                                    <th>全体N3以上保有率</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {enhancedJlptStats.graduationN3PlusRates.map((row, idx) => (
-                                                    <tr key={idx}>
-                                                        <td>{row.year}</td>
-                                                        <td>{row.totalStudents}名</td>
-                                                        <td>
-                                                            {row.kanji_stats
-                                                                ? `${row.kanji_stats.rate.toFixed(1)}% (${row.kanji_stats.n3_plus}/${row.kanji_stats.total})`
-                                                                : '-'}
-                                                        </td>
-                                                        <td>
-                                                            {row.non_kanji_stats
-                                                                ? `${row.non_kanji_stats.rate.toFixed(1)}% (${row.non_kanji_stats.n3_plus}/${row.non_kanji_stats.total})`
-                                                                : '-'}
-                                                        </td>
-                                                        <td>{row.n3PlusStudents}名</td>
-                                                        <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
-                                                            {row.rate}%
-                                                        </td>
+                                    {/* Nationality Statistics Table */}
+                                    <div>
+                                        <h2 className={styles.sectionTitle}>国籍別 合格率 (上位10カ国)</h2>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>国籍</th>
+                                                        <th>受験者数</th>
+                                                        <th>合格者数</th>
+                                                        <th>合格率</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    {enhancedJlptStats.nationalityStats.map((row, idx) => (
+                                                        <tr key={idx}>
+                                                            <td>{row.country}</td>
+                                                            <td>{row.total}</td>
+                                                            <td>{row.passed}</td>
+                                                            <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
+
+                                    {/* N3+ Certification by Graduation Year Table */}
+                                    {enhancedJlptStats.graduationN3PlusRates && (
+                                        <div>
+                                            <h2 className={styles.sectionTitle}>年度別卒業時N3以上保有率</h2>
+                                            <div className={styles.tableContainer}>
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>卒業時期</th>
+                                                            <th>卒業者数</th>
+                                                            <th>漢字圏N3以上保有率</th>
+                                                            <th>非漢字圏N3以上保有率</th>
+                                                            <th>全体N3以上取得者</th>
+                                                            <th>全体N3以上保有率</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {enhancedJlptStats.graduationN3PlusRates.map((row, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{row.year}</td>
+                                                                <td>{row.totalStudents}名</td>
+                                                                <td>
+                                                                    {row.kanji_stats
+                                                                        ? `${row.kanji_stats.rate.toFixed(1)}% (${row.kanji_stats.n3_plus}/${row.kanji_stats.total})`
+                                                                        : '-'}
+                                                                </td>
+                                                                <td>
+                                                                    {row.non_kanji_stats
+                                                                        ? `${row.non_kanji_stats.rate.toFixed(1)}% (${row.non_kanji_stats.n3_plus}/${row.non_kanji_stats.total})`
+                                                                        : '-'}
+                                                                </td>
+                                                                <td>{row.n3PlusStudents}名</td>
+                                                                <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
+                                                                    {row.rate}%
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
+
+                            <div>
+                                <h2 className={styles.sectionTitle}>詳細データ</h2>
+                                <div className={styles.sessionsContainer}>
+                                    {sortedSessionKeys.map(sessionKey => (
+                                        <JlptSessionRow key={sessionKey} sessionData={jlptSessions[sessionKey]} />
+                                    ))}
+                                </div>
+                            </div>
                         </>
                     )}
 
-                    <div>
-                        <h2 className={styles.sectionTitle}>詳細データ</h2>
-                        <div className={styles.sessionsContainer}>
-                            {sortedSessionKeys.map(sessionKey => (
-                                <JlptSessionRow key={sessionKey} sessionData={jlptSessions[sessionKey]} />
-                            ))}
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* Class Analysis Tab */}
-            {activeTab === 'class_analysis' && enhancedJlptStats?.studentStats && (
-                <>
-                    <div className={styles.toolbar}>
-                        <div className={styles.filterGroup}>
-                            <label className={styles.filterLabel}>クラス選択</label>
-                            <select
-                                className={styles.filterSelect}
-                                value={selectedJlptClass}
-                                onChange={(e) => setSelectedJlptClass(e.target.value)}
-                            >
-                                {[...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort().map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className={styles.viewToggle}>
-                            <button
-                                className={`${styles.toggleBtn} ${jlptViewMode === 'summary' ? styles.active : ''}`}
-                                onClick={() => setJlptViewMode('summary')}
-                            >
-                                取得状況一覧
-                            </button>
-                            <button
-                                className={`${styles.toggleBtn} ${jlptViewMode === 'detail' ? styles.active : ''}`}
-                                onClick={() => setJlptViewMode('detail')}
-                            >
-                                実施回別詳細
-                            </button>
-                        </div>
-                    </div>
-
-                    {jlptViewMode === 'summary' ? (
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>学籍番号</th>
-                                        <th>氏名</th>
-                                        <th>N1</th>
-                                        <th>N2</th>
-                                        <th>N3</th>
-                                        <th>N4</th>
-                                        <th>N5</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {enhancedJlptStats.studentStats
-                                        .filter(s => s.class === selectedJlptClass)
-                                        .sort((a, b) => a.studentId.localeCompare(b.studentId))
-                                        .map(student => (
-                                            <tr key={student.studentId}>
-                                                <td>{student.studentId}</td>
-                                                <td>{student.name}</td>
-                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                    const stat = student.levels[level];
-                                                    const badgeClass = stat.status === '合格' ? styles.badgePassed :
-                                                        stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
-                                                    return (
-                                                        <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
-                                                            <span className={`${styles.badge} ${badgeClass}`}>
-                                                                {stat.status === '未受験' ? '-' : stat.status}
-                                                            </span>
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
+                    {/* Class Analysis Content (Matrix Only) */}
+                    {jlptSubTab === 'class' && enhancedJlptStats?.studentStats && (
+                        <>
+                            <div className={styles.toolbar} style={{ marginTop: '1rem' }}>
+                                <div className={styles.filterGroup}>
+                                    <label className={styles.filterLabel}>クラス選択</label>
+                                    <select
+                                        className={styles.filterSelect}
+                                        value={selectedJlptClass}
+                                        onChange={(e) => setSelectedJlptClass(e.target.value)}
+                                    >
+                                        {[...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort().map(c => (
+                                            <option key={c} value={c}>{c}</option>
                                         ))}
-                                </tbody>
-                            </table>
-                            {enhancedJlptStats.studentStats.filter(s => s.class === selectedJlptClass).length === 0 && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                    該当するデータがありません
+                                    </select>
                                 </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className={styles.sessionsContainer}>
-                            {(() => {
-                                // Filter and aggregate data for selected class
-                                const classStudents = enhancedJlptStats.studentStats
-                                    .filter(s => s.class === selectedJlptClass);
+                            </div>
 
-                                const allRecords = classStudents.flatMap(s => s.records || []);
-
-                                const sessionMap = allRecords.reduce((acc, record) => {
-                                    if (!acc[record.session]) {
-                                        acc[record.session] = {
-                                            session: record.session,
-                                            items: [],
-                                            totalExaminees: 0,
-                                            totalPassers: 0
-                                        };
-                                    }
-                                    // Aggregate by level within session
-                                    let existingItem = acc[record.session].items.find(i => i.level === record.level);
-                                    if (existingItem) {
-                                        existingItem.examinees++;
-                                        if (record.result === '合格') existingItem.passers++;
-                                    } else {
-                                        const newItem = {
-                                            session: record.session,
-                                            level: record.level,
-                                            examinees: 1,
-                                            passers: record.result === '合格' ? 1 : 0,
-                                            averageScore: '-'
-                                        };
-                                        acc[record.session].items.push(newItem);
-                                        existingItem = newItem;
-                                    }
-
-                                    acc[record.session].totalExaminees++;
-                                    if (record.result === '合格') acc[record.session].totalPassers++;
-
-                                    return acc;
-                                }, {});
-
-                                // Calculate pass rates for items
-                                Object.values(sessionMap).forEach(session => {
-                                    session.items.forEach(item => {
-                                        item.passRate = ((item.passers / item.examinees) * 100).toFixed(1);
-                                    });
-                                    // Sort items by level
-                                    session.items.sort((a, b) => a.level.localeCompare(b.level));
-                                });
-
-                                const sortedKeys = Object.keys(sessionMap).sort((a, b) => b.localeCompare(a));
-
-                                if (sortedKeys.length === 0) {
-                                    return (
-                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                            記録が見つかりません
-                                        </div>
-                                    );
-                                }
-
-                                return sortedKeys.map(key => (
-                                    <JlptSessionRow key={key} sessionData={sessionMap[key]} />
-                                ));
-                            })()}
-                        </div>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>学籍番号</th>
+                                            <th>氏名</th>
+                                            <th>N1</th>
+                                            <th>N2</th>
+                                            <th>N3</th>
+                                            <th>N4</th>
+                                            <th>N5</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {enhancedJlptStats.studentStats
+                                            .filter(s => s.class === selectedJlptClass)
+                                            .sort((a, b) => a.studentId.localeCompare(b.studentId))
+                                            .map(student => (
+                                                <tr key={student.studentId}>
+                                                    <td>{student.studentId}</td>
+                                                    <td>{student.name}</td>
+                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                        const stat = student.levels[level];
+                                                        const badgeClass = stat.status === '合格' ? styles.badgePassed :
+                                                            stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
+                                                        return (
+                                                            <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
+                                                                <span className={`${styles.badge} ${badgeClass}`}>
+                                                                    {stat.status === '未受験' ? '-' : stat.status}
+                                                                </span>
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </table>
+                                {enhancedJlptStats.studentStats.filter(s => s.class === selectedJlptClass).length === 0 && (
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                        該当するデータがありません
+                                    </div>
+                                )}
+                            </div>
+                        </>
                     )}
                 </>
             )}

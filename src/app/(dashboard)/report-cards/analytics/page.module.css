@@ -62,6 +62,38 @@
     background: var(--primary-500);
 }
 
+/* Sub Tabs for JLPT Analysis */
+.subTabs {
+    display: flex;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-6);
+    padding-bottom: var(--spacing-2);
+}
+
+.subTab {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.subTab:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+.subTab.active {
+    color: var(--primary-600);
+    background: var(--bg-elevated);
+    border-color: var(--primary-200);
+    box-shadow: var(--shadow-sm);
+}
+
 /* Filters */
 .filters {
     display: flex;
