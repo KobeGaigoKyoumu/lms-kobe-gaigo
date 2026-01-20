@@ -641,27 +641,49 @@ export async function getEnhancedJlptStats(students = []) {
     });
 
     // Calculate enrollment by year for Exam Rate
+    // Calculate enrollment by year for Exam Rate
     const enrollmentByYear = {};
+    const processedStudentIds = new Set();
 
+    const addEnrollment = (enrollYear) => {
+        if (enrollYear > 0) {
+            // Assume 2 year course
+            const y1 = enrollYear;
+            const y2 = enrollYear + 1;
+            enrollmentByYear[y1] = (enrollmentByYear[y1] || 0) + 1;
+            enrollmentByYear[y2] = (enrollmentByYear[y2] || 0) + 1;
+        }
+    };
+
+    // 1. From active student list
     if (students && students.length > 0) {
         students.forEach(s => {
+            // Some checks for valid ID
+            const sid = s.student_id;
+            if (sid) processedStudentIds.add(sid);
+
             let enrollYear = 0;
             if (s.enrollment_date) {
                 enrollYear = new Date(s.enrollment_date).getFullYear();
-            } else if (s.student_id) {
-                const parsed = parseStudentIdForEnrollment(s.student_id);
+            } else if (sid) {
+                const parsed = parseStudentIdForEnrollment(sid);
                 if (parsed) enrollYear = parsed.enrollmentYear;
             }
-
-            if (enrollYear > 0) {
-                // Assume 2 year course
-                const y1 = enrollYear;
-                const y2 = enrollYear + 1;
-                enrollmentByYear[y1] = (enrollmentByYear[y1] || 0) + 1;
-                enrollmentByYear[y2] = (enrollmentByYear[y2] || 0) + 1;
-            }
+            addEnrollment(enrollYear);
         });
     }
+
+    // 2. From historical exam data (find students not in current master)
+    rawData.forEach(record => {
+        const sid = record.studentId || record.id; // handle different field names
+        if (sid && !processedStudentIds.has(sid)) {
+            processedStudentIds.add(sid);
+            const parsed = parseStudentIdForEnrollment(sid);
+            if (parsed) {
+                addEnrollment(parsed.enrollmentYear);
+            }
+        }
+    });
 
     const yearlyTrend = Object.entries(byYear)
         .map(([year, stats]) => {

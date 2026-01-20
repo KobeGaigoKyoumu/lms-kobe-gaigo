@@ -1066,7 +1066,7 @@ export default function AnalyticsPage() {
                                                         <tr>
                                                             <th>年度</th>
                                                             <th>本校合格率</th>
-                                                            <th>全国平均合格率(推定)</th>
+                                                            <th>全国平均合格率</th>
                                                             <th>差分</th>
                                                         </tr>
                                                     </thead>
