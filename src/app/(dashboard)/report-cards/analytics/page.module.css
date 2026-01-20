@@ -383,18 +383,40 @@
 }
 
 /* Status Badges for Class Analysis */
+.badgePassed,
+.badgeFailed {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: default;
+}
+
+.badgePassed:hover,
+.badgeFailed:hover {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
 .badgePassed {
     background: #dcfce7;
     color: #166534;
     border: 1px solid #bbf7d0;
-    cursor: help;
+}
+
+.badgePassed:hover {
+    background: #bbf7d0;
+    border-color: #86efac;
 }
 
 .badgeFailed {
     background: #fee2e2;
     color: #991b1b;
     border: 1px solid #fecaca;
-    cursor: help;
+}
+
+.badgeFailed:hover {
+    background: #fecaca;
+    border-color: #fca5a5;
 }
 
 .badgeNone {
