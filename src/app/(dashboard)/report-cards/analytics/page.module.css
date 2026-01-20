@@ -258,6 +258,33 @@
     background: var(--bg-tertiary);
 }
 
+/* Table row interactions */
+.clickableRow {
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.clickableRow:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Detail Button */
+.detailBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: transparent;
+    border: 1px solid var(--primary-300);
+    border-radius: var(--radius-md);
+    color: var(--primary-600);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.detailBtn:hover {
+    background: var(--primary-50);
+    border-color: var(--primary-400);
+}
+
 /* Level Badges */
 .badge {
     display: inline-flex;

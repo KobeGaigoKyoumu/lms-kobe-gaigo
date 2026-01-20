@@ -692,18 +692,17 @@ export default function AnalyticsPage() {
                                                     <tr
                                                         key={cls.className}
                                                         onClick={() => setSelectedJlptClass(cls.className)}
-                                                        style={{ cursor: 'pointer' }}
+                                                        className={styles.clickableRow}
                                                     >
-                                                        <td style={{ fontWeight: 600 }}>{cls.className}</td>
-                                                        <td>{cls.total}名</td>
-                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#166534' : 'inherit' }}>
+                                                        <td style={{ fontWeight: 600, color: '#111827' }}>{cls.className}</td>
+                                                        <td style={{ color: '#4b5563' }}>{cls.total}名</td>
+                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#166534' : '#4b5563' }}>
                                                             {cls.n3PlusRate}%
                                                         </td>
-                                                        <td>{cls.n3Plus}名</td>
+                                                        <td style={{ color: '#4b5563' }}>{cls.n3Plus}名</td>
                                                         <td>
                                                             <button
-                                                                className={styles.toggleBtn}
-                                                                style={{ background: '#eff6ff', color: '#3b82f6', fontSize: '0.75rem', padding: '4px 12px' }}
+                                                                className={styles.detailBtn}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setSelectedJlptClass(cls.className);
