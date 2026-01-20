@@ -700,26 +700,35 @@ export async function getEnhancedJlptStats(students = []) {
 
     // Merge static and dynamic enrollment stats
     // Static now contains objects: {total, first_year, second_year}
+    // PRIORITY: Use static data when available, dynamic only as fallback for missing years
     const allYears = new Set([...Object.keys(staticEnrollmentStats), ...Object.keys(dynamicEnrollment)]);
     allYears.forEach(year => {
         const staticData = staticEnrollmentStats[year];
-        const staticCount = staticData ? (typeof staticData === 'object' ? staticData.total : staticData) : 0;
-        const dynamicCount = dynamicEnrollment[year] || 0;
 
-        if (staticData && typeof staticData === 'object') {
-            // Use static object format with year breakdown
+        if (staticData && typeof staticData === 'object' && staticData.total > 0) {
+            // Use static data (from enrollment_stats.json) - most accurate
             enrollmentByYear[year] = {
-                total: Math.max(staticCount, dynamicCount),
+                total: staticData.total,
                 first_year: staticData.first_year || 0,
                 second_year: staticData.second_year || 0
             };
-        } else {
-            // Fallback to simple number
+        } else if (staticData && typeof staticData === 'number' && staticData > 0) {
+            // Legacy format (simple number)
             enrollmentByYear[year] = {
-                total: Math.max(staticCount, dynamicCount),
+                total: staticData,
                 first_year: 0,
                 second_year: 0
             };
+        } else {
+            // Fallback to dynamic calculation only if no static data
+            const dynamicCount = dynamicEnrollment[year] || 0;
+            if (dynamicCount > 0) {
+                enrollmentByYear[year] = {
+                    total: dynamicCount,
+                    first_year: 0,
+                    second_year: 0
+                };
+            }
         }
     });
 
