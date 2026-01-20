@@ -11,13 +11,17 @@ export async function GET() {
         const supabase = await createClient();
 
         // Fetch specific fields needed for filtering and class info
+        // Fetch specific fields needed for filtering and class info
+        // Removed .eq('status', 'active') to ensure we get all students regardless of status
         const { data, error } = await supabase
             .from('students')
             .select('full_name, enrollment_date, student_id, student_id_text, class_name')
-            .eq('status', 'active');
 
         if (!error && data) {
             students = data;
+            console.log(`JLPT API: Fetched ${students.length} students from DB`);
+        } else if (error) {
+            console.error('JLPT API: Error fetching students', error);
         }
     } catch (dbError) {
         // Log DB error but continue to return stats (unfiltered)

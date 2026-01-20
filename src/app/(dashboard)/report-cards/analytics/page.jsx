@@ -118,12 +118,16 @@ export default function AnalyticsPage() {
     }, [])
 
     useEffect(() => {
-        if (enhancedJlptStats?.students?.length > 0 && !selectedJlptClass) {
-            // Set default class
+        if (enhancedJlptStats?.students?.length > 0) {
+            // Set default class if none selected or invalid
             const classes = [...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort();
-            if (classes.length > 0) setSelectedJlptClass(classes[0]);
+            if (classes.length > 0) {
+                if (!selectedJlptClass || !classes.includes(selectedJlptClass)) {
+                    setSelectedJlptClass(classes[0]);
+                }
+            }
         }
-    }, [enhancedJlptStats, selectedJlptClass])
+    }, [enhancedJlptStats])
 
     const fetchGrades = async () => {
         try {
@@ -693,6 +697,16 @@ export default function AnalyticsPage() {
                                 )}
                             </div>
                         </>
+                    )}
+
+                    {/* Class Analysis - No Data State */}
+                    {jlptSubTab === 'class' && (!enhancedJlptStats?.studentStats || enhancedJlptStats.studentStats.length === 0) && (
+                        <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
+                            <p>表示できるクラスデータがありません。</p>
+                            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                                学生データの読み込みに失敗したか、条件に一致するデータがありません。
+                            </p>
+                        </div>
                     )}
                 </>
             )}
