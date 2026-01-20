@@ -404,34 +404,134 @@ export async function getJlptByStudentId(studentId, enrollmentDate = null) {
         name: r.name
     }));
 }
-
 /**
  * Parse student ID to get enrollment year
- * Format: YYMMXXX (e.g., 2404001 = 2024年4月入学)
+ * 
+ * Student ID formats:
+ * 1. New format (2019~): YYMMXXX (7 digits)
+ *    - YY: Enrollment year (20xx)
+ *    - MM: Enrollment month (04=April, 07=July, 10=October)
+ *    - XXX: Student number
+ *    - Example: 2404001 = 2024年4月入学
+ * 
+ * 2. Old format (2017-2018): Uses Japanese era year
+ *    - 7 digits: YYMMXXX where YY = era year (29=H29=2017, 30=H30=2018, 31=H31=2019)
+ *    - Example: 2904001 = 平成29年4月入学 = 2017年4月入学
+ *    - Example: 3004001 = 平成30年4月入学 = 2018年4月入学
+ * 
+ * 3. Old format (2016): 6 digits
+ *    - 28xxxx = 2016年入学
+ *    - 16xxxxx = 2016年入学
+ * 
  * @param {string} studentId 
+ * @param {string} firstExamSession - Optional: first exam session for fallback (e.g., "2017_1")
  * @returns {{ enrollmentYear: number, enrollmentMonth: number, graduationYear: number } | null}
  */
-function parseStudentIdForEnrollment(studentId) {
-    if (!studentId || String(studentId).length < 4) return null;
+function parseStudentIdForEnrollment(studentId, firstExamSession = null) {
+    if (!studentId) return null;
 
-    const idStr = String(studentId);
-    const yearShort = parseInt(idStr.substring(0, 2), 10);
-    const month = parseInt(idStr.substring(2, 4), 10);
+    const idStr = String(studentId).trim();
 
-    // Validate
-    if (isNaN(yearShort) || isNaN(month)) return null;
-    if (month < 1 || month > 12) return null;
+    // 6-digit format (2016 and earlier)
+    if (idStr.length === 6) {
+        const prefix = idStr.substring(0, 2);
 
-    const enrollmentYear = 2000 + yearShort;
-    // 2-year school: graduation = enrollment year + 2 (March)
-    const graduationYear = enrollmentYear + 2;
+        // 28xxxx = 2016年入学
+        if (prefix === '28') {
+            return {
+                enrollmentYear: 2016,
+                enrollmentMonth: 4, // Default to April
+                graduationYear: 2018
+            };
+        }
+        // 29xxxx (6 digits) = 2017年入学 (rare)
+        if (prefix === '29') {
+            return {
+                enrollmentYear: 2017,
+                enrollmentMonth: 4,
+                graduationYear: 2019
+            };
+        }
 
-    return {
-        enrollmentYear,
-        enrollmentMonth: month,
-        graduationYear
-    };
+        return null; // Unknown 6-digit format
+    }
+
+    // 7-digit format
+    if (idStr.length === 7) {
+        const prefix = idStr.substring(0, 2);
+        const monthPart = parseInt(idStr.substring(2, 4), 10);
+
+        // Validate month
+        const month = (monthPart >= 1 && monthPart <= 12) ? monthPart : 4;
+
+        // Old format: Era year (Heisei 29-31 = 2017-2019)
+        // These were used before switching to Western year format
+        if (prefix === '29') {
+            // 平成29年 = 2017年
+            return {
+                enrollmentYear: 2017,
+                enrollmentMonth: month,
+                graduationYear: 2019
+            };
+        }
+        if (prefix === '30') {
+            // 平成30年 = 2018年
+            return {
+                enrollmentYear: 2018,
+                enrollmentMonth: month,
+                graduationYear: 2020
+            };
+        }
+        if (prefix === '31') {
+            // 平成31年/令和元年 = 2019年
+            return {
+                enrollmentYear: 2019,
+                enrollmentMonth: month,
+                graduationYear: 2021
+            };
+        }
+        if (prefix === '16') {
+            // 2016年入学
+            return {
+                enrollmentYear: 2016,
+                enrollmentMonth: month,
+                graduationYear: 2018
+            };
+        }
+
+        // New format: Western year (19=2019, 20=2020, 21=2021, ...)
+        const yearShort = parseInt(prefix, 10);
+        if (!isNaN(yearShort) && yearShort >= 19 && yearShort <= 30) {
+            const enrollmentYear = 2000 + yearShort;
+            return {
+                enrollmentYear,
+                enrollmentMonth: month,
+                graduationYear: enrollmentYear + 2
+            };
+        }
+    }
+
+    // Fallback: Try to estimate from first exam session
+    if (firstExamSession) {
+        const parts = firstExamSession.split('_');
+        if (parts.length === 2) {
+            const examYear = parseInt(parts[0], 10);
+            if (!isNaN(examYear)) {
+                // First exam is usually in 1st year
+                // 7月（第1回）受験 → 同年4月入学
+                // 12月（第2回）受験 → 同年4月または10月入学
+                return {
+                    enrollmentYear: examYear,
+                    enrollmentMonth: 4,
+                    graduationYear: examYear + 2
+                };
+            }
+        }
+    }
+
+    return null;
 }
+
 
 /**
  * Get enhanced statistics (nationality breakdown, level comparison)
