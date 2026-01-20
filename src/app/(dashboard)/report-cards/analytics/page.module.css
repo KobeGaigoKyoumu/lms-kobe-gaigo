@@ -461,28 +461,30 @@
     gap: var(--spacing-4);
 }
 
-.viewToggle {
+.subTabs {
     display: flex;
-    background: var(--bg-primary);
-    padding: 4px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    gap: var(--spacing-6);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-6);
 }
 
-.toggleBtn {
-    padding: var(--spacing-2) var(--spacing-4);
-    font-size: var(--font-size-sm);
-    border: none;
+.subTab {
+    padding: var(--spacing-3) var(--spacing-1);
     background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
     color: var(--text-secondary);
-    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
-.toggleBtn.active {
-    background: var(--bg-elevated);
+.subTab:hover {
+    color: var(--text-primary);
+}
+
+.subTab.active {
     color: var(--primary-600);
-    font-weight: 500;
-    box-shadow: var(--shadow-sm);
+    border-bottom-color: var(--primary-600);
 }
