@@ -35,6 +35,15 @@ export async function GET() {
         if (accurateGradStats.source === 'official') {
             data.graduationN3PlusRates = accurateGradStats.stats;
             data.graduationDataSource = 'official';
+
+            // Also update the overall N3+ rate with official data
+            if (accurateGradStats.summary) {
+                data.overallN3PlusRate = {
+                    totalUniqueStudents: accurateGradStats.summary.total_graduates,
+                    n3PlusStudents: accurateGradStats.summary.n3_plus_count,
+                    rate: accurateGradStats.summary.n3_plus_rate.toFixed(1)
+                };
+            }
         } else {
             data.graduationDataSource = 'calculated';
         }

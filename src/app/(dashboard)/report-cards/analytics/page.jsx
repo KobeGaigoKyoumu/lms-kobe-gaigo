@@ -469,9 +469,8 @@ export default function AnalyticsPage() {
                                             <thead>
                                                 <tr>
                                                     <th>卒業時期</th>
+                                                    <th>卒業者数</th>
                                                     <th>N3以上取得者</th>
-                                                    <th>漢字圏N3以上保有率</th>
-                                                    <th>非漢字圏N3以上保有率</th>
                                                     <th>N3以上保有率</th>
                                                 </tr>
                                             </thead>
@@ -479,9 +478,8 @@ export default function AnalyticsPage() {
                                                 {enhancedJlptStats.graduationN3PlusRates.map((row, idx) => (
                                                     <tr key={idx}>
                                                         <td>{row.year}</td>
+                                                        <td>{row.totalStudents}名</td>
                                                         <td>{row.n3PlusStudents}名</td>
-                                                        <td>{row.kanjiRate}%</td>
-                                                        <td>{row.nonKanjiRate}%</td>
                                                         <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
                                                             {row.rate}%
                                                         </td>
