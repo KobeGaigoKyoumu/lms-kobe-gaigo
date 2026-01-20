@@ -1,0 +1,66 @@
+{
+  "graduation_stats": [
+    {
+      "year": "2019年3月",
+      "total": 159,
+      "matched": 137,
+      "n3_plus": 37,
+      "rate": 23.270440251572328,
+      "match_rate": 86.16352201257862
+    },
+    {
+      "year": "2020年3月",
+      "total": 139,
+      "matched": 138,
+      "n3_plus": 62,
+      "rate": 44.60431654676259,
+      "match_rate": 99.28057553956835
+    },
+    {
+      "year": "2021年3月",
+      "total": 54,
+      "matched": 45,
+      "n3_plus": 24,
+      "rate": 44.44444444444444,
+      "match_rate": 83.33333333333334
+    },
+    {
+      "year": "2022年3月",
+      "total": 3,
+      "matched": 2,
+      "n3_plus": 2,
+      "rate": 66.66666666666666,
+      "match_rate": 66.66666666666666
+    },
+    {
+      "year": "2023年3月",
+      "total": 45,
+      "matched": 44,
+      "n3_plus": 22,
+      "rate": 48.888888888888886,
+      "match_rate": 97.77777777777777
+    },
+    {
+      "year": "2024年3月",
+      "total": 238,
+      "matched": 229,
+      "n3_plus": 119,
+      "rate": 50.0,
+      "match_rate": 96.21848739495799
+    },
+    {
+      "year": "2025年3月",
+      "total": 250,
+      "matched": 248,
+      "n3_plus": 163,
+      "rate": 65.2,
+      "match_rate": 99.2
+    }
+  ],
+  "summary": {
+    "total_graduates": 888,
+    "matched_with_jlpt": 843,
+    "n3_plus_count": 429,
+    "n3_plus_rate": 48.310810810810814
+  }
+}

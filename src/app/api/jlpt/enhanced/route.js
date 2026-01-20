@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getEnhancedJlptStats } from '@/lib/jlpt';
+import { getEnhancedJlptStats, getAccurateGraduationStats } from '@/lib/jlpt';
 
 
 export async function GET() {
@@ -13,7 +13,7 @@ export async function GET() {
         // Fetch specific fields needed for filtering
         const { data, error } = await supabase
             .from('students')
-            .select('full_name, enrollment_date')
+            .select('full_name, enrollment_date, student_id')
             .eq('status', 'active');
 
         if (!error && data) {
@@ -25,7 +25,20 @@ export async function GET() {
     }
 
     try {
+        // Get enhanced stats (calculated from JLPT data)
         const data = await getEnhancedJlptStats(students || []);
+
+        // Get accurate graduation stats from official school data
+        const accurateGradStats = await getAccurateGraduationStats();
+
+        // If we have official data, use it to override the calculated graduation rates
+        if (accurateGradStats.source === 'official') {
+            data.graduationN3PlusRates = accurateGradStats.stats;
+            data.graduationDataSource = 'official';
+        } else {
+            data.graduationDataSource = 'calculated';
+        }
+
         return NextResponse.json(data);
     } catch (error) {
         console.error('JLPT Stats Error:', error);

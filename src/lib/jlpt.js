@@ -7,6 +7,8 @@ import iconv from 'iconv-lite';
 const JLPT_BASE_DIR = path.join(process.cwd(), 'data', 'JLPT結果');
 const JLPT_HISTORICAL_JSON = path.join(process.cwd(), 'data', 'jlpt_historical.json');
 const NAME_MAPPINGS_JSON = path.join(process.cwd(), 'data', 'name_mappings.json');
+const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_students.json');
+const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;
@@ -873,5 +875,75 @@ export async function getEnhancedJlptStats(students = []) {
             n3PlusStudents,
             rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
         }
+    };
+}
+
+/**
+ * Load pre-calculated graduation N3+ statistics from official school data
+ * This uses the actual graduate list to provide accurate statistics
+ * @returns {{ graduation_stats: Array, summary: Object }}
+ */
+export function getGraduationN3Stats() {
+    try {
+        if (!fs.existsSync(GRADUATION_STATS_JSON)) {
+            console.warn('Graduation stats file not found:', GRADUATION_STATS_JSON);
+            return null;
+        }
+
+        const content = fs.readFileSync(GRADUATION_STATS_JSON, 'utf-8');
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error loading graduation N3 stats:', error);
+        return null;
+    }
+}
+
+/**
+ * Load historical student data (graduates, dropouts, completers)
+ * @returns {{ students: Array }}
+ */
+export function getHistoricalStudents() {
+    try {
+        if (!fs.existsSync(HISTORICAL_STUDENTS_JSON)) {
+            console.warn('Historical students file not found:', HISTORICAL_STUDENTS_JSON);
+            return null;
+        }
+
+        const content = fs.readFileSync(HISTORICAL_STUDENTS_JSON, 'utf-8');
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error loading historical students:', error);
+        return null;
+    }
+}
+
+/**
+ * Get accurate graduation year N3+ rates from official school data
+ * Falls back to calculated data if official data not available
+ */
+export async function getAccurateGraduationStats() {
+    // First try to get pre-calculated stats from official data
+    const officialStats = getGraduationN3Stats();
+
+    if (officialStats && officialStats.graduation_stats) {
+        return {
+            source: 'official',
+            stats: officialStats.graduation_stats.map(s => ({
+                year: s.year,
+                totalStudents: s.total,
+                n3PlusStudents: s.n3_plus,
+                rate: s.rate.toFixed(1),
+                matchRate: s.match_rate.toFixed(1)
+            })),
+            summary: officialStats.summary
+        };
+    }
+
+    // Fallback to calculated stats
+    const calculated = await getEnhancedJlptStats([]);
+    return {
+        source: 'calculated',
+        stats: calculated.graduationN3PlusRates,
+        summary: calculated.overallN3PlusRate
     };
 }
