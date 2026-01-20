@@ -1178,19 +1178,26 @@ export default function AnalyticsPage() {
                                         <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
                                             <h3 className={styles.chartTitle}>本校 受験率の推移 (対全在籍者)</h3>
                                             <div className={styles.chartContainer}>
-                                                <Line
-                                                    data={{
-                                                        labels: enhancedJlptStats.yearlyTrend ? enhancedJlptStats.yearlyTrend.map(s => s.year + '年度') : [],
-                                                        datasets: [{
-                                                            label: '受験率 (%)',
-                                                            data: enhancedJlptStats.yearlyTrend ? enhancedJlptStats.yearlyTrend.map(s => s.examRate || 0) : [],
-                                                            borderColor: 'rgb(139, 92, 246)', // Violet
-                                                            backgroundColor: 'rgba(139, 92, 246, 0.5)',
-                                                            tension: 0.3,
-                                                        }]
-                                                    }}
-                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                                />
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>年度</th>
+                                                            <th>在籍者数(推定含む)</th>
+                                                            <th>受験者数</th>
+                                                            <th>受験率</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.map(s => (
+                                                            <tr key={s.year}>
+                                                                <td style={{ fontWeight: 600 }}>{s.year}年度</td>
+                                                                <td>{s.enrolled}名</td>
+                                                                <td>{s.examinees}名</td>
+                                                                <td style={{ fontWeight: 600, color: '#8b5cf6' }}>{s.examRate}%</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
