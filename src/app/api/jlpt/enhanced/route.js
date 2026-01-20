@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getEnhancedJlptStats, getAccurateGraduationStats } from '@/lib/jlpt';
+import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary } from '@/lib/jlpt';
 
 
 export async function GET() {
@@ -10,10 +10,10 @@ export async function GET() {
     try {
         const supabase = await createClient();
 
-        // Fetch specific fields needed for filtering
+        // Fetch specific fields needed for filtering and class info
         const { data, error } = await supabase
             .from('students')
-            .select('full_name, enrollment_date, student_id')
+            .select('full_name, enrollment_date, student_id, student_id_text, class_name')
             .eq('status', 'active');
 
         if (!error && data) {
@@ -27,6 +27,20 @@ export async function GET() {
     try {
         // Get enhanced stats (calculated from JLPT data)
         const data = await getEnhancedJlptStats(students || []);
+
+        // Get student-level JLPT summary for class analysis
+        // Only include necessary fields for frontend to protect privacy somewhat
+        if (students && students.length > 0) {
+            const studentSummaries = await getStudentsJlptSummary(students);
+            data.studentStats = studentSummaries;
+
+            // Send simplified student list for frontend filtering/mapping
+            data.students = students.map(s => ({
+                id: s.student_id_text || s.student_id,
+                name: s.full_name,
+                class: s.class_name
+            }));
+        }
 
         // Get accurate graduation stats from official school data
         const accurateGradStats = await getAccurateGraduationStats();

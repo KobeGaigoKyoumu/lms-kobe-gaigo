@@ -108,10 +108,22 @@ export default function AnalyticsPage() {
     const [enhancedJlptStats, setEnhancedJlptStats] = useState(null)
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
+    // Class Analysis State
+    const [selectedJlptClass, setSelectedJlptClass] = useState('')
+    const [jlptViewMode, setJlptViewMode] = useState('summary') // 'summary' or 'detail'
+
     useEffect(() => {
         fetchGrades()
         fetchJlptData()
     }, [])
+
+    useEffect(() => {
+        if (enhancedJlptStats?.students?.length > 0 && !selectedJlptClass) {
+            // Set default class
+            const classes = [...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort();
+            if (classes.length > 0) setSelectedJlptClass(classes[0]);
+        }
+    }, [enhancedJlptStats, selectedJlptClass])
 
     const fetchGrades = async () => {
         try {
@@ -371,7 +383,13 @@ export default function AnalyticsPage() {
                     className={`${styles.tab} ${activeTab === 'jlpt' ? styles.active : ''}`}
                     onClick={() => setActiveTab('jlpt')}
                 >
-                    JLPT分析
+                    年度別分析
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'class_analysis' ? styles.active : ''}`}
+                    onClick={() => setActiveTab('class_analysis')}
+                >
+                    クラス別分析
                 </button>
             </div>
 
@@ -597,6 +615,151 @@ export default function AnalyticsPage() {
                             ))}
                         </div>
                     </div>
+                </>
+            )}
+
+            {/* Class Analysis Tab */}
+            {activeTab === 'class_analysis' && enhancedJlptStats?.studentStats && (
+                <>
+                    <div className={styles.toolbar}>
+                        <div className={styles.filterGroup}>
+                            <label className={styles.filterLabel}>クラス選択</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={selectedJlptClass}
+                                onChange={(e) => setSelectedJlptClass(e.target.value)}
+                            >
+                                {[...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort().map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className={styles.viewToggle}>
+                            <button
+                                className={`${styles.toggleBtn} ${jlptViewMode === 'summary' ? styles.active : ''}`}
+                                onClick={() => setJlptViewMode('summary')}
+                            >
+                                取得状況一覧
+                            </button>
+                            <button
+                                className={`${styles.toggleBtn} ${jlptViewMode === 'detail' ? styles.active : ''}`}
+                                onClick={() => setJlptViewMode('detail')}
+                            >
+                                実施回別詳細
+                            </button>
+                        </div>
+                    </div>
+
+                    {jlptViewMode === 'summary' ? (
+                        <div className={styles.tableContainer}>
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th>学籍番号</th>
+                                        <th>氏名</th>
+                                        <th>N1</th>
+                                        <th>N2</th>
+                                        <th>N3</th>
+                                        <th>N4</th>
+                                        <th>N5</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {enhancedJlptStats.studentStats
+                                        .filter(s => s.class === selectedJlptClass)
+                                        .sort((a, b) => a.studentId.localeCompare(b.studentId))
+                                        .map(student => (
+                                            <tr key={student.studentId}>
+                                                <td>{student.studentId}</td>
+                                                <td>{student.name}</td>
+                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                    const stat = student.levels[level];
+                                                    const badgeClass = stat.status === '合格' ? styles.badgePassed :
+                                                        stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
+                                                    return (
+                                                        <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
+                                                            <span className={`${styles.badge} ${badgeClass}`}>
+                                                                {stat.status === '未受験' ? '-' : stat.status}
+                                                            </span>
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                            {enhancedJlptStats.studentStats.filter(s => s.class === selectedJlptClass).length === 0 && (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                    該当するデータがありません
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className={styles.sessionsContainer}>
+                            {(() => {
+                                // Filter and aggregate data for selected class
+                                const classStudents = enhancedJlptStats.studentStats
+                                    .filter(s => s.class === selectedJlptClass);
+
+                                const allRecords = classStudents.flatMap(s => s.records || []);
+
+                                const sessionMap = allRecords.reduce((acc, record) => {
+                                    if (!acc[record.session]) {
+                                        acc[record.session] = {
+                                            session: record.session,
+                                            items: [],
+                                            totalExaminees: 0,
+                                            totalPassers: 0
+                                        };
+                                    }
+                                    // Aggregate by level within session
+                                    let existingItem = acc[record.session].items.find(i => i.level === record.level);
+                                    if (existingItem) {
+                                        existingItem.examinees++;
+                                        if (record.result === '合格') existingItem.passers++;
+                                    } else {
+                                        const newItem = {
+                                            session: record.session,
+                                            level: record.level,
+                                            examinees: 1,
+                                            passers: record.result === '合格' ? 1 : 0,
+                                            averageScore: '-'
+                                        };
+                                        acc[record.session].items.push(newItem);
+                                        existingItem = newItem;
+                                    }
+
+                                    acc[record.session].totalExaminees++;
+                                    if (record.result === '合格') acc[record.session].totalPassers++;
+
+                                    return acc;
+                                }, {});
+
+                                // Calculate pass rates for items
+                                Object.values(sessionMap).forEach(session => {
+                                    session.items.forEach(item => {
+                                        item.passRate = ((item.passers / item.examinees) * 100).toFixed(1);
+                                    });
+                                    // Sort items by level
+                                    session.items.sort((a, b) => a.level.localeCompare(b.level));
+                                });
+
+                                const sortedKeys = Object.keys(sessionMap).sort((a, b) => b.localeCompare(a));
+
+                                if (sortedKeys.length === 0) {
+                                    return (
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                            記録が見つかりません
+                                        </div>
+                                    );
+                                }
+
+                                return sortedKeys.map(key => (
+                                    <JlptSessionRow key={key} sessionData={sessionMap[key]} />
+                                ));
+                            })()}
+                        </div>
+                    )}
                 </>
             )}
 

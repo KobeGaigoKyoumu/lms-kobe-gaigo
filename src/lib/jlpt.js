@@ -938,3 +938,131 @@ export async function getAccurateGraduationStats() {
         summary: calculated.overallN3PlusRate
     };
 }
+
+/**
+ * Get summary of JLPT status for a list of students
+ * Used for class-based analytics
+ * @param {Array} students - List of students from DB (must include student_id_text, full_name)
+ */
+export async function getStudentsJlptSummary(students) {
+    const rawData = await getAllRawJlptData();
+
+    // Create lookups for faster matching
+    const studentResults = new Map(); // studentId|name -> []
+
+    // Helper to add result to map
+    const addResult = (key, record) => {
+        if (!key) return;
+        if (!studentResults.has(key)) {
+            studentResults.set(key, []);
+        }
+        studentResults.get(key).push(record);
+    };
+
+    rawData.forEach(record => {
+        if (record.studentId) {
+            addResult(String(record.studentId), record);
+        }
+        if (record.name) {
+            addResult(record.name.toLowerCase().trim(), record);
+        }
+        // Also add variants for Chinese names
+        const nameVariants = getAllNameVariants(record.name);
+        nameVariants.forEach(variant => {
+            if (variant !== record.name?.toLowerCase()?.trim()) {
+                addResult(variant, record);
+            }
+        });
+    });
+
+    // Process each student
+    const studentSummaries = students.map(student => {
+        const studentId = String(student.student_id_text || student.student_id || '');
+        const name = student.full_name?.toLowerCase()?.trim();
+
+        let myRecords = [];
+        const seenRecordKeys = new Set(); // Avoid duplicates from ID + Name matching
+
+        // 1. Match by ID
+        if (studentId && studentResults.has(studentId)) {
+            studentResults.get(studentId).forEach(r => {
+                const key = `${r.session}-${r.level}-${r.date}`; // simple unique key
+                if (!seenRecordKeys.has(key)) {
+                    myRecords.push(r);
+                    seenRecordKeys.add(key);
+                }
+            });
+        }
+
+        // 2. Match by Name (if ID match didn't find everything, or to cover missing IDs)
+        // Note: Name matching can be risky, but we filter loosely. 
+        // Ideally we prioritize ID matches.
+        if (name) {
+            // Check direct match and variants
+            const variants = getAllNameVariants(student.full_name);
+            variants.forEach(variant => {
+                if (studentResults.has(variant)) {
+                    studentResults.get(variant).forEach(r => {
+                        const key = `${r.session}-${r.level}-${r.date}`;
+                        if (!seenRecordKeys.has(key)) {
+                            // Optional: Check enrollment date if strictly needed, 
+                            // but for class analysis we generally assume name match is valid
+                            // unless common name.
+                            myRecords.push(r);
+                            seenRecordKeys.add(key);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Aggregate by level
+        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+        const levelStatus = {};
+
+        levels.forEach(level => {
+            const levelRecords = myRecords.filter(r => r.level === level);
+            const passed = levelRecords.find(r => r.result === '合格');
+
+            if (passed) {
+                levelStatus[level] = {
+                    status: '合格',
+                    score: passed.totalScore,
+                    date: passed.session,
+                    details: passed
+                };
+            } else if (levelRecords.length > 0) {
+                // Find best score or latest
+                const latest = levelRecords.sort((a, b) => b.session.localeCompare(a.session))[0];
+                levelStatus[level] = {
+                    status: '不合格',
+                    score: latest.totalScore,
+                    date: latest.session,
+                    details: latest
+                };
+            } else {
+                levelStatus[level] = { status: '未受験' };
+            }
+        });
+
+        // Calculate highest passed level
+        let highestLevel = null;
+        for (const level of levels) {
+            if (levelStatus[level].status === '合格') {
+                highestLevel = level;
+                break; // Found highest (N1 -> N5)
+            }
+        }
+
+        return {
+            studentId: student.student_id_text || student.student_id,
+            name: student.full_name,
+            class: student.class_name,
+            levels: levelStatus,
+            highestLevel: highestLevel,
+            records: myRecords
+        };
+    });
+
+    return studentSummaries;
+}
