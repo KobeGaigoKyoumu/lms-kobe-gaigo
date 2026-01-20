@@ -350,24 +350,32 @@ export default function AnalyticsPage() {
                     <div className={styles.statsGrid}>
                         <div className={styles.statCard}>
                             <span className={styles.statLabel}>総受験者数 (延べ人数)</span>
-                            <span className={styles.statValue}>{totalJlptExaminees.toLocaleString()}</span>
-                            <span className={styles.statUnit}>名</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>{totalJlptExaminees.toLocaleString()}</span>
+                                <span className={styles.statUnit}>名</span>
+                            </div>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statLabel}>総合格者数</span>
-                            <span className={styles.statValue}>{totalJlptPassers.toLocaleString()}</span>
-                            <span className={styles.statUnit}>名</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>{totalJlptPassers.toLocaleString()}</span>
+                                <span className={styles.statUnit}>名</span>
+                            </div>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statLabel}>全体合格率</span>
-                            <span className={styles.statValue}>{overallJlptPassRate}%</span>
-                            <span className={styles.statUnit}>平均</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>{overallJlptPassRate}%</span>
+                                <span className={styles.statUnit}>平均</span>
+                            </div>
                         </div>
                         {enhancedJlptStats?.overallN3PlusRate && (
                             <div className={styles.statCard}>
                                 <span className={styles.statLabel}>卒業時N3以上保有率</span>
-                                <span className={styles.statValue}>{enhancedJlptStats.overallN3PlusRate.rate}%</span>
-                                <span className={styles.statUnit}>{enhancedJlptStats.overallN3PlusRate.n3PlusStudents}/{enhancedJlptStats.overallN3PlusRate.totalUniqueStudents}名</span>
+                                <div className={styles.statValueRow}>
+                                    <span className={styles.statValue}>{enhancedJlptStats.overallN3PlusRate.rate}%</span>
+                                    <span className={styles.statUnit}>{enhancedJlptStats.overallN3PlusRate.n3PlusStudents}/{enhancedJlptStats.overallN3PlusRate.totalUniqueStudents}名</span>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -117,6 +117,8 @@
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
 }
 
 .statCard:hover {
@@ -129,21 +131,25 @@
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-weight: 500;
-    margin-bottom: var(--spacing-1);
+    margin-bottom: var(--spacing-2);
+}
+
+.statValueRow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-2);
 }
 
 .statValue {
     font-size: var(--font-size-2xl);
     font-weight: 700;
     color: var(--text-primary);
-    /* letter-spacing: -0.025em; Remove negative spacing */
-    margin: 0 var(--spacing-2);
+    line-height: 1.2;
 }
 
 .statUnit {
     font-size: var(--font-size-sm);
     color: var(--text-tertiary);
-    margin-top: var(--spacing-1);
 }
 
 /* Charts Layout */
