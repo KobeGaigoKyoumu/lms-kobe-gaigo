@@ -632,13 +632,27 @@ export async function getEnhancedJlptStats(students = []) {
         .sort((a, b) => a.level.localeCompare(b.level));
 
     // 3. Yearly Trend (Pass Rate)
+    // 3. Yearly Trend (Pass Rate)
     const byYear = {};
     validData.forEach(record => {
         const year = record.session.substring(0, 4);
         if (!byYear[year]) {
-            byYear[year] = { total: 0, passed: 0 };
+            byYear[year] = {
+                total: 0, // Total sessions (for pass rate calc)
+                passed: 0, // Total passed sessions
+                unique_students: new Set() // For Calculate Exam Rate
+            };
         }
         byYear[year].total++;
+        if (record.studentId) {
+            byYear[year].unique_students.add(String(record.studentId));
+        } else {
+            // If no ID, use name as proxy (though risky) or just increment simple counter?
+            // Use name + country + level as unique key fallback
+            const key = `${record.name}:${record.country}:${record.level}`;
+            byYear[year].unique_students.add(key);
+        }
+
         if (record.result === '合格') byYear[year].passed++;
     });
 
@@ -740,12 +754,15 @@ export async function getEnhancedJlptStats(students = []) {
             const firstYearEnrolled = typeof enrollData === 'object' ? enrollData.first_year : 0;
             const secondYearEnrolled = typeof enrollData === 'object' ? enrollData.second_year : 0;
 
-            const examRate = enrolled > 0 ? ((stats.total / enrolled) * 100).toFixed(1) : 0;
+            // For Exam Rate: Use UNIQUE examinees / Enrolled
+            const uniqueExaminees = stats.unique_students ? stats.unique_students.size : stats.total;
+            const examRate = enrolled > 0 ? ((uniqueExaminees / enrolled) * 100).toFixed(1) : 0;
 
             return {
                 year,
                 passRate: ((stats.passed / stats.total) * 100).toFixed(1),
-                examinees: stats.total,
+                examinees: uniqueExaminees, // Display unique examinees count
+                totalSessions: stats.total, // Keep total sessions if needed elsewhere
                 enrolled,
                 firstYearEnrolled,
                 secondYearEnrolled,
