@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary } from '@/lib/jlpt';
 
 
@@ -8,7 +8,10 @@ export async function GET() {
 
     // Attempt to fetch students for filtering, but don't fail the whole request if DB is unreachable
     try {
-        const supabase = await createClient();
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        );
 
         // Fetch specific fields needed for filtering and class info
         // Fetch specific fields needed for filtering and class info
