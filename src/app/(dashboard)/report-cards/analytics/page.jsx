@@ -1174,41 +1174,7 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
 
-                                    <div className={styles.chartGrid}>
-                                        <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
-                                            <h3 className={styles.chartTitle}>本校 受験率の推移 (対全在籍者)</h3>
-                                            <div className={styles.tableContainer}>
-                                                <table className={styles.table}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>年度</th>
-                                                            <th>在籍者数</th>
-                                                            <th>受験者数</th>
-                                                            <th>1年生受験率</th>
-                                                            <th>2年生受験率</th>
-                                                            <th>受験率</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.map(s => {
-                                                            const firstYearRate = s.firstYearEnrolled > 0 ? '-' : '-';
-                                                            const secondYearRate = s.secondYearEnrolled > 0 ? '-' : '-';
-                                                            return (
-                                                                <tr key={s.year}>
-                                                                    <td style={{ fontWeight: 600 }}>{s.year}年度</td>
-                                                                    <td>{s.enrolled}名 ({s.firstYearEnrolled || 0}+{s.secondYearEnrolled || 0})</td>
-                                                                    <td>{s.examinees}名</td>
-                                                                    <td>{firstYearRate}</td>
-                                                                    <td>{secondYearRate}</td>
-                                                                    <td style={{ fontWeight: 600, color: '#8b5cf6' }}>{s.examRate}%</td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
+
 
                                     {/* Comparison Table */}
                                     <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>レベル別詳細比較</h3>
