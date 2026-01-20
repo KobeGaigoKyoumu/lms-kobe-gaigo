@@ -156,9 +156,27 @@ export default function AnalyticsPage() {
 
     const fetchJlptData = async () => {
         try {
+            // First fetch active students from client side to ensure we have permissions
+            let students = []
+            try {
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('full_name, enrollment_date, student_id, student_id_text, class_name')
+                    .eq('status', 'active')
+
+                if (data) students = data
+                if (error) console.error('Error fetching students:', error)
+            } catch (err) {
+                console.error('Failed to fetch students from Supabase:', err)
+            }
+
             const [statsRes, enhancedRes] = await Promise.all([
                 fetch('/api/jlpt/stats'),
-                fetch('/api/jlpt/enhanced')
+                fetch('/api/jlpt/enhanced', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ students })
+                })
             ])
             const statsData = await statsRes.json()
             const enhancedData = await enhancedRes.json()

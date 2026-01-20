@@ -1,34 +1,51 @@
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary } from '@/lib/jlpt';
 
 
 export async function GET() {
-    let students = [];
+    return handleJlptStats(null);
+}
 
-    // Attempt to fetch students for filtering, but don't fail the whole request if DB is unreachable
+export async function POST(request) {
     try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        );
+        const body = await request.json();
+        return handleJlptStats(body.students);
+    } catch (error) {
+        // If parsing fails or no students in body, proceed without provided students
+        console.error('JLPT API: Error parsing POST body or no students provided, fetching from DB instead.', error);
+        return handleJlptStats(null);
+    }
+}
 
-        // Fetch specific fields needed for filtering and class info
-        // Fetch specific fields needed for filtering and class info
-        // Removed .eq('status', 'active') to ensure we get all students regardless of status
-        const { data, error } = await supabase
-            .from('students')
-            .select('full_name, enrollment_date, student_id, student_id_text, class_name')
+async function handleJlptStats(providedStudents) {
+    let students = providedStudents || [];
 
-        if (!error && data) {
-            students = data;
-            console.log(`JLPT API: Fetched ${students.length} students from DB`);
-        } else if (error) {
-            console.error('JLPT API: Error fetching students', error);
+    // If no students provided from client, try to fetch from DB
+    if (!students || students.length === 0) {
+        try {
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL,
+                process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+            );
+
+            // Fetch specific fields needed for filtering and class info
+            // Removed .eq('status', 'active') to ensure we get all students regardless of status
+            const { data, error } = await supabase
+                .from('students')
+                .select('full_name, enrollment_date, student_id, student_id_text, class_name');
+
+            if (!error && data) {
+                students = data;
+                console.log(`JLPT API: Fetched ${students.length} students from DB`);
+            } else if (error) {
+                console.error('JLPT API: Error fetching students', error);
+            }
+        } catch (dbError) {
+            // Log DB error but continue to return stats (unfiltered)
+            console.error('JLPT API: Failed to fetch students from DB', dbError);
         }
-    } catch (dbError) {
-        // Log DB error but continue to return stats (unfiltered)
-        console.error('JLPT API: Failed to fetch students from DB', dbError);
     }
 
     try {
