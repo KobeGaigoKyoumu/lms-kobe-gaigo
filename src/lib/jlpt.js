@@ -160,45 +160,9 @@ function parseLine(line) {
 
 export async function getJlptData() {
     try {
-        if (!fs.existsSync(JLPT_BASE_DIR)) {
-            console.error(`JLPT Directory not found at: ${JLPT_BASE_DIR}`);
-            return [];
-        }
-
-        const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
-            .filter(dirent => dirent.isDirectory())
-            .map(dirent => dirent.name);
-
-        const allData = [];
-
-        for (const session of sessions) {
-            const sessionDir = path.join(JLPT_BASE_DIR, session);
-            const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
-
-            for (const file of files) {
-                const filePath = path.join(sessionDir, file);
-                const buffer = fs.readFileSync(filePath);
-                const content = iconv.decode(buffer, 'Shift_JIS');
-                const lines = content.split(/\r?\n/);
-
-                // Skip header usually, check first line content if unsure. 
-                // Assuming line 1 is header if it contains "代表者"
-                const dataLines = lines.slice(1).filter(l => l.trim().length > 0);
-
-                for (const line of dataLines) {
-                    const parsed = parseLine(line);
-                    if (parsed) {
-                        allData.push({
-                            session,
-                            ...parsed
-                        });
-                    }
-                }
-            }
-        }
-
+        // Use the combined data source (CSV + Historical JSON)
+        const allData = await getAllRawJlptData();
         return processStatistics(allData);
-
     } catch (error) {
         console.error("Error reading JLPT data:", error);
         return [];
