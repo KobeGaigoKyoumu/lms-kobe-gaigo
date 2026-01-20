@@ -1,43 +1,43 @@
 {
   "2013": {
-    "total": 32,
+    "total": 33,
     "first_year": 32,
-    "second_year": 0
+    "second_year": 1
   },
   "2014": {
-    "total": 104,
+    "total": 105,
     "first_year": 72,
-    "second_year": 32
+    "second_year": 33
   },
   "2015": {
-    "total": 96,
+    "total": 97,
     "first_year": 24,
-    "second_year": 72
+    "second_year": 73
   },
   "2016": {
-    "total": 331,
-    "first_year": 307,
-    "second_year": 24
+    "total": 250,
+    "first_year": 219,
+    "second_year": 31
   },
   "2017": {
-    "total": 635,
-    "first_year": 328,
-    "second_year": 307
+    "total": 422,
+    "first_year": 196,
+    "second_year": 226
   },
   "2018": {
-    "total": 623,
-    "first_year": 292,
-    "second_year": 331
+    "total": 363,
+    "first_year": 155,
+    "second_year": 208
   },
   "2019": {
-    "total": 360,
-    "first_year": 68,
-    "second_year": 292
+    "total": 226,
+    "first_year": 64,
+    "second_year": 162
   },
   "2020": {
-    "total": 179,
-    "first_year": 111,
-    "second_year": 68
+    "total": 176,
+    "first_year": 110,
+    "second_year": 66
   },
   "2021": {
     "total": 164,
@@ -55,14 +55,14 @@
     "second_year": 334
   },
   "2024": {
-    "total": 435,
-    "first_year": 158,
+    "total": 433,
+    "first_year": 156,
     "second_year": 277
   },
   "2025": {
-    "total": 169,
+    "total": 167,
     "first_year": 11,
-    "second_year": 158
+    "second_year": 156
   },
   "2026": {
     "total": 11,
