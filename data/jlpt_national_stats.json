@@ -1,0 +1,828 @@
+{
+  "source": "国際交流基金 JLPT公式統計",
+  "description": "日本語能力試験の全国統計データ（日本国内・海外）",
+  "extracted_at": "2026-01-20T19:02:40.895102",
+  "sessions": [
+    {
+      "year": 2017,
+      "session": 1,
+      "session_name": "2017年7月",
+      "japan": {
+        "N1": {
+          "examinees": 31677,
+          "pass_rate": 35.0
+        },
+        "N2": {
+          "examinees": 47316,
+          "pass_rate": 38.3
+        },
+        "N3": {
+          "examinees": 44847,
+          "pass_rate": 29.6
+        },
+        "N4": {
+          "examinees": 14809,
+          "pass_rate": 34.3
+        },
+        "N5": {
+          "examinees": 2527,
+          "pass_rate": 64.5
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 63021,
+          "pass_rate": 33.1
+        },
+        "N2": {
+          "examinees": 80933,
+          "pass_rate": 47.2
+        },
+        "N3": {
+          "examinees": 50635,
+          "pass_rate": 44.6
+        },
+        "N4": {
+          "examinees": 36193,
+          "pass_rate": 39.1
+        },
+        "N5": {
+          "examinees": 32148,
+          "pass_rate": 53.4
+        }
+      },
+      "total": {
+        "N1": {
+          "examinees": 94698,
+          "pass_rate": 33.8
+        },
+        "N2": {
+          "examinees": 128249,
+          "pass_rate": 43.9
+        },
+        "N3": {
+          "examinees": 95482,
+          "pass_rate": 37.6
+        },
+        "N4": {
+          "examinees": 51002,
+          "pass_rate": 37.7
+        },
+        "N5": {
+          "examinees": 34675,
+          "pass_rate": 54.2
+        }
+      }
+    },
+    {
+      "year": 2017,
+      "session": 2,
+      "session_name": "2017年12月",
+      "japan": {
+        "N1": {
+          "examinees": 39616,
+          "pass_rate": 31.0
+        },
+        "N2": {
+          "examinees": 57374,
+          "pass_rate": 28.6
+        },
+        "N3": {
+          "examinees": 48471,
+          "pass_rate": 30.8
+        },
+        "N4": {
+          "examinees": 16759,
+          "pass_rate": 27.9
+        },
+        "N5": {
+          "examinees": 3280,
+          "pass_rate": 62.0
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 69322,
+          "pass_rate": 31.8
+        },
+        "N2": {
+          "examinees": 86145,
+          "pass_rate": 40.2
+        },
+        "N3": {
+          "examinees": 60855,
+          "pass_rate": 43.4
+        },
+        "N4": {
+          "examinees": 51643,
+          "pass_rate": 35.8
+        },
+        "N5": {
+          "examinees": 49809,
+          "pass_rate": 48.1
+        }
+      },
+      "total": {
+        "N1": {
+          "examinees": 108938,
+          "pass_rate": 31.5
+        },
+        "N2": {
+          "examinees": 143519,
+          "pass_rate": 35.5
+        },
+        "N3": {
+          "examinees": 109326,
+          "pass_rate": 37.8
+        },
+        "N4": {
+          "examinees": 68402,
+          "pass_rate": 33.9
+        },
+        "N5": {
+          "examinees": 53089,
+          "pass_rate": 49.0
+        }
+      }
+    },
+    {
+      "year": 2018,
+      "session": 1,
+      "session_name": "2018年7月",
+      "japan": {
+        "N1": {
+          "examinees": 36791,
+          "pass_rate": 33.9
+        },
+        "N2": {
+          "examinees": 54619,
+          "pass_rate": 32.9
+        },
+        "N3": {
+          "examinees": 58126,
+          "pass_rate": 30.2
+        },
+        "N4": {
+          "examinees": 16737,
+          "pass_rate": 30.6
+        },
+        "N5": {
+          "examinees": 2903,
+          "pass_rate": 63.2
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 68235,
+          "pass_rate": 33.0
+        },
+        "N2": {
+          "examinees": 89320,
+          "pass_rate": 41.8
+        },
+        "N3": {
+          "examinees": 58417,
+          "pass_rate": 45.7
+        },
+        "N4": {
+          "examinees": 42468,
+          "pass_rate": 33.9
+        },
+        "N5": {
+          "examinees": 42463,
+          "pass_rate": 48.9
+        }
+      },
+      "total": {
+        "N1": {
+          "examinees": 105026,
+          "pass_rate": 33.3
+        },
+        "N2": {
+          "examinees": 143939,
+          "pass_rate": 38.4
+        },
+        "N3": {
+          "examinees": 116543,
+          "pass_rate": 38.0
+        },
+        "N4": {
+          "examinees": 59205,
+          "pass_rate": 33.0
+        },
+        "N5": {
+          "examinees": 45366,
+          "pass_rate": 49.8
+        }
+      }
+    },
+    {
+      "year": 2018,
+      "session": 2,
+      "session_name": "2018年12月",
+      "japan": {},
+      "overseas": {},
+      "total": {}
+    },
+    {
+      "year": 2019,
+      "session": 1,
+      "session_name": "2019年7月",
+      "japan": {
+        "N1": {
+          "examinees": 42997,
+          "pass_rate": 29.4
+        },
+        "N2": {
+          "examinees": 64503,
+          "pass_rate": 33.9
+        },
+        "N3": {
+          "examinees": 68231,
+          "pass_rate": 35.9
+        },
+        "N4": {
+          "examinees": 23115,
+          "pass_rate": 32.2
+        },
+        "N5": {
+          "examinees": 4085,
+          "pass_rate": 61.7
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 116860,
+          "pass_rate": 29.3
+        },
+        "N2": {
+          "examinees": 164434,
+          "pass_rate": 36.0
+        },
+        "N3": {
+          "examinees": 136250,
+          "pass_rate": 39.4
+        },
+        "N4": {
+          "examinees": 79731,
+          "pass_rate": 32.7
+        },
+        "N5": {
+          "examinees": 53173,
+          "pass_rate": 47.6
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2019,
+      "session": 2,
+      "session_name": "2019年12月",
+      "japan": {
+        "N1": {
+          "examinees": 52147,
+          "pass_rate": 27.5
+        },
+        "N2": {
+          "examinees": 77410,
+          "pass_rate": 28.2
+        },
+        "N3": {
+          "examinees": 73354,
+          "pass_rate": 27.7
+        },
+        "N4": {
+          "examinees": 28826,
+          "pass_rate": 28.7
+        },
+        "N5": {
+          "examinees": 4417,
+          "pass_rate": 53.9
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 127828,
+          "pass_rate": 30.8
+        },
+        "N2": {
+          "examinees": 178040,
+          "pass_rate": 35.8
+        },
+        "N3": {
+          "examinees": 143894,
+          "pass_rate": 33.6
+        },
+        "N4": {
+          "examinees": 103503,
+          "pass_rate": 30.3
+        },
+        "N5": {
+          "examinees": 64822,
+          "pass_rate": 41.9
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2020,
+      "session": 2,
+      "session_name": "2020年12月",
+      "japan": {
+        "N1": {
+          "examinees": 38537,
+          "pass_rate": 41.8
+        },
+        "N2": {
+          "examinees": 61458,
+          "pass_rate": 50.6
+        },
+        "N3": {
+          "examinees": 60324,
+          "pass_rate": 50.5
+        },
+        "N4": {
+          "examinees": 25184,
+          "pass_rate": 42.4
+        },
+        "N5": {
+          "examinees": 2997,
+          "pass_rate": 66.1
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 80237,
+          "pass_rate": 45.2
+        },
+        "N2": {
+          "examinees": 114076,
+          "pass_rate": 55.9
+        },
+        "N3": {
+          "examinees": 98208,
+          "pass_rate": 54.1
+        },
+        "N4": {
+          "examinees": 52993,
+          "pass_rate": 43.6
+        },
+        "N5": {
+          "examinees": 24514,
+          "pass_rate": 56.0
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2021,
+      "session": 1,
+      "session_name": "2021年7月",
+      "japan": {
+        "N1": {
+          "examinees": 44851,
+          "pass_rate": 29.9
+        },
+        "N2": {
+          "examinees": 59476,
+          "pass_rate": 34.6
+        },
+        "N3": {
+          "examinees": 56230,
+          "pass_rate": 43.8
+        },
+        "N4": {
+          "examinees": 30060,
+          "pass_rate": 48.3
+        },
+        "N5": {
+          "examinees": 3009,
+          "pass_rate": 66.1
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 95175,
+          "pass_rate": 39.4
+        },
+        "N2": {
+          "examinees": 110571,
+          "pass_rate": 43.6
+        },
+        "N3": {
+          "examinees": 77183,
+          "pass_rate": 48.1
+        },
+        "N4": {
+          "examinees": 41074,
+          "pass_rate": 50.0
+        },
+        "N5": {
+          "examinees": 11912,
+          "pass_rate": 67.5
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2021,
+      "session": 2,
+      "session_name": "2021年12月",
+      "japan": {
+        "N1": {
+          "examinees": 45445,
+          "pass_rate": 26.7
+        },
+        "N2": {
+          "examinees": 58559,
+          "pass_rate": 29.2
+        },
+        "N3": {
+          "examinees": 48770,
+          "pass_rate": 34.5
+        },
+        "N4": {
+          "examinees": 20849,
+          "pass_rate": 35.8
+        },
+        "N5": {
+          "examinees": 2004,
+          "pass_rate": 67.4
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 89536,
+          "pass_rate": 34.5
+        },
+        "N2": {
+          "examinees": 101398,
+          "pass_rate": 41.5
+        },
+        "N3": {
+          "examinees": 82283,
+          "pass_rate": 45.2
+        },
+        "N4": {
+          "examinees": 48511,
+          "pass_rate": 43.4
+        },
+        "N5": {
+          "examinees": 27264,
+          "pass_rate": 62.3
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2022,
+      "session": 1,
+      "session_name": "2022年7月",
+      "japan": {
+        "N1": {
+          "examinees": 41076,
+          "pass_rate": 24.3
+        },
+        "N2": {
+          "examinees": 48551,
+          "pass_rate": 26.4
+        },
+        "N3": {
+          "examinees": 33946,
+          "pass_rate": 42.0
+        },
+        "N4": {
+          "examinees": 15424,
+          "pass_rate": 38.5
+        },
+        "N5": {
+          "examinees": 2156,
+          "pass_rate": 63.4
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 90299,
+          "pass_rate": 30.2
+        },
+        "N2": {
+          "examinees": 103093,
+          "pass_rate": 37.3
+        },
+        "N3": {
+          "examinees": 75210,
+          "pass_rate": 47.0
+        },
+        "N4": {
+          "examinees": 55544,
+          "pass_rate": 45.6
+        },
+        "N5": {
+          "examinees": 32359,
+          "pass_rate": 54.1
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2022,
+      "session": 2,
+      "session_name": "2022年12月",
+      "japan": {
+        "N1": {
+          "examinees": 46725,
+          "pass_rate": 25.9
+        },
+        "N2": {
+          "examinees": 56334,
+          "pass_rate": 26.4
+        },
+        "N3": {
+          "examinees": 44177,
+          "pass_rate": 34.6
+        },
+        "N4": {
+          "examinees": 38661,
+          "pass_rate": 35.8
+        },
+        "N5": {
+          "examinees": 4253,
+          "pass_rate": 63.1
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 80518,
+          "pass_rate": 30.8
+        },
+        "N2": {
+          "examinees": 97119,
+          "pass_rate": 33.1
+        },
+        "N3": {
+          "examinees": 90737,
+          "pass_rate": 41.6
+        },
+        "N4": {
+          "examinees": 107539,
+          "pass_rate": 40.7
+        },
+        "N5": {
+          "examinees": 55536,
+          "pass_rate": 47.3
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2023,
+      "session": 1,
+      "session_name": "2023年7月",
+      "japan": {
+        "N1": {
+          "examinees": 41484,
+          "pass_rate": 32.2
+        },
+        "N2": {
+          "examinees": 52189,
+          "pass_rate": 35.0
+        },
+        "N3": {
+          "examinees": 60570,
+          "pass_rate": 42.4
+        },
+        "N4": {
+          "examinees": 39237,
+          "pass_rate": 45.9
+        },
+        "N5": {
+          "examinees": 3664,
+          "pass_rate": 66.0
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 120407,
+          "pass_rate": 34.0
+        },
+        "N2": {
+          "examinees": 144712,
+          "pass_rate": 42.1
+        },
+        "N3": {
+          "examinees": 136237,
+          "pass_rate": 43.7
+        },
+        "N4": {
+          "examinees": 148410,
+          "pass_rate": 42.6
+        },
+        "N5": {
+          "examinees": 52374,
+          "pass_rate": 50.6
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2023,
+      "session": 2,
+      "session_name": "2023年12月",
+      "japan": {
+        "N1": {
+          "examinees": 45050,
+          "pass_rate": 27.8
+        },
+        "N2": {
+          "examinees": 67033,
+          "pass_rate": 33.7
+        },
+        "N3": {
+          "examinees": 74573,
+          "pass_rate": 32.0
+        },
+        "N4": {
+          "examinees": 45891,
+          "pass_rate": 33.0
+        },
+        "N5": {
+          "examinees": 4000,
+          "pass_rate": 55.9
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 121554,
+          "pass_rate": 30.9
+        },
+        "N2": {
+          "examinees": 164670,
+          "pass_rate": 38.7
+        },
+        "N3": {
+          "examinees": 164700,
+          "pass_rate": 35.1
+        },
+        "N4": {
+          "examinees": 149334,
+          "pass_rate": 31.6
+        },
+        "N5": {
+          "examinees": 63037,
+          "pass_rate": 46.7
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2024,
+      "session": 1,
+      "session_name": "2024年7月",
+      "japan": {
+        "N1": {
+          "examinees": 44469,
+          "pass_rate": 31.5
+        },
+        "N2": {
+          "examinees": 69779,
+          "pass_rate": 33.5
+        },
+        "N3": {
+          "examinees": 85232,
+          "pass_rate": 38.5
+        },
+        "N4": {
+          "examinees": 62061,
+          "pass_rate": 44.1
+        },
+        "N5": {
+          "examinees": 4307,
+          "pass_rate": 61.8
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 117940,
+          "pass_rate": 33.3
+        },
+        "N2": {
+          "examinees": 171162,
+          "pass_rate": 38.3
+        },
+        "N3": {
+          "examinees": 177151,
+          "pass_rate": 40.5
+        },
+        "N4": {
+          "examinees": 157053,
+          "pass_rate": 40.9
+        },
+        "N5": {
+          "examinees": 57147,
+          "pass_rate": 50.0
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2024,
+      "session": 2,
+      "session_name": "2024年12月",
+      "japan": {
+        "N1": {
+          "examinees": 52120,
+          "pass_rate": 24.3
+        },
+        "N2": {
+          "examinees": 90471,
+          "pass_rate": 26.4
+        },
+        "N3": {
+          "examinees": 109068,
+          "pass_rate": 32.5
+        },
+        "N4": {
+          "examinees": 77853,
+          "pass_rate": 36.3
+        },
+        "N5": {
+          "examinees": 4471,
+          "pass_rate": 59.6
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 126754,
+          "pass_rate": 28.7
+        },
+        "N2": {
+          "examinees": 197597,
+          "pass_rate": 33.1
+        },
+        "N3": {
+          "examinees": 214579,
+          "pass_rate": 35.2
+        },
+        "N4": {
+          "examinees": 182206,
+          "pass_rate": 35.6
+        },
+        "N5": {
+          "examinees": 69400,
+          "pass_rate": 49.5
+        }
+      },
+      "total": {}
+    },
+    {
+      "year": 2025,
+      "session": 1,
+      "session_name": "2025年7月",
+      "japan": {
+        "N1": {
+          "examinees": 45103,
+          "pass_rate": 24.9
+        },
+        "N2": {
+          "examinees": 88526,
+          "pass_rate": 27.6
+        },
+        "N3": {
+          "examinees": 113656,
+          "pass_rate": 37.9
+        },
+        "N4": {
+          "examinees": 73108,
+          "pass_rate": 37.7
+        },
+        "N5": {
+          "examinees": 4373,
+          "pass_rate": 57.8
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 112262,
+          "pass_rate": 28.0
+        },
+        "N2": {
+          "examinees": 193909,
+          "pass_rate": 33.9
+        },
+        "N3": {
+          "examinees": 218726,
+          "pass_rate": 38.0
+        },
+        "N4": {
+          "examinees": 178849,
+          "pass_rate": 36.8
+        },
+        "N5": {
+          "examinees": 65483,
+          "pass_rate": 50.8
+        }
+      },
+      "total": {}
+    }
+  ]
+}

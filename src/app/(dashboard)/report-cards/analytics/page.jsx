@@ -109,7 +109,9 @@ export default function AnalyticsPage() {
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
-    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly' or 'class'
+    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', or 'compare'
+    const [nationalStats, setNationalStats] = useState(null)
+    const [loadingNational, setLoadingNational] = useState(false)
     const [debugInfo, setDebugInfo] = useState(null)
 
     useEffect(() => {
@@ -487,6 +489,28 @@ export default function AnalyticsPage() {
                         >
                             クラス別分析
                         </button>
+                        <button
+                            className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.active : ''}`}
+                            onClick={() => {
+                                setJlptSubTab('compare');
+                                // Fetch national stats if not already loaded
+                                if (!nationalStats && !loadingNational) {
+                                    setLoadingNational(true);
+                                    fetch('/api/jlpt/national')
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            setNationalStats(data);
+                                            setLoadingNational(false);
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to load national stats:', err);
+                                            setLoadingNational(false);
+                                        });
+                                }
+                            }}
+                        >
+                            全国比較
+                        </button>
                     </div>
 
                     {/* Yearly Analysis Content */}
@@ -818,6 +842,137 @@ export default function AnalyticsPage() {
                                 学生データの読み込みに失敗したか、条件に一致するデータがありません。（対象: {enhancedJlptStats?.students?.length || 0}名）
                             </p>
                         </div>
+                    )}
+
+                    {/* National Comparison Content */}
+                    {jlptSubTab === 'compare' && (
+                        <>
+                            <h2 className={styles.sectionTitle} style={{ marginTop: 0 }}>
+                                本校 vs 全国平均（日本国内）
+                            </h2>
+
+                            {loadingNational && (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                    全国データを読み込み中...
+                                </div>
+                            )}
+
+                            {!loadingNational && nationalStats && enhancedJlptStats?.levelStats && (
+                                <>
+                                    {/* Comparison Bar Chart */}
+                                    <div className={styles.chartGrid}>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>レベル別合格率比較</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Bar
+                                                    data={{
+                                                        labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
+                                                        datasets: [
+                                                            {
+                                                                label: '本校',
+                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                    const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                                    return stat?.passRate || 0;
+                                                                }),
+                                                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                                                borderColor: 'rgb(59, 130, 246)',
+                                                                borderWidth: 1,
+                                                            },
+                                                            {
+                                                                label: '全国平均（日本国内）',
+                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                    return parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                                }),
+                                                                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                                                                borderColor: 'rgb(239, 68, 68)',
+                                                                borderWidth: 1,
+                                                            }
+                                                        ]
+                                                    }}
+                                                    options={{
+                                                        responsive: true,
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            legend: { position: 'top' },
+                                                        },
+                                                        scales: {
+                                                            y: {
+                                                                beginAtZero: true,
+                                                                max: 100,
+                                                                title: { display: true, text: '合格率 (%)' }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Comparison Table */}
+                                    <div className={styles.tableContainer} style={{ marginTop: '2rem' }}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>レベル</th>
+                                                    <th>本校合格率</th>
+                                                    <th>全国平均（日本国内）</th>
+                                                    <th>差分</th>
+                                                    <th>評価</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                    const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                    const schoolRate = schoolStat?.passRate || 0;
+                                                    const nationalRate = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                    const diff = (schoolRate - nationalRate).toFixed(1);
+                                                    const isPositive = parseFloat(diff) > 0;
+                                                    const isNegative = parseFloat(diff) < 0;
+
+                                                    return (
+                                                        <tr key={level}>
+                                                            <td>
+                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>
+                                                                    {level}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ fontWeight: 600 }}>{schoolRate}%</td>
+                                                            <td>{nationalRate}%</td>
+                                                            <td style={{
+                                                                fontWeight: 600,
+                                                                color: isPositive ? '#22c55e' : isNegative ? '#ef4444' : '#6b7280'
+                                                            }}>
+                                                                {isPositive ? '+' : ''}{diff}%
+                                                            </td>
+                                                            <td>
+                                                                {isPositive && <span style={{ color: '#22c55e', fontWeight: 600 }}>全国平均以上</span>}
+                                                                {isNegative && <span style={{ color: '#f59e0b', fontWeight: 600 }}>要改善</span>}
+                                                                {!isPositive && !isNegative && <span style={{ color: '#6b7280' }}>同等</span>}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Data Source Info */}
+                                    <div style={{ marginTop: '2rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', fontSize: '0.875rem', color: '#6b7280' }}>
+                                        <p><strong>データソース:</strong> {nationalStats.source}</p>
+                                        <p><strong>集計期間:</strong> {nationalStats.totalSessions}回分のJLPT試験データ（2017年〜2025年）</p>
+                                        <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                                            ※ 全国平均は日本国内受験者のデータを集計しています。
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+
+                            {!loadingNational && !nationalStats && (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                    全国統計データの読み込みに失敗しました。
+                                </div>
+                            )}
+                        </>
                     )}
                 </>
             )}
