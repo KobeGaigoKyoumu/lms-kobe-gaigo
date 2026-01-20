@@ -8,6 +8,7 @@ export async function fetchJlptAnalyticsData() {
     console.log('Server Action: Fetching JLPT Analytics Data...');
     let students = []
     let fetchError = null
+    let allFetchedData = [] // Store raw data for later access
     let dataSource = 'cookie'
     let statusDistribution = {}
     let totalFetched = 0
@@ -37,6 +38,8 @@ export async function fetchJlptAnalyticsData() {
             .from('students')
             .select('*');
 
+        if (data) allFetchedData = data;
+
         // 2. Fallback: If cookie auth returned no data (likely RLS issue), try Service Role Key
         envDebug = { hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY };
 
@@ -54,6 +57,7 @@ export async function fetchJlptAnalyticsData() {
 
                 if (adminResult.data && adminResult.data.length > 0) {
                     data = adminResult.data;
+                    allFetchedData = data;
                     error = adminResult.error;
                     dataSource = 'service_role';
                     console.log(`Server Action: Successfully fetched ${data.length} records with Service Role Key`);
@@ -121,7 +125,7 @@ export async function fetchJlptAnalyticsData() {
 
         // 2. Enhanced Stats (Overall & Class Analysis)
         // We pass ALL fetched students (including inactive) for accurate historical stats calculation
-        const enhancedStats = await getEnhancedJlptStats(data || []);
+        const enhancedStats = await getEnhancedJlptStats(allFetchedData || []);
 
         // 3. Student Summaries (Class Analysis)
         if (students.length > 0) {
