@@ -1071,49 +1071,58 @@ export default function AnalyticsPage() {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
-                                                            const nationalSessions = nationalStats.sessions.filter(s => s.session.startsWith(yearData.year));
-                                                            let nationalRateVal = 0;
-                                                            let count = 0;
+                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 ? (
+                                                            enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
+                                                                const nationalSessions = nationalStats.sessions ?
+                                                                    nationalStats.sessions.filter(s => s.session && String(s.session).startsWith(yearData.year)) : [];
+                                                                let nationalRateVal = 0;
+                                                                let count = 0;
 
-                                                            if (nationalSessions.length > 0) {
-                                                                nationalSessions.forEach(s => {
-                                                                    // Simple average of all N1-N5 levels for approximation
-                                                                    const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
-                                                                    let sessionSum = 0;
-                                                                    let sessionLevelCount = 0;
-                                                                    levels.forEach(l => {
-                                                                        const rate = s.japan?.[l]?.pass_rate; // Can be string
-                                                                        const rateVal = parseFloat(rate || 0);
-                                                                        if (rateVal > 0) {
-                                                                            sessionSum += rateVal;
-                                                                            sessionLevelCount++;
+                                                                if (nationalSessions.length > 0) {
+                                                                    nationalSessions.forEach(s => {
+                                                                        // Simple average of all N1-N5 levels for approximation
+                                                                        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                                                                        let sessionSum = 0;
+                                                                        let sessionLevelCount = 0;
+                                                                        levels.forEach(l => {
+                                                                            const rate = s.japan?.[l]?.pass_rate; // Can be string
+                                                                            const rateVal = parseFloat(rate || 0);
+                                                                            if (rateVal > 0) {
+                                                                                sessionSum += rateVal;
+                                                                                sessionLevelCount++;
+                                                                            }
+                                                                        });
+                                                                        if (sessionLevelCount > 0) {
+                                                                            nationalRateVal += (sessionSum / sessionLevelCount);
+                                                                            count++;
                                                                         }
                                                                     });
-                                                                    if (sessionLevelCount > 0) {
-                                                                        nationalRateVal += (sessionSum / sessionLevelCount);
-                                                                        count++;
-                                                                    }
-                                                                });
-                                                            }
+                                                                }
 
-                                                            const nationalAvg = count > 0 ? (nationalRateVal / count).toFixed(1) : '-';
-                                                            const diff = nationalAvg !== '-' ? (parseFloat(yearData.passRate) - parseFloat(nationalAvg)).toFixed(1) : '-';
+                                                                const nationalAvg = count > 0 ? (nationalRateVal / count).toFixed(1) : '-';
+                                                                const diff = nationalAvg !== '-' ? (parseFloat(yearData.passRate) - parseFloat(nationalAvg)).toFixed(1) : '-';
 
-                                                            return (
-                                                                <tr key={yearData.year}>
-                                                                    <td style={{ fontWeight: 600 }}>{yearData.year}年度</td>
-                                                                    <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
-                                                                    <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
-                                                                    <td style={{
-                                                                        fontWeight: 600,
-                                                                        color: parseFloat(diff) > 0 ? '#16a34a' : parseFloat(diff) < 0 ? '#dc2626' : '#4b5563'
-                                                                    }}>
-                                                                        {parseFloat(diff) > 0 ? '+' : ''}{diff}%
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })}
+                                                                return (
+                                                                    <tr key={yearData.year}>
+                                                                        <td style={{ fontWeight: 600 }}>{yearData.year}年度</td>
+                                                                        <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
+                                                                        <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
+                                                                        <td style={{
+                                                                            fontWeight: 600,
+                                                                            color: parseFloat(diff) > 0 ? '#16a34a' : parseFloat(diff) < 0 ? '#dc2626' : '#4b5563'
+                                                                        }}>
+                                                                            {parseFloat(diff) > 0 ? '+' : ''}{diff}%
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })
+                                                        ) : (
+                                                            <tr>
+                                                                <td colSpan="4" style={{ textAlign: 'center', padding: '1rem', color: '#6b7280' }}>
+                                                                    データがありません
+                                                                </td>
+                                                            </tr>
+                                                        )}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -1126,10 +1135,10 @@ export default function AnalyticsPage() {
                                             <div className={styles.chartContainer}>
                                                 <Line
                                                     data={{
-                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年度'),
+                                                        labels: enhancedJlptStats.yearlyTrend ? enhancedJlptStats.yearlyTrend.map(s => s.year + '年度') : [],
                                                         datasets: [{
                                                             label: '受験率 (%)',
-                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.examRate || 0),
+                                                            data: enhancedJlptStats.yearlyTrend ? enhancedJlptStats.yearlyTrend.map(s => s.examRate || 0) : [],
                                                             borderColor: 'rgb(139, 92, 246)', // Violet
                                                             backgroundColor: 'rgba(139, 92, 246, 0.5)',
                                                             tension: 0.3,
