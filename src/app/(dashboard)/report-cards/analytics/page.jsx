@@ -684,7 +684,6 @@ export default function AnalyticsPage() {
                                                     <th>在籍数</th>
                                                     <th>N3以上取得率</th>
                                                     <th>N3以上取得数</th>
-                                                    <th>詳細</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -696,21 +695,10 @@ export default function AnalyticsPage() {
                                                     >
                                                         <td style={{ fontWeight: 600, color: '#111827' }}>{cls.className}</td>
                                                         <td style={{ color: '#4b5563' }}>{cls.total}名</td>
-                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#166534' : '#4b5563' }}>
+                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#22c55e' : '#f59e0b' }}>
                                                             {cls.n3PlusRate}%
                                                         </td>
                                                         <td style={{ color: '#4b5563' }}>{cls.n3Plus}名</td>
-                                                        <td>
-                                                            <button
-                                                                className={styles.detailBtn}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setSelectedJlptClass(cls.className);
-                                                                }}
-                                                            >
-                                                                詳細
-                                                            </button>
-                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
