@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
 import { Bar, Line } from 'react-chartjs-2'
@@ -17,7 +17,7 @@ import {
     ArcElement
 } from 'chart.js'
 // ... (previous imports)
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
 import styles from './page.module.css'
 
 // Chart.js registration
@@ -117,38 +117,38 @@ export default function AnalyticsPage() {
         fetchJlptData()
     }, [])
 
-    useEffect(() => {
-        if (enhancedJlptStats?.students?.length > 0) {
-            // Set default class if none selected or invalid
-            const classes = [...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort();
-            if (classes.length > 0) {
-                if (!selectedJlptClass || !classes.includes(selectedJlptClass)) {
-                    setSelectedJlptClass(classes[0]);
-                }
-            }
-        }
+    // Calculate Class Summary List for List View
+    const classSummaryList = useMemo(() => {
+        if (!enhancedJlptStats?.studentStats) return []
+
+        const groups = enhancedJlptStats.studentStats.reduce((acc, student) => {
+            const cls = student.class || '未所属'
+            if (!acc[cls]) acc[cls] = []
+            acc[cls].push(student)
+            return acc
+        }, {})
+
+        return Object.entries(groups).map(([className, students]) => {
+            const total = students.length
+            const n3Plus = students.filter(s =>
+                s.levels.N1.status === '合格' ||
+                s.levels.N2.status === '合格' ||
+                s.levels.N3.status === '合格'
+            ).length
+            const n3PlusRate = total > 0 ? ((n3Plus / total) * 100).toFixed(0) : 0
+
+            // Calculate level counts for summary
+            const n1 = students.filter(s => s.levels.N1.status === '合格').length
+            const n2 = students.filter(s => s.levels.N2.status === '合格').length
+            const n3 = students.filter(s => s.levels.N3.status === '合格').length
+
+            return { className, total, n3Plus, n3PlusRate, n1, n2, n3, students }
+        }).sort((a, b) => a.className.localeCompare(b.className))
     }, [enhancedJlptStats])
 
-    // Filter and sort students for the selected class (Memoized-like calculation)
-    const selectedClassStudents = (jlptSubTab === 'class' && enhancedJlptStats?.studentStats)
-        ? enhancedJlptStats.studentStats
-            .filter(s => s.class === selectedJlptClass)
-            .sort((a, b) => a.studentId.localeCompare(b.studentId))
-        : []
-
-    // Calculate Class Statistics
-    const classStats = {
-        total: selectedClassStudents.length,
-        n1: selectedClassStudents.filter(s => s.levels.N1.status === '合格').length,
-        n2: selectedClassStudents.filter(s => s.levels.N2.status === '合格').length,
-        n3: selectedClassStudents.filter(s => s.levels.N3.status === '合格').length,
-        n3Plus: selectedClassStudents.filter(s =>
-            s.levels.N1.status === '合格' ||
-            s.levels.N2.status === '合格' ||
-            s.levels.N3.status === '合格'
-        ).length,
-    }
-    classStats.n3PlusRate = classStats.total > 0 ? ((classStats.n3Plus / classStats.total) * 100).toFixed(0) : 0
+    const currentClassStats = useMemo(() => {
+        return classSummaryList.find(c => c.className === selectedJlptClass)
+    }, [classSummaryList, selectedJlptClass])
 
     const fetchGrades = async () => {
         try {
@@ -480,7 +480,10 @@ export default function AnalyticsPage() {
                         </button>
                         <button
                             className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.active : ''}`}
-                            onClick={() => setJlptSubTab('class')}
+                            onClick={() => {
+                                setJlptSubTab('class');
+                                setSelectedJlptClass(''); // Reset selected class when switching to class tab
+                            }}
                         >
                             クラス別分析
                         </button>
@@ -669,97 +672,154 @@ export default function AnalyticsPage() {
                     {/* Class Analysis Content */}
                     {jlptSubTab === 'class' && enhancedJlptStats?.studentStats && (
                         <>
-                            <div className={styles.toolbar} style={{ marginTop: '1rem' }}>
-                                <div className={styles.filterGroup}>
-                                    <label className={styles.filterLabel}>クラス選択</label>
-                                    <select
-                                        className={styles.filterSelect}
-                                        value={selectedJlptClass}
-                                        onChange={(e) => setSelectedJlptClass(e.target.value)}
-                                    >
-                                        {[...new Set(enhancedJlptStats.students.map(s => s.class).filter(c => c))].sort().map(c => (
-                                            <option key={c} value={c}>{c}</option>
-                                        ))}
-                                    </select>
+                            {!selectedJlptClass ? (
+                                /* List View */
+                                <div>
+                                    <h2 className={styles.sectionTitle} style={{ marginTop: 0 }}>クラス別一覧</h2>
+                                    <div className={styles.tableContainer}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>クラス名</th>
+                                                    <th>在籍数</th>
+                                                    <th>N3以上取得率</th>
+                                                    <th>N3以上取得数</th>
+                                                    <th>詳細</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {classSummaryList.map((cls) => (
+                                                    <tr
+                                                        key={cls.className}
+                                                        onClick={() => setSelectedJlptClass(cls.className)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        <td style={{ fontWeight: 600 }}>{cls.className}</td>
+                                                        <td>{cls.total}名</td>
+                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#166534' : 'inherit' }}>
+                                                            {cls.n3PlusRate}%
+                                                        </td>
+                                                        <td>{cls.n3Plus}名</td>
+                                                        <td>
+                                                            <button
+                                                                className={styles.toggleBtn}
+                                                                style={{ background: '#eff6ff', color: '#3b82f6', fontSize: '0.75rem', padding: '4px 12px' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedJlptClass(cls.className);
+                                                                }}
+                                                            >
+                                                                詳細
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        {classSummaryList.length === 0 && (
+                                            <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                                クラスデータがありません
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                /* Detail View */
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '1rem' }}>
+                                        <button
+                                            onClick={() => setSelectedJlptClass('')}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                                background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px',
+                                                padding: '0.5rem 1rem', cursor: 'pointer', color: '#4b5563', fontSize: '0.875rem',
+                                                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                                            }}
+                                        >
+                                            <ArrowLeft size={16} /> 一覧に戻る
+                                        </button>
+                                        <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+                                            詳細分析: {selectedJlptClass}
+                                        </h2>
+                                    </div>
 
-                            {selectedClassStudents.length > 0 && (
-                                <div className={styles.statsGrid}>
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>在籍数</span>
-                                        <div className={styles.statValueRow}>
-                                            <span className={styles.statValue}>{classStats.total}</span>
-                                            <span className={styles.statUnit}>名</span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>N3以上取得率</span>
-                                        <div className={styles.statValueRow}>
-                                            <span className={styles.statValue}>{classStats.n3PlusRate}%</span>
-                                            <span className={styles.statUnit}>{classStats.n3Plus}/{classStats.total}名</span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>合格者内訳</span>
-                                        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N1</div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#991b1b' }}>{classStats.n1}</div>
+                                    {currentClassStats && (
+                                        <>
+                                            <div className={styles.statsGrid}>
+                                                <div className={styles.statCard}>
+                                                    <span className={styles.statLabel}>在籍数</span>
+                                                    <div className={styles.statValueRow}>
+                                                        <span className={styles.statValue}>{currentClassStats.total}</span>
+                                                        <span className={styles.statUnit}>名</span>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.statCard}>
+                                                    <span className={styles.statLabel}>N3以上取得率</span>
+                                                    <div className={styles.statValueRow}>
+                                                        <span className={styles.statValue}>{currentClassStats.n3PlusRate}%</span>
+                                                        <span className={styles.statUnit}>{currentClassStats.n3Plus}/{currentClassStats.total}名</span>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.statCard}>
+                                                    <span className={styles.statLabel}>合格者内訳</span>
+                                                    <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N1</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#991b1b' }}>{currentClassStats.n1}</div>
+                                                        </div>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N2</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#9a3412' }}>{currentClassStats.n2}</div>
+                                                        </div>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N3</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#92400e' }}>{currentClassStats.n3}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N2</div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#9a3412' }}>{classStats.n2}</div>
+
+                                            <div className={styles.tableContainer}>
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>学籍番号</th>
+                                                            <th>氏名</th>
+                                                            <th>N1</th>
+                                                            <th>N2</th>
+                                                            <th>N3</th>
+                                                            <th>N4</th>
+                                                            <th>N5</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {currentClassStats.students
+                                                            .sort((a, b) => a.studentId.localeCompare(b.studentId))
+                                                            .map(student => (
+                                                                <tr key={student.studentId}>
+                                                                    <td>{student.studentId}</td>
+                                                                    <td>{student.name}</td>
+                                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        const stat = student.levels[level];
+                                                                        const badgeClass = stat.status === '合格' ? styles.badgePassed :
+                                                                            stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
+                                                                        return (
+                                                                            <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
+                                                                                <span className={`${styles.badge} ${badgeClass}`}>
+                                                                                    {stat.status === '未受験' ? '-' : stat.status}
+                                                                                </span>
+                                                                            </td>
+                                                                        );
+                                                                    })}
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N3</div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#92400e' }}>{classStats.n3}</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
-
-                            <div className={styles.tableContainer}>
-                                <table className={styles.table}>
-                                    <thead>
-                                        <tr>
-                                            <th>学籍番号</th>
-                                            <th>氏名</th>
-                                            <th>N1</th>
-                                            <th>N2</th>
-                                            <th>N3</th>
-                                            <th>N4</th>
-                                            <th>N5</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {selectedClassStudents.map(student => (
-                                            <tr key={student.studentId}>
-                                                <td>{student.studentId}</td>
-                                                <td>{student.name}</td>
-                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                    const stat = student.levels[level];
-                                                    const badgeClass = stat.status === '合格' ? styles.badgePassed :
-                                                        stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
-                                                    return (
-                                                        <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
-                                                            <span className={`${styles.badge} ${badgeClass}`}>
-                                                                {stat.status === '未受験' ? '-' : stat.status}
-                                                            </span>
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {selectedClassStudents.length === 0 && (
-                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                        該当するデータがありません
-                                    </div>
-                                )}
-                            </div>
                         </>
                     )}
 
