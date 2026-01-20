@@ -237,12 +237,17 @@ export async function getAllRawJlptData() {
         const historicalData = loadHistoricalJlptData();
         console.log(`Loaded ${historicalData.length} records from historical JSON`);
 
-        // Create a set to track seen records (avoid duplicates)
-        const seenRecords = new Set();
+        // Create sets to track seen records (avoid duplicates)
+        const seenIds = new Set();
+        const seenNames = new Set();
+
         historicalData.forEach(record => {
+            if (record.studentId) {
+                seenIds.add(`${record.session}|${record.studentId}`);
+            }
             // Create unique key: session + name (normalized)
             const key = `${record.session}|${record.name?.toLowerCase()?.trim()}|${record.level}`;
-            seenRecords.add(key);
+            seenNames.add(key);
         });
 
         const allData = [...historicalData];
@@ -267,10 +272,30 @@ export async function getAllRawJlptData() {
                         const parsed = parseLine(line);
                         if (parsed) {
                             // Check if this record already exists in historical data
-                            const key = `${session}|${parsed.name?.toLowerCase()?.trim()}|${parsed.level}`;
-                            if (!seenRecords.has(key)) {
+                            let isDuplicate = false;
+
+                            // Check by ID first if available
+                            if (parsed.id) {
+                                const idKey = `${session}|${parsed.id}`;
+                                if (seenIds.has(idKey)) {
+                                    isDuplicate = true;
+                                } else {
+                                    seenIds.add(idKey);
+                                }
+                            }
+
+                            // If not duplicate by ID, check by name
+                            if (!isDuplicate) {
+                                const nameKey = `${session}|${parsed.name?.toLowerCase()?.trim()}|${parsed.level}`;
+                                if (seenNames.has(nameKey)) {
+                                    isDuplicate = true;
+                                } else {
+                                    seenNames.add(nameKey);
+                                }
+                            }
+
+                            if (!isDuplicate) {
                                 allData.push({ session, ...parsed, source: 'csv' });
-                                seenRecords.add(key);
                             }
                         }
                     }
@@ -897,7 +922,9 @@ export async function getAccurateGraduationStats() {
                 totalStudents: s.total,
                 n3PlusStudents: s.n3_plus,
                 rate: s.rate.toFixed(1),
-                matchRate: s.match_rate.toFixed(1)
+                matchRate: s.match_rate.toFixed(1),
+                kanji_stats: s.kanji_stats,
+                non_kanji_stats: s.non_kanji_stats
             })),
             summary: officialStats.summary
         };
