@@ -523,40 +523,7 @@ function parseStudentIdForEnrollment(studentId, firstExamSession = null) {
     return null;
 }
 
-/**
- * Helper to parse enrollment year from Student ID
- * Assumes ID format starts with YYMM or YYYYMM
- */
-function parseStudentIdForEnrollment(studentId) {
-    if (!studentId) return null;
-    const sId = String(studentId).trim();
 
-    // KGA format: usually starts with YYMM (e.g. 2404...)
-    // Or sometimes 20YY...
-
-    let year = 0;
-    let month = 4; // Default April
-
-    if (/^20\d{2}(04|10)/.test(sId)) {
-        year = parseInt(sId.substring(0, 4));
-        month = parseInt(sId.substring(4, 6));
-    } else if (/^\d{2}(04|10)/.test(sId)) {
-        year = 2000 + parseInt(sId.substring(0, 2));
-        month = parseInt(sId.substring(2, 4));
-    } else if (/^\d{2}/.test(sId)) {
-        // Fallback just first 2 digits
-        year = 2000 + parseInt(sId.substring(0, 2));
-    }
-
-    if (year > 2000 && year < 2100) {
-        return {
-            enrollmentYear: year,
-            enrollmentMonth: month,
-            graduationYear: year + 2 // Assuming 2 year course
-        };
-    }
-    return null;
-}
 
 
 /**
