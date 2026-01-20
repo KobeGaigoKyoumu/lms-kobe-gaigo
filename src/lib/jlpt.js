@@ -699,17 +699,38 @@ export async function getEnhancedJlptStats(students = []) {
     });
 
     // Merge static and dynamic enrollment stats
+    // Static now contains objects: {total, first_year, second_year}
     const allYears = new Set([...Object.keys(staticEnrollmentStats), ...Object.keys(dynamicEnrollment)]);
     allYears.forEach(year => {
-        const staticCount = staticEnrollmentStats[year] || 0;
+        const staticData = staticEnrollmentStats[year];
+        const staticCount = staticData ? (typeof staticData === 'object' ? staticData.total : staticData) : 0;
         const dynamicCount = dynamicEnrollment[year] || 0;
-        enrollmentByYear[year] = Math.max(staticCount, dynamicCount);
+
+        if (staticData && typeof staticData === 'object') {
+            // Use static object format with year breakdown
+            enrollmentByYear[year] = {
+                total: Math.max(staticCount, dynamicCount),
+                first_year: staticData.first_year || 0,
+                second_year: staticData.second_year || 0
+            };
+        } else {
+            // Fallback to simple number
+            enrollmentByYear[year] = {
+                total: Math.max(staticCount, dynamicCount),
+                first_year: 0,
+                second_year: 0
+            };
+        }
     });
 
     const yearlyTrend = Object.entries(byYear)
         .map(([year, stats]) => {
             const yearNum = parseInt(year);
-            const enrolled = enrollmentByYear[yearNum] || 0;
+            const enrollData = enrollmentByYear[yearNum] || { total: 0, first_year: 0, second_year: 0 };
+            const enrolled = typeof enrollData === 'object' ? enrollData.total : enrollData;
+            const firstYearEnrolled = typeof enrollData === 'object' ? enrollData.first_year : 0;
+            const secondYearEnrolled = typeof enrollData === 'object' ? enrollData.second_year : 0;
+
             const examRate = enrolled > 0 ? ((stats.total / enrolled) * 100).toFixed(1) : 0;
 
             return {
@@ -717,6 +738,8 @@ export async function getEnhancedJlptStats(students = []) {
                 passRate: ((stats.passed / stats.total) * 100).toFixed(1),
                 examinees: stats.total,
                 enrolled,
+                firstYearEnrolled,
+                secondYearEnrolled,
                 examRate
             };
         })

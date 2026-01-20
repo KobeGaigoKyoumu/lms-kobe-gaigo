@@ -1182,20 +1182,28 @@ export default function AnalyticsPage() {
                                                     <thead>
                                                         <tr>
                                                             <th>年度</th>
-                                                            <th>在籍者数(推定含む)</th>
+                                                            <th>在籍者数</th>
                                                             <th>受験者数</th>
+                                                            <th>1年生受験率</th>
+                                                            <th>2年生受験率</th>
                                                             <th>受験率</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.map(s => (
-                                                            <tr key={s.year}>
-                                                                <td style={{ fontWeight: 600 }}>{s.year}年度</td>
-                                                                <td>{s.enrolled}名</td>
-                                                                <td>{s.examinees}名</td>
-                                                                <td style={{ fontWeight: 600, color: '#8b5cf6' }}>{s.examRate}%</td>
-                                                            </tr>
-                                                        ))}
+                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.map(s => {
+                                                            const firstYearRate = s.firstYearEnrolled > 0 ? '-' : '-';
+                                                            const secondYearRate = s.secondYearEnrolled > 0 ? '-' : '-';
+                                                            return (
+                                                                <tr key={s.year}>
+                                                                    <td style={{ fontWeight: 600 }}>{s.year}年度</td>
+                                                                    <td>{s.enrolled}名 ({s.firstYearEnrolled || 0}+{s.secondYearEnrolled || 0})</td>
+                                                                    <td>{s.examinees}名</td>
+                                                                    <td>{firstYearRate}</td>
+                                                                    <td>{secondYearRate}</td>
+                                                                    <td style={{ fontWeight: 600, color: '#8b5cf6' }}>{s.examRate}%</td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                     </tbody>
                                                 </table>
                                             </div>
