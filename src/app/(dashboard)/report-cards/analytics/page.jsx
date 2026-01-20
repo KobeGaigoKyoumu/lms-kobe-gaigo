@@ -814,11 +814,17 @@ export default function AnalyticsPage() {
                                                                         const stat = student.levels[level];
                                                                         const badgeClass = stat.status === '合格' ? styles.badgePassed :
                                                                             stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
+                                                                        // 点数形式で表示（例: 120/180）
+                                                                        const scoreDisplay = stat.score ? stat.score : '-';
                                                                         return (
                                                                             <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
-                                                                                <span className={`${styles.badge} ${badgeClass}`}>
-                                                                                    {stat.status === '未受験' ? '-' : stat.status}
-                                                                                </span>
+                                                                                {stat.status === '未受験' ? (
+                                                                                    <span className={`${styles.badge} ${styles.badgeNone}`}>-</span>
+                                                                                ) : (
+                                                                                    <span className={`${styles.badge} ${badgeClass}`}>
+                                                                                        {scoreDisplay}
+                                                                                    </span>
+                                                                                )}
                                                                             </td>
                                                                         );
                                                                     })}
@@ -989,6 +995,7 @@ export default function AnalyticsPage() {
                                                                 borderColor: 'rgb(239, 68, 68)',
                                                                 backgroundColor: 'rgba(239, 68, 68, 0.5)',
                                                                 tension: 0.3,
+                                                                spanGaps: true,
                                                             },
                                                             {
                                                                 label: 'N2',
@@ -996,6 +1003,7 @@ export default function AnalyticsPage() {
                                                                 borderColor: 'rgb(249, 115, 22)',
                                                                 backgroundColor: 'rgba(249, 115, 22, 0.5)',
                                                                 tension: 0.3,
+                                                                spanGaps: true,
                                                             },
                                                             {
                                                                 label: 'N3',
@@ -1003,6 +1011,7 @@ export default function AnalyticsPage() {
                                                                 borderColor: 'rgb(245, 158, 11)',
                                                                 backgroundColor: 'rgba(245, 158, 11, 0.5)',
                                                                 tension: 0.3,
+                                                                spanGaps: true,
                                                             },
                                                             {
                                                                 label: 'N4',
@@ -1010,6 +1019,7 @@ export default function AnalyticsPage() {
                                                                 borderColor: 'rgb(132, 204, 22)',
                                                                 backgroundColor: 'rgba(132, 204, 22, 0.5)',
                                                                 tension: 0.3,
+                                                                spanGaps: true,
                                                             },
                                                             {
                                                                 label: 'N5',
@@ -1017,6 +1027,7 @@ export default function AnalyticsPage() {
                                                                 borderColor: 'rgb(59, 130, 246)',
                                                                 backgroundColor: 'rgba(59, 130, 246, 0.5)',
                                                                 tension: 0.3,
+                                                                spanGaps: true,
                                                             }
                                                         ]
                                                     }}

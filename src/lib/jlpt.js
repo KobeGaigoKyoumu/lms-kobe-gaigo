@@ -622,6 +622,8 @@ export async function getEnhancedJlptStats(students = []) {
     const levelStats = Object.entries(byLevel)
         .map(([level, stats]) => ({
             level,
+            total: stats.total,
+            passed: stats.passed,
             passRate: ((stats.passed / stats.total) * 100).toFixed(1)
         }))
         .sort((a, b) => a.level.localeCompare(b.level));
