@@ -605,7 +605,7 @@ export async function getEnhancedJlptStats(students = []) {
             passed: stats.passed,
             passRate: ((stats.passed / stats.total) * 100).toFixed(1)
         }))
-        .sort((a, b) => b.total - a.total)
+        .sort((a, b) => parseFloat(b.passRate) - parseFloat(a.passRate))
         .slice(0, 10);
 
     // 2. Level breakdown
@@ -639,11 +639,43 @@ export async function getEnhancedJlptStats(students = []) {
         if (record.result === '合格') byYear[year].passed++;
     });
 
+    // Calculate enrollment by year for Exam Rate
+    const enrollmentByYear = {};
+
+    if (students && students.length > 0) {
+        students.forEach(s => {
+            let enrollYear = 0;
+            if (s.enrollment_date) {
+                enrollYear = new Date(s.enrollment_date).getFullYear();
+            } else if (s.student_id) {
+                const parsed = parseStudentIdForEnrollment(s.student_id);
+                if (parsed) enrollYear = parsed.enrollmentYear;
+            }
+
+            if (enrollYear > 0) {
+                // Assume 2 year course
+                const y1 = enrollYear;
+                const y2 = enrollYear + 1;
+                enrollmentByYear[y1] = (enrollmentByYear[y1] || 0) + 1;
+                enrollmentByYear[y2] = (enrollmentByYear[y2] || 0) + 1;
+            }
+        });
+    }
+
     const yearlyTrend = Object.entries(byYear)
-        .map(([year, stats]) => ({
-            year,
-            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
-        }))
+        .map(([year, stats]) => {
+            const yearNum = parseInt(year);
+            const enrolled = enrollmentByYear[yearNum] || 0;
+            const examRate = enrolled > 0 ? ((stats.total / enrolled) * 100).toFixed(1) : 0;
+
+            return {
+                year,
+                passRate: ((stats.passed / stats.total) * 100).toFixed(1),
+                examinees: stats.total,
+                enrolled,
+                examRate
+            };
+        })
         .sort((a, b) => a.year.localeCompare(b.year));
 
     // 4. N3+ Certification Rate (unique students who passed N1, N2, or N3)

@@ -820,15 +820,13 @@ export default function AnalyticsPage() {
 
                                                                         return (
                                                                             <td key={level} style={{ position: 'relative' }}>
-                                                                                <div className={styles.tooltipContainer} data-tooltip={tooltipText || null}>
-                                                                                    {stat.status === '未受験' ? (
-                                                                                        <span className={`${styles.badge} ${styles.badgeNone} ${styles.badgeTextBlack}`}>-</span>
-                                                                                    ) : (
+                                                                                {stat.status !== '未受験' ? (
+                                                                                    <div className={styles.tooltipContainer} data-tooltip={tooltipText || null}>
                                                                                         <span className={`${styles.badge} ${badgeClass} ${styles.badgeTextBlack}`}>
                                                                                             {scoreDisplay}
                                                                                         </span>
-                                                                                    )}
-                                                                                </div>
+                                                                                    </div>
+                                                                                ) : null}
                                                                             </td>
                                                                         );
                                                                     })}
@@ -1052,6 +1050,92 @@ export default function AnalyticsPage() {
                                                             }
                                                         }
                                                     }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Recent 3 Years Comparison & Exam Rate */}
+                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近3ヶ年の推移</h3>
+                                    <div className={styles.chartGrid}>
+                                        <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
+                                            <h3 className={styles.chartTitle}>直近3ヶ年の合格率比較</h3>
+                                            <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>年度</th>
+                                                            <th>本校合格率</th>
+                                                            <th>全国平均合格率(推定)</th>
+                                                            <th>差分</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
+                                                            const nationalSessions = nationalStats.sessions.filter(s => s.session.startsWith(yearData.year));
+                                                            let nationalRateVal = 0;
+                                                            let count = 0;
+
+                                                            if (nationalSessions.length > 0) {
+                                                                nationalSessions.forEach(s => {
+                                                                    // Simple average of all N1-N5 levels for approximation
+                                                                    const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                                                                    let sessionSum = 0;
+                                                                    let sessionLevelCount = 0;
+                                                                    levels.forEach(l => {
+                                                                        const rate = s.japan?.[l]?.pass_rate; // Can be string
+                                                                        const rateVal = parseFloat(rate || 0);
+                                                                        if (rateVal > 0) {
+                                                                            sessionSum += rateVal;
+                                                                            sessionLevelCount++;
+                                                                        }
+                                                                    });
+                                                                    if (sessionLevelCount > 0) {
+                                                                        nationalRateVal += (sessionSum / sessionLevelCount);
+                                                                        count++;
+                                                                    }
+                                                                });
+                                                            }
+
+                                                            const nationalAvg = count > 0 ? (nationalRateVal / count).toFixed(1) : '-';
+                                                            const diff = nationalAvg !== '-' ? (parseFloat(yearData.passRate) - parseFloat(nationalAvg)).toFixed(1) : '-';
+
+                                                            return (
+                                                                <tr key={yearData.year}>
+                                                                    <td style={{ fontWeight: 600 }}>{yearData.year}年度</td>
+                                                                    <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
+                                                                    <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
+                                                                    <td style={{
+                                                                        fontWeight: 600,
+                                                                        color: parseFloat(diff) > 0 ? '#16a34a' : parseFloat(diff) < 0 ? '#dc2626' : '#4b5563'
+                                                                    }}>
+                                                                        {parseFloat(diff) > 0 ? '+' : ''}{diff}%
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.chartGrid}>
+                                        <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
+                                            <h3 className={styles.chartTitle}>本校 受験率の推移 (対全在籍者)</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Line
+                                                    data={{
+                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年度'),
+                                                        datasets: [{
+                                                            label: '受験率 (%)',
+                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.examRate || 0),
+                                                            borderColor: 'rgb(139, 92, 246)', // Violet
+                                                            backgroundColor: 'rgba(139, 92, 246, 0.5)',
+                                                            tension: 0.3,
+                                                        }]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
                                                 />
                                             </div>
                                         </div>

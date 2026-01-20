@@ -120,8 +120,8 @@ export async function fetchJlptAnalyticsData() {
         result.stats = jlptData;
 
         // 2. Enhanced Stats (Overall & Class Analysis)
-        // We pass the fetched students for class mapping
-        const enhancedStats = await getEnhancedJlptStats(students);
+        // We pass ALL fetched students (including inactive) for accurate historical stats calculation
+        const enhancedStats = await getEnhancedJlptStats(data || []);
 
         // 3. Student Summaries (Class Analysis)
         if (students.length > 0) {
