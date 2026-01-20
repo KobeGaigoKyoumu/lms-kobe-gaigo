@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData } from '@/lib/jlpt'
 
 export async function fetchJlptAnalyticsData() {
@@ -9,17 +9,10 @@ export async function fetchJlptAnalyticsData() {
     let fetchError = null
 
     try {
-        // Use Service Role Key if available to bypass RLS, otherwise Anon Key
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        // Use authenticated client via cookies (same as Server Components)
+        const supabase = await createClient()
 
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-            auth: {
-                persistSession: false
-            }
-        })
-
-        console.log(`Server Action: Init Supabase with Service Key? ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+        console.log('Server Action: Init Supabase with Cookie Session');
 
         // Fetch specific fields needed for filtering and class info
         // We fetch ALL students initially to debug status issues if any
@@ -56,7 +49,16 @@ export async function fetchJlptAnalyticsData() {
     // Initialize return data structure
     const result = {
         stats: [],
-        enhanced: null,
+        enhanced: {
+            students: [],
+            studentStats: [],
+            levelStats: [],
+            yearlyTrend: [],
+            nationalityStats: [],
+            overallN3PlusRate: null,
+            graduationN3PlusRates: null,
+            graduationDataSource: 'none'
+        },
         error: fetchError,
         debug: {
             studentsFound: students.length
