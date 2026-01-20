@@ -612,7 +612,7 @@ export default function AnalyticsPage() {
 
                                     {/* Nationality Statistics Table */}
                                     <div>
-                                        <h2 className={styles.sectionTitle}>国籍別 合格率 (上位10カ国)</h2>
+                                        <h2 className={styles.sectionTitle}>国籍別 合格率</h2>
                                         <div className={styles.tableContainer}>
                                             <table className={styles.table}>
                                                 <thead>
@@ -1074,7 +1074,7 @@ export default function AnalyticsPage() {
                                                         {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 ? (
                                                             enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
                                                                 const nationalSessions = nationalStats.sessions ?
-                                                                    nationalStats.sessions.filter(s => s.session && String(s.session).startsWith(yearData.year)) : [];
+                                                                    nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
                                                                 let nationalRateVal = 0;
                                                                 let count = 0;
 
@@ -1123,6 +1123,51 @@ export default function AnalyticsPage() {
                                                                 </td>
                                                             </tr>
                                                         )}
+                                                        {/* 3-Year Average Row */}
+                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 && (() => {
+                                                            const years = enhancedJlptStats.yearlyTrend.slice(-3);
+                                                            let schoolSum = 0, schoolCount = 0;
+                                                            let nationalSum = 0, nationalCount = 0;
+
+                                                            years.forEach(yearData => {
+                                                                // School
+                                                                const sRate = parseFloat(yearData.passRate);
+                                                                if (!isNaN(sRate)) { schoolSum += sRate; schoolCount++; }
+
+                                                                // National
+                                                                const nSessions = nationalStats.sessions ?
+                                                                    nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
+
+                                                                let nRateVal = 0, nCount = 0;
+                                                                if (nSessions.length > 0) {
+                                                                    nSessions.forEach(s => {
+                                                                        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                                                                        let sSum = 0, lCount = 0;
+                                                                        levels.forEach(l => {
+                                                                            const r = parseFloat(s.japan?.[l]?.pass_rate || 0);
+                                                                            if (r > 0) { sSum += r; lCount++; }
+                                                                        });
+                                                                        if (lCount > 0) { nRateVal += (sSum / lCount); nCount++; }
+                                                                    });
+                                                                }
+                                                                if (nCount > 0) { nationalSum += (nRateVal / nCount); nationalCount++; }
+                                                            });
+
+                                                            const sAvg = schoolCount > 0 ? (schoolSum / schoolCount).toFixed(1) : '-';
+                                                            const nAvg = nationalCount > 0 ? (nationalSum / nationalCount).toFixed(1) : '-';
+                                                            const dAvg = (sAvg !== '-' && nAvg !== '-') ? (parseFloat(sAvg) - parseFloat(nAvg)).toFixed(1) : '-';
+
+                                                            return (
+                                                                <tr style={{ backgroundColor: '#f3f4f6', borderTop: '2px solid #e5e7eb' }}>
+                                                                    <td style={{ fontWeight: 700 }}>3年平均</td>
+                                                                    <td style={{ fontWeight: 700, color: '#2563eb' }}>{sAvg}%</td>
+                                                                    <td style={{ fontWeight: 700 }}>{nAvg}%</td>
+                                                                    <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? '#16a34a' : parseFloat(dAvg) < 0 ? '#dc2626' : '#4b5563' }}>
+                                                                        {parseFloat(dAvg) > 0 ? '+' : ''}{dAvg}%
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })()}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -1210,7 +1255,7 @@ export default function AnalyticsPage() {
                                     </div>
 
                                     {/* Recent Sessions Table */}
-                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近の全国試験データ</h3>
+                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近の全国試験データ(合格率)</h3>
                                     <div className={styles.tableContainer}>
                                         <table className={styles.table}>
                                             <thead>

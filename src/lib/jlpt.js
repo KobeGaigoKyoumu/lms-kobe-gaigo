@@ -607,8 +607,7 @@ export async function getEnhancedJlptStats(students = []) {
             passed: stats.passed,
             passRate: ((stats.passed / stats.total) * 100).toFixed(1)
         }))
-        .sort((a, b) => parseFloat(b.passRate) - parseFloat(a.passRate))
-        .slice(0, 10);
+        .sort((a, b) => parseFloat(b.passRate) - parseFloat(a.passRate));
 
     // 2. Level breakdown
     const byLevel = {};
