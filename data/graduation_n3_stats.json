@@ -6,7 +6,17 @@
       "matched": 137,
       "n3_plus": 37,
       "rate": 23.270440251572328,
-      "match_rate": 86.16352201257862
+      "match_rate": 86.16352201257862,
+      "kanji_stats": {
+        "total": 9,
+        "n3_plus": 4,
+        "rate": 44.44444444444444
+      },
+      "non_kanji_stats": {
+        "total": 150,
+        "n3_plus": 33,
+        "rate": 22.0
+      }
     },
     {
       "year": "2020年3月",
@@ -14,7 +24,17 @@
       "matched": 138,
       "n3_plus": 62,
       "rate": 44.60431654676259,
-      "match_rate": 99.28057553956835
+      "match_rate": 99.28057553956835,
+      "kanji_stats": {
+        "total": 7,
+        "n3_plus": 3,
+        "rate": 42.857142857142854
+      },
+      "non_kanji_stats": {
+        "total": 132,
+        "n3_plus": 59,
+        "rate": 44.696969696969695
+      }
     },
     {
       "year": "2021年3月",
@@ -22,7 +42,17 @@
       "matched": 47,
       "n3_plus": 26,
       "rate": 45.614035087719294,
-      "match_rate": 82.45614035087719
+      "match_rate": 82.45614035087719,
+      "kanji_stats": {
+        "total": 19,
+        "n3_plus": 12,
+        "rate": 63.1578947368421
+      },
+      "non_kanji_stats": {
+        "total": 38,
+        "n3_plus": 14,
+        "rate": 36.84210526315789
+      }
     },
     {
       "year": "2023年3月",
@@ -30,7 +60,17 @@
       "matched": 44,
       "n3_plus": 22,
       "rate": 48.888888888888886,
-      "match_rate": 97.77777777777777
+      "match_rate": 97.77777777777777,
+      "kanji_stats": {
+        "total": 13,
+        "n3_plus": 6,
+        "rate": 46.15384615384615
+      },
+      "non_kanji_stats": {
+        "total": 32,
+        "n3_plus": 16,
+        "rate": 50.0
+      }
     },
     {
       "year": "2024年3月",
@@ -38,7 +78,17 @@
       "matched": 229,
       "n3_plus": 119,
       "rate": 50.0,
-      "match_rate": 96.21848739495799
+      "match_rate": 96.21848739495799,
+      "kanji_stats": {
+        "total": 46,
+        "n3_plus": 28,
+        "rate": 60.86956521739131
+      },
+      "non_kanji_stats": {
+        "total": 192,
+        "n3_plus": 91,
+        "rate": 47.39583333333333
+      }
     },
     {
       "year": "2025年3月",
@@ -46,7 +96,17 @@
       "matched": 248,
       "n3_plus": 163,
       "rate": 65.2,
-      "match_rate": 99.2
+      "match_rate": 99.2,
+      "kanji_stats": {
+        "total": 15,
+        "n3_plus": 9,
+        "rate": 60.0
+      },
+      "non_kanji_stats": {
+        "total": 235,
+        "n3_plus": 154,
+        "rate": 65.53191489361701
+      }
     }
   ],
   "summary": {

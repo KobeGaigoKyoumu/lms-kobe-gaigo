@@ -15,6 +15,8 @@ import {
     Legend,
     ArcElement
 } from 'chart.js'
+// ... (previous imports)
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import styles from './page.module.css'
 
 // Chart.js registration
@@ -34,6 +36,61 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
+
+function JlptSessionRow({ sessionData }) {
+    const [isOpen, setIsOpen] = useState(false)
+    const passRate = sessionData.totalExaminees > 0
+        ? ((sessionData.totalPassers / sessionData.totalExaminees) * 100).toFixed(1)
+        : 0
+
+    return (
+        <div className={styles.sessionGroup}>
+            <div
+                className={styles.sessionHeader}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className={styles.sessionTitle}>
+                    {sessionData.session}
+                    <span className={styles.sessionSummary}>
+                        受験: {sessionData.totalExaminees}名 / 合格: {sessionData.totalPassers}名 (合格率: {passRate}%)
+                    </span>
+                </div>
+                {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </div>
+
+            {isOpen && (
+                <div className={styles.sessionDetails}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>レベル</th>
+                                <th>受験者数</th>
+                                <th>合格者数</th>
+                                <th>合格率</th>
+                                <th>平均点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sessionData.items.map((row, index) => (
+                                <tr key={`${row.session}-${row.level}-${index}`}>
+                                    <td>
+                                        <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                            {row.level}
+                                        </span>
+                                    </td>
+                                    <td>{row.examinees}</td>
+                                    <td>{row.passers}</td>
+                                    <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
+                                    <td>{row.averageScore}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export default function AnalyticsPage() {
     const [activeTab, setActiveTab] = useState('grades') // 'grades' or 'jlpt'
@@ -163,6 +220,25 @@ export default function AnalyticsPage() {
     const totalJlptExaminees = jlptData.reduce((acc, curr) => acc + (curr.examinees || 0), 0)
     const totalJlptPassers = jlptData.reduce((acc, curr) => acc + (curr.passers || 0), 0)
     const overallJlptPassRate = totalJlptExaminees > 0 ? ((totalJlptPassers / totalJlptExaminees) * 100).toFixed(1) : 0
+
+    // Group JLPT data by session for the detailed view
+    const jlptSessions = jlptData.reduce((acc, item) => {
+        if (!acc[item.session]) {
+            acc[item.session] = {
+                session: item.session,
+                items: [],
+                totalExaminees: 0,
+                totalPassers: 0
+            };
+        }
+        acc[item.session].items.push(item);
+        acc[item.session].totalExaminees += (item.examinees || 0);
+        acc[item.session].totalPassers += (item.passers || 0);
+        return acc;
+    }, {});
+
+    // Sort sessions descending (newest first)
+    const sortedSessionKeys = Object.keys(jlptSessions).sort((a, b) => b.localeCompare(a));
 
     const sessionGroups = {}
     jlptData.forEach(item => {
@@ -478,8 +554,10 @@ export default function AnalyticsPage() {
                                                 <tr>
                                                     <th>卒業時期</th>
                                                     <th>卒業者数</th>
-                                                    <th>N3以上取得者</th>
-                                                    <th>N3以上保有率</th>
+                                                    <th>漢字圏N3以上保有率</th>
+                                                    <th>非漢字圏N3以上保有率</th>
+                                                    <th>全体N3以上取得者</th>
+                                                    <th>全体N3以上保有率</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -487,6 +565,16 @@ export default function AnalyticsPage() {
                                                     <tr key={idx}>
                                                         <td>{row.year}</td>
                                                         <td>{row.totalStudents}名</td>
+                                                        <td>
+                                                            {row.kanji_stats
+                                                                ? `${row.kanji_stats.rate.toFixed(1)}% (${row.kanji_stats.n3_plus}/${row.kanji_stats.total})`
+                                                                : '-'}
+                                                        </td>
+                                                        <td>
+                                                            {row.non_kanji_stats
+                                                                ? `${row.non_kanji_stats.rate.toFixed(1)}% (${row.non_kanji_stats.n3_plus}/${row.non_kanji_stats.total})`
+                                                                : '-'}
+                                                        </td>
                                                         <td>{row.n3PlusStudents}名</td>
                                                         <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
                                                             {row.rate}%
@@ -503,35 +591,10 @@ export default function AnalyticsPage() {
 
                     <div>
                         <h2 className={styles.sectionTitle}>詳細データ</h2>
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>実施回</th>
-                                        <th>レベル</th>
-                                        <th>受験者数</th>
-                                        <th>合格者数</th>
-                                        <th>合格率</th>
-                                        <th>平均点</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {jlptData.map((row, index) => (
-                                        <tr key={`${row.session}-${row.level}-${index}`}>
-                                            <td>{row.session}</td>
-                                            <td>
-                                                <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                                    {row.level}
-                                                </span>
-                                            </td>
-                                            <td>{row.examinees}</td>
-                                            <td>{row.passers}</td>
-                                            <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
-                                            <td>{row.averageScore}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className={styles.sessionsContainer}>
+                            {sortedSessionKeys.map(sessionKey => (
+                                <JlptSessionRow key={sessionKey} sessionData={jlptSessions[sessionKey]} />
+                            ))}
                         </div>
                     </div>
                 </>

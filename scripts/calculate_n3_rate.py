@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 卒業生データとJLPT分析データを照合してN3以上保有率を計算
+(漢字圏・非漢字圏の内訳対応版)
 """
 
 import pandas as pd
@@ -45,6 +46,15 @@ def get_all_name_variants(name):
     name_lower = name.lower().strip()
     return name_map.get(name_lower, set([name_lower]))
 
+# 漢字圏の定義
+KANJI_COUNTRIES = {'中国', '台湾', '香港'}
+
+def is_kanji_country(nationality):
+    """国籍が漢字圏かどうかを判定"""
+    if not nationality:
+        return False
+    return nationality in KANJI_COUNTRIES
+
 # 卒業生を卒業年度別にグループ化
 students = students_data['students']
 graduates = [s for s in students if s['source'] == '卒業生']
@@ -59,6 +69,11 @@ for s in graduates:
         try:
             dt = pd.to_datetime(grad_date)
             fiscal_year = dt.year if dt.month <= 3 else dt.year + 1
+            
+            # 特例処理: 2022年3月卒は2021年3月卒に統合（在籍延長のため）
+            if fiscal_year == 2022:
+                fiscal_year = 2021
+                
             grad_by_year[f"{fiscal_year}年3月"].append(s)
         except:
             pass
@@ -87,6 +102,7 @@ def get_best_level(jlpt_records):
     for r in jlpt_records:
         if r['result'] == '合格':
             level_num = int(r['level'].replace('N', ''))
+            # N3以上のみ対象（N1, N2, N3）
             if level_num <= 3:
                 if best is None or level_num < best:
                     best = level_num
@@ -105,10 +121,23 @@ for year in sorted(grad_by_year.keys()):
     matched = 0
     n3_plus = 0
     
+    # 漢字圏・非漢字圏の内訳用
+    kanji_total = 0
+    kanji_n3_plus = 0
+    non_kanji_total = 0
+    non_kanji_n3_plus = 0
+    
     for s in grads:
         sid = str(s['student_id'])
         name = s['name'] if s['name'] else ''
         name_romaji = s['name_romaji'] if s['name_romaji'] else ''
+        nationality = s['nationality']
+        
+        is_kanji = is_kanji_country(nationality)
+        if is_kanji:
+            kanji_total += 1
+        else:
+            non_kanji_total += 1
         
         # JLPT記録を検索
         jlpt_records = []
@@ -128,14 +157,27 @@ for year in sorted(grad_by_year.keys()):
                 if name_romaji_lower in jlpt_by_name:
                     jlpt_records.extend(jlpt_by_name[name_romaji_lower])
         
+        # N3保有チェック
+        has_n3 = False
         if jlpt_records:
             matched += 1
             best = get_best_level(jlpt_records)
             if best:
                 n3_plus += 1
+                has_n3 = True
+        
+        # 内訳カウント
+        if has_n3:
+            if is_kanji:
+                kanji_n3_plus += 1
+            else:
+                non_kanji_n3_plus += 1
     
     rate = (n3_plus / total * 100) if total > 0 else 0
     match_rate = (matched / total * 100) if total > 0 else 0
+    
+    kanji_rate = (kanji_n3_plus / kanji_total * 100) if kanji_total > 0 else 0
+    non_kanji_rate = (non_kanji_n3_plus / non_kanji_total * 100) if non_kanji_total > 0 else 0
     
     results.append({
         'year': year,
@@ -143,14 +185,24 @@ for year in sorted(grad_by_year.keys()):
         'matched': matched,
         'n3_plus': n3_plus,
         'rate': rate,
-        'match_rate': match_rate
+        'match_rate': match_rate,
+        'kanji_stats': {
+            'total': kanji_total,
+            'n3_plus': kanji_n3_plus,
+            'rate': kanji_rate
+        },
+        'non_kanji_stats': {
+            'total': non_kanji_total,
+            'n3_plus': non_kanji_n3_plus,
+            'rate': non_kanji_rate
+        }
     })
     
     print(f"\n{year}:")
     print(f"  卒業者数: {total}人")
-    print(f"  JLPT記録あり: {matched}人 ({match_rate:.1f}%)")
-    print(f"  N3以上保有: {n3_plus}人")
-    print(f"  N3以上保有率: {rate:.1f}%")
+    print(f"    漢字圏: {kanji_total}人 (N3+: {kanji_n3_plus}人, {kanji_rate:.1f}%)")
+    print(f"    非漢字: {non_kanji_total}人 (N3+: {non_kanji_n3_plus}人, {non_kanji_rate:.1f}%)")
+    print(f"  全体N3+: {n3_plus}人 ({rate:.1f}%)")
 
 # サマリー
 print(f"\n{'='*60}")
