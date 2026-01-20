@@ -977,21 +977,45 @@ export default function AnalyticsPage() {
                                             </div>
                                         </div>
                                         <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>全国平均の推移（N3）</h3>
+                                            <h3 className={styles.chartTitle}>全国平均の推移（全レベル）</h3>
                                             <div className={styles.chartContainer}>
                                                 <Line
                                                     data={{
-                                                        labels: nationalStats.sessions
-                                                            .filter(s => s.japan?.N3?.pass_rate)
-                                                            .map(s => s.session_name),
+                                                        labels: nationalStats.sessions.map(s => s.session_name),
                                                         datasets: [
                                                             {
-                                                                label: '全国N3合格率',
-                                                                data: nationalStats.sessions
-                                                                    .filter(s => s.japan?.N3?.pass_rate)
-                                                                    .map(s => s.japan.N3.pass_rate),
+                                                                label: 'N1',
+                                                                data: nationalStats.sessions.map(s => s.japan?.N1?.pass_rate || null),
+                                                                borderColor: 'rgb(239, 68, 68)',
+                                                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                                                                tension: 0.3,
+                                                            },
+                                                            {
+                                                                label: 'N2',
+                                                                data: nationalStats.sessions.map(s => s.japan?.N2?.pass_rate || null),
+                                                                borderColor: 'rgb(249, 115, 22)',
+                                                                backgroundColor: 'rgba(249, 115, 22, 0.5)',
+                                                                tension: 0.3,
+                                                            },
+                                                            {
+                                                                label: 'N3',
+                                                                data: nationalStats.sessions.map(s => s.japan?.N3?.pass_rate || null),
                                                                 borderColor: 'rgb(245, 158, 11)',
                                                                 backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                                                                tension: 0.3,
+                                                            },
+                                                            {
+                                                                label: 'N4',
+                                                                data: nationalStats.sessions.map(s => s.japan?.N4?.pass_rate || null),
+                                                                borderColor: 'rgb(132, 204, 22)',
+                                                                backgroundColor: 'rgba(132, 204, 22, 0.5)',
+                                                                tension: 0.3,
+                                                            },
+                                                            {
+                                                                label: 'N5',
+                                                                data: nationalStats.sessions.map(s => s.japan?.N5?.pass_rate || null),
+                                                                borderColor: 'rgb(59, 130, 246)',
+                                                                backgroundColor: 'rgba(59, 130, 246, 0.5)',
                                                                 tension: 0.3,
                                                             }
                                                         ]
