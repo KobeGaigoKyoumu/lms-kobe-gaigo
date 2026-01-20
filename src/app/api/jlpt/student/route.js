@@ -8,22 +8,42 @@ export async function GET(request) {
         const studentId = searchParams.get('studentId');
         const enrollmentDate = searchParams.get('enrollmentDate');
 
-        // Priority: Use studentId if available, otherwise use name
+        let allResults = [];
+
+        // 1. Fetch by ID
         if (studentId) {
-            const data = await getJlptByStudentId(studentId, enrollmentDate);
-            // If studentId search returns results, use them
-            if (data && data.length > 0) {
-                return NextResponse.json(data);
+            const byId = await getJlptByStudentId(studentId, enrollmentDate);
+            if (byId && byId.length > 0) {
+                allResults = [...allResults, ...byId];
             }
         }
 
-        // Fallback to name search
+        // 2. Fetch by Name (ALWAYS fetch by name too, to catch CSV records which lack IDs)
         if (name) {
-            const data = await getJlptByStudentName(name, enrollmentDate);
-            return NextResponse.json(data);
+            const byName = await getJlptByStudentName(name, enrollmentDate);
+            if (byName && byName.length > 0) {
+                allResults = [...allResults, ...byName];
+            }
         }
 
-        return NextResponse.json({ error: 'Name or studentId parameter is required' }, { status: 400 });
+        // 3. Deduplicate
+        // Key: session + level (Record from JSON matches ID & Name, Record from CSV matches Name only)
+        const uniqueParams = new Set();
+        const uniqueResults = [];
+
+        // Sort by session desc first
+        allResults.sort((a, b) => b.session.localeCompare(a.session));
+
+        for (const record of allResults) {
+            const key = `${record.session}|${record.level}`;
+            if (!uniqueParams.has(key)) {
+                uniqueParams.add(key);
+                uniqueResults.push(record);
+            }
+        }
+
+        return NextResponse.json(uniqueResults);
+
     } catch (error) {
         console.error('Error fetching student JLPT data:', error);
         return NextResponse.json({ error: 'Failed to fetch student JLPT data' }, { status: 500 });
