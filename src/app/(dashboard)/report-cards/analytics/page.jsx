@@ -110,6 +110,7 @@ export default function AnalyticsPage() {
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
     const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly' or 'class'
+    const [debugInfo, setDebugInfo] = useState(null)
 
     useEffect(() => {
         fetchGrades()
@@ -160,6 +161,10 @@ export default function AnalyticsPage() {
 
             if (result.error) {
                 console.error('Server Action Error:', result.error)
+            }
+
+            if (result.debug) {
+                setDebugInfo(result.debug)
             }
 
             if (result.stats) {
@@ -711,6 +716,12 @@ export default function AnalyticsPage() {
                             <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
                                 学生データの読み込みに失敗したか、条件に一致するデータがありません。（対象: {enhancedJlptStats?.students?.length || 0}名）
                             </p>
+                            {debugInfo && (
+                                <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#f3f4f6', borderRadius: '4px', fontSize: '0.75rem', color: '#6b7280', textAlign: 'left', overflowX: 'auto' }}>
+                                    <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Debug Information:</p>
+                                    <pre style={{ margin: 0 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
+                                </div>
+                            )}
                         </div>
                     )}
                 </>
