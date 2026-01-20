@@ -1,0 +1,115 @@
+'use server'
+
+import { createClient } from '@supabase/supabase-js'
+import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData } from '@/lib/jlpt'
+
+export async function fetchJlptAnalyticsData() {
+    console.log('Server Action: Fetching JLPT Analytics Data...');
+    let students = []
+    let fetchError = null
+
+    try {
+        // Use Service Role Key if available to bypass RLS, otherwise Anon Key
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                persistSession: false
+            }
+        })
+
+        console.log(`Server Action: Init Supabase with Service Key? ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+
+        // Fetch specific fields needed for filtering and class info
+        // We fetch ALL students initially to debug status issues if any
+        const { data, error } = await supabase
+            .from('students')
+            .select('full_name, enrollment_date, student_id, student_id_text, class_name, status');
+
+        if (error) {
+            console.error('Server Action: DB Error', error)
+            fetchError = 'Database Error: ' + error.message
+        } else if (data) {
+            console.log(`Server Action: Fetched ${data.length} students from DB`);
+
+            // Log status distribution for debugging
+            const statuses = {};
+            data.forEach(s => {
+                const st = s.status || 'null';
+                statuses[st] = (statuses[st] || 0) + 1;
+            });
+            console.log('Server Action: Student Status Distribution:', statuses);
+
+            // Filter for active students
+            // NOTE: Using loose matching implicitly by trusting the 'active' string
+            const activeStudents = data.filter(s => s.status === 'active');
+            console.log(`Server Action: Active students count: ${activeStudents.length}`);
+
+            students = activeStudents.length > 0 ? activeStudents : [];
+        }
+    } catch (e) {
+        console.error('Server Action: Unexpected error', e)
+        fetchError = 'Unexpected Error: ' + e.message
+    }
+
+    // Initialize return data structure
+    const result = {
+        stats: [],
+        enhanced: null,
+        error: fetchError,
+        debug: {
+            studentsFound: students.length
+        }
+    }
+
+    try {
+        // 1. Basic Stats (for charts)
+        const jlptData = await getJlptData();
+        result.stats = jlptData;
+
+        // 2. Enhanced Stats (Overall & Class Analysis)
+        // We pass the fetched students for class mapping
+        const enhancedStats = await getEnhancedJlptStats(students);
+
+        // 3. Student Summaries (Class Analysis)
+        if (students.length > 0) {
+            const studentSummaries = await getStudentsJlptSummary(students);
+            enhancedStats.studentStats = studentSummaries;
+
+            enhancedStats.students = students.map(s => ({
+                id: s.student_id_text || s.student_id,
+                name: s.full_name,
+                class: s.class_name
+            }));
+        } else {
+            enhancedStats.studentStats = [];
+            enhancedStats.students = [];
+        }
+
+        // 4. Graduation Stats
+        const accurateGradStats = await getAccurateGraduationStats();
+        if (accurateGradStats.source === 'official') {
+            enhancedStats.graduationN3PlusRates = accurateGradStats.stats;
+            enhancedStats.graduationDataSource = 'official';
+            if (accurateGradStats.summary) {
+                enhancedStats.overallN3PlusRate = {
+                    totalUniqueStudents: accurateGradStats.summary.total_graduates,
+                    n3PlusStudents: accurateGradStats.summary.n3_plus_count,
+                    rate: accurateGradStats.summary.n3_plus_rate.toFixed(1)
+                };
+            }
+        } else {
+            enhancedStats.graduationDataSource = 'calculated';
+        }
+
+        result.enhanced = enhancedStats;
+
+    } catch (calcError) {
+        console.error('Server Action: Calculation Error', calcError);
+        result.error = result.error || 'Calculation Error: ' + calcError.message;
+    }
+
+    // Serialize to ensure it can be passed to client
+    return JSON.parse(JSON.stringify(result));
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
 import { Bar, Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -154,32 +155,20 @@ export default function AnalyticsPage() {
 
     const fetchJlptData = async () => {
         try {
-            // First fetch active students from client side to ensure we have permissions
-            let students = []
-            try {
-                const { data, error } = await supabase
-                    .from('students')
-                    .select('full_name, enrollment_date, student_id, student_id_text, class_name')
-                    .eq('status', 'active')
+            // Use Server Action for reliable data fetching
+            const result = await fetchJlptAnalyticsData()
 
-                if (data) students = data
-                if (error) console.error('Error fetching students:', error)
-            } catch (err) {
-                console.error('Failed to fetch students from Supabase:', err)
+            if (result.error) {
+                console.error('Server Action Error:', result.error)
             }
 
-            const [statsRes, enhancedRes] = await Promise.all([
-                fetch('/api/jlpt/stats'),
-                fetch('/api/jlpt/enhanced', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ students })
-                })
-            ])
-            const statsData = await statsRes.json()
-            const enhancedData = await enhancedRes.json()
-            setJlptData(statsData)
-            setEnhancedJlptStats(enhancedData)
+            if (result.stats) {
+                setJlptData(result.stats)
+            }
+
+            if (result.enhanced) {
+                setEnhancedJlptStats(result.enhanced)
+            }
         } catch (error) {
             console.error('Error fetching JLPT data:', error)
         } finally {
