@@ -1256,11 +1256,21 @@ export async function getJlptSectionScoreStats() {
                     if (result !== '合格' && result !== '不合格') continue;
 
                     // 科目別得点を抽出 (インデックス: 11=得点区分名1, 12=得点区分別得点1, ...)
-                    const sections = [
-                        { name: '言語知識', scoreIdx: 12 },
-                        { name: '読解', scoreIdx: 14 },
-                        { name: '聴解', scoreIdx: 16 }
-                    ];
+                    // N1-N3: 言語知識(12), 読解(14), 聴解(16) の3区分
+                    // N4-N5: 言語知識・読解(12), 聴解(14) の2区分
+                    let sections;
+                    if (level === 'N4' || level === 'N5') {
+                        sections = [
+                            { name: '言語知識', scoreIdx: 12 },  // 言語知識・読解の合算
+                            { name: '聴解', scoreIdx: 14 }
+                        ];
+                    } else {
+                        sections = [
+                            { name: '言語知識', scoreIdx: 12 },
+                            { name: '読解', scoreIdx: 14 },
+                            { name: '聴解', scoreIdx: 16 }
+                        ];
+                    }
 
                     for (const sec of sections) {
                         const scoreStr = parts[sec.scoreIdx] || '';
