@@ -129,6 +129,27 @@ export default function AnalyticsPage() {
         }
     }, [enhancedJlptStats])
 
+    // Filter and sort students for the selected class (Memoized-like calculation)
+    const selectedClassStudents = (jlptSubTab === 'class' && enhancedJlptStats?.studentStats)
+        ? enhancedJlptStats.studentStats
+            .filter(s => s.class === selectedJlptClass)
+            .sort((a, b) => a.studentId.localeCompare(b.studentId))
+        : []
+
+    // Calculate Class Statistics
+    const classStats = {
+        total: selectedClassStudents.length,
+        n1: selectedClassStudents.filter(s => s.levels.N1.status === '合格').length,
+        n2: selectedClassStudents.filter(s => s.levels.N2.status === '合格').length,
+        n3: selectedClassStudents.filter(s => s.levels.N3.status === '合格').length,
+        n3Plus: selectedClassStudents.filter(s =>
+            s.levels.N1.status === '合格' ||
+            s.levels.N2.status === '合格' ||
+            s.levels.N3.status === '合格'
+        ).length,
+    }
+    classStats.n3PlusRate = classStats.total > 0 ? ((classStats.n3Plus / classStats.total) * 100).toFixed(0) : 0
+
     const fetchGrades = async () => {
         try {
             const { data, error } = await supabase
@@ -645,7 +666,7 @@ export default function AnalyticsPage() {
                         </>
                     )}
 
-                    {/* Class Analysis Content (Matrix Only) */}
+                    {/* Class Analysis Content */}
                     {jlptSubTab === 'class' && enhancedJlptStats?.studentStats && (
                         <>
                             <div className={styles.toolbar} style={{ marginTop: '1rem' }}>
@@ -663,6 +684,42 @@ export default function AnalyticsPage() {
                                 </div>
                             </div>
 
+                            {selectedClassStudents.length > 0 && (
+                                <div className={styles.statsGrid}>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>在籍数</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>{classStats.total}</span>
+                                            <span className={styles.statUnit}>名</span>
+                                        </div>
+                                    </div>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>N3以上取得率</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>{classStats.n3PlusRate}%</span>
+                                            <span className={styles.statUnit}>{classStats.n3Plus}/{classStats.total}名</span>
+                                        </div>
+                                    </div>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>合格者内訳</span>
+                                        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N1</div>
+                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#991b1b' }}>{classStats.n1}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N2</div>
+                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#9a3412' }}>{classStats.n2}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N3</div>
+                                                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#92400e' }}>{classStats.n3}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={styles.tableContainer}>
                                 <table className={styles.table}>
                                     <thead>
@@ -677,30 +734,27 @@ export default function AnalyticsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {enhancedJlptStats.studentStats
-                                            .filter(s => s.class === selectedJlptClass)
-                                            .sort((a, b) => a.studentId.localeCompare(b.studentId))
-                                            .map(student => (
-                                                <tr key={student.studentId}>
-                                                    <td>{student.studentId}</td>
-                                                    <td>{student.name}</td>
-                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                        const stat = student.levels[level];
-                                                        const badgeClass = stat.status === '合格' ? styles.badgePassed :
-                                                            stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
-                                                        return (
-                                                            <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
-                                                                <span className={`${styles.badge} ${badgeClass}`}>
-                                                                    {stat.status === '未受験' ? '-' : stat.status}
-                                                                </span>
-                                                            </td>
-                                                        );
-                                                    })}
-                                                </tr>
-                                            ))}
+                                        {selectedClassStudents.map(student => (
+                                            <tr key={student.studentId}>
+                                                <td>{student.studentId}</td>
+                                                <td>{student.name}</td>
+                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                    const stat = student.levels[level];
+                                                    const badgeClass = stat.status === '合格' ? styles.badgePassed :
+                                                        stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone;
+                                                    return (
+                                                        <td key={level} title={stat.details ? `${stat.status}\n${stat.date}\n${stat.score}` : ''}>
+                                                            <span className={`${styles.badge} ${badgeClass}`}>
+                                                                {stat.status === '未受験' ? '-' : stat.status}
+                                                            </span>
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
-                                {enhancedJlptStats.studentStats.filter(s => s.class === selectedJlptClass).length === 0 && (
+                                {selectedClassStudents.length === 0 && (
                                     <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
                                         該当するデータがありません
                                     </div>
