@@ -753,9 +753,10 @@ export async function getEnhancedJlptStats(students = []) {
             const firstYearEnrolled = typeof enrollData === 'object' ? enrollData.first_year : 0;
             const secondYearEnrolled = typeof enrollData === 'object' ? enrollData.second_year : 0;
 
-            // For Exam Rate: Use UNIQUE examinees / Enrolled
+            // For Exam Rate: Use UNIQUE examinees / Enrolled (capped at 100%)
             const uniqueExaminees = stats.unique_students ? stats.unique_students.size : stats.total;
-            const examRate = enrolled > 0 ? ((uniqueExaminees / enrolled) * 100).toFixed(1) : 0;
+            const rawExamRate = enrolled > 0 ? (uniqueExaminees / enrolled) * 100 : 0;
+            const examRate = Math.min(rawExamRate, 100).toFixed(1); // Cap at 100%
 
             return {
                 year,
