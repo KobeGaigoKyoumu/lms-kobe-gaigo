@@ -1,46 +1,13 @@
 {
-  "2015": {
-    "total": 97,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2016": {
-    "total": 227,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2017": {
-    "total": 339,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2018": {
-    "total": 372,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2019": {
-    "total": 299,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2020": {
-    "total": 182,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2021": {
-    "total": 81,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2022": {
-    "total": 279,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2023": {
-    "total": 519,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2024": {
-    "total": 319,
-    "source": "Excel enrollment data with course duration"
-  },
-  "2025": {
-    "total": 128,
-    "source": "Excel enrollment data with course duration"
-  }
+  "2015": { "total": 155 },
+  "2016": { "total": 154 },
+  "2017": { "total": 299 },
+  "2018": { "total": 303 },
+  "2019": { "total": 214 },
+  "2020": { "total": 192 },
+  "2021": { "total": 262 },
+  "2022": { "total": 281 },
+  "2023": { "total": 389 },
+  "2024": { "total": 454 },
+  "2025": { "total": 466 }
 }
