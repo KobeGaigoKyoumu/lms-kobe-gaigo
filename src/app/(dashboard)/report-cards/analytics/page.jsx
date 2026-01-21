@@ -622,6 +622,49 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
 
+                                    {/* Examinees and Exam Rate Charts */}
+                                    <div className={styles.chartsRow}>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>年度別 受験者数の推移</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Bar
+                                                    data={{
+                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
+                                                        datasets: [{
+                                                            label: '受験者数（人）',
+                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.examinees),
+                                                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                                            borderColor: 'rgb(59, 130, 246)',
+                                                            borderWidth: 1,
+                                                        }]
+                                                    }}
+                                                    options={{
+                                                        ...chartOptions,
+                                                        scales: { y: { beginAtZero: true } }
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className={styles.chartCard}>
+                                            <h3 className={styles.chartTitle}>年度別 受験率の推移</h3>
+                                            <div className={styles.chartContainer}>
+                                                <Line
+                                                    data={{
+                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
+                                                        datasets: [{
+                                                            label: '受験率 (%)',
+                                                            data: enhancedJlptStats.yearlyTrend.map(s => parseFloat(s.examRate)),
+                                                            borderColor: 'rgb(139, 92, 246)',
+                                                            backgroundColor: 'rgba(139, 92, 246, 0.5)',
+                                                            tension: 0.3,
+                                                        }]
+                                                    }}
+                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Nationality Statistics Table */}
                                     <div>
                                         <h2 className={styles.sectionTitle}>国籍別 合格率</h2>
