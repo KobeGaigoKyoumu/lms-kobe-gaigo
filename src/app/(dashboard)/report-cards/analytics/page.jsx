@@ -625,14 +625,14 @@ export default function AnalyticsPage() {
                                     {/* Examinees and Exam Rate Charts */}
                                     <div className={styles.chartsRow}>
                                         <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>年度別 受験者数の推移</h3>
+                                            <h3 className={styles.chartTitle}>年度別 受験者数の推移（延べ人数）</h3>
                                             <div className={styles.chartContainer}>
                                                 <Bar
                                                     data={{
                                                         labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
                                                         datasets: [{
-                                                            label: '受験者数（人）',
-                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.examinees),
+                                                            label: '受験者数（延べ人数）',
+                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.totalSessions),
                                                             backgroundColor: 'rgba(59, 130, 246, 0.6)',
                                                             borderColor: 'rgb(59, 130, 246)',
                                                             borderWidth: 1,
