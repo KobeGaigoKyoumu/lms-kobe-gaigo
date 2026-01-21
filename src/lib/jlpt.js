@@ -254,11 +254,21 @@ export async function getAllRawJlptData() {
 
         const allData = [...historicalData];
 
+        // Get sessions that already exist in historical data
+        const historicalSessions = new Set();
+        historicalData.forEach(record => {
+            if (record.session) {
+                historicalSessions.add(record.session);
+            }
+        });
+
         // Then load CSV data (may not have student IDs)
+        // Skip sessions that are already in historical data to avoid duplicates
         if (fs.existsSync(JLPT_BASE_DIR)) {
             const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
                 .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name);
+                .map(dirent => dirent.name)
+                .filter(session => !historicalSessions.has(session)); // Skip sessions in historical data
 
             for (const session of sessions) {
                 const sessionDir = path.join(JLPT_BASE_DIR, session);
