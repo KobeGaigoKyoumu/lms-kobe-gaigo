@@ -1370,7 +1370,9 @@ export async function getJlptSectionScoreStats() {
             if (allScores.length > 0) {
                 sectionData.bySection[section] = {
                     count: allScores.length,
-                    avgScore: Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length * 10) / 10
+                    avgScore: Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length * 10) / 10,
+                    maxScore: Math.max(...allScores),
+                    minScore: Math.min(...allScores)
                 };
             }
         }
@@ -1390,7 +1392,7 @@ export async function getJlptSectionScoreStats() {
                 }
             }
 
-            if (scoreCount > 10) { // 10件以上のデータがある国のみ
+            if (scoreCount > 0) { // 全ての国籍を表示
                 nationalityData.push({
                     country,
                     totalRecords: scoreCount,
@@ -1399,7 +1401,7 @@ export async function getJlptSectionScoreStats() {
                 });
             }
         }
-        sectionData.byNationality = nationalityData.sort((a, b) => b.totalRecords - a.totalRecords).slice(0, 10);
+        sectionData.byNationality = nationalityData.sort((a, b) => b.totalRecords - a.totalRecords); // 全件表示
 
         // 5. 全体統計
         let grandTotalScores = [];

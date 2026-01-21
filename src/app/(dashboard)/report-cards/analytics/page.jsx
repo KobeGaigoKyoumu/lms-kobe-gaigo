@@ -114,6 +114,7 @@ export default function AnalyticsPage() {
     const [nationalStats, setNationalStats] = useState(null)
     const [loadingNational, setLoadingNational] = useState(false)
     const [debugInfo, setDebugInfo] = useState(null)
+    const [sectionDetailOpen, setSectionDetailOpen] = useState(false) // 科目別詳細アコーディオン
 
     useEffect(() => {
         fetchGrades()
@@ -1390,47 +1391,89 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Section Score Details Table */}
+                                    {/* Section Overall Average Table */}
                                     <div>
-                                        <h2 className={styles.sectionTitle}>科目×レベル別詳細</h2>
+                                        <h2 className={styles.sectionTitle}>科目別全体平均</h2>
                                         <div className={styles.tableContainer}>
                                             <table className={styles.table}>
                                                 <thead>
                                                     <tr>
                                                         <th>科目</th>
-                                                        <th>レベル</th>
                                                         <th>データ数</th>
                                                         <th>平均点</th>
                                                         <th>最高点</th>
                                                         <th>最低点</th>
-                                                        <th>合格者平均</th>
-                                                        <th>不合格者平均</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {(sectionScoreStats.bySectionLevel || []).map((row, idx) => (
-                                                        <tr key={idx}>
-                                                            <td style={{ fontWeight: 600 }}>{row.section}</td>
-                                                            <td>
-                                                                <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                                                    {row.level}
-                                                                </span>
-                                                            </td>
-                                                            <td>{row.count}</td>
-                                                            <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
-                                                            <td>{row.maxScore}点</td>
-                                                            <td>{row.minScore}点</td>
-                                                            <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
-                                                                {row.passedAvg ? `${row.passedAvg}点` : '-'}
-                                                            </td>
-                                                            <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
-                                                                {row.failedAvg ? `${row.failedAvg}点` : '-'}
-                                                            </td>
+                                                    {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
+                                                        <tr key={section}>
+                                                            <td style={{ fontWeight: 600 }}>{section}</td>
+                                                            <td>{data.count}</td>
+                                                            <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
+                                                            <td>{data.maxScore}点</td>
+                                                            <td>{data.minScore}点</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
                                             </table>
                                         </div>
+                                    </div>
+
+                                    {/* Section Score Details Table - Accordion */}
+                                    <div className={styles.sessionGroup}>
+                                        <div
+                                            className={styles.sessionHeader}
+                                            onClick={() => setSectionDetailOpen(!sectionDetailOpen)}
+                                        >
+                                            <div className={styles.sessionTitle}>
+                                                科目×レベル別詳細
+                                                <span className={styles.sessionSummary}>
+                                                    {sectionScoreStats.bySectionLevel?.length || 0}件のデータ
+                                                </span>
+                                            </div>
+                                            {sectionDetailOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                        </div>
+                                        {sectionDetailOpen && (
+                                            <div className={styles.sessionDetails}>
+                                                <table className={styles.table}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>科目</th>
+                                                            <th>レベル</th>
+                                                            <th>データ数</th>
+                                                            <th>平均点</th>
+                                                            <th>最高点</th>
+                                                            <th>最低点</th>
+                                                            <th>合格者平均</th>
+                                                            <th>不合格者平均</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {(sectionScoreStats.bySectionLevel || []).map((row, idx) => (
+                                                            <tr key={idx}>
+                                                                <td style={{ fontWeight: 600 }}>{row.section}</td>
+                                                                <td>
+                                                                    <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                                        {row.level}
+                                                                    </span>
+                                                                </td>
+                                                                <td>{row.count}</td>
+                                                                <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                                <td>{row.maxScore}点</td>
+                                                                <td>{row.minScore}点</td>
+                                                                <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                                    {row.passedAvg ? `${row.passedAvg}点` : '-'}
+                                                                </td>
+                                                                <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                                    {row.failedAvg ? `${row.failedAvg}点` : '-'}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Nationality Section Scores */}
