@@ -1,68 +1,46 @@
 {
   "2015": {
-    "total": 76,
-    "first_year": 76,
-    "second_year": 0,
-    "source": "Excel student data"
+    "total": 97,
+    "source": "Excel enrollment data with course duration"
   },
   "2016": {
-    "total": 195,
-    "first_year": 119,
-    "second_year": 76,
-    "source": "Excel student data"
+    "total": 227,
+    "source": "Excel enrollment data with course duration"
   },
   "2017": {
-    "total": 283,
-    "first_year": 164,
-    "second_year": 119,
-    "source": "Excel student data"
+    "total": 339,
+    "source": "Excel enrollment data with course duration"
   },
   "2018": {
-    "total": 301,
-    "first_year": 137,
-    "second_year": 164,
-    "source": "Excel student data"
+    "total": 372,
+    "source": "Excel enrollment data with course duration"
   },
   "2019": {
-    "total": 194,
-    "first_year": 57,
-    "second_year": 137,
-    "source": "Excel student data"
+    "total": 299,
+    "source": "Excel enrollment data with course duration"
   },
   "2020": {
-    "total": 119,
-    "first_year": 62,
-    "second_year": 57,
-    "source": "Excel student data"
+    "total": 182,
+    "source": "Excel enrollment data with course duration"
   },
   "2021": {
-    "total": 158,
-    "first_year": 96,
-    "second_year": 62,
-    "source": "Excel student data"
+    "total": 81,
+    "source": "Excel enrollment data with course duration"
   },
   "2022": {
-    "total": 218,
-    "first_year": 122,
-    "second_year": 96,
-    "source": "Excel student data"
+    "total": 279,
+    "source": "Excel enrollment data with course duration"
   },
   "2023": {
-    "total": 377,
-    "first_year": 255,
-    "second_year": 122,
-    "source": "Excel student data"
+    "total": 519,
+    "source": "Excel enrollment data with course duration"
   },
   "2024": {
-    "total": 493,
-    "first_year": 238,
-    "second_year": 255,
-    "source": "Excel student data"
+    "total": 319,
+    "source": "Excel enrollment data with course duration"
   },
   "2025": {
-    "total": 503,
-    "first_year": 265,
-    "second_year": 238,
-    "source": "Excel student data"
+    "total": 128,
+    "source": "Excel enrollment data with course duration"
   }
 }
