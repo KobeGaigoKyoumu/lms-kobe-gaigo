@@ -647,9 +647,8 @@ export async function getEnhancedJlptStats(students = []) {
         if (record.studentId) {
             byYear[year].unique_students.add(String(record.studentId));
         } else {
-            // If no ID, use name as proxy (though risky) or just increment simple counter?
-            // Use name + country + level as unique key fallback
-            const key = `${record.name}:${record.country}:${record.level}`;
+            // If no ID, use name + country as unique key (without level to avoid double counting)
+            const key = `${record.name}:${record.country}`;
             byYear[year].unique_students.add(key);
         }
 
