@@ -528,6 +528,22 @@ export default function AnalyticsPage() {
                     {/* Yearly Analysis Content */}
                     {jlptSubTab === 'yearly' && (
                         <>
+                            {/* COVID Note */}
+                            <div style={{
+                                backgroundColor: '#fef3c7',
+                                border: '1px solid #f59e0b',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginBottom: '24px',
+                                fontSize: '14px',
+                                color: '#92400e'
+                            }}>
+                                <strong>⚠️ COVID-19の影響について：</strong>
+                                <br />
+                                2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延や試験中止がありました。
+                                2020年度は新入生がおらず、2021年度は入学者が45名のみと例年より大幅に少なかったため、
+                                受験者数・受験率が低く表示されています。
+                            </div>
                             <div className={styles.statsGrid}>
                                 <div className={styles.statCard}>
                                     <span className={styles.statLabel}>総受験者数 (延べ人数)</span>
