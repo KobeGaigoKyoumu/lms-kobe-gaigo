@@ -1361,10 +1361,14 @@ export async function getJlptSectionScoreStats() {
         // 3. 科目別平均点
         for (const section of ['言語知識', '読解', '聴解']) {
             const allScores = [];
+            const passedScores = [];
+            const failedScores = [];
             const levelData = sectionStats[section] || {};
             for (const level of levels) {
                 if (levelData[level]) {
                     allScores.push(...levelData[level].total);
+                    passedScores.push(...levelData[level].passed);
+                    failedScores.push(...levelData[level].failed);
                 }
             }
             if (allScores.length > 0) {
@@ -1372,7 +1376,9 @@ export async function getJlptSectionScoreStats() {
                     count: allScores.length,
                     avgScore: Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length * 10) / 10,
                     maxScore: Math.max(...allScores),
-                    minScore: Math.min(...allScores)
+                    minScore: Math.min(...allScores),
+                    passedAvg: passedScores.length > 0 ? Math.round(passedScores.reduce((a, b) => a + b, 0) / passedScores.length * 10) / 10 : null,
+                    failedAvg: failedScores.length > 0 ? Math.round(failedScores.reduce((a, b) => a + b, 0) / failedScores.length * 10) / 10 : null
                 };
             }
         }
@@ -1401,7 +1407,7 @@ export async function getJlptSectionScoreStats() {
                 });
             }
         }
-        sectionData.byNationality = nationalityData.sort((a, b) => b.totalRecords - a.totalRecords); // 全件表示
+        sectionData.byNationality = nationalityData.sort((a, b) => b.avgScore - a.avgScore); // 全体平均が高い順
 
         // 5. 全体統計
         let grandTotalScores = [];

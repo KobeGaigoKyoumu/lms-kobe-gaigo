@@ -1403,6 +1403,8 @@ export default function AnalyticsPage() {
                                                         <th>平均点</th>
                                                         <th>最高点</th>
                                                         <th>最低点</th>
+                                                        <th>合格者平均</th>
+                                                        <th>不合格者平均</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -1413,6 +1415,12 @@ export default function AnalyticsPage() {
                                                             <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
                                                             <td>{data.maxScore}点</td>
                                                             <td>{data.minScore}点</td>
+                                                            <td style={{ color: data.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                                {data.passedAvg ? `${data.passedAvg}点` : '-'}
+                                                            </td>
+                                                            <td style={{ color: data.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                                {data.failedAvg ? `${data.failedAvg}点` : '-'}
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
