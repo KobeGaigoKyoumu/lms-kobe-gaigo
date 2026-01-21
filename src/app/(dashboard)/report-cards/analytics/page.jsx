@@ -569,9 +569,23 @@ export default function AnalyticsPage() {
                                     </div>
                                 </div>
                                 <div className={styles.chartCard}>
-                                    <h3 className={styles.chartTitle}>レベル別 平均点</h3>
+                                    <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
                                     <div className={styles.chartContainer}>
-                                        <Bar data={jlptScoreData} options={chartOptions} />
+                                        {enhancedJlptStats && (
+                                            <Line
+                                                data={{
+                                                    labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
+                                                    datasets: [{
+                                                        label: '合格率 (%)',
+                                                        data: enhancedJlptStats.yearlyTrend.map(s => s.passRate),
+                                                        borderColor: 'rgb(34, 197, 94)',
+                                                        backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                                        tension: 0.3,
+                                                    }]
+                                                }}
+                                                options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -603,21 +617,9 @@ export default function AnalyticsPage() {
                                             </div>
                                         </div>
                                         <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
+                                            <h3 className={styles.chartTitle}>レベル別 平均点</h3>
                                             <div className={styles.chartContainer}>
-                                                <Line
-                                                    data={{
-                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
-                                                        datasets: [{
-                                                            label: '合格率 (%)',
-                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.passRate),
-                                                            borderColor: 'rgb(34, 197, 94)',
-                                                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                                                            tension: 0.3,
-                                                        }]
-                                                    }}
-                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                                />
+                                                <Bar data={jlptScoreData} options={chartOptions} />
                                             </div>
                                         </div>
                                     </div>
