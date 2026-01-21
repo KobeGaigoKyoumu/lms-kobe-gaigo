@@ -1229,7 +1229,9 @@ export async function getJlptSectionScoreStats() {
 
             for (const file of files) {
                 const filePath = path.join(sessionDir, file);
-                const level = file.replace('.csv', '');
+                // ファイル名からレベルを推測（N1.csv, N2.csv等の場合）
+                // SCORE_*.csv形式の場合はファイル名からレベルが取得できないため、各行で判定
+                const levelFromFilename = file.match(/^(N[1-5])\.csv$/i)?.[1]?.toUpperCase();
 
                 let content;
                 try {
@@ -1248,6 +1250,10 @@ export async function getJlptSectionScoreStats() {
                     const parts = parseCSVLine(line);
 
                     if (parts.length < 17) continue;
+
+                    // CSVの3列目（インデックス2）からレベルを取得（SCORE_*.csv形式対応）
+                    const level = levelFromFilename || parts[2]?.toUpperCase();
+                    if (!level || !level.match(/^N[1-5]$/)) continue;
 
                     const result = parts[8];
                     const country = parts[5];
