@@ -10,7 +10,7 @@ const path = require('path');
 const DATA_DIR = 'e:/デスクトップ/LMS(神戸外語)/卒業生進路一覧';
 const OUTPUT_FILE = 'src/data/career_stats.json';
 
-// Files to process (excluding 2021 which has no data)
+// Files to process
 const FILES = [
     { file: '2017年度入学生進路一覧.xlsx', year: 2017 },
     { file: '2018年度入学生進路一覧.xlsx', year: 2018 },
@@ -20,23 +20,133 @@ const FILES = [
     { file: '2023年度入学生進路一覧.xlsx', year: 2023 },
 ];
 
-// Column mappings (may vary by file)
-const COLUMN_NAMES = {
-    studentId: '学籍番号',
-    class: 'クラス',
-    name: '氏名',
-    nationality: '国籍',
-    graduationStatus: '卒業・退学',
-    careerCategory: '進路区分',
-    finalSchool: '最終合格校',
-    applicationExperience: '出願経験',
-    destination: '進学先',
-};
+/**
+ * Helper to find value from multiple potential column names
+ */
+function getValue(row, keys) {
+    // Normalize row keys (remove spaces)
+    const normalizedRow = {};
+    Object.keys(row).forEach(k => {
+        normalizedRow[k.replace(/\s+/g, '')] = row[k];
+    });
 
+    for (const key of keys) {
+        const normalizedKey = key.replace(/\s+/g, '');
+        if (normalizedRow[normalizedKey] !== undefined) {
+            return normalizedRow[normalizedKey];
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Helper to check if a row looks like a student record
+ */
+function isStudentRow(row) {
+    return getValue(row, ['国籍', '出身国', 'Country']) ||
+        getValue(row, ['学籍番号', 'ID', 'Student ID']) ||
+        getValue(row, ['氏名', '名前', 'Name', '氏　名']);
+}
+
+/**
+ * Helper to guess nationality from name
+ */
+function guessNationality(name) {
+    if (!name) return null;
+
+    const upperName = name.toUpperCase();
+
+    // Vietnam (Common Romanized Surnames)
+    if (upperName.includes('NGUYEN') ||
+        upperName.includes('TRAN') ||
+        upperName.includes('PHAM') ||
+        upperName.includes('LE ') ||
+        upperName.includes('VO ') ||
+        upperName.includes('HOANG') ||
+        upperName.includes('DANG') ||
+        upperName.includes('BUI ')) {
+        return 'ベトナム';
+    }
+
+    // China (All Kanji, 2-4 characters)
+    // Regex for Kanji only (allowing spaces)
+    if (/^[\u4e00-\u9faf\u3000\s]+$/.test(name)) {
+        return '中国';
+    }
+
+    // Nepal (Common Romanized/Katakana Surnames)
+    if (upperName.includes('KHADKA') ||
+        upperName.includes('SHRESTHA') ||
+        upperName.includes('TAMANG') ||
+        upperName.includes('KC') ||
+        upperName.includes('GURUNG')) {
+        return 'ネパール';
+    }
+
+    return null;
+}
+
+/**
+ * Read enrollment file for lookup
+ */
+/**
+ * Read all master enrollment files for lookup
+ */
+function getEnrollmentMap() {
+    const map = {}; // ID -> Nationality
+    const MASTER_DIR = 'e:/デスクトップ/LMS(神戸外語)/在籍者と過去在籍者';
+    const MASTER_FILES = ['修了者.xlsx', '卒業者.xlsx', '在籍者.xlsx', '退学者.xlsx'];
+
+    MASTER_FILES.forEach(file => {
+        try {
+            const filePath = path.join(MASTER_DIR, file);
+            if (fs.existsSync(filePath)) {
+                console.log(`Loading master data: ${file}`);
+                const wb = XLSX.readFile(filePath);
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(ws);
+
+                let count = 0;
+                data.forEach(row => {
+                    const id = getValue(row, ['学籍番号', 'ID']);
+                    const nat = getValue(row, ['国籍・地域', '国籍']);
+                    if (id && nat) {
+                        map[id] = nat;
+                        count++;
+                    }
+                });
+                console.log(`  Loaded ${count} records.`);
+            }
+        } catch (e) {
+            console.log(`Error reading master file ${file}:`, e.message);
+        }
+    });
+
+    console.log(`Total master records loaded: ${Object.keys(map).length}`);
+    return map;
+}
+
+/**
+ * Read Excel file (all sheets)
+ */
 function readExcelFile(filePath) {
     const wb = XLSX.readFile(filePath);
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(ws);
+    let allRows = [];
+
+    wb.SheetNames.forEach(sheetName => {
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws);
+
+        // Filter for valid student rows
+        const validRows = rows.filter(isStudentRow);
+
+        if (validRows.length > 0) {
+            console.log(`    Sheet "${sheetName}": ${validRows.length} records`);
+            allRows = allRows.concat(validRows);
+        }
+    });
+
+    return allRows;
 }
 
 function processCareerData() {
@@ -45,7 +155,13 @@ function processCareerData() {
     const categoryStats = {};
     const nationalityStats = {};
     const destinationCounts = {};
-    const destinationDetails = {}; // Added for detailed breakdown
+    const destinationDetails = {};
+
+    // Load enrollment map for nationality lookup
+    const enrollmentMap = getEnrollmentMap();
+
+    // Clear debug log
+    try { fs.writeFileSync('debug_unknown_nationality.txt', ''); } catch (e) { }
 
     FILES.forEach(({ file, year }) => {
         const filePath = path.join(DATA_DIR, file);
@@ -53,7 +169,29 @@ function processCareerData() {
 
         try {
             const data = readExcelFile(filePath);
-            console.log(`  Found ${data.length} records`);
+            console.log(`  Total found: ${data.length} records`);
+
+            // Deduplicate logic
+            const uniqueData = [];
+            const seen = new Set();
+
+            data.forEach(row => {
+                // Initial extraction (without guesswork) for deduplication
+                const name = getValue(row, ['氏名', '名前', 'Name', '氏　名']) || '';
+                // Try to find ANY identifier to dedupe
+                const id = getValue(row, ['学籍番号', 'ID']) || '';
+
+                // Use Name + ID as key if possible, else Name + Year
+                // Note: Nationality might be missing so don't use it for key if possible
+                const key = `${year}-${id}-${name}`;
+
+                if ((name || id) && !seen.has(key)) {
+                    seen.add(key);
+                    uniqueData.push(row);
+                }
+            });
+
+            console.log(`  Unique students: ${uniqueData.length}`);
 
             // Initialize yearly stats
             yearlyStats[year] = {
@@ -64,40 +202,52 @@ function processCareerData() {
                 nationalities: {}
             };
 
-            data.forEach(row => {
+            uniqueData.forEach(row => {
+                let nationality = getValue(row, ['国籍', '出身地', '国', 'Nationality', 'Country']);
+                const studentId = getValue(row, ['学籍番号', 'ID', 'Student ID']);
+                const name = getValue(row, ['氏名', '名前', 'Name', '氏　名']);
+
+                // Fallback 1: Lookup in Enrollment Map
+                if (!nationality && studentId && enrollmentMap[studentId]) {
+                    nationality = enrollmentMap[studentId];
+                }
+
+                // Fallback 2: Name Heuristic (Restored because Master Data is missing 2017+ records)
+                if (!nationality && name) {
+                    nationality = guessNationality(name);
+                }
+
                 const record = {
                     year,
-                    nationality: row[COLUMN_NAMES.nationality] || row['国籍'] || 'Unknown',
-                    graduationStatus: row[COLUMN_NAMES.graduationStatus] || row['卒業・退学'] || 'Unknown',
-                    careerCategory: row[COLUMN_NAMES.careerCategory] || row['進路区分'] || 'Unknown',
-                    destination: row[COLUMN_NAMES.destination] || row['進学先'] || row['最終合格校'] || '',
+                    nationality: nationality || 'Unknown',
+                    graduationStatus: getValue(row, ['卒業・退学', '状態', 'Status', '卒業・修了・退学']) || 'Unknown',
+                    careerCategory: getValue(row, ['進路区分', '区分', 'Category']) || 'Unknown',
+                    destination: getValue(row, ['進学先', '最終合格校', '就職先', 'Destination', 'School']) || '',
                 };
 
+                // Debug log only if STILL Unknown
+                if (record.nationality === 'Unknown') {
+                    try {
+                        const logMsg = `[DEBUG] Unknown Nationality in ${year} (Name: ${name})\n`;
+                        fs.appendFileSync('debug_unknown_nationality.txt', logMsg);
+                    } catch (e) { }
+                }
+
+                // DATA CLEANING & NORMALIZATION
                 // Normalize destination names
                 if (record.destination) {
-                    if (record.destination === '東亜経理') {
-                        record.destination = '東亜経理専門学校';
-                    } else if (record.destination === 'アートカレッジ神戸') {
-                        record.destination = '専門学校アートカレッジ神戸';
-                    } else if (record.destination === '東京国際ビジネスカレッジ') {
-                        record.destination = '東京国際ビジネスカレッジ神戸校';
-                    } else if (record.destination === '愛甲' || record.destination === '愛甲学院') {
-                        record.destination = '愛甲学院専門学校';
-                    } else if (record.destination === 'ICT') {
-                        record.destination = 'ICT専門学校';
-                    } else if (record.destination === '関西国際旅行ホテル専門学校') {
-                        record.destination = '関西国際旅行・ホテル専門学校';
-                    } else if (record.destination === 'トヨタ自動車大学校') {
-                        record.destination = 'トヨタ自動車大学校神戸校';
-                    } else if (record.destination === '大原') {
-                        record.destination = '大原簿記専門学校三宮校';
-                    } else if (record.destination === '日本コンピュータ') {
-                        record.destination = '日本コンピュータ専門学校';
-                    } else if (record.destination === '和歌山福祉専門学校') {
-                        record.destination = '和歌山社会福祉専門学校';
-                    } else if (record.destination === 'アートカレッジ') {
-                        record.destination = '専門学校アートカレッジ神戸';
-                    }
+                    const d = record.destination.trim();
+                    if (d === '東亜経理') record.destination = '東亜経理専門学校';
+                    else if (d === 'アートカレッジ神戸' || d === '専門学校アートカレッジ神戸') record.destination = '専門学校アートカレッジ神戸';
+                    else if (d === '東京国際ビジネスカレッジ') record.destination = '東京国際ビジネスカレッジ神戸校';
+                    else if (d === '愛甲' || d === '愛甲学院') record.destination = '愛甲学院専門学校';
+                    else if (d === 'ICT') record.destination = 'ICT専門学校';
+                    else if (d === '関西国際旅行ホテル専門学校') record.destination = '関西国際旅行・ホテル専門学校';
+                    else if (d === 'トヨタ自動車大学校') record.destination = 'トヨタ自動車大学校神戸校';
+                    else if (d === '大原') record.destination = '大原簿記専門学校三宮校';
+                    else if (d === '日本コンピュータ') record.destination = '日本コンピュータ専門学校';
+                    else if (d === '和歌山福祉専門学校') record.destination = '和歌山社会福祉専門学校';
+                    else if (d === 'アートカレッジ') record.destination = '専門学校アートカレッジ神戸';
                 }
 
                 allData.push(record);
@@ -118,20 +268,20 @@ function processCareerData() {
                 }
 
                 // Nationality stats
-                const nationality = record.nationality;
-                if (nationality && nationality !== 'Unknown') {
-                    if (!nationalityStats[nationality]) {
-                        nationalityStats[nationality] = { total: 0, categories: {} };
+                if (record.nationality && record.nationality !== 'Unknown') {
+                    if (!nationalityStats[record.nationality]) {
+                        nationalityStats[record.nationality] = { total: 0, categories: {} };
                     }
-                    nationalityStats[nationality].total++;
-                    nationalityStats[nationality].categories[category] =
-                        (nationalityStats[nationality].categories[category] || 0) + 1;
+                    nationalityStats[record.nationality].total++;
+                    nationalityStats[record.nationality].categories[category] =
+                        (nationalityStats[record.nationality].categories[category] || 0) + 1;
 
-                    yearlyStats[year].nationalities[nationality] =
-                        (yearlyStats[year].nationalities[nationality] || 0) + 1;
+                    yearlyStats[year].nationalities[record.nationality] =
+                        (yearlyStats[year].nationalities[record.nationality] || 0) + 1;
                 }
 
                 // Destination counts (for top destinations)
+                // Filter out '帰国' (Return to Country) from destination rankings
                 if (record.destination && record.destination.trim() && record.destination !== '帰国') {
                     const dest = record.destination;
                     destinationCounts[dest] = (destinationCounts[dest] || 0) + 1;
@@ -144,24 +294,21 @@ function processCareerData() {
                     destinationDetails[dest].years[year] = (destinationDetails[dest].years[year] || 0) + 1;
                 }
             });
+
         } catch (error) {
             console.error(`Error processing ${file}:`, error.message);
         }
     });
 
-
-
-    // Sort top destinations
+    // Post-processing output
     const topDestinations = Object.entries(destinationDetails)
         .sort((a, b) => b[1].total - a[1].total)
         .map(([name, stats]) => ({ name, count: stats.total, years: stats.years }));
 
-    // Sort nationalities by total
     const sortedNationalities = Object.entries(nationalityStats)
         .sort((a, b) => b[1].total - a[1].total)
         .map(([name, stats]) => ({ name, ...stats }));
 
-    // Calculate yearly rates
     const years = Object.keys(yearlyStats).sort();
     const yearlyTrends = years.map(year => {
         const stats = yearlyStats[year];
@@ -189,7 +336,6 @@ function processCareerData() {
         topDestinations,
     };
 
-    // Ensure output directory exists
     const outputDir = path.dirname(OUTPUT_FILE);
     if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
@@ -198,7 +344,7 @@ function processCareerData() {
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(result, null, 2), 'utf8');
     console.log(`\nCareer stats saved to ${OUTPUT_FILE}`);
     console.log(`Total records: ${allData.length}`);
-    console.log('Categories found:', Object.keys(categoryStats));
+    console.log(`Records with Unknown nationality: ${(fs.readFileSync('debug_unknown_nationality.txt', 'utf8').match(/\n/g) || []).length}`);
 
     return result;
 }
