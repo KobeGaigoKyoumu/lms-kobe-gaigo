@@ -542,9 +542,6 @@ export default function AnalyticsPage() {
                                 <br />
                                 2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延や試験中止（特に2020年第1回試験は中止）がありました。
                                 2020年度は新入生がおらず、2021年度は入学者が45名のみとなりました。
-                                <br />
-                                <strong>特に2022年度は、在籍者の大半（約84%）が入学直後の1年生（238名）であり、
-                                    受験の中心となる2年生が45名と極端に少なかったため、見かけ上の受験率が大きく低下しています。</strong>
                             </div>
                             <div className={styles.statsGrid}>
                                 <div className={styles.statCard}>
@@ -642,48 +639,7 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Examinees and Exam Rate Charts */}
-                                    <div className={styles.chartsRow}>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>年度別 受験者数の推移（延べ人数）</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Bar
-                                                    data={{
-                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
-                                                        datasets: [{
-                                                            label: '受験者数（延べ人数）',
-                                                            data: enhancedJlptStats.yearlyTrend.map(s => s.totalSessions),
-                                                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                                                            borderColor: 'rgb(59, 130, 246)',
-                                                            borderWidth: 1,
-                                                        }]
-                                                    }}
-                                                    options={{
-                                                        ...chartOptions,
-                                                        scales: { y: { beginAtZero: true } }
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>年度別 受験率の推移</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Line
-                                                    data={{
-                                                        labels: enhancedJlptStats.yearlyTrend.map(s => s.year + '年'),
-                                                        datasets: [{
-                                                            label: '受験率 (%)',
-                                                            data: enhancedJlptStats.yearlyTrend.map(s => parseFloat(s.examRate)),
-                                                            borderColor: 'rgb(139, 92, 246)',
-                                                            backgroundColor: 'rgba(139, 92, 246, 0.5)',
-                                                            tension: 0.3,
-                                                        }]
-                                                    }}
-                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+
 
                                     {/* Nationality Statistics Table */}
                                     <div>
