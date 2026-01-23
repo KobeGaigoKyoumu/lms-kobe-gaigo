@@ -1637,7 +1637,7 @@ export default function AnalyticsPage() {
                             <div className={styles.chartContainer}>
                                 <Line
                                     data={{
-                                        labels: careerStats.yearlyTrends.map(t => (t.year + 2) + '年度卒業'),
+                                        labels: careerStats.yearlyTrends.map(t => (t.year + 1) + '年度卒業'),
                                         datasets: [{
                                             label: '卒業率 (%)',
                                             data: careerStats.yearlyTrends.map(t => t.graduationRate),
@@ -1659,7 +1659,7 @@ export default function AnalyticsPage() {
                             <div className={styles.chartContainer}>
                                 <Bar
                                     data={{
-                                        labels: careerStats.yearlyTrends.map(t => (t.year + 2) + '年度卒業'),
+                                        labels: careerStats.yearlyTrends.map(t => (t.year + 1) + '年度卒業'),
                                         datasets: [
                                             {
                                                 label: '専門学校',
