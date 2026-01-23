@@ -2075,6 +2075,6 @@ export default function AnalyticsPage() {
                     <div className={styles.footer}>
                         <p>※ データは現在のフィルタ設定に基づいています。</p>
                     </div>
-                </div >
+                </>
             )
-}
+            }
