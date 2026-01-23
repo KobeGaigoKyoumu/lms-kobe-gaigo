@@ -1505,26 +1505,34 @@ export default function AnalyticsPage() {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {(sectionScoreStats.bySectionLevel || []).map((row, idx) => (
-                                                            <tr key={idx}>
-                                                                <td style={{ fontWeight: 600 }}>{row.section}</td>
-                                                                <td>
-                                                                    <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                                                        {row.level}
-                                                                    </span>
-                                                                </td>
-                                                                <td>{row.count}</td>
-                                                                <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
-                                                                <td>{row.maxScore}点</td>
-                                                                <td>{row.minScore}点</td>
-                                                                <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
-                                                                    {row.passedAvg ? `${row.passedAvg}点` : '-'}
-                                                                </td>
-                                                                <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
-                                                                    {row.failedAvg ? `${row.failedAvg}点` : '-'}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                        {(sectionScoreStats.bySectionLevel || [])
+                                                            .sort((a, b) => {
+                                                                // Sort by Section first (keeping original order or alphabetical)
+                                                                if (a.section !== b.section) return a.section.localeCompare(b.section);
+                                                                // Sort by Level (N1 -> N5)
+                                                                const levelOrder = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+                                                                return (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                                                            })
+                                                            .map((row, idx) => (
+                                                                <tr key={idx}>
+                                                                    <td style={{ fontWeight: 600 }}>{row.section}</td>
+                                                                    <td>
+                                                                        <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                                            {row.level}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>{row.count}</td>
+                                                                    <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                                    <td>{row.maxScore}点</td>
+                                                                    <td>{row.minScore}点</td>
+                                                                    <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                                        {row.passedAvg ? `${row.passedAvg}点` : '-'}
+                                                                    </td>
+                                                                    <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                                        {row.failedAvg ? `${row.failedAvg}点` : '-'}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -1712,6 +1720,47 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
 
+                    {/* Charts Row 2: Yearly Career Breakdown */}
+                    <div className={styles.chartsRow}>
+                        <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
+                            <h3 className={styles.chartTitle}>主な進学先と合格者JLPT成績</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>進学先名</th>
+                                            <th>進学者数</th>
+                                            <th>JLPT平均点</th>
+                                            <th>最高点</th>
+                                            <th>最低点</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {careerStats.topDestinations
+                                            .filter(d => d.jlptStats) // Only show if we have stats
+                                            .sort((a, b) => b.count - a.count)
+                                            .slice(0, 50)
+                                            .map((dest, idx) => (
+                                                <tr key={idx}>
+                                                    <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                    <td>{dest.count}名</td>
+                                                    <td style={{ fontWeight: 600 }}>{dest.jlptStats.avg.toFixed(1)}点</td>
+                                                    <td>{dest.jlptStats.max}点</td>
+                                                    <td>{dest.jlptStats.min}点</td>
+                                                </tr>
+                                            ))}
+                                        {careerStats.topDestinations.filter(d => d.jlptStats).length === 0 && (
+                                            <tr>
+                                                <td colSpan="5" style={{ textAlign: 'center', color: '#6b7280' }}>
+                                                    合格者のJLPTスコアデータがありません
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                     {/* Charts Row 2: Yearly Career Breakdown */}
                     <div className={styles.chartsRow}>
                         <div className={styles.chartCard} style={{ flex: 2 }}>
@@ -1940,11 +1989,12 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
                 </>
-            )}
+            )
+            }
 
             <div className={styles.footer}>
                 <p>※ データは現在のフィルタ設定に基づいています。</p>
             </div>
-        </div>
+        </div >
     )
 }
