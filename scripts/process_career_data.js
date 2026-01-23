@@ -85,6 +85,12 @@ function processCareerData() {
                         record.destination = '愛甲学院専門学校';
                     } else if (record.destination === 'ICT') {
                         record.destination = 'ICT専門学校';
+                    } else if (record.destination === '関西国際旅行ホテル専門学校') {
+                        record.destination = '関西国際旅行・ホテル専門学校';
+                    } else if (record.destination === 'トヨタ自動車大学校') {
+                        record.destination = 'トヨタ自動車大学校神戸校';
+                    } else if (record.destination === '大原') {
+                        record.destination = '大原簿記専門学校三宮校';
                     }
                 }
 
@@ -120,7 +126,7 @@ function processCareerData() {
                 }
 
                 // Destination counts (for top destinations)
-                if (record.destination && record.destination.trim()) {
+                if (record.destination && record.destination.trim() && record.destination !== '帰国') {
                     const dest = record.destination;
                     destinationCounts[dest] = (destinationCounts[dest] || 0) + 1;
 
