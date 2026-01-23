@@ -119,6 +119,8 @@ export default function AnalyticsPage() {
 
     // Career Analytics State
     const [careerStats, setCareerStats] = useState(null)
+    const [expandedDestination, setExpandedDestination] = useState(null)
+    const [expandedNationality, setExpandedNationality] = useState(null)
 
     useEffect(() => {
         fetchGrades()
@@ -1701,7 +1703,7 @@ export default function AnalyticsPage() {
                     {/* Tables Row */}
                     <div className={styles.chartsRow}>
                         {/* Top Destinations */}
-                        <div className={styles.chartCard}>
+                        <div className={styles.chartCard} style={{ flex: 1.2 }}>
                             <h3 className={styles.chartTitle}>人気進学先ランキング (TOP 10)</h3>
                             <div className={styles.tableContainer}>
                                 <table className={styles.table}>
@@ -1710,15 +1712,40 @@ export default function AnalyticsPage() {
                                             <th>順位</th>
                                             <th>進学先</th>
                                             <th>人数</th>
+                                            <th>詳細</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
-                                            <tr key={idx}>
-                                                <td>{idx + 1}</td>
-                                                <td>{dest.name}</td>
-                                                <td style={{ fontWeight: 600 }}>{dest.count}名</td>
-                                            </tr>
+                                            <>
+                                                <tr
+                                                    key={idx}
+                                                    onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
+                                                    style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent' }}
+                                                >
+                                                    <td>{idx + 1}</td>
+                                                    <td>{dest.name}</td>
+                                                    <td style={{ fontWeight: 600 }}>{dest.count}名</td>
+                                                    <td>{expandedDestination === idx ? '▲' : '▼'}</td>
+                                                </tr>
+                                                {expandedDestination === idx && (
+                                                    <tr>
+                                                        <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                            <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                <strong>年度別内訳:</strong>
+                                                                <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                                                    {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
+                                                                        <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                                                            <span>{parseInt(year) + 1}年度卒</span>
+                                                                            <strong>{count}名</strong>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </>
                                         ))}
                                     </tbody>
                                 </table>
@@ -1726,7 +1753,7 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* Nationality Stats */}
-                        <div className={styles.chartCard}>
+                        <div className={styles.chartCard} style={{ flex: 1 }}>
                             <h3 className={styles.chartTitle}>国籍別進路状況</h3>
                             <div className={styles.tableContainer}>
                                 <table className={styles.table}>
@@ -1741,12 +1768,36 @@ export default function AnalyticsPage() {
                                         {careerStats.nationalityStats.slice(0, 8).map((nat, idx) => {
                                             const topCategory = Object.entries(nat.categories)
                                                 .sort((a, b) => b[1] - a[1])[0];
+                                            const isExpanded = expandedNationality === idx;
+
                                             return (
-                                                <tr key={idx}>
-                                                    <td>{nat.name}</td>
-                                                    <td>{nat.total}名</td>
-                                                    <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
-                                                </tr>
+                                                <>
+                                                    <tr
+                                                        key={idx}
+                                                        onClick={() => setExpandedNationality(isExpanded ? null : idx)}
+                                                        style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent' }}
+                                                    >
+                                                        <td>{nat.name}</td>
+                                                        <td>{nat.total}名</td>
+                                                        <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
+                                                    </tr>
+                                                    {isExpanded && (
+                                                        <tr>
+                                                            <td colSpan={3} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                    <strong>進路詳細:</strong>
+                                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                                        {Object.entries(nat.categories).sort((a, b) => b[1] - a[1]).map(([cat, count]) => (
+                                                                            <span key={cat} style={{ padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '0.85rem' }}>
+                                                                                {cat}: <strong>{count}名</strong>
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </>
                                             );
                                         })}
                                     </tbody>

@@ -45,6 +45,7 @@ function processCareerData() {
     const categoryStats = {};
     const nationalityStats = {};
     const destinationCounts = {};
+    const destinationDetails = {}; // Added for detailed breakdown
 
     FILES.forEach(({ file, year }) => {
         const filePath = path.join(DATA_DIR, file);
@@ -120,7 +121,15 @@ function processCareerData() {
 
                 // Destination counts (for top destinations)
                 if (record.destination && record.destination.trim()) {
-                    destinationCounts[record.destination] = (destinationCounts[record.destination] || 0) + 1;
+                    const dest = record.destination;
+                    destinationCounts[dest] = (destinationCounts[dest] || 0) + 1;
+
+                    // Detailed breakdown
+                    if (!destinationDetails[dest]) {
+                        destinationDetails[dest] = { total: 0, years: {} };
+                    }
+                    destinationDetails[dest].total++;
+                    destinationDetails[dest].years[year] = (destinationDetails[dest].years[year] || 0) + 1;
                 }
             });
         } catch (error) {
@@ -128,11 +137,13 @@ function processCareerData() {
         }
     });
 
+
+
     // Sort top destinations
-    const topDestinations = Object.entries(destinationCounts)
-        .sort((a, b) => b[1] - a[1])
+    const topDestinations = Object.entries(destinationDetails)
+        .sort((a, b) => b[1].total - a[1].total)
         .slice(0, 20)
-        .map(([name, count]) => ({ name, count }));
+        .map(([name, stats]) => ({ name, count: stats.total, years: stats.years }));
 
     // Sort nationalities by total
     const sortedNationalities = Object.entries(nationalityStats)
