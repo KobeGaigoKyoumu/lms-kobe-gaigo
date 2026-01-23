@@ -550,15 +550,15 @@
 .subtleAccordionTrigger {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: var(--spacing-2);
     padding: var(--spacing-3) var(--spacing-4);
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
-    background-color: var(--bg-primary);
+    background-color: #f9fafb;
 }
 
 .subtleAccordionTrigger:hover {
