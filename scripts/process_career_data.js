@@ -142,7 +142,6 @@ function processCareerData() {
     // Sort top destinations
     const topDestinations = Object.entries(destinationDetails)
         .sort((a, b) => b[1].total - a[1].total)
-        .slice(0, 20)
         .map(([name, stats]) => ({ name, count: stats.total, years: stats.years }));
 
     // Sort nationalities by total

@@ -91,6 +91,25 @@ function JlptSessionRow({ sessionData }) {
     )
 }
 
+const ChevronDown = ({ className, rotated }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className={className}
+        style={{
+            width: '1em',
+            height: '1em',
+            transition: 'transform 0.2s',
+            transform: rotated ? 'rotate(180deg)' : 'none'
+        }}
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+    </svg>
+)
+
 export default function AnalyticsPage() {
     const supabase = createClient()
     const [activeTab, setActiveTab] = useState('grades') // 'grades' or 'jlpt'
@@ -121,6 +140,7 @@ export default function AnalyticsPage() {
     const [careerStats, setCareerStats] = useState(null)
     const [expandedDestination, setExpandedDestination] = useState(null)
     const [expandedNationality, setExpandedNationality] = useState(null)
+    const [showLowRankings, setShowLowRankings] = useState(false)
 
     useEffect(() => {
         fetchGrades()
@@ -1716,17 +1736,20 @@ export default function AnalyticsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {/* Top 10 */}
                                         {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
                                             <>
                                                 <tr
                                                     key={idx}
                                                     onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
-                                                    style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent' }}
+                                                    style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
                                                 >
-                                                    <td>{idx + 1}</td>
-                                                    <td>{dest.name}</td>
-                                                    <td style={{ fontWeight: 600 }}>{dest.count}名</td>
-                                                    <td>{expandedDestination === idx ? '▲' : '▼'}</td>
+                                                    <td style={{ padding: '0.75rem 1rem' }}>{idx + 1}</td>
+                                                    <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
+                                                    <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
+                                                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                                        <ChevronDown rotated={expandedDestination === idx} />
+                                                    </td>
                                                 </tr>
                                                 {expandedDestination === idx && (
                                                     <tr>
@@ -1747,6 +1770,59 @@ export default function AnalyticsPage() {
                                                 )}
                                             </>
                                         ))}
+
+                                        {/* 11th and below Accordion */}
+                                        {careerStats.topDestinations.length > 10 && (
+                                            <>
+                                                <tr
+                                                    onClick={() => setShowLowRankings(!showLowRankings)}
+                                                    style={{ cursor: 'pointer', backgroundColor: '#f9fafb', borderTop: '2px solid #e5e7eb' }}
+                                                >
+                                                    <td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#6b7280', fontWeight: 500 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                                            {showLowRankings ? '11位以下を閉じる' : '11位以下を表示'}
+                                                            <ChevronDown rotated={showLowRankings} />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {showLowRankings && careerStats.topDestinations.slice(10).map((dest, idx) => {
+                                                    const realIdx = idx + 10;
+                                                    return (
+                                                        <>
+                                                            <tr
+                                                                key={realIdx}
+                                                                onClick={() => setExpandedDestination(expandedDestination === realIdx ? null : realIdx)}
+                                                                style={{ cursor: 'pointer', backgroundColor: expandedDestination === realIdx ? '#f3f4f6' : 'white', borderBottom: '1px solid #f3f4f6' }}
+                                                            >
+                                                                <td style={{ padding: '0.75rem 1rem' }}>{realIdx + 1}</td>
+                                                                <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
+                                                                <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
+                                                                <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                                                    <ChevronDown rotated={expandedDestination === realIdx} />
+                                                                </td>
+                                                            </tr>
+                                                            {expandedDestination === realIdx && (
+                                                                <tr>
+                                                                    <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                            <strong>年度別内訳:</strong>
+                                                                            <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                                                                {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
+                                                                                    <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                                                                        <span>{parseInt(year) + 1}年度卒</span>
+                                                                                        <strong>{count}名</strong>
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })}
+                                            </>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
