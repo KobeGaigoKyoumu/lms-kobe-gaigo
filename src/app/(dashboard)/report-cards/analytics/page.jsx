@@ -1446,7 +1446,7 @@ export default function AnalyticsPage() {
                                     {/* Section Overall Average Table */}
                                     <div>
                                         <h2 className={styles.sectionTitle}>科目別全体平均</h2>
-                                        <div className={styles.tableContainer}>
+                                        <div className={styles.tableContainer} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottom: 'none' }}>
                                             <table className={styles.table}>
                                                 <thead>
                                                     <tr>
@@ -1481,7 +1481,7 @@ export default function AnalyticsPage() {
                                     </div>
 
                                     {/* Section Score Details Table - Accordion */}
-                                    <div className={styles.sessionGroup}>
+                                    <div className={styles.sessionGroup} style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: '1px solid #e5e7eb' }}>
                                         <div
                                             className={styles.subtleAccordionTrigger}
                                             onClick={() => setSectionDetailOpen(!sectionDetailOpen)}
@@ -1619,7 +1619,27 @@ export default function AnalyticsPage() {
                     {/* Charts Row 1: Category Breakdown & Yearly Trends */}
                     <div className={styles.chartsRow}>
                         <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>進路区分別内訳</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>進路区分別内訳</h3>
+                                <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem' }}>
+                                    {Object.entries(careerStats.categoryStats)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .slice(0, 3)
+                                        .map(([cat, count], idx) => {
+                                            const total = careerStats.summary.totalRecords;
+                                            const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                                            return (
+                                                <span key={cat} style={{
+                                                    background: idx === 0 ? '#eff6ff' : '#f9fafb',
+                                                    color: idx === 0 ? '#1d4ed8' : '#4b5563',
+                                                    padding: '2px 8px', borderRadius: '4px', border: '1px solid #e5e7eb'
+                                                }}>
+                                                    {cat}: {pct}%
+                                                </span>
+                                            );
+                                        })}
+                                </div>
+                            </div>
                             <div className={styles.chartContainer}>
                                 <Bar
                                     data={{
@@ -1662,7 +1682,16 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
                         <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>年度別卒業率の推移</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
+                                    全年度平均: {(() => {
+                                        const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
+                                        const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
+                                        return avg.toFixed(1);
+                                    })()}%
+                                </span>
+                            </div>
                             <div className={styles.chartContainer}>
                                 <Line
                                     data={{
@@ -1674,19 +1703,6 @@ export default function AnalyticsPage() {
                                                 borderColor: 'rgb(34, 197, 94)',
                                                 backgroundColor: 'rgba(34, 197, 94, 0.5)',
                                                 tension: 0.3,
-                                            },
-                                            {
-                                                label: '全年度平均',
-                                                data: careerStats.yearlyTrends.map(() => {
-                                                    const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
-                                                    const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
-                                                    return avg.toFixed(1);
-                                                }),
-                                                borderColor: 'rgba(34, 197, 94, 0.4)',
-                                                borderDash: [5, 5],
-                                                pointRadius: 0,
-                                                borderWidth: 2,
-                                                fill: false
                                             }
                                         ]
                                     }}
