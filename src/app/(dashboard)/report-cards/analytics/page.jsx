@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Fragment } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
 import careerStatsData from '@/data/career_stats.json'
@@ -1738,9 +1738,8 @@ export default function AnalyticsPage() {
                                     <tbody>
                                         {/* Top 10 */}
                                         {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
-                                            <>
+                                            <Fragment key={idx}>
                                                 <tr
-                                                    key={idx}
                                                     onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
                                                     style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
                                                 >
@@ -1768,7 +1767,7 @@ export default function AnalyticsPage() {
                                                         </td>
                                                     </tr>
                                                 )}
-                                            </>
+                                            </Fragment>
                                         ))}
 
                                         {/* 11th and below Accordion */}
@@ -1788,9 +1787,8 @@ export default function AnalyticsPage() {
                                                 {showLowRankings && careerStats.topDestinations.slice(10).map((dest, idx) => {
                                                     const realIdx = idx + 10;
                                                     return (
-                                                        <>
+                                                        <Fragment key={realIdx}>
                                                             <tr
-                                                                key={realIdx}
                                                                 onClick={() => setExpandedDestination(expandedDestination === realIdx ? null : realIdx)}
                                                                 style={{ cursor: 'pointer', backgroundColor: expandedDestination === realIdx ? '#f3f4f6' : 'white', borderBottom: '1px solid #f3f4f6' }}
                                                             >
@@ -1818,7 +1816,7 @@ export default function AnalyticsPage() {
                                                                     </td>
                                                                 </tr>
                                                             )}
-                                                        </>
+                                                        </Fragment>
                                                     );
                                                 })}
                                             </>
@@ -1847,7 +1845,7 @@ export default function AnalyticsPage() {
                                             const isExpanded = expandedNationality === idx;
 
                                             return (
-                                                <>
+                                                <Fragment key={idx}>
                                                     <tr
                                                         key={idx}
                                                         onClick={() => setExpandedNationality(isExpanded ? null : idx)}
@@ -1873,7 +1871,7 @@ export default function AnalyticsPage() {
                                                             </td>
                                                         </tr>
                                                     )}
-                                                </>
+                                                </Fragment>
                                             );
                                         })}
                                     </tbody>
