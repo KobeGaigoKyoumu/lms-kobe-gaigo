@@ -1836,6 +1836,7 @@ export default function AnalyticsPage() {
                                             <th>国籍</th>
                                             <th>人数</th>
                                             <th>主な進路</th>
+                                            <th>詳細</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1854,10 +1855,13 @@ export default function AnalyticsPage() {
                                                         <td>{nat.name}</td>
                                                         <td>{nat.total}名</td>
                                                         <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
+                                                        <td style={{ textAlign: 'center' }}>
+                                                            <AccordionChevron rotated={isExpanded} />
+                                                        </td>
                                                     </tr>
                                                     {isExpanded && (
                                                         <tr>
-                                                            <td colSpan={3} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                            <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
                                                                 <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
                                                                     <strong>進路詳細:</strong>
                                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>

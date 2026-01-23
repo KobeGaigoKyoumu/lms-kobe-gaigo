@@ -81,7 +81,7 @@ function processCareerData() {
                         record.destination = '専門学校アートカレッジ神戸';
                     } else if (record.destination === '東京国際ビジネスカレッジ') {
                         record.destination = '東京国際ビジネスカレッジ神戸校';
-                    } else if (record.destination === '愛甲') {
+                    } else if (record.destination === '愛甲' || record.destination === '愛甲学院') {
                         record.destination = '愛甲学院専門学校';
                     } else if (record.destination === 'ICT') {
                         record.destination = 'ICT専門学校';
