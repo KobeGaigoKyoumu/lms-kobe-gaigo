@@ -1483,15 +1483,10 @@ export default function AnalyticsPage() {
                                     {/* Section Score Details Table - Accordion */}
                                     <div className={styles.sessionGroup}>
                                         <div
-                                            className={styles.sessionHeader}
+                                            className={styles.subtleAccordionTrigger}
                                             onClick={() => setSectionDetailOpen(!sectionDetailOpen)}
                                         >
-                                            <div className={styles.sessionTitle}>
-                                                科目×レベル別詳細
-                                                <span className={styles.sessionSummary}>
-                                                    {sectionScoreStats.bySectionLevel?.length || 0}件のデータ
-                                                </span>
-                                            </div>
+                                            科目×レベル別詳細 ({sectionScoreStats.bySectionLevel?.length || 0}件のデータ)
                                             {sectionDetailOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                         </div>
                                         {sectionDetailOpen && (
@@ -1649,7 +1644,19 @@ export default function AnalyticsPage() {
                                     options={{
                                         ...chartOptions,
                                         indexAxis: 'y',
-                                        plugins: { legend: { display: false } }
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function (context) {
+                                                        const value = context.parsed.x;
+                                                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                                                        return `${context.dataset.label || ''}: ${value}名 (${percentage})`;
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }}
                                 />
                             </div>
@@ -1660,13 +1667,28 @@ export default function AnalyticsPage() {
                                 <Line
                                     data={{
                                         labels: careerStats.yearlyTrends.map(t => (t.year + 1) + '年度卒業'),
-                                        datasets: [{
-                                            label: '卒業率 (%)',
-                                            data: careerStats.yearlyTrends.map(t => t.graduationRate),
-                                            borderColor: 'rgb(34, 197, 94)',
-                                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                                            tension: 0.3,
-                                        }]
+                                        datasets: [
+                                            {
+                                                label: '卒業率 (%)',
+                                                data: careerStats.yearlyTrends.map(t => t.graduationRate),
+                                                borderColor: 'rgb(34, 197, 94)',
+                                                backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                                tension: 0.3,
+                                            },
+                                            {
+                                                label: '全年度平均',
+                                                data: careerStats.yearlyTrends.map(() => {
+                                                    const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
+                                                    const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
+                                                    return avg.toFixed(1);
+                                                }),
+                                                borderColor: 'rgba(34, 197, 94, 0.4)',
+                                                borderDash: [5, 5],
+                                                pointRadius: 0,
+                                                borderWidth: 2,
+                                                fill: false
+                                            }
+                                        ]
                                     }}
                                     options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
                                 />
@@ -1712,7 +1734,24 @@ export default function AnalyticsPage() {
                                     }}
                                     options={{
                                         ...chartOptions,
-                                        plugins: { legend: { display: true, position: 'top' } },
+                                        plugins: {
+                                            legend: { display: true, position: 'top' },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function (context) {
+                                                        const value = context.parsed.y;
+                                                        const dataIndex = context.dataIndex;
+                                                        // Calculate total for this specific year (stack)
+                                                        let stackTotal = 0;
+                                                        context.chart.data.datasets.forEach(dataset => {
+                                                            stackTotal += dataset.data[dataIndex] || 0;
+                                                        });
+                                                        const percentage = stackTotal > 0 ? ((value / stackTotal) * 100).toFixed(1) + '%' : '0%';
+                                                        return `${context.dataset.label}: ${value}名 (${percentage})`;
+                                                    }
+                                                }
+                                            }
+                                        },
                                         scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
                                     }}
                                 />
@@ -1773,12 +1812,13 @@ export default function AnalyticsPage() {
                                         {/* 11th and below Accordion */}
                                         {careerStats.topDestinations.length > 10 && (
                                             <>
-                                                <tr
-                                                    onClick={() => setShowLowRankings(!showLowRankings)}
-                                                    style={{ cursor: 'pointer', backgroundColor: '#f9fafb', borderTop: '2px solid #e5e7eb' }}
-                                                >
-                                                    <td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#6b7280', fontWeight: 500 }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                                <tr>
+                                                    <td colSpan={4} style={{ padding: 0, border: 'none' }}>
+                                                        <div
+                                                            className={styles.subtleAccordionTrigger}
+                                                            onClick={() => setShowLowRankings(!showLowRankings)}
+                                                            style={{ borderTop: 'none', borderBottom: showLowRankings ? '1px solid #e5e7eb' : 'none' }}
+                                                        >
                                                             {showLowRankings ? '11位以下を閉じる' : '11位以下を表示'}
                                                             <AccordionChevron rotated={showLowRankings} />
                                                         </div>
