@@ -91,7 +91,7 @@ function JlptSessionRow({ sessionData }) {
     )
 }
 
-const ChevronDown = ({ className, rotated }) => (
+const AccordionChevron = ({ className, rotated }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -1747,7 +1747,7 @@ export default function AnalyticsPage() {
                                                     <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
                                                     <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
                                                     <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                                        <ChevronDown rotated={expandedDestination === idx} />
+                                                        <AccordionChevron rotated={expandedDestination === idx} />
                                                     </td>
                                                 </tr>
                                                 {expandedDestination === idx && (
@@ -1780,7 +1780,7 @@ export default function AnalyticsPage() {
                                                     <td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#6b7280', fontWeight: 500 }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                                             {showLowRankings ? '11位以下を閉じる' : '11位以下を表示'}
-                                                            <ChevronDown rotated={showLowRankings} />
+                                                            <AccordionChevron rotated={showLowRankings} />
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1796,7 +1796,7 @@ export default function AnalyticsPage() {
                                                                 <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
                                                                 <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
                                                                 <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                                                    <ChevronDown rotated={expandedDestination === realIdx} />
+                                                                    <AccordionChevron rotated={expandedDestination === realIdx} />
                                                                 </td>
                                                             </tr>
                                                             {expandedDestination === realIdx && (
