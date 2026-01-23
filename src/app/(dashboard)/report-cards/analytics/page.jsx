@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
+import careerStatsData from '@/data/career_stats.json'
 import { Bar, Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -116,9 +117,13 @@ export default function AnalyticsPage() {
     const [debugInfo, setDebugInfo] = useState(null)
     const [sectionDetailOpen, setSectionDetailOpen] = useState(false) // 科目別詳細アコーディオン
 
+    // Career Analytics State
+    const [careerStats, setCareerStats] = useState(null)
+
     useEffect(() => {
         fetchGrades()
         fetchJlptData()
+        setCareerStats(careerStatsData)
     }, [])
 
     // Calculate Class Summary List for List View
@@ -427,6 +432,12 @@ export default function AnalyticsPage() {
                     onClick={() => setActiveTab('jlpt')}
                 >
                     JLPT分析
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'career' ? styles.active : ''}`}
+                    onClick={() => setActiveTab('career')}
+                >
+                    進路分析
                 </button>
             </div>
 
@@ -1543,6 +1554,206 @@ export default function AnalyticsPage() {
                             )}
                         </>
                     )}
+                </>
+            )}
+
+            {/* Career Analytics Tab */}
+            {activeTab === 'career' && careerStats && (
+                <>
+                    {/* Summary Stats */}
+                    <div className={styles.statsGrid}>
+                        <div className={styles.statCard}>
+                            <span className={styles.statLabel}>総卒業生数</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>{careerStats.summary.totalRecords.toLocaleString()}</span>
+                                <span className={styles.statUnit}>名</span>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <span className={styles.statLabel}>進学率（大学・専門学校）</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>
+                                    {(((careerStats.categoryStats['大学'] || 0) +
+                                        (careerStats.categoryStats['大学院'] || 0) +
+                                        (careerStats.categoryStats['専門学校'] || 0) +
+                                        (careerStats.categoryStats['短期大学'] || 0)) /
+                                        careerStats.summary.totalRecords * 100).toFixed(1)}%
+                                </span>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <span className={styles.statLabel}>就職率</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>
+                                    {((careerStats.categoryStats['就職'] || 0) /
+                                        careerStats.summary.totalRecords * 100).toFixed(1)}%
+                                </span>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <span className={styles.statLabel}>対象年度</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>{careerStats.summary.years.length}</span>
+                                <span className={styles.statUnit}>年度</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Charts Row 1: Category Breakdown & Yearly Trends */}
+                    <div className={styles.chartsRow}>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>進路区分別内訳</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar
+                                    data={{
+                                        labels: Object.keys(careerStats.categoryStats),
+                                        datasets: [{
+                                            label: '人数',
+                                            data: Object.values(careerStats.categoryStats),
+                                            backgroundColor: [
+                                                'rgba(59, 130, 246, 0.7)',
+                                                'rgba(34, 197, 94, 0.7)',
+                                                'rgba(249, 115, 22, 0.7)',
+                                                'rgba(168, 85, 247, 0.7)',
+                                                'rgba(236, 72, 153, 0.7)',
+                                                'rgba(107, 114, 128, 0.7)',
+                                                'rgba(239, 68, 68, 0.7)',
+                                                'rgba(245, 158, 11, 0.7)',
+                                                'rgba(16, 185, 129, 0.7)',
+                                                'rgba(99, 102, 241, 0.7)',
+                                            ],
+                                        }]
+                                    }}
+                                    options={{
+                                        ...chartOptions,
+                                        indexAxis: 'y',
+                                        plugins: { legend: { display: false } }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>年度別卒業率の推移</h3>
+                            <div className={styles.chartContainer}>
+                                <Line
+                                    data={{
+                                        labels: careerStats.yearlyTrends.map(t => t.year + '年'),
+                                        datasets: [{
+                                            label: '卒業率 (%)',
+                                            data: careerStats.yearlyTrends.map(t => t.graduationRate),
+                                            borderColor: 'rgb(34, 197, 94)',
+                                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                            tension: 0.3,
+                                        }]
+                                    }}
+                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Charts Row 2: Yearly Career Breakdown */}
+                    <div className={styles.chartsRow}>
+                        <div className={styles.chartCard} style={{ flex: 2 }}>
+                            <h3 className={styles.chartTitle}>年度別進路内訳</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar
+                                    data={{
+                                        labels: careerStats.yearlyTrends.map(t => t.year + '年'),
+                                        datasets: [
+                                            {
+                                                label: '専門学校',
+                                                data: careerStats.yearlyTrends.map(t => t.categories['専門学校'] || 0),
+                                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                            },
+                                            {
+                                                label: '大学',
+                                                data: careerStats.yearlyTrends.map(t => t.categories['大学'] || 0),
+                                                backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                                            },
+                                            {
+                                                label: '大学院',
+                                                data: careerStats.yearlyTrends.map(t => t.categories['大学院'] || 0),
+                                                backgroundColor: 'rgba(168, 85, 247, 0.7)',
+                                            },
+                                            {
+                                                label: '就職',
+                                                data: careerStats.yearlyTrends.map(t => t.categories['就職'] || 0),
+                                                backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                                            },
+                                            {
+                                                label: '帰国',
+                                                data: careerStats.yearlyTrends.map(t => t.categories['帰国'] || 0),
+                                                backgroundColor: 'rgba(107, 114, 128, 0.7)',
+                                            },
+                                        ]
+                                    }}
+                                    options={{
+                                        ...chartOptions,
+                                        plugins: { legend: { display: true, position: 'top' } },
+                                        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tables Row */}
+                    <div className={styles.chartsRow}>
+                        {/* Top Destinations */}
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>人気進学先ランキング (TOP 10)</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>順位</th>
+                                            <th>進学先</th>
+                                            <th>人数</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
+                                            <tr key={idx}>
+                                                <td>{idx + 1}</td>
+                                                <td>{dest.name}</td>
+                                                <td style={{ fontWeight: 600 }}>{dest.count}名</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Nationality Stats */}
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>国籍別進路状況</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>国籍</th>
+                                            <th>人数</th>
+                                            <th>主な進路</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {careerStats.nationalityStats.slice(0, 8).map((nat, idx) => {
+                                            const topCategory = Object.entries(nat.categories)
+                                                .sort((a, b) => b[1] - a[1])[0];
+                                            return (
+                                                <tr key={idx}>
+                                                    <td>{nat.name}</td>
+                                                    <td>{nat.total}名</td>
+                                                    <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </>
             )}
 
