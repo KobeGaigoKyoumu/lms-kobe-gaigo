@@ -34,84 +34,18 @@ try {
         console.warn('Could not read Excel file, falling back to pure random:', e.message);
     }
 
-    // Helper to get random scores for a level
-    const getRandomScores = (count, preferredLevel = null) => {
-        const stats = {};
-        const levels = ['N1', 'N2', 'N3']; // Graduates typically have N3+
-
-        for (let i = 0; i < count; i++) {
-            // Pick a level: if realScores available, sample from them? 
-            // Better: Assign a level distribution based on destination type.
-            let level;
-            if (preferredLevel) {
-                // 80% chance for preferred, 20% random from N1-N3
-                level = Math.random() < 0.8 ? preferredLevel : levels[Math.floor(Math.random() * levels.length)];
-            } else {
-                // Default distribution
-                const rand = Math.random();
-                if (rand < 0.4) level = 'N2';
-                else if (rand < 0.8) level = 'N3';
-                else level = 'N1';
-            }
-
-            // Pick a score
-            let score;
-            if (realScores.length > 0) {
-                // Filter real scores by level
-                const candidates = realScores.filter(s => s.level === level);
-                if (candidates.length > 0) {
-                    score = candidates[Math.floor(Math.random() * candidates.length)].score;
-                } else {
-                    score = 90 + Math.floor(Math.random() * 60); // Fallback
-                }
-            } else {
-                score = 90 + Math.floor(Math.random() * 60);
-            }
-
-            if (!stats[level]) stats[level] = { sum: 0, max: 0, min: 180, count: 0, scores: [] };
-            stats[level].sum += score;
-            stats[level].count++;
-            stats[level].max = Math.max(stats[level].max, score);
-            stats[level].min = Math.min(stats[level].min, score);
-            stats[level].scores.push(score);
-        }
-
-        // Finalize
-        const result = {};
-        Object.keys(stats).forEach(lvl => {
-            if (stats[lvl].count > 0) {
-                result[lvl] = {
-                    count: stats[lvl].count,
-                    avg: parseFloat((stats[lvl].sum / stats[lvl].count).toFixed(1)),
-                    max: stats[lvl].max,
-                    min: stats[lvl].min
-                };
-            }
-        });
-        return result;
-    };
 
     if (data.topDestinations) {
         data.topDestinations = data.topDestinations.map(d => {
-            // Do not overwrite if we want to keep some stability, but here we want to refresh with Excel data logic
-            const isUni = d.name.includes('大学');
-
-            // Assume "Advanced/Passed" students are a subset of entrants (count)
-            // Just simulate that most entrants have JLPT data
-            const statCount = Math.max(1, Math.round(d.count * 0.8));
-
-            // Universities tend to have N2/N1
-            const stats = getRandomScores(statCount, isUni ? 'N2' : 'N3');
-
             return {
                 ...d,
-                jlptStats: stats // Structure: { N1: {count, avg...}, N2: ... }
+                jlptStats: {} // Explicitly empty as per user request (No simulated data)
             };
         });
     }
 
     fs.writeFileSync(path, JSON.stringify(data, null, 2), 'utf8');
-    console.log('Updated career_stats.json with Level-grouped JLPT stats from Excel pool');
+    console.log('Updated career_stats.json: Cleared all partial/simulated JLPT stats.');
 
 } catch (err) {
     console.error(err);
