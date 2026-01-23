@@ -37,21 +37,21 @@ try {
     // Helper to get random scores for a level
     const getRandomScores = (count, preferredLevel = null) => {
         const stats = {};
-        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+        const levels = ['N1', 'N2', 'N3']; // Graduates typically have N3+
 
         for (let i = 0; i < count; i++) {
             // Pick a level: if realScores available, sample from them? 
             // Better: Assign a level distribution based on destination type.
             let level;
             if (preferredLevel) {
-                level = Math.random() < 0.7 ? preferredLevel : levels[Math.floor(Math.random() * levels.length)];
+                // 80% chance for preferred, 20% random from N1-N3
+                level = Math.random() < 0.8 ? preferredLevel : levels[Math.floor(Math.random() * levels.length)];
             } else {
                 // Default distribution
                 const rand = Math.random();
-                if (rand < 0.3) level = 'N2';
-                else if (rand < 0.6) level = 'N3';
-                else if (rand < 0.8) level = 'N1';
-                else level = 'N4';
+                if (rand < 0.4) level = 'N2';
+                else if (rand < 0.8) level = 'N3';
+                else level = 'N1';
             }
 
             // Pick a score
