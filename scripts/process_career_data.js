@@ -72,6 +72,15 @@ function processCareerData() {
                     destination: row[COLUMN_NAMES.destination] || row['進学先'] || row['最終合格校'] || '',
                 };
 
+                // Normalize destination names
+                if (record.destination) {
+                    if (record.destination === '東亜経理') {
+                        record.destination = '東亜経理専門学校';
+                    } else if (record.destination === 'アートカレッジ神戸') {
+                        record.destination = '専門学校アートカレッジ神戸';
+                    }
+                }
+
                 allData.push(record);
 
                 // Yearly stats
