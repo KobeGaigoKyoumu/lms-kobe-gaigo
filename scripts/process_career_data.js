@@ -91,6 +91,12 @@ function processCareerData() {
                         record.destination = 'トヨタ自動車大学校神戸校';
                     } else if (record.destination === '大原') {
                         record.destination = '大原簿記専門学校三宮校';
+                    } else if (record.destination === '日本コンピュータ') {
+                        record.destination = '日本コンピュータ専門学校';
+                    } else if (record.destination === '和歌山福祉専門学校') {
+                        record.destination = '和歌山社会福祉専門学校';
+                    } else if (record.destination === 'アートカレッジ') {
+                        record.destination = '専門学校アートカレッジ神戸';
                     }
                 }
 
