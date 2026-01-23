@@ -1737,17 +1737,35 @@ export default function AnalyticsPage() {
                                     </thead>
                                     <tbody>
                                         {careerStats.topDestinations
-                                            .filter(d => d.jlptStats) // Only show if we have stats
+                                            .filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0)
                                             .sort((a, b) => b.count - a.count)
                                             .slice(0, 50)
                                             .map((dest, idx) => (
-                                                <tr key={idx}>
-                                                    <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                    <td>{dest.count}名</td>
-                                                    <td style={{ fontWeight: 600 }}>{dest.jlptStats.avg.toFixed(1)}点</td>
-                                                    <td>{dest.jlptStats.max}点</td>
-                                                    <td>{dest.jlptStats.min}点</td>
-                                                </tr>
+                                                <Fragment key={idx}>
+                                                    {/* Destination Name Header Row */}
+                                                    <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                                                        <td colSpan="5" style={{ fontWeight: 700, padding: '0.75rem 1rem' }}>
+                                                            {idx + 1}. {dest.name} ({dest.count}名)
+                                                        </td>
+                                                    </tr>
+                                                    {/* Level Stats Rows */}
+                                                    {Object.entries(dest.jlptStats)
+                                                        .sort((a, b) => {
+                                                            const order = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+                                                            return (order[a[0]] || 99) - (order[b[0]] || 99);
+                                                        })
+                                                        .map(([level, stats]) => (
+                                                            <tr key={`${idx}-${level}`}>
+                                                                <td style={{ paddingLeft: '2rem' }}>
+                                                                    <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                </td>
+                                                                <td>{stats.count}名</td>
+                                                                <td style={{ fontWeight: 600 }}>{stats.avg.toFixed(1)}点</td>
+                                                                <td>{stats.max}点</td>
+                                                                <td>{stats.min}点</td>
+                                                            </tr>
+                                                        ))}
+                                                </Fragment>
                                             ))}
                                         {careerStats.topDestinations.filter(d => d.jlptStats).length === 0 && (
                                             <tr>
