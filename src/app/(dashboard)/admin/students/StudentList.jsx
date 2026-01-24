@@ -446,9 +446,12 @@ export default function StudentList({ students: initialStudents, classes }) {
                         className={styles.filterSelect}
                     >
                         <option value="">すべてのクラス</option>
-                        {classes.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
+                        {classes
+                            .filter(c => !['TestClass', 'ベトナム人新入生クラス', '中国人新入生クラス', '現 クラス'].includes(c))
+                            .map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))
+                        }
                     </select>
                 </div>
                 <input
