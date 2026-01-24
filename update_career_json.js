@@ -7,9 +7,9 @@ const CAREER_DIR = 'e:/デスクトップ/LMS(神戸外語)/卒業生進路一�
 const JLPT_EXCEL_PATH = 'e:/デスクトップ/LMS(神戸外語)/歴代受験結果データベース.xlsx';
 
 try {
+    fs.writeFileSync('processing_log.txt', 'Starting log\n');
     console.log('Starting Career Stats Update...');
 
-    // 1. Build Student ID -> Destination Map
     // 1. Build Student ID -> Destination Map & Destination Yearly Counts
     const studentDestinations = {};
     const destinationYearlyStats = {}; // { DestName: { "2021": count, "2022": count ... } }
@@ -30,9 +30,14 @@ try {
             if (!sheet) return;
 
             const rows = XLSX.utils.sheet_to_json(sheet);
+            console.log(`Processing ${file} (Year: ${year}): Found ${rows.length} rows.`);
+            if (rows.length > 0) {
+                console.log(`  Headers: ${Object.keys(rows[0]).join(', ')}`);
+            }
+
             rows.forEach(row => {
-                const id = row['学籍番号'];
-                const dest = row['進学先'];
+                const id = row['学籍番号'] || row['No.'] || row['ID'] || row['学生番号'];
+                const dest = row['進学先'] || row['進路先'] || row['就職先'] || row['進学・就職先'] || row['学校名'] || row['企業名'] || row['最終合格校'];
                 if (id && dest) {
                     const destName = dest.trim();
                     // Map student to destination
