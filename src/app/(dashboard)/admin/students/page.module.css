@@ -190,8 +190,12 @@
     color: var(--text-secondary);
 }
 
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
 .table tbody tr:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
 }
 
 .idCell {
@@ -235,9 +239,10 @@
 }
 
 .statusSelect.withdrawn {
-    background: #fef2f2;
-    color: #b91c1c;
-    border-color: #fecaca;
+    background: transparent;
+    color: var(--text-primary);
+    border-color: transparent;
+    font-weight: 600;
 }
 
 /* Delete Button */

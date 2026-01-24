@@ -263,6 +263,10 @@
     border-bottom: none;
 }
 
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
 .table tbody tr:hover {
     background: var(--bg-tertiary);
 }
