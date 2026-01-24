@@ -270,22 +270,31 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 10,
-          "avg": 69.6,
-          "max": 99,
-          "min": 36
+          "passed": {
+            "count": 10,
+            "avg": 69.6,
+            "max": 99,
+            "min": 36
+          },
+          "failed": null
         },
         "N3": {
-          "count": 64,
-          "avg": 85.6,
-          "max": 128,
-          "min": 48
+          "passed": {
+            "count": 64,
+            "avg": 85.6,
+            "max": 128,
+            "min": 48
+          },
+          "failed": null
         },
         "N4": {
-          "count": 5,
-          "avg": 104.4,
-          "max": 141,
-          "min": 66
+          "passed": {
+            "count": 5,
+            "avg": 104.4,
+            "max": 141,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -515,22 +524,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 58,
-          "avg": 92,
-          "max": 133,
-          "min": 31
+          "passed": {
+            "count": 58,
+            "avg": 92,
+            "max": 133,
+            "min": 31
+          },
+          "failed": null
         },
         "N4": {
-          "count": 8,
-          "avg": 98,
-          "max": 127,
-          "min": 76
+          "passed": {
+            "count": 8,
+            "avg": 98,
+            "max": 127,
+            "min": 76
+          },
+          "failed": null
         },
         "N2": {
-          "count": 23,
-          "avg": 79.7,
-          "max": 122,
-          "min": 38
+          "passed": {
+            "count": 23,
+            "avg": 79.7,
+            "max": 122,
+            "min": 38
+          },
+          "failed": null
         }
       },
       "students": [
@@ -771,22 +789,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 52,
-          "avg": 79.3,
-          "max": 117,
-          "min": 45
+          "passed": {
+            "count": 52,
+            "avg": 79.3,
+            "max": 117,
+            "min": 45
+          },
+          "failed": null
         },
         "N4": {
-          "count": 5,
-          "avg": 75.4,
-          "max": 97,
-          "min": 64
+          "passed": {
+            "count": 5,
+            "avg": 75.4,
+            "max": 97,
+            "min": 64
+          },
+          "failed": null
         },
         "N2": {
-          "count": 3,
-          "avg": 63.7,
-          "max": 80,
-          "min": 50
+          "passed": {
+            "count": 3,
+            "avg": 63.7,
+            "max": 80,
+            "min": 50
+          },
+          "failed": null
         }
       },
       "students": [
@@ -962,22 +989,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 6,
-          "avg": 98.5,
-          "max": 134,
-          "min": 73
+          "passed": {
+            "count": 6,
+            "avg": 98.5,
+            "max": 134,
+            "min": 73
+          },
+          "failed": null
         },
         "N3": {
-          "count": 35,
-          "avg": 83.9,
-          "max": 123,
-          "min": 52
+          "passed": {
+            "count": 35,
+            "avg": 83.9,
+            "max": 123,
+            "min": 52
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 62,
-          "max": 62,
-          "min": 62
+          "passed": {
+            "count": 1,
+            "avg": 62,
+            "max": 62,
+            "min": 62
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1111,22 +1147,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 66,
-          "avg": 86.4,
-          "max": 131,
-          "min": 63
+          "passed": {
+            "count": 66,
+            "avg": 86.4,
+            "max": 131,
+            "min": 63
+          },
+          "failed": null
         },
         "N2": {
-          "count": 10,
-          "avg": 71.8,
-          "max": 97,
-          "min": 53
+          "passed": {
+            "count": 10,
+            "avg": 71.8,
+            "max": 97,
+            "min": 53
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 78,
-          "max": 78,
-          "min": 78
+          "passed": {
+            "count": 1,
+            "avg": 78,
+            "max": 78,
+            "min": 78
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1337,16 +1382,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 28,
-          "avg": 85.5,
-          "max": 118,
-          "min": 58
+          "passed": {
+            "count": 28,
+            "avg": 85.5,
+            "max": 118,
+            "min": 58
+          },
+          "failed": null
         },
         "N4": {
-          "count": 2,
-          "avg": 107.5,
-          "max": 124,
-          "min": 91
+          "passed": {
+            "count": 2,
+            "avg": 107.5,
+            "max": 124,
+            "min": 91
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1435,22 +1486,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 40,
-          "avg": 93,
-          "max": 138,
-          "min": 66
+          "passed": {
+            "count": 40,
+            "avg": 93,
+            "max": 138,
+            "min": 66
+          },
+          "failed": null
         },
         "N4": {
-          "count": 4,
-          "avg": 101.5,
-          "max": 127,
-          "min": 67
+          "passed": {
+            "count": 4,
+            "avg": 101.5,
+            "max": 127,
+            "min": 67
+          },
+          "failed": null
         },
         "N2": {
-          "count": 7,
-          "avg": 70.7,
-          "max": 82,
-          "min": 56
+          "passed": {
+            "count": 7,
+            "avg": 70.7,
+            "max": 82,
+            "min": 56
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1589,22 +1649,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 21,
-          "avg": 104.1,
-          "max": 152,
-          "min": 69
+          "passed": {
+            "count": 21,
+            "avg": 104.1,
+            "max": 152,
+            "min": 69
+          },
+          "failed": null
         },
         "N2": {
-          "count": 20,
-          "avg": 87.4,
-          "max": 162,
-          "min": 57
+          "passed": {
+            "count": 20,
+            "avg": 87.4,
+            "max": 162,
+            "min": 57
+          },
+          "failed": null
         },
         "N1": {
-          "count": 3,
-          "avg": 62,
-          "max": 91,
-          "min": 44
+          "passed": {
+            "count": 3,
+            "avg": 62,
+            "max": 91,
+            "min": 44
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1746,28 +1815,40 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 16,
-          "avg": 119.1,
-          "max": 162,
-          "min": 85
+          "passed": {
+            "count": 16,
+            "avg": 119.1,
+            "max": 162,
+            "min": 85
+          },
+          "failed": null
         },
         "N2": {
-          "count": 16,
-          "avg": 90.3,
-          "max": 144,
-          "min": 49
+          "passed": {
+            "count": 16,
+            "avg": 90.3,
+            "max": 144,
+            "min": 49
+          },
+          "failed": null
         },
         "N1": {
-          "count": 3,
-          "avg": 63.7,
-          "max": 76,
-          "min": 56
+          "passed": {
+            "count": 3,
+            "avg": 63.7,
+            "max": 76,
+            "min": 56
+          },
+          "failed": null
         },
         "N4": {
-          "count": 3,
-          "avg": 103,
-          "max": 126,
-          "min": 80
+          "passed": {
+            "count": 3,
+            "avg": 103,
+            "max": 126,
+            "min": 80
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1876,16 +1957,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 8,
-          "avg": 79.1,
-          "max": 104,
-          "min": 53
+          "passed": {
+            "count": 8,
+            "avg": 79.1,
+            "max": 104,
+            "min": 53
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 71,
-          "max": 71,
-          "min": 71
+          "passed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          },
+          "failed": null
         }
       },
       "students": [
@@ -1935,22 +2022,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 23,
-          "avg": 78.7,
-          "max": 134,
-          "min": 53
+          "passed": {
+            "count": 23,
+            "avg": 78.7,
+            "max": 134,
+            "min": 53
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 90,
-          "max": 90,
-          "min": 90
+          "passed": {
+            "count": 1,
+            "avg": 90,
+            "max": 90,
+            "min": 90
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 55.5,
-          "max": 57,
-          "min": 54
+          "passed": {
+            "count": 2,
+            "avg": 55.5,
+            "max": 57,
+            "min": 54
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2030,22 +2126,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 2,
-          "avg": 91,
-          "max": 98,
-          "min": 84
+          "passed": {
+            "count": 2,
+            "avg": 91,
+            "max": 98,
+            "min": 84
+          },
+          "failed": null
         },
         "N3": {
-          "count": 20,
-          "avg": 80.4,
-          "max": 101,
-          "min": 47
+          "passed": {
+            "count": 20,
+            "avg": 80.4,
+            "max": 101,
+            "min": 47
+          },
+          "failed": null
         },
         "N2": {
-          "count": 5,
-          "avg": 62.4,
-          "max": 109,
-          "min": 26
+          "passed": {
+            "count": 5,
+            "avg": 62.4,
+            "max": 109,
+            "min": 26
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2120,22 +2225,31 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 15,
-          "avg": 86.1,
-          "max": 114,
-          "min": 58
+          "passed": {
+            "count": 15,
+            "avg": 86.1,
+            "max": 114,
+            "min": 58
+          },
+          "failed": null
         },
         "N3": {
-          "count": 8,
-          "avg": 112.5,
-          "max": 173,
-          "min": 86
+          "passed": {
+            "count": 8,
+            "avg": 112.5,
+            "max": 173,
+            "min": 86
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 37,
-          "max": 37,
-          "min": 37
+          "passed": {
+            "count": 1,
+            "avg": 37,
+            "max": 37,
+            "min": 37
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2208,22 +2322,31 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 12,
-          "avg": 72.4,
-          "max": 101,
-          "min": 47
+          "passed": {
+            "count": 12,
+            "avg": 72.4,
+            "max": 101,
+            "min": 47
+          },
+          "failed": null
         },
         "N3": {
-          "count": 6,
-          "avg": 94.2,
-          "max": 109,
-          "min": 71
+          "passed": {
+            "count": 6,
+            "avg": 94.2,
+            "max": 109,
+            "min": 71
+          },
+          "failed": null
         },
         "N1": {
-          "count": 2,
-          "avg": 59.5,
-          "max": 62,
-          "min": 57
+          "passed": {
+            "count": 2,
+            "avg": 59.5,
+            "max": 62,
+            "min": 57
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2284,22 +2407,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 8,
-          "avg": 110.6,
-          "max": 144,
-          "min": 85
+          "passed": {
+            "count": 8,
+            "avg": 110.6,
+            "max": 144,
+            "min": 85
+          },
+          "failed": null
         },
         "N2": {
-          "count": 4,
-          "avg": 73,
-          "max": 90,
-          "min": 43
+          "passed": {
+            "count": 4,
+            "avg": 73,
+            "max": 90,
+            "min": 43
+          },
+          "failed": null
         },
         "N4": {
-          "count": 3,
-          "avg": 101.3,
-          "max": 144,
-          "min": 70
+          "passed": {
+            "count": 3,
+            "avg": 101.3,
+            "max": 144,
+            "min": 70
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2351,16 +2483,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 9,
-          "avg": 84.1,
-          "max": 118,
-          "min": 62
+          "passed": {
+            "count": 9,
+            "avg": 84.1,
+            "max": 118,
+            "min": 62
+          },
+          "failed": null
         },
         "N2": {
-          "count": 9,
-          "avg": 83.3,
-          "max": 148,
-          "min": 44
+          "passed": {
+            "count": 9,
+            "avg": 83.3,
+            "max": 148,
+            "min": 44
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2416,16 +2554,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 5,
-          "avg": 93.8,
-          "max": 99,
-          "min": 84
+          "passed": {
+            "count": 5,
+            "avg": 93.8,
+            "max": 99,
+            "min": 84
+          },
+          "failed": null
         },
         "N2": {
-          "count": 5,
-          "avg": 89.6,
-          "max": 118,
-          "min": 79
+          "passed": {
+            "count": 5,
+            "avg": 89.6,
+            "max": 118,
+            "min": 79
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2466,16 +2610,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 6,
-          "avg": 99.2,
-          "max": 118,
-          "min": 81
+          "passed": {
+            "count": 6,
+            "avg": 99.2,
+            "max": 118,
+            "min": 81
+          },
+          "failed": null
         },
         "N3": {
-          "count": 4,
-          "avg": 120.3,
-          "max": 137,
-          "min": 78
+          "passed": {
+            "count": 4,
+            "avg": 120.3,
+            "max": 137,
+            "min": 78
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2524,16 +2674,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 97.4,
-          "max": 132,
-          "min": 79
+          "passed": {
+            "count": 5,
+            "avg": 97.4,
+            "max": 132,
+            "min": 79
+          },
+          "failed": null
         },
         "N3": {
-          "count": 6,
-          "avg": 97.3,
-          "max": 127,
-          "min": 72
+          "passed": {
+            "count": 6,
+            "avg": 97.3,
+            "max": 127,
+            "min": 72
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2589,16 +2745,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 108.5,
-          "max": 121,
-          "min": 95
+          "passed": {
+            "count": 4,
+            "avg": 108.5,
+            "max": 121,
+            "min": 95
+          },
+          "failed": null
         },
         "N2": {
-          "count": 5,
-          "avg": 76,
-          "max": 93,
-          "min": 56
+          "passed": {
+            "count": 5,
+            "avg": 76,
+            "max": 93,
+            "min": 56
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2637,16 +2799,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 5,
-          "avg": 110,
-          "max": 156,
-          "min": 83
+          "passed": {
+            "count": 5,
+            "avg": 110,
+            "max": 156,
+            "min": 83
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 98,
-          "max": 98,
-          "min": 98
+          "passed": {
+            "count": 1,
+            "avg": 98,
+            "max": 98,
+            "min": 98
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2677,16 +2845,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 7,
-          "avg": 92.9,
-          "max": 122,
-          "min": 75
+          "passed": {
+            "count": 7,
+            "avg": 92.9,
+            "max": 122,
+            "min": 75
+          },
+          "failed": null
         },
         "N2": {
-          "count": 7,
-          "avg": 83.4,
-          "max": 115,
-          "min": 71
+          "passed": {
+            "count": 7,
+            "avg": 83.4,
+            "max": 115,
+            "min": 71
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2731,22 +2905,31 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 146,
-          "max": 146,
-          "min": 146
+          "passed": {
+            "count": 1,
+            "avg": 146,
+            "max": 146,
+            "min": 146
+          },
+          "failed": null
         },
         "N2": {
-          "count": 4,
-          "avg": 71.8,
-          "max": 92,
-          "min": 44
+          "passed": {
+            "count": 4,
+            "avg": 71.8,
+            "max": 92,
+            "min": 44
+          },
+          "failed": null
         },
         "N3": {
-          "count": 7,
-          "avg": 105.3,
-          "max": 135,
-          "min": 71
+          "passed": {
+            "count": 7,
+            "avg": 105.3,
+            "max": 135,
+            "min": 71
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2795,16 +2978,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 3,
-          "avg": 71,
-          "max": 87,
-          "min": 55
+          "passed": {
+            "count": 3,
+            "avg": 71,
+            "max": 87,
+            "min": 55
+          },
+          "failed": null
         },
         "N3": {
-          "count": 8,
-          "avg": 80.4,
-          "max": 100,
-          "min": 50
+          "passed": {
+            "count": 8,
+            "avg": 80.4,
+            "max": 100,
+            "min": 50
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2854,16 +3043,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 12,
-          "avg": 75.5,
-          "max": 100,
-          "min": 47
+          "passed": {
+            "count": 12,
+            "avg": 75.5,
+            "max": 100,
+            "min": 47
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 57,
-          "max": 61,
-          "min": 53
+          "passed": {
+            "count": 2,
+            "avg": 57,
+            "max": 61,
+            "min": 53
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2912,10 +3107,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 99.5,
-          "max": 141,
-          "min": 75
+          "passed": {
+            "count": 4,
+            "avg": 99.5,
+            "max": 141,
+            "min": 75
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2940,10 +3138,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 12,
-          "avg": 86.6,
-          "max": 109,
-          "min": 63
+          "passed": {
+            "count": 12,
+            "avg": 86.6,
+            "max": 109,
+            "min": 63
+          },
+          "failed": null
         }
       },
       "students": [
@@ -2988,22 +3189,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 8,
-          "avg": 91.6,
-          "max": 114,
-          "min": 65
+          "passed": {
+            "count": 8,
+            "avg": 91.6,
+            "max": 114,
+            "min": 65
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 63,
-          "min": 62
+          "passed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 63,
+            "min": 62
+          },
+          "failed": null
         },
         "N4": {
-          "count": 2,
-          "avg": 62,
-          "max": 72,
-          "min": 52
+          "passed": {
+            "count": 2,
+            "avg": 62,
+            "max": 72,
+            "min": 52
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3043,28 +3253,40 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 101.3,
-          "max": 142,
-          "min": 75
+          "passed": {
+            "count": 4,
+            "avg": 101.3,
+            "max": 142,
+            "min": 75
+          },
+          "failed": null
         },
         "N2": {
-          "count": 3,
-          "avg": 107.7,
-          "max": 144,
-          "min": 67
+          "passed": {
+            "count": 3,
+            "avg": 107.7,
+            "max": 144,
+            "min": 67
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 113,
-          "max": 113,
-          "min": 113
+          "passed": {
+            "count": 1,
+            "avg": 113,
+            "max": 113,
+            "min": 113
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "passed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3103,16 +3325,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 3,
-          "avg": 91.3,
-          "max": 138,
-          "min": 61
+          "passed": {
+            "count": 3,
+            "avg": 91.3,
+            "max": 138,
+            "min": 61
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 97,
-          "max": 97,
-          "min": 97
+          "passed": {
+            "count": 1,
+            "avg": 97,
+            "max": 97,
+            "min": 97
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3136,10 +3364,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 6,
-          "avg": 63.2,
-          "max": 90,
-          "min": 46
+          "passed": {
+            "count": 6,
+            "avg": 63.2,
+            "max": 90,
+            "min": 46
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3193,10 +3424,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 79.3,
-          "max": 88,
-          "min": 73
+          "passed": {
+            "count": 4,
+            "avg": 79.3,
+            "max": 88,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3222,16 +3456,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 51.8,
-          "max": 70,
-          "min": 38
+          "passed": {
+            "count": 5,
+            "avg": 51.8,
+            "max": 70,
+            "min": 38
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 111,
-          "max": 111,
-          "min": 111
+          "passed": {
+            "count": 1,
+            "avg": 111,
+            "max": 111,
+            "min": 111
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3267,22 +3507,31 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 75.7,
-          "max": 87,
-          "min": 65
+          "passed": {
+            "count": 3,
+            "avg": 75.7,
+            "max": 87,
+            "min": 65
+          },
+          "failed": null
         },
         "N5": {
-          "count": 1,
-          "avg": 180,
-          "max": 180,
-          "min": 180
+          "passed": {
+            "count": 1,
+            "avg": 180,
+            "max": 180,
+            "min": 180
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 150,
-          "max": 150,
-          "min": 150
+          "passed": {
+            "count": 1,
+            "avg": 150,
+            "max": 150,
+            "min": 150
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3316,16 +3565,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 66,
-          "max": 95,
-          "min": 47
+          "passed": {
+            "count": 5,
+            "avg": 66,
+            "max": 95,
+            "min": 47
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 87,
-          "max": 87,
-          "min": 87
+          "passed": {
+            "count": 1,
+            "avg": 87,
+            "max": 87,
+            "min": 87
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3360,28 +3615,40 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 114,
-          "max": 114,
-          "min": 114
+          "passed": {
+            "count": 1,
+            "avg": 114,
+            "max": 114,
+            "min": 114
+          },
+          "failed": null
         },
         "N3": {
-          "count": 3,
-          "avg": 114.7,
-          "max": 146,
-          "min": 84
+          "passed": {
+            "count": 3,
+            "avg": 114.7,
+            "max": 146,
+            "min": 84
+          },
+          "failed": null
         },
         "N2": {
-          "count": 3,
-          "avg": 94.3,
-          "max": 134,
-          "min": 52
+          "passed": {
+            "count": 3,
+            "avg": 94.3,
+            "max": 134,
+            "min": 52
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3415,16 +3682,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 65,
-          "max": 65,
-          "min": 65
+          "passed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
+          },
+          "failed": null
         },
         "N3": {
-          "count": 6,
-          "avg": 81,
-          "max": 101,
-          "min": 51
+          "passed": {
+            "count": 6,
+            "avg": 81,
+            "max": 101,
+            "min": 51
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3458,16 +3731,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 5,
-          "avg": 95.6,
-          "max": 113,
-          "min": 71
+          "passed": {
+            "count": 5,
+            "avg": 95.6,
+            "max": 113,
+            "min": 71
+          },
+          "failed": null
         },
         "N2": {
-          "count": 3,
-          "avg": 73.7,
-          "max": 87,
-          "min": 64
+          "passed": {
+            "count": 3,
+            "avg": 73.7,
+            "max": 87,
+            "min": 64
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3501,16 +3780,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 101.5,
-          "max": 111,
-          "min": 82
+          "passed": {
+            "count": 4,
+            "avg": 101.5,
+            "max": 111,
+            "min": 82
+          },
+          "failed": null
         },
         "N2": {
-          "count": 4,
-          "avg": 88.3,
-          "max": 103,
-          "min": 73
+          "passed": {
+            "count": 4,
+            "avg": 88.3,
+            "max": 103,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3540,16 +3825,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 85.4,
-          "max": 101,
-          "min": 72
+          "passed": {
+            "count": 5,
+            "avg": 85.4,
+            "max": 101,
+            "min": 72
+          },
+          "failed": null
         },
         "N1": {
-          "count": 3,
-          "avg": 58.7,
-          "max": 67,
-          "min": 54
+          "passed": {
+            "count": 3,
+            "avg": 58.7,
+            "max": 67,
+            "min": 54
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3579,16 +3870,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 81.3,
-          "max": 102,
-          "min": 65
+          "passed": {
+            "count": 3,
+            "avg": 81.3,
+            "max": 102,
+            "min": 65
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 135,
-          "max": 135,
-          "min": 135
+          "passed": {
+            "count": 1,
+            "avg": 135,
+            "max": 135,
+            "min": 135
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3613,22 +3910,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 106,
-          "max": 114,
-          "min": 101
+          "passed": {
+            "count": 3,
+            "avg": 106,
+            "max": 114,
+            "min": 101
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+          "passed": {
+            "count": 1,
+            "avg": 99,
+            "max": 99,
+            "min": 99
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 73.5,
-          "max": 79,
-          "min": 68
+          "passed": {
+            "count": 2,
+            "avg": 73.5,
+            "max": 79,
+            "min": 68
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3658,10 +3964,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 4,
-          "avg": 83.8,
-          "max": 98,
-          "min": 69
+          "passed": {
+            "count": 4,
+            "avg": 83.8,
+            "max": 98,
+            "min": 69
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3691,16 +4000,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 5,
-          "avg": 82.6,
-          "max": 106,
-          "min": 60
+          "passed": {
+            "count": 5,
+            "avg": 82.6,
+            "max": 106,
+            "min": 60
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 60,
-          "max": 60,
-          "min": 60
+          "passed": {
+            "count": 1,
+            "avg": 60,
+            "max": 60,
+            "min": 60
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3730,16 +4045,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 113.7,
-          "max": 121,
-          "min": 102
+          "passed": {
+            "count": 3,
+            "avg": 113.7,
+            "max": 121,
+            "min": 102
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 60.5,
-          "max": 72,
-          "min": 49
+          "passed": {
+            "count": 2,
+            "avg": 60.5,
+            "max": 72,
+            "min": 49
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3769,16 +4090,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 2,
-          "avg": 59.5,
-          "max": 63,
-          "min": 56
+          "passed": {
+            "count": 2,
+            "avg": 59.5,
+            "max": 63,
+            "min": 56
+          },
+          "failed": null
         },
         "N3": {
-          "count": 4,
-          "avg": 71.3,
-          "max": 96,
-          "min": 49
+          "passed": {
+            "count": 4,
+            "avg": 71.3,
+            "max": 96,
+            "min": 49
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3807,16 +4134,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 84.7,
-          "max": 100,
-          "min": 75
+          "passed": {
+            "count": 3,
+            "avg": 84.7,
+            "max": 100,
+            "min": 75
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 109.5,
-          "max": 115,
-          "min": 104
+          "passed": {
+            "count": 2,
+            "avg": 109.5,
+            "max": 115,
+            "min": 104
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3846,10 +4179,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 92.3,
-          "max": 99,
-          "min": 87
+          "passed": {
+            "count": 3,
+            "avg": 92.3,
+            "max": 99,
+            "min": 87
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3874,16 +4210,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 180,
-          "max": 180,
-          "min": 180
+          "passed": {
+            "count": 1,
+            "avg": 180,
+            "max": 180,
+            "min": 180
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 168,
-          "max": 168,
-          "min": 168
+          "passed": {
+            "count": 1,
+            "avg": 168,
+            "max": 168,
+            "min": 168
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3907,10 +4249,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 87,
-          "max": 109,
-          "min": 65
+          "passed": {
+            "count": 2,
+            "avg": 87,
+            "max": 109,
+            "min": 65
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3939,16 +4284,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 146,
-          "max": 146,
-          "min": 146
+          "passed": {
+            "count": 1,
+            "avg": 146,
+            "max": 146,
+            "min": 146
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 129,
-          "max": 129,
-          "min": 129
+          "passed": {
+            "count": 1,
+            "avg": 129,
+            "max": 129,
+            "min": 129
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3967,16 +4318,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 173,
-          "max": 173,
-          "min": 173
+          "passed": {
+            "count": 1,
+            "avg": 173,
+            "max": 173,
+            "min": 173
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 139,
-          "max": 139,
-          "min": 139
+          "passed": {
+            "count": 1,
+            "avg": 139,
+            "max": 139,
+            "min": 139
+          },
+          "failed": null
         }
       },
       "students": [
@@ -3995,10 +4352,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 113,
-          "max": 145,
-          "min": 81
+          "passed": {
+            "count": 2,
+            "avg": 113,
+            "max": 145,
+            "min": 81
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4017,16 +4377,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 101,
-          "max": 101,
-          "min": 101
+          "passed": {
+            "count": 1,
+            "avg": 101,
+            "max": 101,
+            "min": 101
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "passed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4061,22 +4427,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 102,
-          "max": 125,
-          "min": 79
+          "passed": {
+            "count": 2,
+            "avg": 102,
+            "max": 125,
+            "min": 79
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 98,
-          "max": 98,
-          "min": 98
+          "passed": {
+            "count": 1,
+            "avg": 98,
+            "max": 98,
+            "min": 98
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 60,
-          "max": 60,
-          "min": 60
+          "passed": {
+            "count": 1,
+            "avg": 60,
+            "max": 60,
+            "min": 60
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4100,10 +4475,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 136,
-          "max": 136,
-          "min": 136
+          "passed": {
+            "count": 1,
+            "avg": 136,
+            "max": 136,
+            "min": 136
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4128,16 +4506,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 121.5,
-          "max": 137,
-          "min": 106
+          "passed": {
+            "count": 2,
+            "avg": 121.5,
+            "max": 137,
+            "min": 106
+          },
+          "failed": null
         },
         "N1": {
-          "count": 3,
-          "avg": 85.7,
-          "max": 113,
-          "min": 58
+          "passed": {
+            "count": 3,
+            "avg": 85.7,
+            "max": 113,
+            "min": 58
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4161,10 +4545,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 69.5,
-          "max": 70,
-          "min": 69
+          "passed": {
+            "count": 2,
+            "avg": 69.5,
+            "max": 70,
+            "min": 69
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4189,22 +4576,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 96,
-          "max": 96,
-          "min": 96
+          "passed": {
+            "count": 1,
+            "avg": 96,
+            "max": 96,
+            "min": 96
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 107,
-          "max": 109,
-          "min": 105
+          "passed": {
+            "count": 2,
+            "avg": 107,
+            "max": 109,
+            "min": 105
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 71,
-          "max": 77,
-          "min": 65
+          "passed": {
+            "count": 2,
+            "avg": 71,
+            "max": 77,
+            "min": 65
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4228,10 +4624,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 84,
-          "max": 118,
-          "min": 54
+          "passed": {
+            "count": 3,
+            "avg": 84,
+            "max": 118,
+            "min": 54
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4255,16 +4654,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         },
         "N3": {
-          "count": 3,
-          "avg": 83,
-          "max": 95,
-          "min": 73
+          "passed": {
+            "count": 3,
+            "avg": 83,
+            "max": 95,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4293,16 +4698,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "passed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 89.5,
-          "max": 91,
-          "min": 88
+          "passed": {
+            "count": 2,
+            "avg": 89.5,
+            "max": 91,
+            "min": 88
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4326,10 +4737,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 70.3,
-          "max": 83,
-          "min": 61
+          "passed": {
+            "count": 3,
+            "avg": 70.3,
+            "max": 83,
+            "min": 61
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4353,22 +4767,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+          "passed": {
+            "count": 1,
+            "avg": 99,
+            "max": 99,
+            "min": 99
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 128,
-          "max": 128,
-          "min": 128
+          "passed": {
+            "count": 1,
+            "avg": 128,
+            "max": 128,
+            "min": 128
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 76,
-          "max": 76,
-          "min": 76
+          "passed": {
+            "count": 1,
+            "avg": 76,
+            "max": 76,
+            "min": 76
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4392,22 +4815,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 96.5,
-          "max": 120,
-          "min": 73
+          "passed": {
+            "count": 2,
+            "avg": 96.5,
+            "max": 120,
+            "min": 73
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "passed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4431,22 +4863,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 2,
-          "avg": 108.5,
-          "max": 125,
-          "min": 92
+          "passed": {
+            "count": 2,
+            "avg": 108.5,
+            "max": 125,
+            "min": 92
+          },
+          "failed": null
         },
         "N3": {
-          "count": 3,
-          "avg": 83.3,
-          "max": 102,
-          "min": 73
+          "passed": {
+            "count": 3,
+            "avg": 83.3,
+            "max": 102,
+            "min": 73
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 91,
-          "max": 91,
-          "min": 91
+          "passed": {
+            "count": 1,
+            "avg": 91,
+            "max": 91,
+            "min": 91
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4470,10 +4911,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 75.8,
-          "max": 89,
-          "min": 69
+          "passed": {
+            "count": 4,
+            "avg": 75.8,
+            "max": 89,
+            "min": 69
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4498,16 +4942,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 88.3,
-          "max": 105,
-          "min": 76
+          "passed": {
+            "count": 3,
+            "avg": 88.3,
+            "max": 105,
+            "min": 76
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "passed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4532,22 +4982,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 89.7,
-          "max": 123,
-          "min": 63
+          "passed": {
+            "count": 3,
+            "avg": 89.7,
+            "max": 123,
+            "min": 63
+          },
+          "failed": null
         },
         "N4": {
-          "count": 1,
-          "avg": 120,
-          "max": 120,
-          "min": 120
+          "passed": {
+            "count": 1,
+            "avg": 120,
+            "max": 120,
+            "min": 120
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4571,16 +5030,22 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "passed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 110,
-          "max": 110,
-          "min": 110
+          "passed": {
+            "count": 1,
+            "avg": 110,
+            "max": 110,
+            "min": 110
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4604,10 +5069,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 82.7,
-          "max": 102,
-          "min": 69
+          "passed": {
+            "count": 3,
+            "avg": 82.7,
+            "max": 102,
+            "min": 69
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4631,10 +5099,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 85.5,
-          "max": 106,
-          "min": 73
+          "passed": {
+            "count": 4,
+            "avg": 85.5,
+            "max": 106,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4658,22 +5129,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 90,
-          "max": 90,
-          "min": 90
+          "passed": {
+            "count": 1,
+            "avg": 90,
+            "max": 90,
+            "min": 90
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 100.5,
-          "max": 101,
-          "min": 100
+          "passed": {
+            "count": 2,
+            "avg": 100.5,
+            "max": 101,
+            "min": 100
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 71,
-          "max": 71,
-          "min": 71
+          "passed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4697,16 +5177,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 105,
-          "max": 105,
-          "min": 105
+          "passed": {
+            "count": 1,
+            "avg": 105,
+            "max": 105,
+            "min": 105
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "passed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4725,10 +5211,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 66.5,
-          "max": 68,
-          "min": 65
+          "passed": {
+            "count": 2,
+            "avg": 66.5,
+            "max": 68,
+            "min": 65
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4747,16 +5236,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 89,
-          "max": 89,
-          "min": 89
+          "passed": {
+            "count": 1,
+            "avg": 89,
+            "max": 89,
+            "min": 89
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "passed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4775,10 +5270,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 145,
-          "max": 145,
-          "min": 145
+          "passed": {
+            "count": 1,
+            "avg": 145,
+            "max": 145,
+            "min": 145
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4797,16 +5295,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 94.5,
-          "max": 107,
-          "min": 82
+          "passed": {
+            "count": 2,
+            "avg": 94.5,
+            "max": 107,
+            "min": 82
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "passed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4825,10 +5329,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 49,
-          "max": 49,
-          "min": 49
+          "passed": {
+            "count": 1,
+            "avg": 49,
+            "max": 49,
+            "min": 49
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4847,10 +5354,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 73,
-          "max": 73,
-          "min": 73
+          "passed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4874,10 +5384,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 104,
-          "max": 104,
-          "min": 104
+          "passed": {
+            "count": 1,
+            "avg": 104,
+            "max": 104,
+            "min": 104
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4911,10 +5424,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 2,
-          "avg": 109.5,
-          "max": 128,
-          "min": 91
+          "passed": {
+            "count": 2,
+            "avg": 109.5,
+            "max": 128,
+            "min": 91
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4933,10 +5449,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 100,
-          "max": 100,
-          "min": 100
+          "passed": {
+            "count": 1,
+            "avg": 100,
+            "max": 100,
+            "min": 100
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4955,10 +5474,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 117,
-          "max": 117,
-          "min": 117
+          "passed": {
+            "count": 1,
+            "avg": 117,
+            "max": 117,
+            "min": 117
+          },
+          "failed": null
         }
       },
       "students": [
@@ -4992,10 +5514,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 169,
-          "max": 169,
-          "min": 169
+          "passed": {
+            "count": 1,
+            "avg": 169,
+            "max": 169,
+            "min": 169
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5014,10 +5539,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "passed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5036,22 +5564,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 142,
-          "max": 142,
-          "min": 142
+          "passed": {
+            "count": 1,
+            "avg": 142,
+            "max": 142,
+            "min": 142
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 113,
-          "max": 113,
-          "min": 113
+          "passed": {
+            "count": 1,
+            "avg": 113,
+            "max": 113,
+            "min": 113
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 62,
-          "max": 62,
-          "min": 62
+          "passed": {
+            "count": 1,
+            "avg": 62,
+            "max": 62,
+            "min": 62
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5070,10 +5607,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 124,
-          "max": 124,
-          "min": 124
+          "passed": {
+            "count": 1,
+            "avg": 124,
+            "max": 124,
+            "min": 124
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5092,16 +5632,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 150,
-          "max": 150,
-          "min": 150
+          "passed": {
+            "count": 1,
+            "avg": 150,
+            "max": 150,
+            "min": 150
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 136,
-          "max": 136,
-          "min": 136
+          "passed": {
+            "count": 1,
+            "avg": 136,
+            "max": 136,
+            "min": 136
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5120,10 +5666,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 2,
-          "avg": 91,
-          "max": 111,
-          "min": 71
+          "passed": {
+            "count": 2,
+            "avg": 91,
+            "max": 111,
+            "min": 71
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5142,16 +5691,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 129,
-          "max": 129,
-          "min": 129
+          "passed": {
+            "count": 1,
+            "avg": 129,
+            "max": 129,
+            "min": 129
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 140,
-          "max": 140,
-          "min": 140
+          "passed": {
+            "count": 1,
+            "avg": 140,
+            "max": 140,
+            "min": 140
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5185,10 +5740,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 103,
-          "max": 103,
-          "min": 103
+          "passed": {
+            "count": 1,
+            "avg": 103,
+            "max": 103,
+            "min": 103
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5207,10 +5765,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 103,
-          "max": 103,
-          "min": 103
+          "passed": {
+            "count": 1,
+            "avg": 103,
+            "max": 103,
+            "min": 103
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5229,10 +5790,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 2,
-          "avg": 102.5,
-          "max": 105,
-          "min": 100
+          "passed": {
+            "count": 2,
+            "avg": 102.5,
+            "max": 105,
+            "min": 100
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5251,16 +5815,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 148,
-          "max": 148,
-          "min": 148
+          "passed": {
+            "count": 1,
+            "avg": 148,
+            "max": 148,
+            "min": 148
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 56,
-          "max": 56,
-          "min": 56
+          "passed": {
+            "count": 1,
+            "avg": 56,
+            "max": 56,
+            "min": 56
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5279,10 +5849,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 2,
-          "avg": 116,
-          "max": 127,
-          "min": 105
+          "passed": {
+            "count": 2,
+            "avg": 116,
+            "max": 127,
+            "min": 105
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5316,10 +5889,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 115,
-          "max": 115,
-          "min": 115
+          "passed": {
+            "count": 1,
+            "avg": 115,
+            "max": 115,
+            "min": 115
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5338,10 +5914,13 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 74,
-          "max": 74,
-          "min": 74
+          "passed": {
+            "count": 1,
+            "avg": 74,
+            "max": 74,
+            "min": 74
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5360,16 +5939,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 94,
-          "max": 95,
-          "min": 93
+          "passed": {
+            "count": 2,
+            "avg": 94,
+            "max": 95,
+            "min": 93
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 105,
-          "max": 105,
-          "min": 105
+          "passed": {
+            "count": 1,
+            "avg": 105,
+            "max": 105,
+            "min": 105
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5388,16 +5973,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 63.5,
-          "max": 66,
-          "min": 61
+          "passed": {
+            "count": 2,
+            "avg": 63.5,
+            "max": 66,
+            "min": 61
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "passed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5416,10 +6007,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 77,
-          "max": 90,
-          "min": 66
+          "passed": {
+            "count": 3,
+            "avg": 77,
+            "max": 90,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5438,10 +6032,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 91.5,
-          "max": 107,
-          "min": 76
+          "passed": {
+            "count": 2,
+            "avg": 91.5,
+            "max": 107,
+            "min": 76
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5460,16 +6057,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 80,
-          "max": 80,
-          "min": 80
+          "passed": {
+            "count": 1,
+            "avg": 80,
+            "max": 80,
+            "min": 80
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "passed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5488,10 +6091,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 74,
-          "max": 74,
-          "min": 74
+          "passed": {
+            "count": 1,
+            "avg": 74,
+            "max": 74,
+            "min": 74
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5510,10 +6116,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 58,
-          "max": 58,
-          "min": 58
+          "passed": {
+            "count": 1,
+            "avg": 58,
+            "max": 58,
+            "min": 58
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5532,10 +6141,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 71.5,
-          "max": 77,
-          "min": 66
+          "passed": {
+            "count": 2,
+            "avg": 71.5,
+            "max": 77,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5554,10 +6166,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 100,
-          "max": 100,
-          "min": 100
+          "passed": {
+            "count": 1,
+            "avg": 100,
+            "max": 100,
+            "min": 100
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5576,16 +6191,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "passed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "passed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5619,10 +6240,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 61,
-          "max": 61,
-          "min": 61
+          "passed": {
+            "count": 1,
+            "avg": 61,
+            "max": 61,
+            "min": 61
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5641,16 +6265,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 94,
-          "max": 94,
-          "min": 94
+          "passed": {
+            "count": 1,
+            "avg": 94,
+            "max": 94,
+            "min": 94
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 85.5,
-          "max": 93,
-          "min": 78
+          "passed": {
+            "count": 2,
+            "avg": 85.5,
+            "max": 93,
+            "min": 78
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5669,16 +6299,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 98,
-          "max": 98,
-          "min": 98
+          "passed": {
+            "count": 1,
+            "avg": 98,
+            "max": 98,
+            "min": 98
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "passed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5697,10 +6333,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 78.5,
-          "max": 84,
-          "min": 73
+          "passed": {
+            "count": 2,
+            "avg": 78.5,
+            "max": 84,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5719,10 +6358,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 72,
-          "max": 83,
-          "min": 61
+          "passed": {
+            "count": 2,
+            "avg": 72,
+            "max": 83,
+            "min": 61
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5741,16 +6383,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 102,
-          "max": 102,
-          "min": 102
+          "passed": {
+            "count": 1,
+            "avg": 102,
+            "max": 102,
+            "min": 102
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "passed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5769,10 +6417,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 77,
-          "max": 91,
-          "min": 63
+          "passed": {
+            "count": 2,
+            "avg": 77,
+            "max": 91,
+            "min": 63
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5791,16 +6442,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 138,
-          "max": 138,
-          "min": 138
+          "passed": {
+            "count": 1,
+            "avg": 138,
+            "max": 138,
+            "min": 138
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 87,
-          "max": 87,
-          "min": 87
+          "passed": {
+            "count": 1,
+            "avg": 87,
+            "max": 87,
+            "min": 87
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5819,10 +6476,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 68,
-          "min": 57
+          "passed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 68,
+            "min": 57
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5841,10 +6501,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "passed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5863,16 +6526,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "passed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 91,
-          "max": 91,
-          "min": 91
+          "passed": {
+            "count": 1,
+            "avg": 91,
+            "max": 91,
+            "min": 91
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5891,10 +6560,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 89,
-          "max": 101,
-          "min": 77
+          "passed": {
+            "count": 2,
+            "avg": 89,
+            "max": 101,
+            "min": 77
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5913,10 +6585,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 66,
-          "max": 77,
-          "min": 55
+          "passed": {
+            "count": 2,
+            "avg": 66,
+            "max": 77,
+            "min": 55
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5935,10 +6610,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 85,
-          "max": 87,
-          "min": 83
+          "passed": {
+            "count": 2,
+            "avg": 85,
+            "max": 87,
+            "min": 83
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5957,10 +6635,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 69,
-          "max": 77,
-          "min": 61
+          "passed": {
+            "count": 2,
+            "avg": 69,
+            "max": 77,
+            "min": 61
+          },
+          "failed": null
         }
       },
       "students": [
@@ -5979,10 +6660,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 88.5,
-          "max": 89,
-          "min": 88
+          "passed": {
+            "count": 2,
+            "avg": 88.5,
+            "max": 89,
+            "min": 88
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6001,10 +6685,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 75,
-          "max": 84,
-          "min": 66
+          "passed": {
+            "count": 2,
+            "avg": 75,
+            "max": 84,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6023,10 +6710,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 111,
-          "max": 111,
-          "min": 111
+          "passed": {
+            "count": 1,
+            "avg": 111,
+            "max": 111,
+            "min": 111
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6045,10 +6735,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 91,
-          "max": 93,
-          "min": 89
+          "passed": {
+            "count": 2,
+            "avg": 91,
+            "max": 93,
+            "min": 89
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6067,10 +6760,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 90.5,
-          "max": 115,
-          "min": 66
+          "passed": {
+            "count": 2,
+            "avg": 90.5,
+            "max": 115,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6134,16 +6830,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 124,
-          "max": 124,
-          "min": 124
+          "passed": {
+            "count": 1,
+            "avg": 124,
+            "max": 124,
+            "min": 124
+          },
+          "failed": null
         },
         "N1": {
-          "count": 2,
-          "avg": 109,
-          "max": 130,
-          "min": 88
+          "passed": {
+            "count": 2,
+            "avg": 109,
+            "max": 130,
+            "min": 88
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6162,16 +6864,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 179,
-          "max": 179,
-          "min": 179
+          "passed": {
+            "count": 1,
+            "avg": 179,
+            "max": 179,
+            "min": 179
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 141,
-          "max": 141,
-          "min": 141
+          "passed": {
+            "count": 1,
+            "avg": 141,
+            "max": 141,
+            "min": 141
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6190,10 +6898,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 98,
-          "max": 98,
-          "min": 98
+          "passed": {
+            "count": 1,
+            "avg": 98,
+            "max": 98,
+            "min": 98
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6212,10 +6923,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 98.5,
-          "max": 125,
-          "min": 72
+          "passed": {
+            "count": 2,
+            "avg": 98.5,
+            "max": 125,
+            "min": 72
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6234,10 +6948,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 70,
-          "max": 72,
-          "min": 68
+          "passed": {
+            "count": 2,
+            "avg": 70,
+            "max": 72,
+            "min": 68
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6256,10 +6973,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 153,
-          "max": 153,
-          "min": 153
+          "passed": {
+            "count": 1,
+            "avg": 153,
+            "max": 153,
+            "min": 153
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6278,10 +6998,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6300,10 +7023,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 133,
-          "max": 133,
-          "min": 133
+          "passed": {
+            "count": 1,
+            "avg": 133,
+            "max": 133,
+            "min": 133
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6322,16 +7048,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 95,
-          "max": 95,
-          "min": 95
+          "passed": {
+            "count": 1,
+            "avg": 95,
+            "max": 95,
+            "min": 95
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 94,
-          "max": 106,
-          "min": 82
+          "passed": {
+            "count": 2,
+            "avg": 94,
+            "max": 106,
+            "min": 82
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6350,22 +7082,31 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 113,
-          "max": 113,
-          "min": 113
+          "passed": {
+            "count": 1,
+            "avg": 113,
+            "max": 113,
+            "min": 113
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 112,
-          "max": 112,
-          "min": 112
+          "passed": {
+            "count": 1,
+            "avg": 112,
+            "max": 112,
+            "min": 112
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 49,
-          "max": 49,
-          "min": 49
+          "passed": {
+            "count": 1,
+            "avg": 49,
+            "max": 49,
+            "min": 49
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6384,16 +7125,22 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 130,
-          "max": 130,
-          "min": 130
+          "passed": {
+            "count": 1,
+            "avg": 130,
+            "max": 130,
+            "min": 130
+          },
+          "failed": null
         },
         "N1": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+          "passed": {
+            "count": 1,
+            "avg": 99,
+            "max": 99,
+            "min": 99
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6412,10 +7159,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 73,
-          "max": 73,
-          "min": 73
+          "passed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6434,16 +7184,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 135,
-          "max": 135,
-          "min": 135
+          "passed": {
+            "count": 1,
+            "avg": 135,
+            "max": 135,
+            "min": 135
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 91,
-          "max": 91,
-          "min": 91
+          "passed": {
+            "count": 1,
+            "avg": 91,
+            "max": 91,
+            "min": 91
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6462,16 +7218,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 108,
-          "max": 108,
-          "min": 108
+          "passed": {
+            "count": 1,
+            "avg": 108,
+            "max": 108,
+            "min": 108
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 107,
-          "max": 107,
-          "min": 107
+          "passed": {
+            "count": 1,
+            "avg": 107,
+            "max": 107,
+            "min": 107
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6490,16 +7252,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 114,
-          "max": 136,
-          "min": 92
+          "passed": {
+            "count": 2,
+            "avg": 114,
+            "max": 136,
+            "min": 92
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "passed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6518,16 +7286,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 94.5,
-          "max": 100,
-          "min": 89
+          "passed": {
+            "count": 2,
+            "avg": 94.5,
+            "max": 100,
+            "min": 89
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 88,
-          "max": 88,
-          "min": 88
+          "passed": {
+            "count": 1,
+            "avg": 88,
+            "max": 88,
+            "min": 88
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6546,10 +7320,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 80.5,
-          "max": 95,
-          "min": 66
+          "passed": {
+            "count": 2,
+            "avg": 80.5,
+            "max": 95,
+            "min": 66
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6568,16 +7345,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 93,
-          "max": 93,
-          "min": 93
+          "passed": {
+            "count": 1,
+            "avg": 93,
+            "max": 93,
+            "min": 93
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 55,
-          "max": 55,
-          "min": 55
+          "passed": {
+            "count": 1,
+            "avg": 55,
+            "max": 55,
+            "min": 55
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6596,22 +7379,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 114,
-          "max": 114,
-          "min": 114
+          "passed": {
+            "count": 1,
+            "avg": 114,
+            "max": 114,
+            "min": 114
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 112,
-          "max": 112,
-          "min": 112
+          "passed": {
+            "count": 1,
+            "avg": 112,
+            "max": 112,
+            "min": 112
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 77,
-          "max": 77,
-          "min": 77
+          "passed": {
+            "count": 1,
+            "avg": 77,
+            "max": 77,
+            "min": 77
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6630,10 +7422,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 80.3,
-          "max": 88,
-          "min": 76
+          "passed": {
+            "count": 3,
+            "avg": 80.3,
+            "max": 88,
+            "min": 76
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6652,10 +7447,13 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 124,
-          "max": 124,
-          "min": 124
+          "passed": {
+            "count": 1,
+            "avg": 124,
+            "max": 124,
+            "min": 124
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6674,22 +7472,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 139,
-          "max": 139,
-          "min": 139
+          "passed": {
+            "count": 1,
+            "avg": 139,
+            "max": 139,
+            "min": 139
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 113,
-          "max": 113,
-          "min": 113
+          "passed": {
+            "count": 1,
+            "avg": 113,
+            "max": 113,
+            "min": 113
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "passed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6708,16 +7515,22 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 95,
-          "max": 95,
-          "min": 95
+          "passed": {
+            "count": 1,
+            "avg": 95,
+            "max": 95,
+            "min": 95
+          },
+          "failed": null
         },
         "N2": {
-          "count": 2,
-          "avg": 82,
-          "max": 85,
-          "min": 79
+          "passed": {
+            "count": 2,
+            "avg": 82,
+            "max": 85,
+            "min": 79
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6736,16 +7549,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 2,
-          "avg": 89.5,
-          "max": 95,
-          "min": 84
+          "passed": {
+            "count": 2,
+            "avg": 89.5,
+            "max": 95,
+            "min": 84
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "passed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6764,10 +7583,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "passed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6786,10 +7608,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 63,
-          "max": 67,
-          "min": 59
+          "passed": {
+            "count": 2,
+            "avg": 63,
+            "max": 67,
+            "min": 59
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6808,16 +7633,22 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 59,
-          "max": 59,
-          "min": 59
+          "passed": {
+            "count": 1,
+            "avg": 59,
+            "max": 59,
+            "min": 59
+          },
+          "failed": null
         },
         "N3": {
-          "count": 2,
-          "avg": 92.5,
-          "max": 103,
-          "min": 82
+          "passed": {
+            "count": 2,
+            "avg": 92.5,
+            "max": 103,
+            "min": 82
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6836,10 +7667,13 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 63,
-          "min": 62
+          "passed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 63,
+            "min": 62
+          },
+          "failed": null
         }
       },
       "students": [
@@ -6858,22 +7692,31 @@
       },
       "jlptStats": {
         "N4": {
-          "count": 1,
-          "avg": 90,
-          "max": 90,
-          "min": 90
+          "passed": {
+            "count": 1,
+            "avg": 90,
+            "max": 90,
+            "min": 90
+          },
+          "failed": null
         },
         "N3": {
-          "count": 1,
-          "avg": 94,
-          "max": 94,
-          "min": 94
+          "passed": {
+            "count": 1,
+            "avg": 94,
+            "max": 94,
+            "min": 94
+          },
+          "failed": null
         },
         "N2": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "passed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          },
+          "failed": null
         }
       },
       "students": [

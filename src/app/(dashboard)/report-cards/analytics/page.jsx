@@ -63,26 +63,35 @@ function JlptSessionRow({ sessionData }) {
                         <thead>
                             <tr>
                                 <th>レベル</th>
-                                <th>受験者数</th>
-                                <th>合格者数</th>
+                                <th>合計</th>
+                                <th>合格 / 不合格</th>
                                 <th>合格率</th>
                                 <th>平均点</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sessionData.items.map((row, index) => (
-                                <tr key={`${row.session}-${row.level}-${index}`}>
-                                    <td>
-                                        <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                            {row.level}
-                                        </span>
-                                    </td>
-                                    <td>{row.examinees}</td>
-                                    <td>{row.passers}</td>
-                                    <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
-                                    <td>{row.averageScore}</td>
-                                </tr>
-                            ))}
+                            {sessionData.items.map((row, index) => {
+                                const failed = row.examinees - row.passers;
+                                return (
+                                    <tr key={`${row.session}-${row.level}-${index}`}>
+                                        <td>
+                                            <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                {row.level}
+                                            </span>
+                                        </td>
+                                        <td>{row.examinees}名</td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <span style={{ color: '#166534', fontWeight: 600 }}>{row.passers}</span>
+                                                <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
+                                                <span style={{ color: '#991b1b', fontWeight: 600 }}>{failed}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
+                                        <td>{row.averageScore}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -2035,10 +2044,22 @@ export default function AnalyticsPage() {
                                                                             <thead style={{ background: '#f3f4f6' }}>
                                                                                 <tr>
                                                                                     <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>データ数</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>平均点</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>最高点</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>最低点</th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                        データ数
+                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                    </th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                        平均点
+                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                    </th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                        最高点
+                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                    </th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                        最低点
+                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                    </th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -2051,6 +2072,14 @@ export default function AnalyticsPage() {
                                                                                         // stats now has { passed: {...}, failed: {...} } OR old format if not updated
                                                                                         const passed = stats.passed;
                                                                                         const failed = stats.failed;
+
+                                                                                        const renderDual = (pVal, fVal, isBold = false) => (
+                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                                <span style={{ color: '#166534', fontWeight: isBold ? 700 : 400 }}>{pVal ?? '-'}</span>
+                                                                                                <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
+                                                                                                <span style={{ color: '#991b1b', fontWeight: isBold ? 700 : 400 }}>{fVal ?? '-'}</span>
+                                                                                            </div>
+                                                                                        );
 
                                                                                         // Fallback for legacy data (if 'passed' undefined but 'count' exists)
                                                                                         if (!passed && !failed) {
@@ -2071,38 +2100,15 @@ export default function AnalyticsPage() {
                                                                                         }
 
                                                                                         return (
-                                                                                            <Fragment key={level}>
-                                                                                                {/* Passed Row */}
-                                                                                                {passed && (
-                                                                                                    <tr>
-                                                                                                        <td style={{ padding: '0.5rem' }}>
-                                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                                                <span style={{ fontSize: '0.7rem', background: '#dcfce7', color: '#166534', padding: '1px 4px', borderRadius: '4px' }}>合格</span>
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.count}</td>
-                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{passed.avg.toFixed(1)}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.max}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.min}</td>
-                                                                                                    </tr>
-                                                                                                )}
-                                                                                                {/* Failed Row */}
-                                                                                                {failed && (
-                                                                                                    <tr>
-                                                                                                        <td style={{ padding: '0.5rem' }}>
-                                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                                                <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#991b1b', padding: '1px 4px', borderRadius: '4px' }}>不合格</span>
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.count}</td>
-                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{failed.avg.toFixed(1)}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.max}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.min}</td>
-                                                                                                    </tr>
-                                                                                                )}
-                                                                                            </Fragment>
+                                                                                            <tr key={level}>
+                                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                                    <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                </td>
+                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.count, failed?.count)}</td>
+                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.avg?.toFixed(1), failed?.avg?.toFixed(1), true)}</td>
+                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.max, failed?.max)}</td>
+                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.min, failed?.min)}</td>
+                                                                                            </tr>
                                                                                         );
                                                                                     })}
                                                                             </tbody>
