@@ -2085,7 +2085,7 @@ export default function AnalyticsPage() {
                                 <h3 className={styles.chartTitle} style={{ margin: 0 }}>過去5年間の進学実績詳細 (2019-2023)</h3>
                                 <input
                                     type="text"
-                                    placeholder="学校名で検索..."
+                                    placeholder="学校名・氏名で検索..."
                                     value={careerSearchQuery}
                                     onChange={(e) => setCareerSearchQuery(e.target.value)}
                                     style={{
@@ -2112,8 +2112,17 @@ export default function AnalyticsPage() {
                                     </thead>
                                     <tbody>
                                         {careerStats.topDestinations
-                                            .filter(d => d.name.toLowerCase().includes(careerSearchQuery.toLowerCase()))
+                                            .filter(d => {
+                                                const q = careerSearchQuery.toLowerCase();
+                                                if (d.name.toLowerCase().includes(q)) return true;
+                                                // Check matches in student list
+                                                if (d.students && d.students.some(s => (s.name || '').includes(q))) return true;
+                                                return false;
+                                            })
                                             .map(d => {
+                                                const matches = careerSearchQuery && d.students
+                                                    ? d.students.filter(s => (s.name || '').includes(careerSearchQuery))
+                                                    : [];
                                                 const y2023 = (d.years && d.years['2023']) || 0;
                                                 const y2022 = (d.years && d.years['2022']) || 0;
                                                 const y2021 = (d.years && d.years['2021']) || 0;
@@ -2125,15 +2134,26 @@ export default function AnalyticsPage() {
                                             .filter(d => d.total5 > 0)
                                             .sort((a, b) => b.total5 - a.total5)
                                             .map((dest, idx) => (
-                                                <tr key={idx}>
-                                                    <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                    <td>{dest.total5}名</td>
-                                                    <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
-                                                    <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
-                                                    <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
-                                                    <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
-                                                    <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
-                                                </tr>
+                                                <Fragment key={idx}>
+                                                    <tr key={idx}>
+                                                        <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                        <td>{dest.total5}名</td>
+                                                        <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
+                                                        <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
+                                                        <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
+                                                        <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
+                                                        <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
+                                                    </tr>
+                                                    {matches.length > 0 && (
+                                                        <tr>
+                                                            <td colSpan="7" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
+                                                                <div style={{ fontSize: '0.85rem', color: '#166534' }}>
+                                                                    <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </Fragment>
                                             ))}
                                     </tbody>
                                 </table>

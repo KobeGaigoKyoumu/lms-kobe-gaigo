@@ -13,6 +13,7 @@ try {
     // 1. Build Student ID -> Destination Map & Destination Yearly Counts
     const studentDestinations = {};
     const destinationYearlyStats = {}; // { DestName: { "2021": count, "2022": count ... } }
+    const destinationStudents = {}; // { DestName: [ { year, id, name }... ] }
     const files = fs.readdirSync(CAREER_DIR).filter(f => f.endsWith('.xlsx'));
 
     console.log(`Found ${files.length} career list files.`);
@@ -38,6 +39,7 @@ try {
             rows.forEach(row => {
                 const id = row['学籍番号'] || row['No.'] || row['ID'] || row['学生番号'];
                 const dest = row['進学先'] || row['進路先'] || row['就職先'] || row['進学・就職先'] || row['学校名'] || row['企業名'] || row['最終合格校'];
+                const name = row['氏名'] || row['氏 名'] || row['名前'];
                 if (id && dest) {
                     const destName = dest.trim();
                     // Map student to destination
@@ -47,6 +49,12 @@ try {
                     if (!destinationYearlyStats[destName]) destinationYearlyStats[destName] = {};
                     if (!destinationYearlyStats[destName][year]) destinationYearlyStats[destName][year] = 0;
                     destinationYearlyStats[destName][year]++;
+
+                    // Collect Student Details
+                    if (!destinationStudents[destName]) destinationStudents[destName] = [];
+                    if (name) {
+                        destinationStudents[destName].push({ year, id, name });
+                    }
                 }
             });
         } catch (e) {
