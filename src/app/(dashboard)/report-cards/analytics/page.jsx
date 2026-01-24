@@ -142,6 +142,7 @@ export default function AnalyticsPage() {
     const [expandedNationality, setExpandedNationality] = useState(null)
     const [showLowRankings, setShowLowRankings] = useState(false)
     const [careerSubTab, setCareerSubTab] = useState('overview') // 'overview' or 'schools'
+    const [careerSearchQuery, setCareerSearchQuery] = useState('')
     const [expandedSchoolId, setExpandedSchoolId] = useState(null)
 
     useEffect(() => {
@@ -2080,7 +2081,22 @@ export default function AnalyticsPage() {
 
                     {careerSubTab === 'past5years' && (
                         <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
-                            <h3 className={styles.chartTitle}>過去5年間の進学実績詳細 (2019-2023)</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>過去5年間の進学実績詳細 (2019-2023)</h3>
+                                <input
+                                    type="text"
+                                    placeholder="学校名で検索..."
+                                    value={careerSearchQuery}
+                                    onChange={(e) => setCareerSearchQuery(e.target.value)}
+                                    style={{
+                                        padding: '0.5rem',
+                                        borderRadius: '4px',
+                                        border: '1px solid #d1d5db',
+                                        fontSize: '0.9rem',
+                                        width: '250px'
+                                    }}
+                                />
+                            </div>
                             <div className={styles.tableContainer}>
                                 <table className={styles.table}>
                                     <thead>
@@ -2096,6 +2112,7 @@ export default function AnalyticsPage() {
                                     </thead>
                                     <tbody>
                                         {careerStats.topDestinations
+                                            .filter(d => d.name.toLowerCase().includes(careerSearchQuery.toLowerCase()))
                                             .map(d => {
                                                 const y2023 = (d.years && d.years['2023']) || 0;
                                                 const y2022 = (d.years && d.years['2022']) || 0;
