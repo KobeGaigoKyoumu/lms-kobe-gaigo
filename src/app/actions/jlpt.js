@@ -16,55 +16,48 @@ export async function fetchJlptAnalyticsData() {
     let envDebug = {}
 
     try {
-        // 1. Try with authenticated client via cookies (same as Server Components)
-        let supabase = await createClient()
+        // Analytics requires ALL data (active + graduated). 
+        // Standard RLS might hide graduated students from standard users.
+        // We prioritize Service Role Key to ensure we have the full dataset.
 
-        console.log('Server Action: Init Supabase with Cookie Session');
+        let data = null;
+        let error = null;
+        let supabase;
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            console.log('Server Action: Using Service Role Key for full analytics access');
+            const adminSupabase = createClientJs(
+                process.env.NEXT_PUBLIC_SUPABASE_URL,
+                process.env.SUPABASE_SERVICE_ROLE_KEY,
+                { auth: { persistSession: false } }
+            );
 
-        // Check Auth Status
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        authDebug = {
-            hasUser: !!user,
-            userId: user?.id,
-            error: authError ? authError.message : null
+            const adminResult = await adminSupabase.from('students').select('*');
+
+            if (adminResult.data) {
+                data = adminResult.data;
+                allFetchedData = data;
+                dataSource = 'service_role';
+            } else {
+                error = adminResult.error;
+                console.error('Server Action: Service Role fetch failed', error);
+            }
         }
-        console.log('Server Action: Auth Status:', authDebug);
 
-        // Fetch specific fields needed for filtering and class info
-        // We fetch ALL students initially to debug status issues if any
-        // UPDATE: Changed to select('*') because select('specific_columns') fetched 0 rows in some RLS configs
-        // mimicking admin/students/page.jsx behavior
-        let { data, error } = await supabase
-            .from('students')
-            .select('*');
+        // Fallback to Cookie Auth if Service Role failed or not available
+        if (!data || data.length === 0) {
+            console.log('Server Action: Falling back to Cookie Session (RLS active)');
+            supabase = await createClient();
 
-        if (data) allFetchedData = data;
+            const { data: userUser, error: authError } = await supabase.auth.getUser();
+            authDebug = { hasUser: !!userUser?.user, userId: userUser?.user?.id, error: authError?.message };
 
-        // 2. Fallback: If cookie auth returned no data (likely RLS issue), try Service Role Key
-        envDebug = { hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY };
+            let res = await supabase.from('students').select('*');
+            data = res.data;
+            error = res.error; // Keep error if this also fails
 
-        if ((!data || data.length === 0) && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-            console.log('Server Action: Cookie session yielded 0 results. Switching to Service Role Key...');
-            try {
-                const adminSupabase = createClientJs(
-                    process.env.NEXT_PUBLIC_SUPABASE_URL,
-                    process.env.SUPABASE_SERVICE_ROLE_KEY,
-                    { auth: { persistSession: false } }
-                );
-                const adminResult = await adminSupabase
-                    .from('students')
-                    .select('*');
-
-                if (adminResult.data && adminResult.data.length > 0) {
-                    data = adminResult.data;
-                    allFetchedData = data;
-                    error = adminResult.error;
-                    dataSource = 'service_role';
-                    console.log(`Server Action: Successfully fetched ${data.length} records with Service Role Key`);
-                }
-            } catch (adminErr) {
-                console.error('Server Action: Service Role Fallback failed', adminErr);
-                envDebug.fallbackError = adminErr.message;
+            if (data) {
+                allFetchedData = data;
+                dataSource = 'cookie';
             }
         }
 
