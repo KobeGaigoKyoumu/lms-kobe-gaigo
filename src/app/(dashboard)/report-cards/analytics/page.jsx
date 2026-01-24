@@ -148,6 +148,7 @@ export default function AnalyticsPage() {
     const [dbSearchQuery, setDbSearchQuery] = useState('')
     const [dbFilterStatus, setDbFilterStatus] = useState('all') // 'all', 'enrolled', 'graduated'
     const [dbFilteredStudents, setDbFilteredStudents] = useState([])
+    const [dbSortConfig, setDbSortConfig] = useState({ key: 'studentId', direction: 'asc' })
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
@@ -173,29 +174,63 @@ export default function AnalyticsPage() {
         setCareerStats(careerStatsData)
     }, [])
 
-    // Database Search Effect
+    // Database Search and Sort Effect
     useEffect(() => {
         if (!enhancedJlptStats?.allStudentStats) return
 
-        let results = enhancedJlptStats.allStudentStats
+        let results = [...enhancedJlptStats.allStudentStats]
 
+        // Multi-keyword Search (AND logic)
         if (dbSearchQuery) {
-            const q = dbSearchQuery.toLowerCase()
+            const terms = dbSearchQuery.toLowerCase().trim().split(/\s+/)
             results = results.filter(s =>
-                (s.name && s.name.toLowerCase().includes(q)) ||
-                (s.studentId && String(s.studentId).includes(q)) ||
-                (s.enrollmentYear && String(s.enrollmentYear).includes(q)) ||
-                (s.class && s.class.toLowerCase().includes(q)) ||
-                (s.nationality && s.nationality.toLowerCase().includes(q)) ||
-                (s.destination && s.destination.toLowerCase().includes(q))
+                terms.every(term =>
+                    (s.name && s.name.toLowerCase().includes(term)) ||
+                    (s.studentId && String(s.studentId).includes(term)) ||
+                    (s.enrollmentYear && String(s.enrollmentYear).includes(term)) ||
+                    (s.class && s.class.toLowerCase().includes(term)) ||
+                    (s.nationality && s.nationality.toLowerCase().includes(term)) ||
+                    (s.destination && s.destination.toLowerCase().includes(term))
+                )
             )
         }
 
-        // Simple status filter logic (if needed in future, currently just search)
-        // if (dbFilterStatus === 'enrolled') ...
+        // Sorting
+        results.sort((a, b) => {
+            let valA = a[dbSortConfig.key] || ''
+            let valB = b[dbSortConfig.key] || ''
+
+            // Numeric handling
+            if (dbSortConfig.key === 'studentId' || dbSortConfig.key === 'enrollmentYear') {
+                const nA = parseInt(valA) || 0
+                const nB = parseInt(valB) || 0
+                if (nA !== nB) return dbSortConfig.direction === 'asc' ? nA - nB : nB - nA
+            }
+
+            // String comparison
+            const sA = String(valA).toLowerCase()
+            const sB = String(valB).toLowerCase()
+            if (sA < sB) return dbSortConfig.direction === 'asc' ? -1 : 1
+            if (sA > sB) return dbSortConfig.direction === 'asc' ? 1 : -1
+            return 0
+        })
 
         setDbFilteredStudents(results)
-    }, [dbSearchQuery, enhancedJlptStats])
+    }, [dbSearchQuery, dbSortConfig, enhancedJlptStats])
+
+    const handleDbSort = (key) => {
+        setDbSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+        }))
+    }
+
+    const renderSortIcon = (key) => {
+        if (dbSortConfig.key !== key) return <ChevronDown size={14} style={{ marginLeft: '4px', opacity: 0.2 }} />;
+        return dbSortConfig.direction === 'asc'
+            ? <ChevronUp size={14} style={{ marginLeft: '4px', color: 'var(--primary-600)' }} />
+            : <ChevronDown size={14} style={{ marginLeft: '4px', color: 'var(--primary-600)' }} />;
+    };
 
     // Calculate Class Summary List for List View
     const classSummaryList = useMemo(() => {
@@ -2354,20 +2389,34 @@ export default function AnalyticsPage() {
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>学籍番号</th>
-                                    <th>名前</th>
-                                    <th>入学年度</th>
-                                    <th>クラス</th>
-                                    <th>国籍</th>
-                                    <th>進学先</th>
-                                    <th>JLPT最高レベル</th>
+                                    <th onClick={() => handleDbSort('studentId')} style={{ cursor: 'pointer' }}>
+                                        学籍番号 {renderSortIcon('studentId')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('name')} style={{ cursor: 'pointer' }}>
+                                        名前 {renderSortIcon('name')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('enrollmentYear')} style={{ cursor: 'pointer' }}>
+                                        入学年度 {renderSortIcon('enrollmentYear')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('class')} style={{ cursor: 'pointer' }}>
+                                        クラス {renderSortIcon('class')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('nationality')} style={{ cursor: 'pointer' }}>
+                                        国籍 {renderSortIcon('nationality')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('destination')} style={{ cursor: 'pointer' }}>
+                                        進学先 {renderSortIcon('destination')}
+                                    </th>
+                                    <th onClick={() => handleDbSort('highestLevel')} style={{ cursor: 'pointer' }}>
+                                        JLPT最高レベル {renderSortIcon('highestLevel')}
+                                    </th>
                                     <th>詳細</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {dbFilteredStudents.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
                                             {dbSearchQuery ? '該当する生徒が見つかりません' : '検索条件を入力してください'}
                                         </td>
                                     </tr>
