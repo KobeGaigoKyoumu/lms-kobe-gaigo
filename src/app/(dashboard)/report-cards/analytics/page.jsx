@@ -36,6 +36,13 @@ ChartJS.register(
 
 
 
+// Standardized Color Constants (Unified Density/Weight)
+const COLOR_PASS = '#16a34a' // Green 600
+const COLOR_FAIL = '#dc2626' // Red 600
+const COLOR_WARN = '#d97706' // Amber 600
+const COLOR_INFO = '#2563eb' // Blue 600
+const COLOR_MUTED = '#6b7280' // Gray 500
+
 function JlptSessionRow({ sessionData }) {
     const [isOpen, setIsOpen] = useState(false)
     const passRate = sessionData.totalExaminees > 0
@@ -82,9 +89,9 @@ function JlptSessionRow({ sessionData }) {
                                         <td>{row.examinees}名</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ color: '#166534', fontWeight: 600 }}>{row.passers}</span>
-                                                <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
-                                                <span style={{ color: '#991b1b', fontWeight: 600 }}>{failed}</span>
+                                                <span style={{ color: COLOR_PASS, fontWeight: 600 }}>{row.passers}</span>
+                                                <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
+                                                <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>{failed}</span>
                                             </div>
                                         </td>
                                         <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
@@ -746,7 +753,7 @@ export default function AnalyticsPage() {
                                                                         : '-'}
                                                                 </td>
                                                                 <td>{row.n3PlusStudents}名</td>
-                                                                <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? '#22c55e' : '#f59e0b' }}>
+                                                                <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
                                                                     {row.rate}%
                                                                 </td>
                                                             </tr>
@@ -796,7 +803,7 @@ export default function AnalyticsPage() {
                                                     >
                                                         <td style={{ fontWeight: 600, color: '#111827' }}>{cls.className}</td>
                                                         <td style={{ color: '#4b5563' }}>{cls.total}名</td>
-                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? '#22c55e' : '#f59e0b' }}>
+                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
                                                             {cls.n3PlusRate}%
                                                         </td>
                                                         <td style={{ color: '#4b5563' }}>{cls.n3Plus}名</td>
@@ -852,16 +859,16 @@ export default function AnalyticsPage() {
                                                     <span className={styles.statLabel}>合格者内訳</span>
                                                     <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
                                                         <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N1</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#991b1b' }}>{currentClassStats.n1}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N1</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: COLOR_FAIL }}>{currentClassStats.n1}</div>
                                                         </div>
                                                         <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N2</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#9a3412' }}>{currentClassStats.n2}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N2</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#ea580c' }}>{currentClassStats.n2}</div>
                                                         </div>
                                                         <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>N3</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#92400e' }}>{currentClassStats.n3}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N3</div>
+                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: COLOR_WARN }}>{currentClassStats.n3}</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -966,7 +973,7 @@ export default function AnalyticsPage() {
 
                                                         const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
                                                         const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
-                                                        return schoolAvg >= nationalAvg ? '#22c55e' : '#f59e0b';
+                                                        return schoolAvg >= nationalAvg ? COLOR_PASS : COLOR_WARN;
                                                     })()
                                                 }}>
                                                     {(() => {
@@ -1186,7 +1193,7 @@ export default function AnalyticsPage() {
                                                                         <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
                                                                         <td style={{
                                                                             fontWeight: 600,
-                                                                            color: parseFloat(diff) > 0 ? '#16a34a' : parseFloat(diff) < 0 ? '#dc2626' : '#4b5563'
+                                                                            color: parseFloat(diff) > 0 ? COLOR_PASS : parseFloat(diff) < 0 ? COLOR_FAIL : COLOR_MUTED
                                                                         }}>
                                                                             {parseFloat(diff) > 0 ? '+' : ''}{diff}%
                                                                         </td>
@@ -1239,7 +1246,7 @@ export default function AnalyticsPage() {
                                                                     <td style={{ fontWeight: 700 }}>3年平均</td>
                                                                     <td style={{ fontWeight: 700, color: '#2563eb' }}>{sAvg}%</td>
                                                                     <td style={{ fontWeight: 700 }}>{nAvg}%</td>
-                                                                    <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? '#16a34a' : parseFloat(dAvg) < 0 ? '#dc2626' : '#4b5563' }}>
+                                                                    <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? COLOR_PASS : parseFloat(dAvg) < 0 ? COLOR_FAIL : COLOR_MUTED }}>
                                                                         {parseFloat(dAvg) > 0 ? '+' : ''}{dAvg}%
                                                                     </td>
                                                                 </tr>
@@ -1295,15 +1302,15 @@ export default function AnalyticsPage() {
                                                             <td style={{ color: '#6b7280' }}>{nationalMax}%</td>
                                                             <td style={{
                                                                 fontWeight: 600,
-                                                                color: isPositive ? '#22c55e' : isNegative ? '#ef4444' : '#6b7280'
+                                                                color: isPositive ? COLOR_PASS : isNegative ? COLOR_FAIL : COLOR_MUTED
                                                             }}>
                                                                 {isPositive ? '+' : ''}{diff}%
                                                             </td>
                                                             <td>
-                                                                {isPositive && <span style={{ color: '#22c55e', fontWeight: 600 }}>◎ 優秀</span>}
-                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: '#ef4444', fontWeight: 600 }}>△ 要改善</span>}
-                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: '#f59e0b', fontWeight: 600 }}>○ 標準</span>}
-                                                                {!isPositive && !isNegative && <span style={{ color: '#6b7280' }}>○ 同等</span>}
+                                                                {isPositive && <span style={{ color: COLOR_PASS, fontWeight: 600 }}>◎ 優秀</span>}
+                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>△ 要改善</span>}
+                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: COLOR_WARN, fontWeight: 600 }}>○ 標準</span>}
+                                                                {!isPositive && !isNegative && <span style={{ color: COLOR_MUTED }}>○ 同等</span>}
                                                             </td>
                                                         </tr>
                                                     );
@@ -1480,10 +1487,10 @@ export default function AnalyticsPage() {
                                                             <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
                                                             <td>{data.maxScore}点</td>
                                                             <td>{data.minScore}点</td>
-                                                            <td style={{ color: data.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                            <td style={{ color: data.passedAvg ? COLOR_PASS : COLOR_MUTED }}>
                                                                 {data.passedAvg ? `${data.passedAvg}点` : '-'}
                                                             </td>
-                                                            <td style={{ color: data.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                            <td style={{ color: data.failedAvg ? COLOR_FAIL : COLOR_MUTED }}>
                                                                 {data.failedAvg ? `${data.failedAvg}点` : '-'}
                                                             </td>
                                                         </tr>
@@ -1538,10 +1545,10 @@ export default function AnalyticsPage() {
                                                                     <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
                                                                     <td>{row.maxScore}点</td>
                                                                     <td>{row.minScore}点</td>
-                                                                    <td style={{ color: row.passedAvg ? '#22c55e' : '#9ca3af' }}>
+                                                                    <td style={{ color: row.passedAvg ? COLOR_PASS : COLOR_MUTED }}>
                                                                         {row.passedAvg ? `${row.passedAvg}点` : '-'}
                                                                     </td>
-                                                                    <td style={{ color: row.failedAvg ? '#ef4444' : '#9ca3af' }}>
+                                                                    <td style={{ color: row.failedAvg ? COLOR_FAIL : COLOR_MUTED }}>
                                                                         {row.failedAvg ? `${row.failedAvg}点` : '-'}
                                                                     </td>
                                                                 </tr>
@@ -1593,387 +1600,528 @@ export default function AnalyticsPage() {
                         </>
                     )}
                 </>
-            )}
+            )
+            }
 
             {/* Career Analytics Tab */}
-            {activeTab === 'career' && careerStats && (
-                <>
-                    {/* Sub Tabs */}
-                    <div className={styles.subTabs}>
-                        <button
-                            className={`${styles.subTab} ${careerSubTab === 'overview' ? styles.active : ''}`}
-                            onClick={() => setCareerSubTab('overview')}
-                        >
-                            全体概要
-                        </button>
-                        <button
-                            className={`${styles.subTab} ${careerSubTab === 'schools' ? styles.active : ''}`}
-                            onClick={() => setCareerSubTab('schools')}
-                        >
-                            学校別詳細
-                        </button>
-                        <button
-                            className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.active : ''}`}
-                            onClick={() => setCareerSubTab('past5years')}
-                        >
-                            過去5年詳細
-                        </button>
-                    </div>
+            {
+                activeTab === 'career' && careerStats && (
+                    <>
+                        {/* Sub Tabs */}
+                        <div className={styles.subTabs}>
+                            <button
+                                className={`${styles.subTab} ${careerSubTab === 'overview' ? styles.active : ''}`}
+                                onClick={() => setCareerSubTab('overview')}
+                            >
+                                全体概要
+                            </button>
+                            <button
+                                className={`${styles.subTab} ${careerSubTab === 'schools' ? styles.active : ''}`}
+                                onClick={() => setCareerSubTab('schools')}
+                            >
+                                学校別詳細
+                            </button>
+                            <button
+                                className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.active : ''}`}
+                                onClick={() => setCareerSubTab('past5years')}
+                            >
+                                過去5年詳細
+                            </button>
+                        </div>
 
-                    {careerSubTab === 'overview' && (
-                        <>
-                            {/* Summary Stats */}
-                            <div className={styles.statsGrid}>
-                                <div className={styles.statCard}>
-                                    <span className={styles.statLabel}>総卒業生数</span>
-                                    <div className={styles.statValueRow}>
-                                        <span className={styles.statValue}>{careerStats.summary.totalRecords.toLocaleString()}</span>
-                                        <span className={styles.statUnit}>名</span>
-                                    </div>
-                                </div>
-                                <div className={styles.statCard}>
-                                    <span className={styles.statLabel}>進学率（大学・専門学校）</span>
-                                    <div className={styles.statValueRow}>
-                                        <span className={styles.statValue}>
-                                            {(((careerStats.categoryStats['大学'] || 0) +
-                                                (careerStats.categoryStats['大学院'] || 0) +
-                                                (careerStats.categoryStats['専門学校'] || 0) +
-                                                (careerStats.categoryStats['短期大学'] || 0)) /
-                                                careerStats.summary.totalRecords * 100).toFixed(1)}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className={styles.statCard}>
-                                    <span className={styles.statLabel}>就職率</span>
-                                    <div className={styles.statValueRow}>
-                                        <span className={styles.statValue}>
-                                            {((careerStats.categoryStats['就職'] || 0) /
-                                                careerStats.summary.totalRecords * 100).toFixed(1)}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className={styles.statCard}>
-                                    <span className={styles.statLabel}>対象年度</span>
-                                    <div className={styles.statValueRow}>
-                                        <span className={styles.statValue}>{careerStats.summary.years.length}</span>
-                                        <span className={styles.statUnit}>年度</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Charts Row 1: Category Breakdown & Yearly Trends */}
-                            <div className={styles.chartsRow}>
-                                <div className={styles.chartCard}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                        <h3 className={styles.chartTitle} style={{ margin: 0 }}>進路区分別内訳</h3>
-                                        <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem' }}>
-                                            {Object.entries(careerStats.categoryStats)
-                                                .sort((a, b) => b[1] - a[1])
-                                                .slice(0, 3)
-                                                .map(([cat, count], idx) => {
-                                                    const total = careerStats.summary.totalRecords;
-                                                    const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                                                    return (
-                                                        <span key={cat} style={{
-                                                            background: idx === 0 ? '#eff6ff' : '#f9fafb',
-                                                            color: idx === 0 ? '#1d4ed8' : '#4b5563',
-                                                            padding: '2px 8px', borderRadius: '4px', border: '1px solid #e5e7eb'
-                                                        }}>
-                                                            {cat}: {pct}%
-                                                        </span>
-                                                    );
-                                                })}
+                        {careerSubTab === 'overview' && (
+                            <>
+                                {/* Summary Stats */}
+                                <div className={styles.statsGrid}>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>総卒業生数</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>{careerStats.summary.totalRecords.toLocaleString()}</span>
+                                            <span className={styles.statUnit}>名</span>
                                         </div>
                                     </div>
-                                    <div className={styles.chartContainer}>
-                                        <Bar
-                                            data={{
-                                                labels: Object.keys(careerStats.categoryStats),
-                                                datasets: [{
-                                                    label: '人数',
-                                                    data: Object.values(careerStats.categoryStats),
-                                                    backgroundColor: [
-                                                        'rgba(59, 130, 246, 0.7)',
-                                                        'rgba(34, 197, 94, 0.7)',
-                                                        'rgba(249, 115, 22, 0.7)',
-                                                        'rgba(168, 85, 247, 0.7)',
-                                                        'rgba(236, 72, 153, 0.7)',
-                                                        'rgba(107, 114, 128, 0.7)',
-                                                        'rgba(239, 68, 68, 0.7)',
-                                                        'rgba(245, 158, 11, 0.7)',
-                                                        'rgba(16, 185, 129, 0.7)',
-                                                        'rgba(99, 102, 241, 0.7)',
-                                                    ],
-                                                }]
-                                            }}
-                                            options={{
-                                                ...chartOptions,
-                                                indexAxis: 'y',
-                                                plugins: {
-                                                    legend: { display: false },
-                                                    tooltip: {
-                                                        callbacks: {
-                                                            label: function (context) {
-                                                                const value = context.parsed.x;
-                                                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-                                                                return `${context.dataset.label || ''}: ${value}名 (${percentage})`;
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>進学率（大学・専門学校）</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>
+                                                {(((careerStats.categoryStats['大学'] || 0) +
+                                                    (careerStats.categoryStats['大学院'] || 0) +
+                                                    (careerStats.categoryStats['専門学校'] || 0) +
+                                                    (careerStats.categoryStats['短期大学'] || 0)) /
+                                                    careerStats.summary.totalRecords * 100).toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>就職率</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>
+                                                {((careerStats.categoryStats['就職'] || 0) /
+                                                    careerStats.summary.totalRecords * 100).toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className={styles.statCard}>
+                                        <span className={styles.statLabel}>対象年度</span>
+                                        <div className={styles.statValueRow}>
+                                            <span className={styles.statValue}>{careerStats.summary.years.length}</span>
+                                            <span className={styles.statUnit}>年度</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Charts Row 1: Category Breakdown & Yearly Trends */}
+                                <div className={styles.chartsRow}>
+                                    <div className={styles.chartCard}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 className={styles.chartTitle} style={{ margin: 0 }}>進路区分別内訳</h3>
+                                            <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem' }}>
+                                                {Object.entries(careerStats.categoryStats)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .slice(0, 3)
+                                                    .map(([cat, count], idx) => {
+                                                        const total = careerStats.summary.totalRecords;
+                                                        const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                                                        return (
+                                                            <span key={cat} style={{
+                                                                background: idx === 0 ? '#eff6ff' : '#f9fafb',
+                                                                color: idx === 0 ? '#1d4ed8' : '#4b5563',
+                                                                padding: '2px 8px', borderRadius: '4px', border: '1px solid #e5e7eb'
+                                                            }}>
+                                                                {cat}: {pct}%
+                                                            </span>
+                                                        );
+                                                    })}
+                                            </div>
+                                        </div>
+                                        <div className={styles.chartContainer}>
+                                            <Bar
+                                                data={{
+                                                    labels: Object.keys(careerStats.categoryStats),
+                                                    datasets: [{
+                                                        label: '人数',
+                                                        data: Object.values(careerStats.categoryStats),
+                                                        backgroundColor: [
+                                                            'rgba(59, 130, 246, 0.7)',
+                                                            'rgba(34, 197, 94, 0.7)',
+                                                            'rgba(249, 115, 22, 0.7)',
+                                                            'rgba(168, 85, 247, 0.7)',
+                                                            'rgba(236, 72, 153, 0.7)',
+                                                            'rgba(107, 114, 128, 0.7)',
+                                                            'rgba(239, 68, 68, 0.7)',
+                                                            'rgba(245, 158, 11, 0.7)',
+                                                            'rgba(16, 185, 129, 0.7)',
+                                                            'rgba(99, 102, 241, 0.7)',
+                                                        ],
+                                                    }]
+                                                }}
+                                                options={{
+                                                    ...chartOptions,
+                                                    indexAxis: 'y',
+                                                    plugins: {
+                                                        legend: { display: false },
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: function (context) {
+                                                                    const value = context.parsed.x;
+                                                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                                                                    return `${context.dataset.label || ''}: ${value}名 (${percentage})`;
+                                                                }
                                                             }
                                                         }
                                                     }
-                                                }
-                                            }}
-                                        />
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className={styles.chartCard}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
+                                            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
+                                                全年度平均: {(() => {
+                                                    const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
+                                                    const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
+                                                    return avg.toFixed(1);
+                                                })()}%
+                                            </span>
+                                        </div>
+                                        <div className={styles.chartContainer}>
+                                            <Line
+                                                data={{
+                                                    labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
+                                                    datasets: [
+                                                        {
+                                                            label: '卒業率 (%)',
+                                                            data: careerStats.yearlyTrends.map(t => t.graduationRate),
+                                                            borderColor: 'rgb(34, 197, 94)',
+                                                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                                            tension: 0.3,
+                                                        }
+                                                    ]
+                                                }}
+                                                options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className={styles.chartCard}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                        <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
-                                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
-                                            全年度平均: {(() => {
-                                                const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
-                                                const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
-                                                return avg.toFixed(1);
-                                            })()}%
-                                        </span>
-                                    </div>
-                                    <div className={styles.chartContainer}>
-                                        <Line
-                                            data={{
-                                                labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
-                                                datasets: [
-                                                    {
-                                                        label: '卒業率 (%)',
-                                                        data: careerStats.yearlyTrends.map(t => t.graduationRate),
-                                                        borderColor: 'rgb(34, 197, 94)',
-                                                        backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                                                        tension: 0.3,
-                                                    }
-                                                ]
-                                            }}
-                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Charts Row 2: Yearly Career Breakdown */}
+                                {/* Charts Row 2: Yearly Career Breakdown */}
 
-                            {/* Charts Row 2: Yearly Career Breakdown */}
-                            <div className={styles.chartsRow}>
-                                <div className={styles.chartCard} style={{ flex: 2 }}>
-                                    <h3 className={styles.chartTitle}>年度別進路内訳</h3>
-                                    <div className={styles.chartContainer}>
-                                        <Bar
-                                            data={{
-                                                labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
-                                                datasets: [
-                                                    {
-                                                        label: '専門学校',
-                                                        data: careerStats.yearlyTrends.map(t => t.categories['専門学校'] || 0),
-                                                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                                                    },
-                                                    {
-                                                        label: '大学',
-                                                        data: careerStats.yearlyTrends.map(t => t.categories['大学'] || 0),
-                                                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
-                                                    },
-                                                    {
-                                                        label: '大学院',
-                                                        data: careerStats.yearlyTrends.map(t => t.categories['大学院'] || 0),
-                                                        backgroundColor: 'rgba(168, 85, 247, 0.7)',
-                                                    },
-                                                    {
-                                                        label: '就職',
-                                                        data: careerStats.yearlyTrends.map(t => t.categories['就職'] || 0),
-                                                        backgroundColor: 'rgba(249, 115, 22, 0.7)',
-                                                    },
-                                                    {
-                                                        label: '帰国',
-                                                        data: careerStats.yearlyTrends.map(t => t.categories['帰国'] || 0),
-                                                        backgroundColor: 'rgba(107, 114, 128, 0.7)',
-                                                    },
-                                                ]
-                                            }}
-                                            options={{
-                                                ...chartOptions,
-                                                plugins: {
-                                                    legend: { display: true, position: 'top' },
-                                                    tooltip: {
-                                                        callbacks: {
-                                                            label: function (context) {
-                                                                const value = context.parsed.y;
-                                                                const dataIndex = context.dataIndex;
-                                                                // Calculate total for this specific year (stack)
-                                                                let stackTotal = 0;
-                                                                context.chart.data.datasets.forEach(dataset => {
-                                                                    stackTotal += dataset.data[dataIndex] || 0;
-                                                                });
-                                                                const percentage = stackTotal > 0 ? ((value / stackTotal) * 100).toFixed(1) + '%' : '0%';
-                                                                return `${context.dataset.label}: ${value}名 (${percentage})`;
+                                {/* Charts Row 2: Yearly Career Breakdown */}
+                                <div className={styles.chartsRow}>
+                                    <div className={styles.chartCard} style={{ flex: 2 }}>
+                                        <h3 className={styles.chartTitle}>年度別進路内訳</h3>
+                                        <div className={styles.chartContainer}>
+                                            <Bar
+                                                data={{
+                                                    labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
+                                                    datasets: [
+                                                        {
+                                                            label: '専門学校',
+                                                            data: careerStats.yearlyTrends.map(t => t.categories['専門学校'] || 0),
+                                                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                                        },
+                                                        {
+                                                            label: '大学',
+                                                            data: careerStats.yearlyTrends.map(t => t.categories['大学'] || 0),
+                                                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                                                        },
+                                                        {
+                                                            label: '大学院',
+                                                            data: careerStats.yearlyTrends.map(t => t.categories['大学院'] || 0),
+                                                            backgroundColor: 'rgba(168, 85, 247, 0.7)',
+                                                        },
+                                                        {
+                                                            label: '就職',
+                                                            data: careerStats.yearlyTrends.map(t => t.categories['就職'] || 0),
+                                                            backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                                                        },
+                                                        {
+                                                            label: '帰国',
+                                                            data: careerStats.yearlyTrends.map(t => t.categories['帰国'] || 0),
+                                                            backgroundColor: 'rgba(107, 114, 128, 0.7)',
+                                                        },
+                                                    ]
+                                                }}
+                                                options={{
+                                                    ...chartOptions,
+                                                    plugins: {
+                                                        legend: { display: true, position: 'top' },
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: function (context) {
+                                                                    const value = context.parsed.y;
+                                                                    const dataIndex = context.dataIndex;
+                                                                    // Calculate total for this specific year (stack)
+                                                                    let stackTotal = 0;
+                                                                    context.chart.data.datasets.forEach(dataset => {
+                                                                        stackTotal += dataset.data[dataIndex] || 0;
+                                                                    });
+                                                                    const percentage = stackTotal > 0 ? ((value / stackTotal) * 100).toFixed(1) + '%' : '0%';
+                                                                    return `${context.dataset.label}: ${value}名 (${percentage})`;
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                },
-                                                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
-                                            }}
-                                        />
+                                                    },
+                                                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Tables Row */}
-                            <div className={styles.chartsRow}>
-                                {/* Top Destinations */}
-                                <div className={styles.chartCard} style={{ flex: 1.2 }}>
-                                    <h3 className={styles.chartTitle}>人気進学先ランキング (TOP 10)</h3>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>順位</th>
-                                                    <th>進学先</th>
-                                                    <th>人数</th>
-                                                    <th>詳細</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {/* Top 10 */}
-                                                {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
-                                                    <Fragment key={idx}>
-                                                        <tr
-                                                            onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
-                                                            style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
-                                                        >
-                                                            <td style={{ padding: '0.75rem 1rem' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
-                                                            <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
-                                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                                                <AccordionChevron rotated={expandedDestination === idx} />
-                                                            </td>
-                                                        </tr>
-                                                        {expandedDestination === idx && (
+                                {/* Tables Row */}
+                                <div className={styles.chartsRow}>
+                                    {/* Top Destinations */}
+                                    <div className={styles.chartCard} style={{ flex: 1.2 }}>
+                                        <h3 className={styles.chartTitle}>人気進学先ランキング (TOP 10)</h3>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>順位</th>
+                                                        <th>進学先</th>
+                                                        <th>人数</th>
+                                                        <th>詳細</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {/* Top 10 */}
+                                                    {careerStats.topDestinations.slice(0, 10).map((dest, idx) => (
+                                                        <Fragment key={idx}>
+                                                            <tr
+                                                                onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
+                                                                style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
+                                                            >
+                                                                <td style={{ padding: '0.75rem 1rem' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
+                                                                <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
+                                                                <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                                                    <AccordionChevron rotated={expandedDestination === idx} />
+                                                                </td>
+                                                            </tr>
+                                                            {expandedDestination === idx && (
+                                                                <tr>
+                                                                    <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                            <strong>年度別内訳:</strong>
+                                                                            <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                                                                {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
+                                                                                    <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                                                                        <span>{parseInt(year) + 1}年度卒</span>
+                                                                                        <strong>{count}名</strong>
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </Fragment>
+                                                    ))}
+
+                                                    {/* 11th and below Accordion */}
+                                                    {careerStats.topDestinations.length > 10 && (
+                                                        <>
                                                             <tr>
-                                                                <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
-                                                                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                                                                        <strong>年度別内訳:</strong>
-                                                                        <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
-                                                                            {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
-                                                                                <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                    <span>{parseInt(year) + 1}年度卒</span>
-                                                                                    <strong>{count}名</strong>
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
+                                                                <td colSpan={4} style={{ padding: 0, border: 'none' }}>
+                                                                    <div
+                                                                        className={styles.subtleAccordionTrigger}
+                                                                        onClick={() => setShowLowRankings(!showLowRankings)}
+                                                                        style={{ borderTop: 'none', borderBottom: showLowRankings ? '1px solid #e5e7eb' : 'none' }}
+                                                                    >
+                                                                        {showLowRankings ? '11位以下を閉じる' : '11位以下を表示'}
+                                                                        <AccordionChevron rotated={showLowRankings} />
                                                                     </div>
                                                                 </td>
                                                             </tr>
-                                                        )}
-                                                    </Fragment>
-                                                ))}
-
-                                                {/* 11th and below Accordion */}
-                                                {careerStats.topDestinations.length > 10 && (
-                                                    <>
-                                                        <tr>
-                                                            <td colSpan={4} style={{ padding: 0, border: 'none' }}>
-                                                                <div
-                                                                    className={styles.subtleAccordionTrigger}
-                                                                    onClick={() => setShowLowRankings(!showLowRankings)}
-                                                                    style={{ borderTop: 'none', borderBottom: showLowRankings ? '1px solid #e5e7eb' : 'none' }}
-                                                                >
-                                                                    {showLowRankings ? '11位以下を閉じる' : '11位以下を表示'}
-                                                                    <AccordionChevron rotated={showLowRankings} />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        {showLowRankings && careerStats.topDestinations.slice(10).map((dest, idx) => {
-                                                            const realIdx = idx + 10;
-                                                            return (
-                                                                <Fragment key={realIdx}>
-                                                                    <tr
-                                                                        onClick={() => setExpandedDestination(expandedDestination === realIdx ? null : realIdx)}
-                                                                        style={{ cursor: 'pointer', backgroundColor: expandedDestination === realIdx ? '#f3f4f6' : 'white', borderBottom: '1px solid #f3f4f6' }}
-                                                                    >
-                                                                        <td style={{ padding: '0.75rem 1rem' }}>{realIdx + 1}</td>
-                                                                        <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
-                                                                        <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
-                                                                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                                                                            <AccordionChevron rotated={expandedDestination === realIdx} />
-                                                                        </td>
-                                                                    </tr>
-                                                                    {expandedDestination === realIdx && (
-                                                                        <tr>
-                                                                            <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
-                                                                                <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                                                                                    <strong>年度別内訳:</strong>
-                                                                                    <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
-                                                                                        {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
-                                                                                            <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                                <span>{parseInt(year) + 1}年度卒</span>
-                                                                                                <strong>{count}名</strong>
-                                                                                            </li>
-                                                                                        ))}
-                                                                                    </ul>
-                                                                                </div>
+                                                            {showLowRankings && careerStats.topDestinations.slice(10).map((dest, idx) => {
+                                                                const realIdx = idx + 10;
+                                                                return (
+                                                                    <Fragment key={realIdx}>
+                                                                        <tr
+                                                                            onClick={() => setExpandedDestination(expandedDestination === realIdx ? null : realIdx)}
+                                                                            style={{ cursor: 'pointer', backgroundColor: expandedDestination === realIdx ? '#f3f4f6' : 'white', borderBottom: '1px solid #f3f4f6' }}
+                                                                        >
+                                                                            <td style={{ padding: '0.75rem 1rem' }}>{realIdx + 1}</td>
+                                                                            <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
+                                                                            <td style={{ fontWeight: 600, padding: '0.75rem 1rem' }}>{dest.count}名</td>
+                                                                            <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                                                                <AccordionChevron rotated={expandedDestination === realIdx} />
                                                                             </td>
                                                                         </tr>
-                                                                    )}
-                                                                </Fragment>
-                                                            );
-                                                        })}
-                                                    </>
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                                        {expandedDestination === realIdx && (
+                                                                            <tr>
+                                                                                <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                                        <strong>年度別内訳:</strong>
+                                                                                        <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                                                                            {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
+                                                                                                <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                                                                                    <span>{parseInt(year) + 1}年度卒</span>
+                                                                                                    <strong>{count}名</strong>
+                                                                                                </li>
+                                                                                            ))}
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </Fragment>
+                                                                );
+                                                            })}
+                                                        </>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* Nationality Stats */}
+                                    <div className={styles.chartCard} style={{ flex: 1 }}>
+                                        <h3 className={styles.chartTitle}>国籍別進路状況</h3>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>国籍</th>
+                                                        <th>人数</th>
+                                                        <th>主な進路</th>
+                                                        <th>詳細</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {careerStats.nationalityStats.slice(0, 8).map((nat, idx) => {
+                                                        const topCategory = Object.entries(nat.categories)
+                                                            .sort((a, b) => b[1] - a[1])[0];
+                                                        const isExpanded = expandedNationality === idx;
+
+                                                        return (
+                                                            <Fragment key={idx}>
+                                                                <tr
+                                                                    key={idx}
+                                                                    onClick={() => setExpandedNationality(isExpanded ? null : idx)}
+                                                                    style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent' }}
+                                                                >
+                                                                    <td>{nat.name}</td>
+                                                                    <td>{nat.total}名</td>
+                                                                    <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
+                                                                    <td style={{ textAlign: 'center' }}>
+                                                                        <AccordionChevron rotated={isExpanded} />
+                                                                    </td>
+                                                                </tr>
+                                                                {isExpanded && (
+                                                                    <tr>
+                                                                        <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                            <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                                <strong>進路詳細:</strong>
+                                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                                                    {Object.entries(nat.categories).sort((a, b) => b[1] - a[1]).map(([cat, count]) => (
+                                                                                        <span key={cat} style={{ padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '0.85rem' }}>
+                                                                                            {cat}: <strong>{count}名</strong>
+                                                                                        </span>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
+                            </>
+                        )
+                        }
 
-                                {/* Nationality Stats */}
-                                <div className={styles.chartCard} style={{ flex: 1 }}>
-                                    <h3 className={styles.chartTitle}>国籍別進路状況</h3>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>国籍</th>
-                                                    <th>人数</th>
-                                                    <th>主な進路</th>
-                                                    <th>詳細</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {careerStats.nationalityStats.slice(0, 8).map((nat, idx) => {
-                                                    const topCategory = Object.entries(nat.categories)
-                                                        .sort((a, b) => b[1] - a[1])[0];
-                                                    const isExpanded = expandedNationality === idx;
 
+                        {careerSubTab === 'schools' && (
+                            <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先とJLPT成績 (詳細:合格/不合格)</h3>
+                                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                                        {careerStats.topDestinations.filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0).length}校
+                                    </span>
+                                </div>
+                                <div className={styles.tableContainer}>
+                                    <table className={styles.table}>
+                                        <thead>
+                                            <tr>
+                                                <th>進学先名</th>
+                                                <th>進学者数</th>
+                                                <th>JLPTデータ</th>
+                                                <th>詳細</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {careerStats.topDestinations
+                                                .filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0)
+                                                .sort((a, b) => b.count - a.count)
+                                                .map((dest, idx) => {
+                                                    const isExpanded = expandedSchoolId === idx;
                                                     return (
                                                         <Fragment key={idx}>
                                                             <tr
-                                                                key={idx}
-                                                                onClick={() => setExpandedNationality(isExpanded ? null : idx)}
-                                                                style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent' }}
+                                                                onClick={() => setExpandedSchoolId(isExpanded ? null : idx)}
+                                                                style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
                                                             >
-                                                                <td>{nat.name}</td>
-                                                                <td>{nat.total}名</td>
-                                                                <td>{topCategory ? `${topCategory[0]} (${topCategory[1]}名)` : '-'}</td>
+                                                                <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                                <td>{dest.count}名</td>
+                                                                <td>
+                                                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                                                        {Object.keys(dest.jlptStats).sort().map(lvl => (
+                                                                            <span key={lvl} className={`${styles.badge} ${styles[`badge${lvl}`]}`} style={{ fontSize: '0.7rem', padding: '1px 6px' }}>
+                                                                                {lvl}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </td>
                                                                 <td style={{ textAlign: 'center' }}>
                                                                     <AccordionChevron rotated={isExpanded} />
                                                                 </td>
                                                             </tr>
                                                             {isExpanded && (
-                                                                <tr>
-                                                                    <td colSpan={4} style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
-                                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                                                                            <strong>進路詳細:</strong>
-                                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                                                {Object.entries(nat.categories).sort((a, b) => b[1] - a[1]).map(([cat, count]) => (
-                                                                                    <span key={cat} style={{ padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '0.85rem' }}>
-                                                                                        {cat}: <strong>{count}名</strong>
-                                                                                    </span>
-                                                                                ))}
-                                                                            </div>
+                                                                <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                                                                    <td colSpan="4" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+                                                                        <div style={{ background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+                                                                            <table className={styles.table} style={{ margin: 0 }}>
+                                                                                <thead style={{ background: '#f3f4f6' }}>
+                                                                                    <tr>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                            データ数
+                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                        </th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                            平均点
+                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                        </th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                            最高点
+                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                        </th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+                                                                                            最低点
+                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
+                                                                                        </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {Object.entries(dest.jlptStats)
+                                                                                        .sort((a, b) => {
+                                                                                            const order = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+                                                                                            return (order[a[0]] || 99) - (order[b[0]] || 99);
+                                                                                        })
+                                                                                        .map(([level, stats]) => {
+                                                                                            // stats now has { passed: {...}, failed: {...} } OR old format if not updated
+                                                                                            const passed = stats.passed;
+                                                                                            const failed = stats.failed;
+
+                                                                                            const renderDual = (pVal, fVal, isBold = false) => (
+                                                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                                    <span style={{ color: COLOR_PASS, fontWeight: isBold ? 700 : 400 }}>{pVal ?? '-'}</span>
+                                                                                                    <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
+                                                                                                    <span style={{ color: COLOR_FAIL, fontWeight: isBold ? 700 : 400 }}>{fVal ?? '-'}</span>
+                                                                                                </div>
+                                                                                            );
+
+                                                                                            // Fallback for legacy data (if 'passed' undefined but 'count' exists)
+                                                                                            if (!passed && !failed) {
+                                                                                                if (stats.count) {
+                                                                                                    return (
+                                                                                                        <tr key={level}>
+                                                                                                            <td style={{ padding: '0.5rem' }}>
+                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                            </td>
+                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.count}</td>
+                                                                                                            <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
+                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.max}</td>
+                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.min}</td>
+                                                                                                        </tr>
+                                                                                                    );
+                                                                                                }
+                                                                                                return null;
+                                                                                            }
+
+                                                                                            return (
+                                                                                                <tr key={level}>
+                                                                                                    <td style={{ padding: '0.5rem' }}>
+                                                                                                        <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.count, failed?.count)}</td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.avg?.toFixed(1), failed?.avg?.toFixed(1), true)}</td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.max, failed?.max)}</td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.min, failed?.min)}</td>
+                                                                                                </tr>
+                                                                                            );
+                                                                                        })}
+                                                                                </tbody>
+                                                                            </table>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -1981,307 +2129,168 @@ export default function AnalyticsPage() {
                                                         </Fragment>
                                                     );
                                                 })}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            {careerStats.topDestinations.filter(d => d.jlptStats).length === 0 && (
+                                                <tr>
+                                                    <td colSpan="4" style={{ textAlign: 'center', color: '#6b7280' }}>
+                                                        合格者のJLPTスコアデータがありません
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </>
-                    )
-                    }
+                        )}
 
-
-                    {careerSubTab === 'schools' && (
-                        <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先とJLPT成績 (詳細:合格/不合格)</h3>
-                                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                                    {careerStats.topDestinations.filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0).length}校
-                                </span>
-                            </div>
-                            <div className={styles.tableContainer}>
-                                <table className={styles.table}>
-                                    <thead>
-                                        <tr>
-                                            <th>進学先名</th>
-                                            <th>進学者数</th>
-                                            <th>JLPTデータ</th>
-                                            <th>詳細</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {careerStats.topDestinations
-                                            .filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0)
-                                            .sort((a, b) => b.count - a.count)
-                                            .map((dest, idx) => {
-                                                const isExpanded = expandedSchoolId === idx;
-                                                return (
-                                                    <Fragment key={idx}>
-                                                        <tr
-                                                            onClick={() => setExpandedSchoolId(isExpanded ? null : idx)}
-                                                            style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
-                                                        >
-                                                            <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                            <td>{dest.count}名</td>
-                                                            <td>
-                                                                <div style={{ display: 'flex', gap: '4px' }}>
-                                                                    {Object.keys(dest.jlptStats).sort().map(lvl => (
-                                                                        <span key={lvl} className={`${styles.badge} ${styles[`badge${lvl}`]}`} style={{ fontSize: '0.7rem', padding: '1px 6px' }}>
-                                                                            {lvl}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </td>
-                                                            <td style={{ textAlign: 'center' }}>
-                                                                <AccordionChevron rotated={isExpanded} />
-                                                            </td>
-                                                        </tr>
-                                                        {isExpanded && (
-                                                            <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                                                                <td colSpan="4" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
-                                                                    <div style={{ background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-                                                                        <table className={styles.table} style={{ margin: 0 }}>
-                                                                            <thead style={{ background: '#f3f4f6' }}>
-                                                                                <tr>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                        データ数
-                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                    </th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                        平均点
-                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                    </th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                        最高点
-                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                    </th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                        最低点
-                                                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                    </th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {Object.entries(dest.jlptStats)
-                                                                                    .sort((a, b) => {
-                                                                                        const order = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
-                                                                                        return (order[a[0]] || 99) - (order[b[0]] || 99);
-                                                                                    })
-                                                                                    .map(([level, stats]) => {
-                                                                                        // stats now has { passed: {...}, failed: {...} } OR old format if not updated
-                                                                                        const passed = stats.passed;
-                                                                                        const failed = stats.failed;
-
-                                                                                        const renderDual = (pVal, fVal, isBold = false) => (
-                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                                <span style={{ color: '#166534', fontWeight: isBold ? 700 : 400 }}>{pVal ?? '-'}</span>
-                                                                                                <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
-                                                                                                <span style={{ color: '#991b1b', fontWeight: isBold ? 700 : 400 }}>{fVal ?? '-'}</span>
-                                                                                            </div>
-                                                                                        );
-
-                                                                                        // Fallback for legacy data (if 'passed' undefined but 'count' exists)
-                                                                                        if (!passed && !failed) {
-                                                                                            if (stats.count) {
-                                                                                                return (
-                                                                                                    <tr key={level}>
-                                                                                                        <td style={{ padding: '0.5rem' }}>
-                                                                                                            <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                                        </td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.count}</td>
-                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.max}</td>
-                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.min}</td>
-                                                                                                    </tr>
-                                                                                                );
-                                                                                            }
-                                                                                            return null;
-                                                                                        }
-
-                                                                                        return (
-                                                                                            <tr key={level}>
-                                                                                                <td style={{ padding: '0.5rem' }}>
-                                                                                                    <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                                </td>
-                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.count, failed?.count)}</td>
-                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.avg?.toFixed(1), failed?.avg?.toFixed(1), true)}</td>
-                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.max, failed?.max)}</td>
-                                                                                                <td style={{ padding: '0.5rem' }}>{renderDual(passed?.min, failed?.min)}</td>
-                                                                                            </tr>
-                                                                                        );
-                                                                                    })}
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </Fragment>
-                                                );
-                                            })}
-                                        {careerStats.topDestinations.filter(d => d.jlptStats).length === 0 && (
+                        {careerSubTab === 'past5years' && (
+                            <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h3 className={styles.chartTitle} style={{ margin: 0 }}>過去5年間の進学実績詳細 (2019-2023)</h3>
+                                    <input
+                                        type="text"
+                                        placeholder="学校名・氏名で検索..."
+                                        value={careerSearchQuery}
+                                        onChange={(e) => setCareerSearchQuery(e.target.value)}
+                                        style={{
+                                            padding: '0.5rem',
+                                            borderRadius: '4px',
+                                            border: '1px solid #d1d5db',
+                                            fontSize: '0.9rem',
+                                            width: '250px'
+                                        }}
+                                    />
+                                </div>
+                                <div className={styles.tableContainer}>
+                                    <table className={styles.table}>
+                                        <thead>
                                             <tr>
-                                                <td colSpan="4" style={{ textAlign: 'center', color: '#6b7280' }}>
-                                                    合格者のJLPTスコアデータがありません
-                                                </td>
+                                                <th>進学先名</th>
+                                                <th>5年間合計</th>
+                                                <th>2024年度</th>
+                                                <th>2023年度</th>
+                                                <th>2022年度</th>
+                                                <th>2021年度</th>
+                                                <th>2020年度</th>
+                                                <th>詳細</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
+                                        </thead>
+                                        <tbody>
+                                            {careerStats.topDestinations
+                                                .filter(d => {
+                                                    const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
+                                                    if (!q) return true;
+                                                    // Normalize data for comparison
+                                                    const normDestName = d.name.toLowerCase().replace(/\s+/g, '');
+                                                    if (normDestName.includes(q)) return true;
 
-                    {careerSubTab === 'past5years' && (
-                        <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>過去5年間の進学実績詳細 (2019-2023)</h3>
-                                <input
-                                    type="text"
-                                    placeholder="学校名・氏名で検索..."
-                                    value={careerSearchQuery}
-                                    onChange={(e) => setCareerSearchQuery(e.target.value)}
-                                    style={{
-                                        padding: '0.5rem',
-                                        borderRadius: '4px',
-                                        border: '1px solid #d1d5db',
-                                        fontSize: '0.9rem',
-                                        width: '250px'
-                                    }}
-                                />
-                            </div>
-                            <div className={styles.tableContainer}>
-                                <table className={styles.table}>
-                                    <thead>
-                                        <tr>
-                                            <th>進学先名</th>
-                                            <th>5年間合計</th>
-                                            <th>2024年度</th>
-                                            <th>2023年度</th>
-                                            <th>2022年度</th>
-                                            <th>2021年度</th>
-                                            <th>2020年度</th>
-                                            <th>詳細</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {careerStats.topDestinations
-                                            .filter(d => {
-                                                const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
-                                                if (!q) return true;
-                                                // Normalize data for comparison
-                                                const normDestName = d.name.toLowerCase().replace(/\s+/g, '');
-                                                if (normDestName.includes(q)) return true;
-
-                                                // Check matches in student list
-                                                if (d.students && d.students.some(s => {
-                                                    const normName = (s.name || '').toLowerCase().replace(/\s+/g, '');
-                                                    return normName.includes(q);
-                                                })) return true;
-
-                                                return false;
-                                            })
-                                            .map(d => {
-                                                const matches = careerSearchQuery && d.students
-                                                    ? d.students.filter(s => (s.name || '').includes(careerSearchQuery))
-                                                    : [];
-                                                const y2023 = (d.years && d.years['2023']) || 0;
-                                                const y2022 = (d.years && d.years['2022']) || 0;
-                                                const y2021 = (d.years && d.years['2021']) || 0;
-                                                const y2020 = (d.years && d.years['2020']) || 0;
-                                                const y2019 = (d.years && d.years['2019']) || 0;
-                                                const total5 = y2023 + y2022 + y2021 + y2020 + y2019;
-                                                return { ...d, y2023, y2022, y2021, y2020, y2019, total5 };
-                                            })
-                                            .filter(d => d.total5 > 0)
-                                            .sort((a, b) => b.total5 - a.total5)
-                                            .map((dest, idx) => {
-                                                const matches = careerSearchQuery && dest.students
-                                                    ? dest.students.filter(s => {
-                                                        const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
+                                                    // Check matches in student list
+                                                    if (d.students && d.students.some(s => {
                                                         const normName = (s.name || '').toLowerCase().replace(/\s+/g, '');
                                                         return normName.includes(q);
-                                                    })
-                                                    : [];
+                                                    })) return true;
 
-                                                const isExpanded = expandedPast5YearsSchoolId === idx;
+                                                    return false;
+                                                })
+                                                .map(d => {
+                                                    const matches = careerSearchQuery && d.students
+                                                        ? d.students.filter(s => (s.name || '').includes(careerSearchQuery))
+                                                        : [];
+                                                    const y2023 = (d.years && d.years['2023']) || 0;
+                                                    const y2022 = (d.years && d.years['2022']) || 0;
+                                                    const y2021 = (d.years && d.years['2021']) || 0;
+                                                    const y2020 = (d.years && d.years['2020']) || 0;
+                                                    const y2019 = (d.years && d.years['2019']) || 0;
+                                                    const total5 = y2023 + y2022 + y2021 + y2020 + y2019;
+                                                    return { ...d, y2023, y2022, y2021, y2020, y2019, total5 };
+                                                })
+                                                .filter(d => d.total5 > 0)
+                                                .sort((a, b) => b.total5 - a.total5)
+                                                .map((dest, idx) => {
+                                                    const matches = careerSearchQuery && dest.students
+                                                        ? dest.students.filter(s => {
+                                                            const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
+                                                            const normName = (s.name || '').toLowerCase().replace(/\s+/g, '');
+                                                            return normName.includes(q);
+                                                        })
+                                                        : [];
 
-                                                return (
-                                                    <Fragment key={idx}>
-                                                        <tr key={idx}
-                                                            onClick={() => setExpandedPast5YearsSchoolId(isExpanded ? null : idx)}
-                                                            style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'white', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
-                                                        >
-                                                            <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                            <td>{dest.total5}名</td>
-                                                            <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
-                                                            <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
-                                                            <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
-                                                            <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
-                                                            <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
-                                                            <td style={{ textAlign: 'center' }}>
-                                                                <AccordionChevron rotated={isExpanded} />
-                                                            </td>
-                                                        </tr>
-                                                        {matches.length > 0 && !isExpanded && (
-                                                            <tr>
-                                                                <td colSpan="8" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
-                                                                    <div style={{ fontSize: '0.85rem', color: '#166534' }}>
-                                                                        <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
-                                                                    </div>
+                                                    const isExpanded = expandedPast5YearsSchoolId === idx;
+
+                                                    return (
+                                                        <Fragment key={idx}>
+                                                            <tr key={idx}
+                                                                onClick={() => setExpandedPast5YearsSchoolId(isExpanded ? null : idx)}
+                                                                style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'white', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
+                                                            >
+                                                                <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                                <td>{dest.total5}名</td>
+                                                                <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
+                                                                <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
+                                                                <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
+                                                                <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
+                                                                <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
+                                                                <td style={{ textAlign: 'center' }}>
+                                                                    <AccordionChevron rotated={isExpanded} />
                                                                 </td>
                                                             </tr>
-                                                        )}
-                                                        {isExpanded && (
-                                                            <tr>
-                                                                <td colSpan="8" style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
-                                                                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                                                                        <strong>合格者一覧 (年度別):</strong>
-                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                                            {['2023', '2022', '2021', '2020', '2019'].map(year => {
-                                                                                const studentsInYear = (dest.students || []).filter(s => String(s.year) === String(year));
-                                                                                if (studentsInYear.length === 0) return null;
-                                                                                return (
-                                                                                    <div key={year} style={{ display: 'flex', alignItems: 'baseline', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>
-                                                                                        <span style={{ fontWeight: 600, minWidth: '80px', color: '#4b5563' }}>{parseInt(year) + 1}年度卒:</span>
-                                                                                        <span style={{ marginLeft: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                                                            {studentsInYear.map((s, i) => (
-                                                                                                <span key={i} style={{
-                                                                                                    backgroundColor: '#e0f2fe',
-                                                                                                    color: '#0369a1',
-                                                                                                    padding: '0.25rem 0.5rem',
-                                                                                                    borderRadius: '9999px',
-                                                                                                    fontSize: '0.85rem',
-                                                                                                    whiteSpace: 'nowrap'
-                                                                                                }}>
-                                                                                                    {s.name}
-                                                                                                </span>
-                                                                                            ))}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                );
-                                                                            })}
+                                                            {matches.length > 0 && !isExpanded && (
+                                                                <tr>
+                                                                    <td colSpan="8" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
+                                                                        <div style={{ fontSize: '0.85rem', color: '#166534' }}>
+                                                                            <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </Fragment>
-                                                )
-                                            })}
-                                    </tbody>
-                                </table>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            {isExpanded && (
+                                                                <tr>
+                                                                    <td colSpan="8" style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                            <strong>合格者一覧 (年度別):</strong>
+                                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                                                {['2023', '2022', '2021', '2020', '2019'].map(year => {
+                                                                                    const studentsInYear = (dest.students || []).filter(s => String(s.year) === String(year));
+                                                                                    if (studentsInYear.length === 0) return null;
+                                                                                    return (
+                                                                                        <div key={year} style={{ display: 'flex', alignItems: 'baseline', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>
+                                                                                            <span style={{ fontWeight: 600, minWidth: '80px', color: '#4b5563' }}>{parseInt(year) + 1}年度卒:</span>
+                                                                                            <span style={{ marginLeft: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                                                                {studentsInYear.map((s, i) => (
+                                                                                                    <span key={i} style={{
+                                                                                                        backgroundColor: '#e0f2fe',
+                                                                                                        color: '#0369a1',
+                                                                                                        padding: '0.25rem 0.5rem',
+                                                                                                        borderRadius: '9999px',
+                                                                                                        fontSize: '0.85rem',
+                                                                                                        whiteSpace: 'nowrap'
+                                                                                                    }}>
+                                                                                                        {s.name}
+                                                                                                    </span>
+                                                                                                ))}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </Fragment>
+                                                    )
+                                                })}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <div className={styles.footer}>
-                        <p>※ データは現在のフィルタ設定に基づいています。</p>
-                    </div>
-                </>
-            )
+                        <div className={styles.footer}>
+                            <p>※ データは現在のフィルタ設定に基づいています。</p>
+                        </div>
+                    </>
+                )
             }
-        </div>
+        </div >
     )
 }
