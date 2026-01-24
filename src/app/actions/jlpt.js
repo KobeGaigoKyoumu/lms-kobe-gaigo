@@ -143,6 +143,15 @@ export async function fetchJlptAnalyticsData() {
             enhancedStats.students = [];
         }
 
+        // 3.5. All Students Summary (for Database Tab)
+        // Includes both active and inactive/past students
+        if (allFetchedData && allFetchedData.length > 0) {
+            const allStudentSummaries = await getStudentsJlptSummary(allFetchedData);
+            enhancedStats.allStudentStats = allStudentSummaries;
+        } else {
+            enhancedStats.allStudentStats = [];
+        }
+
         // 4. Graduation Stats
         const accurateGradStats = await getAccurateGraduationStats();
         if (accurateGradStats.source === 'official') {

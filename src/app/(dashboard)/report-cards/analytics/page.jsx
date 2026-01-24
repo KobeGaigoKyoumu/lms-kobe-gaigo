@@ -144,6 +144,11 @@ export default function AnalyticsPage() {
     const [sectionScoreStats, setSectionScoreStats] = useState(null) // 科目別得点データ
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
+    // Database Tab State
+    const [dbSearchQuery, setDbSearchQuery] = useState('')
+    const [dbFilterStatus, setDbFilterStatus] = useState('all') // 'all', 'enrolled', 'graduated'
+    const [dbFilteredStudents, setDbFilteredStudents] = useState([])
+
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
     const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', 'compare', or 'section'
@@ -167,6 +172,26 @@ export default function AnalyticsPage() {
         fetchJlptData()
         setCareerStats(careerStatsData)
     }, [])
+
+    // Database Search Effect
+    useEffect(() => {
+        if (!enhancedJlptStats?.allStudentStats) return
+
+        let results = enhancedJlptStats.allStudentStats
+
+        if (dbSearchQuery) {
+            const q = dbSearchQuery.toLowerCase()
+            results = results.filter(s =>
+                (s.name && s.name.toLowerCase().includes(q)) ||
+                (s.studentId && String(s.studentId).includes(q))
+            )
+        }
+
+        // Simple status filter logic (if needed in future, currently just search)
+        // if (dbFilterStatus === 'enrolled') ...
+
+        setDbFilteredStudents(results)
+    }, [dbSearchQuery, enhancedJlptStats])
 
     // Calculate Class Summary List for List View
     const classSummaryList = useMemo(() => {
@@ -480,6 +505,12 @@ export default function AnalyticsPage() {
                     onClick={() => setActiveTab('career')}
                 >
                     進路分析
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'database' ? styles.active : ''}`}
+                    onClick={() => setActiveTab('database')}
+                >
+                    データベース
                 </button>
             </div>
 
@@ -924,598 +955,559 @@ export default function AnalyticsPage() {
                                 </div>
                             )}
                         </>
-                    )}
+                    )
+                    }
 
                     {/* Class Analysis - No Data State */}
-                    {jlptSubTab === 'class' && (!enhancedJlptStats?.studentStats || enhancedJlptStats.studentStats.length === 0) && (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
-                            <p>表示できるクラスデータがありません。</p>
-                            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                                学生データの読み込みに失敗したか、条件に一致するデータがありません。（対象: {enhancedJlptStats?.students?.length || 0}名）
-                            </p>
-                        </div>
-                    )}
+                    {
+                        jlptSubTab === 'class' && (!enhancedJlptStats?.studentStats || enhancedJlptStats.studentStats.length === 0) && (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
+                                <p>表示できるクラスデータがありません。</p>
+                                <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                                    学生データの読み込みに失敗したか、条件に一致するデータがありません。（対象: {enhancedJlptStats?.students?.length || 0}名）
+                                </p>
+                            </div>
+                        )
+                    }
 
                     {/* National Comparison Content */}
-                    {jlptSubTab === 'compare' && (
-                        <>
-                            <h2 className={styles.sectionTitle} style={{ marginTop: 0 }}>
-                                本校 vs 全国平均（日本国内）
-                            </h2>
+                    {
+                        jlptSubTab === 'compare' && (
+                            <>
+                                <h2 className={styles.sectionTitle} style={{ marginTop: 0 }}>
+                                    本校 vs 全国平均（日本国内）
+                                </h2>
 
-                            {loadingNational && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                    全国データを読み込み中...
-                                </div>
-                            )}
-
-                            {!loadingNational && nationalStats && enhancedJlptStats?.levelStats && (
-                                <>
-                                    {/* Summary Stats Cards */}
-                                    <div className={styles.statsGrid}>
-                                        <div className={styles.statCard}>
-                                            <span className={styles.statLabel}>全国平均との比較</span>
-                                            <div className={styles.statValueRow}>
-                                                <span className={styles.statValue} style={{
-                                                    color: (() => {
-                                                        // 本校の有効データのみで平均を計算（passRateは文字列なのでparseFloat）
-                                                        const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => {
-                                                                const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                                return stat ? parseFloat(stat.passRate) : null;
-                                                            })
-                                                            .filter(rate => rate !== null && !isNaN(rate));
-                                                        const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
-                                                            .filter(rate => rate > 0);
-
-                                                        if (schoolRates.length === 0 || nationalRates.length === 0) return '#6b7280';
-
-                                                        const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
-                                                        const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
-                                                        return schoolAvg >= nationalAvg ? COLOR_PASS : COLOR_WARN;
-                                                    })()
-                                                }}>
-                                                    {(() => {
-                                                        const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => {
-                                                                const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                                return stat ? parseFloat(stat.passRate) : null;
-                                                            })
-                                                            .filter(rate => rate !== null && !isNaN(rate));
-                                                        const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
-                                                            .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
-                                                            .filter(rate => rate > 0);
-
-                                                        if (schoolRates.length === 0 || nationalRates.length === 0) return '-';
-
-                                                        const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
-                                                        const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
-                                                        const diff = schoolAvg - nationalAvg;
-                                                        return diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
-                                                    })()}%
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className={styles.statCard}>
-                                            <span className={styles.statLabel}>全国平均以上のレベル数</span>
-                                            <div className={styles.statValueRow}>
-                                                <span className={styles.statValue}>
-                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].filter(level => {
-                                                        const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                        const schoolRate = schoolStat?.passRate || 0;
-                                                        const nationalRate = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
-                                                        return schoolRate > nationalRate;
-                                                    }).length}
-                                                </span>
-                                                <span className={styles.statUnit}>/ 5レベル</span>
-                                            </div>
-                                        </div>
-                                        <div className={styles.statCard}>
-                                            <span className={styles.statLabel}>データ収集期間</span>
-                                            <div className={styles.statValueRow}>
-                                                <span className={styles.statValue}>{nationalStats.totalSessions}</span>
-                                                <span className={styles.statUnit}>回分</span>
-                                            </div>
-                                        </div>
+                                {loadingNational && (
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                        全国データを読み込み中...
                                     </div>
+                                )}
 
-                                    {/* Comparison Bar Chart */}
-                                    <h3 className={styles.sectionTitle}>レベル別合格率比較</h3>
-                                    <div className={styles.chartGrid}>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>本校 vs 全国平均（日本国内）</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Bar
-                                                    data={{
-                                                        labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
-                                                        datasets: [
-                                                            {
-                                                                label: '本校',
-                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                {!loadingNational && nationalStats && enhancedJlptStats?.levelStats && (
+                                    <>
+                                        {/* Summary Stats Cards */}
+                                        <div className={styles.statsGrid}>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>全国平均との比較</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue} style={{
+                                                        color: (() => {
+                                                            // 本校の有効データのみで平均を計算（passRateは文字列なのでparseFloat）
+                                                            const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                                .map(level => {
                                                                     const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                                    return stat ? parseFloat(stat.passRate) || 0 : 0;
-                                                                }),
-                                                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                                                                borderColor: 'rgb(59, 130, 246)',
-                                                                borderWidth: 1,
-                                                            },
-                                                            {
-                                                                label: '全国平均（日本国内）',
-                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                                    return parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
-                                                                }),
-                                                                backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                                                                borderColor: 'rgb(239, 68, 68)',
-                                                                borderWidth: 1,
-                                                            }
-                                                        ]
-                                                    }}
-                                                    options={{
-                                                        responsive: true,
-                                                        maintainAspectRatio: false,
-                                                        plugins: {
-                                                            legend: { position: 'top' },
-                                                        },
-                                                        scales: {
-                                                            y: {
-                                                                beginAtZero: true,
-                                                                max: 100,
-                                                                title: { display: true, text: '合格率 (%)' }
-                                                            }
-                                                        }
-                                                    }}
-                                                />
+                                                                    return stat ? parseFloat(stat.passRate) : null;
+                                                                })
+                                                                .filter(rate => rate !== null && !isNaN(rate));
+                                                            const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                                .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
+                                                                .filter(rate => rate > 0);
+
+                                                            if (schoolRates.length === 0 || nationalRates.length === 0) return '#6b7280';
+
+                                                            const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
+                                                            const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
+                                                            return schoolAvg >= nationalAvg ? COLOR_PASS : COLOR_WARN;
+                                                        })()
+                                                    }}>
+                                                        {(() => {
+                                                            const schoolRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                                .map(level => {
+                                                                    const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                                    return stat ? parseFloat(stat.passRate) : null;
+                                                                })
+                                                                .filter(rate => rate !== null && !isNaN(rate));
+                                                            const nationalRates = ['N1', 'N2', 'N3', 'N4', 'N5']
+                                                                .map(level => parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0))
+                                                                .filter(rate => rate > 0);
+
+                                                            if (schoolRates.length === 0 || nationalRates.length === 0) return '-';
+
+                                                            const schoolAvg = schoolRates.reduce((a, b) => a + b, 0) / schoolRates.length;
+                                                            const nationalAvg = nationalRates.reduce((a, b) => a + b, 0) / nationalRates.length;
+                                                            const diff = schoolAvg - nationalAvg;
+                                                            return diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+                                                        })()}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>全国平均以上のレベル数</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>
+                                                        {['N1', 'N2', 'N3', 'N4', 'N5'].filter(level => {
+                                                            const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                            const schoolRate = schoolStat?.passRate || 0;
+                                                            const nationalRate = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                            return schoolRate > nationalRate;
+                                                        }).length}
+                                                    </span>
+                                                    <span className={styles.statUnit}>/ 5レベル</span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>データ収集期間</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{nationalStats.totalSessions}</span>
+                                                    <span className={styles.statUnit}>回分</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>全国平均の推移（全レベル）</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Line
-                                                    data={{
-                                                        labels: nationalStats.sessions.map(s => s.session_name),
-                                                        datasets: [
-                                                            {
-                                                                label: 'N1',
-                                                                data: nationalStats.sessions.map(s => s.japan?.N1?.pass_rate || null),
-                                                                borderColor: 'rgb(239, 68, 68)',
-                                                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
-                                                                tension: 0.3,
-                                                                spanGaps: true,
+
+                                        {/* Comparison Bar Chart */}
+                                        <h3 className={styles.sectionTitle}>レベル別合格率比較</h3>
+                                        <div className={styles.chartGrid}>
+                                            <div className={styles.chartCard}>
+                                                <h3 className={styles.chartTitle}>本校 vs 全国平均（日本国内）</h3>
+                                                <div className={styles.chartContainer}>
+                                                    <Bar
+                                                        data={{
+                                                            labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
+                                                            datasets: [
+                                                                {
+                                                                    label: '本校',
+                                                                    data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        const stat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                                        return stat ? parseFloat(stat.passRate) || 0 : 0;
+                                                                    }),
+                                                                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                                                    borderColor: 'rgb(59, 130, 246)',
+                                                                    borderWidth: 1,
+                                                                },
+                                                                {
+                                                                    label: '全国平均（日本国内）',
+                                                                    data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        return parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                                    }),
+                                                                    backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                                                                    borderColor: 'rgb(239, 68, 68)',
+                                                                    borderWidth: 1,
+                                                                }
+                                                            ]
+                                                        }}
+                                                        options={{
+                                                            responsive: true,
+                                                            maintainAspectRatio: false,
+                                                            plugins: {
+                                                                legend: { position: 'top' },
                                                             },
-                                                            {
-                                                                label: 'N2',
-                                                                data: nationalStats.sessions.map(s => s.japan?.N2?.pass_rate || null),
-                                                                borderColor: 'rgb(249, 115, 22)',
-                                                                backgroundColor: 'rgba(249, 115, 22, 0.5)',
-                                                                tension: 0.3,
-                                                                spanGaps: true,
-                                                            },
-                                                            {
-                                                                label: 'N3',
-                                                                data: nationalStats.sessions.map(s => s.japan?.N3?.pass_rate || null),
-                                                                borderColor: 'rgb(245, 158, 11)',
-                                                                backgroundColor: 'rgba(245, 158, 11, 0.5)',
-                                                                tension: 0.3,
-                                                                spanGaps: true,
-                                                            },
-                                                            {
-                                                                label: 'N4',
-                                                                data: nationalStats.sessions.map(s => s.japan?.N4?.pass_rate || null),
-                                                                borderColor: 'rgb(132, 204, 22)',
-                                                                backgroundColor: 'rgba(132, 204, 22, 0.5)',
-                                                                tension: 0.3,
-                                                                spanGaps: true,
-                                                            },
-                                                            {
-                                                                label: 'N5',
-                                                                data: nationalStats.sessions.map(s => s.japan?.N5?.pass_rate || null),
-                                                                borderColor: 'rgb(59, 130, 246)',
-                                                                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                                                                tension: 0.3,
-                                                                spanGaps: true,
+                                                            scales: {
+                                                                y: {
+                                                                    beginAtZero: true,
+                                                                    max: 100,
+                                                                    title: { display: true, text: '合格率 (%)' }
+                                                                }
                                                             }
-                                                        ]
-                                                    }}
-                                                    options={{
-                                                        responsive: true,
-                                                        maintainAspectRatio: false,
-                                                        plugins: {
-                                                            legend: { position: 'top' },
-                                                        },
-                                                        scales: {
-                                                            y: {
-                                                                beginAtZero: true,
-                                                                max: 100,
-                                                                title: { display: true, text: '合格率 (%)' }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className={styles.chartCard}>
+                                                <h3 className={styles.chartTitle}>全国平均の推移（全レベル）</h3>
+                                                <div className={styles.chartContainer}>
+                                                    <Line
+                                                        data={{
+                                                            labels: nationalStats.sessions.map(s => s.session_name),
+                                                            datasets: [
+                                                                {
+                                                                    label: 'N1',
+                                                                    data: nationalStats.sessions.map(s => s.japan?.N1?.pass_rate || null),
+                                                                    borderColor: 'rgb(239, 68, 68)',
+                                                                    backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                                                                    tension: 0.3,
+                                                                    spanGaps: true,
+                                                                },
+                                                                {
+                                                                    label: 'N2',
+                                                                    data: nationalStats.sessions.map(s => s.japan?.N2?.pass_rate || null),
+                                                                    borderColor: 'rgb(249, 115, 22)',
+                                                                    backgroundColor: 'rgba(249, 115, 22, 0.5)',
+                                                                    tension: 0.3,
+                                                                    spanGaps: true,
+                                                                },
+                                                                {
+                                                                    label: 'N3',
+                                                                    data: nationalStats.sessions.map(s => s.japan?.N3?.pass_rate || null),
+                                                                    borderColor: 'rgb(245, 158, 11)',
+                                                                    backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                                                                    tension: 0.3,
+                                                                    spanGaps: true,
+                                                                },
+                                                                {
+                                                                    label: 'N4',
+                                                                    data: nationalStats.sessions.map(s => s.japan?.N4?.pass_rate || null),
+                                                                    borderColor: 'rgb(132, 204, 22)',
+                                                                    backgroundColor: 'rgba(132, 204, 22, 0.5)',
+                                                                    tension: 0.3,
+                                                                    spanGaps: true,
+                                                                },
+                                                                {
+                                                                    label: 'N5',
+                                                                    data: nationalStats.sessions.map(s => s.japan?.N5?.pass_rate || null),
+                                                                    borderColor: 'rgb(59, 130, 246)',
+                                                                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                                                                    tension: 0.3,
+                                                                    spanGaps: true,
+                                                                }
+                                                            ]
+                                                        }}
+                                                        options={{
+                                                            responsive: true,
+                                                            maintainAspectRatio: false,
+                                                            plugins: {
+                                                                legend: { position: 'top' },
                                                             },
-                                                            x: {
-                                                                ticks: { maxRotation: 45, minRotation: 45 }
+                                                            scales: {
+                                                                y: {
+                                                                    beginAtZero: true,
+                                                                    max: 100,
+                                                                    title: { display: true, text: '合格率 (%)' }
+                                                                },
+                                                                x: {
+                                                                    ticks: { maxRotation: 45, minRotation: 45 }
+                                                                }
                                                             }
-                                                        }
-                                                    }}
-                                                />
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Recent 3 Years Comparison & Exam Rate */}
-                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近3ヶ年の推移</h3>
-                                    <div className={styles.chartGrid}>
-                                        <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
-                                            <h3 className={styles.chartTitle}>直近3ヶ年の合格率比較</h3>
-                                            <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
-                                                <table className={styles.table}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>年度</th>
-                                                            <th>本校合格率</th>
-                                                            <th>全国平均合格率</th>
-                                                            <th>差分</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 ? (
-                                                            enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
-                                                                const nationalSessions = nationalStats.sessions ?
-                                                                    nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
-                                                                let nationalRateVal = 0;
-                                                                let count = 0;
+                                        {/* Recent 3 Years Comparison & Exam Rate */}
+                                        <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近3ヶ年の推移</h3>
+                                        <div className={styles.chartGrid}>
+                                            <div className={styles.chartCard} style={{ gridColumn: 'span 2' }}>
+                                                <h3 className={styles.chartTitle}>直近3ヶ年の合格率比較</h3>
+                                                <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
+                                                    <table className={styles.table}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>年度</th>
+                                                                <th>本校合格率</th>
+                                                                <th>全国平均合格率</th>
+                                                                <th>差分</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 ? (
+                                                                enhancedJlptStats.yearlyTrend.slice(-3).reverse().map(yearData => {
+                                                                    const nationalSessions = nationalStats.sessions ?
+                                                                        nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
+                                                                    let nationalRateVal = 0;
+                                                                    let count = 0;
 
-                                                                if (nationalSessions.length > 0) {
-                                                                    nationalSessions.forEach(s => {
-                                                                        // Simple average of all N1-N5 levels for approximation
-                                                                        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
-                                                                        let sessionSum = 0;
-                                                                        let sessionLevelCount = 0;
-                                                                        levels.forEach(l => {
-                                                                            const rate = s.japan?.[l]?.pass_rate; // Can be string
-                                                                            const rateVal = parseFloat(rate || 0);
-                                                                            if (rateVal > 0) {
-                                                                                sessionSum += rateVal;
-                                                                                sessionLevelCount++;
+                                                                    if (nationalSessions.length > 0) {
+                                                                        nationalSessions.forEach(s => {
+                                                                            // Simple average of all N1-N5 levels for approximation
+                                                                            const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                                                                            let sessionSum = 0;
+                                                                            let sessionLevelCount = 0;
+                                                                            levels.forEach(l => {
+                                                                                const rate = s.japan?.[l]?.pass_rate; // Can be string
+                                                                                const rateVal = parseFloat(rate || 0);
+                                                                                if (rateVal > 0) {
+                                                                                    sessionSum += rateVal;
+                                                                                    sessionLevelCount++;
+                                                                                }
+                                                                            });
+                                                                            if (sessionLevelCount > 0) {
+                                                                                nationalRateVal += (sessionSum / sessionLevelCount);
+                                                                                count++;
                                                                             }
                                                                         });
-                                                                        if (sessionLevelCount > 0) {
-                                                                            nationalRateVal += (sessionSum / sessionLevelCount);
-                                                                            count++;
-                                                                        }
-                                                                    });
-                                                                }
+                                                                    }
 
-                                                                const nationalAvg = count > 0 ? (nationalRateVal / count).toFixed(1) : '-';
-                                                                const diff = nationalAvg !== '-' ? (parseFloat(yearData.passRate) - parseFloat(nationalAvg)).toFixed(1) : '-';
+                                                                    const nationalAvg = count > 0 ? (nationalRateVal / count).toFixed(1) : '-';
+                                                                    const diff = nationalAvg !== '-' ? (parseFloat(yearData.passRate) - parseFloat(nationalAvg)).toFixed(1) : '-';
+
+                                                                    return (
+                                                                        <tr key={yearData.year}>
+                                                                            <td style={{ fontWeight: 600 }}>{yearData.year}年度</td>
+                                                                            <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
+                                                                            <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
+                                                                            <td style={{
+                                                                                fontWeight: 600,
+                                                                                color: parseFloat(diff) > 0 ? COLOR_PASS : parseFloat(diff) < 0 ? COLOR_FAIL : COLOR_MUTED
+                                                                            }}>
+                                                                                {parseFloat(diff) > 0 ? '+' : ''}{diff}%
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })
+                                                            ) : (
+                                                                <tr>
+                                                                    <td colSpan="4" style={{ textAlign: 'center', padding: '1rem', color: '#6b7280' }}>
+                                                                        データがありません
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            {/* 3-Year Average Row */}
+                                                            {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 && (() => {
+                                                                const years = enhancedJlptStats.yearlyTrend.slice(-3);
+                                                                let schoolSum = 0, schoolCount = 0;
+                                                                let nationalSum = 0, nationalCount = 0;
+
+                                                                years.forEach(yearData => {
+                                                                    // School
+                                                                    const sRate = parseFloat(yearData.passRate);
+                                                                    if (!isNaN(sRate)) { schoolSum += sRate; schoolCount++; }
+
+                                                                    // National
+                                                                    const nSessions = nationalStats.sessions ?
+                                                                        nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
+
+                                                                    let nRateVal = 0, nCount = 0;
+                                                                    if (nSessions.length > 0) {
+                                                                        nSessions.forEach(s => {
+                                                                            const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                                                                            let sSum = 0, lCount = 0;
+                                                                            levels.forEach(l => {
+                                                                                const r = parseFloat(s.japan?.[l]?.pass_rate || 0);
+                                                                                if (r > 0) { sSum += r; lCount++; }
+                                                                            });
+                                                                            if (lCount > 0) { nRateVal += (sSum / lCount); nCount++; }
+                                                                        });
+                                                                    }
+                                                                    if (nCount > 0) { nationalSum += (nRateVal / nCount); nationalCount++; }
+                                                                });
+
+                                                                const sAvg = schoolCount > 0 ? (schoolSum / schoolCount).toFixed(1) : '-';
+                                                                const nAvg = nationalCount > 0 ? (nationalSum / nationalCount).toFixed(1) : '-';
+                                                                const dAvg = (sAvg !== '-' && nAvg !== '-') ? (parseFloat(sAvg) - parseFloat(nAvg)).toFixed(1) : '-';
 
                                                                 return (
-                                                                    <tr key={yearData.year}>
-                                                                        <td style={{ fontWeight: 600 }}>{yearData.year}年度</td>
-                                                                        <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
-                                                                        <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
-                                                                        <td style={{
-                                                                            fontWeight: 600,
-                                                                            color: parseFloat(diff) > 0 ? COLOR_PASS : parseFloat(diff) < 0 ? COLOR_FAIL : COLOR_MUTED
-                                                                        }}>
-                                                                            {parseFloat(diff) > 0 ? '+' : ''}{diff}%
+                                                                    <tr style={{ backgroundColor: '#f3f4f6', borderTop: '2px solid #e5e7eb' }}>
+                                                                        <td style={{ fontWeight: 700 }}>3年平均</td>
+                                                                        <td style={{ fontWeight: 700, color: '#2563eb' }}>{sAvg}%</td>
+                                                                        <td style={{ fontWeight: 700 }}>{nAvg}%</td>
+                                                                        <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? COLOR_PASS : parseFloat(dAvg) < 0 ? COLOR_FAIL : COLOR_MUTED }}>
+                                                                            {parseFloat(dAvg) > 0 ? '+' : ''}{dAvg}%
                                                                         </td>
                                                                     </tr>
                                                                 );
-                                                            })
-                                                        ) : (
-                                                            <tr>
-                                                                <td colSpan="4" style={{ textAlign: 'center', padding: '1rem', color: '#6b7280' }}>
-                                                                    データがありません
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                        {/* 3-Year Average Row */}
-                                                        {enhancedJlptStats.yearlyTrend && enhancedJlptStats.yearlyTrend.length > 0 && (() => {
-                                                            const years = enhancedJlptStats.yearlyTrend.slice(-3);
-                                                            let schoolSum = 0, schoolCount = 0;
-                                                            let nationalSum = 0, nationalCount = 0;
-
-                                                            years.forEach(yearData => {
-                                                                // School
-                                                                const sRate = parseFloat(yearData.passRate);
-                                                                if (!isNaN(sRate)) { schoolSum += sRate; schoolCount++; }
-
-                                                                // National
-                                                                const nSessions = nationalStats.sessions ?
-                                                                    nationalStats.sessions.filter(s => s.session && String(s.year) === String(yearData.year)) : [];
-
-                                                                let nRateVal = 0, nCount = 0;
-                                                                if (nSessions.length > 0) {
-                                                                    nSessions.forEach(s => {
-                                                                        const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
-                                                                        let sSum = 0, lCount = 0;
-                                                                        levels.forEach(l => {
-                                                                            const r = parseFloat(s.japan?.[l]?.pass_rate || 0);
-                                                                            if (r > 0) { sSum += r; lCount++; }
-                                                                        });
-                                                                        if (lCount > 0) { nRateVal += (sSum / lCount); nCount++; }
-                                                                    });
-                                                                }
-                                                                if (nCount > 0) { nationalSum += (nRateVal / nCount); nationalCount++; }
-                                                            });
-
-                                                            const sAvg = schoolCount > 0 ? (schoolSum / schoolCount).toFixed(1) : '-';
-                                                            const nAvg = nationalCount > 0 ? (nationalSum / nationalCount).toFixed(1) : '-';
-                                                            const dAvg = (sAvg !== '-' && nAvg !== '-') ? (parseFloat(sAvg) - parseFloat(nAvg)).toFixed(1) : '-';
-
-                                                            return (
-                                                                <tr style={{ backgroundColor: '#f3f4f6', borderTop: '2px solid #e5e7eb' }}>
-                                                                    <td style={{ fontWeight: 700 }}>3年平均</td>
-                                                                    <td style={{ fontWeight: 700, color: '#2563eb' }}>{sAvg}%</td>
-                                                                    <td style={{ fontWeight: 700 }}>{nAvg}%</td>
-                                                                    <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? COLOR_PASS : parseFloat(dAvg) < 0 ? COLOR_FAIL : COLOR_MUTED }}>
-                                                                        {parseFloat(dAvg) > 0 ? '+' : ''}{dAvg}%
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })()}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                    {/* Comparison Table */}
-                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>レベル別詳細比較</h3>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>レベル</th>
-                                                    <th>本校合格率</th>
-                                                    <th>本校受験者数</th>
-                                                    <th>全国平均</th>
-                                                    <th>全国最低</th>
-                                                    <th>全国最高</th>
-                                                    <th>差分</th>
-                                                    <th>評価</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                    const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
-                                                    const schoolRate = schoolStat?.passRate || 0;
-                                                    const schoolExaminees = schoolStat?.total || 0;
-                                                    const nationalAvg = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
-                                                    const nationalMin = parseFloat(nationalStats.averageRates?.japan?.[level]?.min || 0);
-                                                    const nationalMax = parseFloat(nationalStats.averageRates?.japan?.[level]?.max || 0);
-                                                    const diff = (schoolRate - nationalAvg).toFixed(1);
-                                                    const isPositive = parseFloat(diff) > 0;
-                                                    const isNegative = parseFloat(diff) < 0;
-
-                                                    return (
-                                                        <tr key={level}>
-                                                            <td>
-                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>
-                                                                    {level}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ fontWeight: 600 }}>{schoolRate}%</td>
-                                                            <td>{schoolExaminees}名</td>
-                                                            <td>{nationalAvg}%</td>
-                                                            <td style={{ color: '#6b7280' }}>{nationalMin}%</td>
-                                                            <td style={{ color: '#6b7280' }}>{nationalMax}%</td>
-                                                            <td style={{
-                                                                fontWeight: 600,
-                                                                color: isPositive ? COLOR_PASS : isNegative ? COLOR_FAIL : COLOR_MUTED
-                                                            }}>
-                                                                {isPositive ? '+' : ''}{diff}%
-                                                            </td>
-                                                            <td>
-                                                                {isPositive && <span style={{ color: COLOR_PASS, fontWeight: 600 }}>◎ 優秀</span>}
-                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>△ 要改善</span>}
-                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: COLOR_WARN, fontWeight: 600 }}>○ 標準</span>}
-                                                                {!isPositive && !isNegative && <span style={{ color: COLOR_MUTED }}>○ 同等</span>}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    {/* Recent Sessions Table */}
-                                    <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近の全国試験データ(合格率)</h3>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>試験回</th>
-                                                    <th>N1</th>
-                                                    <th>N2</th>
-                                                    <th>N3</th>
-                                                    <th>N4</th>
-                                                    <th>N5</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {nationalStats.recentSessions?.slice(0, 6).map((session, idx) => (
-                                                    <tr key={idx}>
-                                                        <td style={{ fontWeight: 600 }}>{session.session_name}</td>
-                                                        {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => (
-                                                            <td key={level}>
-                                                                {session.japan?.[level]?.pass_rate
-                                                                    ? `${session.japan[level].pass_rate}%`
-                                                                    : '-'
-                                                                }
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    {/* Data Source Info */}
-                                    <div style={{ marginTop: '2rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', fontSize: '0.875rem', color: '#6b7280' }}>
-                                        <p><strong>データソース:</strong> {nationalStats.source}</p>
-                                        <p><strong>集計期間:</strong> {nationalStats.totalSessions}回分のJLPT試験データ（2017年〜2025年）</p>
-                                        <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
-                                            ※ 全国平均は日本国内受験者のデータを集計しています。海外受験者データも別途保有しています。
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-
-                            {!loadingNational && !nationalStats && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                    全国統計データの読み込みに失敗しました。
-                                </div>
-                            )}
-                        </>
-                    )}
-
-                    {/* Section Scores (科目別得点) Tab */}
-                    {jlptSubTab === 'section' && (
-                        <>
-                            {sectionScoreStats ? (
-                                <>
-                                    {/* Summary Stats */}
-                                    <div className={styles.statsGrid}>
-                                        <div className={styles.statCard}>
-                                            <span className={styles.statLabel}>科目別データ件数</span>
-                                            <div className={styles.statValueRow}>
-                                                <span className={styles.statValue}>{sectionScoreStats.overall?.totalRecords?.toLocaleString() || 0}</span>
-                                                <span className={styles.statUnit}>件</span>
-                                            </div>
-                                        </div>
-                                        <div className={styles.statCard}>
-                                            <span className={styles.statLabel}>全科目平均点</span>
-                                            <div className={styles.statValueRow}>
-                                                <span className={styles.statValue}>{sectionScoreStats.overall?.avgScore || 0}</span>
-                                                <span className={styles.statUnit}>点</span>
-                                            </div>
-                                        </div>
-                                        {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
-                                            <div className={styles.statCard} key={section}>
-                                                <span className={styles.statLabel}>{section}</span>
-                                                <div className={styles.statValueRow}>
-                                                    <span className={styles.statValue}>{data.avgScore}</span>
-                                                    <span className={styles.statUnit}>点平均</span>
+                                                            })()}
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Section Score Charts */}
-                                    <div className={styles.chartsRow}>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>科目別平均点</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Bar
-                                                    data={{
-                                                        labels: Object.keys(sectionScoreStats.bySection || {}),
-                                                        datasets: [{
-                                                            label: '平均点',
-                                                            data: Object.values(sectionScoreStats.bySection || {}).map(s => s.avgScore),
-                                                            backgroundColor: [
-                                                                'rgba(239, 68, 68, 0.6)',
-                                                                'rgba(59, 130, 246, 0.6)',
-                                                                'rgba(34, 197, 94, 0.6)',
-                                                            ],
-                                                        }]
-                                                    }}
-                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
-                                                />
-                                            </div>
                                         </div>
-                                        <div className={styles.chartCard}>
-                                            <h3 className={styles.chartTitle}>レベル別科目平均点</h3>
-                                            <div className={styles.chartContainer}>
-                                                <Bar
-                                                    data={{
-                                                        labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
-                                                        datasets: [
-                                                            {
-                                                                label: '言語知識',
-                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '言語知識' && s.level === level);
-                                                                    return item?.avgScore || 0;
-                                                                }),
-                                                                backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                                                            },
-                                                            {
-                                                                label: '読解',
-                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '読解' && s.level === level);
-                                                                    return item?.avgScore || 0;
-                                                                }),
-                                                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                                                            },
-                                                            {
-                                                                label: '聴解',
-                                                                data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                                    const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '聴解' && s.level === level);
-                                                                    return item?.avgScore || 0;
-                                                                }),
-                                                                backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                                                            }
-                                                        ]
-                                                    }}
-                                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    {/* Section Overall Average Table */}
-                                    <div>
-                                        <h2 className={styles.sectionTitle}>科目別全体平均</h2>
-                                        <div className={styles.tableContainer} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottom: 'none' }}>
+
+
+                                        {/* Comparison Table */}
+                                        <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>レベル別詳細比較</h3>
+                                        <div className={styles.tableContainer}>
                                             <table className={styles.table}>
                                                 <thead>
                                                     <tr>
-                                                        <th>科目</th>
-                                                        <th>データ数</th>
-                                                        <th>平均点</th>
-                                                        <th>最高点</th>
-                                                        <th>最低点</th>
-                                                        <th>合格者平均</th>
-                                                        <th>不合格者平均</th>
+                                                        <th>レベル</th>
+                                                        <th>本校合格率</th>
+                                                        <th>本校受験者数</th>
+                                                        <th>全国平均</th>
+                                                        <th>全国最低</th>
+                                                        <th>全国最高</th>
+                                                        <th>差分</th>
+                                                        <th>評価</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
-                                                        <tr key={section}>
-                                                            <td style={{ fontWeight: 600 }}>{section}</td>
-                                                            <td>{data.count}</td>
-                                                            <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
-                                                            <td>{data.maxScore}点</td>
-                                                            <td>{data.minScore}点</td>
-                                                            <td style={{ color: data.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
-                                                                {data.passedAvg ? `${data.passedAvg}点` : '-'}
-                                                            </td>
-                                                            <td style={{ color: data.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
-                                                                {data.failedAvg ? `${data.failedAvg}点` : '-'}
-                                                            </td>
+                                                    {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                        const schoolStat = enhancedJlptStats.levelStats.find(s => s.level === level);
+                                                        const schoolRate = schoolStat?.passRate || 0;
+                                                        const schoolExaminees = schoolStat?.total || 0;
+                                                        const nationalAvg = parseFloat(nationalStats.averageRates?.japan?.[level]?.average || 0);
+                                                        const nationalMin = parseFloat(nationalStats.averageRates?.japan?.[level]?.min || 0);
+                                                        const nationalMax = parseFloat(nationalStats.averageRates?.japan?.[level]?.max || 0);
+                                                        const diff = (schoolRate - nationalAvg).toFixed(1);
+                                                        const isPositive = parseFloat(diff) > 0;
+                                                        const isNegative = parseFloat(diff) < 0;
+
+                                                        return (
+                                                            <tr key={level}>
+                                                                <td>
+                                                                    <span className={`${styles.badge} ${styles[`badge${level}`]}`}>
+                                                                        {level}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ fontWeight: 600 }}>{schoolRate}%</td>
+                                                                <td>{schoolExaminees}名</td>
+                                                                <td>{nationalAvg}%</td>
+                                                                <td style={{ color: '#6b7280' }}>{nationalMin}%</td>
+                                                                <td style={{ color: '#6b7280' }}>{nationalMax}%</td>
+                                                                <td style={{
+                                                                    fontWeight: 600,
+                                                                    color: isPositive ? COLOR_PASS : isNegative ? COLOR_FAIL : COLOR_MUTED
+                                                                }}>
+                                                                    {isPositive ? '+' : ''}{diff}%
+                                                                </td>
+                                                                <td>
+                                                                    {isPositive && <span style={{ color: COLOR_PASS, fontWeight: 600 }}>◎ 優秀</span>}
+                                                                    {isNegative && parseFloat(diff) < -5 && <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>△ 要改善</span>}
+                                                                    {isNegative && parseFloat(diff) >= -5 && <span style={{ color: COLOR_WARN, fontWeight: 600 }}>○ 標準</span>}
+                                                                    {!isPositive && !isNegative && <span style={{ color: COLOR_MUTED }}>○ 同等</span>}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Recent Sessions Table */}
+                                        <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>直近の全国試験データ(合格率)</h3>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>試験回</th>
+                                                        <th>N1</th>
+                                                        <th>N2</th>
+                                                        <th>N3</th>
+                                                        <th>N4</th>
+                                                        <th>N5</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {nationalStats.recentSessions?.slice(0, 6).map((session, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ fontWeight: 600 }}>{session.session_name}</td>
+                                                            {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => (
+                                                                <td key={level}>
+                                                                    {session.japan?.[level]?.pass_rate
+                                                                        ? `${session.japan[level].pass_rate}%`
+                                                                        : '-'
+                                                                    }
+                                                                </td>
+                                                            ))}
                                                         </tr>
                                                     ))}
                                                 </tbody>
                                             </table>
                                         </div>
-                                    </div>
 
-                                    {/* Section Score Details Table - Accordion */}
-                                    <div className={styles.sessionGroup} style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: '1px solid #e5e7eb' }}>
-                                        <div
-                                            className={styles.subtleAccordionTrigger}
-                                            onClick={() => setSectionDetailOpen(!sectionDetailOpen)}
-                                        >
-                                            科目×レベル別詳細 ({sectionScoreStats.bySectionLevel?.length || 0}件のデータ)
-                                            {sectionDetailOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                        {/* Data Source Info */}
+                                        <div style={{ marginTop: '2rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', fontSize: '0.875rem', color: '#6b7280' }}>
+                                            <p><strong>データソース:</strong> {nationalStats.source}</p>
+                                            <p><strong>集計期間:</strong> {nationalStats.totalSessions}回分のJLPT試験データ（2017年〜2025年）</p>
+                                            <p style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                                                ※ 全国平均は日本国内受験者のデータを集計しています。海外受験者データも別途保有しています。
+                                            </p>
                                         </div>
-                                        {sectionDetailOpen && (
-                                            <div className={styles.sessionDetails}>
+                                    </>
+                                )}
+
+                                {!loadingNational && !nationalStats && (
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                        全国統計データの読み込みに失敗しました。
+                                    </div>
+                                )}
+                            </>
+                        )
+                    }
+
+                    {/* Section Scores (科目別得点) Tab */}
+                    {
+                        jlptSubTab === 'section' && (
+                            <>
+                                {sectionScoreStats ? (
+                                    <>
+                                        {/* Summary Stats */}
+                                        <div className={styles.statsGrid}>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>科目別データ件数</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{sectionScoreStats.overall?.totalRecords?.toLocaleString() || 0}</span>
+                                                    <span className={styles.statUnit}>件</span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>全科目平均点</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{sectionScoreStats.overall?.avgScore || 0}</span>
+                                                    <span className={styles.statUnit}>点</span>
+                                                </div>
+                                            </div>
+                                            {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
+                                                <div className={styles.statCard} key={section}>
+                                                    <span className={styles.statLabel}>{section}</span>
+                                                    <div className={styles.statValueRow}>
+                                                        <span className={styles.statValue}>{data.avgScore}</span>
+                                                        <span className={styles.statUnit}>点平均</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Section Score Charts */}
+                                        <div className={styles.chartsRow}>
+                                            <div className={styles.chartCard}>
+                                                <h3 className={styles.chartTitle}>科目別平均点</h3>
+                                                <div className={styles.chartContainer}>
+                                                    <Bar
+                                                        data={{
+                                                            labels: Object.keys(sectionScoreStats.bySection || {}),
+                                                            datasets: [{
+                                                                label: '平均点',
+                                                                data: Object.values(sectionScoreStats.bySection || {}).map(s => s.avgScore),
+                                                                backgroundColor: [
+                                                                    'rgba(239, 68, 68, 0.6)',
+                                                                    'rgba(59, 130, 246, 0.6)',
+                                                                    'rgba(34, 197, 94, 0.6)',
+                                                                ],
+                                                            }]
+                                                        }}
+                                                        options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className={styles.chartCard}>
+                                                <h3 className={styles.chartTitle}>レベル別科目平均点</h3>
+                                                <div className={styles.chartContainer}>
+                                                    <Bar
+                                                        data={{
+                                                            labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
+                                                            datasets: [
+                                                                {
+                                                                    label: '言語知識',
+                                                                    data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '言語知識' && s.level === level);
+                                                                        return item?.avgScore || 0;
+                                                                    }),
+                                                                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                                                                },
+                                                                {
+                                                                    label: '読解',
+                                                                    data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '読解' && s.level === level);
+                                                                        return item?.avgScore || 0;
+                                                                    }),
+                                                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                                                },
+                                                                {
+                                                                    label: '聴解',
+                                                                    data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                        const item = (sectionScoreStats.bySectionLevel || []).find(s => s.section === '聴解' && s.level === level);
+                                                                        return item?.avgScore || 0;
+                                                                    }),
+                                                                    backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                                                                }
+                                                            ]
+                                                        }}
+                                                        options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Section Overall Average Table */}
+                                        <div>
+                                            <h2 className={styles.sectionTitle}>科目別全体平均</h2>
+                                            <div className={styles.tableContainer} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottom: 'none' }}>
                                                 <table className={styles.table}>
                                                     <thead>
                                                         <tr>
                                                             <th>科目</th>
-                                                            <th>レベル</th>
                                                             <th>データ数</th>
                                                             <th>平均点</th>
                                                             <th>最高点</th>
@@ -1525,84 +1517,127 @@ export default function AnalyticsPage() {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {(sectionScoreStats.bySectionLevel || [])
-                                                            .sort((a, b) => {
-                                                                // Sort by Level first (N1 -> N5)
-                                                                const levelOrder = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
-                                                                const levelDiff = (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
-                                                                if (levelDiff !== 0) return levelDiff;
-                                                                // Then by Section
-                                                                return a.section.localeCompare(b.section);
-                                                            })
-                                                            .map((row, idx) => (
-                                                                <tr key={idx}>
-                                                                    <td style={{ fontWeight: 600 }}>{row.section}</td>
-                                                                    <td>
-                                                                        <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                                                            {row.level}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td>{row.count}</td>
-                                                                    <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
-                                                                    <td>{row.maxScore}点</td>
-                                                                    <td>{row.minScore}点</td>
-                                                                    <td style={{ color: row.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
-                                                                        {row.passedAvg ? `${row.passedAvg}点` : '-'}
-                                                                    </td>
-                                                                    <td style={{ color: row.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
-                                                                        {row.failedAvg ? `${row.failedAvg}点` : '-'}
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Nationality Section Scores */}
-                                    {sectionScoreStats.byNationality && sectionScoreStats.byNationality.length > 0 && (
-                                        <div>
-                                            <h2 className={styles.sectionTitle}>国籍別科目得点</h2>
-                                            <div className={styles.tableContainer}>
-                                                <table className={styles.table}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>国籍</th>
-                                                            <th>データ数</th>
-                                                            <th>全体平均</th>
-                                                            <th>言語知識</th>
-                                                            <th>読解</th>
-                                                            <th>聴解</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {sectionScoreStats.byNationality.map((row, idx) => (
-                                                            <tr key={idx}>
-                                                                <td style={{ fontWeight: 600 }}>{row.country}</td>
-                                                                <td>{row.totalRecords}</td>
-                                                                <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
-                                                                <td>{row['言語知識'] || '-'}</td>
-                                                                <td>{row['読解'] || '-'}</td>
-                                                                <td>{row['聴解'] || '-'}</td>
+                                                        {sectionScoreStats.bySection && Object.entries(sectionScoreStats.bySection).map(([section, data]) => (
+                                                            <tr key={section}>
+                                                                <td style={{ fontWeight: 600 }}>{section}</td>
+                                                                <td>{data.count}</td>
+                                                                <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
+                                                                <td>{data.maxScore}点</td>
+                                                                <td>{data.minScore}点</td>
+                                                                <td style={{ color: data.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
+                                                                    {data.passedAvg ? `${data.passedAvg}点` : '-'}
+                                                                </td>
+                                                                <td style={{ color: data.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
+                                                                    {data.failedAvg ? `${data.failedAvg}点` : '-'}
+                                                                </td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                                    科目別得点データを読み込み中...
-                                </div>
-                            )}
-                        </>
-                    )}
+
+                                        {/* Section Score Details Table - Accordion */}
+                                        <div className={styles.sessionGroup} style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: '1px solid #e5e7eb' }}>
+                                            <div
+                                                className={styles.subtleAccordionTrigger}
+                                                onClick={() => setSectionDetailOpen(!sectionDetailOpen)}
+                                            >
+                                                科目×レベル別詳細 ({sectionScoreStats.bySectionLevel?.length || 0}件のデータ)
+                                                {sectionDetailOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                            </div>
+                                            {sectionDetailOpen && (
+                                                <div className={styles.sessionDetails}>
+                                                    <table className={styles.table}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>科目</th>
+                                                                <th>レベル</th>
+                                                                <th>データ数</th>
+                                                                <th>平均点</th>
+                                                                <th>最高点</th>
+                                                                <th>最低点</th>
+                                                                <th>合格者平均</th>
+                                                                <th>不合格者平均</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {(sectionScoreStats.bySectionLevel || [])
+                                                                .sort((a, b) => {
+                                                                    // Sort by Level first (N1 -> N5)
+                                                                    const levelOrder = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+                                                                    const levelDiff = (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                                                                    if (levelDiff !== 0) return levelDiff;
+                                                                    // Then by Section
+                                                                    return a.section.localeCompare(b.section);
+                                                                })
+                                                                .map((row, idx) => (
+                                                                    <tr key={idx}>
+                                                                        <td style={{ fontWeight: 600 }}>{row.section}</td>
+                                                                        <td>
+                                                                            <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                                                {row.level}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>{row.count}</td>
+                                                                        <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                                        <td>{row.maxScore}点</td>
+                                                                        <td>{row.minScore}点</td>
+                                                                        <td style={{ color: row.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
+                                                                            {row.passedAvg ? `${row.passedAvg}点` : '-'}
+                                                                        </td>
+                                                                        <td style={{ color: row.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
+                                                                            {row.failedAvg ? `${row.failedAvg}点` : '-'}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* Nationality Section Scores */}
+                                        {sectionScoreStats.byNationality && sectionScoreStats.byNationality.length > 0 && (
+                                            <div>
+                                                <h2 className={styles.sectionTitle}>国籍別科目得点</h2>
+                                                <div className={styles.tableContainer}>
+                                                    <table className={styles.table}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>国籍</th>
+                                                                <th>データ数</th>
+                                                                <th>全体平均</th>
+                                                                <th>言語知識</th>
+                                                                <th>読解</th>
+                                                                <th>聴解</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {sectionScoreStats.byNationality.map((row, idx) => (
+                                                                <tr key={idx}>
+                                                                    <td style={{ fontWeight: 600 }}>{row.country}</td>
+                                                                    <td>{row.totalRecords}</td>
+                                                                    <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
+                                                                    <td>{row['言語知識'] || '-'}</td>
+                                                                    <td>{row['読解'] || '-'}</td>
+                                                                    <td>{row['聴解'] || '-'}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                        科目別得点データを読み込み中...
+                                    </div>
+                                )}
+                            </>
+                        )}
                 </>
-            )
-            }
+            )}
 
             {/* Career Analytics Tab */}
             {
@@ -2285,13 +2320,83 @@ export default function AnalyticsPage() {
                                 </div>
                             </div>
                         )}
-
-                        <div className={styles.footer}>
-                            <p>※ データは現在のフィルタ設定に基づいています。</p>
-                        </div>
                     </>
-                )
-            }
-        </div >
+                )}
+
+            {/* Database Tab Content */}
+            {activeTab === 'database' && (
+                <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                    <div className={styles.filters} style={{ marginBottom: '1.5rem' }}>
+                        <div className={styles.filterGroup} style={{ flex: 1 }}>
+                            <label className={styles.filterLabel}>生徒検索 (名前 / 学籍番号)</label>
+                            <input
+                                type="text"
+                                placeholder="名前または学籍番号を入力..."
+                                className={styles.filterSelect} // Reusing select style for input consistency
+                                style={{ width: '100%', padding: '0.5rem' }}
+                                value={dbSearchQuery}
+                                onChange={(e) => setDbSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        {/* Optional: Add status filter here if needed */}
+                    </div>
+
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>学籍番号</th>
+                                    <th>名前</th>
+                                    <th>クラス</th>
+                                    <th>JLPT最高レベル</th>
+                                    <th>詳細</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {dbFilteredStudents.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                                            {dbSearchQuery ? '該当する生徒が見つかりません' : '検索条件を入力してください'}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    dbFilteredStudents.map((student, idx) => (
+                                        <tr key={idx}>
+                                            <td>{student.studentId || '-'}</td>
+                                            <td style={{ fontWeight: 600 }}>{student.name}</td>
+                                            <td>{student.class || '-'}</td>
+                                            <td>
+                                                {student.highestLevel ? (
+                                                    <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>
+                                                        {student.highestLevel}
+                                                    </span>
+                                                ) : '-'}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
+                                                    {['N1', 'N2', 'N3'].map(lvl => {
+                                                        const s = student.levels[lvl];
+                                                        if (s.status === '合格') return <span key={lvl} style={{ color: COLOR_PASS }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                        if (s.status === '不合格') return <span key={lvl} style={{ color: COLOR_FAIL }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                        return null;
+                                                    })}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#6b7280', textAlign: 'right' }}>
+                        表示件数: {dbFilteredStudents.length}件
+                    </div>
+                </div>
+            )}
+
+            <div className={styles.footer}>
+                <p>※ データは現在のフィルタ設定に基づいています。</p>
+            </div>
+        </div>
     )
 }

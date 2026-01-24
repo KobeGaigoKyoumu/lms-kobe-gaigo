@@ -1,0 +1,26 @@
+
+> lms-app@0.1.0 build
+> next build
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/(dashboard)/report-cards/analytics/page.jsx:2399:19
+Parsing ecmascript source code failed
+[0m [90m 2397 |[39m                         [33m<[39m[33mp[39m[33m>[39m※ データは現在のフィルタ設定に基づいています。[33m<[39m[33m/[39m[33mp[39m[33m>[39m
+ [90m 2398 |[39m                     [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+[31m[1m>[22m[39m[90m 2399 |[39m                 [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m      |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2400 |[39m             )
+ [90m 2401 |[39m }
+ [90m 2402 |[39m[0m
+
+Expected '</', got 'div'
+
+
+    at <unknown> (./src/app/(dashboard)/report-cards/analytics/page.jsx:2399:19)

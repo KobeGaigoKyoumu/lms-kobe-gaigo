@@ -1,0 +1,6 @@
+
+E:\デスクトップ\LMS(神戸外語)\lms-app\src\app\(dashboard)\report-cards\analytics\page.jsx
+  2398:16  error  Parsing error: Expected corresponding JSX closing tag for <>. (2398:16)
+
+✖ 1 problem (1 error, 0 warnings)
+

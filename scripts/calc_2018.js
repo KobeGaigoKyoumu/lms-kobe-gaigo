@@ -15,7 +15,7 @@ function calculate2018() {
 
     // Check for graduates
     const graduates2018 = cohort2016.filter(s => s.source === '修了生' || s.source === '卒業生');
-    console.log(`Found ${graduates2018.length} confirmed graduates.`);
+
 
     if (graduates2018.length === 0) return;
 
@@ -63,7 +63,7 @@ function calculate2018() {
         }
     });
 
-    console.log(`Matched JLPT records for ${debugMatchCount} students.`);
+
 
     const total = graduates2018.length;
     const rate = total > 0 ? (n3PlusCount / total * 100) : 0;
@@ -88,7 +88,7 @@ function calculate2018() {
     };
 
     fs.writeFileSync('data/2018_stats_clean.json', JSON.stringify(stats, null, 2));
-    console.log("Written to data/2018_stats_clean.json");
+
 }
 
 calculate2018();
