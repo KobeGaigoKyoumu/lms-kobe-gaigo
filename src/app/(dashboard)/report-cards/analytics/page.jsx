@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
-import careerStatsData from '@/data/career_stats.json'
+import careerStatsData from '@/data/career_stats_v2.json'
 import { Bar, Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,

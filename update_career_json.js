@@ -2,7 +2,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const OUTPUT_PATH = './src/data/career_stats.json';
+const OUTPUT_PATH = './src/data/career_stats_v2.json';
 const CAREER_DIR = 'e:/デスクトップ/LMS(神戸外語)/卒業生進路一覧';
 const JLPT_EXCEL_PATH = 'e:/デスクトップ/LMS(神戸外語)/歴代受験結果データベース.xlsx';
 
