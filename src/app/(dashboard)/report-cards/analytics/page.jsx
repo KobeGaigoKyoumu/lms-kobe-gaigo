@@ -2192,8 +2192,19 @@ export default function AnalyticsPage() {
                                                                                 return (
                                                                                     <div key={year} style={{ display: 'flex', alignItems: 'baseline', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>
                                                                                         <span style={{ fontWeight: 600, minWidth: '80px', color: '#4b5563' }}>{parseInt(year) + 1}年度卒:</span>
-                                                                                        <span style={{ marginLeft: '0.5rem' }}>
-                                                                                            {studentsInYear.map(s => s.name).join(', ')}
+                                                                                        <span style={{ marginLeft: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                                                            {studentsInYear.map((s, i) => (
+                                                                                                <span key={i} style={{
+                                                                                                    backgroundColor: '#e0f2fe',
+                                                                                                    color: '#0369a1',
+                                                                                                    padding: '0.25rem 0.5rem',
+                                                                                                    borderRadius: '9999px',
+                                                                                                    fontSize: '0.85rem',
+                                                                                                    whiteSpace: 'nowrap'
+                                                                                                }}>
+                                                                                                    {s.name}
+                                                                                                </span>
+                                                                                            ))}
                                                                                         </span>
                                                                                     </div>
                                                                                 );
