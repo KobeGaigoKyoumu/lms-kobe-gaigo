@@ -1985,7 +1985,7 @@ export default function AnalyticsPage() {
                     {careerSubTab === 'schools' && (
                         <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先と合格者JLPT成績 (全件表示)</h3>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先とJLPT成績 (詳細:合格/不合格)</h3>
                                 <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
                                     {careerStats.topDestinations.filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0).length}校
                                 </span>
@@ -2047,17 +2047,48 @@ export default function AnalyticsPage() {
                                                                                         const order = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
                                                                                         return (order[a[0]] || 99) - (order[b[0]] || 99);
                                                                                     })
-                                                                                    .map(([level, stats]) => (
-                                                                                        <tr key={level}>
-                                                                                            <td style={{ padding: '0.5rem' }}>
-                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                            </td>
-                                                                                            <td style={{ padding: '0.5rem' }}>{stats.count}</td>
-                                                                                            <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
-                                                                                            <td style={{ padding: '0.5rem' }}>{stats.max}</td>
-                                                                                            <td style={{ padding: '0.5rem' }}>{stats.min}</td>
-                                                                                        </tr>
-                                                                                    ))}
+                                                                                    .map(([level, stats]) => {
+                                                                                        // stats now has { passed: {...}, failed: {...} } OR old format if not updated
+                                                                                        const passed = stats.passed;
+                                                                                        const failed = stats.failed;
+
+                                                                                        if (!passed && !failed) return null; // Should not happen with new data
+
+                                                                                        return (
+                                                                                            <Fragment key={level}>
+                                                                                                {/* Passed Row */}
+                                                                                                {passed && (
+                                                                                                    <tr>
+                                                                                                        <td style={{ padding: '0.5rem' }}>
+                                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                                <span style={{ fontSize: '0.7rem', background: '#dcfce7', color: '#166534', padding: '1px 4px', borderRadius: '4px' }}>合格</span>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.count}</td>
+                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{passed.avg.toFixed(1)}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.max}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{passed.min}</td>
+                                                                                                    </tr>
+                                                                                                )}
+                                                                                                {/* Failed Row */}
+                                                                                                {failed && (
+                                                                                                    <tr>
+                                                                                                        <td style={{ padding: '0.5rem' }}>
+                                                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                                <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#991b1b', padding: '1px 4px', borderRadius: '4px' }}>不合格</span>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.count}</td>
+                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{failed.avg.toFixed(1)}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.max}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{failed.min}</td>
+                                                                                                    </tr>
+                                                                                                )}
+                                                                                            </Fragment>
+                                                                                        );
+                                                                                    })}
                                                                             </tbody>
                                                                         </table>
                                                                     </div>
