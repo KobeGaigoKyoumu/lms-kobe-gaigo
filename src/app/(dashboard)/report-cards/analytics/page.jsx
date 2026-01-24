@@ -484,6 +484,14 @@ export default function AnalyticsPage() {
             <header className={styles.header}>
                 <h1 className={styles.title}>統計・分析</h1>
                 <p className={styles.subtitle}>成績データおよびJLPT結果の分析概要</p>
+                {/* DEBUG INFO - REMOVE LATER */}
+                {debugInfo && (
+                    <div style={{ fontSize: '10px', color: '#666', marginTop: '5px', border: '1px dashed #ccc', padding: '4px' }}>
+                        DEBUG: Source={debugInfo.dataSource} | Total Fetched={debugInfo.totalFetched} |
+                        Students Found={debugInfo.studentsFound} |
+                        ServiceRoleKey={debugInfo.env?.hasServiceRole ? 'YES' : 'NO'}
+                    </div>
+                )}
             </header>
 
             {/* Tabs */}

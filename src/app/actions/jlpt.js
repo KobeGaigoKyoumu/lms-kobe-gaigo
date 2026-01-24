@@ -31,7 +31,7 @@ export async function fetchJlptAnalyticsData() {
                 { auth: { persistSession: false } }
             );
 
-            const adminResult = await adminSupabase.from('students').select('*');
+            const adminResult = await adminSupabase.from('students').select('*').range(0, 9999);
 
             if (adminResult.data) {
                 data = adminResult.data;
@@ -51,7 +51,7 @@ export async function fetchJlptAnalyticsData() {
             const { data: userUser, error: authError } = await supabase.auth.getUser();
             authDebug = { hasUser: !!userUser?.user, userId: userUser?.user?.id, error: authError?.message };
 
-            let res = await supabase.from('students').select('*');
+            let res = await supabase.from('students').select('*').range(0, 9999);
             data = res.data;
             error = res.error; // Keep error if this also fails
 
