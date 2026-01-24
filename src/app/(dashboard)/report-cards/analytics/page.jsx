@@ -2113,10 +2113,18 @@ export default function AnalyticsPage() {
                                     <tbody>
                                         {careerStats.topDestinations
                                             .filter(d => {
-                                                const q = careerSearchQuery.toLowerCase();
-                                                if (d.name.toLowerCase().includes(q)) return true;
+                                                const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
+                                                if (!q) return true;
+                                                // Normalize data for comparison
+                                                const normDestName = d.name.toLowerCase().replace(/\s+/g, '');
+                                                if (normDestName.includes(q)) return true;
+
                                                 // Check matches in student list
-                                                if (d.students && d.students.some(s => (s.name || '').includes(q))) return true;
+                                                if (d.students && d.students.some(s => {
+                                                    const normName = (s.name || '').toLowerCase().replace(/\s+/g, '');
+                                                    return normName.includes(q);
+                                                })) return true;
+
                                                 return false;
                                             })
                                             .map(d => {
@@ -2135,7 +2143,11 @@ export default function AnalyticsPage() {
                                             .sort((a, b) => b.total5 - a.total5)
                                             .map((dest, idx) => {
                                                 const matches = careerSearchQuery && dest.students
-                                                    ? dest.students.filter(s => (s.name || '').includes(careerSearchQuery))
+                                                    ? dest.students.filter(s => {
+                                                        const q = careerSearchQuery.toLowerCase().replace(/\s+/g, '');
+                                                        const normName = (s.name || '').toLowerCase().replace(/\s+/g, '');
+                                                        return normName.includes(q);
+                                                    })
                                                     : [];
                                                 return (
                                                     <Fragment key={idx}>
