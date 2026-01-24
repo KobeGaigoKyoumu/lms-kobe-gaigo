@@ -184,7 +184,7 @@ export default function AnalyticsPage() {
         if (!enhancedJlptStats?.allStudentStats) return
 
         let results = (enhancedJlptStats.allStudentStats || []).filter(s =>
-            s.studentId !== '学籍番号' && s.name !== '氏名'
+            s.studentId !== '学籍番号' && s.name !== '氏名' && s.nationality !== '国籍・地域'
         )
 
         // Multi-keyword Search (AND logic)
