@@ -55,7 +55,9 @@ export default function StudentDetailModal({ student, onClose }) {
     const statusLabels = {
         active: '在籍中',
         graduated: '卒業',
-        inactive: '休学'
+        inactive: '休学',
+        completed: '修了',
+        withdrawn: '退学'
     }
 
     const getResultBadgeClass = (result) => {
@@ -195,6 +197,10 @@ export default function StudentDetailModal({ student, onClose }) {
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>卒業予定</span>
                                 <span className={styles.detailValue}>{formatDate(student.graduation_date)}</span>
+                            </div>
+                            <div className={styles.detailItemFull}>
+                                <span className={styles.detailLabel}>進学先</span>
+                                <span className={styles.detailValue}>{student.destination || '-'}</span>
                             </div>
                         </div>
                     </section>

@@ -31,7 +31,8 @@ export default function StudentList({ students: initialStudents, classes }) {
         const matchesSearch =
             student.full_name?.toLowerCase().includes(search.toLowerCase()) ||
             student.student_id_text?.includes(search) ||
-            student.email?.toLowerCase().includes(search.toLowerCase())
+            student.email?.toLowerCase().includes(search.toLowerCase()) ||
+            student.destination?.toLowerCase().includes(search.toLowerCase())
         return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
 
@@ -369,7 +370,9 @@ export default function StudentList({ students: initialStudents, classes }) {
                         <option value="all">すべてのステータス</option>
                         <option value="active">在籍中</option>
                         <option value="graduated">卒業</option>
+                        <option value="completed">修了</option>
                         <option value="inactive">休学</option>
+                        <option value="withdrawn">退学</option>
                     </select>
                     <select
                         value={gradeFilter}
@@ -410,6 +413,7 @@ export default function StudentList({ students: initialStudents, classes }) {
                             <th>氏名</th>
                             <th>学年</th>
                             <th>クラス</th>
+                            <th>進学先</th>
                             <th>ステータス</th>
                             <th>操作</th>
                         </tr>
@@ -423,6 +427,7 @@ export default function StudentList({ students: initialStudents, classes }) {
                                     <td>{student.full_name}</td>
                                     <td>{studentInfo.gradeName || '-'}</td>
                                     <td>{student.class_name || '-'}</td>
+                                    <td>{student.destination || '-'}</td>
                                     <td>
                                         <select
                                             value={student.status}
@@ -431,7 +436,9 @@ export default function StudentList({ students: initialStudents, classes }) {
                                         >
                                             <option value="active">在籍中</option>
                                             <option value="graduated">卒業</option>
+                                            <option value="completed">修了</option>
                                             <option value="inactive">休学</option>
+                                            <option value="withdrawn">退学</option>
                                         </select>
                                     </td>
                                     <td className={styles.actionCell}>

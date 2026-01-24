@@ -21,6 +21,7 @@
     "docx": "^9.5.1",
     "docx-templates": "^4.15.0",
     "docxtemplater": "^3.67.6",
+    "dotenv": "^17.2.3",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "iconv-lite": "^0.7.2",
