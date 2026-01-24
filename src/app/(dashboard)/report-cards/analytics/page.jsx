@@ -2368,7 +2368,7 @@ export default function AnalyticsPage() {
                                             <td>{student.studentId || '-'}</td>
                                             <td style={{ fontWeight: 600, maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.name}</td>
                                             <td>{student.enrollmentYear || '-'}</td>
-                                            <td>{student.class === '中国人新入生クラス' ? '-' : (student.class || '-')}</td>
+                                            <td>{['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(student.class) ? '-' : (student.class || '-')}</td>
                                             <td>{student.nationality || '-'}</td>
                                             <td style={{ maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.destination || '-'}</td>
                                             <td>
