@@ -36,12 +36,12 @@ ChartJS.register(
 
 
 
-// Standardized Color Constants (Unified Density/Weight)
-const COLOR_PASS = '#16a34a' // Green 600
-const COLOR_FAIL = '#dc2626' // Red 600
-const COLOR_WARN = '#d97706' // Amber 600
-const COLOR_INFO = '#2563eb' // Blue 600
-const COLOR_MUTED = '#6b7280' // Gray 500
+// Standardized Color Constants (Unified Density/Weight: Lighter)
+const COLOR_PASS = '#22c55e' // Green 500
+const COLOR_FAIL = '#ef4444' // Red 500
+const COLOR_WARN = '#f59e0b' // Amber 500
+const COLOR_INFO = '#3b82f6' // Blue 500
+const COLOR_MUTED = '#9ca3af' // Gray 400
 
 function JlptSessionRow({ sessionData }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -89,9 +89,9 @@ function JlptSessionRow({ sessionData }) {
                                         <td>{row.examinees}名</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ color: COLOR_PASS, fontWeight: 600 }}>{row.passers}</span>
+                                                <span style={{ color: COLOR_PASS }}>{row.passers}</span>
                                                 <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
-                                                <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>{failed}</span>
+                                                <span style={{ color: COLOR_FAIL }}>{failed}</span>
                                             </div>
                                         </td>
                                         <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
@@ -753,7 +753,7 @@ export default function AnalyticsPage() {
                                                                         : '-'}
                                                                 </td>
                                                                 <td>{row.n3PlusStudents}名</td>
-                                                                <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
+                                                                <td style={{ color: parseFloat(row.rate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
                                                                     {row.rate}%
                                                                 </td>
                                                             </tr>
@@ -803,7 +803,7 @@ export default function AnalyticsPage() {
                                                     >
                                                         <td style={{ fontWeight: 600, color: '#111827' }}>{cls.className}</td>
                                                         <td style={{ color: '#4b5563' }}>{cls.total}名</td>
-                                                        <td style={{ fontWeight: 600, color: parseFloat(cls.n3PlusRate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
+                                                        <td style={{ color: parseFloat(cls.n3PlusRate) >= 50 ? COLOR_PASS : COLOR_WARN }}>
                                                             {cls.n3PlusRate}%
                                                         </td>
                                                         <td style={{ color: '#4b5563' }}>{cls.n3Plus}名</td>
@@ -860,15 +860,15 @@ export default function AnalyticsPage() {
                                                     <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
                                                         <div style={{ textAlign: 'center' }}>
                                                             <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N1</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: COLOR_FAIL }}>{currentClassStats.n1}</div>
+                                                            <div style={{ fontSize: '1.25rem', color: COLOR_FAIL }}>{currentClassStats.n1}</div>
                                                         </div>
                                                         <div style={{ textAlign: 'center' }}>
                                                             <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N2</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: '#ea580c' }}>{currentClassStats.n2}</div>
+                                                            <div style={{ fontSize: '1.25rem', color: '#ea580c' }}>{currentClassStats.n2}</div>
                                                         </div>
                                                         <div style={{ textAlign: 'center' }}>
                                                             <div style={{ fontSize: '0.75rem', color: COLOR_MUTED }}>N3</div>
-                                                            <div style={{ fontWeight: 700, fontSize: '1.25rem', color: COLOR_WARN }}>{currentClassStats.n3}</div>
+                                                            <div style={{ fontSize: '1.25rem', color: COLOR_WARN }}>{currentClassStats.n3}</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1192,7 +1192,6 @@ export default function AnalyticsPage() {
                                                                         <td style={{ fontWeight: 600, color: '#2563eb' }}>{yearData.passRate}%</td>
                                                                         <td style={{ fontWeight: 600 }}>{nationalAvg}%</td>
                                                                         <td style={{
-                                                                            fontWeight: 600,
                                                                             color: parseFloat(diff) > 0 ? COLOR_PASS : parseFloat(diff) < 0 ? COLOR_FAIL : COLOR_MUTED
                                                                         }}>
                                                                             {parseFloat(diff) > 0 ? '+' : ''}{diff}%
@@ -1246,7 +1245,7 @@ export default function AnalyticsPage() {
                                                                     <td style={{ fontWeight: 700 }}>3年平均</td>
                                                                     <td style={{ fontWeight: 700, color: '#2563eb' }}>{sAvg}%</td>
                                                                     <td style={{ fontWeight: 700 }}>{nAvg}%</td>
-                                                                    <td style={{ fontWeight: 700, color: parseFloat(dAvg) > 0 ? COLOR_PASS : parseFloat(dAvg) < 0 ? COLOR_FAIL : COLOR_MUTED }}>
+                                                                    <td style={{ color: parseFloat(dAvg) > 0 ? COLOR_PASS : parseFloat(dAvg) < 0 ? COLOR_FAIL : COLOR_MUTED }}>
                                                                         {parseFloat(dAvg) > 0 ? '+' : ''}{dAvg}%
                                                                     </td>
                                                                 </tr>
@@ -1301,15 +1300,14 @@ export default function AnalyticsPage() {
                                                             <td style={{ color: '#6b7280' }}>{nationalMin}%</td>
                                                             <td style={{ color: '#6b7280' }}>{nationalMax}%</td>
                                                             <td style={{
-                                                                fontWeight: 600,
                                                                 color: isPositive ? COLOR_PASS : isNegative ? COLOR_FAIL : COLOR_MUTED
                                                             }}>
                                                                 {isPositive ? '+' : ''}{diff}%
                                                             </td>
                                                             <td>
-                                                                {isPositive && <span style={{ color: COLOR_PASS, fontWeight: 600 }}>◎ 優秀</span>}
-                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>△ 要改善</span>}
-                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: COLOR_WARN, fontWeight: 600 }}>○ 標準</span>}
+                                                                {isPositive && <span style={{ color: COLOR_PASS }}>◎ 優秀</span>}
+                                                                {isNegative && parseFloat(diff) < -5 && <span style={{ color: COLOR_FAIL }}>△ 要改善</span>}
+                                                                {isNegative && parseFloat(diff) >= -5 && <span style={{ color: COLOR_WARN }}>○ 標準</span>}
                                                                 {!isPositive && !isNegative && <span style={{ color: COLOR_MUTED }}>○ 同等</span>}
                                                             </td>
                                                         </tr>
@@ -2084,9 +2082,9 @@ export default function AnalyticsPage() {
 
                                                                                             const renderDual = (pVal, fVal, isBold = false) => (
                                                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                                    <span style={{ color: COLOR_PASS, fontWeight: isBold ? 700 : 400 }}>{pVal ?? '-'}</span>
+                                                                                                    <span style={{ color: COLOR_PASS, fontWeight: isBold ? 500 : 400 }}>{pVal ?? '-'}</span>
                                                                                                     <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
-                                                                                                    <span style={{ color: COLOR_FAIL, fontWeight: isBold ? 700 : 400 }}>{fVal ?? '-'}</span>
+                                                                                                    <span style={{ color: COLOR_FAIL, fontWeight: isBold ? 500 : 400 }}>{fVal ?? '-'}</span>
                                                                                                 </div>
                                                                                             );
 
