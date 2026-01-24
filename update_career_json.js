@@ -79,17 +79,22 @@ try {
                 const result = row['合否'];
                 const id = row['学籍番号'];
 
-                // Only consider passed students
-                if (level && !isNaN(score) && result && result.includes('合格') && id) {
+                // Consider both passed and failed
+                if (level && !isNaN(score) && result && id) {
                     const studentId = String(id).trim();
                     const destName = studentDestinations[studentId];
 
                     if (destName) {
                         if (!destinationStats[destName]) destinationStats[destName] = {};
                         if (!destinationStats[destName][level]) {
-                            destinationStats[destName][level] = { scores: [] };
+                            destinationStats[destName][level] = { passed: [], failed: [] };
                         }
-                        destinationStats[destName][level].scores.push(score);
+
+                        if (result.includes('合格')) {
+                            destinationStats[destName][level].passed.push(score);
+                        } else {
+                            destinationStats[destName][level].failed.push(score);
+                        }
                     }
                 }
             });
@@ -115,18 +120,24 @@ try {
 
             if (statsObj) {
                 Object.keys(statsObj).forEach(level => {
-                    const scores = statsObj[level].scores;
-                    if (scores.length > 0) {
+                    const { passed, failed } = statsObj[level];
+
+                    const calculateStats = (scores) => {
+                        if (scores.length === 0) return null;
                         const sum = scores.reduce((a, b) => a + b, 0);
                         const avg = sum / scores.length;
                         const max = Math.max(...scores);
                         const min = Math.min(...scores);
+                        return { count: scores.length, avg: parseFloat(avg.toFixed(1)), max, min };
+                    };
 
+                    const passedStats = calculateStats(passed);
+                    const failedStats = calculateStats(failed);
+
+                    if (passedStats || failedStats) {
                         jlptStats[level] = {
-                            count: scores.length,
-                            avg: parseFloat(avg.toFixed(1)),
-                            max: max,
-                            min: min
+                            passed: passedStats,
+                            failed: failedStats
                         };
                     }
                 });
@@ -135,7 +146,8 @@ try {
             return {
                 ...d,
                 years: yearsObj, // Update with real yearly counts
-                jlptStats: jlptStats
+                jlptStats: jlptStats,
+                students: destinationStudents[destName] || []
             };
         });
     }
