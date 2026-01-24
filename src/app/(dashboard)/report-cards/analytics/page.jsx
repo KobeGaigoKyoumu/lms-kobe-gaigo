@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
         return {
             years: [...new Set(stats.map(s => s.enrollmentYear).filter(Boolean))].sort().reverse(),
             classes: [...new Set(stats.map(s => s.class).filter(c => c && !['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(c)))].sort(),
-            nationalities: [...new Set(stats.map(s => s.nationality).filter(Boolean))].sort(),
+            nationalities: [...new Set(stats.map(s => s.nationality).filter(n => n && n !== '国籍・地域'))].sort(),
             levels: ['N1', 'N2', 'N3', 'N4', 'N5']
         }
     }, [enhancedJlptStats])
