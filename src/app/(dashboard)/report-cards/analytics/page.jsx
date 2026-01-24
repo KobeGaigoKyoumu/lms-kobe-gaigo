@@ -1527,11 +1527,12 @@ export default function AnalyticsPage() {
                                                     <tbody>
                                                         {(sectionScoreStats.bySectionLevel || [])
                                                             .sort((a, b) => {
-                                                                // Sort by Section first (keeping original order or alphabetical)
-                                                                if (a.section !== b.section) return a.section.localeCompare(b.section);
-                                                                // Sort by Level (N1 -> N5)
+                                                                // Sort by Level first (N1 -> N5)
                                                                 const levelOrder = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
-                                                                return (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                                                                const levelDiff = (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                                                                if (levelDiff !== 0) return levelDiff;
+                                                                // Then by Section
+                                                                return a.section.localeCompare(b.section);
                                                             })
                                                             .map((row, idx) => (
                                                                 <tr key={idx}>

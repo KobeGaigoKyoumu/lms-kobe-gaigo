@@ -1,6 +1,24 @@
 {
   "graduation_stats": [
     {
+      "year": "2018年3月",
+      "total": 119,
+      "matched": 89,
+      "n3_plus": 16,
+      "rate": 13.445378151260504,
+      "match_rate": 74.78991596638656,
+      "kanji_stats": {
+        "total": 17,
+        "n3_plus": 3,
+        "rate": 17.647058823529413
+      },
+      "non_kanji_stats": {
+        "total": 102,
+        "n3_plus": 13,
+        "rate": 12.745098039215685
+      }
+    },
+    {
       "year": "2019年3月",
       "total": 159,
       "matched": 137,
