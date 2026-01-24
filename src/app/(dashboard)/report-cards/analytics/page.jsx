@@ -2354,7 +2354,6 @@ export default function AnalyticsPage() {
                                     <th>入学年度</th>
                                     <th>クラス</th>
                                     <th>国籍</th>
-                                    <th>進学先</th>
                                     <th>JLPT最高レベル</th>
                                     <th>詳細</th>
                                 </tr>
@@ -2362,7 +2361,7 @@ export default function AnalyticsPage() {
                             <tbody>
                                 {dbFilteredStudents.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
                                             {dbSearchQuery ? '該当する生徒が見つかりません' : '検索条件を入力してください'}
                                         </td>
                                     </tr>
@@ -2374,7 +2373,6 @@ export default function AnalyticsPage() {
                                             <td>{student.enrollmentYear || '-'}</td>
                                             <td>{['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(student.class) ? '-' : (student.class || '-')}</td>
                                             <td>{student.nationality || '-'}</td>
-                                            <td style={{ maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.destination || '-'}</td>
                                             <td>
                                                 {student.highestLevel ? (
                                                     <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>

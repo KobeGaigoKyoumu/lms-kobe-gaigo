@@ -413,7 +413,6 @@ export default function StudentList({ students: initialStudents, classes }) {
                             <th>氏名</th>
                             <th>学年</th>
                             <th>クラス</th>
-                            <th>進学先</th>
                             <th>ステータス</th>
                             <th>操作</th>
                         </tr>
@@ -427,7 +426,6 @@ export default function StudentList({ students: initialStudents, classes }) {
                                     <td>{student.full_name}</td>
                                     <td>{studentInfo.gradeName || '-'}</td>
                                     <td>{student.class_name || '-'}</td>
-                                    <td>{student.destination || '-'}</td>
                                     <td>
                                         <select
                                             value={student.status}
