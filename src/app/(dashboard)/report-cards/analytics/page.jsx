@@ -2376,8 +2376,8 @@ export default function AnalyticsPage() {
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
                                                     {['N1', 'N2', 'N3'].map(lvl => {
                                                         const s = student.levels[lvl];
-                                                        if (s.status === '合格') return <span key={lvl} style={{ color: COLOR_PASS }}>{lvl}: {s.score}点 ({s.date})</span>;
-                                                        if (s.status === '不合格') return <span key={lvl} style={{ color: COLOR_FAIL }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                        if (s.status === '合格') return <span key={lvl} style={{ color: COLOR_PASS, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                        if (s.status === '不合格') return <span key={lvl} style={{ color: COLOR_FAIL, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
                                                         return null;
                                                     })}
                                                 </div>
