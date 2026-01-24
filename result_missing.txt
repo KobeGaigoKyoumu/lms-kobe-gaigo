@@ -1,0 +1,16 @@
+Target: 2004009, Name: WANG PENGHUI, Romaji: WANG PENGHUI
+Target: 2104006, Name: QIAO HANXIAO, Romaji: QIAO HANXIAO
+Searching in 卒業者.xlsx...
+Searching in 退学者.xlsx...
+  [FOUND ID] 2004009 found in column '学籍番号'
+    Row data: {'Unnamed: 0': nan, '番号': 113, '学籍番号': '2004009', '氏名': 'WANG PENGHUI', 'カタカナ': 'オウ ホウケイ', 'ローマ字': 'WANG PENGHUI', '国籍・地域': '中国', '性別': '男', '生年月日': datetime.datetime(1992, 2, 15, 0, 0), '在留資格': '留学', '入国日': datetime.datetime(2021, 1, 8, 0, 0), '在留期限': datetime.datetime(2023, 5, 8, 0, 0), 'パスポート\n番号': 'EG6925298', '在留カード\n番号': 'TJ09877009NA', '住所': '兵庫県神戸市長田区御蔵通6丁目210番地の12\u3000201号', '連絡方法': '08065969106', '期': '2020年4月期生', '現\nクラス': 'A', '入学年月日': datetime.datetime(2021, 1, 26, 0, 0), '卒業年月': datetime.datetime(2023, 3, 31, 0, 0), 'コース': '2年'}
+  [FOUND NAME] WANG PENGHUI found in column '氏名'
+  [FOUND NAME] WANG PENGHUI found in column 'ローマ字'
+  [FOUND ID] 2104006 found in column '学籍番号'
+    Row data: {'Unnamed: 0': nan, '番号': 176, '学籍番号': '2104006', '氏名': 'QIAO HANXIAO', 'カタカナ': ' ', 'ローマ字': 'QIAO HANXIAO', '国籍・地域': '中国', '性別': '男', '生年月日': datetime.datetime(2002, 1, 25, 0, 0), '在留資格': '留学', '入国日': nan, '在留期限': nan, 'パスポート\n番号': 'EJ1597989', '在留カード\n番号': nan, '住所': nan, '連絡方法': nan, '期': '2021年4月期生', '現\nクラス': nan, '入学年月日': datetime.datetime(2021, 4, 1, 0, 0), '卒業年月': datetime.datetime(2024, 3, 31, 0, 0), 'コース': '2年'}
+  [FOUND NAME] QIAO HANXIAO found in column '氏名'
+  [FOUND NAME] QIAO HANXIAO found in column 'ローマ字'
+Searching in ~$卒業者.xlsx...
+  Error reading e:/デスクトップ/LMS(神戸外語)/在籍者と過去在籍者\~$卒業者.xlsx: [Errno 13] Permission denied: 'e:/デスクトップ/LMS(神戸外語)/在籍者と過去在籍者\\~$卒業者.xlsx'
+Searching in 在籍者.xlsx...
+Searching in 修了者.xlsx...
