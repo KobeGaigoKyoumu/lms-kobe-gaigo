@@ -1729,7 +1729,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.chartContainer}>
                                         <Line
                                             data={{
-                                                labels: careerStats.yearlyTrends.map(t => t.year + '年度卒業'),
+                                                labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
                                                 datasets: [
                                                     {
                                                         label: '卒業率 (%)',
@@ -1755,7 +1755,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.chartContainer}>
                                         <Bar
                                             data={{
-                                                labels: careerStats.yearlyTrends.map(t => t.year + '年度卒業'),
+                                                labels: careerStats.yearlyTrends.map(t => (parseInt(t.year) + 1) + '年度卒業'),
                                                 datasets: [
                                                     {
                                                         label: '専門学校',
@@ -1849,7 +1849,7 @@ export default function AnalyticsPage() {
                                                                         <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
                                                                             {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
                                                                                 <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                    <span>{year}年度</span>
+                                                                                    <span>{parseInt(year) + 1}年度卒</span>
                                                                                     <strong>{count}名</strong>
                                                                                 </li>
                                                                             ))}
@@ -1899,7 +1899,7 @@ export default function AnalyticsPage() {
                                                                                     <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
                                                                                         {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
                                                                                             <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                                <span>{year}年度</span>
+                                                                                                <span>{parseInt(year) + 1}年度卒</span>
                                                                                                 <strong>{count}名</strong>
                                                                                             </li>
                                                                                         ))}
@@ -2087,11 +2087,11 @@ export default function AnalyticsPage() {
                                         <tr>
                                             <th>進学先名</th>
                                             <th>5年間合計</th>
+                                            <th>2024年度</th>
                                             <th>2023年度</th>
                                             <th>2022年度</th>
                                             <th>2021年度</th>
                                             <th>2020年度</th>
-                                            <th>2019年度</th>
                                         </tr>
                                     </thead>
                                     <tbody>
