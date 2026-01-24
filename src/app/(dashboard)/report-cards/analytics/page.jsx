@@ -1602,10 +1602,10 @@ export default function AnalyticsPage() {
                             学校別詳細
                         </button>
                         <button
-                            className={`${styles.subTab} ${careerSubTab === 'past3years' ? styles.active : ''}`}
-                            onClick={() => setCareerSubTab('past3years')}
+                            className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.active : ''}`}
+                            onClick={() => setCareerSubTab('past5years')}
                         >
-                            過去3年詳細
+                            過去5年詳細
                         </button>
                     </div>
 
@@ -1729,7 +1729,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.chartContainer}>
                                         <Line
                                             data={{
-                                                labels: careerStats.yearlyTrends.map(t => (t.year + 1) + '年度卒業'),
+                                                labels: careerStats.yearlyTrends.map(t => t.year + '年度卒業'),
                                                 datasets: [
                                                     {
                                                         label: '卒業率 (%)',
@@ -1755,7 +1755,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.chartContainer}>
                                         <Bar
                                             data={{
-                                                labels: careerStats.yearlyTrends.map(t => (t.year + 1) + '年度卒業'),
+                                                labels: careerStats.yearlyTrends.map(t => t.year + '年度卒業'),
                                                 datasets: [
                                                     {
                                                         label: '専門学校',
@@ -1849,7 +1849,7 @@ export default function AnalyticsPage() {
                                                                         <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
                                                                             {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
                                                                                 <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                    <span>{parseInt(year) + 1}年度卒</span>
+                                                                                    <span>{year}年度</span>
                                                                                     <strong>{count}名</strong>
                                                                                 </li>
                                                                             ))}
@@ -1899,7 +1899,7 @@ export default function AnalyticsPage() {
                                                                                     <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
                                                                                         {Object.entries(dest.years || {}).sort((a, b) => b[0] - a[0]).map(([year, count]) => (
                                                                                             <li key={year} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0.5rem', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                                                                                                <span>{parseInt(year) + 1}年度卒</span>
+                                                                                                <span>{year}年度</span>
                                                                                                 <strong>{count}名</strong>
                                                                                             </li>
                                                                                         ))}
@@ -2078,18 +2078,20 @@ export default function AnalyticsPage() {
                         </div>
                     )}
 
-                    {careerSubTab === 'past3years' && (
+                    {careerSubTab === 'past5years' && (
                         <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
-                            <h3 className={styles.chartTitle}>過去3年間の進学実績詳細 (2021-2023)</h3>
+                            <h3 className={styles.chartTitle}>過去5年間の進学実績詳細 (2019-2023)</h3>
                             <div className={styles.tableContainer}>
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
                                             <th>進学先名</th>
-                                            <th>3年間合計</th>
+                                            <th>5年間合計</th>
                                             <th>2023年度</th>
                                             <th>2022年度</th>
                                             <th>2021年度</th>
+                                            <th>2020年度</th>
+                                            <th>2019年度</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -2098,18 +2100,22 @@ export default function AnalyticsPage() {
                                                 const y2023 = (d.years && d.years['2023']) || 0;
                                                 const y2022 = (d.years && d.years['2022']) || 0;
                                                 const y2021 = (d.years && d.years['2021']) || 0;
-                                                const total3 = y2023 + y2022 + y2021;
-                                                return { ...d, y2023, y2022, y2021, total3 };
+                                                const y2020 = (d.years && d.years['2020']) || 0;
+                                                const y2019 = (d.years && d.years['2019']) || 0;
+                                                const total5 = y2023 + y2022 + y2021 + y2020 + y2019;
+                                                return { ...d, y2023, y2022, y2021, y2020, y2019, total5 };
                                             })
-                                            .filter(d => d.total3 > 0)
-                                            .sort((a, b) => b.total3 - a.total3)
+                                            .filter(d => d.total5 > 0)
+                                            .sort((a, b) => b.total5 - a.total5)
                                             .map((dest, idx) => (
                                                 <tr key={idx}>
                                                     <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                    <td>{dest.total3}名</td>
+                                                    <td>{dest.total5}名</td>
                                                     <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
                                                     <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
                                                     <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
+                                                    <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
+                                                    <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
                                                 </tr>
                                             ))}
                                     </tbody>
