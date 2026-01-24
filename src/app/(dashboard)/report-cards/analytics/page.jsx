@@ -144,6 +144,7 @@ export default function AnalyticsPage() {
     const [careerSubTab, setCareerSubTab] = useState('overview') // 'overview' or 'schools'
     const [careerSearchQuery, setCareerSearchQuery] = useState('')
     const [expandedSchoolId, setExpandedSchoolId] = useState(null)
+    const [expandedPast5YearsSchoolId, setExpandedPast5YearsSchoolId] = useState(null)
 
     useEffect(() => {
         fetchGrades()
@@ -2108,6 +2109,7 @@ export default function AnalyticsPage() {
                                             <th>2022年度</th>
                                             <th>2021年度</th>
                                             <th>2020年度</th>
+                                            <th>詳細</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -2149,9 +2151,15 @@ export default function AnalyticsPage() {
                                                         return normName.includes(q);
                                                     })
                                                     : [];
+
+                                                const isExpanded = expandedPast5YearsSchoolId === idx;
+
                                                 return (
                                                     <Fragment key={idx}>
-                                                        <tr key={idx}>
+                                                        <tr key={idx}
+                                                            onClick={() => setExpandedPast5YearsSchoolId(isExpanded ? null : idx)}
+                                                            style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'white', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
+                                                        >
                                                             <td style={{ fontWeight: 600 }}>{dest.name}</td>
                                                             <td>{dest.total5}名</td>
                                                             <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
@@ -2159,12 +2167,38 @@ export default function AnalyticsPage() {
                                                             <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
                                                             <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
                                                             <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
+                                                            <td style={{ textAlign: 'center' }}>
+                                                                <AccordionChevron rotated={isExpanded} />
+                                                            </td>
                                                         </tr>
-                                                        {matches.length > 0 && (
+                                                        {matches.length > 0 && !isExpanded && (
                                                             <tr>
-                                                                <td colSpan="7" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
+                                                                <td colSpan="8" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
                                                                     <div style={{ fontSize: '0.85rem', color: '#166534' }}>
                                                                         <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                        {isExpanded && (
+                                                            <tr>
+                                                                <td colSpan="8" style={{ padding: '0 1rem 1rem 1rem', backgroundColor: '#f9fafb' }}>
+                                                                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                                                                        <strong>合格者一覧 (年度別):</strong>
+                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                                            {['2023', '2022', '2021', '2020', '2019'].map(year => {
+                                                                                const studentsInYear = (dest.students || []).filter(s => s.year === year);
+                                                                                if (studentsInYear.length === 0) return null;
+                                                                                return (
+                                                                                    <div key={year} style={{ display: 'flex', alignItems: 'baseline', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>
+                                                                                        <span style={{ fontWeight: 600, minWidth: '80px', color: '#4b5563' }}>{parseInt(year) + 1}年度卒:</span>
+                                                                                        <span style={{ marginLeft: '0.5rem' }}>
+                                                                                            {studentsInYear.map(s => s.name).join(', ')}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
                                                                     </div>
                                                                 </td>
                                                             </tr>
