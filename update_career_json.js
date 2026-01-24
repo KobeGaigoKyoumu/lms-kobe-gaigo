@@ -10,13 +10,19 @@ try {
     console.log('Starting Career Stats Update...');
 
     // 1. Build Student ID -> Destination Map
+    // 1. Build Student ID -> Destination Map & Destination Yearly Counts
     const studentDestinations = {};
+    const destinationYearlyStats = {}; // { DestName: { "2021": count, "2022": count ... } }
     const files = fs.readdirSync(CAREER_DIR).filter(f => f.endsWith('.xlsx'));
 
     console.log(`Found ${files.length} career list files.`);
 
     files.forEach(file => {
         const filePath = path.join(CAREER_DIR, file);
+        // Extract year from filename "2023年度..."
+        const match = file.match(/^(\d{4})/);
+        const year = match ? match[1] : 'Unknown';
+
         try {
             const workbook = XLSX.readFile(filePath);
             const sheetName = workbook.SheetNames[0];
@@ -28,8 +34,14 @@ try {
                 const id = row['学籍番号'];
                 const dest = row['進学先'];
                 if (id && dest) {
-                    // Normalize ID if needed (string/number)
-                    studentDestinations[String(id).trim()] = dest.trim();
+                    const destName = dest.trim();
+                    // Map student to destination
+                    studentDestinations[String(id).trim()] = destName;
+
+                    // Aggregate yearly stats
+                    if (!destinationYearlyStats[destName]) destinationYearlyStats[destName] = {};
+                    if (!destinationYearlyStats[destName][year]) destinationYearlyStats[destName][year] = 0;
+                    destinationYearlyStats[destName][year]++;
                 }
             });
         } catch (e) {
@@ -84,6 +96,7 @@ try {
         data.topDestinations = data.topDestinations.map(d => {
             const destName = d.name;
             const statsObj = destinationStats[destName];
+            const yearsObj = destinationYearlyStats[destName] || {};
 
             const jlptStats = {};
 
@@ -108,6 +121,7 @@ try {
 
             return {
                 ...d,
+                years: yearsObj, // Update with real yearly counts
                 jlptStats: jlptStats
             };
         });

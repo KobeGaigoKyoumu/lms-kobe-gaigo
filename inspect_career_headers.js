@@ -6,9 +6,12 @@ try {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     if (sheet) {
-        const headers = XLSX.utils.sheet_to_json(sheet, { header: 1 })[0];
-        console.log('Sheet:', sheetName);
-        console.log('Headers:', headers);
+        const rows = XLSX.utils.sheet_to_json(sheet);
+        const uniqueStatus = new Set();
+        rows.forEach(row => {
+            if (row['進路状況']) uniqueStatus.add(row['進路状況']);
+        });
+        console.log('Unique Career Statuses:', Array.from(uniqueStatus));
     }
 } catch (e) {
     console.error('Error:', e.message);

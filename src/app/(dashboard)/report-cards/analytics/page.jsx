@@ -1601,6 +1601,12 @@ export default function AnalyticsPage() {
                         >
                             学校別詳細
                         </button>
+                        <button
+                            className={`${styles.subTab} ${careerSubTab === 'past3years' ? styles.active : ''}`}
+                            onClick={() => setCareerSubTab('past3years')}
+                        >
+                            過去3年詳細
+                        </button>
                     </div>
 
                     {careerSubTab === 'overview' && (
@@ -2066,6 +2072,46 @@ export default function AnalyticsPage() {
                                                 </td>
                                             </tr>
                                         )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {careerSubTab === 'past3years' && (
+                        <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
+                            <h3 className={styles.chartTitle}>過去3年間の進学実績詳細 (2021-2023)</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>進学先名</th>
+                                            <th>3年間合計</th>
+                                            <th>2023年度</th>
+                                            <th>2022年度</th>
+                                            <th>2021年度</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {careerStats.topDestinations
+                                            .map(d => {
+                                                const y2023 = (d.years && d.years['2023']) || 0;
+                                                const y2022 = (d.years && d.years['2022']) || 0;
+                                                const y2021 = (d.years && d.years['2021']) || 0;
+                                                const total3 = y2023 + y2022 + y2021;
+                                                return { ...d, y2023, y2022, y2021, total3 };
+                                            })
+                                            .filter(d => d.total3 > 0)
+                                            .sort((a, b) => b.total3 - a.total3)
+                                            .map((dest, idx) => (
+                                                <tr key={idx}>
+                                                    <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                    <td>{dest.total3}名</td>
+                                                    <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
+                                                    <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
+                                                    <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
+                                                </tr>
+                                            ))}
                                     </tbody>
                                 </table>
                             </div>
