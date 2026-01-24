@@ -1892,7 +1892,8 @@ export default function AnalyticsPage() {
                                                         <Fragment key={idx}>
                                                             <tr
                                                                 onClick={() => setExpandedDestination(expandedDestination === idx ? null : idx)}
-                                                                style={{ cursor: 'pointer', backgroundColor: expandedDestination === idx ? '#f3f4f6' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
+                                                                className={expandedDestination === idx ? styles.expandedRow : ''}
+                                                                style={{ cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
                                                             >
                                                                 <td style={{ padding: '0.75rem 1rem' }}>{idx + 1}</td>
                                                                 <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
@@ -1942,7 +1943,8 @@ export default function AnalyticsPage() {
                                                                     <Fragment key={realIdx}>
                                                                         <tr
                                                                             onClick={() => setExpandedDestination(expandedDestination === realIdx ? null : realIdx)}
-                                                                            style={{ cursor: 'pointer', backgroundColor: expandedDestination === realIdx ? '#f3f4f6' : 'white', borderBottom: '1px solid #f3f4f6' }}
+                                                                            className={expandedDestination === realIdx ? styles.expandedRow : ''}
+                                                                            style={{ cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
                                                                         >
                                                                             <td style={{ padding: '0.75rem 1rem' }}>{realIdx + 1}</td>
                                                                             <td style={{ padding: '0.75rem 1rem' }}>{dest.name}</td>
@@ -2002,7 +2004,8 @@ export default function AnalyticsPage() {
                                                                 <tr
                                                                     key={idx}
                                                                     onClick={() => setExpandedNationality(isExpanded ? null : idx)}
-                                                                    style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent' }}
+                                                                    className={isExpanded ? styles.expandedRow : ''}
+                                                                    style={{ cursor: 'pointer' }}
                                                                 >
                                                                     <td>{nat.name}</td>
                                                                     <td>{nat.total}名</td>
@@ -2068,7 +2071,8 @@ export default function AnalyticsPage() {
                                                         <Fragment key={idx}>
                                                             <tr
                                                                 onClick={() => setExpandedSchoolId(isExpanded ? null : idx)}
-                                                                style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'transparent', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
+                                                                className={isExpanded ? styles.expandedRow : ''}
+                                                                style={{ cursor: 'pointer', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
                                                             >
                                                                 <td style={{ fontWeight: 600 }}>{dest.name}</td>
                                                                 <td>{dest.count}名</td>
@@ -2260,7 +2264,8 @@ export default function AnalyticsPage() {
                                                         <Fragment key={idx}>
                                                             <tr key={idx}
                                                                 onClick={() => setExpandedPast5YearsSchoolId(isExpanded ? null : idx)}
-                                                                style={{ cursor: 'pointer', backgroundColor: isExpanded ? '#f3f4f6' : 'white', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
+                                                                className={isExpanded ? styles.expandedRow : ''}
+                                                                style={{ cursor: 'pointer', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
                                                             >
                                                                 <td style={{ fontWeight: 600 }}>{dest.name}</td>
                                                                 <td>{dest.total5}名</td>
