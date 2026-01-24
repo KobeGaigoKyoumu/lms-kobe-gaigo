@@ -1191,10 +1191,26 @@ export async function getStudentsJlptSummary(students) {
             }
         }
 
+        // Calculate enrollment year
+        let enrollmentYear = null;
+        if (student.enrollment_date) {
+            const d = new Date(student.enrollment_date);
+            if (!isNaN(d.getTime())) {
+                enrollmentYear = d.getFullYear();
+            }
+        }
+        if (!enrollmentYear && studentId) {
+            const parsed = parseStudentIdForEnrollment(studentId);
+            if (parsed) {
+                enrollmentYear = parsed.enrollmentYear;
+            }
+        }
+
         return {
             studentId: student.student_id_text || student.student_id,
             name: student.full_name,
             class: student.class_name,
+            enrollmentYear: enrollmentYear,
             levels: levelStatus,
             highestLevel: highestLevel,
             records: myRecords
