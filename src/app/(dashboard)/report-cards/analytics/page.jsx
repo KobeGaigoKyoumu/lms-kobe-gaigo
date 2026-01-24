@@ -148,7 +148,12 @@ export default function AnalyticsPage() {
     const [dbSearchQuery, setDbSearchQuery] = useState('')
     const [dbFilterStatus, setDbFilterStatus] = useState('all') // 'all', 'enrolled', 'graduated'
     const [dbFilteredStudents, setDbFilteredStudents] = useState([])
-    const [dbSortConfig, setDbSortConfig] = useState({ key: 'studentId', direction: 'asc' })
+
+    // New Filters
+    const [dbYearFilter, setDbYearFilter] = useState('')
+    const [dbClassFilter, setDbClassFilter] = useState('')
+    const [dbNationalityFilter, setDbNationalityFilter] = useState('')
+    const [dbLevelFilter, setDbLevelFilter] = useState('')
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
@@ -174,7 +179,7 @@ export default function AnalyticsPage() {
         setCareerStats(careerStatsData)
     }, [])
 
-    // Database Search and Sort Effect
+    // Database Search and Category Filter Effect
     useEffect(() => {
         if (!enhancedJlptStats?.allStudentStats) return
 
@@ -195,42 +200,41 @@ export default function AnalyticsPage() {
             )
         }
 
-        // Sorting
+        // Category Filters
+        if (dbYearFilter) {
+            results = results.filter(s => String(s.enrollmentYear) === dbYearFilter)
+        }
+        if (dbClassFilter) {
+            results = results.filter(s => s.class === dbClassFilter)
+        }
+        if (dbNationalityFilter) {
+            results = results.filter(s => s.nationality === dbNationalityFilter)
+        }
+        if (dbLevelFilter) {
+            results = results.filter(s => s.highestLevel === dbLevelFilter)
+        }
+
+        // Default Sort: Student ID ascending (always sorted, just not user-switchable)
         results.sort((a, b) => {
-            let valA = a[dbSortConfig.key] || ''
-            let valB = b[dbSortConfig.key] || ''
-
-            // Numeric handling
-            if (dbSortConfig.key === 'studentId' || dbSortConfig.key === 'enrollmentYear') {
-                const nA = parseInt(valA) || 0
-                const nB = parseInt(valB) || 0
-                if (nA !== nB) return dbSortConfig.direction === 'asc' ? nA - nB : nB - nA
-            }
-
-            // String comparison
-            const sA = String(valA).toLowerCase()
-            const sB = String(valB).toLowerCase()
-            if (sA < sB) return dbSortConfig.direction === 'asc' ? -1 : 1
-            if (sA > sB) return dbSortConfig.direction === 'asc' ? 1 : -1
-            return 0
+            const nA = parseInt(a.studentId) || 0
+            const nB = parseInt(b.studentId) || 0
+            return nA - nB
         })
 
         setDbFilteredStudents(results)
-    }, [dbSearchQuery, dbSortConfig, enhancedJlptStats])
+    }, [dbSearchQuery, dbYearFilter, dbClassFilter, dbNationalityFilter, dbLevelFilter, enhancedJlptStats])
 
-    const handleDbSort = (key) => {
-        setDbSortConfig(prev => ({
-            key,
-            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-        }))
-    }
-
-    const renderSortIcon = (key) => {
-        if (dbSortConfig.key !== key) return <ChevronDown size={14} style={{ marginLeft: '4px', opacity: 0.2 }} />;
-        return dbSortConfig.direction === 'asc'
-            ? <ChevronUp size={14} style={{ marginLeft: '4px', color: 'var(--primary-600)' }} />
-            : <ChevronDown size={14} style={{ marginLeft: '4px', color: 'var(--primary-600)' }} />;
-    };
+    // Generate automatic filter options for Database tab
+    const dbFilterOptions = useMemo(() => {
+        if (!enhancedJlptStats?.allStudentStats) return { years: [], classes: [], nationalities: [], levels: [] }
+        const stats = enhancedJlptStats.allStudentStats
+        return {
+            years: [...new Set(stats.map(s => s.enrollmentYear).filter(Boolean))].sort().reverse(),
+            classes: [...new Set(stats.map(s => s.class).filter(c => c && !['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(c)))].sort(),
+            nationalities: [...new Set(stats.map(s => s.nationality).filter(Boolean))].sort(),
+            levels: ['N1', 'N2', 'N3', 'N4', 'N5']
+        }
+    }, [enhancedJlptStats])
 
     // Calculate Class Summary List for List View
     const classSummaryList = useMemo(() => {
@@ -2370,46 +2374,79 @@ export default function AnalyticsPage() {
             {/* Database Tab Content */}
             {activeTab === 'database' && (
                 <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
-                    <div className={styles.filters} style={{ marginBottom: '1.5rem' }}>
-                        <div className={styles.filterGroup} style={{ flex: 1 }}>
-                            <label className={styles.filterLabel}>生徒検索 (名前/学籍番号/年度/クラス/国籍/進学先)</label>
+                    <div className={styles.filters} style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div className={styles.filterGroup} style={{ flex: '1 1 300px' }}>
+                            <label className={styles.filterLabel}>生徒検索 (キーワードを入力)</label>
                             <input
                                 type="text"
-                                placeholder="キーワードを入力..."
-                                className={styles.filterSelect} // Reusing select style for input consistency
+                                placeholder="名前/学籍番号/進学先などで絞り込み..."
+                                className={styles.filterSelect}
                                 style={{ width: '100%', padding: '0.5rem' }}
                                 value={dbSearchQuery}
                                 onChange={(e) => setDbSearchQuery(e.target.value)}
                             />
                         </div>
-                        {/* Optional: Add status filter here if needed */}
+
+                        <div className={styles.filterGroup} style={{ flex: '0 1 120px' }}>
+                            <label className={styles.filterLabel}>入学年度</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={dbYearFilter}
+                                onChange={(e) => setDbYearFilter(e.target.value)}
+                            >
+                                <option value="">すべて</option>
+                                {dbFilterOptions.years.map(y => <option key={y} value={y}>{y}年度</option>)}
+                            </select>
+                        </div>
+
+                        <div className={styles.filterGroup} style={{ flex: '0 1 180px' }}>
+                            <label className={styles.filterLabel}>クラス</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={dbClassFilter}
+                                onChange={(e) => setDbClassFilter(e.target.value)}
+                            >
+                                <option value="">すべて</option>
+                                {dbFilterOptions.classes.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
+                        <div className={styles.filterGroup} style={{ flex: '0 1 120px' }}>
+                            <label className={styles.filterLabel}>国籍</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={dbNationalityFilter}
+                                onChange={(e) => setDbNationalityFilter(e.target.value)}
+                            >
+                                <option value="">すべて</option>
+                                {dbFilterOptions.nationalities.map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                        </div>
+
+                        <div className={styles.filterGroup} style={{ flex: '0 1 140px' }}>
+                            <label className={styles.filterLabel}>JLPT最高レベル</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={dbLevelFilter}
+                                onChange={(e) => setDbLevelFilter(e.target.value)}
+                            >
+                                <option value="">すべて</option>
+                                {dbFilterOptions.levels.map(l => <option key={l} value={l}>{l}</option>)}
+                            </select>
+                        </div>
                     </div>
 
                     <div className={styles.tableContainer}>
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th onClick={() => handleDbSort('studentId')} style={{ cursor: 'pointer' }}>
-                                        学籍番号 {renderSortIcon('studentId')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('name')} style={{ cursor: 'pointer' }}>
-                                        名前 {renderSortIcon('name')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('enrollmentYear')} style={{ cursor: 'pointer' }}>
-                                        入学年度 {renderSortIcon('enrollmentYear')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('class')} style={{ cursor: 'pointer' }}>
-                                        クラス {renderSortIcon('class')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('nationality')} style={{ cursor: 'pointer' }}>
-                                        国籍 {renderSortIcon('nationality')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('destination')} style={{ cursor: 'pointer' }}>
-                                        進学先 {renderSortIcon('destination')}
-                                    </th>
-                                    <th onClick={() => handleDbSort('highestLevel')} style={{ cursor: 'pointer' }}>
-                                        JLPT最高レベル {renderSortIcon('highestLevel')}
-                                    </th>
+                                    <th>学籍番号</th>
+                                    <th>名前</th>
+                                    <th>入学年度</th>
+                                    <th>クラス</th>
+                                    <th>国籍</th>
+                                    <th>進学先</th>
+                                    <th>JLPT最高レベル</th>
                                     <th>詳細</th>
                                 </tr>
                             </thead>
