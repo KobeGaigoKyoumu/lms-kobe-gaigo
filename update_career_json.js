@@ -54,17 +54,26 @@ try {
                 const result = row['合否'];
                 const id = row['学籍番号'];
 
-                // Only consider passed students
-                if (level && !isNaN(score) && result && result.includes('合格') && id) {
-                    const studentId = String(id).trim();
-                    const destName = studentDestinations[studentId];
+                // Only consider passed or failed students
+                if (level && !isNaN(score) && result && id) {
+                    const isPass = result.includes('合格') && !result.includes('不合格');
+                    const isFail = result.includes('不合格');
 
-                    if (destName) {
-                        if (!destinationStats[destName]) destinationStats[destName] = {};
-                        if (!destinationStats[destName][level]) {
-                            destinationStats[destName][level] = { scores: [] };
+                    if (isPass || isFail) {
+                        const studentId = String(id).trim();
+                        const destName = studentDestinations[studentId];
+
+                        if (destName) {
+                            if (!destinationStats[destName]) destinationStats[destName] = {};
+                            if (!destinationStats[destName][level]) {
+                                destinationStats[destName][level] = { passedScores: [], failedScores: [] };
+                            }
+                            if (isPass) {
+                                destinationStats[destName][level].passedScores.push(score);
+                            } else {
+                                destinationStats[destName][level].failedScores.push(score);
+                            }
                         }
-                        destinationStats[destName][level].scores.push(score);
                     }
                 }
             });
@@ -88,19 +97,31 @@ try {
             const jlptStats = {};
 
             if (statsObj) {
-                Object.keys(statsObj).forEach(level => {
-                    const scores = statsObj[level].scores;
-                    if (scores.length > 0) {
-                        const sum = scores.reduce((a, b) => a + b, 0);
-                        const avg = sum / scores.length;
-                        const max = Math.max(...scores);
-                        const min = Math.min(...scores);
+                Object.keys(statsObj).sort().forEach(level => {
+                    const passed = statsObj[level].passedScores;
+                    const failed = statsObj[level].failedScores;
+
+                    if (passed.length > 0 || failed.length > 0) {
+                        const calculateStats = (scores) => {
+                            if (scores.length === 0) return null;
+                            const sum = scores.reduce((a, b) => a + b, 0);
+                            return {
+                                count: scores.length,
+                                avg: parseFloat((sum / scores.length).toFixed(1)),
+                                max: Math.max(...scores),
+                                min: Math.min(...scores)
+                            };
+                        };
+
+                        const passStats = calculateStats(passed);
+                        const failStats = calculateStats(failed);
 
                         jlptStats[level] = {
-                            count: scores.length,
-                            avg: parseFloat(avg.toFixed(1)),
-                            max: max,
-                            min: min
+                            count: passStats ? passStats.count : 0,
+                            avg: passStats ? passStats.avg : 0,
+                            max: passStats ? passStats.max : 0,
+                            min: passStats ? passStats.min : 0,
+                            failed: failStats ? failStats : { count: 0, avg: 0, max: 0, min: 0 }
                         };
                     }
                 });

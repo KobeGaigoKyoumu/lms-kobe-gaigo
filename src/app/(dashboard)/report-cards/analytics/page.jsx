@@ -2027,10 +2027,10 @@ export default function AnalyticsPage() {
                                                                             <thead style={{ background: '#f3f4f6' }}>
                                                                                 <tr>
                                                                                     <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>データ数</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>平均点</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>最高点</th>
-                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>最低点</th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>合格者数</th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>合格平均</th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>不合格数</th>
+                                                                                    <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>不合格平均</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -2046,8 +2046,8 @@ export default function AnalyticsPage() {
                                                                                             </td>
                                                                                             <td style={{ padding: '0.5rem' }}>{stats.count}</td>
                                                                                             <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
-                                                                                            <td style={{ padding: '0.5rem' }}>{stats.max}</td>
-                                                                                            <td style={{ padding: '0.5rem' }}>{stats.min}</td>
+                                                                                            <td style={{ padding: '0.5rem', color: '#b91c1c' }}>{stats.failed?.count || 0}</td>
+                                                                                            <td style={{ padding: '0.5rem', color: '#b91c1c' }}>{stats.failed?.avg ? stats.failed.avg.toFixed(1) : '-'}</td>
                                                                                         </tr>
                                                                                     ))}
                                                                             </tbody>

@@ -273,22 +273,40 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 10,
-          "avg": 69.6,
+          "count": 1,
+          "avg": 99,
           "max": 99,
-          "min": 36
+          "min": 99,
+          "failed": {
+            "count": 9,
+            "avg": 66.3,
+            "max": 83,
+            "min": 36
+          }
         },
         "N3": {
-          "count": 64,
-          "avg": 85.6,
+          "count": 15,
+          "avg": 110.1,
           "max": 128,
-          "min": 48
+          "min": 98,
+          "failed": {
+            "count": 49,
+            "avg": 78.1,
+            "max": 94,
+            "min": 48
+          }
         },
         "N4": {
-          "count": 5,
-          "avg": 104.4,
+          "count": 3,
+          "avg": 125,
           "max": 141,
-          "min": 66
+          "min": 97,
+          "failed": {
+            "count": 2,
+            "avg": 73.5,
+            "max": 81,
+            "min": 66
+          }
         }
       }
     },
@@ -304,23 +322,41 @@
         "2023": 17
       },
       "jlptStats": {
+        "N2": {
+          "count": 6,
+          "avg": 105.5,
+          "max": 122,
+          "min": 95,
+          "failed": {
+            "count": 15,
+            "avg": 67.5,
+            "max": 88,
+            "min": 38
+          }
+        },
         "N3": {
-          "count": 58,
-          "avg": 92,
+          "count": 26,
+          "avg": 110.8,
           "max": 133,
-          "min": 31
+          "min": 95,
+          "failed": {
+            "count": 32,
+            "avg": 76.7,
+            "max": 94,
+            "min": 31
+          }
         },
         "N4": {
-          "count": 8,
-          "avg": 98,
+          "count": 5,
+          "avg": 108.6,
           "max": 127,
-          "min": 76
-        },
-        "N2": {
-          "count": 21,
-          "avg": 78.3,
-          "max": 122,
-          "min": 38
+          "min": 95,
+          "failed": {
+            "count": 3,
+            "avg": 80.3,
+            "max": 87,
+            "min": 76
+          }
         }
       }
     },
@@ -336,23 +372,41 @@
         "2023": 10
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 63.7,
+            "max": 80,
+            "min": 50
+          }
+        },
         "N3": {
-          "count": 52,
-          "avg": 79.3,
+          "count": 10,
+          "avg": 105.1,
           "max": 117,
-          "min": 45
+          "min": 96,
+          "failed": {
+            "count": 42,
+            "avg": 73.2,
+            "max": 102,
+            "min": 45
+          }
         },
         "N4": {
-          "count": 5,
-          "avg": 75.4,
+          "count": 1,
+          "avg": 97,
           "max": 97,
-          "min": 64
-        },
-        "N2": {
-          "count": 3,
-          "avg": 63.7,
-          "max": 80,
-          "min": 50
+          "min": 97,
+          "failed": {
+            "count": 4,
+            "avg": 70,
+            "max": 75,
+            "min": 64
+          }
         }
       }
     },
@@ -368,23 +422,41 @@
         "2023": 9
       },
       "jlptStats": {
-        "N4": {
-          "count": 6,
-          "avg": 98.5,
-          "max": 134,
-          "min": 73
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 62,
+            "max": 62,
+            "min": 62
+          }
         },
         "N3": {
-          "count": 35,
-          "avg": 83.9,
+          "count": 9,
+          "avg": 109.3,
           "max": 123,
-          "min": 52
+          "min": 97,
+          "failed": {
+            "count": 26,
+            "avg": 75,
+            "max": 95,
+            "min": 52
+          }
         },
-        "N2": {
-          "count": 1,
-          "avg": 62,
-          "max": 62,
-          "min": 62
+        "N4": {
+          "count": 4,
+          "avg": 108,
+          "max": 134,
+          "min": 90,
+          "failed": {
+            "count": 2,
+            "avg": 79.5,
+            "max": 86,
+            "min": 73
+          }
         }
       }
     },
@@ -400,23 +472,41 @@
         "2023": 5
       },
       "jlptStats": {
-        "N3": {
-          "count": 59,
-          "avg": 86.2,
-          "max": 131,
-          "min": 63
-        },
         "N2": {
-          "count": 10,
-          "avg": 71.8,
+          "count": 2,
+          "avg": 96,
           "max": 97,
-          "min": 53
+          "min": 95,
+          "failed": {
+            "count": 8,
+            "avg": 65.8,
+            "max": 81,
+            "min": 53
+          }
+        },
+        "N3": {
+          "count": 17,
+          "avg": 105.6,
+          "max": 131,
+          "min": 96,
+          "failed": {
+            "count": 42,
+            "avg": 78.4,
+            "max": 92,
+            "min": 63
+          }
         },
         "N4": {
-          "count": 1,
-          "avg": 78,
-          "max": 78,
-          "min": 78
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 78,
+            "max": 78,
+            "min": 78
+          }
         }
       }
     },
@@ -433,16 +523,28 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 28,
-          "avg": 85.5,
+          "count": 7,
+          "avg": 105.1,
           "max": 118,
-          "min": 58
+          "min": 95,
+          "failed": {
+            "count": 21,
+            "avg": 79,
+            "max": 94,
+            "min": 58
+          }
         },
         "N4": {
           "count": 2,
           "avg": 107.5,
           "max": 124,
-          "min": 91
+          "min": 91,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -455,23 +557,41 @@
         "2023": 23
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 7,
+            "avg": 70.7,
+            "max": 82,
+            "min": 56
+          }
+        },
         "N3": {
-          "count": 39,
-          "avg": 93,
+          "count": 16,
+          "avg": 108.3,
           "max": 138,
-          "min": 66
+          "min": 95,
+          "failed": {
+            "count": 23,
+            "avg": 82.3,
+            "max": 94,
+            "min": 66
+          }
         },
         "N4": {
-          "count": 4,
-          "avg": 101.5,
+          "count": 3,
+          "avg": 113,
           "max": 127,
-          "min": 67
-        },
-        "N2": {
-          "count": 7,
-          "avg": 70.7,
-          "max": 82,
-          "min": 56
+          "min": 106,
+          "failed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          }
         }
       }
     },
@@ -487,23 +607,41 @@
         "2023": 10
       },
       "jlptStats": {
-        "N3": {
-          "count": 17,
-          "avg": 105.4,
-          "max": 152,
-          "min": 69
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 47.5,
+            "max": 51,
+            "min": 44
+          }
         },
         "N2": {
-          "count": 16,
-          "avg": 83.1,
+          "count": 4,
+          "avg": 108.3,
           "max": 127,
-          "min": 57
+          "min": 94,
+          "failed": {
+            "count": 12,
+            "avg": 74.8,
+            "max": 89,
+            "min": 57
+          }
         },
-        "N1": {
-          "count": 2,
-          "avg": 47.5,
-          "max": 51,
-          "min": 44
+        "N3": {
+          "count": 12,
+          "avg": 114.8,
+          "max": 152,
+          "min": 99,
+          "failed": {
+            "count": 5,
+            "avg": 82.8,
+            "max": 91,
+            "min": 69
+          }
         }
       }
     },
@@ -518,29 +656,53 @@
         "2023": 12
       },
       "jlptStats": {
-        "N3": {
-          "count": 14,
-          "avg": 123.4,
-          "max": 162,
-          "min": 85
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 63.7,
+            "max": 76,
+            "min": 56
+          }
         },
         "N2": {
-          "count": 16,
-          "avg": 90.3,
+          "count": 8,
+          "avg": 108.6,
           "max": 144,
-          "min": 49
+          "min": 93,
+          "failed": {
+            "count": 8,
+            "avg": 71.9,
+            "max": 89,
+            "min": 49
+          }
         },
-        "N1": {
-          "count": 3,
-          "avg": 63.7,
-          "max": 76,
-          "min": 56
+        "N3": {
+          "count": 10,
+          "avg": 136.6,
+          "max": 162,
+          "min": 103,
+          "failed": {
+            "count": 4,
+            "avg": 90.3,
+            "max": 93,
+            "min": 85
+          }
         },
         "N4": {
           "count": 1,
           "avg": 126,
           "max": 126,
-          "min": 126
+          "min": 126,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -552,17 +714,29 @@
         "2019": 7
       },
       "jlptStats": {
-        "N3": {
-          "count": 8,
-          "avg": 79.1,
-          "max": 104,
-          "min": 53
-        },
         "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          }
+        },
+        "N3": {
           "count": 1,
-          "avg": 71,
-          "max": 71,
-          "min": 71
+          "avg": 104,
+          "max": 104,
+          "min": 104,
+          "failed": {
+            "count": 7,
+            "avg": 75.6,
+            "max": 94,
+            "min": 53
+          }
         }
       }
     },
@@ -574,23 +748,41 @@
         "2023": 9
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 55.5,
+            "max": 57,
+            "min": 54
+          }
+        },
         "N3": {
-          "count": 23,
-          "avg": 78.7,
+          "count": 3,
+          "avg": 114,
           "max": 134,
-          "min": 53
+          "min": 100,
+          "failed": {
+            "count": 20,
+            "avg": 73.4,
+            "max": 93,
+            "min": 53
+          }
         },
         "N4": {
           "count": 1,
           "avg": 90,
           "max": 90,
-          "min": 90
-        },
-        "N2": {
-          "count": 2,
-          "avg": 55.5,
-          "max": 57,
-          "min": 54
+          "min": 90,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -602,23 +794,41 @@
         "2023": 10
       },
       "jlptStats": {
-        "N4": {
-          "count": 2,
-          "avg": 91,
-          "max": 98,
-          "min": 84
+        "N2": {
+          "count": 1,
+          "avg": 109,
+          "max": 109,
+          "min": 109,
+          "failed": {
+            "count": 4,
+            "avg": 50.8,
+            "max": 62,
+            "min": 26
+          }
         },
         "N3": {
-          "count": 20,
-          "avg": 80.4,
+          "count": 6,
+          "avg": 98.2,
           "max": 101,
-          "min": 47
+          "min": 95,
+          "failed": {
+            "count": 14,
+            "avg": 72.8,
+            "max": 93,
+            "min": 47
+          }
         },
-        "N2": {
-          "count": 5,
-          "avg": 62.4,
-          "max": 109,
-          "min": 26
+        "N4": {
+          "count": 1,
+          "avg": 98,
+          "max": 98,
+          "min": 98,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
         }
       }
     },
@@ -630,23 +840,41 @@
         "2023": 7
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 37,
+            "max": 37,
+            "min": 37
+          }
+        },
         "N2": {
-          "count": 15,
-          "avg": 86.1,
+          "count": 5,
+          "avg": 104.2,
           "max": 114,
-          "min": 58
+          "min": 90,
+          "failed": {
+            "count": 10,
+            "avg": 77.1,
+            "max": 100,
+            "min": 58
+          }
         },
         "N3": {
-          "count": 8,
-          "avg": 112.5,
+          "count": 6,
+          "avg": 120.5,
           "max": 173,
-          "min": 86
-        },
-        "N1": {
-          "count": 1,
-          "avg": 37,
-          "max": 37,
-          "min": 37
+          "min": 97,
+          "failed": {
+            "count": 2,
+            "avg": 88.5,
+            "max": 91,
+            "min": 86
+          }
         }
       }
     },
@@ -661,23 +889,41 @@
         "2023": 3
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 59.5,
+            "max": 62,
+            "min": 57
+          }
+        },
         "N2": {
-          "count": 11,
-          "avg": 72.8,
+          "count": 2,
+          "avg": 96,
           "max": 101,
-          "min": 47
+          "min": 91,
+          "failed": {
+            "count": 9,
+            "avg": 67.7,
+            "max": 88,
+            "min": 47
+          }
         },
         "N3": {
-          "count": 5,
-          "avg": 92.4,
+          "count": 3,
+          "avg": 102.3,
           "max": 109,
-          "min": 71
-        },
-        "N1": {
-          "count": 2,
-          "avg": 59.5,
-          "max": 62,
-          "min": 57
+          "min": 95,
+          "failed": {
+            "count": 2,
+            "avg": 77.5,
+            "max": 84,
+            "min": 71
+          }
         }
       }
     },
@@ -692,23 +938,41 @@
         "2023": 3
       },
       "jlptStats": {
-        "N3": {
-          "count": 8,
-          "avg": 110.6,
-          "max": 144,
-          "min": 85
-        },
         "N2": {
-          "count": 4,
-          "avg": 73,
+          "count": 1,
+          "avg": 90,
           "max": 90,
-          "min": 43
+          "min": 90,
+          "failed": {
+            "count": 3,
+            "avg": 67.3,
+            "max": 84,
+            "min": 43
+          }
+        },
+        "N3": {
+          "count": 6,
+          "avg": 119,
+          "max": 144,
+          "min": 100,
+          "failed": {
+            "count": 2,
+            "avg": 85.5,
+            "max": 86,
+            "min": 85
+          }
         },
         "N4": {
-          "count": 3,
-          "avg": 101.3,
+          "count": 2,
+          "avg": 117,
           "max": 144,
-          "min": 70
+          "min": 90,
+          "failed": {
+            "count": 1,
+            "avg": 70,
+            "max": 70,
+            "min": 70
+          }
         }
       }
     },
@@ -722,17 +986,29 @@
         "2022": 5
       },
       "jlptStats": {
-        "N3": {
-          "count": 9,
-          "avg": 84.1,
-          "max": 118,
-          "min": 62
-        },
         "N2": {
-          "count": 7,
-          "avg": 74.3,
+          "count": 2,
+          "avg": 93.5,
           "max": 96,
-          "min": 44
+          "min": 91,
+          "failed": {
+            "count": 5,
+            "avg": 66.6,
+            "max": 76,
+            "min": 44
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 108,
+          "max": 118,
+          "min": 96,
+          "failed": {
+            "count": 6,
+            "avg": 72.2,
+            "max": 86,
+            "min": 62
+          }
         }
       }
     },
@@ -746,17 +1022,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 5,
-          "avg": 93.8,
-          "max": 99,
-          "min": 84
-        },
         "N2": {
-          "count": 5,
-          "avg": 89.6,
-          "max": 118,
-          "min": 79
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 5,
+            "avg": 89.6,
+            "max": 118,
+            "min": 79
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 97.3,
+          "max": 99,
+          "min": 96,
+          "failed": {
+            "count": 2,
+            "avg": 88.5,
+            "max": 93,
+            "min": 84
+          }
         }
       }
     },
@@ -769,17 +1057,29 @@
         "2023": 5
       },
       "jlptStats": {
-        "N3": {
-          "count": 4,
-          "avg": 120.3,
-          "max": 137,
-          "min": 78
-        },
         "N2": {
-          "count": 5,
-          "avg": 99.6,
+          "count": 3,
+          "avg": 110.3,
           "max": 118,
-          "min": 81
+          "min": 98,
+          "failed": {
+            "count": 2,
+            "avg": 83.5,
+            "max": 86,
+            "min": 81
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 134.3,
+          "max": 137,
+          "min": 132,
+          "failed": {
+            "count": 1,
+            "avg": 78,
+            "max": 78,
+            "min": 78
+          }
         }
       }
     },
@@ -791,16 +1091,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 97.4,
+          "count": 3,
+          "avg": 109.7,
           "max": 132,
-          "min": 79
+          "min": 96,
+          "failed": {
+            "count": 2,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          }
         },
         "N3": {
-          "count": 6,
-          "avg": 97.3,
+          "count": 3,
+          "avg": 113,
           "max": 127,
-          "min": 72
+          "min": 101,
+          "failed": {
+            "count": 3,
+            "avg": 81.7,
+            "max": 91,
+            "min": 72
+          }
         }
       }
     },
@@ -814,17 +1126,29 @@
         "2023": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 2,
+          "avg": 92,
+          "max": 93,
+          "min": 91,
+          "failed": {
+            "count": 3,
+            "avg": 65.3,
+            "max": 76,
+            "min": 56
+          }
+        },
         "N3": {
           "count": 4,
           "avg": 108.5,
           "max": 121,
-          "min": 95
-        },
-        "N2": {
-          "count": 5,
-          "avg": 76,
-          "max": 93,
-          "min": 56
+          "min": 95,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -838,17 +1162,29 @@
         "2022": 3
       },
       "jlptStats": {
-        "N3": {
-          "count": 5,
-          "avg": 110,
-          "max": 156,
-          "min": 83
-        },
         "N2": {
           "count": 1,
           "avg": 98,
           "max": 98,
-          "min": 98
+          "min": 98,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 121.3,
+          "max": 156,
+          "min": 98,
+          "failed": {
+            "count": 2,
+            "avg": 93,
+            "max": 103,
+            "min": 83
+          }
         }
       }
     },
@@ -862,17 +1198,29 @@
         "2023": 2
       },
       "jlptStats": {
-        "N3": {
-          "count": 7,
-          "avg": 92.9,
-          "max": 122,
-          "min": 75
-        },
         "N2": {
-          "count": 7,
-          "avg": 83.4,
+          "count": 2,
+          "avg": 103,
           "max": 115,
-          "min": 71
+          "min": 91,
+          "failed": {
+            "count": 5,
+            "avg": 75.6,
+            "max": 84,
+            "min": 71
+          }
+        },
+        "N3": {
+          "count": 4,
+          "avg": 102.5,
+          "max": 122,
+          "min": 96,
+          "failed": {
+            "count": 3,
+            "avg": 80,
+            "max": 87,
+            "min": 75
+          }
         }
       }
     },
@@ -885,16 +1233,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 4,
-          "avg": 71.8,
+          "count": 1,
+          "avg": 92,
           "max": 92,
-          "min": 44
+          "min": 92,
+          "failed": {
+            "count": 3,
+            "avg": 65,
+            "max": 80,
+            "min": 44
+          }
         },
         "N3": {
-          "count": 7,
-          "avg": 105.3,
+          "count": 4,
+          "avg": 120.5,
           "max": 135,
-          "min": 71
+          "min": 103,
+          "failed": {
+            "count": 3,
+            "avg": 85,
+            "max": 92,
+            "min": 71
+          }
         }
       }
     },
@@ -905,17 +1265,29 @@
         "2022": 7
       },
       "jlptStats": {
-        "N4": {
-          "count": 3,
-          "avg": 71,
-          "max": 87,
-          "min": 55
-        },
         "N3": {
-          "count": 8,
-          "avg": 80.4,
+          "count": 2,
+          "avg": 97.5,
           "max": 100,
-          "min": 50
+          "min": 95,
+          "failed": {
+            "count": 6,
+            "avg": 74.7,
+            "max": 94,
+            "min": 50
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 71,
+            "max": 87,
+            "min": 55
+          }
         }
       }
     },
@@ -927,17 +1299,29 @@
         "2023": 6
       },
       "jlptStats": {
-        "N3": {
-          "count": 12,
-          "avg": 75.5,
-          "max": 100,
-          "min": 47
-        },
         "N2": {
-          "count": 2,
-          "avg": 57,
-          "max": 61,
-          "min": 53
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 57,
+            "max": 61,
+            "min": 53
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 100,
+          "max": 100,
+          "min": 100,
+          "failed": {
+            "count": 11,
+            "avg": 73.3,
+            "max": 89,
+            "min": 47
+          }
         }
       }
     },
@@ -950,10 +1334,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 99.5,
+          "count": 1,
+          "avg": 141,
           "max": 141,
-          "min": 75
+          "min": 141,
+          "failed": {
+            "count": 3,
+            "avg": 85.7,
+            "max": 94,
+            "min": 75
+          }
         }
       }
     },
@@ -966,10 +1356,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 12,
-          "avg": 86.6,
+          "count": 5,
+          "avg": 102.2,
           "max": 109,
-          "min": 63
+          "min": 96,
+          "failed": {
+            "count": 7,
+            "avg": 75.4,
+            "max": 84,
+            "min": 63
+          }
         }
       }
     },
@@ -981,23 +1377,41 @@
         "2023": 3
       },
       "jlptStats": {
-        "N3": {
-          "count": 8,
-          "avg": 91.6,
-          "max": 114,
-          "min": 65
-        },
         "N2": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 63,
-          "min": 62
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 63,
+            "min": 62
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 110,
+          "max": 114,
+          "min": 103,
+          "failed": {
+            "count": 5,
+            "avg": 80.6,
+            "max": 92,
+            "min": 65
+          }
         },
         "N4": {
-          "count": 2,
-          "avg": 62,
-          "max": 72,
-          "min": 52
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 62,
+            "max": 72,
+            "min": 52
+          }
         }
       }
     },
@@ -1009,29 +1423,53 @@
         "2023": 4
       },
       "jlptStats": {
-        "N3": {
-          "count": 4,
-          "avg": 101.3,
-          "max": 142,
-          "min": 75
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          }
         },
         "N2": {
-          "count": 3,
-          "avg": 107.7,
+          "count": 2,
+          "avg": 128,
           "max": 144,
-          "min": 67
+          "min": 112,
+          "failed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          }
+        },
+        "N3": {
+          "count": 2,
+          "avg": 126,
+          "max": 142,
+          "min": 110,
+          "failed": {
+            "count": 2,
+            "avg": 76.5,
+            "max": 78,
+            "min": 75
+          }
         },
         "N4": {
           "count": 1,
           "avg": 113,
           "max": 113,
-          "min": 113
-        },
-        "N1": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "min": 113,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1043,17 +1481,29 @@
         "2023": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 3,
-          "avg": 91.3,
-          "max": 138,
-          "min": 61
-        },
         "N3": {
           "count": 1,
           "avg": 97,
           "max": 97,
-          "min": 97
+          "min": 97,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N4": {
+          "count": 1,
+          "avg": 138,
+          "max": 138,
+          "min": 138,
+          "failed": {
+            "count": 2,
+            "avg": 68,
+            "max": 75,
+            "min": 61
+          }
         }
       }
     },
@@ -1065,10 +1515,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 53.3,
-          "max": 62,
-          "min": 46
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 53.3,
+            "max": 62,
+            "min": 46
+          }
         }
       }
     },
@@ -1081,10 +1537,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 79.3,
-          "max": 88,
-          "min": 73
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 4,
+            "avg": 79.3,
+            "max": 88,
+            "min": 73
+          }
         }
       }
     },
@@ -1098,16 +1560,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 48,
-          "max": 55,
-          "min": 41
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 48,
+            "max": 55,
+            "min": 41
+          }
         },
         "N3": {
           "count": 1,
           "avg": 111,
           "max": 111,
-          "min": 111
+          "min": 111,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1121,22 +1595,40 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 75.7,
-          "max": 87,
-          "min": 65
-        },
-        "N5": {
-          "count": 1,
-          "avg": 180,
-          "max": 180,
-          "min": 180
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 75.7,
+            "max": 87,
+            "min": 65
+          }
         },
         "N3": {
           "count": 1,
           "avg": 150,
           "max": 150,
-          "min": 150
+          "min": 150,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N5": {
+          "count": 1,
+          "avg": 180,
+          "max": 180,
+          "min": 180,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1148,16 +1640,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 5,
-          "avg": 66,
+          "count": 1,
+          "avg": 95,
           "max": 95,
-          "min": 47
+          "min": 95,
+          "failed": {
+            "count": 4,
+            "avg": 58.8,
+            "max": 70,
+            "min": 47
+          }
         },
         "N3": {
-          "count": 1,
-          "avg": 87,
-          "max": 87,
-          "min": 87
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 87,
+            "max": 87,
+            "min": 87
+          }
         }
       }
     },
@@ -1169,29 +1673,53 @@
         "2023": 2
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
+        },
+        "N2": {
+          "count": 2,
+          "avg": 115.5,
+          "max": 134,
+          "min": 97,
+          "failed": {
+            "count": 1,
+            "avg": 52,
+            "max": 52,
+            "min": 52
+          }
+        },
+        "N3": {
+          "count": 2,
+          "avg": 130,
+          "max": 146,
+          "min": 114,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
+        },
         "N4": {
           "count": 1,
           "avg": 114,
           "max": 114,
-          "min": 114
-        },
-        "N3": {
-          "count": 3,
-          "avg": 114.7,
-          "max": 146,
-          "min": 84
-        },
-        "N2": {
-          "count": 3,
-          "avg": 94.3,
-          "max": 134,
-          "min": 52
-        },
-        "N1": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "min": 114,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1202,17 +1730,29 @@
         "2022": 4
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 65,
-          "max": 65,
-          "min": 65
-        },
         "N3": {
-          "count": 6,
-          "avg": 81,
+          "count": 1,
+          "avg": 101,
           "max": 101,
-          "min": 51
+          "min": 101,
+          "failed": {
+            "count": 5,
+            "avg": 77,
+            "max": 89,
+            "min": 51
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
+          }
         }
       }
     },
@@ -1223,17 +1763,29 @@
         "2023": 4
       },
       "jlptStats": {
-        "N3": {
-          "count": 5,
-          "avg": 95.6,
-          "max": 113,
-          "min": 71
-        },
         "N2": {
-          "count": 3,
-          "avg": 73.7,
-          "max": 87,
-          "min": 64
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 73.7,
+            "max": 87,
+            "min": 64
+          }
+        },
+        "N3": {
+          "count": 4,
+          "avg": 101.8,
+          "max": 113,
+          "min": 98,
+          "failed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          }
         }
       }
     },
@@ -1244,17 +1796,29 @@
         "2017": 3
       },
       "jlptStats": {
-        "N3": {
-          "count": 4,
-          "avg": 101.5,
-          "max": 111,
-          "min": 82
-        },
         "N2": {
-          "count": 4,
-          "avg": 88.3,
+          "count": 2,
+          "avg": 99,
           "max": 103,
-          "min": 73
+          "min": 95,
+          "failed": {
+            "count": 2,
+            "avg": 77.5,
+            "max": 82,
+            "min": 73
+          }
+        },
+        "N3": {
+          "count": 3,
+          "avg": 108,
+          "max": 111,
+          "min": 104,
+          "failed": {
+            "count": 1,
+            "avg": 82,
+            "max": 82,
+            "min": 82
+          }
         }
       }
     },
@@ -1266,17 +1830,29 @@
         "2020": 2
       },
       "jlptStats": {
-        "N2": {
-          "count": 5,
-          "avg": 85.4,
-          "max": 101,
-          "min": 72
-        },
         "N1": {
-          "count": 3,
-          "avg": 58.7,
-          "max": 67,
-          "min": 54
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 58.7,
+            "max": 67,
+            "min": 54
+          }
+        },
+        "N2": {
+          "count": 1,
+          "avg": 101,
+          "max": 101,
+          "min": 101,
+          "failed": {
+            "count": 4,
+            "avg": 81.5,
+            "max": 88,
+            "min": 72
+          }
         }
       }
     },
@@ -1290,16 +1866,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 81.3,
+          "count": 1,
+          "avg": 102,
           "max": 102,
-          "min": 65
+          "min": 102,
+          "failed": {
+            "count": 2,
+            "avg": 71,
+            "max": 77,
+            "min": 65
+          }
         },
         "N3": {
           "count": 1,
           "avg": 135,
           "max": 135,
-          "min": 135
+          "min": 135,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1311,23 +1899,41 @@
         "2023": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 73.5,
+            "max": 79,
+            "min": 68
+          }
         },
         "N3": {
           "count": 2,
           "avg": 107.5,
           "max": 114,
-          "min": 101
+          "min": 101,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
-          "count": 2,
-          "avg": 73.5,
-          "max": 79,
-          "min": 68
+        "N4": {
+          "count": 1,
+          "avg": 99,
+          "max": 99,
+          "min": 99,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1340,10 +1946,16 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 4,
-          "avg": 83.8,
-          "max": 98,
-          "min": 69
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 4,
+            "avg": 83.8,
+            "max": 98,
+            "min": 69
+          }
         }
       }
     },
@@ -1355,17 +1967,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 5,
-          "avg": 82.6,
-          "max": 106,
-          "min": 60
-        },
         "N2": {
-          "count": 1,
-          "avg": 60,
-          "max": 60,
-          "min": 60
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 60,
+            "max": 60,
+            "min": 60
+          }
+        },
+        "N3": {
+          "count": 2,
+          "avg": 105.5,
+          "max": 106,
+          "min": 105,
+          "failed": {
+            "count": 3,
+            "avg": 67.3,
+            "max": 75,
+            "min": 60
+          }
         }
       }
     },
@@ -1377,17 +2001,29 @@
         "2023": 2
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 60.5,
+            "max": 72,
+            "min": 49
+          }
+        },
         "N3": {
           "count": 3,
           "avg": 113.7,
           "max": 121,
-          "min": 102
-        },
-        "N2": {
-          "count": 2,
-          "avg": 60.5,
-          "max": 72,
-          "min": 49
+          "min": 102,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1399,17 +2035,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 2,
-          "avg": 59.5,
-          "max": 63,
-          "min": 56
-        },
         "N3": {
-          "count": 4,
-          "avg": 71.3,
+          "count": 1,
+          "avg": 96,
           "max": 96,
-          "min": 49
+          "min": 96,
+          "failed": {
+            "count": 3,
+            "avg": 63,
+            "max": 72,
+            "min": 49
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 59.5,
+            "max": 63,
+            "min": 56
+          }
         }
       }
     },
@@ -1421,16 +2069,28 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 84.7,
+          "count": 1,
+          "avg": 100,
           "max": 100,
-          "min": 75
+          "min": 100,
+          "failed": {
+            "count": 2,
+            "avg": 77,
+            "max": 79,
+            "min": 75
+          }
         },
         "N3": {
           "count": 2,
           "avg": 109.5,
           "max": 115,
-          "min": 104
+          "min": 104,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1443,10 +2103,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 92.3,
-          "max": 99,
-          "min": 87
+          "count": 1,
+          "avg": 91,
+          "max": 91,
+          "min": 91,
+          "failed": {
+            "count": 2,
+            "avg": 93,
+            "max": 99,
+            "min": 87
+          }
         }
       }
     },
@@ -1458,17 +2124,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 180,
-          "max": 180,
-          "min": 180
-        },
         "N2": {
           "count": 1,
           "avg": 168,
           "max": 168,
-          "min": 168
+          "min": 168,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N4": {
+          "count": 1,
+          "avg": 180,
+          "max": 180,
+          "min": 180,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1480,10 +2158,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 65,
-          "max": 65,
-          "min": 65
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
+          }
         }
       }
     },
@@ -1495,17 +2179,29 @@
         "2019": 1
       },
       "jlptStats": {
-        "N2": {
-          "count": 1,
-          "avg": 146,
-          "max": 146,
-          "min": 146
-        },
         "N1": {
           "count": 1,
           "avg": 129,
           "max": 129,
-          "min": 129
+          "min": 129,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N2": {
+          "count": 1,
+          "avg": 146,
+          "max": 146,
+          "min": 146,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1517,17 +2213,29 @@
         "2019": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 173,
-          "max": 173,
-          "min": 173
-        },
         "N2": {
           "count": 1,
           "avg": 139,
           "max": 139,
-          "min": 139
+          "min": 139,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 173,
+          "max": 173,
+          "min": 173,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1540,10 +2248,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 113,
+          "count": 1,
+          "avg": 145,
           "max": 145,
-          "min": 81
+          "min": 145,
+          "failed": {
+            "count": 1,
+            "avg": 81,
+            "max": 81,
+            "min": 81
+          }
         }
       }
     },
@@ -1555,17 +2269,29 @@
         "2019": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 101,
           "max": 101,
-          "min": 101
-        },
-        "N2": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "min": 101,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1586,23 +2312,41 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 98,
-          "max": 98,
-          "min": 98
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 60,
+            "max": 60,
+            "min": 60
+          }
         },
         "N3": {
           "count": 1,
           "avg": 125,
           "max": 125,
-          "min": 125
+          "min": 125,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
+        "N4": {
           "count": 1,
-          "avg": 60,
-          "max": 60,
-          "min": 60
+          "avg": 98,
+          "max": 98,
+          "min": 98,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1622,17 +2366,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N1": {
+          "count": 1,
+          "avg": 113,
+          "max": 113,
+          "min": 113,
+          "failed": {
+            "count": 2,
+            "avg": 72,
+            "max": 86,
+            "min": 58
+          }
+        },
         "N2": {
           "count": 2,
           "avg": 121.5,
           "max": 137,
-          "min": 106
-        },
-        "N1": {
-          "count": 3,
-          "avg": 85.7,
-          "max": 113,
-          "min": 58
+          "min": 106,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1644,10 +2400,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 69.5,
-          "max": 70,
-          "min": 69
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 69.5,
+            "max": 70,
+            "min": 69
+          }
         }
       }
     },
@@ -1659,23 +2421,41 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 96,
-          "max": 96,
-          "min": 96
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 71,
+            "max": 77,
+            "min": 65
+          }
         },
         "N3": {
           "count": 2,
           "avg": 107,
           "max": 109,
-          "min": 105
+          "min": 105,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
-          "count": 2,
-          "avg": 71,
-          "max": 77,
-          "min": 65
+        "N4": {
+          "count": 1,
+          "avg": 96,
+          "max": 96,
+          "min": 96,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1687,10 +2467,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 84,
+          "count": 1,
+          "avg": 118,
           "max": 118,
-          "min": 54
+          "min": 118,
+          "failed": {
+            "count": 2,
+            "avg": 67,
+            "max": 80,
+            "min": 54
+          }
         }
       }
     },
@@ -1701,17 +2487,29 @@
         "2022": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
-        },
         "N3": {
-          "count": 2,
-          "avg": 77,
-          "max": 81,
-          "min": 73
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 77,
+            "max": 81,
+            "min": 73
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
         }
       }
     },
@@ -1722,17 +2520,29 @@
         "2022": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
-        },
         "N3": {
-          "count": 2,
-          "avg": 89.5,
-          "max": 91,
-          "min": 88
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 89.5,
+            "max": 91,
+            "min": 88
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
         }
       }
     },
@@ -1744,10 +2554,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 70.3,
-          "max": 83,
-          "min": 61
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 70.3,
+            "max": 83,
+            "min": 61
+          }
         }
       }
     },
@@ -1758,23 +2574,41 @@
         "2022": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 76,
+            "max": 76,
+            "min": 76
+          }
         },
         "N3": {
           "count": 1,
           "avg": 128,
           "max": 128,
-          "min": 128
+          "min": 128,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
+        "N4": {
           "count": 1,
-          "avg": 76,
-          "max": 76,
-          "min": 76
+          "avg": 99,
+          "max": 99,
+          "min": 99,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1785,23 +2619,41 @@
         "2022": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          }
         },
         "N3": {
-          "count": 2,
-          "avg": 96.5,
-          "max": 120,
-          "min": 73
-        },
-        "N2": {
           "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "avg": 120,
+          "max": 120,
+          "min": 120,
+          "failed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
         }
       }
     },
@@ -1812,23 +2664,41 @@
         "2022": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 2,
-          "avg": 108.5,
-          "max": 125,
-          "min": 92
-        },
-        "N3": {
-          "count": 3,
-          "avg": 83.3,
-          "max": 102,
-          "min": 73
-        },
         "N2": {
           "count": 1,
           "avg": 91,
           "max": 91,
-          "min": 91
+          "min": 91,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 102,
+          "max": 102,
+          "min": 102,
+          "failed": {
+            "count": 2,
+            "avg": 74,
+            "max": 75,
+            "min": 73
+          }
+        },
+        "N4": {
+          "count": 2,
+          "avg": 108.5,
+          "max": 125,
+          "min": 92,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1840,10 +2710,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 75.8,
-          "max": 89,
-          "min": 69
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 4,
+            "avg": 75.8,
+            "max": 89,
+            "min": 69
+          }
         }
       }
     },
@@ -1855,17 +2731,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 3,
-          "avg": 88.3,
-          "max": 105,
-          "min": 76
-        },
         "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          }
+        },
+        "N3": {
           "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "avg": 105,
+          "max": 105,
+          "min": 105,
+          "failed": {
+            "count": 2,
+            "avg": 80,
+            "max": 84,
+            "min": 76
+          }
         }
       }
     },
@@ -1877,23 +2765,41 @@
         "2023": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
+        },
         "N3": {
-          "count": 3,
-          "avg": 89.7,
+          "count": 1,
+          "avg": 123,
           "max": 123,
-          "min": 63
+          "min": 123,
+          "failed": {
+            "count": 2,
+            "avg": 73,
+            "max": 83,
+            "min": 63
+          }
         },
         "N4": {
           "count": 1,
           "avg": 120,
           "max": 120,
-          "min": 120
-        },
-        "N2": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "min": 120,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1905,16 +2811,28 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          }
         },
         "N2": {
           "count": 1,
           "avg": 110,
           "max": 110,
-          "min": 110
+          "min": 110,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1926,10 +2844,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 82.7,
+          "count": 1,
+          "avg": 102,
           "max": 102,
-          "min": 69
+          "min": 102,
+          "failed": {
+            "count": 2,
+            "avg": 73,
+            "max": 77,
+            "min": 69
+          }
         }
       }
     },
@@ -1941,10 +2865,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 4,
-          "avg": 85.5,
+          "count": 1,
+          "avg": 106,
           "max": 106,
-          "min": 73
+          "min": 106,
+          "failed": {
+            "count": 3,
+            "avg": 78.7,
+            "max": 87,
+            "min": 73
+          }
         }
       }
     },
@@ -1955,23 +2885,41 @@
         "2023": 2
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 90,
-          "max": 90,
-          "min": 90
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          }
         },
         "N3": {
           "count": 2,
           "avg": 100.5,
           "max": 101,
-          "min": 100
+          "min": 100,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
+        "N4": {
           "count": 1,
-          "avg": 71,
-          "max": 71,
-          "min": 71
+          "avg": 90,
+          "max": 90,
+          "min": 90,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -1982,17 +2930,29 @@
         "2017": 1
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          }
+        },
         "N2": {
           "count": 1,
           "avg": 105,
           "max": 105,
-          "min": 105
-        },
-        "N1": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "min": 105,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2004,10 +2964,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 66.5,
-          "max": 68,
-          "min": 65
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 66.5,
+            "max": 68,
+            "min": 65
+          }
         }
       }
     },
@@ -2018,17 +2984,29 @@
         "2017": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 89,
-          "max": 89,
-          "min": 89
-        },
         "N2": {
-          "count": 1,
-          "avg": 67,
-          "max": 67,
-          "min": 67
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 67,
+            "max": 67,
+            "min": 67
+          }
+        },
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 89,
+            "max": 89,
+            "min": 89
+          }
         }
       }
     },
@@ -2043,7 +3021,13 @@
           "count": 1,
           "avg": 145,
           "max": 145,
-          "min": 145
+          "min": 145,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2054,17 +3038,29 @@
         "2017": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 2,
-          "avg": 94.5,
-          "max": 107,
-          "min": 82
-        },
         "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          }
+        },
+        "N3": {
           "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "avg": 107,
+          "max": 107,
+          "min": 107,
+          "failed": {
+            "count": 1,
+            "avg": 82,
+            "max": 82,
+            "min": 82
+          }
         }
       }
     },
@@ -2076,10 +3072,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 49,
-          "max": 49,
-          "min": 49
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 49,
+            "max": 49,
+            "min": 49
+          }
         }
       }
     },
@@ -2091,10 +3093,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 73,
-          "max": 73,
-          "min": 73
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          }
         }
       }
     },
@@ -2109,7 +3117,13 @@
           "count": 1,
           "avg": 104,
           "max": 104,
-          "min": 104
+          "min": 104,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2164,7 +3178,13 @@
           "count": 1,
           "avg": 169,
           "max": 169,
-          "min": 169
+          "min": 169,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2176,10 +3196,16 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          }
         }
       }
     },
@@ -2190,23 +3216,41 @@
         "2020": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 142,
-          "max": 142,
-          "min": 142
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 62,
+            "max": 62,
+            "min": 62
+          }
         },
         "N2": {
           "count": 1,
           "avg": 113,
           "max": 113,
-          "min": 113
+          "min": 113,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N1": {
+        "N3": {
           "count": 1,
-          "avg": 62,
-          "max": 62,
-          "min": 62
+          "avg": 142,
+          "max": 142,
+          "min": 142,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2221,7 +3265,13 @@
           "count": 1,
           "avg": 124,
           "max": 124,
-          "min": 124
+          "min": 124,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2232,17 +3282,29 @@
         "2020": 1
       },
       "jlptStats": {
-        "N2": {
-          "count": 1,
-          "avg": 150,
-          "max": 150,
-          "min": 150
-        },
         "N1": {
           "count": 1,
           "avg": 136,
           "max": 136,
-          "min": 136
+          "min": 136,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N2": {
+          "count": 1,
+          "avg": 150,
+          "max": 150,
+          "min": 150,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2254,10 +3316,16 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 2,
-          "avg": 91,
+          "count": 1,
+          "avg": 111,
           "max": 111,
-          "min": 71
+          "min": 111,
+          "failed": {
+            "count": 1,
+            "avg": 71,
+            "max": 71,
+            "min": 71
+          }
         }
       }
     },
@@ -2268,17 +3336,29 @@
         "2020": 1
       },
       "jlptStats": {
-        "N2": {
-          "count": 1,
-          "avg": 129,
-          "max": 129,
-          "min": 129
-        },
         "N1": {
           "count": 1,
           "avg": 140,
           "max": 140,
-          "min": 140
+          "min": 140,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N2": {
+          "count": 1,
+          "avg": 129,
+          "max": 129,
+          "min": 129,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2301,7 +3381,13 @@
           "count": 1,
           "avg": 103,
           "max": 103,
-          "min": 103
+          "min": 103,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2316,7 +3402,13 @@
           "count": 1,
           "avg": 103,
           "max": 103,
-          "min": 103
+          "min": 103,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2331,7 +3423,13 @@
           "count": 2,
           "avg": 102.5,
           "max": 105,
-          "min": 100
+          "min": 100,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2342,17 +3440,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 56,
+            "max": 56,
+            "min": 56
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 148,
           "max": 148,
-          "min": 148
-        },
-        "N1": {
-          "count": 1,
-          "avg": 56,
-          "max": 56,
-          "min": 56
+          "min": 148,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2367,7 +3477,13 @@
           "count": 2,
           "avg": 116,
           "max": 127,
-          "min": 105
+          "min": 105,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2390,7 +3506,13 @@
           "count": 1,
           "avg": 115,
           "max": 115,
-          "min": 115
+          "min": 115,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2402,10 +3524,16 @@
       },
       "jlptStats": {
         "N1": {
-          "count": 1,
-          "avg": 74,
-          "max": 74,
-          "min": 74
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 74,
+            "max": 74,
+            "min": 74
+          }
         }
       }
     },
@@ -2416,17 +3544,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 2,
-          "avg": 94,
-          "max": 95,
-          "min": 93
-        },
         "N2": {
           "count": 1,
           "avg": 105,
           "max": 105,
-          "min": 105
+          "min": 105,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 95,
+          "max": 95,
+          "min": 95,
+          "failed": {
+            "count": 1,
+            "avg": 93,
+            "max": 93,
+            "min": 93
+          }
         }
       }
     },
@@ -2437,17 +3577,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 2,
-          "avg": 63.5,
-          "max": 66,
-          "min": 61
-        },
         "N2": {
-          "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
+        },
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 63.5,
+            "max": 66,
+            "min": 61
+          }
         }
       }
     },
@@ -2459,10 +3611,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 3,
-          "avg": 77,
+          "count": 1,
+          "avg": 90,
           "max": 90,
-          "min": 66
+          "min": 90,
+          "failed": {
+            "count": 2,
+            "avg": 70.5,
+            "max": 75,
+            "min": 66
+          }
         }
       }
     },
@@ -2474,10 +3632,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 91.5,
+          "count": 1,
+          "avg": 107,
           "max": 107,
-          "min": 76
+          "min": 107,
+          "failed": {
+            "count": 1,
+            "avg": 76,
+            "max": 76,
+            "min": 76
+          }
         }
       }
     },
@@ -2488,17 +3652,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 80,
-          "max": 80,
-          "min": 80
-        },
         "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 80,
+            "max": 80,
+            "min": 80
+          }
         }
       }
     },
@@ -2510,10 +3686,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 74,
-          "max": 74,
-          "min": 74
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 74,
+            "max": 74,
+            "min": 74
+          }
         }
       }
     },
@@ -2525,10 +3707,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 58,
-          "max": 58,
-          "min": 58
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 58,
+            "max": 58,
+            "min": 58
+          }
         }
       }
     },
@@ -2540,10 +3728,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 71.5,
-          "max": 77,
-          "min": 66
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 71.5,
+            "max": 77,
+            "min": 66
+          }
         }
       }
     },
@@ -2558,7 +3752,13 @@
           "count": 1,
           "avg": 100,
           "max": 100,
-          "min": 100
+          "min": 100,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2569,17 +3769,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
-        },
         "N3": {
-          "count": 1,
-          "avg": 68,
-          "max": 68,
-          "min": 68
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
+          }
         }
       }
     },
@@ -2599,10 +3811,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 61,
-          "max": 61,
-          "min": 61
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 61,
+            "max": 61,
+            "min": 61
+          }
         }
       }
     },
@@ -2613,17 +3831,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 85.5,
+            "max": 93,
+            "min": 78
+          }
+        },
         "N4": {
           "count": 1,
           "avg": 94,
           "max": 94,
-          "min": 94
-        },
-        "N3": {
-          "count": 2,
-          "avg": 85.5,
-          "max": 93,
-          "min": 78
+          "min": 94,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2634,17 +3864,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 98,
           "max": 98,
-          "min": 98
-        },
-        "N2": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "min": 98,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2656,10 +3898,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 78.5,
-          "max": 84,
-          "min": 73
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 78.5,
+            "max": 84,
+            "min": 73
+          }
         }
       }
     },
@@ -2671,10 +3919,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 72,
-          "max": 83,
-          "min": 61
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 72,
+            "max": 83,
+            "min": 61
+          }
         }
       }
     },
@@ -2685,17 +3939,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 102,
           "max": 102,
-          "min": 102
-        },
-        "N2": {
-          "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "min": 102,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2707,10 +3973,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 77,
+          "count": 1,
+          "avg": 91,
           "max": 91,
-          "min": 63
+          "min": 91,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
         }
       }
     },
@@ -2721,17 +3993,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 87,
+            "max": 87,
+            "min": 87
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 138,
           "max": 138,
-          "min": 138
-        },
-        "N2": {
-          "count": 1,
-          "avg": 87,
-          "max": 87,
-          "min": 87
+          "min": 138,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2743,10 +4027,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 68,
-          "min": 57
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 68,
+            "min": 57
+          }
         }
       }
     },
@@ -2758,10 +4048,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
         }
       }
     },
@@ -2772,17 +4068,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
-        },
         "N2": {
           "count": 1,
           "avg": 91,
           "max": 91,
-          "min": 91
+          "min": 91,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          }
         }
       }
     },
@@ -2794,10 +4102,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 89,
+          "count": 1,
+          "avg": 101,
           "max": 101,
-          "min": 77
+          "min": 101,
+          "failed": {
+            "count": 1,
+            "avg": 77,
+            "max": 77,
+            "min": 77
+          }
         }
       }
     },
@@ -2809,10 +4123,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 66,
-          "max": 77,
-          "min": 55
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 66,
+            "max": 77,
+            "min": 55
+          }
         }
       }
     },
@@ -2824,10 +4144,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 85,
-          "max": 87,
-          "min": 83
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 85,
+            "max": 87,
+            "min": 83
+          }
         }
       }
     },
@@ -2839,10 +4165,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 69,
-          "max": 77,
-          "min": 61
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 69,
+            "max": 77,
+            "min": 61
+          }
         }
       }
     },
@@ -2854,10 +4186,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 88.5,
-          "max": 89,
-          "min": 88
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 88.5,
+            "max": 89,
+            "min": 88
+          }
         }
       }
     },
@@ -2869,10 +4207,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 75,
-          "max": 84,
-          "min": 66
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 75,
+            "max": 84,
+            "min": 66
+          }
         }
       }
     },
@@ -2887,7 +4231,13 @@
           "count": 1,
           "avg": 111,
           "max": 111,
-          "min": 111
+          "min": 111,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2899,10 +4249,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 91,
-          "max": 93,
-          "min": 89
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 91,
+            "max": 93,
+            "min": 89
+          }
         }
       }
     },
@@ -2914,10 +4270,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 90.5,
+          "count": 1,
+          "avg": 115,
           "max": 115,
-          "min": 66
+          "min": 115,
+          "failed": {
+            "count": 1,
+            "avg": 66,
+            "max": 66,
+            "min": 66
+          }
         }
       }
     },
@@ -2952,17 +4314,29 @@
         "2022": 1
       },
       "jlptStats": {
+        "N1": {
+          "count": 1,
+          "avg": 130,
+          "max": 130,
+          "min": 130,
+          "failed": {
+            "count": 1,
+            "avg": 88,
+            "max": 88,
+            "min": 88
+          }
+        },
         "N2": {
           "count": 1,
           "avg": 124,
           "max": 124,
-          "min": 124
-        },
-        "N1": {
-          "count": 2,
-          "avg": 109,
-          "max": 130,
-          "min": 88
+          "min": 124,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2973,17 +4347,29 @@
         "2022": 1
       },
       "jlptStats": {
-        "N2": {
-          "count": 1,
-          "avg": 179,
-          "max": 179,
-          "min": 179
-        },
         "N1": {
           "count": 1,
           "avg": 141,
           "max": 141,
-          "min": 141
+          "min": 141,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N2": {
+          "count": 1,
+          "avg": 179,
+          "max": 179,
+          "min": 179,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -2998,7 +4384,13 @@
           "count": 1,
           "avg": 98,
           "max": 98,
-          "min": 98
+          "min": 98,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3010,10 +4402,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 98.5,
+          "count": 1,
+          "avg": 125,
           "max": 125,
-          "min": 72
+          "min": 125,
+          "failed": {
+            "count": 1,
+            "avg": 72,
+            "max": 72,
+            "min": 72
+          }
         }
       }
     },
@@ -3025,10 +4423,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 2,
-          "avg": 70,
-          "max": 72,
-          "min": 68
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 70,
+            "max": 72,
+            "min": 68
+          }
         }
       }
     },
@@ -3043,7 +4447,13 @@
           "count": 1,
           "avg": 153,
           "max": 153,
-          "min": 153
+          "min": 153,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3055,10 +4465,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
         }
       }
     },
@@ -3073,7 +4489,13 @@
           "count": 1,
           "avg": 133,
           "max": 133,
-          "min": 133
+          "min": 133,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3084,17 +4506,29 @@
         "2023": 1
       },
       "jlptStats": {
+        "N3": {
+          "count": 1,
+          "avg": 106,
+          "max": 106,
+          "min": 106,
+          "failed": {
+            "count": 1,
+            "avg": 82,
+            "max": 82,
+            "min": 82
+          }
+        },
         "N4": {
           "count": 1,
           "avg": 95,
           "max": 95,
-          "min": 95
-        },
-        "N3": {
-          "count": 2,
-          "avg": 94,
-          "max": 106,
-          "min": 82
+          "min": 95,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3105,23 +4539,41 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 113,
-          "max": 113,
-          "min": 113
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 49,
+            "max": 49,
+            "min": 49
+          }
         },
         "N2": {
           "count": 1,
           "avg": 112,
           "max": 112,
-          "min": 112
+          "min": 112,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N1": {
+        "N3": {
           "count": 1,
-          "avg": 49,
-          "max": 49,
-          "min": 49
+          "avg": 113,
+          "max": 113,
+          "min": 113,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3132,17 +4584,29 @@
         "2023": 1
       },
       "jlptStats": {
+        "N1": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 99,
+            "max": 99,
+            "min": 99
+          }
+        },
         "N2": {
           "count": 1,
           "avg": 130,
           "max": 130,
-          "min": 130
-        },
-        "N1": {
-          "count": 1,
-          "avg": 99,
-          "max": 99,
-          "min": 99
+          "min": 130,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3154,10 +4618,16 @@
       },
       "jlptStats": {
         "N2": {
-          "count": 1,
-          "avg": 73,
-          "max": 73,
-          "min": 73
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          }
         }
       }
     },
@@ -3168,17 +4638,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 135,
-          "max": 135,
-          "min": 135
-        },
         "N2": {
           "count": 1,
           "avg": 91,
           "max": 91,
-          "min": 91
+          "min": 91,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 135,
+          "max": 135,
+          "min": 135,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3189,17 +4671,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 108,
-          "max": 108,
-          "min": 108
-        },
         "N2": {
           "count": 1,
           "avg": 107,
           "max": 107,
-          "min": 107
+          "min": 107,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "N3": {
+          "count": 1,
+          "avg": 108,
+          "max": 108,
+          "min": 108,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3210,17 +4704,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 2,
-          "avg": 114,
-          "max": 136,
-          "min": 92
-        },
         "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
+        },
+        "N3": {
           "count": 1,
-          "avg": 84,
-          "max": 84,
-          "min": 84
+          "avg": 136,
+          "max": 136,
+          "min": 136,
+          "failed": {
+            "count": 1,
+            "avg": 92,
+            "max": 92,
+            "min": 92
+          }
         }
       }
     },
@@ -3231,17 +4737,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 2,
-          "avg": 94.5,
-          "max": 100,
-          "min": 89
-        },
         "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 88,
+            "max": 88,
+            "min": 88
+          }
+        },
+        "N3": {
           "count": 1,
-          "avg": 88,
-          "max": 88,
-          "min": 88
+          "avg": 100,
+          "max": 100,
+          "min": 100,
+          "failed": {
+            "count": 1,
+            "avg": 89,
+            "max": 89,
+            "min": 89
+          }
         }
       }
     },
@@ -3253,10 +4771,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 80.5,
+          "count": 1,
+          "avg": 95,
           "max": 95,
-          "min": 66
+          "min": 95,
+          "failed": {
+            "count": 1,
+            "avg": 66,
+            "max": 66,
+            "min": 66
+          }
         }
       }
     },
@@ -3267,17 +4791,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N3": {
-          "count": 1,
-          "avg": 93,
-          "max": 93,
-          "min": 93
-        },
         "N2": {
-          "count": 1,
-          "avg": 55,
-          "max": 55,
-          "min": 55
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 55,
+            "max": 55,
+            "min": 55
+          }
+        },
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 93,
+            "max": 93,
+            "min": 93
+          }
         }
       }
     },
@@ -3288,23 +4824,41 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 114,
-          "max": 114,
-          "min": 114
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 77,
+            "max": 77,
+            "min": 77
+          }
         },
         "N3": {
           "count": 1,
           "avg": 112,
           "max": 112,
-          "min": 112
+          "min": 112,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
+        "N4": {
           "count": 1,
-          "avg": 77,
-          "max": 77,
-          "min": 77
+          "avg": 114,
+          "max": 114,
+          "min": 114,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3316,10 +4870,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 3,
-          "avg": 80.3,
-          "max": 88,
-          "min": 76
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 3,
+            "avg": 80.3,
+            "max": 88,
+            "min": 76
+          }
         }
       }
     },
@@ -3334,7 +4894,13 @@
           "count": 1,
           "avg": 124,
           "max": 124,
-          "min": 124
+          "min": 124,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3345,23 +4911,41 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 139,
-          "max": 139,
-          "min": 139
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
         },
         "N3": {
           "count": 1,
           "avg": 113,
           "max": 113,
-          "min": 113
+          "min": 113,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         },
-        "N2": {
+        "N4": {
           "count": 1,
-          "avg": 63,
-          "max": 63,
-          "min": 63
+          "avg": 139,
+          "max": 139,
+          "min": 139,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3372,17 +4956,29 @@
         "2023": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 82,
+            "max": 85,
+            "min": 79
+          }
+        },
         "N3": {
           "count": 1,
           "avg": 95,
           "max": 95,
-          "min": 95
-        },
-        "N2": {
-          "count": 2,
-          "avg": 82,
-          "max": 85,
-          "min": 79
+          "min": 95,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
@@ -3393,17 +4989,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 2,
-          "avg": 89.5,
-          "max": 95,
-          "min": 84
-        },
         "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
+        },
+        "N4": {
           "count": 1,
-          "avg": 75,
-          "max": 75,
-          "min": 75
+          "avg": 95,
+          "max": 95,
+          "min": 95,
+          "failed": {
+            "count": 1,
+            "avg": 84,
+            "max": 84,
+            "min": 84
+          }
         }
       }
     },
@@ -3415,10 +5023,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 1,
-          "avg": 85,
-          "max": 85,
-          "min": 85
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 85,
+            "max": 85,
+            "min": 85
+          }
         }
       }
     },
@@ -3430,10 +5044,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 63,
-          "max": 67,
-          "min": 59
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 63,
+            "max": 67,
+            "min": 59
+          }
         }
       }
     },
@@ -3444,17 +5064,29 @@
         "2023": 1
       },
       "jlptStats": {
-        "N4": {
-          "count": 1,
-          "avg": 59,
-          "max": 59,
-          "min": 59
-        },
         "N3": {
-          "count": 2,
-          "avg": 92.5,
+          "count": 1,
+          "avg": 103,
           "max": 103,
-          "min": 82
+          "min": 103,
+          "failed": {
+            "count": 1,
+            "avg": 82,
+            "max": 82,
+            "min": 82
+          }
+        },
+        "N4": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 59,
+            "max": 59,
+            "min": 59
+          }
         }
       }
     },
@@ -3466,10 +5098,16 @@
       },
       "jlptStats": {
         "N3": {
-          "count": 2,
-          "avg": 62.5,
-          "max": 63,
-          "min": 62
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 2,
+            "avg": 62.5,
+            "max": 63,
+            "min": 62
+          }
         }
       }
     },
@@ -3480,23 +5118,41 @@
         "2023": 1
       },
       "jlptStats": {
+        "N2": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 79,
+            "max": 79,
+            "min": 79
+          }
+        },
+        "N3": {
+          "count": 0,
+          "avg": 0,
+          "max": 0,
+          "min": 0,
+          "failed": {
+            "count": 1,
+            "avg": 94,
+            "max": 94,
+            "min": 94
+          }
+        },
         "N4": {
           "count": 1,
           "avg": 90,
           "max": 90,
-          "min": 90
-        },
-        "N3": {
-          "count": 1,
-          "avg": 94,
-          "max": 94,
-          "min": 94
-        },
-        "N2": {
-          "count": 1,
-          "avg": 79,
-          "max": 79,
-          "min": 79
+          "min": 90,
+          "failed": {
+            "count": 0,
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
         }
       }
     },
