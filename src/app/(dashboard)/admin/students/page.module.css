@@ -519,12 +519,25 @@
     align-items: center;
     gap: var(--spacing-4);
     padding: var(--spacing-4) var(--spacing-6);
-    background: var(--primary-50);
-    border-bottom: 2px solid var(--primary-100);
+    background: white;
+    border-bottom: 2px solid var(--primary-500);
     position: sticky;
     top: 0;
-    z-index: 10;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .selectedCount {
