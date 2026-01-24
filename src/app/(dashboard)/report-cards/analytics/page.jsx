@@ -183,7 +183,9 @@ export default function AnalyticsPage() {
     useEffect(() => {
         if (!enhancedJlptStats?.allStudentStats) return
 
-        let results = [...enhancedJlptStats.allStudentStats]
+        let results = (enhancedJlptStats.allStudentStats || []).filter(s =>
+            s.studentId !== '学籍番号' && s.name !== '氏名'
+        )
 
         // Multi-keyword Search (AND logic)
         if (dbSearchQuery) {
