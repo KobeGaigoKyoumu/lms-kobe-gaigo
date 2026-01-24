@@ -80,7 +80,8 @@ try {
                 const id = row['学籍番号'];
 
                 // Consider both passed and failed
-                if (level && !isNaN(score) && result && id) {
+                // If score exists, include it. If 'result' is missing/empty, assume failed if not '合格'.
+                if (level && !isNaN(score) && id) {
                     const studentId = String(id).trim();
                     const destName = studentDestinations[studentId];
 
@@ -90,7 +91,8 @@ try {
                             destinationStats[destName][level] = { passed: [], failed: [] };
                         }
 
-                        if (result.includes('合格')) {
+                        // Strict check for Pass. Everything else with a score is Failed.
+                        if (result && result.includes('合格')) {
                             destinationStats[destName][level].passed.push(score);
                         } else {
                             destinationStats[destName][level].failed.push(score);
