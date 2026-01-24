@@ -18,8 +18,6 @@ try {
 
     console.log(`Found ${files.length} career list files.`);
 
-    const debugLog = (msg, data) => { const fs = require('fs'); fs.appendFileSync('debug_trace.txt', JSON.stringify({ msg, ...data }) + '\n'); };
-
     files.forEach(file => {
         const filePath = path.join(CAREER_DIR, file);
         // Extract year from filename "2023年度..."
@@ -69,15 +67,6 @@ try {
     // 2. Read Real JLPT Scores
     const destinationStats = {}; // { DestName: { N1: { counts: [], ... }, ... } }
 
-    const keys = Object.keys(studentDestinations);
-    debugLog('Key Check', {
-        total: keys.length,
-        sample: keys.slice(0, 5),
-        targetKey: keys.find(k => k.includes('2007023')),
-        valueDirect: studentDestinations['2007023'],
-        valueString: studentDestinations[String(2007023)]
-    });
-
     try {
         const workbook = XLSX.readFile(JLPT_EXCEL_PATH);
         const sheet = workbook.Sheets['歴代受験記録'];
@@ -85,7 +74,6 @@ try {
             const rows = XLSX.utils.sheet_to_json(sheet);
 
             rows.forEach((row, idx) => {
-                if (idx < 5) debugLog('Raw Row', row);
                 const level = row['レベル'];
                 const score = parseInt(row['得点']);
                 const result = row['合否'];
@@ -104,17 +92,10 @@ try {
                         }
 
                         // Strict check for Pass.
-                        let branch = 'unknown';
                         if (result === '合格') {
-                            branch = 'pass';
                             destinationStats[destName][level].passed.push(score);
                         } else {
-                            branch = 'fail';
                             destinationStats[destName][level].failed.push(score);
-                        }
-
-                        if (studentId === '2007023' || studentId === '2904035') {
-                            debugLog('Trace Student', { id: studentId, result, branch, score, destName });
                         }
                     }
                 }
