@@ -19,6 +19,7 @@ export default function StudentList({ students: initialStudents, classes }) {
     const [uploading, setUploading] = useState(false)
     const [uploadResult, setUploadResult] = useState(null)
     const [selectedStudent, setSelectedStudent] = useState(null)
+    const [selectedIds, setSelectedIds] = useState(new Set())
 
     const supabase = createClient()
 
@@ -35,6 +36,44 @@ export default function StudentList({ students: initialStudents, classes }) {
             student.destination?.toLowerCase().includes(search.toLowerCase())
         return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = filteredStudents.map(s => s.student_id_text)
+            setSelectedIds(new Set(allIds))
+        } else {
+            setSelectedIds(new Set())
+        }
+    }
+
+    const handleToggleSelect = (id) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) {
+                next.delete(id)
+            } else {
+                next.add(id)
+            }
+            return next
+        })
+    }
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return
+        if (!confirm(`${selectedIds.size}件の学生データを削除しますか？`)) return
+
+        const { error } = await supabase
+            .from('students')
+            .delete()
+            .in('student_id_text', Array.from(selectedIds))
+
+        if (!error) {
+            setStudents(prev => prev.filter(s => !selectedIds.has(s.student_id_text)))
+            setSelectedIds(new Set())
+        } else {
+            alert('一括削除に失敗しました')
+        }
+    }
 
     const handleFileUpload = async (e) => {
         const file = e.target.files?.[0]
@@ -359,6 +398,23 @@ export default function StudentList({ students: initialStudents, classes }) {
                 )}
             </div>
 
+            {/* 一括操作ツールバー */}
+            {selectedIds.size > 0 && (
+                <div className={styles.bulkActions}>
+                    <span className={styles.selectedCount}>{selectedIds.size}件選択中</span>
+                    <button onClick={handleBulkDelete} className={styles.bulkDeleteBtn}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        選択した学生を一括削除
+                    </button>
+                    <button onClick={() => setSelectedIds(new Set())} className={styles.cancelSelectionBtn}>
+                        選択解除
+                    </button>
+                </div>
+            )}
+
             {/* フィルターとサーチ */}
             <div className={styles.toolbar}>
                 <div className={styles.filters}>
@@ -409,6 +465,13 @@ export default function StudentList({ students: initialStudents, classes }) {
                 <table className={styles.table}>
                     <thead>
                         <tr>
+                            <th style={{ width: '40px' }}>
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={filteredStudents.length > 0 && selectedIds.size === filteredStudents.length}
+                                />
+                            </th>
                             <th>学籍番号</th>
                             <th>氏名</th>
                             <th>学年</th>
@@ -421,8 +484,16 @@ export default function StudentList({ students: initialStudents, classes }) {
                     <tbody>
                         {filteredStudents.map(student => {
                             const studentInfo = parseStudentId(student.student_id_text)
+                            const isSelected = selectedIds.has(student.student_id_text)
                             return (
-                                <tr key={student.student_id_text}>
+                                <tr key={student.student_id_text} className={isSelected ? styles.selectedRow : ''}>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={() => handleToggleSelect(student.student_id_text)}
+                                        />
+                                    </td>
                                     <td className={styles.idCell}>{student.student_id_text}</td>
                                     <td>{student.full_name}</td>
                                     <td>{studentInfo.gradeName || '-'}</td>

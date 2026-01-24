@@ -512,3 +512,57 @@
     padding: var(--spacing-4);
     text-align: center;
 }
+
+/* Bulk Actions */
+.bulkActions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-3) var(--spacing-4);
+    background: #eff6ff;
+    border-bottom: 1px solid #bfdbfe;
+}
+
+.selectedCount {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--primary-700);
+}
+
+.bulkDeleteBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.bulkDeleteBtn:hover {
+    background: #b91c1c;
+}
+
+.cancelSelectionBtn {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.cancelSelectionBtn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.selectedRow td {
+    background: #f0f9ff !important;
+}
