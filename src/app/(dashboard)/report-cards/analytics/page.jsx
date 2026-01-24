@@ -2187,7 +2187,7 @@ export default function AnalyticsPage() {
                                                                         <strong>合格者一覧 (年度別):</strong>
                                                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
                                                                             {['2023', '2022', '2021', '2020', '2019'].map(year => {
-                                                                                const studentsInYear = (dest.students || []).filter(s => s.year === year);
+                                                                                const studentsInYear = (dest.students || []).filter(s => String(s.year) === String(year));
                                                                                 if (studentsInYear.length === 0) return null;
                                                                                 return (
                                                                                     <div key={year} style={{ display: 'flex', alignItems: 'baseline', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.25rem' }}>
