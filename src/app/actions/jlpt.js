@@ -24,6 +24,7 @@ export async function fetchJlptAnalyticsData() {
         let error = null;
         let supabase;
         if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            // Trigger redeploy to pick up new env vars
             console.log('Server Action: Using Service Role Key for full analytics access');
             const adminSupabase = createClientJs(
                 process.env.NEXT_PUBLIC_SUPABASE_URL,
