@@ -18,7 +18,7 @@ async function check() {
     console.log("Checking ID 2010029 details...");
     const { data, error } = await supabase
         .from('students')
-        .select('student_id_text, full_name, class_name, status, enrollment_date, graduation_date')
+        .select('*')
         .eq('student_id_text', '2010029');
 
     if (error) console.error(error);

@@ -2349,6 +2349,8 @@ export default function AnalyticsPage() {
                                     <th>名前</th>
                                     <th>入学年度</th>
                                     <th>クラス</th>
+                                    <th>国籍</th>
+                                    <th>進学先</th>
                                     <th>JLPT最高レベル</th>
                                     <th>詳細</th>
                                 </tr>
@@ -2367,6 +2369,8 @@ export default function AnalyticsPage() {
                                             <td style={{ fontWeight: 600, maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.name}</td>
                                             <td>{student.enrollmentYear || '-'}</td>
                                             <td>{student.class || '-'}</td>
+                                            <td>{student.nationality || '-'}</td>
+                                            <td style={{ maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.destination || '-'}</td>
                                             <td>
                                                 {student.highestLevel ? (
                                                     <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>

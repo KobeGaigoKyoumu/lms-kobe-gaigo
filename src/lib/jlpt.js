@@ -11,6 +11,7 @@ const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_st
 
 const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
 const ENROLLMENT_STATS_JSON = path.join(process.cwd(), 'data', 'enrollment_stats.json');
+const CAREER_STATS_JSON = path.join(process.cwd(), 'src', 'data', 'career_stats.json');
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;
@@ -1112,6 +1113,25 @@ export async function getStudentsJlptSummary(students) {
         });
     });
 
+    // Load career destinations for additional info
+    const careerMap = new Map();
+    try {
+        if (fs.existsSync(CAREER_STATS_JSON)) {
+            const careerData = JSON.parse(fs.readFileSync(CAREER_STATS_JSON, 'utf8'));
+            if (careerData.topDestinations) {
+                careerData.topDestinations.forEach(dest => {
+                    if (dest.students) {
+                        dest.students.forEach(s => {
+                            if (s.id) careerMap.set(String(s.id), dest.name);
+                        });
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error loading career stats for summary:', e);
+    }
+
     // Process each student
     const studentSummaries = students.map(student => {
         const studentId = String(student.student_id_text || student.student_id || '');
@@ -1210,6 +1230,8 @@ export async function getStudentsJlptSummary(students) {
             studentId: student.student_id_text || student.student_id,
             name: student.full_name,
             class: student.class_name,
+            nationality: student.nationality || student.country, // Fallback if needed
+            destination: student.career_destination || student.destination || careerMap.get(studentId) || null,
             enrollmentYear: enrollmentYear,
             levels: levelStatus,
             highestLevel: highestLevel,
