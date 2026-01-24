@@ -198,10 +198,14 @@ export default function StudentDetailModal({ student, onClose }) {
                                 <span className={styles.detailLabel}>卒業予定</span>
                                 <span className={styles.detailValue}>{formatDate(student.graduation_date)}</span>
                             </div>
-                            <div className={styles.detailItemFull}>
-                                <span className={styles.detailLabel}>進学先</span>
-                                <span className={styles.detailValue}>{student.destination || '-'}</span>
-                            </div>
+                        </div>
+                    </section>
+
+                    {/* 進学先情報 */}
+                    <section className={styles.detailSection}>
+                        <h3>進学先情報</h3>
+                        <div className={styles.detailValue} style={{ padding: '0.5rem 0', fontWeight: '500' }}>
+                            {student.destination || '-'}
                         </div>
                     </section>
 
