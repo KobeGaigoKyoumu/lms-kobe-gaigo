@@ -2052,7 +2052,23 @@ export default function AnalyticsPage() {
                                                                                         const passed = stats.passed;
                                                                                         const failed = stats.failed;
 
-                                                                                        if (!passed && !failed) return null; // Should not happen with new data
+                                                                                        // Fallback for legacy data (if 'passed' undefined but 'count' exists)
+                                                                                        if (!passed && !failed) {
+                                                                                            if (stats.count) {
+                                                                                                return (
+                                                                                                    <tr key={level}>
+                                                                                                        <td style={{ padding: '0.5rem' }}>
+                                                                                                            <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
+                                                                                                        </td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.count}</td>
+                                                                                                        <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.max}</td>
+                                                                                                        <td style={{ padding: '0.5rem' }}>{stats.min}</td>
+                                                                                                    </tr>
+                                                                                                );
+                                                                                            }
+                                                                                            return null;
+                                                                                        }
 
                                                                                         return (
                                                                                             <Fragment key={level}>
