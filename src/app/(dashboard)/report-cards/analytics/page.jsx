@@ -2133,28 +2133,33 @@ export default function AnalyticsPage() {
                                             })
                                             .filter(d => d.total5 > 0)
                                             .sort((a, b) => b.total5 - a.total5)
-                                            .map((dest, idx) => (
-                                                <Fragment key={idx}>
-                                                    <tr key={idx}>
-                                                        <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                        <td>{dest.total5}名</td>
-                                                        <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
-                                                        <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
-                                                        <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
-                                                        <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
-                                                        <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
-                                                    </tr>
-                                                    {matches.length > 0 && (
-                                                        <tr>
-                                                            <td colSpan="7" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
-                                                                <div style={{ fontSize: '0.85rem', color: '#166534' }}>
-                                                                    <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
-                                                                </div>
-                                                            </td>
+                                            .map((dest, idx) => {
+                                                const matches = careerSearchQuery && dest.students
+                                                    ? dest.students.filter(s => (s.name || '').includes(careerSearchQuery))
+                                                    : [];
+                                                return (
+                                                    <Fragment key={idx}>
+                                                        <tr key={idx}>
+                                                            <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                            <td>{dest.total5}名</td>
+                                                            <td style={{ color: dest.y2023 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2023 > 0 ? `${dest.y2023}名` : '-'}</td>
+                                                            <td style={{ color: dest.y2022 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2022 > 0 ? `${dest.y2022}名` : '-'}</td>
+                                                            <td style={{ color: dest.y2021 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2021 > 0 ? `${dest.y2021}名` : '-'}</td>
+                                                            <td style={{ color: dest.y2020 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2020 > 0 ? `${dest.y2020}名` : '-'}</td>
+                                                            <td style={{ color: dest.y2019 > 0 ? 'inherit' : '#d1d5db' }}>{dest.y2019 > 0 ? `${dest.y2019}名` : '-'}</td>
                                                         </tr>
-                                                    )}
-                                                </Fragment>
-                                            ))}
+                                                        {matches.length > 0 && (
+                                                            <tr>
+                                                                <td colSpan="7" style={{ backgroundColor: '#f0fdf4', padding: '0.5rem 1rem' }}>
+                                                                    <div style={{ fontSize: '0.85rem', color: '#166534' }}>
+                                                                        <strong>検索ヒット:</strong> {matches.map(s => `${s.name} (${parseInt(s.year) + 1}年卒)`).join(', ')}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </Fragment>
+                                                )
+                                            })}
                                     </tbody>
                                 </table>
                             </div>
