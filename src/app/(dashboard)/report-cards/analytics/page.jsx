@@ -1487,10 +1487,10 @@ export default function AnalyticsPage() {
                                                             <td style={{ fontWeight: 600 }}>{data.avgScore}点</td>
                                                             <td>{data.maxScore}点</td>
                                                             <td>{data.minScore}点</td>
-                                                            <td style={{ color: data.passedAvg ? COLOR_PASS : COLOR_MUTED }}>
+                                                            <td style={{ color: data.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
                                                                 {data.passedAvg ? `${data.passedAvg}点` : '-'}
                                                             </td>
-                                                            <td style={{ color: data.failedAvg ? COLOR_FAIL : COLOR_MUTED }}>
+                                                            <td style={{ color: data.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
                                                                 {data.failedAvg ? `${data.failedAvg}点` : '-'}
                                                             </td>
                                                         </tr>
@@ -1545,10 +1545,10 @@ export default function AnalyticsPage() {
                                                                     <td style={{ fontWeight: 600 }}>{row.avgScore}点</td>
                                                                     <td>{row.maxScore}点</td>
                                                                     <td>{row.minScore}点</td>
-                                                                    <td style={{ color: row.passedAvg ? COLOR_PASS : COLOR_MUTED }}>
+                                                                    <td style={{ color: row.passedAvg ? COLOR_PASS : COLOR_MUTED, fontWeight: 600 }}>
                                                                         {row.passedAvg ? `${row.passedAvg}点` : '-'}
                                                                     </td>
-                                                                    <td style={{ color: row.failedAvg ? COLOR_FAIL : COLOR_MUTED }}>
+                                                                    <td style={{ color: row.failedAvg ? COLOR_FAIL : COLOR_MUTED, fontWeight: 600 }}>
                                                                         {row.failedAvg ? `${row.failedAvg}点` : '-'}
                                                                     </td>
                                                                 </tr>
@@ -2084,9 +2084,9 @@ export default function AnalyticsPage() {
 
                                                                                             const renderDual = (pVal, fVal, isBold = false) => (
                                                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                                    <span style={{ color: COLOR_PASS, fontWeight: isBold ? 600 : 400 }}>{pVal ?? '-'}</span>
+                                                                                                    <span style={{ color: COLOR_PASS, fontWeight: 600 }}>{pVal ?? '-'}</span>
                                                                                                     <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
-                                                                                                    <span style={{ color: COLOR_FAIL, fontWeight: isBold ? 600 : 400 }}>{fVal ?? '-'}</span>
+                                                                                                    <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>{fVal ?? '-'}</span>
                                                                                                 </div>
                                                                                             );
 
