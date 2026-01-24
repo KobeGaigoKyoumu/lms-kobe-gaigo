@@ -183,7 +183,11 @@ export default function AnalyticsPage() {
             const q = dbSearchQuery.toLowerCase()
             results = results.filter(s =>
                 (s.name && s.name.toLowerCase().includes(q)) ||
-                (s.studentId && String(s.studentId).includes(q))
+                (s.studentId && String(s.studentId).includes(q)) ||
+                (s.enrollmentYear && String(s.enrollmentYear).includes(q)) ||
+                (s.class && s.class.toLowerCase().includes(q)) ||
+                (s.nationality && s.nationality.toLowerCase().includes(q)) ||
+                (s.destination && s.destination.toLowerCase().includes(q))
             )
         }
 
@@ -2328,10 +2332,10 @@ export default function AnalyticsPage() {
                 <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
                     <div className={styles.filters} style={{ marginBottom: '1.5rem' }}>
                         <div className={styles.filterGroup} style={{ flex: 1 }}>
-                            <label className={styles.filterLabel}>生徒検索 (名前 / 学籍番号)</label>
+                            <label className={styles.filterLabel}>生徒検索 (名前/学籍番号/年度/クラス/国籍/進学先)</label>
                             <input
                                 type="text"
-                                placeholder="名前または学籍番号を入力..."
+                                placeholder="キーワードを入力..."
                                 className={styles.filterSelect} // Reusing select style for input consistency
                                 style={{ width: '100%', padding: '0.5rem' }}
                                 value={dbSearchQuery}
