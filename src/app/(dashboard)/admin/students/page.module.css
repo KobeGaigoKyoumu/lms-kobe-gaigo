@@ -583,3 +583,10 @@
 .selectedRow td {
     background: var(--primary-50) !important;
 }
+
+.destinationName {
+    padding: var(--spacing-2) 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+}

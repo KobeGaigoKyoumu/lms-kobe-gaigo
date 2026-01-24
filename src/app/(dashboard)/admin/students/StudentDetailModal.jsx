@@ -204,7 +204,7 @@ export default function StudentDetailModal({ student, onClose }) {
                     {/* 進学先情報 */}
                     <section className={styles.detailSection}>
                         <h3>進学先情報</h3>
-                        <div className={styles.detailValue} style={{ padding: '0.5rem 0', fontWeight: '500' }}>
+                        <div className={styles.destinationName}>
                             {student.destination || '-'}
                         </div>
                     </section>
