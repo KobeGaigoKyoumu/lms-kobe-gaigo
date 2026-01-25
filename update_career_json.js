@@ -18,45 +18,79 @@ try {
 
     console.log(`Found ${files.length} career list files.`);
 
+    const normalizeDestination = (d) => {
+        if (!d) return '';
+        const name = String(d).replace(/\s+/g, '').trim();
+
+        const mapping = {
+            '東亜経理': '東亜経理専門学校',
+            '東亜経理専門学校': '東亜経理専門学校',
+            '東京国際ビジネスカレッジ': '東京国際ビジネスカレッジ神戸校',
+            '東京国際ビジネスカレッジ神戸校': '東京国際ビジネスカレッジ神戸校',
+            'アートカレッジ': '専門学校アートカレッジ神戸',
+            'アートカレッジ神戸': '専門学校アートカレッジ神戸',
+            '専門学校アートカレッジ神戸': '専門学校アートカレッジ神戸',
+            '愛甲': '愛甲学院専門学校',
+            '愛甲学院': '愛甲学院専門学校',
+            '愛甲学院専門学校': '愛甲学院専門学校',
+            'ICT': 'ICT専門学校',
+            'ICT専門学校': 'ICT専門学校',
+            '関西国際旅行ホテル専門学校': '関西国際旅行・ホテル専門学校',
+            'トヨタ自動車大学校': 'トヨタ自動車大学校神戸校',
+            'トヨタ神戸自動車大学校': 'トヨタ自動車大学校神戸校',
+            '大原': '大原簿記専門学校三宮校',
+            '大原簿記専門学校三宮校': '大原簿記専門学校三宮校',
+            '日本コンピュータ': '日本コンピュータ専門学校',
+            '和歌山福祉専門学校': '和歌山社会福祉専門学校',
+            '和歌山社会福祉専門学校': '和歌山社会福祉専門学校'
+        };
+
+        return mapping[name] || name;
+    };
+
     files.forEach(file => {
         const filePath = path.join(CAREER_DIR, file);
         // Extract year from filename "2023年度..."
         const match = file.match(/^(\d{4})/);
         const year = match ? match[1] : 'Unknown';
+        const seenInYear = new Set();
 
         try {
             const workbook = XLSX.readFile(filePath);
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            if (!sheet) return;
 
-            const rows = XLSX.utils.sheet_to_json(sheet);
-            console.log(`Processing ${file} (Year: ${year}): Found ${rows.length} rows.`);
-            if (rows.length > 0) {
-                console.log(`  Headers: ${Object.keys(rows[0]).join(', ')}`);
-            }
+            // Process all sheets
+            workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet);
 
-            rows.forEach(row => {
-                const id = row['学籍番号'] || row['No.'] || row['ID'] || row['学生番号'];
-                const dest = row['進学先'] || row['進路先'] || row['就職先'] || row['進学・就職先'] || row['学校名'] || row['企業名'] || row['最終合格校'];
-                const name = row['氏名'] || row['氏 名'] || row['名前'];
-                if (id && dest) {
-                    const destName = dest.trim();
-                    // Map student to destination
-                    studentDestinations[String(id).trim()] = destName;
+                rows.forEach(row => {
+                    const id = row['学籍番号'] || row['No.'] || row['ID'] || row['学生番号'];
+                    const dest = row['進学先'] || row['進路先'] || row['就職先'] || row['進学・就職先'] || row['学校名'] || row['企業名'] || row['最終合格校'];
+                    const name = row['氏名'] || row['氏 名'] || row['名前'];
 
-                    // Aggregate yearly stats
-                    if (!destinationYearlyStats[destName]) destinationYearlyStats[destName] = {};
-                    if (!destinationYearlyStats[destName][year]) destinationYearlyStats[destName][year] = 0;
-                    destinationYearlyStats[destName][year]++;
+                    if (id && dest) {
+                        const studentId = String(id).trim();
+                        if (seenInYear.has(studentId)) return;
+                        seenInYear.add(studentId);
 
-                    // Collect Student Details
-                    if (!destinationStudents[destName]) destinationStudents[destName] = [];
-                    if (name) {
-                        destinationStudents[destName].push({ year, id, name });
+                        const destName = normalizeDestination(dest);
+                        // Map student to destination
+                        studentDestinations[studentId] = destName;
+
+                        // Aggregate yearly stats
+                        if (!destinationYearlyStats[destName]) destinationYearlyStats[destName] = {};
+                        if (!destinationYearlyStats[destName][year]) destinationYearlyStats[destName][year] = 0;
+                        destinationYearlyStats[destName][year]++;
+
+                        // Collect Student Details
+                        if (!destinationStudents[destName]) destinationStudents[destName] = [];
+                        if (name) {
+                            destinationStudents[destName].push({ year, id, name });
+                        }
                     }
-                }
+                });
             });
+            console.log(`Processed ${file} (Year: ${year})`);
         } catch (e) {
             console.warn(`Error reading ${file}:`, e.message);
         }
@@ -106,15 +140,13 @@ try {
     }
 
     // 3. Aggregate Stats and Update JSON
-    // Read existing JSON to preserve structure (like topDestinations list info if needed, or rebuild it?)
-    // The user wants to update the stats. We should match the existing "name" in topDestinations.
-
     const rawJson = fs.readFileSync(OUTPUT_PATH, 'utf8');
     const data = JSON.parse(rawJson);
+    data.generatedAt = new Date().toISOString();
 
     if (data.topDestinations) {
         data.topDestinations = data.topDestinations.map(d => {
-            const destName = d.name;
+            const destName = normalizeDestination(d.name);
             const statsObj = destinationStats[destName];
             const yearsObj = destinationYearlyStats[destName] || {};
 
@@ -145,8 +177,13 @@ try {
                 });
             }
 
+            // Calculate current total count from matched years
+            const totalCount = Object.values(yearsObj).reduce((a, b) => a + b, 0);
+
             return {
                 ...d,
+                name: destName,
+                count: totalCount || d.count, // Update with real total, fallback to existing if no new data found
                 years: yearsObj, // Update with real yearly counts
                 jlptStats: jlptStats,
                 students: destinationStudents[destName] || []
@@ -155,7 +192,7 @@ try {
     }
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(data, null, 2), 'utf8');
-    console.log('Updated career_stats.json with REAL linked JLPT data.');
+    console.log('Updated career_stats_v2.json with REAL linked JLPT data.');
 
 } catch (err) {
     console.error('Fatal Error:', err);

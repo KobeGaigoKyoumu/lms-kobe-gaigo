@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-23T17:53:01.955Z",
+  "generatedAt": "2026-01-25T02:00:09.434Z",
   "summary": {
     "totalRecords": 1119,
     "years": [
@@ -262,39 +262,42 @@
   "topDestinations": [
     {
       "name": "東亜経理専門学校",
-      "count": 127,
+      "count": 129,
       "years": {
+        "2017": 23,
+        "2018": 27,
+        "2019": 36,
         "2020": 6,
         "2022": 22,
         "2023": 15
       },
       "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 29,
+            "avg": 109.5,
+            "max": 135,
+            "min": 95
+          },
+          "failed": {
+            "count": 112,
+            "avg": 76.9,
+            "max": 94,
+            "min": 48
+          }
+        },
         "N2": {
           "passed": {
-            "count": 1,
-            "avg": 99,
-            "max": 99,
+            "count": 2,
+            "avg": 103,
+            "max": 107,
             "min": 99
           },
           "failed": {
-            "count": 9,
-            "avg": 66.3,
-            "max": 83,
+            "count": 19,
+            "avg": 66.5,
+            "max": 86,
             "min": 36
-          }
-        },
-        "N3": {
-          "passed": {
-            "count": 15,
-            "avg": 110.1,
-            "max": 128,
-            "min": 98
-          },
-          "failed": {
-            "count": 49,
-            "avg": 78.1,
-            "max": 94,
-            "min": 48
           }
         },
         "N4": {
@@ -313,6 +316,436 @@
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904032,
+          "name": "TO THANH CHAT"
+        },
+        {
+          "year": "2017",
+          "id": 2904088,
+          "name": "DOAN TRONG NGHIA"
+        },
+        {
+          "year": "2017",
+          "id": 2904108,
+          "name": "PHUNG THI THU TRANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904125,
+          "name": "DO THANH HAI"
+        },
+        {
+          "year": "2017",
+          "id": 2904016,
+          "name": "NGUYEN THI THU THUY"
+        },
+        {
+          "year": "2017",
+          "id": 2904018,
+          "name": "HOANG THI KIM OANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904027,
+          "name": "NGUYEN THI VAN ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904033,
+          "name": "VU THI DUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2904041,
+          "name": "BUI NGOC NAM"
+        },
+        {
+          "year": "2017",
+          "id": 2904056,
+          "name": "NGUYEN THI THU HUYEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904059,
+          "name": "NGUYEN THI THUY"
+        },
+        {
+          "year": "2017",
+          "id": 2904066,
+          "name": "PHAM THI MUA"
+        },
+        {
+          "year": "2017",
+          "id": 2904070,
+          "name": "VU THI HIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904074,
+          "name": "LE VAN SY"
+        },
+        {
+          "year": "2017",
+          "id": 2904087,
+          "name": "DUONG THI PHUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904094,
+          "name": "LE THI THU "
+        },
+        {
+          "year": "2017",
+          "id": 2904042,
+          "name": "NGUYEN THU HA"
+        },
+        {
+          "year": "2017",
+          "id": 2904096,
+          "name": "NGUYEN DUONG QUYNH NHU"
+        },
+        {
+          "year": "2017",
+          "id": 2904111,
+          "name": "TRAN THI PHUONG THAO"
+        },
+        {
+          "year": "2017",
+          "id": 2904100,
+          "name": "HO VAN THANH"
+        },
+        {
+          "year": "2017",
+          "id": 2907006,
+          "name": "PHAM THI KIM NGAN"
+        },
+        {
+          "year": "2017",
+          "id": 2910002,
+          "name": "遅 濱道"
+        },
+        {
+          "year": "2017",
+          "id": 2910009,
+          "name": "VU THI VAN"
+        },
+        {
+          "year": "2018",
+          "id": 3004008,
+          "name": "NGUYEN THI TUOI"
+        },
+        {
+          "year": "2018",
+          "id": 3004017,
+          "name": "HOANG THI LINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004026,
+          "name": "HA VAN HIEU"
+        },
+        {
+          "year": "2018",
+          "id": 3004027,
+          "name": "HA VAN TUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004041,
+          "name": "HOANG THI THU NGUYET"
+        },
+        {
+          "year": "2018",
+          "id": 3004048,
+          "name": "BUI VAN QUYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004049,
+          "name": "NGUYEN XUAN CUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004053,
+          "name": "LE VAN MINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004054,
+          "name": "HA THI HOA"
+        },
+        {
+          "year": "2018",
+          "id": 3004065,
+          "name": "BUI THI UYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004070,
+          "name": "NGUYEN DIEM HAU"
+        },
+        {
+          "year": "2018",
+          "id": 3004071,
+          "name": "NGUYEN THUY LINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004072,
+          "name": "NGUYEN THI NHU QUYNH"
+        },
+        {
+          "year": "2018",
+          "id": 3004077,
+          "name": "LE THI HANG"
+        },
+        {
+          "year": "2018",
+          "id": 3004079,
+          "name": "NGUYEN NGOC QUYNH"
+        },
+        {
+          "year": "2018",
+          "id": 3004083,
+          "name": "PHAN THANH TRUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3004090,
+          "name": "PHAM PHUONG ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004092,
+          "name": "DANG HA MY"
+        },
+        {
+          "year": "2018",
+          "id": 3004094,
+          "name": "NGUYEN THI HA KHANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004104,
+          "name": "NGUYEN TUAN ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004105,
+          "name": "VU THI LY"
+        },
+        {
+          "year": "2018",
+          "id": 3004120,
+          "name": "LE TRUNG HIEU"
+        },
+        {
+          "year": "2018",
+          "id": 3004121,
+          "name": "VU THI NGUYET ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004123,
+          "name": "TRAN HOANG MINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004136,
+          "name": "VO THI HUYEN TRANG"
+        },
+        {
+          "year": "2018",
+          "id": 3004139,
+          "name": "NGUYEN THI HUYEN"
+        },
+        {
+          "year": "2018",
+          "id": 1901001,
+          "name": "宮 雲朋"
+        },
+        {
+          "year": "2019",
+          "id": 1904017,
+          "name": "HOANG THI THU NHI"
+        },
+        {
+          "year": "2019",
+          "id": 1904018,
+          "name": "NGUYEN THI NGOC HUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 1904019,
+          "name": "DINH THI NGUYET"
+        },
+        {
+          "year": "2019",
+          "id": 1904020,
+          "name": "HUONG THANH MANH"
+        },
+        {
+          "year": "2019",
+          "id": 1904022,
+          "name": "TRAN THANH TUNG"
+        },
+        {
+          "year": "2019",
+          "id": 1904029,
+          "name": "TIEU THI THUY DUNG"
+        },
+        {
+          "year": "2019",
+          "id": 1904031,
+          "name": "DO TRAN PHUONG THAO"
+        },
+        {
+          "year": "2019",
+          "id": 1904033,
+          "name": "PHAM PHI HUNG"
+        },
+        {
+          "year": "2019",
+          "id": 1904042,
+          "name": "LE THI DIEU HIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004105,
+          "name": "VU THI LY"
+        },
+        {
+          "year": "2019",
+          "id": 3004094,
+          "name": "NGUYEN THI HA KHANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004008,
+          "name": "NGUYEN THI TUOI"
+        },
+        {
+          "year": "2019",
+          "id": 3004049,
+          "name": "NGUYEN XUAN CUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004026,
+          "name": "HA VAN HIEU"
+        },
+        {
+          "year": "2019",
+          "id": 3004041,
+          "name": "HOANG THI THU NGUYET"
+        },
+        {
+          "year": "2019",
+          "id": 3004054,
+          "name": "HA THI HOA"
+        },
+        {
+          "year": "2019",
+          "id": 3004077,
+          "name": "LE THI HANG"
+        },
+        {
+          "year": "2019",
+          "id": 3004017,
+          "name": "HOANG THI LINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004053,
+          "name": "LE VAN MINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004083,
+          "name": "PHAN THANH TRUNG"
+        },
+        {
+          "year": "2019",
+          "id": 3004090,
+          "name": "PHAM PHUONG ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004120,
+          "name": "LE TRUNG HIEU"
+        },
+        {
+          "year": "2019",
+          "id": 3004048,
+          "name": "BUI VAN QUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004065,
+          "name": "BUI THI UYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004070,
+          "name": "NGUYEN DIEM HAU"
+        },
+        {
+          "year": "2019",
+          "id": 3004072,
+          "name": "NGUYEN THI NHU QUYNH"
+        },
+        {
+          "year": "2019",
+          "id": 3004079,
+          "name": "NGUYEN NGOC QUYNH"
+        },
+        {
+          "year": "2019",
+          "id": 3004092,
+          "name": "DANG HA MY"
+        },
+        {
+          "year": "2019",
+          "id": 3004104,
+          "name": "NGUYEN TUAN ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004123,
+          "name": "TRAN HOANG MINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004027,
+          "name": "HA VAN TUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004071,
+          "name": "NGUYEN THUY LINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004121,
+          "name": "VU THI NGUYET ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004136,
+          "name": "VO THI HUYEN TRANG"
+        },
+        {
+          "year": "2019",
+          "id": 3004139,
+          "name": "NGUYEN THI HUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 1901001,
+          "name": "宮 雲朋"
+        },
         {
           "year": "2020",
           "id": 2004016,
@@ -532,24 +965,42 @@
     },
     {
       "name": "東京国際ビジネスカレッジ神戸校",
-      "count": 125,
+      "count": 127,
       "years": {
+        "2017": 18,
+        "2018": 27,
+        "2019": 36,
+        "2020": 1,
         "2022": 27,
         "2023": 18
       },
       "jlptStats": {
         "N3": {
           "passed": {
-            "count": 26,
-            "avg": 110.8,
-            "max": 133,
+            "count": 59,
+            "avg": 111.6,
+            "max": 150,
             "min": 95
           },
           "failed": {
-            "count": 32,
-            "avg": 76.7,
+            "count": 73,
+            "avg": 78.1,
             "max": 94,
             "min": 31
+          }
+        },
+        "N2": {
+          "passed": {
+            "count": 13,
+            "avg": 106.2,
+            "max": 155,
+            "min": 95
+          },
+          "failed": {
+            "count": 35,
+            "avg": 67.7,
+            "max": 89,
+            "min": 38
           }
         },
         "N4": {
@@ -565,23 +1016,419 @@
             "max": 87,
             "min": 76
           }
-        },
-        "N2": {
-          "passed": {
-            "count": 7,
-            "avg": 104.7,
-            "max": 122,
-            "min": 95
-          },
-          "failed": {
-            "count": 16,
-            "avg": 68.8,
-            "max": 89,
-            "min": 38
-          }
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904121,
+          "name": "NGUYEN DUC SANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904068,
+          "name": "BUI TUAN ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904117,
+          "name": "HUYNH VAN DAY"
+        },
+        {
+          "year": "2017",
+          "id": 2904036,
+          "name": "TRAN DUC THINH"
+        },
+        {
+          "year": "2017",
+          "id": 2904055,
+          "name": "DUONG VAN THANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904084,
+          "name": "NGO VAN TIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904058,
+          "name": "TRAN HAI DANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904101,
+          "name": "TRAN VAN HOANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904109,
+          "name": "HOANG THI LOAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904051,
+          "name": "GIANG DAI KHOA"
+        },
+        {
+          "year": "2017",
+          "id": 2907005,
+          "name": "DANG THAI KHANH HONG"
+        },
+        {
+          "year": "2017",
+          "id": 2907014,
+          "name": "NGUYEN VAN LAI"
+        },
+        {
+          "year": "2017",
+          "id": 2907021,
+          "name": "LAI DUY CUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2910019,
+          "name": "PHAM THI THU"
+        },
+        {
+          "year": "2017",
+          "id": 2910026,
+          "name": "PHAM THI NHUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2910012,
+          "name": "NGUYEN THI NGA"
+        },
+        {
+          "year": "2017",
+          "id": 2910021,
+          "name": "TRAN DINH TINH"
+        },
+        {
+          "year": "2017",
+          "id": 2910023,
+          "name": "VU TUAN KHANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004007,
+          "name": "NGUYEN VAN THUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004010,
+          "name": "DO VAN SON"
+        },
+        {
+          "year": "2018",
+          "id": 3004032,
+          "name": "BUI CHI LINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004033,
+          "name": "HOANG THI MINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004034,
+          "name": "LUONG THI HUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004040,
+          "name": "PHAM THUY TIEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004042,
+          "name": "NGO THI THANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004043,
+          "name": "TRUONG THI THU UYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004045,
+          "name": "NGUYEN ANH VU"
+        },
+        {
+          "year": "2018",
+          "id": 3004051,
+          "name": "LE THI HUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004055,
+          "name": "VU THI NHUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3004057,
+          "name": "TRINH PHUONG ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004064,
+          "name": "PHAM THI HANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004066,
+          "name": "PHAM QUANG HUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3004067,
+          "name": "TRAN THI THU THAO"
+        },
+        {
+          "year": "2018",
+          "id": 3004068,
+          "name": "NGUYEN THI DUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3004087,
+          "name": "VI THI LAN ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004108,
+          "name": "NGUYEN KHAC HOANG"
+        },
+        {
+          "year": "2018",
+          "id": 3004109,
+          "name": "NGUYEN NHAT LINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004112,
+          "name": "DAO VAN MANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004113,
+          "name": "LA QUOC KHANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004116,
+          "name": "PHAM THUY TIEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004131,
+          "name": "NGUYEN THIEN TINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004132,
+          "name": "HUA VIET HOANG"
+        },
+        {
+          "year": "2018",
+          "id": 3010005,
+          "name": "TA THI DUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3010007,
+          "name": "NGUYEN MANH QUYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3010009,
+          "name": "VU NGOC HOAI NAM"
+        },
+        {
+          "year": "2019",
+          "id": 1904010,
+          "name": "NGUYEN TIEN SON"
+        },
+        {
+          "year": "2019",
+          "id": 1904023,
+          "name": "TRAN CONG TRUNG"
+        },
+        {
+          "year": "2019",
+          "id": 1904025,
+          "name": "PHAM THI THU HIEN"
+        },
+        {
+          "year": "2019",
+          "id": 1904028,
+          "name": "NGUYEN THI THU HUONG"
+        },
+        {
+          "year": "2019",
+          "id": 1904044,
+          "name": "NGUYEN DANG CUONG"
+        },
+        {
+          "year": "2019",
+          "id": 1904045,
+          "name": "THIEU VAN DUY"
+        },
+        {
+          "year": "2019",
+          "id": 1910002,
+          "name": "林 子昕"
+        },
+        {
+          "year": "2019",
+          "id": 1910008,
+          "name": "HO ANH DUNG"
+        },
+        {
+          "year": "2019",
+          "id": 1910011,
+          "name": "DANG NGUYEN HUY"
+        },
+        {
+          "year": "2019",
+          "id": 3004032,
+          "name": "BUI CHI LINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004033,
+          "name": "HOANG THI MINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004034,
+          "name": "LUONG THI HUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004045,
+          "name": "NGUYEN ANH VU"
+        },
+        {
+          "year": "2019",
+          "id": 3004055,
+          "name": "VU THI NHUNG"
+        },
+        {
+          "year": "2019",
+          "id": 3004067,
+          "name": "TRAN THI THU THAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004109,
+          "name": "NGUYEN NHAT LINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004131,
+          "name": "NGUYEN THIEN TINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004132,
+          "name": "HUA VIET HOANG"
+        },
+        {
+          "year": "2019",
+          "id": 3004010,
+          "name": "DO VAN SON"
+        },
+        {
+          "year": "2019",
+          "id": 3004108,
+          "name": "NGUYEN KHAC HOANG"
+        },
+        {
+          "year": "2019",
+          "id": 3004116,
+          "name": "PHAM THUY TIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004042,
+          "name": "NGO THI THANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004051,
+          "name": "LE THI HUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004113,
+          "name": "LA QUOC KHANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004040,
+          "name": "PHAM THUY TIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004057,
+          "name": "TRINH PHUONG ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004064,
+          "name": "PHAM THI HANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004066,
+          "name": "PHAM QUANG HUNG"
+        },
+        {
+          "year": "2019",
+          "id": 3004087,
+          "name": "VI THI LAN ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004112,
+          "name": "DAO VAN MANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004007,
+          "name": "NGUYEN VAN THUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004043,
+          "name": "TRUONG THI THU UYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004068,
+          "name": "NGUYEN THI DUNG"
+        },
+        {
+          "year": "2019",
+          "id": 3010005,
+          "name": "TA THI DUNG"
+        },
+        {
+          "year": "2019",
+          "id": 3010007,
+          "name": "NGUYEN MANH QUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3010009,
+          "name": "VU NGOC HOAI NAM"
+        },
+        {
+          "year": "2020",
+          "id": 2004058,
+          "name": "NGUYEN CANH THINH"
+        },
         {
           "year": "2022",
           "id": 2007023,
@@ -811,8 +1658,11 @@
     },
     {
       "name": "専門学校アートカレッジ神戸",
-      "count": 97,
+      "count": 103,
       "years": {
+        "2017": 30,
+        "2018": 18,
+        "2019": 23,
         "2020": 2,
         "2022": 20,
         "2023": 10
@@ -820,16 +1670,30 @@
       "jlptStats": {
         "N3": {
           "passed": {
-            "count": 10,
-            "avg": 105.1,
+            "count": 17,
+            "avg": 103.9,
             "max": 117,
-            "min": 96
+            "min": 95
           },
           "failed": {
-            "count": 42,
-            "avg": 73.2,
+            "count": 86,
+            "avg": 71,
             "max": 102,
-            "min": 45
+            "min": 25
+          }
+        },
+        "N2": {
+          "passed": {
+            "count": 1,
+            "avg": 99,
+            "max": 99,
+            "min": 99
+          },
+          "failed": {
+            "count": 9,
+            "avg": 58.2,
+            "max": 80,
+            "min": 40
           }
         },
         "N4": {
@@ -845,18 +1709,364 @@
             "max": 75,
             "min": 64
           }
-        },
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 3,
-            "avg": 63.7,
-            "max": 80,
-            "min": 50
-          }
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904037,
+          "name": "NGUYEN THI MEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904061,
+          "name": "LE DINH DUC"
+        },
+        {
+          "year": "2017",
+          "id": 2904034,
+          "name": "LE TRUONG QUAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904067,
+          "name": "LEU HUY THIN"
+        },
+        {
+          "year": "2017",
+          "id": 2904078,
+          "name": "NGUYEN VAN DUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904085,
+          "name": "NGUYEN VAN KHANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904110,
+          "name": "NGUYEN HONG PHONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904008,
+          "name": "TO THI THU"
+        },
+        {
+          "year": "2017",
+          "id": 2904039,
+          "name": "TRIEU THI THANH NHAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904093,
+          "name": "HOANG THI THUY HANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904118,
+          "name": "NGUYEN XUAN THANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904044,
+          "name": "PHUNG VAN THANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904102,
+          "name": "NGUYEN THI THANH MAI"
+        },
+        {
+          "year": "2017",
+          "id": 2904021,
+          "name": "DUONG DINH QUAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904024,
+          "name": "NGUYEN KHANH DUY"
+        },
+        {
+          "year": "2017",
+          "id": 2904049,
+          "name": "PHAM VAN HAI"
+        },
+        {
+          "year": "2017",
+          "id": 2904112,
+          "name": "NGUYEN THI HIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2907007,
+          "name": "PHAM THI LAN"
+        },
+        {
+          "year": "2017",
+          "id": 2907017,
+          "name": "PHAM MINH HIEU"
+        },
+        {
+          "year": "2017",
+          "id": 2907018,
+          "name": "LE THI HONG"
+        },
+        {
+          "year": "2017",
+          "id": 2907028,
+          "name": "DANG THI THANH HAI"
+        },
+        {
+          "year": "2017",
+          "id": 2910013,
+          "name": "HOANG BAO CHUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2910033,
+          "name": "NGUYEN VAN KHANH SON"
+        },
+        {
+          "year": "2017",
+          "id": 2907008,
+          "name": "NGUYEN THI PHUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2910016,
+          "name": "NGUYEN THI PHUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2910034,
+          "name": "LE DAC CHUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2910036,
+          "name": "NGUYEN THI HONG MINH"
+        },
+        {
+          "year": "2017",
+          "id": 2904077,
+          "name": "HOANG VAN SON"
+        },
+        {
+          "year": "2017",
+          "id": 2904046,
+          "name": "PHAN DINH TRUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904009,
+          "name": "NGUYEN VAN HIEU"
+        },
+        {
+          "year": "2018",
+          "id": 3004005,
+          "name": "TRAN THI TRANG"
+        },
+        {
+          "year": "2018",
+          "id": 3004013,
+          "name": "NGUYEN MANH HAI"
+        },
+        {
+          "year": "2018",
+          "id": 3004024,
+          "name": "NGUYEN THI LIEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004039,
+          "name": "TRUONG THI HUYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004046,
+          "name": "VU VIET DUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004063,
+          "name": "PHAN THI THANH THAO"
+        },
+        {
+          "year": "2018",
+          "id": 3004074,
+          "name": "TRAN TIEN BAO"
+        },
+        {
+          "year": "2018",
+          "id": 3004088,
+          "name": "TRAN HOAI THU"
+        },
+        {
+          "year": "2018",
+          "id": 3004095,
+          "name": "PHAM THI YEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004100,
+          "name": "NGUYEN THI DUYEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004101,
+          "name": "PHAM THI MEN"
+        },
+        {
+          "year": "2018",
+          "id": 3004118,
+          "name": "NGUYEN QUANG HUY"
+        },
+        {
+          "year": "2018",
+          "id": 3004122,
+          "name": "NGUYEN HOANG DAT"
+        },
+        {
+          "year": "2018",
+          "id": 3004127,
+          "name": "VU NAM ANH"
+        },
+        {
+          "year": "2018",
+          "id": 3004135,
+          "name": "VU THI PHUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3010001,
+          "name": "BUI THI THUY"
+        },
+        {
+          "year": "2018",
+          "id": 3010006,
+          "name": "TRAN THI THANH HOA"
+        },
+        {
+          "year": "2018",
+          "id": 3010008,
+          "name": "NGO NGOC HAI"
+        },
+        {
+          "year": "2019",
+          "id": 1904024,
+          "name": "DO VIET TUAN"
+        },
+        {
+          "year": "2019",
+          "id": 1904030,
+          "name": "TRAN XUAN TRUC"
+        },
+        {
+          "year": "2019",
+          "id": 1904041,
+          "name": "PHAM THI NGOC ANH"
+        },
+        {
+          "year": "2019",
+          "id": 1910009,
+          "name": "BUI DUC TAI"
+        },
+        {
+          "year": "2019",
+          "id": 1910019,
+          "name": "孫 正宵"
+        },
+        {
+          "year": "2019",
+          "id": 3004046,
+          "name": "VU VIET DUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004005,
+          "name": "TRAN THI TRANG"
+        },
+        {
+          "year": "2019",
+          "id": 3004013,
+          "name": "NGUYEN MANH HAI"
+        },
+        {
+          "year": "2019",
+          "id": 3004095,
+          "name": "PHAM THI YEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004118,
+          "name": "NGUYEN QUANG HUY"
+        },
+        {
+          "year": "2019",
+          "id": 3004088,
+          "name": "TRAN HOAI THU"
+        },
+        {
+          "year": "2019",
+          "id": 3004135,
+          "name": "VU THI PHUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004039,
+          "name": "TRUONG THI HUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004100,
+          "name": "NGUYEN THI DUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004101,
+          "name": "PHAM THI MEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004122,
+          "name": "NGUYEN HOANG DAT"
+        },
+        {
+          "year": "2019",
+          "id": 3004063,
+          "name": "PHAN THI THANH THAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004024,
+          "name": "NGUYEN THI LIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004074,
+          "name": "TRAN TIEN BAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004127,
+          "name": "VU NAM ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3010001,
+          "name": "BUI THI THUY"
+        },
+        {
+          "year": "2019",
+          "id": 3010006,
+          "name": "TRAN THI THANH HOA"
+        },
+        {
+          "year": "2019",
+          "id": 3010008,
+          "name": "NGO NGOC HAI"
+        },
         {
           "year": "2020",
           "id": 2004065,
@@ -1021,13 +2231,39 @@
     },
     {
       "name": "愛甲学院専門学校",
-      "count": 79,
+      "count": 80,
       "years": {
+        "2017": 35,
+        "2018": 10,
+        "2019": 12,
         "2020": 2,
         "2022": 12,
         "2023": 9
       },
       "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 15,
+            "avg": 106.3,
+            "max": 123,
+            "min": 95
+          },
+          "failed": {
+            "count": 68,
+            "avg": 72.2,
+            "max": 95,
+            "min": 48
+          }
+        },
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 5,
+            "avg": 60.4,
+            "max": 85,
+            "min": 42
+          }
+        },
         "N4": {
           "passed": {
             "count": 4,
@@ -1041,32 +2277,294 @@
             "max": 86,
             "min": 73
           }
-        },
-        "N3": {
-          "passed": {
-            "count": 9,
-            "avg": 109.3,
-            "max": 123,
-            "min": 97
-          },
-          "failed": {
-            "count": 26,
-            "avg": 75,
-            "max": 95,
-            "min": 52
-          }
-        },
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 62,
-            "max": 62,
-            "min": 62
-          }
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904022,
+          "name": "MAC THI NGHIA"
+        },
+        {
+          "year": "2017",
+          "id": 2907020,
+          "name": "HOANG VAN DUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904065,
+          "name": "DINH NAM PHONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904025,
+          "name": "LUU QUANG VU"
+        },
+        {
+          "year": "2017",
+          "id": 2904052,
+          "name": "NGUYEN THI NGA"
+        },
+        {
+          "year": "2017",
+          "id": 2904054,
+          "name": "NGUYEN THI THAO"
+        },
+        {
+          "year": "2017",
+          "id": 2904071,
+          "name": "BUI VAN THIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904107,
+          "name": "HOANG TRONG KIEM"
+        },
+        {
+          "year": "2017",
+          "id": 2904122,
+          "name": "TRAN THI BICH LIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904128,
+          "name": "NGUYEN THI HIEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904010,
+          "name": "CAO THE QUYEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904057,
+          "name": "VU VAN TRUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2904092,
+          "name": "MAI THI NGOC ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2904023,
+          "name": "LE VAN TUYEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904075,
+          "name": "NGUYEN THI HOAI THUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904079,
+          "name": "PHAM QUANG DAT"
+        },
+        {
+          "year": "2017",
+          "id": 2904081,
+          "name": "NGUYEN HUU TIN"
+        },
+        {
+          "year": "2017",
+          "id": 2904099,
+          "name": "LE NGOC HUYEN"
+        },
+        {
+          "year": "2017",
+          "id": 2904050,
+          "name": "LE THI THANH XUAN "
+        },
+        {
+          "year": "2017",
+          "id": 2904073,
+          "name": "LUONG THI LAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904076,
+          "name": "NGUYEN THI HIEP"
+        },
+        {
+          "year": "2017",
+          "id": 2904115,
+          "name": "NGUYEN VIET HAI"
+        },
+        {
+          "year": "2017",
+          "id": 2907010,
+          "name": "NGUYEN VAN TUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2907013,
+          "name": "DONG THE LUC"
+        },
+        {
+          "year": "2017",
+          "id": 2907015,
+          "name": "NGUYEN THI DAO"
+        },
+        {
+          "year": "2017",
+          "id": 2907016,
+          "name": "TRAN CONG DUC ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2907023,
+          "name": "NGUYEN KHANH VINH"
+        },
+        {
+          "year": "2017",
+          "id": 2907026,
+          "name": "PHAN THI THAO"
+        },
+        {
+          "year": "2017",
+          "id": 2910038,
+          "name": "RANASINGHE ARACHCHIGE SHEHAN NISHEDA"
+        },
+        {
+          "year": "2017",
+          "id": 2907022,
+          "name": "NGUYEN HUY THACH"
+        },
+        {
+          "year": "2017",
+          "id": 2910015,
+          "name": "NGUYEN VAN QUANG"
+        },
+        {
+          "year": "2017",
+          "id": 2910017,
+          "name": "NGO LUONG BAO HA"
+        },
+        {
+          "year": "2017",
+          "id": 2910031,
+          "name": "BUI TUAN ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2910022,
+          "name": "DINH THE NGHIA"
+        },
+        {
+          "year": "2017",
+          "id": 2904089,
+          "name": "NGUYEN VAN HIEP"
+        },
+        {
+          "year": "2018",
+          "id": 3004025,
+          "name": "LUONG THE VINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004044,
+          "name": "LUU THI KHANH LINH"
+        },
+        {
+          "year": "2018",
+          "id": 3004058,
+          "name": "MAI THI THANH THAO"
+        },
+        {
+          "year": "2018",
+          "id": 3004086,
+          "name": "HOANG THI THUONG"
+        },
+        {
+          "year": "2018",
+          "id": 3004133,
+          "name": "MAI YEN NHI"
+        },
+        {
+          "year": "2018",
+          "id": 3004138,
+          "name": "PHAM DINH DUOC"
+        },
+        {
+          "year": "2018",
+          "id": 3007004,
+          "name": "PAYAGALA WADUGE KESHALA MADUSHANKI FERNANDO"
+        },
+        {
+          "year": "2018",
+          "id": 3010003,
+          "name": "TRAN THI HANG"
+        },
+        {
+          "year": "2018",
+          "id": 3010004,
+          "name": "HOANG MINH TRI"
+        },
+        {
+          "year": "2018",
+          "id": 3010010,
+          "name": "PHUNG THI PHUONG"
+        },
+        {
+          "year": "2019",
+          "id": 1904008,
+          "name": "LAI THI THUY"
+        },
+        {
+          "year": "2019",
+          "id": 1904036,
+          "name": "LUU THI VAN ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004058,
+          "name": "MAI THI THANH THAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004138,
+          "name": "PHAM DINH DUOC"
+        },
+        {
+          "year": "2019",
+          "id": 3007004,
+          "name": "PAYAGALA WADUGE KESHALA MADUSHANKI FERNANDO"
+        },
+        {
+          "year": "2019",
+          "id": 3004133,
+          "name": "MAI YEN NHI"
+        },
+        {
+          "year": "2019",
+          "id": 3004025,
+          "name": "LUONG THE VINH"
+        },
+        {
+          "year": "2019",
+          "id": 3004086,
+          "name": "HOANG THI THUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004044,
+          "name": "LUU THI KHANH LINH"
+        },
+        {
+          "year": "2019",
+          "id": 3010003,
+          "name": "TRAN THI HANG"
+        },
+        {
+          "year": "2019",
+          "id": 3010004,
+          "name": "HOANG MINH TRI"
+        },
+        {
+          "year": "2019",
+          "id": 3010010,
+          "name": "PHUNG THI PHUONG"
+        },
         {
           "year": "2020",
           "id": 2004055,
@@ -1190,7 +2688,7 @@
       "years": {
         "2017": 4,
         "2018": 10,
-        "2019": 5,
+        "2019": 15,
         "2020": 7,
         "2022": 8,
         "2023": 5
@@ -1331,6 +2829,56 @@
           "name": "PHAN NGOC VU"
         },
         {
+          "year": "2019",
+          "id": 3004114,
+          "name": "BUI THE TOAN"
+        },
+        {
+          "year": "2019",
+          "id": 3004018,
+          "name": "TRAN THI YEN NHI"
+        },
+        {
+          "year": "2019",
+          "id": 3004021,
+          "name": "NGUYEN THI THUYEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004141,
+          "name": "亓 輝"
+        },
+        {
+          "year": "2019",
+          "id": 3004016,
+          "name": "TRUONG THI THANH THAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004028,
+          "name": "NGUYEN THI NHI"
+        },
+        {
+          "year": "2019",
+          "id": 3004036,
+          "name": "HOANG VAN THAI"
+        },
+        {
+          "year": "2019",
+          "id": 3004020,
+          "name": "DOAN THI LAM"
+        },
+        {
+          "year": "2019",
+          "id": 3004102,
+          "name": "LUU THI NGA"
+        },
+        {
+          "year": "2019",
+          "id": 3004103,
+          "name": "NGUYEN VAN NAM"
+        },
+        {
           "year": "2020",
           "id": 2004050,
           "name": "NGUYEN THI THUY LINH"
@@ -1434,8 +2982,11 @@
     },
     {
       "name": "ICT専門学校",
-      "count": 32,
+      "count": 33,
       "years": {
+        "2017": 8,
+        "2018": 5,
+        "2019": 5,
         "2020": 1,
         "2022": 4,
         "2023": 10
@@ -1443,16 +2994,25 @@
       "jlptStats": {
         "N3": {
           "passed": {
-            "count": 7,
-            "avg": 105.1,
+            "count": 11,
+            "avg": 105.8,
             "max": 118,
             "min": 95
           },
           "failed": {
-            "count": 21,
-            "avg": 79,
+            "count": 30,
+            "avg": 77.3,
             "max": 94,
-            "min": 58
+            "min": 55
+          }
+        },
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 5,
+            "avg": 75.4,
+            "max": 100,
+            "min": 61
           }
         },
         "N4": {
@@ -1466,6 +3026,96 @@
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904030,
+          "name": "LE THANH TRUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2907027,
+          "name": "NGUYEN VAN QUAN"
+        },
+        {
+          "year": "2017",
+          "id": 2910006,
+          "name": "TRAN NGOC MINH"
+        },
+        {
+          "year": "2017",
+          "id": 2910008,
+          "name": "LE DUY BAO"
+        },
+        {
+          "year": "2017",
+          "id": 2910028,
+          "name": "TRAN MINH QUANG"
+        },
+        {
+          "year": "2017",
+          "id": 2910029,
+          "name": "NGUYEN THI HUE"
+        },
+        {
+          "year": "2017",
+          "id": 2910032,
+          "name": "PHUNG VAN SON"
+        },
+        {
+          "year": "2017",
+          "id": 2904090,
+          "name": "NGUYEN THI DUNG"
+        },
+        {
+          "year": "2018",
+          "id": 3004019,
+          "name": "BUI ANH TUAN"
+        },
+        {
+          "year": "2018",
+          "id": 3004029,
+          "name": "NGUYEN DUC ANH TUAN"
+        },
+        {
+          "year": "2018",
+          "id": 3004078,
+          "name": "TRINH MINH HIEU"
+        },
+        {
+          "year": "2018",
+          "id": 3004082,
+          "name": "CAO VAN PHUC"
+        },
+        {
+          "year": "2018",
+          "id": 3004089,
+          "name": "NGUYEN VAN DUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004029,
+          "name": "NGUYEN DUC ANH TUAN"
+        },
+        {
+          "year": "2019",
+          "id": 3004082,
+          "name": "CAO VAN PHUC"
+        },
+        {
+          "year": "2019",
+          "id": 3004078,
+          "name": "TRINH MINH HIEU"
+        },
+        {
+          "year": "2019",
+          "id": 3004019,
+          "name": "BUI ANH TUAN"
+        },
+        {
+          "year": "2019",
+          "id": 3004089,
+          "name": "NGUYEN VAN DUONG"
+        },
         {
           "year": "2020",
           "id": 2010024,
@@ -1545,21 +3195,32 @@
     },
     {
       "name": "関西国際旅行・ホテル専門学校",
-      "count": 29,
+      "count": 30,
       "years": {
+        "2019": 4,
+        "2022": 2,
         "2023": 24
       },
       "jlptStats": {
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 10,
+            "avg": 72.7,
+            "max": 82,
+            "min": 56
+          }
+        },
         "N3": {
           "passed": {
-            "count": 16,
-            "avg": 108.3,
+            "count": 18,
+            "avg": 107.5,
             "max": 138,
             "min": 95
           },
           "failed": {
-            "count": 24,
-            "avg": 82.8,
+            "count": 27,
+            "avg": 82.4,
             "max": 94,
             "min": 66
           }
@@ -1572,23 +3233,44 @@
             "min": 106
           },
           "failed": {
-            "count": 1,
-            "avg": 67,
-            "max": 67,
+            "count": 3,
+            "avg": 77.7,
+            "max": 84,
             "min": 67
-          }
-        },
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 7,
-            "avg": 70.7,
-            "max": 82,
-            "min": 56
           }
         }
       },
       "students": [
+        {
+          "year": "2019",
+          "id": 1904021,
+          "name": "NGUYEN NHAT HUY"
+        },
+        {
+          "year": "2019",
+          "id": 1904043,
+          "name": "DO THI YEN"
+        },
+        {
+          "year": "2019",
+          "id": 1907001,
+          "name": "袁 仲"
+        },
+        {
+          "year": "2019",
+          "id": 1910010,
+          "name": "PHAN THI TAM"
+        },
+        {
+          "year": "2022",
+          "id": 2204051,
+          "name": "KADE GEDARA CHANARU LAKSHITHA PERERA"
+        },
+        {
+          "year": "2022",
+          "id": 2104032,
+          "name": "PABITRA NEPALI"
+        },
         {
           "year": "2023",
           "id": 2304028,
@@ -1713,11 +3395,11 @@
     },
     {
       "name": "流通科学大学",
-      "count": 25,
+      "count": 26,
       "years": {
         "2017": 4,
         "2018": 1,
-        "2019": 4,
+        "2019": 5,
         "2020": 3,
         "2022": 2,
         "2023": 11
@@ -1808,6 +3490,11 @@
           "name": "周 澤灝"
         },
         {
+          "year": "2019",
+          "id": 3004031,
+          "name": "LAI THI HONG THUY"
+        },
+        {
           "year": "2020",
           "id": 2004062,
           "name": "NGUYEN THI HUYEN TRANG"
@@ -1891,9 +3578,10 @@
     },
     {
       "name": "神戸電子専門学校",
-      "count": 18,
+      "count": 20,
       "years": {
         "2018": 1,
+        "2019": 1,
         "2020": 1,
         "2022": 3,
         "2023": 14
@@ -1954,6 +3642,11 @@
       "students": [
         {
           "year": "2018",
+          "id": 3004110,
+          "name": "TRAN DANG QUYEN"
+        },
+        {
+          "year": "2019",
           "id": 3004110,
           "name": "TRAN DANG QUYEN"
         },
@@ -2053,7 +3746,8 @@
       "name": "奈良介護福祉中央学院",
       "count": 14,
       "years": {
-        "2018": 7
+        "2018": 7,
+        "2019": 7
       },
       "jlptStats": {
         "N3": {
@@ -2115,6 +3809,41 @@
           "year": "2018",
           "id": 3007002,
           "name": "邹 超"
+        },
+        {
+          "year": "2019",
+          "id": 3004107,
+          "name": "DO THI HIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004119,
+          "name": "LE ANH DUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3007002,
+          "name": "邹 超"
+        },
+        {
+          "year": "2019",
+          "id": 3004047,
+          "name": "NGUYEN THANH HUY"
+        },
+        {
+          "year": "2019",
+          "id": 3004023,
+          "name": "TRAN DUC PHUC"
+        },
+        {
+          "year": "2019",
+          "id": 3004060,
+          "name": "TRUONG MY HANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004128,
+          "name": "PHAM THI NGOC PHUONG"
         }
       ]
     },
@@ -2450,7 +4179,7 @@
       "count": 10,
       "years": {
         "2018": 1,
-        "2019": 1,
+        "2019": 2,
         "2020": 1,
         "2022": 3,
         "2023": 3
@@ -2506,6 +4235,11 @@
           "name": "NGUYEN THI LUYEN"
         },
         {
+          "year": "2019",
+          "id": 3004001,
+          "name": "孫 祥羽"
+        },
+        {
           "year": "2020",
           "id": 2004043,
           "name": "NGUYEN HOANG THUY DIEU"
@@ -2546,7 +4280,9 @@
       "name": "和歌山社会福祉専門学校",
       "count": 9,
       "years": {
+        "2017": 1,
         "2018": 1,
+        "2019": 1,
         "2022": 3,
         "2023": 3
       },
@@ -2559,8 +4295,8 @@
             "min": 100
           },
           "failed": {
-            "count": 2,
-            "avg": 85.5,
+            "count": 3,
+            "avg": 85.3,
             "max": 86,
             "min": 85
           }
@@ -2596,7 +4332,17 @@
       },
       "students": [
         {
+          "year": "2017",
+          "id": 2910011,
+          "name": "NGUYEN DUY DAT"
+        },
+        {
           "year": "2018",
+          "id": 3004084,
+          "name": "TRAN THI LAN"
+        },
+        {
+          "year": "2019",
           "id": 3004084,
           "name": "TRAN THI LAN"
         },
@@ -2637,7 +4383,7 @@
       "count": 9,
       "years": {
         "2018": 1,
-        "2019": 1,
+        "2019": 2,
         "2020": 1,
         "2022": 5
       },
@@ -2683,6 +4429,11 @@
           "name": "劉 建燁"
         },
         {
+          "year": "2019",
+          "id": 3004115,
+          "name": "DIEP VAN TUAN"
+        },
+        {
           "year": "2020",
           "id": 2010031,
           "name": "S.M. SAKHAWAT HOSSAIN"
@@ -2719,6 +4470,7 @@
       "count": 8,
       "years": {
         "2018": 3,
+        "2019": 3,
         "2020": 1,
         "2023": 1
       },
@@ -2764,6 +4516,21 @@
           "name": "BUI HAI DANG"
         },
         {
+          "year": "2019",
+          "id": 3004015,
+          "name": "NGUYEN THI NGOC ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004037,
+          "name": "TRAN DUY DUC"
+        },
+        {
+          "year": "2019",
+          "id": 3004069,
+          "name": "BUI HAI DANG"
+        },
+        {
           "year": "2020",
           "id": 2004063,
           "name": "VU THU HA"
@@ -2780,7 +4547,7 @@
       "count": 8,
       "years": {
         "2018": 1,
-        "2019": 1,
+        "2019": 2,
         "2023": 5
       },
       "jlptStats": {
@@ -2823,6 +4590,11 @@
           "year": "2019",
           "id": 1907002,
           "name": "孟 汝樺"
+        },
+        {
+          "year": "2019",
+          "id": 1901003,
+          "name": "王 海名"
         },
         {
           "year": "2023",
@@ -2935,6 +4707,7 @@
       "count": 7,
       "years": {
         "2018": 2,
+        "2019": 2,
         "2022": 2,
         "2023": 1
       },
@@ -2975,6 +4748,16 @@
           "name": "NGUYEN DINH SON"
         },
         {
+          "year": "2019",
+          "id": 3004012,
+          "name": "NGUYEN GIANG TRUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004030,
+          "name": "NGUYEN DINH SON"
+        },
+        {
           "year": "2022",
           "id": 2210040,
           "name": "丁 雪洋"
@@ -2993,36 +4776,79 @@
     },
     {
       "name": "トヨタ自動車大学校神戸校",
-      "count": 7,
+      "count": 14,
       "years": {
-        "2022": 3
+        "2018": 1,
+        "2019": 2,
+        "2020": 2,
+        "2022": 3,
+        "2023": 6
       },
       "jlptStats": {
         "N3": {
           "passed": {
-            "count": 3,
-            "avg": 121.3,
+            "count": 9,
+            "avg": 118.3,
             "max": 156,
-            "min": 98
+            "min": 96
           },
           "failed": {
-            "count": 2,
-            "avg": 93,
+            "count": 7,
+            "avg": 80.9,
             "max": 103,
-            "min": 83
+            "min": 62
           }
+        },
+        "N1": {
+          "passed": {
+            "count": 1,
+            "avg": 146,
+            "max": 146,
+            "min": 146
+          },
+          "failed": null
         },
         "N2": {
           "passed": {
-            "count": 1,
-            "avg": 98,
+            "count": 2,
+            "avg": 95,
             "max": 98,
-            "min": 98
+            "min": 92
           },
-          "failed": null
+          "failed": {
+            "count": 4,
+            "avg": 65.5,
+            "max": 80,
+            "min": 44
+          }
         }
       },
       "students": [
+        {
+          "year": "2018",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
+          "year": "2019",
+          "id": 1910023,
+          "name": "武 文杰"
+        },
+        {
+          "year": "2019",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
+          "year": "2020",
+          "id": 2004048,
+          "name": "NGUYEN VAN TUAN"
+        },
+        {
+          "year": "2020",
+          "id": 2004072,
+          "name": "NGUYEN SY DAT"
+        },
         {
           "year": "2022",
           "id": 2110068,
@@ -3037,6 +4863,36 @@
           "year": "2022",
           "id": 2107029,
           "name": "SURENDRA SHRESTHA"
+        },
+        {
+          "year": "2023",
+          "id": 2304072,
+          "name": "ARKAR HEIN"
+        },
+        {
+          "year": "2023",
+          "id": 2304024,
+          "name": "HOANG THANH TUNG"
+        },
+        {
+          "year": "2023",
+          "id": 2307012,
+          "name": "TIN ZAW WIN"
+        },
+        {
+          "year": "2023",
+          "id": 2304130,
+          "name": "DABNATH TAPO "
+        },
+        {
+          "year": "2023",
+          "id": 2310027,
+          "name": "KAUNG ZIN KHANT"
+        },
+        {
+          "year": "2023",
+          "id": 2310039,
+          "name": "RAKIBUL HASAN"
         }
       ]
     },
@@ -3045,6 +4901,7 @@
       "count": 7,
       "years": {
         "2018": 1,
+        "2019": 1,
         "2022": 3,
         "2023": 2
       },
@@ -3085,6 +4942,11 @@
           "name": "NGUYEN THI TRANG"
         },
         {
+          "year": "2019",
+          "id": 3004098,
+          "name": "NGUYEN THI TRANG"
+        },
+        {
           "year": "2022",
           "id": 2110062,
           "name": "SHAHIL MAHARJAN"
@@ -3112,13 +4974,30 @@
       ]
     },
     {
-      "name": "トヨタ神戸自動車大学校",
-      "count": 7,
+      "name": "トヨタ自動車大学校神戸校",
+      "count": 14,
       "years": {
-        "2019": 1,
+        "2018": 1,
+        "2019": 2,
+        "2020": 2,
+        "2022": 3,
         "2023": 6
       },
       "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 9,
+            "avg": 118.3,
+            "max": 156,
+            "min": 96
+          },
+          "failed": {
+            "count": 7,
+            "avg": 80.9,
+            "max": 103,
+            "min": 62
+          }
+        },
         "N1": {
           "passed": {
             "count": 1,
@@ -3130,38 +5009,59 @@
         },
         "N2": {
           "passed": {
-            "count": 1,
-            "avg": 92,
-            "max": 92,
+            "count": 2,
+            "avg": 95,
+            "max": 98,
             "min": 92
           },
           "failed": {
-            "count": 3,
-            "avg": 65,
+            "count": 4,
+            "avg": 65.5,
             "max": 80,
             "min": 44
-          }
-        },
-        "N3": {
-          "passed": {
-            "count": 4,
-            "avg": 120.5,
-            "max": 135,
-            "min": 103
-          },
-          "failed": {
-            "count": 3,
-            "avg": 85,
-            "max": 92,
-            "min": 71
           }
         }
       },
       "students": [
         {
+          "year": "2018",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
           "year": "2019",
           "id": 1910023,
           "name": "武 文杰"
+        },
+        {
+          "year": "2019",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
+          "year": "2020",
+          "id": 2004048,
+          "name": "NGUYEN VAN TUAN"
+        },
+        {
+          "year": "2020",
+          "id": 2004072,
+          "name": "NGUYEN SY DAT"
+        },
+        {
+          "year": "2022",
+          "id": 2110068,
+          "name": "RAJESH GURUNG"
+        },
+        {
+          "year": "2022",
+          "id": 2110073,
+          "name": "SHAMIM MIAH"
+        },
+        {
+          "year": "2022",
+          "id": 2107029,
+          "name": "SURENDRA SHRESTHA"
         },
         {
           "year": "2023",
@@ -3338,25 +5238,55 @@
       "name": "大原簿記専門学校三宮校",
       "count": 6,
       "years": {
+        "2017": 4,
         "2022": 2
       },
       "jlptStats": {
         "N3": {
           "passed": {
-            "count": 1,
-            "avg": 141,
+            "count": 3,
+            "avg": 117.7,
             "max": 141,
-            "min": 141
+            "min": 104
           },
           "failed": {
-            "count": 3,
-            "avg": 85.7,
+            "count": 8,
+            "avg": 85.1,
             "max": 94,
-            "min": 75
+            "min": 72
+          }
+        },
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
           }
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904015,
+          "name": "NGUYEN THI HUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904028,
+          "name": "NGUYEN TRONG DAI"
+        },
+        {
+          "year": "2017",
+          "id": 2910020,
+          "name": "HOANG THIEN KET"
+        },
+        {
+          "year": "2017",
+          "id": 2910024,
+          "name": "NGUYEN NGOC HUYEN"
+        },
         {
           "year": "2022",
           "id": 2107032,
@@ -3581,9 +5511,33 @@
       "name": "日本コンピュータ専門学校",
       "count": 4,
       "years": {
+        "2017": 2,
         "2023": 2
       },
       "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 2,
+            "avg": 96.5,
+            "max": 97,
+            "min": 96
+          },
+          "failed": {
+            "count": 1,
+            "avg": 76,
+            "max": 76,
+            "min": 76
+          }
+        },
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 52,
+            "max": 52,
+            "min": 52
+          }
+        },
         "N4": {
           "passed": {
             "count": 1,
@@ -3597,18 +5551,19 @@
             "max": 75,
             "min": 61
           }
-        },
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 97,
-            "max": 97,
-            "min": 97
-          },
-          "failed": null
         }
       },
       "students": [
+        {
+          "year": "2017",
+          "id": 2904053,
+          "name": "NGUYEN MINH QUY"
+        },
+        {
+          "year": "2017",
+          "id": 2904106,
+          "name": "NGUYEN HAI SON"
+        },
         {
           "year": "2023",
           "id": 2304020,
@@ -3623,7 +5578,7 @@
     },
     {
       "name": "西日本アカデミー",
-      "count": 4,
+      "count": 8,
       "years": {
         "2017": 8
       },
@@ -3685,7 +5640,8 @@
       "name": "大阪コミュニティワーカー専門学校",
       "count": 4,
       "years": {
-        "2018": 2
+        "2018": 2,
+        "2019": 2
       },
       "jlptStats": {
         "N3": {
@@ -3706,6 +5662,16 @@
         },
         {
           "year": "2018",
+          "id": 3004137,
+          "name": "NGUYEN THI THU HIEN"
+        },
+        {
+          "year": "2019",
+          "id": 3004129,
+          "name": "NGUYEN VIET ANH"
+        },
+        {
+          "year": "2019",
           "id": 3004137,
           "name": "NGUYEN THI THU HIEN"
         }
@@ -4171,6 +6137,7 @@
       "count": 3,
       "years": {
         "2018": 1,
+        "2019": 1,
         "2023": 1
       },
       "jlptStats": {
@@ -4201,6 +6168,11 @@
       "students": [
         {
           "year": "2018",
+          "id": 3007001,
+          "name": "仇 豪"
+        },
+        {
+          "year": "2019",
           "id": 3007001,
           "name": "仇 豪"
         },
@@ -4573,7 +6545,7 @@
     },
     {
       "name": "JMC",
-      "count": 2,
+      "count": 3,
       "years": {
         "2017": 3
       },
@@ -4615,7 +6587,8 @@
       "name": "京都芸術デザイン専門学校",
       "count": 2,
       "years": {
-        "2018": 1
+        "2018": 1,
+        "2019": 1
       },
       "jlptStats": {
         "N2": {
@@ -4642,6 +6615,11 @@
           "year": "2018",
           "id": 3004003,
           "name": "劉 愷明"
+        },
+        {
+          "year": "2019",
+          "id": 3004003,
+          "name": "劉 愷明"
         }
       ]
     },
@@ -4649,7 +6627,8 @@
       "name": "名古屋モード学園",
       "count": 2,
       "years": {
-        "2018": 1
+        "2018": 1,
+        "2019": 1
       },
       "jlptStats": {
         "N3": {
@@ -4676,6 +6655,11 @@
           "year": "2018",
           "id": 3004076,
           "name": "PHAM THI THANH THAO"
+        },
+        {
+          "year": "2019",
+          "id": 3004076,
+          "name": "PHAM THI THANH THAO"
         }
       ]
     },
@@ -4683,7 +6667,8 @@
       "name": "ホンダ自動車大学校",
       "count": 2,
       "years": {
-        "2018": 1
+        "2018": 1,
+        "2019": 1
       },
       "jlptStats": {
         "N2": {
@@ -4706,6 +6691,11 @@
           "year": "2018",
           "id": 3004117,
           "name": "PHAM VAN CUONG"
+        },
+        {
+          "year": "2019",
+          "id": 3004117,
+          "name": "PHAM VAN CUONG"
         }
       ]
     },
@@ -4713,7 +6703,8 @@
       "name": "穴吹工科カレッジ",
       "count": 2,
       "years": {
-        "2018": 1
+        "2018": 1,
+        "2019": 1
       },
       "jlptStats": {
         "N3": {
@@ -4740,6 +6731,11 @@
           "year": "2018",
           "id": 3004126,
           "name": "PHUNG TUAN ANH"
+        },
+        {
+          "year": "2019",
+          "id": 3004126,
+          "name": "PHUNG TUAN ANH"
         }
       ]
     },
@@ -4747,12 +6743,18 @@
       "name": "東北大学",
       "count": 2,
       "years": {
-        "2018": 1
+        "2018": 1,
+        "2019": 1
       },
       "jlptStats": {},
       "students": [
         {
           "year": "2018",
+          "id": 1901002,
+          "name": "李雪"
+        },
+        {
+          "year": "2019",
           "id": 1901002,
           "name": "李雪"
         }
@@ -5003,7 +7005,7 @@
     },
     {
       "name": "九州ビジネス専門学校",
-      "count": 2,
+      "count": 3,
       "years": {
         "2022": 3
       },
@@ -5743,7 +7745,7 @@
     },
     {
       "name": "長岡公務員・情報ビジネス",
-      "count": 1,
+      "count": 2,
       "years": {
         "2017": 2
       },
@@ -8135,7 +10137,7 @@
       ]
     },
     {
-      "name": "GIA 専門学校 新潟国際自動車大学校",
+      "name": "GIA専門学校新潟国際自動車大学校",
       "count": 1,
       "years": {
         "2023": 1
