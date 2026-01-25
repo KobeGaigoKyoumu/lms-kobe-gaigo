@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-25T02:00:09.434Z",
+  "generatedAt": "2026-01-25T02:26:20.377Z",
   "summary": {
     "totalRecords": 1119,
     "years": [
@@ -3848,6 +3848,128 @@
       ]
     },
     {
+      "name": "トヨタ自動車大学校神戸校",
+      "count": 14,
+      "years": {
+        "2018": 1,
+        "2019": 2,
+        "2020": 2,
+        "2022": 3,
+        "2023": 6
+      },
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 9,
+            "avg": 118.3,
+            "max": 156,
+            "min": 96
+          },
+          "failed": {
+            "count": 7,
+            "avg": 80.9,
+            "max": 103,
+            "min": 62
+          }
+        },
+        "N1": {
+          "passed": {
+            "count": 1,
+            "avg": 146,
+            "max": 146,
+            "min": 146
+          },
+          "failed": null
+        },
+        "N2": {
+          "passed": {
+            "count": 2,
+            "avg": 95,
+            "max": 98,
+            "min": 92
+          },
+          "failed": {
+            "count": 4,
+            "avg": 65.5,
+            "max": 80,
+            "min": 44
+          }
+        }
+      },
+      "students": [
+        {
+          "year": "2018",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
+          "year": "2019",
+          "id": 1910023,
+          "name": "武 文杰"
+        },
+        {
+          "year": "2019",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI"
+        },
+        {
+          "year": "2020",
+          "id": 2004048,
+          "name": "NGUYEN VAN TUAN"
+        },
+        {
+          "year": "2020",
+          "id": 2004072,
+          "name": "NGUYEN SY DAT"
+        },
+        {
+          "year": "2022",
+          "id": 2110068,
+          "name": "RAJESH GURUNG"
+        },
+        {
+          "year": "2022",
+          "id": 2110073,
+          "name": "SHAMIM MIAH"
+        },
+        {
+          "year": "2022",
+          "id": 2107029,
+          "name": "SURENDRA SHRESTHA"
+        },
+        {
+          "year": "2023",
+          "id": 2304072,
+          "name": "ARKAR HEIN"
+        },
+        {
+          "year": "2023",
+          "id": 2304024,
+          "name": "HOANG THANH TUNG"
+        },
+        {
+          "year": "2023",
+          "id": 2307012,
+          "name": "TIN ZAW WIN"
+        },
+        {
+          "year": "2023",
+          "id": 2304130,
+          "name": "DABNATH TAPO "
+        },
+        {
+          "year": "2023",
+          "id": 2310027,
+          "name": "KAUNG ZIN KHANT"
+        },
+        {
+          "year": "2023",
+          "id": 2310039,
+          "name": "RAKIBUL HASAN"
+        }
+      ]
+    },
+    {
       "name": "中央美術学園",
       "count": 13,
       "years": {
@@ -4703,6 +4825,66 @@
       ]
     },
     {
+      "name": "西日本アカデミー",
+      "count": 8,
+      "years": {
+        "2017": 8
+      },
+      "jlptStats": {
+        "N3": {
+          "passed": null,
+          "failed": {
+            "count": 6,
+            "avg": 63.2,
+            "max": 90,
+            "min": 46
+          }
+        }
+      },
+      "students": [
+        {
+          "year": "2017",
+          "id": 2904116,
+          "name": "VU TUAN HOANG"
+        },
+        {
+          "year": "2017",
+          "id": 2904086,
+          "name": "NGUYEN THI HOA"
+        },
+        {
+          "year": "2017",
+          "id": 2904123,
+          "name": "NGUYEN THE ANH"
+        },
+        {
+          "year": "2017",
+          "id": 2910027,
+          "name": "LE THANH TAI"
+        },
+        {
+          "year": "2017",
+          "id": 2910018,
+          "name": "NGUYEN THI THU HA"
+        },
+        {
+          "year": "2017",
+          "id": 2904064,
+          "name": "HO MINH TUAN"
+        },
+        {
+          "year": "2017",
+          "id": 2904105,
+          "name": "NGUYEN QUOC CUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904031,
+          "name": "HA HAI NAM"
+        }
+      ]
+    },
+    {
       "name": "日本工科大学校",
       "count": 7,
       "years": {
@@ -4771,128 +4953,6 @@
           "year": "2023",
           "id": 2310007,
           "name": "付 佳順"
-        }
-      ]
-    },
-    {
-      "name": "トヨタ自動車大学校神戸校",
-      "count": 14,
-      "years": {
-        "2018": 1,
-        "2019": 2,
-        "2020": 2,
-        "2022": 3,
-        "2023": 6
-      },
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 9,
-            "avg": 118.3,
-            "max": 156,
-            "min": 96
-          },
-          "failed": {
-            "count": 7,
-            "avg": 80.9,
-            "max": 103,
-            "min": 62
-          }
-        },
-        "N1": {
-          "passed": {
-            "count": 1,
-            "avg": 146,
-            "max": 146,
-            "min": 146
-          },
-          "failed": null
-        },
-        "N2": {
-          "passed": {
-            "count": 2,
-            "avg": 95,
-            "max": 98,
-            "min": 92
-          },
-          "failed": {
-            "count": 4,
-            "avg": 65.5,
-            "max": 80,
-            "min": 44
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2018",
-          "id": 3004056,
-          "name": "NGUYEN XUAN KHAI"
-        },
-        {
-          "year": "2019",
-          "id": 1910023,
-          "name": "武 文杰"
-        },
-        {
-          "year": "2019",
-          "id": 3004056,
-          "name": "NGUYEN XUAN KHAI"
-        },
-        {
-          "year": "2020",
-          "id": 2004048,
-          "name": "NGUYEN VAN TUAN"
-        },
-        {
-          "year": "2020",
-          "id": 2004072,
-          "name": "NGUYEN SY DAT"
-        },
-        {
-          "year": "2022",
-          "id": 2110068,
-          "name": "RAJESH GURUNG"
-        },
-        {
-          "year": "2022",
-          "id": 2110073,
-          "name": "SHAMIM MIAH"
-        },
-        {
-          "year": "2022",
-          "id": 2107029,
-          "name": "SURENDRA SHRESTHA"
-        },
-        {
-          "year": "2023",
-          "id": 2304072,
-          "name": "ARKAR HEIN"
-        },
-        {
-          "year": "2023",
-          "id": 2304024,
-          "name": "HOANG THANH TUNG"
-        },
-        {
-          "year": "2023",
-          "id": 2307012,
-          "name": "TIN ZAW WIN"
-        },
-        {
-          "year": "2023",
-          "id": 2304130,
-          "name": "DABNATH TAPO "
-        },
-        {
-          "year": "2023",
-          "id": 2310027,
-          "name": "KAUNG ZIN KHANT"
-        },
-        {
-          "year": "2023",
-          "id": 2310039,
-          "name": "RAKIBUL HASAN"
         }
       ]
     },
@@ -4970,128 +5030,6 @@
           "year": "2023",
           "id": 2310001,
           "name": "邱 継森"
-        }
-      ]
-    },
-    {
-      "name": "トヨタ自動車大学校神戸校",
-      "count": 14,
-      "years": {
-        "2018": 1,
-        "2019": 2,
-        "2020": 2,
-        "2022": 3,
-        "2023": 6
-      },
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 9,
-            "avg": 118.3,
-            "max": 156,
-            "min": 96
-          },
-          "failed": {
-            "count": 7,
-            "avg": 80.9,
-            "max": 103,
-            "min": 62
-          }
-        },
-        "N1": {
-          "passed": {
-            "count": 1,
-            "avg": 146,
-            "max": 146,
-            "min": 146
-          },
-          "failed": null
-        },
-        "N2": {
-          "passed": {
-            "count": 2,
-            "avg": 95,
-            "max": 98,
-            "min": 92
-          },
-          "failed": {
-            "count": 4,
-            "avg": 65.5,
-            "max": 80,
-            "min": 44
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2018",
-          "id": 3004056,
-          "name": "NGUYEN XUAN KHAI"
-        },
-        {
-          "year": "2019",
-          "id": 1910023,
-          "name": "武 文杰"
-        },
-        {
-          "year": "2019",
-          "id": 3004056,
-          "name": "NGUYEN XUAN KHAI"
-        },
-        {
-          "year": "2020",
-          "id": 2004048,
-          "name": "NGUYEN VAN TUAN"
-        },
-        {
-          "year": "2020",
-          "id": 2004072,
-          "name": "NGUYEN SY DAT"
-        },
-        {
-          "year": "2022",
-          "id": 2110068,
-          "name": "RAJESH GURUNG"
-        },
-        {
-          "year": "2022",
-          "id": 2110073,
-          "name": "SHAMIM MIAH"
-        },
-        {
-          "year": "2022",
-          "id": 2107029,
-          "name": "SURENDRA SHRESTHA"
-        },
-        {
-          "year": "2023",
-          "id": 2304072,
-          "name": "ARKAR HEIN"
-        },
-        {
-          "year": "2023",
-          "id": 2304024,
-          "name": "HOANG THANH TUNG"
-        },
-        {
-          "year": "2023",
-          "id": 2307012,
-          "name": "TIN ZAW WIN"
-        },
-        {
-          "year": "2023",
-          "id": 2304130,
-          "name": "DABNATH TAPO "
-        },
-        {
-          "year": "2023",
-          "id": 2310027,
-          "name": "KAUNG ZIN KHANT"
-        },
-        {
-          "year": "2023",
-          "id": 2310039,
-          "name": "RAKIBUL HASAN"
         }
       ]
     },
@@ -5573,66 +5511,6 @@
           "year": "2023",
           "id": 2307090,
           "name": "MALIMBADAGE DILSHAN MADHUSHANKA"
-        }
-      ]
-    },
-    {
-      "name": "西日本アカデミー",
-      "count": 8,
-      "years": {
-        "2017": 8
-      },
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 6,
-            "avg": 63.2,
-            "max": 90,
-            "min": 46
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2017",
-          "id": 2904116,
-          "name": "VU TUAN HOANG"
-        },
-        {
-          "year": "2017",
-          "id": 2904086,
-          "name": "NGUYEN THI HOA"
-        },
-        {
-          "year": "2017",
-          "id": 2904123,
-          "name": "NGUYEN THE ANH"
-        },
-        {
-          "year": "2017",
-          "id": 2910027,
-          "name": "LE THANH TAI"
-        },
-        {
-          "year": "2017",
-          "id": 2910018,
-          "name": "NGUYEN THI THU HA"
-        },
-        {
-          "year": "2017",
-          "id": 2904064,
-          "name": "HO MINH TUAN"
-        },
-        {
-          "year": "2017",
-          "id": 2904105,
-          "name": "NGUYEN QUOC CUONG"
-        },
-        {
-          "year": "2017",
-          "id": 2904031,
-          "name": "HA HAI NAM"
         }
       ]
     },
@@ -6468,6 +6346,95 @@
       ]
     },
     {
+      "name": "JMC",
+      "count": 3,
+      "years": {
+        "2017": 3
+      },
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 1,
+            "avg": 109,
+            "max": 109,
+            "min": 109
+          },
+          "failed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
+          }
+        }
+      },
+      "students": [
+        {
+          "year": "2017",
+          "id": 2904038,
+          "name": "PHAM VAN DAI"
+        },
+        {
+          "year": "2017",
+          "id": 2904048,
+          "name": "TRAN NGOC CHUNG"
+        },
+        {
+          "year": "2017",
+          "id": 2904062,
+          "name": "NGUYEN XUAN HAO"
+        }
+      ]
+    },
+    {
+      "name": "九州ビジネス専門学校",
+      "count": 3,
+      "years": {
+        "2022": 3
+      },
+      "jlptStats": {
+        "N4": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 75,
+            "max": 75,
+            "min": 75
+          }
+        },
+        "N3": {
+          "passed": {
+            "count": 1,
+            "avg": 95,
+            "max": 95,
+            "min": 95
+          },
+          "failed": {
+            "count": 2,
+            "avg": 77,
+            "max": 81,
+            "min": 73
+          }
+        }
+      },
+      "students": [
+        {
+          "year": "2022",
+          "id": 2107014,
+          "name": "CHHETRI SITA"
+        },
+        {
+          "year": "2022",
+          "id": 2110023,
+          "name": "DIPA KHADKA"
+        },
+        {
+          "year": "2022",
+          "id": 2204018,
+          "name": "RAM DHAMI"
+        }
+      ]
+    },
+    {
       "name": "神戸芸術工科大学",
       "count": 2,
       "years": {
@@ -6540,46 +6507,6 @@
           "year": "2022",
           "id": 2104007,
           "name": "王 晨夏"
-        }
-      ]
-    },
-    {
-      "name": "JMC",
-      "count": 3,
-      "years": {
-        "2017": 3
-      },
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 109,
-            "max": 109,
-            "min": 109
-          },
-          "failed": {
-            "count": 1,
-            "avg": 65,
-            "max": 65,
-            "min": 65
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2017",
-          "id": 2904038,
-          "name": "PHAM VAN DAI"
-        },
-        {
-          "year": "2017",
-          "id": 2904048,
-          "name": "TRAN NGOC CHUNG"
-        },
-        {
-          "year": "2017",
-          "id": 2904062,
-          "name": "NGUYEN XUAN HAO"
         }
       ]
     },
@@ -7000,55 +6927,6 @@
           "year": "2022",
           "id": 2010025,
           "name": "LE THANH MAI"
-        }
-      ]
-    },
-    {
-      "name": "九州ビジネス専門学校",
-      "count": 3,
-      "years": {
-        "2022": 3
-      },
-      "jlptStats": {
-        "N4": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 75,
-            "max": 75,
-            "min": 75
-          }
-        },
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 95,
-            "max": 95,
-            "min": 95
-          },
-          "failed": {
-            "count": 2,
-            "avg": 77,
-            "max": 81,
-            "min": 73
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2022",
-          "id": 2107014,
-          "name": "CHHETRI SITA"
-        },
-        {
-          "year": "2022",
-          "id": 2110023,
-          "name": "DIPA KHADKA"
-        },
-        {
-          "year": "2022",
-          "id": 2204018,
-          "name": "RAM DHAMI"
         }
       ]
     },
@@ -7562,6 +7440,36 @@
       ]
     },
     {
+      "name": "長岡公務員・情報ビジネス",
+      "count": 2,
+      "years": {
+        "2017": 2
+      },
+      "jlptStats": {
+        "N3": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 73,
+            "max": 73,
+            "min": 73
+          }
+        }
+      },
+      "students": [
+        {
+          "year": "2017",
+          "id": 2904047,
+          "name": "PHAM THI HUONG"
+        },
+        {
+          "year": "2017",
+          "id": 2904045,
+          "name": "DOAN NGUYEN DINH CHIEU"
+        }
+      ]
+    },
+    {
       "name": "神戸大学大学院",
       "count": 1,
       "years": {
@@ -7740,36 +7648,6 @@
           "year": "2017",
           "id": 2904091,
           "name": "BUI QUANG MINH"
-        }
-      ]
-    },
-    {
-      "name": "長岡公務員・情報ビジネス",
-      "count": 2,
-      "years": {
-        "2017": 2
-      },
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 73,
-            "max": 73,
-            "min": 73
-          }
-        }
-      },
-      "students": [
-        {
-          "year": "2017",
-          "id": 2904047,
-          "name": "PHAM THI HUONG"
-        },
-        {
-          "year": "2017",
-          "id": 2904045,
-          "name": "DOAN NGUYEN DINH CHIEU"
         }
       ]
     },

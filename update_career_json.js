@@ -36,13 +36,20 @@ try {
             'ICT': 'ICT専門学校',
             'ICT専門学校': 'ICT専門学校',
             '関西国際旅行ホテル専門学校': '関西国際旅行・ホテル専門学校',
+            '関西国際旅行・ホテル専門学校': '関西国際旅行・ホテル専門学校',
             'トヨタ自動車大学校': 'トヨタ自動車大学校神戸校',
             'トヨタ神戸自動車大学校': 'トヨタ自動車大学校神戸校',
+            'トヨタ自動車大学校神戸校': 'トヨタ自動車大学校神戸校',
             '大原': '大原簿記専門学校三宮校',
             '大原簿記専門学校三宮校': '大原簿記専門学校三宮校',
             '日本コンピュータ': '日本コンピュータ専門学校',
+            '日本コンピュータ専門学校': '日本コンピュータ専門学校',
             '和歌山福祉専門学校': '和歌山社会福祉専門学校',
-            '和歌山社会福祉専門学校': '和歌山社会福祉専門学校'
+            '和歌山社会福祉専門学校': '和歌山社会福祉専門学校',
+            '駿台観光&外語ビジネス専門学校': '駿台観光＆外語ビジネス専門学校',
+            '駿台観光＆外語ビジネス専門学校': '駿台観光＆外語ビジネス専門学校',
+            '中日本自動車短期大学': '中日本自動車短期大学',
+            '中日本自動車': '中日本自動車短期大学'
         };
 
         return mapping[name] || name;
@@ -145,7 +152,9 @@ try {
     data.generatedAt = new Date().toISOString();
 
     if (data.topDestinations) {
-        data.topDestinations = data.topDestinations.map(d => {
+        const uniqueDestinations = {};
+
+        data.topDestinations.forEach(d => {
             const destName = normalizeDestination(d.name);
             const statsObj = destinationStats[destName];
             const yearsObj = destinationYearlyStats[destName] || {};
@@ -180,15 +189,25 @@ try {
             // Calculate current total count from matched years
             const totalCount = Object.values(yearsObj).reduce((a, b) => a + b, 0);
 
-            return {
-                ...d,
-                name: destName,
-                count: totalCount || d.count, // Update with real total, fallback to existing if no new data found
-                years: yearsObj, // Update with real yearly counts
-                jlptStats: jlptStats,
-                students: destinationStudents[destName] || []
-            };
+            // Create or update the unique entry
+            if (!uniqueDestinations[destName]) {
+                uniqueDestinations[destName] = {
+                    ...d,
+                    name: destName,
+                    count: totalCount || d.count,
+                    years: yearsObj,
+                    jlptStats: jlptStats,
+                    students: destinationStudents[destName] || []
+                };
+            } else {
+                // Already exists, the data (count, years, students) is already processed via the destName map
+                // so we don't need to do anything else, just skip the duplicate entry.
+                console.log(`Merging duplicate entry for normalized name: ${destName}`);
+            }
         });
+
+        // Convert back to array and sort by count descending
+        data.topDestinations = Object.values(uniqueDestinations).sort((a, b) => b.count - a.count);
     }
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(data, null, 2), 'utf8');
