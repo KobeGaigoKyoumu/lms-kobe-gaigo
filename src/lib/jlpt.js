@@ -11,7 +11,7 @@ const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_st
 
 const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
 const ENROLLMENT_STATS_JSON = path.join(process.cwd(), 'data', 'enrollment_stats.json');
-const CAREER_STATS_JSON = path.join(process.cwd(), 'src', 'data', 'career_stats.json');
+const CAREER_STATS_JSON = path.join(process.cwd(), 'src', 'data', 'career_stats_v2.json');
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;
