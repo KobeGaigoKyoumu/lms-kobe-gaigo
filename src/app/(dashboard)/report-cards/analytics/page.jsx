@@ -141,7 +141,7 @@ export default function AnalyticsPage() {
     // JLPT analytics state
     const [jlptData, setJlptData] = useState([])
     const [enhancedJlptStats, setEnhancedJlptStats] = useState(null)
-    const [sectionScoreStats, setSectionScoreStats] = useState(null) // 科目別得点データ
+    const [sectionScoreStats, setSectionScoreStats] = useState(null) // 科目別分析データ
     const [loadingJlpt, setLoadingJlpt] = useState(true)
 
     // Database Tab State
@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
-    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', 'compare', or 'section'
+    const [jlptSubTab, setJlptSubTab] = useState('yearly') // 'yearly', 'class', 'section', or 'compare'
     const [nationalStats, setNationalStats] = useState(null)
     const [loadingNational, setLoadingNational] = useState(false)
     const [debugInfo, setDebugInfo] = useState(null)
@@ -613,7 +613,7 @@ export default function AnalyticsPage() {
                             className={`${styles.subTab} ${jlptSubTab === 'yearly' ? styles.active : ''}`}
                             onClick={() => setJlptSubTab('yearly')}
                         >
-                            年度別分析
+                            全体概要
                         </button>
                         <button
                             className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.active : ''}`}
@@ -623,6 +623,12 @@ export default function AnalyticsPage() {
                             }}
                         >
                             クラス別分析
+                        </button>
+                        <button
+                            className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.active : ''}`}
+                            onClick={() => setJlptSubTab('section')}
+                        >
+                            科目別分析
                         </button>
                         <button
                             className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.active : ''}`}
@@ -645,12 +651,6 @@ export default function AnalyticsPage() {
                             }}
                         >
                             全国比較
-                        </button>
-                        <button
-                            className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.active : ''}`}
-                            onClick={() => setJlptSubTab('section')}
-                        >
-                            科目別得点
                         </button>
                     </div>
 
