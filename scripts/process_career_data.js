@@ -327,6 +327,8 @@ function processCareerData() {
         generatedAt: new Date().toISOString(),
         summary: {
             totalRecords: allData.length,
+            totalGraduates: allData.filter(r => r.graduationStatus === '卒業').length,
+            years: years.map(y => parseInt(y)),
             years: years.map(y => parseInt(y)),
             categories: Object.keys(categoryStats),
         },

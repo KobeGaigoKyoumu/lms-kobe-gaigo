@@ -1717,7 +1717,7 @@ export default function AnalyticsPage() {
                                     <div className={styles.statCard}>
                                         <span className={styles.statLabel}>総卒業生数</span>
                                         <div className={styles.statValueRow}>
-                                            <span className={styles.statValue}>{careerStats.summary.totalRecords.toLocaleString()}</span>
+                                            <span className={styles.statValue}>{careerStats.summary.totalGraduates.toLocaleString()}</span>
                                             <span className={styles.statUnit}>名</span>
                                         </div>
                                     </div>
