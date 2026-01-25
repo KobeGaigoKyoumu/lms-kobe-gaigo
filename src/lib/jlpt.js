@@ -1113,8 +1113,11 @@ export async function getStudentsJlptSummary(students) {
         });
     });
 
-    // Load career destinations for additional info
+    // Load career destinations for additional info and identify missing students
     const careerMap = new Map();
+    const virtualStudents = [];
+    const dbStudentIds = new Set(students.map(s => String(s.student_id_text || s.student_id || '')));
+
     try {
         if (fs.existsSync(CAREER_STATS_JSON)) {
             const careerData = JSON.parse(fs.readFileSync(CAREER_STATS_JSON, 'utf8'));
@@ -1122,7 +1125,24 @@ export async function getStudentsJlptSummary(students) {
                 careerData.topDestinations.forEach(dest => {
                     if (dest.students) {
                         dest.students.forEach(s => {
-                            if (s.id) careerMap.set(String(s.id), dest.name);
+                            const sid = String(s.id);
+                            if (sid) {
+                                careerMap.set(sid, dest.name);
+
+                                // If this student from the career file is NOT in the database list,
+                                // add them as a virtual student so they appear in the search.
+                                if (!dbStudentIds.has(sid)) {
+                                    virtualStudents.push({
+                                        student_id_text: sid,
+                                        full_name: s.name,
+                                        enrollment_date: s.year + '-04-01', // Approximate
+                                        status: 'graduated', // Historical students are graduated
+                                        destination: dest.name,
+                                        is_virtual: true
+                                    });
+                                    dbStudentIds.add(sid); // Avoid duplicates within this loop
+                                }
+                            }
                         });
                     }
                 });
@@ -1132,8 +1152,10 @@ export async function getStudentsJlptSummary(students) {
         console.error('Error loading career stats for summary:', e);
     }
 
+    const allStudentsToProcess = [...students, ...virtualStudents];
+
     // Process each student
-    const studentSummaries = students.map(student => {
+    const studentSummaries = allStudentsToProcess.map(student => {
         const studentId = String(student.student_id_text || student.student_id || '');
         const name = student.full_name?.toLowerCase()?.trim();
 
@@ -1229,13 +1251,14 @@ export async function getStudentsJlptSummary(students) {
         return {
             studentId: student.student_id_text || student.student_id,
             name: student.full_name,
-            class: student.class_name,
-            nationality: student.nationality || student.country, // Fallback if needed
-            destination: student.career_destination || student.destination || careerMap.get(studentId) || null,
+            class: student.class_name || (student.is_virtual ? '卒業生' : ''),
+            nationality: student.nationality || student.country,
+            destination: student.destination || student.career_destination || careerMap.get(studentId) || null,
             enrollmentYear: enrollmentYear,
             levels: levelStatus,
             highestLevel: highestLevel,
-            records: myRecords
+            records: myRecords,
+            isVirtual: !!student.is_virtual
         };
     });
 
