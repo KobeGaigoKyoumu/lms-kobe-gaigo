@@ -2138,6 +2138,8 @@ export default function AnalyticsPage() {
                                                                                 <thead style={{ background: '#f3f4f6' }}>
                                                                                     <tr>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>取得率</th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>全体平均点</th>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
                                                                                             データ数
                                                                                             <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
@@ -2146,14 +2148,7 @@ export default function AnalyticsPage() {
                                                                                             平均点
                                                                                             <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
                                                                                         </th>
-                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                            最高点
-                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                        </th>
-                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
-                                                                                            最低点
-                                                                                            <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
-                                                                                        </th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>最高点 / 最低点</th>
                                                                                     </tr>
                                                                                 </thead>
                                                                                 <tbody>
@@ -2163,9 +2158,43 @@ export default function AnalyticsPage() {
                                                                                             return (order[a[0]] || 99) - (order[b[0]] || 99);
                                                                                         })
                                                                                         .map(([level, stats]) => {
-                                                                                            // stats now has { passed: {...}, failed: {...} } OR old format if not updated
-                                                                                            const passed = stats.passed;
-                                                                                            const failed = stats.failed;
+                                                                                            const passed = stats.passed || {};
+                                                                                            const failed = stats.failed || {};
+
+                                                                                            // Robust calculation of metrics
+                                                                                            const pCount = passed.count || 0;
+                                                                                            const fCount = failed.count || 0;
+                                                                                            const totalCount = pCount + fCount;
+
+                                                                                            const passRate = stats.passRate !== undefined
+                                                                                                ? stats.passRate
+                                                                                                : (totalCount > 0 ? ((pCount / totalCount) * 100).toFixed(1) : 0);
+
+                                                                                            let overallAvg = stats.overall?.avg;
+                                                                                            if (overallAvg === undefined) {
+                                                                                                const pSum = (passed.avg || 0) * pCount;
+                                                                                                const fSum = (failed.avg || 0) * fCount;
+                                                                                                overallAvg = totalCount > 0 ? (pSum + fSum) / totalCount : 0;
+                                                                                                overallAvg = overallAvg.toFixed(1);
+                                                                                            }
+
+                                                                                            let overallMax = stats.overall?.max;
+                                                                                            if (overallMax === undefined) {
+                                                                                                const pMax = passed.max !== undefined ? passed.max : -1;
+                                                                                                const fMax = failed.max !== undefined ? failed.max : -1;
+                                                                                                overallMax = Math.max(pMax, fMax);
+                                                                                                if (overallMax === -1) overallMax = '-';
+                                                                                            }
+
+                                                                                            let overallMin = stats.overall?.min;
+                                                                                            if (overallMin === undefined) {
+                                                                                                // Filter out undefined/null/0 if strictly checking, but here we assume valid scores > 0 usually
+                                                                                                // If both are missing, result is '-'
+                                                                                                const candidates = [];
+                                                                                                if (passed.min !== undefined) candidates.push(passed.min);
+                                                                                                if (failed.min !== undefined) candidates.push(failed.min);
+                                                                                                overallMin = candidates.length > 0 ? Math.min(...candidates) : '-';
+                                                                                            }
 
                                                                                             const renderDual = (pVal, fVal, isBold = false) => (
                                                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -2175,33 +2204,30 @@ export default function AnalyticsPage() {
                                                                                                 </div>
                                                                                             );
 
-                                                                                            // Fallback for legacy data (if 'passed' undefined but 'count' exists)
-                                                                                            if (!passed && !failed) {
-                                                                                                if (stats.count) {
-                                                                                                    return (
-                                                                                                        <tr key={level}>
-                                                                                                            <td style={{ padding: '0.5rem' }}>
-                                                                                                                <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
-                                                                                                            </td>
-                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.count}</td>
-                                                                                                            <td style={{ padding: '0.5rem', fontWeight: 600 }}>{stats.avg.toFixed(1)}</td>
-                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.max}</td>
-                                                                                                            <td style={{ padding: '0.5rem' }}>{stats.min}</td>
-                                                                                                        </tr>
-                                                                                                    );
-                                                                                                }
-                                                                                                return null;
-                                                                                            }
-
                                                                                             return (
                                                                                                 <tr key={level}>
                                                                                                     <td style={{ padding: '0.5rem' }}>
                                                                                                         <span className={`${styles.badge} ${styles[`badge${level}`]}`}>{level}</span>
                                                                                                     </td>
-                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.count, failed?.count)}</td>
-                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.avg?.toFixed(1), failed?.avg?.toFixed(1), true)}</td>
-                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.max, failed?.max)}</td>
-                                                                                                    <td style={{ padding: '0.5rem' }}>{renderDual(passed?.min, failed?.min)}</td>
+                                                                                                    <td style={{ padding: '0.5rem', fontWeight: 600, color: '#16a34a' }}>
+                                                                                                        {passRate}%
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem', fontWeight: 600 }}>
+                                                                                                        {overallAvg}
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>
+                                                                                                        {renderDual(passed.count, failed.count)}
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem' }}>
+                                                                                                        {renderDual(passed.avg?.toFixed(1), failed.avg?.toFixed(1), true)}
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem', fontWeight: 600 }}>
+                                                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                                            <span>{overallMax}</span>
+                                                                                                            <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
+                                                                                                            <span>{overallMin}</span>
+                                                                                                        </div>
+                                                                                                    </td>
                                                                                                 </tr>
                                                                                             );
                                                                                         })}
