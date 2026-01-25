@@ -2139,11 +2139,11 @@ export default function AnalyticsPage() {
                                                                                     <tr>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>レベル</th>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>取得率</th>
-                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>全体平均点</th>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
                                                                                             データ数
                                                                                             <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
                                                                                         </th>
+                                                                                        <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>全体平均点</th>
                                                                                         <th style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
                                                                                             平均点
                                                                                             <div style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</div>
@@ -2212,20 +2212,20 @@ export default function AnalyticsPage() {
                                                                                                     <td style={{ padding: '0.5rem', fontWeight: 600, color: '#16a34a' }}>
                                                                                                         {passRate}%
                                                                                                     </td>
-                                                                                                    <td style={{ padding: '0.5rem', fontWeight: 600 }}>
-                                                                                                        {overallAvg}
-                                                                                                    </td>
                                                                                                     <td style={{ padding: '0.5rem' }}>
                                                                                                         {renderDual(passed.count, failed.count)}
+                                                                                                    </td>
+                                                                                                    <td style={{ padding: '0.5rem', fontWeight: 600, color: '#3b82f6' }}>
+                                                                                                        {overallAvg}
                                                                                                     </td>
                                                                                                     <td style={{ padding: '0.5rem' }}>
                                                                                                         {renderDual(passed.avg?.toFixed(1), failed.avg?.toFixed(1), true)}
                                                                                                     </td>
                                                                                                     <td style={{ padding: '0.5rem', fontWeight: 600 }}>
                                                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                                            <span>{overallMax}</span>
+                                                                                                            <span style={{ color: '#22c55e' }}>{overallMax}</span>
                                                                                                             <span style={{ color: '#9ca3af', fontSize: '0.8em' }}>/</span>
-                                                                                                            <span>{overallMin}</span>
+                                                                                                            <span style={{ color: '#ef4444' }}>{overallMin}</span>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 </tr>
