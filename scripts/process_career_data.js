@@ -133,7 +133,9 @@ function readExcelFile(filePath) {
     const wb = XLSX.readFile(filePath);
     let allRows = [];
 
-    wb.SheetNames.forEach(sheetName => {
+    // Only process the first sheet (Master list)
+    if (wb.SheetNames.length > 0) {
+        const sheetName = wb.SheetNames[0];
         const ws = wb.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(ws);
 
@@ -144,7 +146,7 @@ function readExcelFile(filePath) {
             console.log(`    Sheet "${sheetName}": ${validRows.length} records`);
             allRows = allRows.concat(validRows);
         }
-    });
+    }
 
     return allRows;
 }
