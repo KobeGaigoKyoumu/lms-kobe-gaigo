@@ -1,17 +1,25 @@
-
-import { generateGradeReportPDF } from '@/lib/export/puppeteerPdfGenerator';
+import { generateGradeReportPDF, generateFinalExamPDF } from '@/lib/export/puppeteerPdfGenerator';
 
 export async function POST(request) {
     try {
-        const { student, yearTerm } = await request.json();
+        const { student, yearTerm, type } = await request.json();
 
         if (!student) {
             return new Response(JSON.stringify({ error: 'Student data is required' }), { status: 400 });
         }
 
-        const buffer = await generateGradeReportPDF(student, yearTerm);
+        let buffer;
+        let fileName;
 
-        const fileName = `成績通知表_${student.student_id_text}_${yearTerm.replace(/\s+/g, '_')}.pdf`;
+        if (type === 'final_exam') {
+            buffer = await generateFinalExamPDF(student, yearTerm);
+            // Make filename safe
+            fileName = `期末試験結果_${student.student_id_text}_${yearTerm.replace(/\s+/g, '_')}.pdf`;
+        } else {
+            // Default to Report Card
+            buffer = await generateGradeReportPDF(student, yearTerm);
+            fileName = `成績通知表_${student.student_id_text}_${yearTerm.replace(/\s+/g, '_')}.pdf`;
+        }
 
         return new Response(buffer, {
             headers: {

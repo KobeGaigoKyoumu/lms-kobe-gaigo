@@ -83,20 +83,36 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 btn.innerText = '生成中...';
                                 btn.disabled = true;
 
+                                const payload = {
+                                    yearTerm: student.yearTerm || '',
+                                    type: viewMode === 'exam' ? 'final_exam' : 'report_card'
+                                };
+
+                                if (viewMode === 'exam') {
+                                    // Payload for Final Exam PDF (only exam data needed)
+                                    payload.student = {
+                                        student_id_text: student.id,
+                                        student_name: student.name,
+                                        class_name: student.class,
+                                        final_exam_total: finalExamSum,
+                                        final_exam_data: finalExam // Use finalExam object directly
+                                    };
+                                } else {
+                                    // Payload for Report Card PDF (needs everything)
+                                    payload.student = {
+                                        student_id_text: student.id,
+                                        student_name: student.name,
+                                        class_name: student.class,
+                                        final_exam_total: finalExamSum,
+                                        report_card_total: reportCardTotal,
+                                        report_card_data: reportDetails
+                                    };
+                                }
+
                                 const response = await fetch('/api/grades/report/generate', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        student: {
-                                            student_id_text: student.id,
-                                            student_name: student.name,
-                                            class_name: student.class,
-                                            final_exam_total: finalExamSum,
-                                            report_card_total: reportCardTotal,
-                                            report_card_data: reportDetails
-                                        },
-                                        yearTerm: student.yearTerm || ''
-                                    })
+                                    body: JSON.stringify(payload)
                                 });
 
                                 if (!response.ok) throw new Error('PDF生成に失敗しました');
@@ -105,7 +121,10 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 const url = window.URL.createObjectURL(blob);
                                 const a = document.createElement('a');
                                 a.href = url;
-                                a.download = `成績通知表_${student.name}_${student.id}.pdf`;
+                                const filename = viewMode === 'exam'
+                                    ? `期末試験結果_${student.name}_${student.id}.pdf`
+                                    : `成績通知表_${student.name}_${student.id}.pdf`;
+                                a.download = filename;
                                 document.body.appendChild(a);
                                 a.click();
                                 window.URL.revokeObjectURL(url);

@@ -970,6 +970,274 @@ async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
   return await htmlToPdf(html, outputPath);
 }
 
+/**
+ * 期末試験結果通知書 HTMLを生成 (日本語版・公的文書スタイル)
+ */
+function generateFinalExamHTML(data, yearTerm) {
+  const { student_name, student_id_text, class_name, final_exam_total, final_exam_data } = data;
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // 評価判定 (100点満点)
+  const calculateGrade = (score) => {
+    if (score >= 80) return 'A';
+    if (score >= 60) return 'B';
+    if (score >= 40) return 'C';
+    if (score >= 20) return 'D';
+    return 'F';
+  };
+
+  // 評価判定 (600点満点 -> 平均100点換算)
+  const calculateTotalGrade = (totalScore) => {
+    return calculateGrade(totalScore / 6);
+  };
+
+  const subjectNames = {
+    'vocab': '文字・語彙',
+    'grammar': '文法',
+    'reading': '読解',
+    'listening': '聴解',
+    'writing': '作文',
+    'conversation': '会話'
+  };
+
+  // Define order
+  const subjects = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'];
+
+  const subjectRows = subjects.map(key => {
+    // final_exam_data structure is simple: { vocab: 85, grammar: 70 ... }
+    const score = final_exam_data[key];
+
+    return `
+      <tr>
+        <td class="subject-name">${subjectNames[key]}</td>
+        <td>100</td>
+        <td class="bold">${score !== undefined ? score : '-'}</td>
+        <td class="bold">${score !== undefined ? calculateGrade(score) : '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>期末試験結果通知書</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Serif JP", "Noto Serif CJK JP", "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
+      font-size: 10.5pt;
+      line-height: 1.5;
+      color: #000;
+      padding: 15mm 20mm;
+      background: #fff;
+    }
+    
+    /* Header */
+    .header-area {
+        position: relative;
+        margin-bottom: 10mm;
+        height: 25mm;
+        border-bottom: 2px solid #000;
+    }
+    
+    .date-right {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 10pt;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 22pt;
+      font-weight: bold;
+      letter-spacing: 5px;
+      margin-top: 5mm;
+      font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+    }
+
+    /* Info Table */
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #000;
+        margin-bottom: 8mm;
+    }
+    .info-table td {
+        border: 1px solid #000;
+        padding: 5px 10px;
+        font-size: 11pt;
+    }
+    .info-label {
+        background-color: #f5f5f5;
+        text-align: center;
+        width: 15%;
+        font-weight: normal;
+        font-size: 10pt;
+    }
+    .info-value {
+        width: 35%;
+        text-align: left;
+        font-weight: bold;
+    }
+    
+    /* Grade Table */
+    .grade-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid #000;
+        margin-bottom: 8mm;
+    }
+    .grade-table th, .grade-table td {
+        border: 1px solid #000;
+        padding: 6px 4px;
+        text-align: center;
+        font-size: 10pt;
+    }
+    .grade-table th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+        height: 10mm;
+    }
+    .grade-table td {
+        height: 9mm;
+    }
+    .subject-name {
+        font-weight: bold;
+        text-align: center !important;
+    }
+    
+    /* Summary Section */
+    .summary-section {
+        margin-top: 5mm;
+        border: 1px solid #000;
+        padding: 4mm;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+    .summary-item {
+        font-size: 12pt;
+        text-align: center;
+    }
+    .summary-val {
+        font-size: 16pt;
+        font-weight: bold;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+    .grade-circle {
+        display: inline-block;
+        width: 40px; 
+        height: 40px; 
+        line-height: 36px;
+        border: 2px solid #000; 
+        border-radius: 50%;
+        text-align: center;
+        font-size: 18pt;
+        font-weight: bold;
+    }
+
+    /* Footer */
+    .footer {
+        margin-top: 15mm;
+        text-align: right;
+        font-size: 11pt;
+    }
+    .school-name {
+        font-size: 16pt;
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+    }
+    
+    /* Utility */
+    .bold { font-weight: bold; }
+    .note { margin-top: 2mm; font-size: 9pt; }
+  </style>
+</head>
+<body>
+  
+  <div class="header-area">
+      <div class="date-right">発行日：${today}</div>
+      <h1>期末試験結果通知書</h1>
+  </div>
+
+  <table class="info-table">
+    <tr>
+      <td class="info-label">学籍番号</td>
+      <td class="info-value">${student_id_text}</td>
+      <td class="info-label">氏　名</td>
+      <td class="info-value" style="font-size: 13pt;">${student_name}</td>
+    </tr>
+    <tr>
+      <td class="info-label">クラス</td>
+      <td class="info-value">${class_name}</td>
+      <td class="info-label">学　期</td>
+      <td class="info-value">${yearTerm}</td>
+    </tr>
+  </table>
+
+  <div style="margin-bottom: 3mm; font-size: 10.5pt;">
+    今学期の期末試験の結果を下記の通り通知致します。
+  </div>
+
+  <table class="grade-table">
+    <thead>
+      <tr>
+        <th width="25%">科目</th>
+        <th width="25%">満点</th>
+        <th width="25%">得点</th>
+        <th width="25%">評価</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${subjectRows}
+    </tbody>
+  </table>
+
+  <div class="summary-section">
+    <div class="summary-item">
+        <div>総合計</div>
+        <div><span class="summary-val">${final_exam_total}</span> / 600</div>
+    </div>
+    <div class="summary-item">
+        <div>平均点</div>
+        <div><span class="summary-val">${(final_exam_total / 6).toFixed(1)}</span> / 100</div>
+    </div>
+    <div class="summary-item">
+        <div>総合判定</div>
+        <div style="margin-top:5px;"><span class="grade-circle">${calculateTotalGrade(final_exam_total)}</span></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <p>＊評価基準： A (80点以上), B (79-60点), C (59-40点), D (39-20点), F (19点以下)</p>
+  </div>
+
+  <div class="footer">
+    <div class="school-name">神戸外語教育学院</div>
+    <div>Kobe Gaigo Language School</div>
+  </div>
+
+</body>
+</html>`;
+}
+
+/**
+ * 期末試験結果PDFを生成
+ */
+async function generateFinalExamPDF(data, yearTerm, outputPath = null) {
+  const html = generateFinalExamHTML(data, yearTerm);
+  return await htmlToPdf(html, outputPath);
+}
+
 export {
   generateTranscriptHTML,
   htmlToPdf,
@@ -977,5 +1245,7 @@ export {
   generateAttendanceHTML,
   generateAttendancePDF,
   generateGradeReportHTML,
-  generateGradeReportPDF
+  generateGradeReportPDF,
+  generateFinalExamHTML,
+  generateFinalExamPDF
 };
