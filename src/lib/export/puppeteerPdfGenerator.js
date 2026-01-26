@@ -17,10 +17,10 @@ async function getBrowser() {
 
     // Setup for Japanese fonts
     // IPAmjMincho (45MB) is too heavy and local loading is fragile on Vercel.
-    // Switching to Noto Serif JP (Regular) via direct GitHub Raw link.
-    // This is a standard, reliable, and lighter Mincho-style font.
+    // Switching to Noto Serif CJK JP (Regular) via direct GitHub Raw link.
+    // This provides a formal Mincho-style look for official documents.
     try {
-      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf');
+      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Serif/OTF/Japanese/NotoSerifCJKjp-Regular.otf');
     } catch (e) {
       console.error('Font loading failed:', e);
     }
@@ -98,7 +98,7 @@ function generateTranscriptHTML(data, issueDate) {
     }
     
     body {
-      font-family: "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
+      font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
       font-size: 10pt;
       line-height: 1.4;
       color: #000;
@@ -756,7 +756,7 @@ function generateGradeReportHTML(data, yearTerm) {
     @page { size: A4; margin: 0; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
+      font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
       font-size: 10.5pt;
       line-height: 1.5;
       color: #000;
@@ -785,7 +785,7 @@ function generateGradeReportHTML(data, yearTerm) {
       font-weight: bold;
       letter-spacing: 5px;
       margin-top: 5mm;
-      font-family: "ＭＳ ゴシック", "MS Gothic", sans-serif;
+      font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
     }
 
     /* Info Table */
@@ -881,7 +881,7 @@ function generateGradeReportHTML(data, yearTerm) {
         font-size: 16pt;
         font-weight: bold;
         margin-bottom: 5px;
-        font-family: "ＭＳ ゴシック", "MS Gothic", sans-serif;
+        font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
     }
     
     /* Utility */
