@@ -781,7 +781,7 @@ export default function AnalyticsPage() {
                                 <div className={styles.statCard}>
                                     <span className={styles.statLabel}>対象年度の範囲</span>
                                     <div className={styles.statValueRow}>
-                                        <span className={styles.statValue} style={{ fontSize: '1.5rem' }}>2017年～2025年</span>
+                                        <span className={styles.statValue}>2017年～2025年</span>
                                     </div>
                                 </div>
                             </div>
