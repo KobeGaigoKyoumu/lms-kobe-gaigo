@@ -2186,6 +2186,7 @@ export default function AnalyticsPage() {
                                         <thead>
                                             <tr>
                                                 <th>進学先名</th>
+                                                <th>対象年度</th>
                                                 <th>進学者数</th>
                                                 <th>JLPTデータ</th>
                                                 <th>詳細</th>
@@ -2197,6 +2198,11 @@ export default function AnalyticsPage() {
                                                 .sort((a, b) => b.count - a.count)
                                                 .map((dest, idx) => {
                                                     const isExpanded = expandedSchoolId === idx;
+                                                    const years = Object.keys(dest.years || {}).map(y => parseInt(y) + 1).sort((a, b) => a - b);
+                                                    const yearDisplay = years.length > 0
+                                                        ? (years.length === 1 ? `${years[0]}年度` : `${years[0]}~${years[years.length - 1]}年度`)
+                                                        : '-';
+
                                                     return (
                                                         <Fragment key={idx}>
                                                             <tr
@@ -2205,6 +2211,7 @@ export default function AnalyticsPage() {
                                                                 style={{ cursor: 'pointer', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
                                                             >
                                                                 <td style={{ fontWeight: 600 }}>{dest.name}</td>
+                                                                <td style={{ fontSize: '0.85rem' }}>{yearDisplay}</td>
                                                                 <td>{dest.count}名</td>
                                                                 <td>
                                                                     <div style={{ display: 'flex', gap: '4px' }}>
@@ -2226,7 +2233,7 @@ export default function AnalyticsPage() {
                                                             </tr>
                                                             {isExpanded && (
                                                                 <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                                                                    <td colSpan="4" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+                                                                    <td colSpan="5" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
                                                                         <div style={{ background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
                                                                             <table className={styles.table} style={{ margin: 0 }}>
                                                                                 <thead style={{ background: '#f3f4f6' }}>
