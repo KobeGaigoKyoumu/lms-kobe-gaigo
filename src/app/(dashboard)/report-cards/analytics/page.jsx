@@ -1828,7 +1828,7 @@ export default function AnalyticsPage() {
 
                                 {/* Charts Row 1: Category Breakdown & Yearly Trends */}
                                 <div className={styles.chartsRow}>
-                                    <div className={styles.chartCard}>
+                                    <div className={styles.chartCard} style={{ flex: 1.2 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                             <h3 className={styles.chartTitle} style={{ margin: 0 }}>進路区分別内訳</h3>
                                             <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem' }}>
@@ -1874,13 +1874,14 @@ export default function AnalyticsPage() {
                                                 options={{
                                                     ...chartOptions,
                                                     indexAxis: 'y',
+                                                    maintainAspectRatio: false,
                                                     plugins: {
                                                         legend: { display: false },
                                                         tooltip: {
                                                             callbacks: {
                                                                 label: function (context) {
                                                                     const value = context.parsed.x;
-                                                                    const total = careerStats.summary.totalRecords; // Use true total
+                                                                    const total = careerStats.summary.totalRecords;
                                                                     const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
                                                                     return `${context.dataset.label || ''}: ${value}名 (${percentage})`;
                                                                 }
@@ -1891,10 +1892,10 @@ export default function AnalyticsPage() {
                                             />
                                         </div>
                                     </div>
-                                    <div className={styles.chartCard}>
+                                    <div className={styles.chartCard} style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                             <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
-                                            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
                                                 全年度平均: {(() => {
                                                     const rates = careerStats.yearlyTrends.map(t => parseFloat(t.graduationRate));
                                                     const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
@@ -1913,10 +1914,23 @@ export default function AnalyticsPage() {
                                                             borderColor: 'rgb(34, 197, 94)',
                                                             backgroundColor: 'rgba(34, 197, 94, 0.5)',
                                                             tension: 0.3,
+                                                            pointRadius: 4,
+                                                            pointHoverRadius: 6
                                                         }
                                                     ]
                                                 }}
-                                                options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                                options={{
+                                                    ...chartOptions,
+                                                    maintainAspectRatio: false,
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            max: 100,
+                                                            ticks: { stepSize: 20 },
+                                                            grid: { color: 'rgba(0,0,0,0.05)' }
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     </div>
