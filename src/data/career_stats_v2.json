@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-01-26T13:46:08.035Z",
+  "generatedAt": "2026-01-26T14:12:59.767Z",
   "summary": {
     "totalRecords": 994,
-    "totalGraduates": 891,
+    "totalGraduates": 888,
     "years": [
       2017,
       2018,
@@ -49,10 +49,10 @@
   "yearlyTrends": [
     {
       "year": 2017,
-      "total": 186,
-      "graduated": 160,
+      "total": 0,
+      "graduated": 159,
       "withdrawn": 26,
-      "graduationRate": 86,
+      "graduationRate": 0,
       "categories": {
         "大学": 17,
         "就職": 13,
@@ -66,10 +66,10 @@
     },
     {
       "year": 2018,
-      "total": 152,
+      "total": 0,
       "graduated": 139,
       "withdrawn": 13,
-      "graduationRate": 91.4,
+      "graduationRate": 0,
       "categories": {
         "大学": 16,
         "帰国": 11,
@@ -84,10 +84,10 @@
     },
     {
       "year": 2019,
-      "total": 65,
-      "graduated": 55,
+      "total": 0,
+      "graduated": 57,
       "withdrawn": 8,
-      "graduationRate": 84.6,
+      "graduationRate": 0,
       "categories": {
         "大学": 14,
         "専門学校": 33,
@@ -99,10 +99,10 @@
     },
     {
       "year": 2020,
-      "total": 58,
-      "graduated": 48,
+      "total": 0,
+      "graduated": 45,
       "withdrawn": 10,
-      "graduationRate": 82.8,
+      "graduationRate": 0,
       "categories": {
         "専門学校": 21,
         "大学院": 4,
@@ -115,10 +115,10 @@
     },
     {
       "year": 2022,
-      "total": 270,
-      "graduated": 239,
+      "total": 0,
+      "graduated": 238,
       "withdrawn": 31,
-      "graduationRate": 88.5,
+      "graduationRate": 0,
       "categories": {
         "大学院": 14,
         "就職": 11,
@@ -134,10 +134,10 @@
     },
     {
       "year": 2023,
-      "total": 263,
+      "total": 0,
       "graduated": 250,
       "withdrawn": 13,
-      "graduationRate": 95.1,
+      "graduationRate": 0,
       "categories": {
         "専門学校": 198,
         "大学": 40,

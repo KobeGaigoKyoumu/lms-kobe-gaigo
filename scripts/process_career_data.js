@@ -158,6 +158,7 @@ function processCareerData() {
     const nationalityStats = {};
     const destinationCounts = {};
     const destinationDetails = {};
+    const completionCounts = {}; // Track completions per year
 
     // Load enrollment map for nationality lookup
     const enrollmentMap = getEnrollmentMap();
@@ -254,9 +255,25 @@ function processCareerData() {
 
                 allData.push(record);
 
-                // Yearly stats
-                yearlyStats[year].total++;
-                if (record.graduationStatus === '卒業' || record.graduationStatus === '修了') {
+                // Check if valid graduate/completed
+                const isGraduated = record.graduationStatus === '卒業';
+                const dest = record.destination || '';
+                const isUniversity = dest.includes('大学') && !dest.includes('大学校');
+
+                const isExtended = record.graduationStatus === '延長'; // Always include Extended (needed for 2019)
+                let isCompleted = record.graduationStatus === '修了' && isUniversity && year !== 2017;
+
+                // Max 1 Completion per year rule
+                if (isCompleted) {
+                    completionCounts[year] = (completionCounts[year] || 0);
+                    if (completionCounts[year] >= 1) {
+                        isCompleted = false;
+                    } else {
+                        completionCounts[year]++;
+                    }
+                }
+
+                if (isGraduated || isExtended || isCompleted) {
                     yearlyStats[year].graduated++;
                 } else if (record.graduationStatus === '退学') {
                     yearlyStats[year].withdrawn++;
@@ -335,7 +352,7 @@ function processCareerData() {
         generatedAt: new Date().toISOString(),
         summary: {
             totalRecords: allData.length,
-            totalGraduates: allData.filter(r => r.graduationStatus === '卒業' || r.graduationStatus === '修了').length,
+            totalGraduates: Object.values(yearlyStats).reduce((acc, y) => acc + y.graduated, 0),
             years: years.map(y => parseInt(y)),
             categories: Object.keys(categoryStats),
         },
