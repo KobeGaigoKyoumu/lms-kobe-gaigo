@@ -256,7 +256,7 @@ function processCareerData() {
 
                 // Yearly stats
                 yearlyStats[year].total++;
-                if (record.graduationStatus === '卒業') {
+                if (record.graduationStatus === '卒業' || record.graduationStatus === '修了') {
                     yearlyStats[year].graduated++;
                 } else if (record.graduationStatus === '退学') {
                     yearlyStats[year].withdrawn++;
@@ -335,7 +335,7 @@ function processCareerData() {
         generatedAt: new Date().toISOString(),
         summary: {
             totalRecords: allData.length,
-            totalGraduates: allData.filter(r => r.graduationStatus === '卒業').length,
+            totalGraduates: allData.filter(r => r.graduationStatus === '卒業' || r.graduationStatus === '修了').length,
             years: years.map(y => parseInt(y)),
             categories: Object.keys(categoryStats),
         },
