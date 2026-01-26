@@ -327,10 +327,11 @@ function processCareerData() {
     const years = Object.keys(yearlyStats).sort();
     const yearlyTrends = years.map(year => {
         const stats = yearlyStats[year];
-        const graduationRate = stats.total > 0 ? ((stats.graduated / stats.total) * 100).toFixed(1) : 0;
+        const calculatedTotal = stats.graduated + stats.withdrawn;
+        const graduationRate = calculatedTotal > 0 ? ((stats.graduated / calculatedTotal) * 100).toFixed(1) : 0;
         return {
             year: parseInt(year),
-            total: stats.total,
+            total: calculatedTotal,
             graduated: stats.graduated,
             withdrawn: stats.withdrawn,
             graduationRate: parseFloat(graduationRate),
