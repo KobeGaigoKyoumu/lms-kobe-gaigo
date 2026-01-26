@@ -698,10 +698,223 @@ async function generateAttendancePDF(data, outputPath = null) {
   return await htmlToPdf(html, outputPath);
 }
 
+/**
+ * 成績通知表 個票HTMLを生成 (日本語版)
+ */
+function generateGradeReportHTML(data, yearTerm) {
+  const { student_name, student_id_text, class_name, final_exam_total, report_card_total, report_card_data } = data;
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // 評価判定
+  const calculateGrade = (score) => {
+    if (score >= 80) return 'A';
+    if (score >= 60) return 'B';
+    if (score >= 40) return 'C';
+    if (score >= 20) return 'D';
+    return 'F';
+  };
+
+  const subjectNames = {
+    'vocab': '文字・語彙',
+    'grammar': '文法',
+    'reading': '読解',
+    'listening': '聴解',
+    'writing': '作文',
+    'conversation': '会話'
+  };
+
+  const subjectRows = Object.entries(report_card_data || {})
+    .filter(([key]) => subjectNames[key])
+    .map(([key, d]) => `
+      <tr>
+        <td class="subject-name">${subjectNames[key]}</td>
+        <td>${d.base?.toFixed(1) || '0.0'}</td>
+        <td>${report_card_data.attendance?.toFixed(1) || '0.0'}</td>
+        <td>${report_card_data.participation?.toFixed(1) || '0.0'}</td>
+        <td class="bold">${d.total?.toFixed(1) || '0.0'}</td>
+        <td class="bold grade-${calculateGrade(d.total)}">${calculateGrade(d.total)}</td>
+      </tr>
+    `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>成績通知表 - ${student_name}</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans JP", "Noto Sans CJK JP", "ＭＳ ゴシック", sans-serif;
+      font-size: 10pt;
+      color: #333;
+      padding: 20mm 20mm;
+      line-height: 1.5;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 10mm;
+      border-bottom: 2px solid #333;
+      padding-bottom: 5mm;
+    }
+    .title-box h1 {
+      font-size: 24pt;
+      letter-spacing: 4px;
+      margin-bottom: 2mm;
+    }
+    .school-name { font-size: 12pt; color: #666; }
+    .issue-date { font-size: 10pt; text-align: right; }
+
+    .student-info {
+      margin-bottom: 8mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10mm;
+    }
+    .info-item {
+      font-size: 11pt;
+      border-bottom: 1px solid #ddd;
+      padding: 2mm 0;
+    }
+    .info-label { color: #666; font-size: 9pt; margin-right: 2mm; }
+    .info-value { font-weight: bold; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5mm;
+      margin-bottom: 10mm;
+    }
+    .summary-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 4mm;
+      text-align: center;
+      background: #f9fafb;
+    }
+    .summary-label { font-size: 9pt; color: #6b7280; display: block; margin-bottom: 1mm; }
+    .summary-value { font-size: 18pt; font-weight: bold; }
+    .summary-unit { font-size: 10pt; color: #6b7280; margin-left: 1mm; }
+
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10mm;
+    }
+    .details-table th, .details-table td {
+      border: 1px solid #e5e7eb;
+      padding: 3mm 2mm;
+      text-align: center;
+    }
+    .details-table th {
+      background-color: #f3f4f6;
+      font-weight: bold;
+      font-size: 9pt;
+      color: #374151;
+    }
+    .subject-name { text-align: left !important; padding-left: 4mm !important; font-weight: bold; }
+    .bold { font-weight: bold; }
+    .grade-A { color: #059669; }
+    .grade-B { color: #2563eb; }
+    .grade-C { color: #d97706; }
+    .grade-D { color: #dc2626; }
+    .grade-F { color: #7f1d1d; }
+
+    .footer {
+      margin-top: auto;
+      text-align: center;
+      font-size: 8pt;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 5mm;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-box">
+      <h1>成績通知表</h1>
+      <div class="school-name">神戸外語教育学院 / Kobe Gaigo Language School</div>
+    </div>
+    <div class="issue-date">発行日: ${today}</div>
+  </div>
+
+  <div class="student-info">
+    <div class="info-item">
+      <span class="info-label">氏名:</span>
+      <span class="info-value">${student_name}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">学籍番号:</span>
+      <span class="info-value">${student_id_text}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">クラス:</span>
+      <span class="info-value">${class_name}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">期別:</span>
+      <span class="info-value">${yearTerm}</span>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-label">期末試験合計</span>
+      <span class="summary-value" style="color: #3b82f6;">${final_exam_total}</span>
+      <span class="summary-unit">/ 600</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">総合評価点</span>
+      <span class="summary-value" style="color: #059669;">${report_card_total.toFixed(1)}</span>
+      <span class="summary-unit">/ 100</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">総合評定</span>
+      <span class="summary-value grade-${calculateGrade(report_card_total)}">${calculateGrade(report_card_total)}</span>
+    </div>
+  </div>
+
+  <table class="details-table">
+    <thead>
+      <tr>
+        <th width="25%">科目</th>
+        <th width="15%">基礎点(70)</th>
+        <th width="15%">出席点(15)</th>
+        <th width="15%">平常点(15)</th>
+        <th width="15%">合計(100)</th>
+        <th width="15%">評定</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${subjectRows}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>※本通知表は、本校の学習管理システム（LMS）により自動生成されたものです。</p>
+    <p>Kobe Gaigo Language School LMS - Academic Achievement Report</p>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * 成績通知表PDFを生成
+ */
+async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
+  const html = generateGradeReportHTML(data, yearTerm);
+  return await htmlToPdf(html, outputPath);
+}
+
 module.exports = {
   generateTranscriptHTML,
   htmlToPdf,
   generateTranscriptPDF,
   generateAttendanceHTML,
-  generateAttendancePDF
+  generateAttendancePDF,
+  generateGradeReportHTML,
+  generateGradeReportPDF
 };

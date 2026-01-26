@@ -1,0 +1,58 @@
+--- 2017年度入学生進路一覧.xlsx ---
+Sheet1: 186 rows
+卒業者割合: 1 rows
+卒業生進路: 8 rows
+退学内訳: 9 rows
+合格率: 5 rows
+大学進学先: 13 rows
+専門学校進学先: 14 rows
+進学先: 186 rows
+
+--- 2018年度入学生進路一覧.xlsx ---
+Sheet1: 152 rows
+卒業者割合: 1 rows
+卒業生進路: 6 rows
+退学内訳: 8 rows
+合格率: 5 rows
+大学進学先: 7 rows
+専門学校進学先: 19 rows
+進学先: 125 rows
+
+--- 2019年度入学生進路一覧.xlsx ---
+Sheet1: 65 rows
+卒業者割合: 2 rows
+卒業生進路: 8 rows
+退学内訳: 12 rows
+合格率: 5 rows
+大学進学先: 10 rows
+専門学校進学先: 10 rows
+進学先: 125 rows
+
+--- 2020年度入学生進路一覧.xlsx ---
+Sheet1: 58 rows
+卒業者割合: 2 rows
+卒業生進路: 8 rows
+退学内訳: 12 rows
+合格率: 5 rows
+大学進学先: 14 rows
+専門学校進学先: 13 rows
+進学先: 8 rows
+
+--- 2022年度入学生進路一覧.xlsx ---
+Sheet1: 270 rows
+卒業者割合: 2 rows
+卒業生進路: 9 rows
+退学内訳: 14 rows
+合格率: 5 rows
+大学進学先: 28 rows
+専門学校進学先: 59 rows
+
+--- 2023年度入学生進路一覧.xlsx ---
+Sheet1: 263 rows
+卒業者割合: 2 rows
+卒業生進路: 9 rows
+退学内訳: 14 rows
+合格率: 5 rows
+大学進学先: 20 rows
+専門学校進学先: 48 rows
+

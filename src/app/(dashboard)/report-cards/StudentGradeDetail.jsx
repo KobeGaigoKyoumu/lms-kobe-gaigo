@@ -76,14 +76,54 @@ const StudentGradeDetail = ({ student, viewMode }) => {
 
                     {/* PDF Export Button */}
                     <button
-                        onClick={() => exportStudentGradeToPDF({
-                            student_id_text: student.id,
-                            student_name: student.name,
-                            class_name: student.class,
-                            final_exam_total: finalExamSum,
-                            report_card_total: reportCardTotal,
-                            report_card_data: reportDetails
-                        }, student.yearTerm || '')}
+                        onClick={async () => {
+                            try {
+                                const btn = event.currentTarget;
+                                const originalText = btn.innerText;
+                                btn.innerText = '生成中...';
+                                btn.disabled = true;
+
+                                const response = await fetch('/api/grades/report/generate', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        student: {
+                                            student_id_text: student.id,
+                                            student_name: student.name,
+                                            class_name: student.class,
+                                            final_exam_total: finalExamSum,
+                                            report_card_total: reportCardTotal,
+                                            report_card_data: reportDetails
+                                        },
+                                        yearTerm: student.yearTerm || ''
+                                    })
+                                });
+
+                                if (!response.ok) throw new Error('PDF生成に失敗しました');
+
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `成績通知表_${student.name}_${student.id}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+
+                                btn.innerText = originalText;
+                                btn.disabled = false;
+                            } catch (err) {
+                                console.error(err);
+                                alert('PDFの出力中にエラーが発生しました');
+                                const btn = document.querySelector(`button[data-student-id="${student.id}"]`);
+                                if (btn) {
+                                    btn.innerText = 'PDF';
+                                    btn.disabled = false;
+                                }
+                            }
+                        }}
+                        data-student-id={student.id}
                         style={{
                             padding: '8px 12px',
                             backgroundColor: '#ef4444',
