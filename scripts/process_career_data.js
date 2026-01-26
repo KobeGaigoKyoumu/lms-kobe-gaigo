@@ -290,10 +290,16 @@ function processCareerData() {
 
                     // Detailed breakdown
                     if (!destinationDetails[dest]) {
-                        destinationDetails[dest] = { total: 0, years: {} };
+                        destinationDetails[dest] = { total: 0, years: {}, students: [] };
                     }
                     destinationDetails[dest].total++;
                     destinationDetails[dest].years[year] = (destinationDetails[dest].years[year] || 0) + 1;
+                    destinationDetails[dest].students.push({
+                        id: studentId,
+                        name: name,
+                        year: year,
+                        nationality: record.nationality
+                    });
                 }
             });
 
@@ -305,7 +311,7 @@ function processCareerData() {
     // Post-processing output
     const topDestinations = Object.entries(destinationDetails)
         .sort((a, b) => b[1].total - a[1].total)
-        .map(([name, stats]) => ({ name, count: stats.total, years: stats.years }));
+        .map(([name, stats]) => ({ name, count: stats.total, years: stats.years, students: stats.students }));
 
     const sortedNationalities = Object.entries(nationalityStats)
         .sort((a, b) => b[1].total - a[1].total)
@@ -330,7 +336,6 @@ function processCareerData() {
         summary: {
             totalRecords: allData.length,
             totalGraduates: allData.filter(r => r.graduationStatus === '卒業').length,
-            years: years.map(y => parseInt(y)),
             years: years.map(y => parseInt(y)),
             categories: Object.keys(categoryStats),
         },
