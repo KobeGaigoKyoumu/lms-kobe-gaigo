@@ -2208,11 +2208,16 @@ export default function AnalyticsPage() {
                                                                 <td>{dest.count}名</td>
                                                                 <td>
                                                                     <div style={{ display: 'flex', gap: '4px' }}>
-                                                                        {Object.keys(dest.jlptStats).sort().map(lvl => (
-                                                                            <span key={lvl} className={`${styles.badge} ${styles[`badge${lvl}`]}`} style={{ fontSize: '0.7rem', padding: '1px 6px' }}>
-                                                                                {lvl}
-                                                                            </span>
-                                                                        ))}
+                                                                        {Object.keys(dest.jlptStats).sort().map(lvl => {
+                                                                            const stats = dest.jlptStats[lvl];
+                                                                            const hasData = (stats.passed?.count || 0) + (stats.failed?.count || 0) > 0;
+                                                                            if (!hasData) return null;
+                                                                            return (
+                                                                                <span key={lvl} className={`${styles.badge} ${styles[`badge${lvl}`]}`} style={{ fontSize: '0.7rem', padding: '1px 6px' }}>
+                                                                                    {lvl}
+                                                                                </span>
+                                                                            );
+                                                                        })}
                                                                     </div>
                                                                 </td>
                                                                 <td style={{ textAlign: 'center' }}>
@@ -2254,6 +2259,8 @@ export default function AnalyticsPage() {
                                                                                             const pCount = passed.count || 0;
                                                                                             const fCount = failed.count || 0;
                                                                                             const totalCount = pCount + fCount;
+
+                                                                                            if (totalCount === 0) return null;
 
                                                                                             const passRate = stats.passRate !== undefined
                                                                                                 ? stats.passRate
