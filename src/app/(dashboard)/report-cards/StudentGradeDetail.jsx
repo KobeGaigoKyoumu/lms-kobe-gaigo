@@ -3,7 +3,7 @@
 import React from 'react'
 import RadarChart from './RadarChart'
 import styles from './page.module.css'
-import { exportStudentGradeToPDF } from '@/lib/export/pdfExport'
+// export { exportStudentGradeToPDF } removed - using server-side API
 
 const StudentGradeDetail = ({ student, viewMode }) => {
     // Helper used in GradeUploader
@@ -76,9 +76,9 @@ const StudentGradeDetail = ({ student, viewMode }) => {
 
                     {/* PDF Export Button */}
                     <button
-                        onClick={async () => {
+                        onClick={async (e) => {
                             try {
-                                const btn = event.currentTarget;
+                                const btn = e.currentTarget;
                                 const originalText = btn.innerText;
                                 btn.innerText = '生成中...';
                                 btn.disabled = true;
