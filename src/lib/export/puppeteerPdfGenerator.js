@@ -752,11 +752,14 @@ function generateGradeReportHTML(data, yearTerm) {
 <head>
   <meta charset="UTF-8">
   <title>成績通知表</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
     @page { size: A4; margin: 0; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
+      font-family: "Noto Serif JP", "Noto Serif CJK JP", "ＭＳ 明朝", "MS Mincho", "游明朝", "Yu Mincho", serif;
       font-size: 10.5pt;
       line-height: 1.5;
       color: #000;
