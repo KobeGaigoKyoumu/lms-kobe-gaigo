@@ -1880,7 +1880,7 @@ export default function AnalyticsPage() {
                                                             callbacks: {
                                                                 label: function (context) {
                                                                     const value = context.parsed.x;
-                                                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                                    const total = careerStats.summary.totalRecords; // Use true total
                                                                     const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
                                                                     return `${context.dataset.label || ''}: ${value}名 (${percentage})`;
                                                                 }
@@ -1896,7 +1896,7 @@ export default function AnalyticsPage() {
                                             <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
                                             <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.25rem 0.75rem', borderRadius: '99px' }}>
                                                 全年度平均: {(() => {
-                                                    const rates = careerStats.yearlyTrends.map(t => t.graduationRate);
+                                                    const rates = careerStats.yearlyTrends.map(t => parseFloat(t.graduationRate));
                                                     const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
                                                     return avg.toFixed(1);
                                                 })()}%
@@ -1909,7 +1909,7 @@ export default function AnalyticsPage() {
                                                     datasets: [
                                                         {
                                                             label: '卒業率 (%)',
-                                                            data: careerStats.yearlyTrends.map(t => t.graduationRate),
+                                                            data: careerStats.yearlyTrends.map(t => parseFloat(t.graduationRate)),
                                                             borderColor: 'rgb(34, 197, 94)',
                                                             backgroundColor: 'rgba(34, 197, 94, 0.5)',
                                                             tension: 0.3,
