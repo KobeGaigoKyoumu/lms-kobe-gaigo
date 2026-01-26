@@ -2176,7 +2176,10 @@ export default function AnalyticsPage() {
                         {careerSubTab === 'schools' && (
                             <div className={styles.chartCard} style={{ marginTop: '1rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先とJLPT成績 (詳細:合格/不合格)</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <h3 className={styles.chartTitle} style={{ margin: 0 }}>主な進学先とJLPT成績 (詳細:合格/不合格)</h3>
+                                        <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.25rem' }}>調査対象: 2018~2024年度卒業生</div>
+                                    </div>
                                     <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
                                         {careerStats.topDestinations.filter(d => d.jlptStats && Object.keys(d.jlptStats).length > 0).length}校
                                     </span>
@@ -2186,7 +2189,6 @@ export default function AnalyticsPage() {
                                         <thead>
                                             <tr>
                                                 <th>進学先名</th>
-                                                <th>対象年度</th>
                                                 <th>進学者数</th>
                                                 <th>JLPTデータ</th>
                                                 <th>詳細</th>
@@ -2198,11 +2200,6 @@ export default function AnalyticsPage() {
                                                 .sort((a, b) => b.count - a.count)
                                                 .map((dest, idx) => {
                                                     const isExpanded = expandedSchoolId === idx;
-                                                    const years = Object.keys(dest.years || {}).map(y => parseInt(y) + 1).sort((a, b) => a - b);
-                                                    const yearDisplay = years.length > 0
-                                                        ? (years.length === 1 ? `${years[0]}年度` : `${years[0]}~${years[years.length - 1]}年度`)
-                                                        : '-';
-
                                                     return (
                                                         <Fragment key={idx}>
                                                             <tr
@@ -2211,7 +2208,6 @@ export default function AnalyticsPage() {
                                                                 style={{ cursor: 'pointer', borderBottom: isExpanded ? 'none' : '1px solid #e5e7eb' }}
                                                             >
                                                                 <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                                <td style={{ fontSize: '0.85rem' }}>{yearDisplay}</td>
                                                                 <td>{dest.count}名</td>
                                                                 <td>
                                                                     <div style={{ display: 'flex', gap: '4px' }}>
@@ -2233,7 +2229,7 @@ export default function AnalyticsPage() {
                                                             </tr>
                                                             {isExpanded && (
                                                                 <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                                                                    <td colSpan="5" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+                                                                    <td colSpan="4" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
                                                                         <div style={{ background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
                                                                             <table className={styles.table} style={{ margin: 0 }}>
                                                                                 <thead style={{ background: '#f3f4f6' }}>
