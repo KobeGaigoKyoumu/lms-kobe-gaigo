@@ -909,7 +909,7 @@ async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
   return await htmlToPdf(html, outputPath);
 }
 
-module.exports = {
+export {
   generateTranscriptHTML,
   htmlToPdf,
   generateTranscriptPDF,
