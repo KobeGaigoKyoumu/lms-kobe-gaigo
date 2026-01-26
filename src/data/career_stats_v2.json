@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-01-26T14:12:59.767Z",
+  "generatedAt": "2026-01-26T14:40:50.314Z",
   "summary": {
     "totalRecords": 994,
-    "totalGraduates": 888,
+    "totalGraduates": 893,
     "years": [
       2017,
       2018,
@@ -50,7 +50,7 @@
     {
       "year": 2017,
       "total": 0,
-      "graduated": 159,
+      "graduated": 160,
       "withdrawn": 26,
       "graduationRate": 0,
       "categories": {
@@ -100,7 +100,7 @@
     {
       "year": 2020,
       "total": 0,
-      "graduated": 45,
+      "graduated": 48,
       "withdrawn": 10,
       "graduationRate": 0,
       "categories": {
@@ -116,7 +116,7 @@
     {
       "year": 2022,
       "total": 0,
-      "graduated": 238,
+      "graduated": 239,
       "withdrawn": 31,
       "graduationRate": 0,
       "categories": {

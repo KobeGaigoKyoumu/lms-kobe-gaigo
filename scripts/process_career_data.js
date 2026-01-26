@@ -257,21 +257,11 @@ function processCareerData() {
 
                 // Check if valid graduate/completed
                 const isGraduated = record.graduationStatus === '卒業';
-                const dest = record.destination || '';
-                const isUniversity = dest.includes('大学') && !dest.includes('大学校');
+                const isExtended = record.graduationStatus === '延長';
+                const isCompleted = record.graduationStatus === '修了';
 
-                const isExtended = record.graduationStatus === '延長'; // Always include Extended (needed for 2019)
-                let isCompleted = record.graduationStatus === '修了' && isUniversity && year !== 2017;
-
-                // Max 1 Completion per year rule
-                if (isCompleted) {
-                    completionCounts[year] = (completionCounts[year] || 0);
-                    if (completionCounts[year] >= 1) {
-                        isCompleted = false;
-                    } else {
-                        completionCounts[year]++;
-                    }
-                }
+                // Note: User requested to include ALL completions/extensions to correct the official data.
+                // No artificial filters (University-only, Max 1, etc.) are applied.
 
                 if (isGraduated || isExtended || isCompleted) {
                     yearlyStats[year].graduated++;
