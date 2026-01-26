@@ -1793,6 +1793,21 @@ export default function AnalyticsPage() {
 
                         {careerSubTab === 'overview' && (
                             <>
+                                {/* COVID Note */}
+                                <div style={{
+                                    backgroundColor: '#fef3c7',
+                                    border: '1px solid #f59e0b',
+                                    borderRadius: '8px',
+                                    padding: '12px 16px',
+                                    marginBottom: '24px',
+                                    fontSize: '14px',
+                                    color: '#92400e'
+                                }}>
+                                    <strong>⚠️ COVID-19の影響について：</strong>
+                                    <br />
+                                    2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延や試験中止（特に2020年第1回試験は中止）がありました。
+                                    2020年度は新入生がおらず、2021年度は入学者が45名のみとなりました。
+                                </div>
                                 {/* Summary Stats */}
                                 <div className={styles.statsGrid}>
                                     <div className={styles.statCard}>
