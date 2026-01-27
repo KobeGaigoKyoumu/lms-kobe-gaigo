@@ -573,6 +573,7 @@
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
 }
+
 .sortableHeader {
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
@@ -588,11 +589,11 @@
 }
 
 /* Custom Tooltip */
-[data-tooltip] {
+.sortableHeader[data-tooltip] {
     position: relative;
 }
 
-[data-tooltip]:hover::after {
+.sortableHeader[data-tooltip]:hover::after {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 100%;
@@ -607,10 +608,10 @@
     z-index: 100;
     pointer-events: none;
     margin-bottom: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-[data-tooltip]:hover::before {
+.sortableHeader[data-tooltip]:hover::before {
     content: '';
     position: absolute;
     bottom: 100%;
