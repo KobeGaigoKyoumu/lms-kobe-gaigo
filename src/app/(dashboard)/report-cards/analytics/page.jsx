@@ -579,12 +579,7 @@ export default function AnalyticsPage() {
         }
     }
 
-    // Derived state for class list
-    const classes = useMemo(() => {
-        if (!grades) return []
-        const unique = [...new Set(grades.map(g => g.class_name))].filter(Boolean).sort()
-        return unique
-    }, [grades])
+
 
     // --- Grade Analytics Processing ---
     const filteredGrades = grades.filter(g => {
