@@ -24,16 +24,38 @@ export default function StudentList({ students: initialStudents, classes }) {
     const supabase = createClient()
 
     const filteredStudents = students.filter(student => {
-        const studentInfo = parseStudentId(student.student_id_text)
+        const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year) // Pass academic_year for accurate grade calc
+
         const matchesStatus = filter === 'all' || student.status === filter
         const matchesGrade = !gradeFilter || String(studentInfo.grade) === gradeFilter
-        // クラスフィルターは学生マスターのclass_nameを使用
         const matchesClass = !classFilter || student.class_name === classFilter
-        const matchesSearch =
-            student.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-            student.student_id_text?.includes(search) ||
-            student.email?.toLowerCase().includes(search.toLowerCase()) ||
-            student.destination?.toLowerCase().includes(search.toLowerCase())
+
+        // Advanced Search Logic
+        if (!search) return matchesStatus && matchesGrade && matchesClass
+
+        const searchTerms = search.toLowerCase().replace(/　/g, ' ').split(' ').filter(t => t)
+
+        // Fields to search (include all detail fields)
+        const searchableText = [
+            student.student_id_text,
+            student.full_name,
+            student.name_kana,
+            student.name_romaji,
+            student.email,
+            student.nationality,
+            student.address,
+            student.phone,
+            student.visa_status,
+            student.passport_number,
+            student.residence_card_number,
+            student.course,
+            student.destination,
+            student.class_name
+        ].filter(Boolean).join(' ').toLowerCase()
+
+        // AND logic: all terms must be present in the searchable text
+        const matchesSearch = searchTerms.every(term => searchableText.includes(term))
+
         return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
 
@@ -56,6 +78,43 @@ export default function StudentList({ students: initialStudents, classes }) {
             }
             return next
         })
+    }
+
+    // Handler for Grade Change
+    const handleGradeChange = async (studentId, newGrade) => {
+        // Calculate new academic year based on desired grade
+        // Grade 1 = Current Year
+        // Grade 2 = Current Year - 1
+        const currentYear = new Date().getFullYear()
+        // Determine current academic year (April start)
+        const today = new Date()
+        const isBeforeApril = today.getMonth() < 3
+        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+
+        let newAcademicYear
+
+        if (newGrade === '1') {
+            newAcademicYear = academicYearBase
+        } else if (newGrade === '2') {
+            newAcademicYear = academicYearBase - 1
+        } else {
+            // For "Other", maybe don't change or set to null? 
+            // Let's assume user only changes to 1 or 2 for now, or we keep existing if selecting "other"
+            return
+        }
+
+        const { error } = await supabase
+            .from('students')
+            .update({ academic_year: newAcademicYear })
+            .eq('student_id_text', studentId)
+
+        if (!error) {
+            setStudents(prev => prev.map(s =>
+                s.student_id_text === studentId ? { ...s, academic_year: newAcademicYear } : s
+            ))
+        } else {
+            alert('学年の更新に失敗しました')
+        }
     }
 
     const handleBulkDelete = async () => {
@@ -498,7 +557,19 @@ export default function StudentList({ students: initialStudents, classes }) {
                                     </td>
                                     <td className={styles.idCell}>{student.student_id_text}</td>
                                     <td>{student.full_name}</td>
-                                    <td>{studentInfo.gradeName || '-'}</td>
+                                    <td>
+                                        <select
+                                            value={studentInfo.grade || ''}
+                                            onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
+                                            className={styles.gradeSelect} // Add appropriate style or reuse statusSelect style
+                                            style={{ padding: '4px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        >
+                                            <option value="1">1年生</option>
+                                            <option value="2">2年生</option>
+                                            <option value="0">非在籍</option>
+                                            {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={studentInfo.grade}>その他</option>}
+                                        </select>
+                                    </td>
                                     <td>{student.class_name || '-'}</td>
                                     <td>
                                         <select

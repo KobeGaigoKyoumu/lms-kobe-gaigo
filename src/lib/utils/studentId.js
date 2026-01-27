@@ -20,7 +20,7 @@
  * @param {Date} [baseDate] 基準日（デフォルト: 現在日時）
  * @returns {object} { grade, gradeName, enrollmentYear, enrollmentMonth, enrollmentPeriod, isGraduated }
  */
-export function parseStudentId(studentId, baseDate = new Date()) {
+export function parseStudentId(studentId, baseDate = new Date(), academicYearOverride = null) {
     if (!studentId || studentId.length < 4) {
         return {
             grade: null,
@@ -35,8 +35,13 @@ export function parseStudentId(studentId, baseDate = new Date()) {
     const idStr = String(studentId)
 
     // 入学年度（先頭2桁）
-    const enrollmentYearShort = parseInt(idStr.substring(0, 2), 10)
-    const enrollmentYear = 2000 + enrollmentYearShort
+    let enrollmentYearShort = parseInt(idStr.substring(0, 2), 10)
+    let enrollmentYear = 2000 + enrollmentYearShort
+
+    // Override if provided (allows manual grade adjustment)
+    if (academicYearOverride) {
+        enrollmentYear = academicYearOverride
+    }
 
     // 入学月（3-4桁目）
     const enrollmentMonth = parseInt(idStr.substring(2, 4), 10)
