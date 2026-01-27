@@ -803,7 +803,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
-                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb', fontSize: '0.9em' }}>出席率</th>
+
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>出席</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>平常</th>
                                             </>
@@ -815,7 +815,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
-                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb', fontSize: '0.9em' }}>出席率</th>
+
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>出席</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>平常</th>
 
@@ -919,9 +919,7 @@ export default function AnalyticsPage() {
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
                                                                 {reportGrade}
                                                             </td>
-                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb', color: '#4b5563' }}>
-                                                                {formatNumber(attendanceRate)}%
-                                                            </td>
+
                                                             <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
                                                                 {formatNumber(student.report_card_data?.attendance)}
                                                             </td>
@@ -938,9 +936,7 @@ export default function AnalyticsPage() {
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
                                                                 {reportGrade}
                                                             </td>
-                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb', color: '#4b5563' }}>
-                                                                {formatNumber(attendanceRate)}%
-                                                            </td>
+
                                                             <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
                                                                 {formatNumber(student.report_card_data?.attendance)}
                                                             </td>
