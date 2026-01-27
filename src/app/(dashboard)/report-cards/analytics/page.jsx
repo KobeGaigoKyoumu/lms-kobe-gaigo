@@ -424,23 +424,54 @@ export default function AnalyticsPage() {
         }],
     }
 
+    // New: Final Exam Total Score Distribution (600 points max)
+    const finalExamDistribution = {
+        labels: ['0-299', '300-359', '360-419', '420-479', '480-539', '540-600'], // Adjusted to match grade boundaries roughly (50%, 60%, 70%, 80%, 90%?)
+        // Let's use simpler 50-point bins? Or 100?
+        // User didn't specify bins. Let's use 100-point ranges + split high scores? 
+        // Or 0-359 (Fail), 360-419 (60%), 420-479 (70%), 480-539 (80%), 540-600 (90%)
+        // Let's use straightforward ranges: 0-299, 300-399, 400-499, 500-600
+        labels: ['0-299', '300-399', '400-499', '500-600'],
+        datasets: [{
+            label: '人数',
+            data: [0, 0, 0, 0],
+            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+            borderWidth: 1,
+        }]
+    }
+
     filteredGrades.forEach(g => {
+        // Grade Distribution (Report Card Total)
         const score = g.report_card_total || 0
         if (score >= 80) gradeDistribution.datasets[0].data[0]++
         else if (score >= 70) gradeDistribution.datasets[0].data[1]++
         else if (score >= 60) gradeDistribution.datasets[0].data[2]++
         else if (score >= 50) gradeDistribution.datasets[0].data[3]++
         else gradeDistribution.datasets[0].data[4]++
+
+        // Final Exam Distribution
+        if (g.final_exam_data) {
+            const scores = Object.values(g.final_exam_data)
+            const total = scores.reduce((a, b) => a + (parseFloat(b) || 0), 0)
+
+            if (total >= 500) finalExamDistribution.datasets[0].data[3]++
+            else if (total >= 400) finalExamDistribution.datasets[0].data[2]++
+            else if (total >= 300) finalExamDistribution.datasets[0].data[1]++
+            else finalExamDistribution.datasets[0].data[0]++
+        }
     })
 
     const subjectTotals = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
     const subjectCounts = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
 
     filteredGrades.forEach(g => {
-        if (g.report_card_data) {
+        // Use final_exam_data for subject averages
+        if (g.final_exam_data) {
             Object.keys(subjectTotals).forEach(subj => {
-                if (g.report_card_data[subj]?.total) {
-                    subjectTotals[subj] += g.report_card_data[subj].total
+                // Ensure key exists in final_exam_data
+                const val = parseFloat(g.final_exam_data[subj])
+                if (!isNaN(val)) {
+                    subjectTotals[subj] += val
                     subjectCounts[subj]++
                 }
             })
@@ -670,7 +701,13 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
                         <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>科目別平均点</h3>
+                            <h3 className={styles.chartTitle}>期末試験6科目合計点数分布</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar data={finalExamDistribution} options={chartOptions} />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>期末試験科目別平均点</h3>
                             <div className={styles.chartContainer}>
                                 <Bar data={subjectAverages} options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }} />
                             </div>
