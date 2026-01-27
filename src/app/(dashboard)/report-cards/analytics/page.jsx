@@ -803,6 +803,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
+                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb', fontSize: '0.9em' }}>出席率</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>出席</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>平常</th>
                                             </>
@@ -814,6 +815,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
+                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb', fontSize: '0.9em' }}>出席率</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>出席</th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>平常</th>
 
@@ -842,6 +844,14 @@ export default function AnalyticsPage() {
                                             }
                                         })
                                         .map((student, index) => {
+                                            // Helper to truncate to 2 decimal places (floor)
+                                            const formatNumber = (num) => {
+                                                if (num === null || num === undefined || num === '-' || num === '') return '-'
+                                                const val = parseFloat(num)
+                                                if (isNaN(val)) return num
+                                                return Math.floor(val * 100) / 100
+                                            }
+
                                             const finalTotal = student.final_exam_data
                                                 ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
                                                 : 0
@@ -868,6 +878,10 @@ export default function AnalyticsPage() {
                                             }
                                             const reportGrade = getReportGrade(reportTotal)
 
+                                            // Attendance Calculation
+                                            const attendanceScore = parseFloat(student.report_card_data?.attendance || 0)
+                                            const attendanceRate = student.report_card_data?.attendance ? (attendanceScore / 15) * 100 : 0
+
                                             const getRatingColor = (grade) => {
                                                 if (grade === 'A') return '#16a34a' // green
                                                 if (grade === 'F') return '#dc2626' // red
@@ -887,57 +901,63 @@ export default function AnalyticsPage() {
                                                         <>
                                                             {/* Final Exam Section */}
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
-                                                                {finalTotal}
+                                                                {formatNumber(finalTotal)}
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(finalGrade), backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                                 {finalGrade}
                                                             </td>
                                                             {['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(key => (
                                                                 <td key={key} style={{ padding: '10px', textAlign: 'center', fontSize: '0.9em', color: '#6b7280', borderRight: '1px solid #e5e7eb' }}>
-                                                                    {student.final_exam_data?.[key] ?? '-'}
+                                                                    {formatNumber(student.final_exam_data?.[key])}
                                                                 </td>
                                                             ))}
 
                                                             {/* Report Card Section */}
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                                {reportTotal}
+                                                                {formatNumber(reportTotal)}
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
                                                                 {reportGrade}
                                                             </td>
+                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb', color: '#4b5563' }}>
+                                                                {formatNumber(attendanceRate)}%
+                                                            </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                                {student.report_card_data?.attendance ?? '-'}
+                                                                {formatNumber(student.report_card_data?.attendance)}
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center' }}>
-                                                                {student.report_card_data?.participation ?? '-'}
+                                                                {formatNumber(student.report_card_data?.participation)}
                                                             </td>
                                                         </>
                                                     ) : (
                                                         <>
                                                             {/* Report Card Section */}
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                                {reportTotal}
+                                                                {formatNumber(reportTotal)}
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
                                                                 {reportGrade}
                                                             </td>
-                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                                {student.report_card_data?.attendance ?? '-'}
+                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb', color: '#4b5563' }}>
+                                                                {formatNumber(attendanceRate)}%
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                                {student.report_card_data?.participation ?? '-'}
+                                                                {formatNumber(student.report_card_data?.attendance)}
+                                                            </td>
+                                                            <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
+                                                                {formatNumber(student.report_card_data?.participation)}
                                                             </td>
 
                                                             {/* Final Exam Section */}
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
-                                                                {finalTotal}
+                                                                {formatNumber(finalTotal)}
                                                             </td>
                                                             <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(finalGrade), backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                                 {finalGrade}
                                                             </td>
                                                             {['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(key => (
                                                                 <td key={key} style={{ padding: '10px', textAlign: 'center', fontSize: '0.9em', color: '#6b7280', borderRight: '1px solid #e5e7eb' }}>
-                                                                    {student.final_exam_data?.[key] ?? '-'}
+                                                                    {formatNumber(student.final_exam_data?.[key])}
                                                                 </td>
                                                             ))}
                                                         </>
