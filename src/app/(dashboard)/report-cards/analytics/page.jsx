@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, Fragment } from 'react'
+import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
 import careerStatsData from '@/data/career_stats_v2.json'
@@ -128,14 +128,24 @@ const AccordionChevron = ({ className, rotated }) => (
 
 const MultiSelect = ({ label, options, selected, onChange, placeholder = "選択してください" }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     return (
         <div
+            ref={containerRef}
             className={styles.filterGroup}
             style={{ position: 'relative', minWidth: '200px' }}
-            onMouseLeave={() => {
-                // Small delay to prevent accidental closing
-                setTimeout(() => setIsOpen(false), 100);
-            }}
+            onMouseLeave={() => setIsOpen(false)}
         >
             <label className={styles.filterLabel}>{label}</label>
             <div
@@ -183,52 +193,46 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder = "選択
                 <ChevronDown size={16} color="#6b7280" style={{ marginLeft: '8px' }} />
             </div>
             {isOpen && (
-                <>
-                    <div
-                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
-                        onClick={() => setIsOpen(false)}
-                    />
-                    <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        zIndex: 20,
-                        backgroundColor: 'white',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '0 0 6px 6px',
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        width: '100%'
-                    }}>
-                        {options.map(option => (
-                            <div
-                                key={option}
-                                onClick={() => {
-                                    if (selected.includes(option)) {
-                                        onChange(selected.filter(i => i !== option));
-                                    } else {
-                                        onChange([...selected, option]);
-                                    }
-                                }}
-                                style={{
-                                    padding: '8px 12px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    backgroundColor: selected.includes(option) ? '#eff6ff' : 'white',
-                                    fontSize: '0.9rem',
-                                    borderBottom: '1px solid #f3f4f6'
-                                }}
-                            >
-                                <span>{option}</span>
-                                {selected.includes(option) && <Check size={14} color="#3b82f6" />}
-                            </div>
-                        ))}
-                    </div>
-                </>
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    zIndex: 20,
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0 0 6px 6px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    width: '100%'
+                }}>
+                    {options.map(option => (
+                        <div
+                            key={option}
+                            onClick={() => {
+                                if (selected.includes(option)) {
+                                    onChange(selected.filter(i => i !== option));
+                                } else {
+                                    onChange([...selected, option]);
+                                }
+                            }}
+                            style={{
+                                padding: '8px 12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                backgroundColor: selected.includes(option) ? '#eff6ff' : 'white',
+                                fontSize: '0.9rem',
+                                borderBottom: '1px solid #f3f4f6'
+                            }}
+                        >
+                            <span>{option}</span>
+                            {selected.includes(option) && <Check size={14} color="#3b82f6" />}
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     );
