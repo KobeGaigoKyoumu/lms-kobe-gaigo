@@ -87,6 +87,8 @@ export default function StudentList({ students: initialStudents, classes }) {
 
     // Handler for Grade Change
     const handleGradeChange = async (studentId, newGrade) => {
+        console.log(`handleGradeChange: ID=${studentId}, NewGrade=${newGrade}`)
+
         // Calculate new academic year based on desired grade
         // Grade 1 = Current Year
         // Grade 2 = Current Year - 1
@@ -95,6 +97,8 @@ export default function StudentList({ students: initialStudents, classes }) {
         const today = new Date()
         const isBeforeApril = today.getMonth() < 3
         const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+
+        console.log(`Year Base: ${academicYearBase}`)
 
         let newAcademicYear
 
@@ -106,10 +110,11 @@ export default function StudentList({ students: initialStudents, classes }) {
             // Set to 2 years ago (making them 3rd year+, i.e., graduated/non-enrolled)
             newAcademicYear = academicYearBase - 2
         } else {
-            // For "Other", maybe don't change or set to null? 
-            // Let's assume user only changes to 1, 2, or 0 for now
+            console.log('Unknown grade selected')
             return
         }
+
+        console.log(`Updating academic_year to: ${newAcademicYear}`)
 
         const { error } = await supabase
             .from('students')
@@ -117,6 +122,7 @@ export default function StudentList({ students: initialStudents, classes }) {
             .eq('student_id_text', studentId)
 
         if (!error) {
+            console.log('Update successful, updating local state')
             setStudents(prev => prev.map(s =>
                 s.student_id_text === studentId ? { ...s, academic_year: newAcademicYear } : s
             ))
@@ -554,8 +560,11 @@ export default function StudentList({ students: initialStudents, classes }) {
                     </thead>
                     <tbody>
                         {filteredStudents.map(student => {
-                            const studentInfo = parseStudentId(student.student_id_text)
+                            const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
                             const isSelected = selectedIds.has(student.student_id_text)
+                            // Debug logs for first few students
+                            // if (filteredStudents.indexOf(student) < 2) console.log(`Render ID:${student.student_id_text} AY:${student.academic_year} Grade:${studentInfo.grade}`)
+
                             return (
                                 <tr key={student.student_id_text} className={isSelected ? styles.selectedRow : ''}>
                                     <td>
