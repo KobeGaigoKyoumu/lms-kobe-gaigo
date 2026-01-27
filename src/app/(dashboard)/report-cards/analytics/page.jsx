@@ -528,8 +528,8 @@ export default function AnalyticsPage() {
         return '降順に並べ替え'
     }
 
-    // Determine Layout Mode based on Sort Key (to keep relevant columns visible/first)
-    const layoutMode = 'final_exam' // Force full layout to allow subject sorting even when sorted by total
+    // Determine Layout Order: If sorting by Report Total, put that section first. Otherwise Final Exam first.
+    const isReportFirst = sortConfig.key === 'report_total'
 
     // Helper for Sort Icon
     const SortIcon = ({ columnKey }) => {
@@ -583,14 +583,27 @@ export default function AnalyticsPage() {
         return matchTerm && matchClass && matchGrade
     })
 
+    // Calculate Ranks (Pre-calculation for persistent rank display)
+    const rankedGrades = useMemo(() => {
+        // Sort by Final Total Descending to determine Rank
+        const sortedForRank = [...filteredGrades].sort((a, b) => {
+            const scoreA = a.final_exam_data ? Object.values(a.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0) : 0
+            const scoreB = b.final_exam_data ? Object.values(b.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0) : 0
+            return scoreB - scoreA
+        })
+        // Assign Rank
+        return sortedForRank.map((item, index) => ({ ...item, originalRank: index + 1 }))
+    }, [filteredGrades])
+
     const getSortedGrades = () => {
-        return [...filteredGrades].sort((a, b) => { // Create a copy before sorting
+        return [...rankedGrades].sort((a, b) => { // Create a copy before sorting
             const { key, direction } = sortConfig
             const modifier = direction === 'asc' ? 1 : -1
 
             const getVal = (item, k) => {
                 switch (k) {
-                    case 'rank': // Rank is based on Final Total (Score), so same value
+                    case 'rank': return item.originalRank || 9999
+
                     case 'final_total':
                         return item.final_exam_data
                             ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
@@ -951,22 +964,23 @@ export default function AnalyticsPage() {
                             <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-                                        <th onClick={() => handleSort('rank')} title={getSortTooltip('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
-                                        <th onClick={() => handleSort('student_id')} title={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('rank')} data-tooltip={getSortTooltip('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
+                                        <th onClick={() => handleSort('student_id')} data-tooltip={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>学籍番号</div>
                                         </th>
-                                        <th onClick={() => handleSort('class_name')} title={getSortTooltip('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('class_name')} data-tooltip={getSortTooltip('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>クラス</div>
                                         </th>
-                                        <th onClick={() => handleSort('name')} title={getSortTooltip('name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('name')} data-tooltip={getSortTooltip('name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>氏名</div>
                                         </th>
 
                                         {/* Dynamic Section Ordering */}
-                                        {layoutMode === 'final_exam' ? (
+                                        {/* Dynamic Section Ordering */}
+                                        {/* Final Exam Section (Render First if NOT report sort) */}
+                                        {!isReportFirst && (
                                             <>
-                                                {/* Final Exam Section */}
-                                                <th onClick={() => handleSort('final_total')} title={getSortTooltip('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                <th onClick={() => handleSort('final_total')} data-tooltip={getSortTooltip('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
                                                 </th>
@@ -982,52 +996,55 @@ export default function AnalyticsPage() {
                                                     <th
                                                         key={subj.key}
                                                         onClick={() => handleSort(subj.key)}
-                                                        title={getSortTooltip(subj.key)}
+                                                        data-tooltip={getSortTooltip(subj.key)}
                                                         className={styles.sortableHeader}
                                                         style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}
                                                     >
                                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>{subj.label}</div>
                                                     </th>
                                                 ))}
-
-                                                {/* Report Card Section */}
-                                                <th onClick={() => handleSort('report_total')} title={getSortTooltip('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
-                                                    <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
-                                                </th>
-                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
-
-                                                <th onClick={() => handleSort('attendance')} title={getSortTooltip('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
-                                                </th>
-                                                <th onClick={() => handleSort('participation')} title={getSortTooltip('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
-                                                </th>
                                             </>
-                                        ) : (
+                                        )}
+
+                                        {/* Report Card Section (Always Rendered, position depends on isReportFirst) */}
+                                        <th onClick={() => handleSort('report_total')} data-tooltip={getSortTooltip('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
+                                            <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
+                                        </th>
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
+
+                                        <th onClick={() => handleSort('attendance')} data-tooltip={getSortTooltip('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
+                                        </th>
+                                        <th onClick={() => handleSort('participation')} data-tooltip={getSortTooltip('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
+                                        </th>
+
+                                        {/* Final Exam Section (Render Last if isReportFirst) */}
+                                        {isReportFirst && (
                                             <>
-                                                {/* Report Card Section */}
-                                                <th onClick={() => handleSort('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
-                                                    <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
-                                                </th>
-                                                <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
-
-                                                <th onClick={() => handleSort('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
-                                                </th>
-                                                <th onClick={() => handleSort('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
-                                                </th>
-
-                                                {/* Final Exam Section */}
-                                                <th onClick={() => handleSort('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                <th onClick={() => handleSort('final_total')} data-tooltip={getSortTooltip('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>評定</th>
-                                                {['語彙', '聴解', '読解', '文法', '作文', '会話'].map(subj => (
-                                                    <th key={subj} style={{ padding: '12px', textAlign: 'center', fontSize: '0.9em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}>{subj}</th>
+                                                {[
+                                                    { key: 'vocab', label: '語彙' },
+                                                    { key: 'listening', label: '聴解' },
+                                                    { key: 'reading', label: '読解' },
+                                                    { key: 'grammar', label: '文法' },
+                                                    { key: 'writing', label: '作文' },
+                                                    { key: 'conversation', label: '会話' }
+                                                ].map(subj => (
+                                                    <th
+                                                        key={subj.key}
+                                                        onClick={() => handleSort(subj.key)}
+                                                        data-tooltip={getSortTooltip(subj.key)}
+                                                        className={styles.sortableHeader}
+                                                        style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>{subj.label}</div>
+                                                    </th>
                                                 ))}
                                             </>
                                         )}
@@ -1083,12 +1100,13 @@ export default function AnalyticsPage() {
 
                                         return (
                                             <tr key={student.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: rowBg }}>
-                                                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>{index + 1}</td>
+                                                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>{student.originalRank}</td>
                                                 <td style={{ padding: '10px', borderRight: '1px solid #e5e7eb' }}>{student.student_id_text}</td>
                                                 <td style={{ padding: '10px', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>{student.class_name || '-'}</td>
                                                 <td style={{ padding: '10px', borderRight: '1px solid #e5e7eb' }}>{student.student_name}</td>
 
-                                                {layoutMode === 'final_exam' ? (
+                                                {/* Dynamic Section Ordering */}
+                                                {!isReportFirst && (
                                                     <>
                                                         {/* Final Exam Section */}
                                                         <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
@@ -1102,39 +1120,26 @@ export default function AnalyticsPage() {
                                                                 {formatNumber(student.final_exam_data?.[key])}
                                                             </td>
                                                         ))}
-
-                                                        {/* Report Card Section */}
-                                                        <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                            {formatNumber(reportTotal)}
-                                                        </td>
-                                                        <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                            {reportGrade}
-                                                        </td>
-
-                                                        <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                            {formatNumber(student.report_card_data?.attendance)}
-                                                        </td>
-                                                        <td style={{ padding: '10px', textAlign: 'center' }}>
-                                                            {formatNumber(student.report_card_data?.participation)}
-                                                        </td>
                                                     </>
-                                                ) : (
+                                                )}
+
+                                                {/* Report Card Section */}
+                                                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb' }}>
+                                                    {formatNumber(reportTotal)}
+                                                </td>
+                                                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#dcfce7', borderRight: '1px solid #e5e7eb' }}>
+                                                    {reportGrade}
+                                                </td>
+
+                                                <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
+                                                    {formatNumber(student.report_card_data?.attendance)}
+                                                </td>
+                                                <td style={{ padding: '10px', textAlign: 'center' }}>
+                                                    {formatNumber(student.report_card_data?.participation)}
+                                                </td>
+
+                                                {isReportFirst && (
                                                     <>
-                                                        {/* Report Card Section */}
-                                                        <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                            {formatNumber(reportTotal)}
-                                                        </td>
-                                                        <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: getRatingColor(reportGrade), backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
-                                                            {reportGrade}
-                                                        </td>
-
-                                                        <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                            {formatNumber(student.report_card_data?.attendance)}
-                                                        </td>
-                                                        <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
-                                                            {formatNumber(student.report_card_data?.participation)}
-                                                        </td>
-
                                                         {/* Final Exam Section */}
                                                         <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                             {formatNumber(finalTotal)}
