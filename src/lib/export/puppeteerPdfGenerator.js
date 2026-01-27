@@ -914,7 +914,7 @@ function generateGradeReportHTML(data, yearTerm) {
     </tr>
   </table>
 
-  <div style="margin-bottom: 3mm; font-size: 10.5pt;">
+  <div style="margin-bottom: 3mm; font-size: 10.5pt; text-indent: 1em;">
     今学期の成績を下記の通り通知致します。
   </div>
 
@@ -955,7 +955,7 @@ function generateGradeReportHTML(data, yearTerm) {
 
   <div class="footer">
     <div class="school-name">神戸外語教育学院</div>
-    <div>Kobe Gaigo Language School</div>
+    <div>Kobe Foreign Language Education Academy</div>
   </div>
 
 </body>
@@ -1184,7 +1184,7 @@ function generateFinalExamHTML(data, yearTerm) {
     </tr>
   </table>
 
-  <div style="margin-bottom: 3mm; font-size: 10.5pt;">
+  <div style="margin-bottom: 3mm; font-size: 10.5pt; text-indent: 1em;">
     今学期の期末試験の結果を下記の通り通知致します。
   </div>
 
@@ -1223,7 +1223,7 @@ function generateFinalExamHTML(data, yearTerm) {
 
   <div class="footer">
     <div class="school-name">神戸外語教育学院</div>
-    <div>Kobe Gaigo Language School</div>
+    <div>Kobe Foreign Language Education Academy</div>
   </div>
 
 </body>
