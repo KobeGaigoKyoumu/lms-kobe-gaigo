@@ -844,12 +844,12 @@ export default function AnalyticsPage() {
                                             }
                                         })
                                         .map((student, index) => {
-                                            // Helper to truncate to 2 decimal places (floor)
+                                            // Helper to truncate to 1 decimal place (floor)
                                             const formatNumber = (num) => {
                                                 if (num === null || num === undefined || num === '-' || num === '') return '-'
                                                 const val = parseFloat(num)
                                                 if (isNaN(val)) return num
-                                                return Math.floor(val * 100) / 100
+                                                return Math.floor(val * 10) / 10
                                             }
 
                                             const finalTotal = student.final_exam_data
