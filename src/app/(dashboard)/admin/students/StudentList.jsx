@@ -577,22 +577,20 @@ export default function StudentList({ students: initialStudents, classes }) {
                                     <td className={styles.idCell}>{student.student_id_text}</td>
                                     <td>{student.full_name}</td>
                                     <td>
-                                        <td>
-                                            <select
-                                                value={String(studentInfo.grade || '')}
-                                                onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
-                                                className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
-                                                    String(studentInfo.grade) === '2' ? styles.grade2 :
-                                                        String(studentInfo.grade) === '0' ? styles.grade0 :
-                                                            styles.gradeOther
-                                                    }`}
-                                            >
-                                                <option value="1">1年生</option>
-                                                <option value="2">2年生</option>
-                                                <option value="0">非在籍</option>
-                                                {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={String(studentInfo.grade)}>その他</option>}
-                                            </select>
-                                        </td>
+                                        <select
+                                            value={String(studentInfo.grade || '')}
+                                            onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
+                                            className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
+                                                String(studentInfo.grade) === '2' ? styles.grade2 :
+                                                    String(studentInfo.grade) === '0' ? styles.grade0 :
+                                                        styles.gradeOther
+                                                }`}
+                                        >
+                                            <option value="1">1年生</option>
+                                            <option value="2">2年生</option>
+                                            <option value="0">非在籍</option>
+                                            {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={String(studentInfo.grade)}>その他</option>}
+                                        </select>
                                     </td>
                                     <td>{student.class_name || '-'}</td>
                                     <td>
