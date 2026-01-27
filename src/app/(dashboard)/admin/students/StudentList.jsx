@@ -25,7 +25,6 @@ export default function StudentList({ students: initialStudents, classes }) {
 
     // Sync state with props when router refreshes
     useEffect(() => {
-        console.log('useEffect: initialStudents updated', initialStudents.slice(0, 3).map(s => ({ id: s.student_id_text, year: s.academic_year })))
         setStudents(initialStudents)
     }, [initialStudents])
 
@@ -65,14 +64,7 @@ export default function StudentList({ students: initialStudents, classes }) {
         return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
 
-    // Debug loop inside render (simplified)
-    if (selectedIds.size === 0 && students.length > 0) {
-        const target = students.find(s => s.student_id_text === '2307077')
-        if (target) {
-            const info = parseStudentId(target.student_id_text, new Date(), target.academic_year)
-            console.log(`Render 2307077: AY=${target.academic_year} Grade=${info.grade}`)
-        }
-    }
+
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
@@ -97,8 +89,6 @@ export default function StudentList({ students: initialStudents, classes }) {
 
     // Handler for Grade Change
     const handleGradeChange = async (studentId, newGrade) => {
-        console.log(`handleGradeChange: ID=${studentId}, NewGrade=${newGrade}`)
-
         // Calculate new academic year based on desired grade
         // Grade 1 = Current Year
         // Grade 2 = Current Year - 1
@@ -107,8 +97,6 @@ export default function StudentList({ students: initialStudents, classes }) {
         const today = new Date()
         const isBeforeApril = today.getMonth() < 3
         const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-
-        console.log(`Year Base: ${academicYearBase}`)
 
         let newAcademicYear
 
@@ -120,11 +108,8 @@ export default function StudentList({ students: initialStudents, classes }) {
             // Set to 2 years ago (making them 3rd year+, i.e., graduated/non-enrolled)
             newAcademicYear = academicYearBase - 2
         } else {
-            console.log('Unknown grade selected')
             return
         }
-
-        console.log(`Updating academic_year to: ${newAcademicYear}`)
 
         const { error } = await supabase
             .from('students')
@@ -132,7 +117,6 @@ export default function StudentList({ students: initialStudents, classes }) {
             .eq('student_id_text', studentId)
 
         if (!error) {
-            console.log('Update successful, updating local state')
             setStudents(prev => prev.map(s =>
                 s.student_id_text === studentId ? { ...s, academic_year: newAcademicYear } : s
             ))
@@ -574,7 +558,7 @@ export default function StudentList({ students: initialStudents, classes }) {
                             const isSelected = selectedIds.has(student.student_id_text)
 
                             if (student.student_id_text === '2307077') {
-                                console.log(`Rendering 2307077: AY=${student.academic_year} Grade=${studentInfo.grade}`)
+                                // console.log(`Rendering 2307077: AY=${student.academic_year} Grade=${studentInfo.grade}`)
                             }
 
                             return (
