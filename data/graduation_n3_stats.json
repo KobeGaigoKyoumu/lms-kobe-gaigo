@@ -2,117 +2,133 @@
   "graduation_stats": [
     {
       "year": "2019年3月",
-      "total": 160,
-      "matched": 137,
-      "n3_plus": 37,
-      "rate": 23.125,
-      "match_rate": 85.625,
+      "total": 159,
+      "matched": 159,
+      "n3_plus": 35,
+      "rate": 22.0,
+      "match_rate": 100,
       "kanji_stats": {
-        "total": 9,
-        "n3_plus": 4,
-        "rate": 44.44444444444444
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0
       },
       "non_kanji_stats": {
-        "total": 151,
-        "n3_plus": 33,
-        "rate": 21.85430463576159
+        "total": 159,
+        "n3_plus": 35,
+        "rate": 22.0
       }
     },
     {
       "year": "2020年3月",
       "total": 139,
-      "matched": 138,
-      "n3_plus": 62,
-      "rate": 44.60431654676259,
-      "match_rate": 99.28057553956835,
+      "matched": 139,
+      "n3_plus": 59,
+      "rate": 42.4,
+      "match_rate": 100,
       "kanji_stats": {
-        "total": 7,
-        "n3_plus": 3,
-        "rate": 42.857142857142854
+        "total": 2,
+        "n3_plus": 0,
+        "rate": 0.0
       },
       "non_kanji_stats": {
-        "total": 132,
+        "total": 137,
         "n3_plus": 59,
-        "rate": 44.696969696969695
+        "rate": 43.1
       }
     },
     {
       "year": "2021年3月",
       "total": 57,
-      "matched": 47,
-      "n3_plus": 26,
-      "rate": 45.614035087719294,
-      "match_rate": 82.45614035087719,
+      "matched": 57,
+      "n3_plus": 13,
+      "rate": 22.8,
+      "match_rate": 100,
       "kanji_stats": {
         "total": 19,
-        "n3_plus": 12,
-        "rate": 63.1578947368421
+        "n3_plus": 0,
+        "rate": 0.0
       },
       "non_kanji_stats": {
         "total": 38,
-        "n3_plus": 14,
-        "rate": 36.84210526315789
+        "n3_plus": 13,
+        "rate": 34.2
+      }
+    },
+    {
+      "year": "2022年3月",
+      "total": 0,
+      "matched": 0,
+      "n3_plus": 0,
+      "rate": 0,
+      "match_rate": 0,
+      "kanji_stats": {
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0
+      },
+      "non_kanji_stats": {
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0
       }
     },
     {
       "year": "2023年3月",
-      "total": 48,
-      "matched": 44,
-      "n3_plus": 22,
-      "rate": 45.83333333333333,
-      "match_rate": 91.66666666666667,
+      "total": 45,
+      "matched": 45,
+      "n3_plus": 18,
+      "rate": 40.0,
+      "match_rate": 100,
       "kanji_stats": {
-        "total": 13,
-        "n3_plus": 6,
-        "rate": 46.15384615384615
+        "total": 16,
+        "n3_plus": 5,
+        "rate": 31.2
       },
       "non_kanji_stats": {
-        "total": 35,
-        "n3_plus": 16,
-        "rate": 45.714285714285715
+        "total": 29,
+        "n3_plus": 13,
+        "rate": 44.8
       }
     },
     {
       "year": "2024年3月",
-      "total": 239,
-      "matched": 229,
-      "n3_plus": 119,
-      "rate": 49.7907949790795,
-      "match_rate": 95.81589958158995,
+      "total": 238,
+      "matched": 238,
+      "n3_plus": 97,
+      "rate": 40.8,
+      "match_rate": 100,
       "kanji_stats": {
         "total": 46,
-        "n3_plus": 28,
-        "rate": 60.86956521739131
+        "n3_plus": 16,
+        "rate": 34.8
       },
       "non_kanji_stats": {
-        "total": 193,
-        "n3_plus": 91,
-        "rate": 47.150259067357516
+        "total": 192,
+        "n3_plus": 81,
+        "rate": 42.2
       }
     },
     {
       "year": "2025年3月",
       "total": 250,
-      "matched": 248,
-      "n3_plus": 163,
-      "rate": 65.2,
-      "match_rate": 99.2,
+      "matched": 250,
+      "n3_plus": 153,
+      "rate": 61.2,
+      "match_rate": 100,
       "kanji_stats": {
         "total": 15,
-        "n3_plus": 9,
-        "rate": 60.0
+        "n3_plus": 8,
+        "rate": 53.3
       },
       "non_kanji_stats": {
         "total": 235,
-        "n3_plus": 154,
-        "rate": 65.53191489361701
+        "n3_plus": 145,
+        "rate": 61.7
       }
     }
   ],
   "summary": {
-    "total_graduates": 893,
-    "matched_with_jlpt": 843,
-    "n3_plus_count": 429,
-    "n3_plus_rate": 48.04031354983203
+    "total_graduates": 888,
+    "last_updated": "2026-01-26"
   }
 }
