@@ -763,7 +763,7 @@ function generateGradeReportHTML(data, yearTerm) {
       font-size: 10.5pt;
       line-height: 1.5;
       color: #000;
-      padding: 15mm 20mm;
+      padding: 25mm 20mm;
       background: #fff;
     }
     
@@ -1033,7 +1033,7 @@ function generateFinalExamHTML(data, yearTerm) {
       font-size: 10.5pt;
       line-height: 1.5;
       color: #000;
-      padding: 15mm 20mm;
+      padding: 25mm 20mm;
       background: #fff;
     }
     
