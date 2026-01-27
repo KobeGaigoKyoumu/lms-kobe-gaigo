@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import StudentList from './StudentList'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StudentsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
