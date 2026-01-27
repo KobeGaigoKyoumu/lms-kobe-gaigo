@@ -943,9 +943,9 @@ function generateGradeReportHTML(data, yearTerm) {
         <div>成績合計点</div>
         <div><span class="summary-val">${report_card_total.toFixed(1)}</span> / 100</div>
     </div>
-    <div class="summary-item">
-        <div>総合評定</div>
-        <div style="margin-top:5px;"><span class="grade-circle">${calculateGrade(report_card_total)}</span></div>
+    <div class="summary-item" style="border: 2px solid #000; padding: 5px 15px;">
+        <div style="font-size: 11pt;">総合評定</div>
+        <div style="margin-top:0px; font-size: 20pt; font-weight: bold;">${calculateGrade(report_card_total)}</div>
     </div>
   </div>
 
