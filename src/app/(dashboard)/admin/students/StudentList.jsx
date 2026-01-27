@@ -97,9 +97,12 @@ export default function StudentList({ students: initialStudents, classes }) {
             newAcademicYear = academicYearBase
         } else if (newGrade === '2') {
             newAcademicYear = academicYearBase - 1
+        } else if (newGrade === '0') {
+            // Set to 2 years ago (making them 3rd year+, i.e., graduated/non-enrolled)
+            newAcademicYear = academicYearBase - 2
         } else {
             // For "Other", maybe don't change or set to null? 
-            // Let's assume user only changes to 1 or 2 for now, or we keep existing if selecting "other"
+            // Let's assume user only changes to 1, 2, or 0 for now
             return
         }
 
