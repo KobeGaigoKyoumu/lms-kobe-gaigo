@@ -703,6 +703,23 @@ export default function AnalyticsPage() {
         }]
     }
 
+    // New: Final Exam Rating Distribution (A-F based on 600 scale)
+    const finalGradeDistribution = {
+        labels: ['F (0-119)', 'D (120-239)', 'C (240-359)', 'B (360-479)', 'A (480-600)'],
+        datasets: [{
+            label: '人数',
+            data: [0, 0, 0, 0, 0],
+            backgroundColor: [
+                'rgba(239, 68, 68, 0.6)',   // F
+                'rgba(249, 115, 22, 0.6)',  // D
+                'rgba(250, 204, 21, 0.6)',  // C
+                'rgba(59, 130, 246, 0.6)',  // B
+                'rgba(34, 197, 94, 0.6)',   // A
+            ],
+            borderWidth: 1,
+        }]
+    }
+
     filteredGrades.forEach(g => {
         // Grade Distribution (Report Card Total)
         const score = g.report_card_total || 0
@@ -717,10 +734,18 @@ export default function AnalyticsPage() {
             const scores = Object.values(g.final_exam_data)
             const total = scores.reduce((a, b) => a + (parseFloat(b) || 0), 0)
 
+            // Range distribution
             if (total >= 500) finalExamDistribution.datasets[0].data[3]++
             else if (total >= 400) finalExamDistribution.datasets[0].data[2]++
             else if (total >= 300) finalExamDistribution.datasets[0].data[1]++
             else finalExamDistribution.datasets[0].data[0]++
+
+            // Grade distribution (A-F)
+            if (total >= 480) finalGradeDistribution.datasets[0].data[4]++
+            else if (total >= 360) finalGradeDistribution.datasets[0].data[3]++
+            else if (total >= 240) finalGradeDistribution.datasets[0].data[2]++
+            else if (total >= 120) finalGradeDistribution.datasets[0].data[1]++
+            else finalGradeDistribution.datasets[0].data[0]++
         }
     })
 
@@ -971,6 +996,12 @@ export default function AnalyticsPage() {
                             <h3 className={styles.chartTitle}>成績分布</h3>
                             <div className={styles.chartContainer}>
                                 <Bar data={gradeDistribution} options={chartOptions} />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>期末試験の判定分布</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar data={finalGradeDistribution} options={chartOptions} />
                             </div>
                         </div>
                         <div className={styles.chartCard}>
