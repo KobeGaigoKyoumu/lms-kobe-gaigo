@@ -1218,12 +1218,12 @@ function generateFinalExamHTML(data, yearTerm) {
         <div><span class="summary-val">${final_exam_total}</span> / 600</div>
     </div>
     <div class="summary-item">
-        <div>平均</div>
+        <div>6科目平均</div>
         <div><span class="summary-val">${(final_exam_total / 6).toFixed(1)}</span> / 100</div>
     </div>
-    <div class="summary-item">
-        <div>総合判定</div>
-        <div style="margin-top:5px;"><span class="grade-square">${calculateTotalGrade(final_exam_total)}</span></div>
+    <div class="summary-item" style="border: 2px solid #000; padding: 5px 15px;">
+        <div style="font-size: 11pt;">総合判定</div>
+        <div style="margin-top:0px; font-size: 20pt; font-weight: bold;">${calculateTotalGrade(final_exam_total)}</div>
     </div>
   </div>
 
