@@ -781,7 +781,7 @@ export default function AnalyticsPage() {
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
                                         <th style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
                                         <th style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>学籍番号</th>
-                                        <th style={{ padding: '12px', textAlign: 'left', minWidth: '80px', borderRight: '1px solid #e5e7eb' }}>クラス</th>
+                                        <th style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>クラス</th>
                                         <th style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>氏名</th>
 
                                         {/* Dynamic Section Ordering */}
