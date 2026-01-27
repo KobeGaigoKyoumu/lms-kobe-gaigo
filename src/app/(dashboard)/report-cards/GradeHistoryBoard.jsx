@@ -138,34 +138,38 @@ export default function GradeHistoryBoard() {
 
 
 
-    const deleteClassRecords = async () => {
-        if (!selectedTerm || !selectedClass || selectedClass === 'ALL') return
+    // Class Deletion State
+    const [selectedClassesForDeletion, setSelectedClassesForDeletion] = useState([])
 
-        const targetCount = filteredRecords.length
-        if (targetCount === 0) return
+    // Clear selection when term changes
+    useEffect(() => {
+        setSelectedClassesForDeletion([])
+    }, [selectedTerm])
 
-        if (!confirm(`【警告】\n${selectedTerm} のクラス「${selectedClass}」の全データ（${targetCount}件）を削除しようとしています。\n\nこの操作は取り消せません。\n本当に削除してもよろしいですか？`)) return
+    const deleteSelectedClasses = async () => {
+        if (!selectedTerm || selectedClassesForDeletion.length === 0) return
+
+        if (!confirm(`【警告】\n${selectedTerm} の以下のクラスの全データを削除しようとしています。\n\n対象クラス: ${selectedClassesForDeletion.join(', ')}\n\nこの操作は取り消せません。\n本当に削除してもよろしいですか？`)) return
 
         try {
             setLoading(true)
+
+            // Delete records for each selected class
+            // Supabase "in" operator is useful here: class_name.in.(item1,item2)
             const { error, count } = await supabase
                 .from('grade_records')
                 .delete({ count: 'exact' })
                 .eq('year_term', selectedTerm)
-                .eq('class_name', selectedClass)
+                .in('class_name', selectedClassesForDeletion)
 
             if (error) throw error
 
-            if (count === 0) {
-                console.warn('Deletion attempted but 0 rows deleted. Term:', selectedTerm, 'Class:', selectedClass);
-                alert('削除できませんでした。\n権限不足の可能性があります。管理者に連絡するか、権限を確認してください。');
-                // Refresh to make sure UI is in sync
-                fetchRecords();
-            } else {
-                alert(`${count}件のデータを削除しました`);
-                // Use fetchRecords to ensure local state perfectly matches DB state
-                fetchRecords();
-            }
+            alert(`${count}件のデータを削除しました`);
+
+            // Refresh
+            fetchRecords();
+            setSelectedClassesForDeletion([]); // Clear selection
+
         } catch (err) {
             console.error('Error deleting class records:', err)
             alert('一括削除に失敗しました: ' + err.message)
@@ -330,39 +334,90 @@ export default function GradeHistoryBoard() {
                 </div>
             </div>
 
-            {/* Class Delete Button (Accordion) - Restored */}
-            <details style={{ marginTop: '10px', marginBottom: '20px' }}>
-                <summary style={{ cursor: 'pointer', color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', listStyle: 'none' }}>
-                    開発者メニュー（クラス一括削除）
-                </summary>
-                <div style={{ marginTop: '10px' }}>
-                    <button
-                        onClick={deleteClassRecords}
-                        disabled={!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#f3f4f6' : '#fff1f2',
-                            color: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#9ca3af' : '#be123c',
-                            border: '1px solid',
-                            borderColor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? '#e5e7eb' : '#fda4af',
-                            borderRadius: '6px',
-                            fontWeight: 'bold',
-                            cursor: (!selectedClass || selectedClass === 'ALL' || filteredRecords.length === 0) ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                        {(!selectedClass || selectedClass === 'ALL') ? 'クラスを選択して削除' : `クラス「${selectedClass}」の全データを削除`}
-                    </button>
+            {/* Class Management Section */}
+            {selectedTerm && (
+                <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#374151', margin: 0 }}>
+                            {selectedTerm} のクラス管理
+                        </h3>
+                        <button
+                            onClick={deleteSelectedClasses}
+                            disabled={selectedClassesForDeletion.length === 0 || loading}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: selectedClassesForDeletion.length === 0 ? '#f3f4f6' : '#fee2e2',
+                                color: selectedClassesForDeletion.length === 0 ? '#9ca3af' : '#b91c1c',
+                                border: '1px solid',
+                                borderColor: selectedClassesForDeletion.length === 0 ? '#e5e7eb' : '#fca5a5',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                cursor: selectedClassesForDeletion.length === 0 ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                            選択したクラス ({selectedClassesForDeletion.length}件) を削除
+                        </button>
+                    </div>
+
+                    {(() => {
+                        const classesInTerm = [...new Set(records.filter(r => r.year_term === selectedTerm).map(r => r.class_name))].sort();
+
+                        if (classesInTerm.length === 0) {
+                            return <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>この学期にはクラスデータがありません。</div>;
+                        }
+
+                        return (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
+                                {classesInTerm.map(cls => {
+                                    const count = records.filter(r => r.year_term === selectedTerm && r.class_name === cls).length;
+                                    const isSelected = selectedClassesForDeletion.includes(cls);
+
+                                    return (
+                                        <label
+                                            key={cls}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                padding: '10px',
+                                                backgroundColor: '#fff',
+                                                border: isSelected ? '1px solid #3b82f6' : '1px solid #d1d5db',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                            }}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => {
+                                                    setSelectedClassesForDeletion(prev =>
+                                                        prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]
+                                                    );
+                                                }}
+                                                style={{ marginRight: '10px', width: '16px', height: '16px' }}
+                                            />
+                                            <div>
+                                                <div style={{ fontWeight: 'bold', color: '#1f2937' }}>{cls}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{count}名のデータ</div>
+                                            </div>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })()}
                 </div>
-            </details>
+            )}
 
             {/* PRIMARY TABS: List vs Details */}
             <div style={{ marginBottom: '20px', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '20px' }}>
