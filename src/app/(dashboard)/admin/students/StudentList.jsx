@@ -590,7 +590,7 @@ export default function StudentList({ students: initialStudents, classes }) {
                                     <td>{student.full_name}</td>
                                     <td>
                                         <select
-                                            value={String(studentInfo.grade || '')}
+                                            value={String(studentInfo.grade ?? '')}
                                             onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
                                             className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
                                                 String(studentInfo.grade) === '2' ? styles.grade2 :
