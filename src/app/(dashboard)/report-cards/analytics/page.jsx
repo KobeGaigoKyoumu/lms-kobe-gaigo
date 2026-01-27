@@ -138,6 +138,10 @@ export default function AnalyticsPage() {
     const [terms, setTerms] = useState([])
     const [classes, setClasses] = useState([])
 
+    // Range Filter State
+    const [finalExamRange, setFinalExamRange] = useState({ min: 0, max: 600 })
+    const [reportCardRange, setReportCardRange] = useState({ min: 0, max: 100 })
+
     // JLPT analytics state
     const [jlptData, setJlptData] = useState([])
     const [enhancedJlptStats, setEnhancedJlptStats] = useState(null)
@@ -403,22 +407,38 @@ export default function AnalyticsPage() {
     }
 
     // --- Grade Analytics Processing ---
-    const filteredGrades = grades.filter(g =>
-        (selectedTerm ? g.year_term === selectedTerm : true) &&
-        (selectedClass ? g.class_name === selectedClass : true)
-    )
+    const filteredGrades = grades.filter(g => {
+        // Basic Filters (Term, Class)
+        const matchBasic = (selectedTerm ? g.year_term === selectedTerm : true) &&
+            (selectedClass ? g.class_name === selectedClass : true)
 
+        if (!matchBasic) return false
+
+        // Range Filters
+        const reportTotal = g.report_card_total || 0
+        const finalExamTotal = g.final_exam_data
+            ? Object.values(g.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
+            : 0
+
+        const matchFinalExam = finalExamTotal >= finalExamRange.min && finalExamTotal <= finalExamRange.max
+        const matchReportCard = reportTotal >= reportCardRange.min && reportTotal <= reportCardRange.max
+
+        return matchFinalExam && matchReportCard
+    })
+
+    // Reordered: Low Score (F) -> High Score (A)
+    // Reordered: Low Score (F) -> High Score (A)
     const gradeDistribution = {
-        labels: ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'F (0-49)'],
+        labels: ['F (0-49)', 'D (50-59)', 'C (60-69)', 'B (70-79)', 'A (80-100)'],
         datasets: [{
             label: '人数',
             data: [0, 0, 0, 0, 0],
             backgroundColor: [
-                'rgba(34, 197, 94, 0.6)',
-                'rgba(59, 130, 246, 0.6)',
-                'rgba(250, 204, 21, 0.6)',
-                'rgba(249, 115, 22, 0.6)',
-                'rgba(239, 68, 68, 0.6)',
+                'rgba(239, 68, 68, 0.6)',   // F - Red
+                'rgba(249, 115, 22, 0.6)',  // D - Orange
+                'rgba(250, 204, 21, 0.6)',  // C - Yellow
+                'rgba(59, 130, 246, 0.6)',  // B - Blue
+                'rgba(34, 197, 94, 0.6)',   // A - Green
             ],
             borderWidth: 1,
         }],
@@ -426,11 +446,6 @@ export default function AnalyticsPage() {
 
     // New: Final Exam Total Score Distribution (600 points max)
     const finalExamDistribution = {
-        labels: ['0-299', '300-359', '360-419', '420-479', '480-539', '540-600'], // Adjusted to match grade boundaries roughly (50%, 60%, 70%, 80%, 90%?)
-        // Let's use simpler 50-point bins? Or 100?
-        // User didn't specify bins. Let's use 100-point ranges + split high scores? 
-        // Or 0-359 (Fail), 360-419 (60%), 420-479 (70%), 480-539 (80%), 540-600 (90%)
-        // Let's use straightforward ranges: 0-299, 300-399, 400-499, 500-600
         labels: ['0-299', '300-399', '400-499', '500-600'],
         datasets: [{
             label: '人数',
@@ -443,11 +458,11 @@ export default function AnalyticsPage() {
     filteredGrades.forEach(g => {
         // Grade Distribution (Report Card Total)
         const score = g.report_card_total || 0
-        if (score >= 80) gradeDistribution.datasets[0].data[0]++
-        else if (score >= 70) gradeDistribution.datasets[0].data[1]++
-        else if (score >= 60) gradeDistribution.datasets[0].data[2]++
-        else if (score >= 50) gradeDistribution.datasets[0].data[3]++
-        else gradeDistribution.datasets[0].data[4]++
+        if (score >= 80) gradeDistribution.datasets[0].data[4]++      // A -> Index 4
+        else if (score >= 70) gradeDistribution.datasets[0].data[3]++ // B -> Index 3
+        else if (score >= 60) gradeDistribution.datasets[0].data[2]++ // C -> Index 2
+        else if (score >= 50) gradeDistribution.datasets[0].data[1]++ // D -> Index 1
+        else gradeDistribution.datasets[0].data[0]++                  // F -> Index 0
 
         // Final Exam Distribution
         if (g.final_exam_data) {
@@ -691,6 +706,49 @@ export default function AnalyticsPage() {
                                 {classes.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
+
+                        {/* Range Filters */}
+                        <div className={styles.filterGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: 0 }}>期末合計:</label>
+                            <input
+                                type="number"
+                                className={styles.filterInput}
+                                style={{ width: '70px', padding: '6px', border: '1px solid #e2e8f0', borderRadius: '4px' }}
+                                value={finalExamRange.min}
+                                onChange={(e) => setFinalExamRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                                placeholder="0"
+                            />
+                            <span>~</span>
+                            <input
+                                type="number"
+                                className={styles.filterInput}
+                                style={{ width: '70px', padding: '6px', border: '1px solid #e2e8f0', borderRadius: '4px' }}
+                                value={finalExamRange.max}
+                                onChange={(e) => setFinalExamRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                                placeholder="600"
+                            />
+                        </div>
+
+                        <div className={styles.filterGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: 0 }}>成績総合:</label>
+                            <input
+                                type="number"
+                                className={styles.filterInput}
+                                style={{ width: '70px', padding: '6px', border: '1px solid #e2e8f0', borderRadius: '4px' }}
+                                value={reportCardRange.min}
+                                onChange={(e) => setReportCardRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                                placeholder="0"
+                            />
+                            <span>~</span>
+                            <input
+                                type="number"
+                                className={styles.filterInput}
+                                style={{ width: '70px', padding: '6px', border: '1px solid #e2e8f0', borderRadius: '4px' }}
+                                value={reportCardRange.max}
+                                onChange={(e) => setReportCardRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                                placeholder="100"
+                            />
+                        </div>
                     </div>
 
                     <div className={styles.chartsRow}>
@@ -711,6 +769,111 @@ export default function AnalyticsPage() {
                             <div className={styles.chartContainer}>
                                 <Bar data={subjectAverages} options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }} />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Student Ranking Table */}
+                    <div className={styles.tableCard} style={{ marginTop: '24px', padding: '24px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3 className={styles.chartTitle} style={{ margin: 0 }}>学生成績順位表 ({filteredGrades.length}名)</h3>
+                        </div>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+                                        <th style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
+                                        <th style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>学籍番号</th>
+                                        <th style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>氏名</th>
+
+                                        {/* Final Exam Section */}
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                            <div>期末合計</div>
+                                            <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
+                                        </th>
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>評定</th>
+                                        {['語彙', '聴解', '読解', '文法', '作文', '会話'].map(subj => (
+                                            <th key={subj} style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}>{subj}</th>
+                                        ))}
+
+                                        {/* Report Card Section */}
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>出席</th>
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>平常</th>
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
+                                            <div>成績総合</div>
+                                            <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
+                                        </th>
+                                        <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold' }}>評定</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredGrades
+                                        .sort((a, b) => (b.report_card_total || 0) - (a.report_card_total || 0))
+                                        .map((student, index) => {
+                                            const finalTotal = student.final_exam_data
+                                                ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
+                                                : 0
+
+                                            // Final Exam Grade Calculation (Using 600 scale percentages)
+                                            // A: 80% (480+), B: 60% (360+), C: 40% (240+), D: 20% (120+)
+                                            const getFinalGrade = (score) => {
+                                                if (score >= 480) return 'A'
+                                                if (score >= 360) return 'B'
+                                                if (score >= 240) return 'C'
+                                                if (score >= 120) return 'D'
+                                                return 'F'
+                                            }
+                                            const finalGrade = getFinalGrade(finalTotal)
+
+                                            // Report Card Grade
+                                            const reportTotal = student.report_card_total || 0
+                                            const getReportGrade = (score) => {
+                                                if (score >= 80) return 'A'
+                                                if (score >= 70) return 'B'
+                                                if (score >= 60) return 'C'
+                                                if (score >= 50) return 'D'
+                                                return 'F'
+                                            }
+                                            const reportGrade = getReportGrade(reportTotal)
+
+                                            const rowBg = index % 2 === 0 ? 'white' : '#f9fafb'
+
+                                            return (
+                                                <tr key={student.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: rowBg }}>
+                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>{index + 1}</td>
+                                                    <td style={{ padding: '10px', borderRight: '1px solid #e5e7eb' }}>{student.student_id_text}</td>
+                                                    <td style={{ padding: '10px', borderRight: '1px solid #e5e7eb' }}>{student.student_name}</td>
+
+                                                    {/* Final Exam */}
+                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                        {finalTotal}
+                                                    </td>
+                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: finalGrade === 'A' ? '#16a34a' : finalGrade === 'F' ? '#dc2626' : 'inherit', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                        {finalGrade}
+                                                    </td>
+                                                    {['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(key => (
+                                                        <td key={key} style={{ padding: '10px', textAlign: 'center', fontSize: '0.9em', color: '#6b7280', borderRight: '1px solid #e5e7eb' }}>
+                                                            {student.final_exam_data?.[key] ?? '-'}
+                                                        </td>
+                                                    ))}
+
+                                                    {/* Report Card */}
+                                                    <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
+                                                        {student.report_card_data?.attendance ?? '-'}
+                                                    </td>
+                                                    <td style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #e5e7eb' }}>
+                                                        {student.report_card_data?.participation ?? '-'}
+                                                    </td>
+                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                                        {reportTotal}
+                                                    </td>
+                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: reportGrade === 'A' ? '#16a34a' : reportGrade === 'F' ? '#dc2626' : 'inherit', backgroundColor: '#f0fdf4' }}>
+                                                        {reportGrade}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </>
