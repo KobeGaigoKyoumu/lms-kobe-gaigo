@@ -509,6 +509,9 @@ export default function AnalyticsPage() {
             if (result.enhanced) {
                 setEnhancedJlptStats(result.enhanced)
             }
+            if (result.sectionScores) {
+                setSectionScoreStats(result.sectionScores)
+            }
             setLoadingJlpt(false)
         } catch (error) {
             console.error('Error fetching JLPT data:', error)
