@@ -520,8 +520,16 @@ export default function AnalyticsPage() {
         })
     }
 
+    // Tooltip for Sort Direction
+    const getSortTooltip = (columnKey) => {
+        const isCurrent = sortConfig.key === columnKey
+        // If current is desc, next is asc. Otherwise (asc or new column), next is desc.
+        if (isCurrent && sortConfig.direction === 'desc') return '昇順に並べ替え'
+        return '降順に並べ替え'
+    }
+
     // Determine Layout Mode based on Sort Key (to keep relevant columns visible/first)
-    const layoutMode = ['report_total', 'attendance', 'participation'].includes(sortConfig.key) ? 'report_card' : 'final_exam'
+    const layoutMode = 'final_exam' // Force full layout to allow subject sorting even when sorted by total
 
     // Helper for Sort Icon
     const SortIcon = ({ columnKey }) => {
@@ -582,13 +590,14 @@ export default function AnalyticsPage() {
 
             const getVal = (item, k) => {
                 switch (k) {
-                    case 'student_id': return item.student_id ? String(item.student_id) : ''
-                    case 'class_name': return item.class_name ? String(item.class_name) : ''
-                    case 'name': return item.student_name ? String(item.student_name) : ''
+                    case 'rank': // Rank is based on Final Total (Score), so same value
                     case 'final_total':
                         return item.final_exam_data
                             ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
                             : 0
+                    case 'student_id': return item.student_id ? String(item.student_id) : ''
+                    case 'class_name': return item.class_name ? String(item.class_name) : ''
+                    case 'name': return item.student_name ? String(item.student_name) : ''
                     case 'report_total': return item.report_card_total || 0
                     case 'attendance': return parseFloat(item.report_card_data?.attendance || 0)
                     case 'participation': return parseFloat(item.report_card_data?.participation || 0)
@@ -942,14 +951,14 @@ export default function AnalyticsPage() {
                             <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-                                        <th onClick={() => handleSort('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
-                                        <th onClick={() => handleSort('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('rank')} title={getSortTooltip('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
+                                        <th onClick={() => handleSort('student_id')} title={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>学籍番号</div>
                                         </th>
-                                        <th onClick={() => handleSort('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('class_name')} title={getSortTooltip('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>クラス</div>
                                         </th>
-                                        <th onClick={() => handleSort('name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('name')} title={getSortTooltip('name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>氏名</div>
                                         </th>
 
@@ -957,7 +966,7 @@ export default function AnalyticsPage() {
                                         {layoutMode === 'final_exam' ? (
                                             <>
                                                 {/* Final Exam Section */}
-                                                <th onClick={() => handleSort('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                <th onClick={() => handleSort('final_total')} title={getSortTooltip('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
                                                 </th>
@@ -973,6 +982,7 @@ export default function AnalyticsPage() {
                                                     <th
                                                         key={subj.key}
                                                         onClick={() => handleSort(subj.key)}
+                                                        title={getSortTooltip(subj.key)}
                                                         className={styles.sortableHeader}
                                                         style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}
                                                     >
@@ -981,16 +991,16 @@ export default function AnalyticsPage() {
                                                 ))}
 
                                                 {/* Report Card Section */}
-                                                <th onClick={() => handleSort('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
+                                                <th onClick={() => handleSort('report_total')} title={getSortTooltip('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
 
-                                                <th onClick={() => handleSort('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                                <th onClick={() => handleSort('attendance')} title={getSortTooltip('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
                                                 </th>
-                                                <th onClick={() => handleSort('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
+                                                <th onClick={() => handleSort('participation')} title={getSortTooltip('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
                                                 </th>
                                             </>
