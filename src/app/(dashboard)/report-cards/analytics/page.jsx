@@ -578,6 +578,13 @@ export default function AnalyticsPage() {
             }
         }
 
+        // Derived state for class list
+        const classes = useMemo(() => {
+            if (!grades) return []
+            const unique = [...new Set(grades.map(g => g.class_name))].filter(Boolean).sort()
+            return unique
+        }, [grades])
+
         // --- Grade Analytics Processing ---
         const filteredGrades = grades.filter(g => {
             // Calculate Grade Logic
@@ -868,17 +875,6 @@ export default function AnalyticsPage() {
                 {activeTab === 'grades' && (
                     <>
                         <div className={styles.filters}>
-                            <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>学期</label>
-                                <select
-                                    className={styles.filterSelect}
-                                    value={selectedTerm}
-                                    onChange={(e) => setSelectedTerm(e.target.value)}
-                                >
-                                    <option value="">すべての学期</option>
-                                    {terms.map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                            </div>
                             <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>学期</label>
                                 <select
