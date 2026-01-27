@@ -1143,6 +1143,16 @@ function generateFinalExamHTML(data, yearTerm) {
         font-size: 18pt;
         font-weight: bold;
     }
+    .grade-square {
+        display: inline-block;
+        width: 40px; 
+        height: 40px; 
+        line-height: 36px;
+        border: 2px solid #000; 
+        text-align: center;
+        font-size: 18pt;
+        font-weight: bold;
+    }
 
     /* Footer */
     .footer {
@@ -1204,16 +1214,16 @@ function generateFinalExamHTML(data, yearTerm) {
 
   <div class="summary-section">
     <div class="summary-item">
-        <div>総合計</div>
+        <div>総得点</div>
         <div><span class="summary-val">${final_exam_total}</span> / 600</div>
     </div>
     <div class="summary-item">
-        <div>平均点</div>
+        <div>平均</div>
         <div><span class="summary-val">${(final_exam_total / 6).toFixed(1)}</span> / 100</div>
     </div>
     <div class="summary-item">
         <div>総合判定</div>
-        <div style="margin-top:5px;"><span class="grade-circle">${calculateTotalGrade(final_exam_total)}</span></div>
+        <div style="margin-top:5px;"><span class="grade-square">${calculateTotalGrade(final_exam_total)}</span></div>
     </div>
   </div>
 
