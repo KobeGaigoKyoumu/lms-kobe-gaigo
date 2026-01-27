@@ -338,9 +338,38 @@ export default function GradeHistoryBoard() {
             {selectedTerm && (
                 <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#374151', margin: 0 }}>
-                            {selectedTerm} のクラス管理
-                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#374151', margin: 0 }}>
+                                {selectedTerm} のクラス管理
+                            </h3>
+                            {(() => {
+                                const classesInTerm = [...new Set(records.filter(r => r.year_term === selectedTerm).map(r => r.class_name))];
+                                const isAllSelected = classesInTerm.length > 0 && selectedClassesForDeletion.length === classesInTerm.length;
+
+                                return (
+                                    <button
+                                        onClick={() => {
+                                            if (isAllSelected) {
+                                                setSelectedClassesForDeletion([]);
+                                            } else {
+                                                setSelectedClassesForDeletion(classesInTerm);
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '4px 10px',
+                                            fontSize: '0.85rem',
+                                            backgroundColor: '#fff',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            color: '#4b5563'
+                                        }}
+                                    >
+                                        {isAllSelected ? '全解除' : '全選択'}
+                                    </button>
+                                );
+                            })()}
+                        </div>
                         <button
                             onClick={deleteSelectedClasses}
                             disabled={selectedClassesForDeletion.length === 0 || loading}
