@@ -132,7 +132,10 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder = "選択
         <div
             className={styles.filterGroup}
             style={{ position: 'relative', minWidth: '200px' }}
-            onMouseLeave={() => setIsOpen(false)}
+            onMouseLeave={() => {
+                // Small delay to prevent accidental closing
+                setTimeout(() => setIsOpen(false), 100);
+            }}
         >
             <label className={styles.filterLabel}>{label}</label>
             <div
