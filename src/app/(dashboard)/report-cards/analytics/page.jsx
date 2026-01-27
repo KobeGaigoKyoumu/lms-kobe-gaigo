@@ -581,13 +581,15 @@ export default function AnalyticsPage() {
         // Calculate Grade Logic: Use selectedTerm or the student's entry term as reference
         let studentGrade = null
         const targetTerm = selectedTerm || g.year_term
-        if (targetTerm && g.student_id) {
+        const studentId = g.student_id_text || g.student_id // Use student_id_text primarily
+
+        if (targetTerm && studentId) {
             // Extract Year from Term (e.g. "2024年度 前期" -> 2024)
-            const termYearMatch = targetTerm.match(/^(\d{4})/)
+            const termYearMatch = String(targetTerm).match(/^(\d{4})/)
             const termYear = termYearMatch ? parseInt(termYearMatch[1]) : null
 
             // Extract Year from Student ID (e.g. "2301001" -> 2023)
-            const idStr = String(g.student_id)
+            const idStr = String(studentId)
             if (termYear && idStr.length >= 2) {
                 const enrollmentPrefix = parseInt(idStr.substring(0, 2))
                 const enrollmentYear = 2000 + enrollmentPrefix
