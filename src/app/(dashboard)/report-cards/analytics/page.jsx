@@ -429,7 +429,7 @@ export default function AnalyticsPage() {
                     case 'class_name': return item.class_name ? String(item.class_name) : ''
                     case 'name': return item.student_name ? String(item.student_name) : ''
                     case 'final_total':
-                        return item.final_exam_data
+                        return (item.final_exam_data && typeof item.final_exam_data === 'object')
                             ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
                             : 0
                     case 'report_total': return item.report_card_total || 0
@@ -1030,7 +1030,7 @@ export default function AnalyticsPage() {
                                             return Math.floor(val * 10) / 10
                                         }
 
-                                        const finalTotal = student.final_exam_data
+                                        const finalTotal = (student.final_exam_data && typeof student.final_exam_data === 'object')
                                             ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
                                             : 0
 
