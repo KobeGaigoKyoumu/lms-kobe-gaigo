@@ -418,45 +418,7 @@ export default function AnalyticsPage() {
         setCareerStats(enhancedCareerStats)
     }, [enhancedJlptStats])
 
-    const getSortedGrades = () => {
-        return [...filteredGrades].sort((a, b) => { // Create a copy before sorting
-            const { key, direction } = sortConfig
-            const modifier = direction === 'asc' ? 1 : -1
 
-            const getVal = (item, k) => {
-                switch (k) {
-                    case 'student_id': return item.student_id ? String(item.student_id) : ''
-                    case 'class_name': return item.class_name ? String(item.class_name) : ''
-                    case 'name': return item.student_name ? String(item.student_name) : ''
-                    case 'final_total':
-                        return (item.final_exam_data && typeof item.final_exam_data === 'object')
-                            ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
-                            : 0
-                    case 'report_total': return item.report_card_total || 0
-                    case 'attendance': return parseFloat(item.report_card_data?.attendance || 0)
-                    case 'participation': return parseFloat(item.report_card_data?.participation || 0)
-                    // Subject scores
-                    case 'vocab': return parseFloat(item.final_exam_data?.vocab || 0)
-                    case 'listening': return parseFloat(item.final_exam_data?.listening || 0)
-                    case 'reading': return parseFloat(item.final_exam_data?.reading || 0)
-                    case 'grammar': return parseFloat(item.final_exam_data?.grammar || 0)
-                    case 'writing': return parseFloat(item.final_exam_data?.writing || 0)
-                    case 'conversation': return parseFloat(item.final_exam_data?.conversation || 0)
-                    default: return 0
-                }
-            }
-
-            const valA = getVal(a, key)
-            const valB = getVal(b, key)
-
-            if (typeof valA === 'string' && typeof valB === 'string') {
-                return valA.localeCompare(valB) * modifier
-            }
-            return (valA - valB) * modifier
-        })
-    }
-
-    const sortedFilteredGrades = getSortedGrades()
 
     // Calculate Class Summary List for List View
     const classSummaryList = useMemo(() => {
@@ -612,6 +574,46 @@ export default function AnalyticsPage() {
 
         return matchTerm && matchClass && matchGrade
     })
+
+    const getSortedGrades = () => {
+        return [...filteredGrades].sort((a, b) => { // Create a copy before sorting
+            const { key, direction } = sortConfig
+            const modifier = direction === 'asc' ? 1 : -1
+
+            const getVal = (item, k) => {
+                switch (k) {
+                    case 'student_id': return item.student_id ? String(item.student_id) : ''
+                    case 'class_name': return item.class_name ? String(item.class_name) : ''
+                    case 'name': return item.student_name ? String(item.student_name) : ''
+                    case 'final_total':
+                        return (item.final_exam_data && typeof item.final_exam_data === 'object')
+                            ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
+                            : 0
+                    case 'report_total': return item.report_card_total || 0
+                    case 'attendance': return parseFloat(item.report_card_data?.attendance || 0)
+                    case 'participation': return parseFloat(item.report_card_data?.participation || 0)
+                    // Subject scores
+                    case 'vocab': return parseFloat(item.final_exam_data?.vocab || 0)
+                    case 'listening': return parseFloat(item.final_exam_data?.listening || 0)
+                    case 'reading': return parseFloat(item.final_exam_data?.reading || 0)
+                    case 'grammar': return parseFloat(item.final_exam_data?.grammar || 0)
+                    case 'writing': return parseFloat(item.final_exam_data?.writing || 0)
+                    case 'conversation': return parseFloat(item.final_exam_data?.conversation || 0)
+                    default: return 0
+                }
+            }
+
+            const valA = getVal(a, key)
+            const valB = getVal(b, key)
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                return valA.localeCompare(valB) * modifier
+            }
+            return (valA - valB) * modifier
+        })
+    }
+
+    const sortedFilteredGrades = getSortedGrades()
 
     // Reordered: Low Score (F) -> High Score (A)
     // Reordered: Low Score (F) -> High Score (A)
