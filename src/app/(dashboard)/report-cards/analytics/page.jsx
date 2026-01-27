@@ -540,11 +540,11 @@ export default function AnalyticsPage() {
     // Helper for Rating Colors
     const getRatingColor = (grade) => {
         switch (grade) {
-            case 'A': return '#16a34a' // Green
-            case 'B': return '#2563eb' // Blue
-            case 'C': return '#ca8a04' // Yellow/Gold
-            case 'D': return '#ea580c' // Orange
-            case 'F': return '#dc2626' // Red
+            case 'A': return '#86efac' // Green 300
+            case 'B': return '#93c5fd' // Blue 300
+            case 'C': return '#fcd34d' // Amber 300
+            case 'D': return '#fdba74' // Orange 300
+            case 'F': return '#fca5a5' // Red 300
             default: return 'inherit'
         }
     }
