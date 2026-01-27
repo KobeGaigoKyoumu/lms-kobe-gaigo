@@ -573,3 +573,16 @@
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
 }
+.sortableHeader {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.sortableHeader:hover {
+    filter: brightness(0.95);
+}
+
+.sortableHeader:active {
+    transform: scale(0.98);
+}

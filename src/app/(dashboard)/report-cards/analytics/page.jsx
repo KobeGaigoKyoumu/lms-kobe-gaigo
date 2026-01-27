@@ -586,7 +586,7 @@ export default function AnalyticsPage() {
                     case 'class_name': return item.class_name ? String(item.class_name) : ''
                     case 'name': return item.student_name ? String(item.student_name) : ''
                     case 'final_total':
-                        return (item.final_exam_data && typeof item.final_exam_data === 'object')
+                        return item.final_exam_data
                             ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
                             : 0
                     case 'report_total': return item.report_card_total || 0
@@ -942,23 +942,23 @@ export default function AnalyticsPage() {
                             <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-                                        <th onClick={() => handleSort('rank')} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>順位</th>
-                                        <th onClick={() => handleSort('student_id')} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>学籍番号 <SortIcon columnKey="student_id" /></div>
+                                        <th onClick={() => handleSort('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
+                                        <th onClick={() => handleSort('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>学籍番号</div>
                                         </th>
-                                        <th onClick={() => handleSort('class_name')} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>クラス <SortIcon columnKey="class_name" /></div>
+                                        <th onClick={() => handleSort('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>クラス</div>
                                         </th>
-                                        <th onClick={() => handleSort('name')} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>氏名 <SortIcon columnKey="name" /></div>
+                                        <th onClick={() => handleSort('name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '140px', borderRight: '1px solid #e5e7eb' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>氏名</div>
                                         </th>
 
                                         {/* Dynamic Section Ordering */}
                                         {layoutMode === 'final_exam' ? (
                                             <>
                                                 {/* Final Exam Section */}
-                                                <th onClick={() => handleSort('final_total')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計 <SortIcon columnKey="final_total" /></div>
+                                                <th onClick={() => handleSort('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>評定</th>
@@ -973,45 +973,46 @@ export default function AnalyticsPage() {
                                                     <th
                                                         key={subj.key}
                                                         onClick={() => handleSort(subj.key)}
-                                                        style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}
+                                                        className={styles.sortableHeader}
+                                                        style={{ padding: '12px', textAlign: 'center', fontSize: '0.85em', backgroundColor: '#f0f9ff', color: '#4b5563', borderRight: '1px solid #e5e7eb' }}
                                                     >
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>{subj.label} <SortIcon columnKey={subj.key} /></div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>{subj.label}</div>
                                                     </th>
                                                 ))}
 
                                                 {/* Report Card Section */}
-                                                <th onClick={() => handleSort('report_total')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合 <SortIcon columnKey="report_total" /></div>
+                                                <th onClick={() => handleSort('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
 
-                                                <th onClick={() => handleSort('attendance')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席 <SortIcon columnKey="attendance" /></div>
+                                                <th onClick={() => handleSort('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
                                                 </th>
-                                                <th onClick={() => handleSort('participation')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常 <SortIcon columnKey="participation" /></div>
+                                                <th onClick={() => handleSort('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
                                                 </th>
                                             </>
                                         ) : (
                                             <>
                                                 {/* Report Card Section */}
-                                                <th onClick={() => handleSort('report_total')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合 <SortIcon columnKey="report_total" /></div>
+                                                <th onClick={() => handleSort('report_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>成績総合</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(100)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#dcfce7', fontWeight: 'bold', borderRight: '1px solid #e5e7eb' }}>評定</th>
 
-                                                <th onClick={() => handleSort('attendance')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席 <SortIcon columnKey="attendance" /></div>
+                                                <th onClick={() => handleSort('attendance')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>出席</div>
                                                 </th>
-                                                <th onClick={() => handleSort('participation')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常 <SortIcon columnKey="participation" /></div>
+                                                <th onClick={() => handleSort('participation')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f0fdf4', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>平常</div>
                                                 </th>
 
                                                 {/* Final Exam Section */}
-                                                <th onClick={() => handleSort('final_total')} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計 <SortIcon columnKey="final_total" /></div>
+                                                <th onClick={() => handleSort('final_total')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>期末合計</div>
                                                     <div style={{ fontSize: '0.8em', color: '#6b7280' }}>(600)</div>
                                                 </th>
                                                 <th style={{ padding: '12px', textAlign: 'center', backgroundColor: '#eff6ff', borderRight: '1px solid #e5e7eb' }}>評定</th>
@@ -1032,7 +1033,7 @@ export default function AnalyticsPage() {
                                             return Math.floor(val * 10) / 10
                                         }
 
-                                        const finalTotal = (student.final_exam_data && typeof student.final_exam_data === 'object')
+                                        const finalTotal = student.final_exam_data
                                             ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
                                             : 0
 
