@@ -245,6 +245,42 @@
     font-weight: 600;
 }
 
+/* Grade Select matching Status Select style */
+.gradeSelect {
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.gradeSelect.grade1 {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #bae6fd;
+}
+
+.gradeSelect.grade2 {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.gradeSelect.grade0 {
+    background: #f3f4f6;
+    color: #4b5563;
+    /* Gray like graduated */
+    border-color: #e5e7eb;
+}
+
+.gradeSelect.gradeOther {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
 /* Delete Button */
 .deleteBtn {
     padding: var(--spacing-1) var(--spacing-2);
