@@ -528,8 +528,8 @@ export default function AnalyticsPage() {
         return '降順に並べ替え'
     }
 
-    // Determine Layout Order: If sorting by Report Total, put that section first. Otherwise Final Exam first.
-    const isReportFirst = sortConfig.key === 'report_total'
+    // Determine Layout Order: If sorting by Report Total, Attendance, or Participation, put that section first. Otherwise Final Exam first.
+    const isReportFirst = ['report_total', 'attendance', 'participation'].includes(sortConfig.key)
 
     // Helper for Sort Icon
     const SortIcon = ({ columnKey }) => {
