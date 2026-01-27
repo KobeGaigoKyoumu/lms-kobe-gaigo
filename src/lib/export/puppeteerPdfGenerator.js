@@ -777,7 +777,7 @@ function generateGradeReportHTML(data, yearTerm) {
     
     .date-right {
         position: absolute;
-        top: 0;
+        top: -10mm;
         right: 0;
         font-size: 10pt;
     }
@@ -1047,7 +1047,7 @@ function generateFinalExamHTML(data, yearTerm) {
     
     .date-right {
         position: absolute;
-        top: 0;
+        top: -10mm;
         right: 0;
         font-size: 10pt;
     }
