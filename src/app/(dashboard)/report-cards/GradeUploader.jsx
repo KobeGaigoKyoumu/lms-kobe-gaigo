@@ -427,38 +427,46 @@ export default function GradeUploader() {
 
         try {
             const academicYear = selectedYear
-            const term = selectedTerm
+            const currentSelectedTerm = selectedTerm
 
-
-            const yearTerm = `${academicYear}年度 ${term}`
+            // If "通算" is selected, we want to save for "前期", "後期", and "通算"
+            // effectively copying this data to all 3 slots.
+            const targetTerms = currentSelectedTerm === '通算' ? ['前期', '後期', '通算'] : [currentSelectedTerm]
 
             let successCount = 0
 
             for (const student of grades) {
-                const { error } = await supabase
-                    .from('grade_records')
-                    .upsert({
-                        student_id_text: String(student.id),
-                        student_name: student.name,
-                        class_name: student.class,
-                        year_term: yearTerm,
-                        final_exam_data: student.finalExam,
-                        report_card_data: student.reportDetails, // 詳細データ保存
-                        final_exam_total: student.finalExamSum,
-                        report_card_total: student.reportCardTotal,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'student_id_text, year_term'
-                    })
 
-                if (error) {
-                    console.error('Save error for:', student.id, error)
-                } else {
-                    successCount++
+                // Save for each target term
+                for (const term of targetTerms) {
+                    const yearTerm = `${academicYear}年度 ${term}`
+
+                    const { error } = await supabase
+                        .from('grade_records')
+                        .upsert({
+                            student_id_text: String(student.id),
+                            student_name: student.name,
+                            class_name: student.class,
+                            year_term: yearTerm,
+                            final_exam_data: student.finalExam,
+                            report_card_data: student.reportDetails, // 詳細データ保存
+                            final_exam_total: student.finalExamSum,
+                            report_card_total: student.reportCardTotal,
+                            updated_at: new Date().toISOString()
+                        }, {
+                            onConflict: 'student_id_text, year_term'
+                        })
+
+                    if (error) {
+                        console.error(`Save error for ${student.id} (${yearTerm}):`, error)
+                    }
                 }
+                // Count successful students (not individual inserts)
+                successCount++
             }
 
-            setSaveMessage(`${successCount}件のデータを保存しました (学期: ${yearTerm})`)
+            const termDisplay = currentSelectedTerm === '通算' ? `${academicYear}年度 (前期・後期・通算)` : `${academicYear}年度 ${currentSelectedTerm}`
+            setSaveMessage(`${successCount}件のデータを保存しました (${termDisplay})`)
         } catch (err) {
             console.error(err)
             setSaveMessage('保存中にエラーが発生しました')
@@ -496,6 +504,7 @@ export default function GradeUploader() {
                         >
                             <option value="前期">前期</option>
                             <option value="後期">後期</option>
+                            <option value="通算">通算</option>
                         </select>
                     </div>
                 </div>
