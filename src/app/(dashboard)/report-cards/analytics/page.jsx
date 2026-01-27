@@ -981,7 +981,7 @@ export default function AnalyticsPage() {
                             <h3 className={styles.chartTitle} style={{ margin: 0 }}>
                                 学生成績順位表 ({filteredGrades.length}名)
                                 <span style={{ fontSize: '0.8em', fontWeight: 'normal', marginLeft: '10px', color: '#64748b' }}>
-                                    {layoutMode === 'final_exam' ? '※ 期末試験・科目中心' : '※ 成績総合・出席中心'}
+                                    {!isReportFirst ? '※ 期末試験・科目中心' : '※ 成績総合・出席中心'}
                                 </span>
                             </h3>
                         </div>
