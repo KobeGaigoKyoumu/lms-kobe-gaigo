@@ -115,7 +115,9 @@ export default function StudentList({ students: initialStudents, classes }) {
             setStudents(prev => prev.map(s =>
                 s.student_id_text === studentId ? { ...s, academic_year: newAcademicYear } : s
             ))
+            router.refresh()
         } else {
+            console.error('Grade update error:', error)
             alert('学年の更新に失敗しました')
         }
     }
@@ -566,9 +568,9 @@ export default function StudentList({ students: initialStudents, classes }) {
                                                 value={String(studentInfo.grade || '')}
                                                 onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
                                                 className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
-                                                        String(studentInfo.grade) === '2' ? styles.grade2 :
-                                                            String(studentInfo.grade) === '0' ? styles.grade0 :
-                                                                styles.gradeOther
+                                                    String(studentInfo.grade) === '2' ? styles.grade2 :
+                                                        String(studentInfo.grade) === '0' ? styles.grade0 :
+                                                            styles.gradeOther
                                                     }`}
                                             >
                                                 <option value="1">1年生</option>

@@ -40,7 +40,7 @@ export function parseStudentId(studentId, baseDate = new Date(), academicYearOve
 
     // Override if provided (allows manual grade adjustment)
     if (academicYearOverride) {
-        enrollmentYear = academicYearOverride
+        enrollmentYear = Number(academicYearOverride)
     }
 
     // 入学月（3-4桁目）
