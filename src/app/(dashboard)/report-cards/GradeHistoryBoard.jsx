@@ -382,35 +382,61 @@ export default function GradeHistoryBoard() {
                                     const isSelected = selectedClassesForDeletion.includes(cls);
 
                                     return (
-                                        <label
+                                        <div
                                             key={cls}
                                             style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 padding: '10px',
-                                                backgroundColor: '#fff',
-                                                border: isSelected ? '1px solid #3b82f6' : '1px solid #d1d5db',
+                                                backgroundColor: selectedClass === cls ? '#eff6ff' : '#fff',
+                                                border: selectedClass === cls ? '2px solid #3b82f6' : (isSelected ? '1px solid #ef4444' : '1px solid #d1d5db'),
                                                 borderRadius: '6px',
-                                                cursor: 'pointer',
                                                 transition: 'all 0.2s',
-                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                position: 'relative'
                                             }}
                                         >
-                                            <input
-                                                type="checkbox"
-                                                checked={isSelected}
-                                                onChange={() => {
+                                            {/* Checkbox for Deletion */}
+                                            <div
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     setSelectedClassesForDeletion(prev =>
                                                         prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]
                                                     );
                                                 }}
-                                                style={{ marginRight: '10px', width: '16px', height: '16px' }}
-                                            />
-                                            <div>
-                                                <div style={{ fontWeight: 'bold', color: '#1f2937' }}>{cls}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{count}名のデータ</div>
+                                                style={{
+                                                    padding: '5px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginRight: '8px'
+                                                }}
+                                                title="削除対象として選択"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => { }} // Handled by div click
+                                                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#ef4444' }}
+                                                />
                                             </div>
-                                        </label>
+
+                                            {/* Main Area for Viewing Details */}
+                                            <div
+                                                onClick={() => setSelectedClass(cls)}
+                                                style={{
+                                                    flex: 1,
+                                                    cursor: 'pointer',
+                                                }}
+                                                title="このクラスの成績を表示"
+                                            >
+                                                <div style={{ fontWeight: 'bold', color: selectedClass === cls ? '#1d4ed8' : '#1f2937' }}>{cls}</div>
+                                                <div style={{ fontSize: '0.8rem', color: selectedClass === cls ? '#60a5fa' : '#6b7280' }}>
+                                                    {count}名のデータ
+                                                    {selectedClass === cls && <span style={{ marginLeft: '5px', fontWeight: 'bold' }}>● 表示中</span>}
+                                                </div>
+                                            </div>
+                                        </div>
                                     );
                                 })}
                             </div>

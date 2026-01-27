@@ -221,6 +221,13 @@ export default function GradeUploader() {
                         conversation: parseFloat(row[examColMap.conversation]) || 0,
                     }
 
+                    // User Request: Multiplier for 2020-2023
+                    // Conversation and Writing scores are multiplied by 4 only for these years
+                    if (selectedYear >= 2020 && selectedYear <= 2023) {
+                        finalExam.writing *= 4
+                        finalExam.conversation *= 4
+                    }
+
                     // 期末試験の合計点 (600点満点)
                     const examScores = Object.values(finalExam)
                     const examSum = examScores.reduce((a, b) => a + b, 0)
