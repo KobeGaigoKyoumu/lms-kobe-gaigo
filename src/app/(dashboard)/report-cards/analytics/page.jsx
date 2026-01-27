@@ -549,6 +549,31 @@ export default function AnalyticsPage() {
         }
     }
 
+    // Helper to truncate to 1 decimal place (floor)
+    const formatNumber = (num) => {
+        if (num === null || num === undefined || num === '-' || num === '') return '-'
+        const val = parseFloat(num)
+        if (isNaN(val)) return num
+        return Math.floor(val * 10) / 10
+    }
+
+    // Final Exam Grade Calculation (Using 600 scale percentages)
+    const getFinalGrade = (score) => {
+        if (score >= 480) return 'A'
+        if (score >= 360) return 'B'
+        if (score >= 240) return 'C'
+        if (score >= 120) return 'D'
+        return 'F'
+    }
+
+    // Report Card Grade Calculation
+    const getReportGrade = (score) => {
+        if (score >= 80) return 'A'
+        if (score >= 70) return 'B'
+        if (score >= 60) return 'C'
+        if (score >= 50) return 'D'
+        return 'F'
+    }
 
 
     // --- Grade Analytics Processing ---
@@ -1052,49 +1077,13 @@ export default function AnalyticsPage() {
                                 </thead>
                                 <tbody>
                                     {sortedFilteredGrades.map((student, index) => {
-                                        // Helper to truncate to 1 decimal place (floor)
-                                        const formatNumber = (num) => {
-                                            if (num === null || num === undefined || num === '-' || num === '') return '-'
-                                            const val = parseFloat(num)
-                                            if (isNaN(val)) return num
-                                            return Math.floor(val * 10) / 10
-                                        }
-
                                         const finalTotal = student.final_exam_data
                                             ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
                                             : 0
-
-                                        // Final Exam Grade Calculation (Using 600 scale percentages)
-                                        // A: 80% (480+), B: 60% (360+), C: 40% (240+), D: 20% (120+)
-                                        const getFinalGrade = (score) => {
-                                            if (score >= 480) return 'A'
-                                            if (score >= 360) return 'B'
-                                            if (score >= 240) return 'C'
-                                            if (score >= 120) return 'D'
-                                            return 'F'
-                                        }
                                         const finalGrade = getFinalGrade(finalTotal)
 
-                                        // Report Card Grade
                                         const reportTotal = student.report_card_total || 0
-                                        const getReportGrade = (score) => {
-                                            if (score >= 80) return 'A'
-                                            if (score >= 70) return 'B'
-                                            if (score >= 60) return 'C'
-                                            if (score >= 50) return 'D'
-                                            return 'F'
-                                        }
                                         const reportGrade = getReportGrade(reportTotal)
-
-                                        // Attendance Calculation
-                                        const attendanceScore = parseFloat(student.report_card_data?.attendance || 0)
-                                        const attendanceRate = student.report_card_data?.attendance ? (attendanceScore / 15) * 100 : 0
-
-                                        const getRatingColor = (grade) => {
-                                            if (grade === 'A') return '#16a34a' // green
-                                            if (grade === 'F') return '#dc2626' // red
-                                            return 'inherit'
-                                        }
 
                                         const rowBg = index % 2 === 0 ? 'white' : '#f9fafb'
 
