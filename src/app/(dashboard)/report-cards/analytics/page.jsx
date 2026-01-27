@@ -129,7 +129,11 @@ const AccordionChevron = ({ className, rotated }) => (
 const MultiSelect = ({ label, options, selected, onChange, placeholder = "選択してください" }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className={styles.filterGroup} style={{ position: 'relative', minWidth: '200px' }}>
+        <div
+            className={styles.filterGroup}
+            style={{ position: 'relative', minWidth: '200px' }}
+            onMouseLeave={() => setIsOpen(false)}
+        >
             <label className={styles.filterLabel}>{label}</label>
             <div
                 className={styles.filterSelect}
