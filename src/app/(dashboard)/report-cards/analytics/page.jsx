@@ -540,11 +540,11 @@ export default function AnalyticsPage() {
     // Helper for Rating Colors
     const getRatingColor = (grade) => {
         switch (grade) {
-            case 'A': return '#86efac' // Green 300
-            case 'B': return '#93c5fd' // Blue 300
-            case 'C': return '#fcd34d' // Amber 300
-            case 'D': return '#fdba74' // Orange 300
-            case 'F': return '#fca5a5' // Red 300
+            case 'A': return '#16a34a' // Green 600
+            case 'B': return '#2563eb' // Blue 600
+            case 'C': return '#ca8a04' // Yellow 600
+            case 'D': return '#ea580c' // Orange 600
+            case 'F': return '#dc2626' // Red 600
             default: return 'inherit'
         }
     }
@@ -578,21 +578,20 @@ export default function AnalyticsPage() {
 
     // --- Grade Analytics Processing ---
     const filteredGrades = grades.filter(g => {
-        // Calculate Grade Logic
+        // Calculate Grade Logic: Use selectedTerm or the student's entry term as reference
         let studentGrade = null
-        if (selectedTerm && g.student_id) {
+        const targetTerm = selectedTerm || g.year_term
+        if (targetTerm && g.student_id) {
             // Extract Year from Term (e.g. "2024年度 前期" -> 2024)
-            const termYearMatch = selectedTerm.match(/^(\d{4})/)
+            const termYearMatch = targetTerm.match(/^(\d{4})/)
             const termYear = termYearMatch ? parseInt(termYearMatch[1]) : null
 
             // Extract Year from Student ID (e.g. "2301001" -> 2023)
-            // Assuming prefix is always first 2 digits + 2000
             const idStr = String(g.student_id)
             if (termYear && idStr.length >= 2) {
                 const enrollmentPrefix = parseInt(idStr.substring(0, 2))
                 const enrollmentYear = 2000 + enrollmentPrefix
                 // Grade = TermYear - EnrollmentYear + 1
-                // e.g. 2024 Term - 2023 Enroll + 1 = 2nd Grade
                 studentGrade = termYear - enrollmentYear + 1
             }
         }
@@ -935,7 +934,7 @@ export default function AnalyticsPage() {
                         {/* Grade Filter */}
                         <MultiSelect
                             label="学年"
-                            options={['1年生', '2年生', '3年生', '4年生']}
+                            options={['1年生', '2年生']}
                             selected={selectedGrades}
                             onChange={setSelectedGrades}
                             placeholder="すべての学年"
