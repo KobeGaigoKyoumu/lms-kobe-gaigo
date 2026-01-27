@@ -297,11 +297,9 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                     })}
                                     <tr style={{ borderTop: '2px solid #10b981', backgroundColor: '#f0fdf4' }}>
                                         <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>総合評価</td>
-                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                                            {reportDetails.overall?.base?.toFixed(1)}
-                                        </td>
-                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
-                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>-</td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
+                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#047857' }}>
                                             {reportCardTotal.toFixed(1)} <span style={{ fontSize: '0.8rem' }}>/ 100</span>
                                         </td>
