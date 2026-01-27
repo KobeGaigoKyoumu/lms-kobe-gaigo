@@ -474,10 +474,9 @@ export default function GradeUploader() {
                             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '100px' }}
                         >
-                            {[...Array(5)].map((_, i) => {
-                                const y = new Date().getFullYear() - 2 + i
-                                return <option key={y} value={y}>{y}年度</option>
-                            })}
+                            {Array.from({ length: new Date().getFullYear() + 2 - 2020 + 1 }, (_, i) => 2020 + i).map(y => (
+                                <option key={y} value={y}>{y}年度</option>
+                            ))}
                         </select>
                     </div>
 
