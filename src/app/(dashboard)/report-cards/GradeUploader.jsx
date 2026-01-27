@@ -211,8 +211,8 @@ export default function GradeUploader() {
                     // 重複チェック (既に読み込んだ学生を除外する場合)
                     // if (allStudents.some(s => s.id === id)) continue; 
 
-                    // 1. 期末試験データ
-                    const finalExam = {
+                    // 1. 期末試験データ (Raw values for calculation)
+                    const rawExam = {
                         vocab: parseFloat(row[examColMap.vocab]) || 0,
                         listening: parseFloat(row[examColMap.listening]) || 0,
                         reading: parseFloat(row[examColMap.reading]) || 0,
@@ -221,11 +221,15 @@ export default function GradeUploader() {
                         conversation: parseFloat(row[examColMap.conversation]) || 0,
                     }
 
+                    // Final Exam Data (For DB storage - modified as needed)
+                    // Copy raw values initially
+                    const finalExam = { ...rawExam }
+
                     // User Request: Multiplier for 2020-2023
-                    // Conversation and Writing scores are multiplied by 4 only for these years
+                    // Conversation and Writing scores in FINAL EXAM DATA are multiplied by 4
                     if (selectedYear >= 2020 && selectedYear <= 2023) {
-                        finalExam.writing *= 4
-                        finalExam.conversation *= 4
+                        finalExam.writing = rawExam.writing * 4
+                        finalExam.conversation = rawExam.conversation * 4
                     }
 
                     // 期末試験の合計点 (600点満点)
@@ -282,7 +286,9 @@ export default function GradeUploader() {
                             // Formula: 0.5 * (sqrt(140*Y - Y^2) + Y)
                             // Where Y = 70 * (Score / MaxScore)
 
-                            const score = finalExam[subjectKey]
+                            // IMPORTANT: Use RAW score for calculation to match raw MaxScores
+                            // (Even if finalExam is multiplied, the curve calculation needs original scale)
+                            const score = rawExam[subjectKey]
                             const max = maxScores[subjectKey] || 100 // Avoid divide by zero
 
                             let base = 0
