@@ -596,32 +596,30 @@
 .sortableHeader[data-tooltip]:hover::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: 100%;
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(30, 41, 59, 1);
-    /* Fully opaque for clarity */
     color: white;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 13px;
     white-space: nowrap;
     z-index: 9999;
-    /* Max z-index to stay on top */
     pointer-events: none;
-    margin-bottom: 12px;
+    margin-top: 12px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
 }
 
 .sortableHeader[data-tooltip]:hover::before {
     content: '';
     position: absolute;
-    bottom: 100%;
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 6px;
     border-style: solid;
-    border-color: rgba(30, 41, 59, 1) transparent transparent transparent;
-    margin-bottom: 0px;
+    border-color: transparent transparent rgba(30, 41, 59, 1) transparent;
+    margin-top: 0px;
     z-index: 9999;
 }

@@ -987,7 +987,7 @@ export default function AnalyticsPage() {
                         </div>
                         <div style={{ overflowX: 'auto' }}>
                             <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead>
+                                <thead style={{ position: 'relative', zIndex: 100 }}>
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
                                         <th onClick={() => handleSort('rank')} data-tooltip={getSortTooltip('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
                                         <th onClick={() => handleSort('student_id')} data-tooltip={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
