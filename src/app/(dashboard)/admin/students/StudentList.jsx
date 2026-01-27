@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import * as XLSX from 'xlsx'
@@ -22,6 +22,11 @@ export default function StudentList({ students: initialStudents, classes }) {
     const [selectedIds, setSelectedIds] = useState(new Set())
 
     const supabase = createClient()
+
+    // Sync state with props when router refreshes
+    useEffect(() => {
+        setStudents(initialStudents)
+    }, [initialStudents])
 
     const filteredStudents = students.filter(student => {
         const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year) // Pass academic_year for accurate grade calc
