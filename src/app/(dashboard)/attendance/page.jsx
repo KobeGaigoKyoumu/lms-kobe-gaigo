@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import * as XLSX from 'xlsx'
@@ -52,6 +52,9 @@ export default function AttendancePage() {
     const [importMonth, setImportMonth] = useState(new Date().getMonth() + 1)
     const [importCumulative, setImportCumulative] = useState(false)
     const [importing, setImporting] = useState(false)
+
+    // Data Cache
+    const dataCache = useRef({})
 
     useEffect(() => {
         fetchUserRole()
@@ -134,6 +137,33 @@ export default function AttendancePage() {
 
     const fetchData = async () => {
         setLoading(true)
+        const cacheKey = `${activeTab}-${selectedYear}-${selectedMonth}-${isCumulative}-${activeTab === 'individual' ? studentSearch : ''}`
+
+        // Check Cache
+        if (dataCache.current[cacheKey]) {
+            // Fast path: use cache
+            const data = dataCache.current[cacheKey]
+            setOriginalData(data)
+            setAttendanceData(data)
+
+            switch (activeTab) {
+                case 'school':
+                    setSchoolData(data)
+                    break
+                case 'grade':
+                    setGradeData(data)
+                    break
+                case 'class':
+                    setClassData(data)
+                    break
+                case 'individual':
+                    setIndividualData(data)
+                    break
+            }
+            setLoading(false)
+            return
+        }
+
         try {
             const params = new URLSearchParams({
                 type: activeTab,
@@ -148,6 +178,9 @@ export default function AttendancePage() {
 
             const res = await fetch(`/api/attendance?${params}`, { cache: 'no-store' })
             const data = await res.json()
+
+            // Save to Cache
+            dataCache.current[cacheKey] = data
 
             setOriginalData(data) // Store original data
             setAttendanceData(data) // Initialize filtered data
