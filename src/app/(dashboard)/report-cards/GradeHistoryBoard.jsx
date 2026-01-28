@@ -7,7 +7,7 @@ import StudentGradeDetail from './StudentGradeDetail'
 import { exportGradesToExcel } from '@/lib/export/excelExport'
 import PizZip from 'pizzip'
 import { saveAs } from 'file-saver'
-import { loadCertificateTemplate, generateClientCertificateBlob } from '@/lib/export/clientWordGenerator'
+// import { loadCertificateTemplate, generateClientCertificateBlob } from '@/lib/export/clientWordGenerator' // Removed unused client generator
 
 export default function GradeHistoryBoard() {
     const supabase = createClient()
@@ -53,8 +53,6 @@ export default function GradeHistoryBoard() {
         setGenerating(true)
         try {
             // Use Server-Side Generation for both PDF and Word
-            // Word uses docxtemplater (pure JS) - works on Vercel
-            // PDF uses Puppeteer - may fail on Vercel
             const response = await fetch('/api/certificates/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
