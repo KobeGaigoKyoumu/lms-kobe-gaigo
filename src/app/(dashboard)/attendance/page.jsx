@@ -507,7 +507,10 @@ export default function AttendancePage() {
             {/* コンテンツ */}
             <div className={styles.content}>
                 {loading ? (
-                    <div className={styles.loading}>読み込み中...</div>
+                    <div className={styles.loadingContainer}>
+                        <div className="spinner"></div>
+                        <p>データを読み込んでいます...</p>
+                    </div>
                 ) : error ? (
                     <div className={styles.error}>{error}</div>
                 ) : (

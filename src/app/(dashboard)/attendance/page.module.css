@@ -522,3 +522,14 @@
     color: var(--text-secondary);
 }
 
+
+/* Loading State */
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    color: var(--text-secondary);
+    flex-direction: column;
+    gap: var(--spacing-4);
+}

@@ -8,10 +8,14 @@ import styles from './page.module.css'
 import StudentDetailModal from './StudentDetailModal'
 import { parseStudentId } from '@/lib/utils/studentId'
 
-export default function StudentList({ students: initialStudents, classes }) {
+export default function StudentList() {
+    // Props removed, internal state used for fetching
     const router = useRouter()
     const fileInputRef = useRef(null)
-    const [students, setStudents] = useState(initialStudents)
+    const [students, setStudents] = useState([])
+    const [classes, setClasses] = useState([])
+    const [loading, setLoading] = useState(true)
+
     const [filter, setFilter] = useState('all')
     const [gradeFilter, setGradeFilter] = useState('')
     const [classFilter, setClassFilter] = useState('')
@@ -27,10 +31,35 @@ export default function StudentList({ students: initialStudents, classes }) {
 
     const supabase = createClient()
 
-    // Sync state with props when router refreshes
+    // Fetch data on mount
     useEffect(() => {
-        setStudents(initialStudents)
-    }, [initialStudents])
+        const fetchData = async () => {
+            try {
+                // Fetch Students
+                const { data: studentsData, error: studentsError } = await supabase
+                    .from('students')
+                    .select('*')
+                    .order('class_name', { ascending: true })
+                    .order('student_id_text', { ascending: true })
+
+                if (studentsError) throw studentsError
+
+                setStudents(studentsData || [])
+
+                // Extract Classes
+                const uniqueClasses = [...new Set((studentsData || []).map(s => s.class_name).filter(Boolean))].sort()
+                setClasses(uniqueClasses)
+
+            } catch (error) {
+                console.error('Error fetching students:', error)
+                alert('学生データの取得に失敗しました')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [])
 
     const filteredStudents = students.filter(student => {
         const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year) // Pass academic_year for accurate grade calc
@@ -446,242 +475,276 @@ export default function StudentList({ students: initialStudents, classes }) {
         }
     }
 
+    if (loading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <div className="spinner"></div>
+                <p>データを読み込んでいます...</p>
+            </div>
+        )
+    }
+
     return (
-        <div className={styles.content}>
-            {/* アップロードセクション */}
-            <div className={styles.uploadSection}>
-                <div className={styles.uploadActions}>
-                    <button onClick={downloadTemplate} className={styles.templateBtn}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        テンプレートDL
-                    </button>
-                    <label className={styles.uploadBtn}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        {uploading ? 'アップロード中...' : 'Excelアップロード'}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".xlsx,.xls"
-                            onChange={handleFileUpload}
-                            disabled={uploading}
-                            hidden
-                        />
-                    </label>
+        <div className={styles.page}>
+            <header className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>学生マスター管理</h1>
+                    <p className={styles.subtitle}>
+                        学生情報の一括登録・管理を行います
+                    </p>
                 </div>
-                {uploadResult && (
-                    <div className={`${styles.uploadResult} ${uploadResult.success ? styles.success : styles.error}`}>
-                        {uploadResult.message}
-                    </div>
-                )}
-            </div>
-
-            {/* 一括操作ツールバー */}
-            {selectedIds.size > 0 && (
-                <div className={styles.bulkActions}>
-                    <span className={styles.selectedCount}>{selectedIds.size}件選択中</span>
-                    <button onClick={handleBulkDelete} className={styles.bulkDeleteBtn}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                        選択した学生を一括削除
-                    </button>
-                    <button onClick={() => setSelectedIds(new Set())} className={styles.cancelSelectionBtn}>
-                        選択解除
-                    </button>
-                </div>
-            )}
-
-            {/* フィルターとサーチ */}
-            <div className={styles.toolbar}>
-                <div className={styles.filters}>
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className={styles.filterSelect}
-                    >
-                        <option value="all">すべてのステータス</option>
-                        <option value="active">在籍中</option>
-                        <option value="graduated">卒業</option>
-                        <option value="completed">修了</option>
-                        <option value="inactive">休学</option>
-                        <option value="withdrawn">退学</option>
-                    </select>
-                    <select
-                        value={gradeFilter}
-                        onChange={(e) => setGradeFilter(e.target.value)}
-                        className={styles.filterSelect}
-                    >
-                        <option value="">すべての学年</option>
-                        <option value="1">1年生</option>
-                        <option value="2">2年生</option>
-                        <option value="0">非在籍者</option>
-                    </select>
-                    <select
-                        value={classFilter}
-                        onChange={(e) => setClassFilter(e.target.value)}
-                        className={styles.filterSelect}
-                    >
-                        <option value="">すべてのクラス</option>
-                        {classes
-                            .filter(c => !['TestClass', 'ベトナム人新入生クラス', '中国人新入生クラス', '現 クラス'].includes(c))
-                            .map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))
-                        }
-                    </select>
-                </div>
-                <input
-                    type="text"
-                    placeholder="学籍番号、名前、メールで検索..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className={styles.searchInput}
-                />
-            </div>
-
-            {/* 学生テーブル */}
-            <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th style={{ width: '40px' }}>
-                                <input
-                                    type="checkbox"
-                                    onChange={handleSelectAll}
-                                    checked={filteredStudents.length > 0 && selectedIds.size === filteredStudents.length}
-                                />
-                            </th>
-                            <th>学籍番号</th>
-                            <th>氏名</th>
-                            <th>学年</th>
-                            <th>クラス</th>
-                            <th>ステータス</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {paginatedStudents.map(student => {
-                            const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
-                            const isSelected = selectedIds.has(student.student_id_text)
-
-                            if (student.student_id_text === '2307077') {
-                                // console.log(`Rendering 2307077: AY=${student.academic_year} Grade=${studentInfo.grade}`)
-                            }
-
-                            return (
-                                <tr key={student.student_id_text} className={isSelected ? styles.selectedRow : ''}>
-                                    <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => handleToggleSelect(student.student_id_text)}
-                                        />
-                                    </td>
-                                    <td className={styles.idCell}>{student.student_id_text}</td>
-                                    <td>{student.full_name}</td>
-                                    <td>
-                                        <select
-                                            value={String(studentInfo.grade ?? '')}
-                                            onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
-                                            className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
-                                                String(studentInfo.grade) === '2' ? styles.grade2 :
-                                                    String(studentInfo.grade) === '0' ? styles.grade0 :
-                                                        styles.gradeOther
-                                                }`}
-                                        >
-                                            <option value="1">1年生</option>
-                                            <option value="2">2年生</option>
-                                            <option value="0">非在籍</option>
-                                            {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={String(studentInfo.grade)}>その他</option>}
-                                        </select>
-                                    </td>
-                                    <td>{student.class_name || '-'}</td>
-                                    <td>
-                                        <select
-                                            value={student.status}
-                                            onChange={(e) => handleStatusChange(student.student_id_text, e.target.value)}
-                                            className={`${styles.statusSelect} ${styles[student.status]}`}
-                                        >
-                                            <option value="active">在籍中</option>
-                                            <option value="graduated">卒業</option>
-                                            <option value="completed">修了</option>
-                                            <option value="inactive">休学</option>
-                                            <option value="withdrawn">退学</option>
-                                        </select>
-                                    </td>
-                                    <td className={styles.actionCell}>
-                                        <button
-                                            onClick={() => setSelectedStudent(student)}
-                                            className={styles.detailBtn}
-                                        >
-                                            詳細
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(student.student_id_text)}
-                                            className={styles.deleteBtn}
-                                        >
-                                            削除
-                                        </button>
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
-
-                {filteredStudents.length === 0 && (
-                    <div className={styles.empty}>
-                        該当する学生がいません
-                    </div>
-                )}
-            </div>
-
-            <div className={styles.footer}>
-                <div className={styles.paginationInfo}>
-                    表示中: {filteredStudents.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredStudents.length)} / {filteredStudents.length} 件 (全 {students.length} 件中)
-                </div>
-
-                {totalPages > 1 && (
-                    <div className={styles.paginationControls}>
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                            className={styles.pageBtn}
-                        >
-                            &lt; 前へ
-                        </button>
-
-                        <span className={styles.pageIndicator}>
-                            Page {currentPage} / {totalPages}
+                <div className={styles.stats}>
+                    <div className={styles.stat}>
+                        <span className={styles.statValue}>
+                            {students?.filter(s => s.status === 'active').length || 0}
                         </span>
+                        <span className={styles.statLabel}>在籍中</span>
+                    </div>
+                    <div className={styles.stat}>
+                        <span className={styles.statValue}>
+                            {classes.length}
+                        </span>
+                        <span className={styles.statLabel}>クラス数</span>
+                    </div>
+                </div>
+            </header>
 
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                            className={styles.pageBtn}
-                        >
-                            次へ &gt;
+            <div className={styles.content}>
+                {/* アップロードセクション */}
+                <div className={styles.uploadSection}>
+                    <div className={styles.uploadActions}>
+                        <button onClick={downloadTemplate} className={styles.templateBtn}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            テンプレートDL
+                        </button>
+                        <label className={styles.uploadBtn}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            {uploading ? 'アップロード中...' : 'Excelアップロード'}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".xlsx,.xls"
+                                onChange={handleFileUpload}
+                                disabled={uploading}
+                                hidden
+                            />
+                        </label>
+                    </div>
+                    {uploadResult && (
+                        <div className={`${styles.uploadResult} ${uploadResult.success ? styles.success : styles.error}`}>
+                            {uploadResult.message}
+                        </div>
+                    )}
+                </div>
+
+                {/* 一括操作ツールバー */}
+                {selectedIds.size > 0 && (
+                    <div className={styles.bulkActions}>
+                        <span className={styles.selectedCount}>{selectedIds.size}件選択中</span>
+                        <button onClick={handleBulkDelete} className={styles.bulkDeleteBtn}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            選択した学生を一括削除
+                        </button>
+                        <button onClick={() => setSelectedIds(new Set())} className={styles.cancelSelectionBtn}>
+                            選択解除
                         </button>
                     </div>
                 )}
-            </div>
 
-            {/* 学生詳細モーダル */}
-            {selectedStudent && (
-                <StudentDetailModal
-                    student={selectedStudent}
-                    onClose={() => setSelectedStudent(null)}
-                />
-            )}
+                {/* フィルターとサーチ */}
+                <div className={styles.toolbar}>
+                    <div className={styles.filters}>
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="all">すべてのステータス</option>
+                            <option value="active">在籍中</option>
+                            <option value="graduated">卒業</option>
+                            <option value="completed">修了</option>
+                            <option value="inactive">休学</option>
+                            <option value="withdrawn">退学</option>
+                        </select>
+                        <select
+                            value={gradeFilter}
+                            onChange={(e) => setGradeFilter(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="">すべての学年</option>
+                            <option value="1">1年生</option>
+                            <option value="2">2年生</option>
+                            <option value="0">非在籍者</option>
+                        </select>
+                        <select
+                            value={classFilter}
+                            onChange={(e) => setClassFilter(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="">すべてのクラス</option>
+                            {classes
+                                .filter(c => !['TestClass', 'ベトナム人新入生クラス', '中国人新入生クラス', '現 クラス'].includes(c))
+                                .map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="学籍番号、名前、メールで検索..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className={styles.searchInput}
+                    />
+                </div>
+
+                {/* 学生テーブル */}
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th style={{ width: '40px' }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAll}
+                                        checked={filteredStudents.length > 0 && selectedIds.size === filteredStudents.length}
+                                    />
+                                </th>
+                                <th>学籍番号</th>
+                                <th>氏名</th>
+                                <th>学年</th>
+                                <th>クラス</th>
+                                <th>ステータス</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedStudents.map(student => {
+                                const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
+                                const isSelected = selectedIds.has(student.student_id_text)
+
+                                if (student.student_id_text === '2307077') {
+                                    // console.log(`Rendering 2307077: AY=${student.academic_year} Grade=${studentInfo.grade}`)
+                                }
+
+                                return (
+                                    <tr key={student.student_id_text} className={isSelected ? styles.selectedRow : ''}>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => handleToggleSelect(student.student_id_text)}
+                                            />
+                                        </td>
+                                        <td className={styles.idCell}>{student.student_id_text}</td>
+                                        <td>{student.full_name}</td>
+                                        <td>
+                                            <select
+                                                value={String(studentInfo.grade ?? '')}
+                                                onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
+                                                className={`${styles.gradeSelect} ${String(studentInfo.grade) === '1' ? styles.grade1 :
+                                                    String(studentInfo.grade) === '2' ? styles.grade2 :
+                                                        String(studentInfo.grade) === '0' ? styles.grade0 :
+                                                            styles.gradeOther
+                                                    }`}
+                                            >
+                                                <option value="1">1年生</option>
+                                                <option value="2">2年生</option>
+                                                <option value="0">非在籍</option>
+                                                {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={String(studentInfo.grade)}>その他</option>}
+                                            </select>
+                                        </td>
+                                        <td>{student.class_name || '-'}</td>
+                                        <td>
+                                            <select
+                                                value={student.status}
+                                                onChange={(e) => handleStatusChange(student.student_id_text, e.target.value)}
+                                                className={`${styles.statusSelect} ${styles[student.status]}`}
+                                            >
+                                                <option value="active">在籍中</option>
+                                                <option value="graduated">卒業</option>
+                                                <option value="completed">修了</option>
+                                                <option value="inactive">休学</option>
+                                                <option value="withdrawn">退学</option>
+                                            </select>
+                                        </td>
+                                        <td className={styles.actionCell}>
+                                            <button
+                                                onClick={() => setSelectedStudent(student)}
+                                                className={styles.detailBtn}
+                                            >
+                                                詳細
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(student.student_id_text)}
+                                                className={styles.deleteBtn}
+                                            >
+                                                削除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+
+                    {filteredStudents.length === 0 && (
+                        <div className={styles.empty}>
+                            該当する学生がいません
+                        </div>
+                    )}
+                </div>
+
+                <div className={styles.footer}>
+                    <div className={styles.paginationInfo}>
+                        表示中: {filteredStudents.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredStudents.length)} / {filteredStudents.length} 件 (全 {students.length} 件中)
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className={styles.paginationControls}>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className={styles.pageBtn}
+                            >
+                                &lt; 前へ
+                            </button>
+
+                            <span className={styles.pageIndicator}>
+                                Page {currentPage} / {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className={styles.pageBtn}
+                            >
+                                次へ &gt;
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* 学生詳細モーダル */}
+                {selectedStudent && (
+                    <StudentDetailModal
+                        student={selectedStudent}
+                        onClose={() => setSelectedStudent(null)}
+                    />
+                )}
+            </div>
         </div>
     )
 }
