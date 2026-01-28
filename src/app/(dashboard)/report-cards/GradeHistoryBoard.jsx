@@ -100,11 +100,17 @@ export default function GradeHistoryBoard() {
     }
 
     // Batch PDF Export Handler for Exam/Report (New)
-    const handleBatchPdfExport = async (type) => {
-        if (filteredRecords.length === 0) return
+    const handleBatchPdfExport = async (type, targetIds = null) => {
+        // Filter records: defaults to all filteredRecords, or subset if targetIds provided
+        let targetRecords = filteredRecords;
+        if (targetIds && targetIds.length > 0) {
+            targetRecords = filteredRecords.filter(r => targetIds.includes(r.student_id_text));
+        }
 
-        // Prepare payload for all filtered students
-        const studentsPayload = filteredRecords.map(r => {
+        if (targetRecords.length === 0) return
+
+        // Prepare payload for target students
+        const studentsPayload = targetRecords.map(r => {
             const s = recordToStudent(r);
             if (type === 'final_exam') {
                 return {
@@ -350,6 +356,25 @@ export default function GradeHistoryBoard() {
                             <span style={{ fontSize: '0.9rem', color: '#4b5563', marginRight: '5px' }}>
                                 {selectedIds.length}件選択中
                             </span>
+                            <button
+                                onClick={() => handleBatchPdfExport('report_card', selectedIds)}
+                                disabled={generating}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: 'bold',
+                                    cursor: generating ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    opacity: generating ? 0.7 : 1
+                                }}
+                            >
+                                {generating ? '生成中...' : 'PDF出力'}
+                            </button>
                             <button
                                 onClick={() => handleCertificateExport('docx')}
                                 disabled={generating}
