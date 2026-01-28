@@ -351,25 +351,6 @@ export default function GradeHistoryBoard() {
                                 {selectedIds.length}件選択中
                             </span>
                             <button
-                                onClick={() => handleCertificateExport('pdf')}
-                                disabled={generating}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: '#ef4444',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontWeight: 'bold',
-                                    cursor: generating ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    opacity: generating ? 0.7 : 1
-                                }}
-                            >
-                                {generating ? '生成中...' : '証明書 (PDF)'}
-                            </button>
-                            <button
                                 onClick={() => handleCertificateExport('docx')}
                                 disabled={generating}
                                 style={{
