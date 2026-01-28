@@ -11,13 +11,13 @@
 .title {
     font-size: 2rem;
     font-weight: bold;
-    color: #1f2937;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
 .subtitle {
     font-size: 1rem;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 /* Notice for missing student_id */
@@ -79,7 +79,7 @@
 .historySection h2 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #1f2937;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
 }
 
@@ -93,7 +93,7 @@
 }
 
 .table {
-    background-color: white;
+    background-color: var(--bg-elevated);
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -105,8 +105,8 @@
 }
 
 .table thead {
-    background-color: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table th {
@@ -114,24 +114,24 @@
     text-align: left;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .table tbody tr {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table tbody tr:hover {
-    background-color: #f9fafb;
+    background-color: var(--bg-tertiary);
 }
 
 .table td {
     padding: 1rem;
-    color: #1f2937;
+    color: var(--text-primary);
 }
 
 .examScore {
-    color: #3b82f6;
+    color: var(--primary-500);
     font-weight: 500;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .date {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.875rem;
 }
 
@@ -185,7 +185,7 @@
 .subjectSection h2 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #1f2937;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
 }
 
@@ -196,8 +196,8 @@
 }
 
 .subjectCard {
-    background-color: white;
-    border: 1px solid #e5e7eb;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1.5rem;
 }
@@ -205,10 +205,10 @@
 .subjectCard h3 {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text-primary);
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .subjectScores {
@@ -226,24 +226,24 @@
 .scoreItem.total {
     margin-top: 0.5rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border-color);
     font-weight: 600;
 }
 
 .scoreLabel {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .scoreValue {
     font-size: 1rem;
     font-weight: 500;
-    color: #1f2937;
+    color: var(--text-primary);
 }
 
 .scoreItem.total .scoreValue {
     font-size: 1.125rem;
-    color: #3b82f6;
+    color: var(--primary-500);
 }
 
 /* Responsive */
