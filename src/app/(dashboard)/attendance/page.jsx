@@ -40,7 +40,7 @@ export default function AttendancePage() {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1)
-    const ITEMS_PER_PAGE = 100
+    const ITEMS_PER_PAGE = 50
 
     // クラス詳細用
     const [selectedClass, setSelectedClass] = useState(null)

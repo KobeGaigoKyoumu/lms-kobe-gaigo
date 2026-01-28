@@ -23,7 +23,7 @@ export default function StudentList({ students: initialStudents, classes }) {
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1)
-    const ITEMS_PER_PAGE = 100
+    const ITEMS_PER_PAGE = 50
 
     const supabase = createClient()
 
