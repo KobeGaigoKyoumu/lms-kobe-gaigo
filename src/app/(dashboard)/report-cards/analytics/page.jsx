@@ -271,6 +271,9 @@ export default function AnalyticsPage() {
     const [dbClassFilter, setDbClassFilter] = useState('')
     const [dbNationalityFilter, setDbNationalityFilter] = useState('')
     const [dbLevelFilter, setDbLevelFilter] = useState('')
+    // Pagination State
+    const [dbCurrentPage, setDbCurrentPage] = useState(1)
+    const DB_ITEMS_PER_PAGE = 50
 
     // Class Analysis State
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
@@ -339,6 +342,9 @@ export default function AnalyticsPage() {
             const nB = parseInt(b.studentId) || 0
             return nA - nB
         })
+
+        // Reset to first page on filter change
+        setDbCurrentPage(1)
 
         setDbFilteredStudents(results)
     }, [dbSearchQuery, dbYearFilter, dbClassFilter, dbNationalityFilter, dbLevelFilter, enhancedJlptStats])
@@ -3124,39 +3130,79 @@ export default function AnalyticsPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    dbFilteredStudents.map((student, idx) => (
-                                        <tr key={idx}>
-                                            <td>{student.studentId || '-'}</td>
-                                            <td style={{ fontWeight: 600, maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.name}</td>
-                                            <td>{student.enrollmentYear || '-'}</td>
-                                            <td>{['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(student.class) ? '-' : (student.class || '-')}</td>
-                                            <td>{student.nationality || '-'}</td>
-                                            <td style={{ maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.destination || '-'}</td>
-                                            <td>
-                                                {student.highestLevel ? (
-                                                    <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>
-                                                        {student.highestLevel}
-                                                    </span>
-                                                ) : '-'}
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
-                                                    {['N1', 'N2', 'N3'].map(lvl => {
-                                                        const s = student.levels[lvl];
-                                                        if (s.status === '合格') return <span key={lvl} style={{ color: COLOR_PASS, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
-                                                        if (s.status === '不合格') return <span key={lvl} style={{ color: COLOR_FAIL, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
-                                                        return null;
-                                                    })}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                    dbFilteredStudents
+                                        .slice((dbCurrentPage - 1) * DB_ITEMS_PER_PAGE, dbCurrentPage * DB_ITEMS_PER_PAGE)
+                                        .map((student, idx) => (
+                                            <tr key={idx}>
+                                                <td>{student.studentId || '-'}</td>
+                                                <td style={{ fontWeight: 600, maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.name}</td>
+                                                <td>{student.enrollmentYear || '-'}</td>
+                                                <td>{['中国人新入生クラス', 'ベトナム人新入生クラス', 'ベトナムっ人新入生クラス'].includes(student.class) ? '-' : (student.class || '-')}</td>
+                                                <td>{student.nationality || '-'}</td>
+                                                <td style={{ maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{student.destination || '-'}</td>
+                                                <td>
+                                                    {student.highestLevel ? (
+                                                        <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>
+                                                            {student.highestLevel}
+                                                        </span>
+                                                    ) : '-'}
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
+                                                        {['N1', 'N2', 'N3'].map(lvl => {
+                                                            const s = student.levels[lvl];
+                                                            if (s.status === '合格') return <span key={lvl} style={{ color: COLOR_PASS, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                            if (s.status === '不合格') return <span key={lvl} style={{ color: COLOR_FAIL, fontWeight: 'bold' }}>{lvl}: {s.score}点 ({s.date})</span>;
+                                                            return null;
+                                                        })}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
                                 )}
                             </tbody>
                         </table>
                     </div>
-                    <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#6b7280', textAlign: 'right' }}>
-                        表示件数: {dbFilteredStudents.length}件
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                            全 {dbFilteredStudents.length} 件中 {(dbCurrentPage - 1) * DB_ITEMS_PER_PAGE + 1} - {Math.min(dbCurrentPage * DB_ITEMS_PER_PAGE, dbFilteredStudents.length)} 件を表示
+                        </div>
+
+                        {dbFilteredStudents.length > DB_ITEMS_PER_PAGE && (
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    onClick={() => setDbCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={dbCurrentPage === 1}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '0.375rem',
+                                        backgroundColor: dbCurrentPage === 1 ? '#f3f4f6' : 'white',
+                                        color: dbCurrentPage === 1 ? '#9ca3af' : '#374151',
+                                        cursor: dbCurrentPage === 1 ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    前へ
+                                </button>
+                                <span style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', color: '#4b5563' }}>
+                                    {dbCurrentPage} / {Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}
+                                </span>
+                                <button
+                                    onClick={() => setDbCurrentPage(prev => Math.min(prev + 1, Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)))}
+                                    disabled={dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '0.375rem',
+                                        backgroundColor: dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE) ? '#f3f4f6' : 'white',
+                                        color: dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE) ? '#9ca3af' : '#374151',
+                                        cursor: dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE) ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    次へ
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
