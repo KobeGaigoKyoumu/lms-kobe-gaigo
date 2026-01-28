@@ -99,6 +99,67 @@ export default function GradeHistoryBoard() {
         }
     }
 
+    // Batch PDF Export Handler for Exam/Report (New)
+    const handleBatchPdfExport = async (type) => {
+        if (filteredRecords.length === 0) return
+
+        // Prepare payload for all filtered students
+        const studentsPayload = filteredRecords.map(r => {
+            const s = recordToStudent(r);
+            if (type === 'final_exam') {
+                return {
+                    student_id_text: s.id,
+                    student_name: s.name,
+                    class_name: s.class,
+                    final_exam_total: s.finalExamSum,
+                    final_exam_data: s.finalExam,
+                    yearTerm: s.yearTerm
+                }
+            } else {
+                return {
+                    student_id_text: s.id,
+                    student_name: s.name,
+                    class_name: s.class,
+                    final_exam_total: s.finalExamSum,
+                    report_card_total: s.reportCardTotal,
+                    report_card_data: s.reportDetails,
+                    yearTerm: s.yearTerm
+                }
+            }
+        });
+
+        setGenerating(true)
+        try {
+            const response = await fetch('/api/grades/report/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    students: studentsPayload,
+                    type: type,
+                    yearTerm: selectedTerm // Fallback
+                })
+            });
+
+            if (!response.ok) throw new Error('一括生成に失敗しました');
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = type === 'final_exam' ? '期末試験結果_一括.zip' : '成績通知表_一括.zip'
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+
+        } catch (err) {
+            console.error(err)
+            alert('PDFの一括出力に失敗しました: ' + err.message)
+        } finally {
+            setGenerating(false)
+        }
+    }
+
     useEffect(() => {
         fetchRecords()
     }, [])
@@ -503,32 +564,56 @@ export default function GradeHistoryBoard() {
             {/* SECONDARY TABS: (Only visible in Details mode) - Exam vs Report */}
             {
                 historyViewMode === 'details' && (
-                    <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                    <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={() => setDetailSubMode('exam')}
+                                style={{
+                                    padding: '6px 14px',
+                                    backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
+                                    color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
+                                    borderRadius: '20px', border: '1px solid',
+                                    borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
+                                    cursor: 'pointer', fontSize: '0.85rem'
+                                }}
+                            >
+                                期末試験結果を表示
+                            </button>
+                            <button
+                                onClick={() => setDetailSubMode('report')}
+                                style={{
+                                    padding: '6px 14px',
+                                    backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
+                                    color: detailSubMode === 'report' ? '#047857' : '#4b5563',
+                                    borderRadius: '20px', border: '1px solid',
+                                    borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
+                                    cursor: 'pointer', fontSize: '0.85rem'
+                                }}
+                            >
+                                成績通知表を表示
+                            </button>
+                        </div>
+
+                        {/* Batch Export Button */}
                         <button
-                            onClick={() => setDetailSubMode('exam')}
+                            onClick={() => handleBatchPdfExport(detailSubMode === 'exam' ? 'final_exam' : 'report_card')}
+                            disabled={generating}
                             style={{
-                                padding: '6px 14px',
-                                backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
-                                color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
-                                borderRadius: '20px', border: '1px solid',
-                                borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
-                                cursor: 'pointer', fontSize: '0.85rem'
+                                padding: '8px 16px',
+                                backgroundColor: detailSubMode === 'exam' ? '#3b82f6' : '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                cursor: generating ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                opacity: generating ? 0.7 : 1,
+                                fontSize: '0.85rem'
                             }}
                         >
-                            期末試験結果を表示
-                        </button>
-                        <button
-                            onClick={() => setDetailSubMode('report')}
-                            style={{
-                                padding: '6px 14px',
-                                backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
-                                color: detailSubMode === 'report' ? '#047857' : '#4b5563',
-                                borderRadius: '20px', border: '1px solid',
-                                borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
-                                cursor: 'pointer', fontSize: '0.85rem'
-                            }}
-                        >
-                            成績通知表を表示
+                            {generating ? '生成中...' : (detailSubMode === 'exam' ? '一括PDF出力 (期末試験)' : '一括PDF出力 (通知表)')}
                         </button>
                     </div>
                 )

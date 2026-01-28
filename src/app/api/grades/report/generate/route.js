@@ -1,9 +1,39 @@
 import { generateGradeReportPDF, generateFinalExamPDF } from '@/lib/export/puppeteerPdfGenerator';
+import AdmZip from 'adm-zip';
 
 export async function POST(request) {
     try {
-        const { student, yearTerm, type } = await request.json();
+        const { student, students, yearTerm, type } = await request.json();
 
+        // --- BATCH MODE ---
+        if (students && Array.isArray(students) && students.length > 0) {
+            const zip = new AdmZip();
+
+            for (const s of students) {
+                let buffer;
+                let fileName;
+
+                if (type === 'final_exam') {
+                    buffer = await generateFinalExamPDF(s, s.yearTerm || yearTerm);
+                    fileName = `期末試験結果_${s.student_id_text}_${s.student_name.replace(/\s+/g, '_')}.pdf`;
+                } else {
+                    buffer = await generateGradeReportPDF(s, s.yearTerm || yearTerm);
+                    fileName = `成績通知表_${s.student_id_text}_${s.student_name.replace(/\s+/g, '_')}.pdf`;
+                }
+
+                zip.addFile(fileName, buffer);
+            }
+
+            const zipBuffer = zip.toBuffer();
+            return new Response(zipBuffer, {
+                headers: {
+                    'Content-Type': 'application/zip',
+                    'Content-Disposition': `attachment; filename=grades_batch_${Date.now()}.zip`
+                }
+            });
+        }
+
+        // --- SINGLE MODE ---
         if (!student) {
             return new Response(JSON.stringify({ error: 'Student data is required' }), { status: 400 });
         }
