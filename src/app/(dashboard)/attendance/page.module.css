@@ -479,6 +479,7 @@
         font-size: 1.5rem;
     }
 }
+
 /* Pagination */
 .paginationInfo {
     margin-bottom: var(--spacing-4);
@@ -532,4 +533,13 @@
     color: var(--text-secondary);
     flex-direction: column;
     gap: var(--spacing-4);
+}
+
+.subHeader {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
 }
