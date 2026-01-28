@@ -163,7 +163,7 @@ export async function GET(request) {
             }
         }
 
-        // 学校全体の統計
+        // 学校全体の統計（全体概要）
         if (type === 'school') {
             const { data: students, error } = await supabase
                 .from('attendance_records')
@@ -179,37 +179,14 @@ export async function GET(request) {
                 return NextResponse.json({ error: 'データが見つかりません' }, { status: 404 })
             }
 
+            // 全体統計
             const rates = students.map(s => parseFloat(s.attendance_rate))
             const avgRate = rates.reduce((sum, r) => sum + r, 0) / rates.length
             const sortedRates = rates.sort((a, b) => a - b)
 
-            return NextResponse.json({
-                totalStudents: students.length,
-                averageRate: avgRate,
-                minRate: sortedRates[0],
-                maxRate: sortedRates[sortedRates.length - 1],
-                year: targetYear,
-                month: targetMonth,
-                isCumulative: cumulative
-            })
-        }
-
-        // 学年別の統計
-        if (type === 'grade') {
-            // Fetch student_id to recalculate grade dynamically because DB grade might be stale/incorrect
-            const { data: students, error } = await supabase
-                .from('attendance_records')
-                .select('student_id, attendance_rate')
-                .eq('year', targetYear)
-                .eq('month', targetMonth)
-                .eq('is_cumulative', cumulative)
-                .range(0, 49999)
-
-            if (error) throw error
-
-            // 学年ごとに集計
+            // 学年別集計 (旧 grade type ロジックを統合)
             const gradeGroups = {}
-            students?.forEach(s => {
+            students.forEach(s => {
                 // Calculate grade dynamically
                 const grade = calculateGrade(s.student_id, targetYear, targetMonth)
 
@@ -221,12 +198,12 @@ export async function GET(request) {
 
             const grades = Object.keys(gradeGroups).map(grade => {
                 const gradeNum = parseInt(grade)
-                const rates = gradeGroups[grade]
+                const gRates = gradeGroups[grade]
                 return {
                     grade: gradeNum,
                     gradeName: gradeNum === 0 ? '非在籍者' : `${gradeNum}年生`,
-                    studentCount: rates.length,
-                    averageRate: rates.reduce((sum, r) => sum + r, 0) / rates.length
+                    studentCount: gRates.length,
+                    averageRate: gRates.reduce((sum, r) => sum + r, 0) / gRates.length
                 }
             }).sort((a, b) => {
                 // 非在籍者（grade=0）は最後に
@@ -236,7 +213,11 @@ export async function GET(request) {
             })
 
             return NextResponse.json({
-                grades,
+                totalStudents: students.length,
+                averageRate: avgRate,
+                minRate: sortedRates[0],
+                maxRate: sortedRates[sortedRates.length - 1],
+                grades: grades, // Added grades data
                 year: targetYear,
                 month: targetMonth,
                 isCumulative: cumulative

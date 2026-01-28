@@ -150,9 +150,6 @@ export default function AttendancePage() {
                 case 'school':
                     setSchoolData(data)
                     break
-                case 'grade':
-                    setGradeData(data)
-                    break
                 case 'class':
                     setClassData(data)
                     break
@@ -188,9 +185,6 @@ export default function AttendancePage() {
             switch (activeTab) {
                 case 'school':
                     setSchoolData(data)
-                    break
-                case 'grade':
-                    setGradeData(data)
                     break
                 case 'class':
                     setClassData(data)
@@ -421,8 +415,7 @@ export default function AttendancePage() {
     }
 
     const tabs = [
-        { id: 'school', label: '学校全体' },
-        { id: 'grade', label: '学年別' },
+        { id: 'school', label: '全体概要' },
         { id: 'class', label: 'クラス別' },
         { id: 'individual', label: '個別' }
     ]
@@ -548,7 +541,7 @@ export default function AttendancePage() {
                     <div className={styles.error}>{error}</div>
                 ) : (
                     <>
-                        {/* 学校全体 */}
+                        {/* 全体概要（旧 学校全体 + 学年別） */}
                         {activeTab === 'school' && schoolData && (
                             <div className={styles.schoolStats}>
                                 <div className={styles.statCards}>
@@ -571,23 +564,24 @@ export default function AttendancePage() {
                                         <div className={styles.statValue}>{formatRate(schoolData.minRate)}</div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {/* 学年別 */}
-                        {activeTab === 'grade' && gradeData && (
-                            <div className={styles.gradeStats}>
-                                <div className={styles.gradeCards}>
-                                    {gradeData.grades?.map(g => (
-                                        <div key={g.grade} className={styles.gradeCard}>
-                                            <div className={styles.gradeTitle}>{g.gradeName || `${g.grade}年生`}</div>
-                                            <div className={`${styles.gradeRate} ${getRateColor(g.averageRate)}`}>
-                                                {formatRate(g.averageRate)}
-                                            </div>
-                                            <div className={styles.gradeCount}>{g.studentCount}名</div>
+                                {/* 学年別データをここに統合 */}
+                                {schoolData.grades && (
+                                    <div className={styles.gradeStats}>
+                                        <h3 className={styles.subHeader}>学年別状況</h3>
+                                        <div className={styles.gradeCards}>
+                                            {schoolData.grades.map(g => (
+                                                <div key={g.grade} className={styles.gradeCard}>
+                                                    <div className={styles.gradeTitle}>{g.gradeName || `${g.grade}年生`}</div>
+                                                    <div className={`${styles.gradeRate} ${getRateColor(g.averageRate)}`}>
+                                                        {formatRate(g.averageRate)}
+                                                    </div>
+                                                    <div className={styles.gradeCount}>{g.studentCount}名</div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
