@@ -21,6 +21,10 @@ export default function StudentList({ students: initialStudents, classes }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [selectedIds, setSelectedIds] = useState(new Set())
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1)
+    const ITEMS_PER_PAGE = 100
+
     const supabase = createClient()
 
     // Sync state with props when router refreshes
@@ -63,6 +67,18 @@ export default function StudentList({ students: initialStudents, classes }) {
 
         return matchesStatus && matchesGrade && matchesClass && matchesSearch
     })
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [filter, gradeFilter, classFilter, search])
+
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE)
+    const paginatedStudents = filteredStudents.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
 
 
 
@@ -553,7 +569,7 @@ export default function StudentList({ students: initialStudents, classes }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredStudents.map(student => {
+                        {paginatedStudents.map(student => {
                             const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
                             const isSelected = selectedIds.has(student.student_id_text)
 
@@ -630,7 +646,33 @@ export default function StudentList({ students: initialStudents, classes }) {
             </div>
 
             <div className={styles.footer}>
-                表示中: {filteredStudents.length} / {students.length} 件
+                <div className={styles.paginationInfo}>
+                    表示中: {filteredStudents.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredStudents.length)} / {filteredStudents.length} 件 (全 {students.length} 件中)
+                </div>
+
+                {totalPages > 1 && (
+                    <div className={styles.paginationControls}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className={styles.pageBtn}
+                        >
+                            &lt; 前へ
+                        </button>
+
+                        <span className={styles.pageIndicator}>
+                            Page {currentPage} / {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className={styles.pageBtn}
+                        >
+                            次へ &gt;
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* 学生詳細モーダル */}
