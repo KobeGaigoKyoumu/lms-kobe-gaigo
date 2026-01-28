@@ -38,6 +38,10 @@ export default function AttendancePage() {
     const [historyLoading, setHistoryLoading] = useState(false)
     const [sortOrder, setSortOrder] = useState('asc')
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1)
+    const ITEMS_PER_PAGE = 100
+
     // クラス詳細用
     const [selectedClass, setSelectedClass] = useState(null)
     const [classMembers, setClassMembers] = useState(null)
@@ -89,7 +93,13 @@ export default function AttendancePage() {
         }
 
         setAttendanceData(filtered)
+
     }, [originalData, activeTab, rateFilter, classMembers]) // Added classMembers to dependencies for class view filtering
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [activeTab, rateFilter, studentSearch, sortOrder])
 
     const fetchUserRole = async () => {
         const { data: { user } } = await supabase.auth.getUser()
@@ -687,35 +697,83 @@ export default function AttendancePage() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {getSortedStudents(attendanceData?.students)?.map(s => (
-                                                    <tr key={s.student_id}>
-                                                        <td style={{ textAlign: 'center' }}>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedStudents.has(s.student_id)}
-                                                                onChange={() => handleSelectStudent(s.student_id)}
-                                                            />
-                                                        </td>
-                                                        <td>{s.student_id}</td>
-                                                        <td>{s.class_name || '-'}</td>
-                                                        <td>{formatStudentName(s)}</td>
-                                                        <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
-                                                        <td className={getRateColor(s.attendance_rate)}>
-                                                            {formatRate(s.attendance_rate)}
-                                                        </td>
-                                                        <td>
-                                                            <button
-                                                                onClick={() => fetchStudentHistory(s.student_id)}
-                                                                className={styles.detailBtn}
-                                                            >
-                                                                詳細
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {(() => {
+                                                    const sortedStudents = getSortedStudents(attendanceData?.students);
+                                                    const totalPages = Math.ceil((sortedStudents?.length || 0) / ITEMS_PER_PAGE);
+                                                    const paginatedStudents = sortedStudents?.slice(
+                                                        (currentPage - 1) * ITEMS_PER_PAGE,
+                                                        currentPage * ITEMS_PER_PAGE
+                                                    );
+
+                                                    return paginatedStudents?.map(s => (
+                                                        <tr key={s.student_id}>
+                                                            <td style={{ textAlign: 'center' }}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedStudents.has(s.student_id)}
+                                                                    onChange={() => handleSelectStudent(s.student_id)}
+                                                                />
+                                                            </td>
+                                                            <td>{s.student_id}</td>
+                                                            <td>{s.class_name || '-'}</td>
+                                                            <td>{formatStudentName(s)}</td>
+                                                            <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
+                                                            <td className={getRateColor(s.attendance_rate)}>
+                                                                {formatRate(s.attendance_rate)}
+                                                            </td>
+                                                            <td>
+                                                                <button
+                                                                    onClick={() => fetchStudentHistory(s.student_id)}
+                                                                    className={styles.detailBtn}
+                                                                >
+                                                                    詳細
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ));
+                                                })()}
                                             </tbody>
                                         </table>
+
+                                        {/* Pagination Controls */}
+                                        {(() => {
+                                            const sortedStudents = getSortedStudents(attendanceData?.students);
+                                            const totalPages = Math.ceil((sortedStudents?.length || 0) / ITEMS_PER_PAGE);
+
+                                            if (totalPages <= 1) return null;
+
+                                            return (
+                                                <div className={styles.footer}>
+                                                    <div className={styles.paginationInfo}>
+                                                        表示中: {sortedStudents?.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} - {Math.min(currentPage * ITEMS_PER_PAGE, sortedStudents?.length || 0)} / {sortedStudents?.length || 0} 件
+                                                    </div>
+
+                                                    <div className={styles.paginationControls}>
+                                                        <button
+                                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                            disabled={currentPage === 1}
+                                                            className={styles.pageBtn}
+                                                        >
+                                                            &lt; 前へ
+                                                        </button>
+
+                                                        <span className={styles.pageIndicator}>
+                                                            Page {currentPage} / {totalPages}
+                                                        </span>
+
+                                                        <button
+                                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                            disabled={currentPage === totalPages}
+                                                            className={styles.pageBtn}
+                                                        >
+                                                            次へ &gt;
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </>
+
                                 ) : (
                                     <div className={styles.studentDetail}>
                                         <div className={styles.detailHeader}>
