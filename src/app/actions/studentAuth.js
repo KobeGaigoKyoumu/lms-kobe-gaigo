@@ -62,10 +62,12 @@ export async function loginStudent(formData) {
 
     } catch (e) {
         console.error('Student Login Critical Error:', e)
-        return { error: 'システムエラーが発生しました。管理者にお問い合わせください。' }
+        // DEBUG: Return the actual error message to the client to verify if it is Env var issue or redirect issue
+        return { error: `システムエラー: ${e.message}` }
     }
 
     // Redirect needs to be outside try-catch because it throws a special error in Next.js
+    // ensure this path is reachable only if no error occurred above
     redirect('/student/dashboard')
 }
 
