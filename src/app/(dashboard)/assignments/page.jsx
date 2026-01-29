@@ -66,7 +66,6 @@ export default async function AssignmentsPage() {
                             href={`/assignments/class/${encodeURIComponent(cls.name)}`}
                             className={styles.classCard}
                         >
-                            <div className={styles.checkboxPlaceholder}></div>
                             <div className={styles.classInfo}>
                                 <h2 className={styles.className}>{cls.name}</h2>
                                 <p className={styles.classMeta}>{cls.count}件の課題</p>

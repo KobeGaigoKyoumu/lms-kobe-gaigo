@@ -29,7 +29,6 @@
 
 .title {
     font-size: var(--font-size-2xl);
-    /* Slightly smaller to match ref */
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-1);
@@ -73,15 +72,6 @@
     border-color: var(--primary-300);
     box-shadow: var(--shadow-sm);
     transform: translateY(-2px);
-}
-
-.checkboxPlaceholder {
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--border-color);
-    /* Thinner border for checkbox look */
-    border-radius: 4px;
-    flex-shrink: 0;
 }
 
 .classInfo {
