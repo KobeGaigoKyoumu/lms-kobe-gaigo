@@ -1,49 +1,30 @@
-import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { getTeacherAssignments } from '@/app/actions/homework'
+import { Plus } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default async function AssignmentsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // プロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
-
-    // 課題一覧取得
-    const { data: assignments, error } = await supabase
-        .from('assignments')
-        .select(`
-      *,
-      course:courses (
-        id,
-        title
-      )
-    `)
-        .order('due_date', { ascending: true })
-
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    const assignments = await getTeacherAssignments()
 
     // 締切でグループ分け
     const now = new Date()
-    const upcoming = assignments?.filter(a => !a.due_date || new Date(a.due_date) >= now) || []
-    const past = assignments?.filter(a => a.due_date && new Date(a.due_date) < now) || []
+    const upcoming = assignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
+    const past = assignments.filter(a => a.deadline && new Date(a.deadline) < now)
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>課題</h1>
-                    <p className={styles.subtitle}>課題の提出と管理</p>
+                    <h1 className={styles.title}>課題管理</h1>
+                    <p className={styles.subtitle}>課題の作成・配布・採点</p>
                 </div>
+                <Link href="/assignments/new" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-bold flex items-center gap-2 transition-colors">
+                    <Plus size={20} />
+                    新規課題作成
+                </Link>
             </header>
-
-            {error && (
-                <div className={styles.error}>課題の取得に失敗しました</div>
-            )}
 
             {/* これからの課題 */}
             <section className={styles.section}>
@@ -52,11 +33,11 @@ export default async function AssignmentsPage() {
                         <circle cx="10" cy="10" r="8" />
                         <path d="M10 6v4l2 2" />
                     </svg>
-                    これからの課題 ({upcoming.length})
+                    進行中の課題 ({upcoming.length})
                 </h2>
 
                 {upcoming.length === 0 ? (
-                    <p className={styles.empty}>現在提出期限内の課題はありません</p>
+                    <p className={styles.empty}>進行中の課題はありません</p>
                 ) : (
                     <div className={styles.list}>
                         {upcoming.map(assignment => (
@@ -66,13 +47,18 @@ export default async function AssignmentsPage() {
                                 className={styles.card}
                             >
                                 <div className={styles.cardMain}>
-                                    <h3>{assignment.title}</h3>
-                                    <p className={styles.courseName}>{assignment.course?.title}</p>
+                                    <div className="flex justify-between items-start">
+                                        <h3>{assignment.title}</h3>
+                                        <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                            {assignment.class_name}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-500 mt-1 truncate">{assignment.description}</p>
                                 </div>
                                 <div className={styles.cardMeta}>
-                                    {assignment.due_date ? (
+                                    {assignment.deadline ? (
                                         <span className={styles.dueDate}>
-                                            締切: {new Date(assignment.due_date).toLocaleDateString('ja-JP', {
+                                            締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
                                                 month: 'long',
                                                 day: 'numeric',
                                                 hour: '2-digit',
@@ -82,7 +68,6 @@ export default async function AssignmentsPage() {
                                     ) : (
                                         <span className={styles.noDue}>締切なし</span>
                                     )}
-                                    <span className={styles.score}>配点: {assignment.max_score}点</span>
                                 </div>
                             </Link>
                         ))}
@@ -98,7 +83,7 @@ export default async function AssignmentsPage() {
                             <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
                             <path d="M7 10l2 2 4-4" />
                         </svg>
-                        過去の課題 ({past.length})
+                        終了した課題 ({past.length})
                     </h2>
 
                     <div className={styles.list}>
@@ -109,12 +94,16 @@ export default async function AssignmentsPage() {
                                 className={`${styles.card} ${styles.past}`}
                             >
                                 <div className={styles.cardMain}>
-                                    <h3>{assignment.title}</h3>
-                                    <p className={styles.courseName}>{assignment.course?.title}</p>
+                                    <div className="flex justify-between items-start">
+                                        <h3>{assignment.title}</h3>
+                                        <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                            {assignment.class_name}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className={styles.cardMeta}>
                                     <span className={styles.dueDate}>
-                                        締切: {new Date(assignment.due_date).toLocaleDateString('ja-JP')}
+                                        締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP')}
                                     </span>
                                 </div>
                             </Link>
