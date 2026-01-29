@@ -66,25 +66,10 @@ export default async function AssignmentsPage() {
                             href={`/assignments/class/${encodeURIComponent(cls.name)}`}
                             className={styles.classCard}
                         >
-                            <div className={styles.classCardContent}>
-                                <div className={styles.classIconLarge}>
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                                    </svg>
-                                </div>
+                            <div className={styles.checkboxPlaceholder}></div>
+                            <div className={styles.classInfo}>
                                 <h2 className={styles.className}>{cls.name}</h2>
-                                <div className={styles.stats}>
-                                    <span className={styles.statItem}>
-                                        <span className={styles.statLabel}>進行中</span>
-                                        <span className={styles.statValue}>{cls.activeCount}</span>
-                                    </span>
-                                    <span className={styles.statDivider}>/</span>
-                                    <span className={styles.statItem}>
-                                        <span className={styles.statLabel}>全課題</span>
-                                        <span className={styles.statValue}>{cls.count}</span>
-                                    </span>
-                                </div>
+                                <p className={styles.classMeta}>{cls.count}件の課題</p>
                             </div>
                         </Link>
                     ))}

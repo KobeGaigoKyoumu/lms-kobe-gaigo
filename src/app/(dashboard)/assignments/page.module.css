@@ -28,7 +28,8 @@
 }
 
 .title {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
+    /* Slightly smaller to match ref */
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-1);
@@ -36,6 +37,7 @@
 
 .subtitle {
     color: var(--text-secondary);
+    font-size: var(--font-size-sm);
 }
 
 .emptyState {
@@ -49,89 +51,53 @@
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-6);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-4);
 }
 
 .classCard {
-    background: var(--bg-elevated);
+    background: #fff;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-6);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
     text-decoration: none;
     transition: all var(--transition-base);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    gap: var(--spacing-3);
     color: var(--text-primary);
-    position: relative;
-    overflow: hidden;
+    cursor: pointer;
 }
 
 .classCard:hover {
-    transform: translateY(-4px);
     border-color: var(--primary-300);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
 }
 
-.classCardContent {
-    position: relative;
-    z-index: 1;
-    width: 100%;
+.checkboxPlaceholder {
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--border-color);
+    /* Thinner border for checkbox look */
+    border-radius: 4px;
+    flex-shrink: 0;
 }
 
-.classIconLarge {
-    width: 64px;
-    height: 64px;
-    background: var(--primary-50);
-    color: var(--primary-600);
-    border-radius: var(--radius-full);
+.classInfo {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--spacing-4);
+    flex-direction: column;
 }
 
 .className {
-    font-size: var(--font-size-2xl);
-    font-weight: 800;
-    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2px;
     color: var(--text-primary);
 }
 
-.stats {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--spacing-3);
-    background: var(--bg-secondary);
-    padding: var(--spacing-3) var(--spacing-6);
-    border-radius: var(--radius-lg);
-}
-
-.statItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.statLabel {
+.classMeta {
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
-    font-weight: 600;
-}
-
-.statValue {
-    font-size: var(--font-size-xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-}
-
-.statDivider {
-    font-size: var(--font-size-xl);
-    color: var(--text-placeholder);
-    font-weight: 300;
 }
