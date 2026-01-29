@@ -16,10 +16,13 @@ export default async function AssignmentPage({ params }) {
 
     return (
         <div>
-            <div className="p-6 pb-0">
-                <Link href="/assignments" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900">
-                    <ChevronLeft size={16} />
-                    一覧に戻る
+            <div className="max-w-[1000px] mx-auto pt-6 px-6">
+                <Link
+                    href={`/assignments/class/${encodeURIComponent(data.assignment.class_name)}`}
+                    className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4 px-3 py-2 rounded-md hover:bg-gray-100"
+                >
+                    <ChevronLeft size={18} />
+                    <span className="font-medium">{data.assignment.class_name} の課題一覧に戻る</span>
                 </Link>
             </div>
             <AssignmentGradingView
