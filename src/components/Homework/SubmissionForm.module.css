@@ -59,6 +59,8 @@
     align-items: center;
     gap: var(--spacing-2);
     overflow: hidden;
+    flex: 1;
+    /* Ensure text truncates properly */
 }
 
 .fileIcon {
@@ -73,6 +75,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 300px;
 }
 
 .fileName:hover {
@@ -178,20 +181,25 @@
     }
 }
 
+/* Image Preview & Modal Styles */
 .imageWrapper {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: var(--radius-md);
     overflow: hidden;
     flex-shrink: 0;
     border: 1px solid var(--border-color);
-    cursor: pointer;
+    cursor: zoom-in;
+    margin-right: var(--spacing-2);
+    position: relative;
+    background: #000;
 }
 
 .imageThumbnail {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
     transition: transform 0.2s;
 }
 
@@ -205,49 +213,57 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
     padding: var(--spacing-4);
-    opacity: 0;
-    animation: fadeIn 0.2s forwards;
 }
 
 .modalContent {
     position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
+    max-width: 95vw;
+    max-height: 95vh;
+    animation: zoomIn 0.2s ease-out;
 }
 
 .modalImage {
     max-width: 100%;
     max-height: 90vh;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: block;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .closeButton {
     position: absolute;
     top: -40px;
     right: 0;
-    background: none;
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeButton:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-@keyframes fadeIn {
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
     to {
+        transform: scale(1);
         opacity: 1;
     }
 }
