@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 import { getStudentSession } from './studentAuth'
 import { revalidatePath } from 'next/cache'
 
@@ -10,6 +10,20 @@ const createAdminClient = () => {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const { createClient } = require('@supabase/supabase-js')
     return createClient(supabaseUrl, supabaseServiceKey)
+}
+
+export async function getClassesList() {
+    const supabase = await createClient()
+    const { data: classes, error } = await supabase
+        .from('classes')
+        .select('*')
+        .order('name', { ascending: true })
+
+    if (error) {
+        console.error('Fetch classes error:', error)
+        return []
+    }
+    return classes
 }
 
 // Fetch active assignments for the student's class
@@ -145,7 +159,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
 
 // Create a new assignment
 export async function createAssignment(formData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -182,7 +196,7 @@ export async function createAssignment(formData) {
 
 // Fetch all assignments for teacher list
 export async function getTeacherAssignments() {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // We want to get submission counts too.
     // This might be complex in one query with Supabase depending on foreign keys.
@@ -205,11 +219,11 @@ export async function getTeacherAssignments() {
 export async function getAssignmentSubmissions(assignmentId) {
     // For grading, we need to join student names from 'students' table.
     // Since 'students' table policies rely on profiles/auth role, an authenticated teacher can read it.
-    // However, the relationship assumes 'students' table is foreign keyed properly. 
+    // However, the relationship assumes 'students' table is foreign keyed properly.
     // If not, we might need a manual join. But let's try the join first if FK exists.
     // If no FK, we fetch manually.
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // 1. Fetch Assignment
     const { data: assignment, error: assignmentError } = await supabase
@@ -249,7 +263,7 @@ export async function getAssignmentSubmissions(assignmentId) {
 
 // Grade a submission
 export async function gradeSubmission(submissionId, score, feedback) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
         .from('homework_submissions')
