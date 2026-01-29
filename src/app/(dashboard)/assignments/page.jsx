@@ -8,10 +8,18 @@ export const dynamic = 'force-dynamic'
 export default async function AssignmentsPage() {
     const assignments = await getTeacherAssignments()
 
-    // 締切でグループ分け
-    const now = new Date()
-    const upcoming = assignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
-    const past = assignments.filter(a => a.deadline && new Date(a.deadline) < now)
+    // Group by class
+    const assignmentsByClass = assignments.reduce((acc, assignment) => {
+        const className = assignment.class_name || '未分類'
+        if (!acc[className]) {
+            acc[className] = []
+        }
+        acc[className].push(assignment)
+        return acc
+    }, {})
+
+    // Sort classes (optional, e.g., alphabetical)
+    const sortedClasses = Object.keys(assignmentsByClass).sort()
 
     return (
         <div className={styles.page}>
@@ -26,90 +34,66 @@ export default async function AssignmentsPage() {
                 </Link>
             </header>
 
-            {/* これからの課題 */}
-            <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <circle cx="10" cy="10" r="8" />
-                        <path d="M10 6v4l2 2" />
-                    </svg>
-                    進行中の課題 ({upcoming.length})
-                </h2>
+            {sortedClasses.length === 0 ? (
+                <div className={styles.emptyState}>
+                    <p>課題はまだ作成されていません</p>
+                </div>
+            ) : (
+                <div className={styles.classSections}>
+                    {sortedClasses.map(className => (
+                        <section key={className} className={styles.section}>
+                            <h2 className={styles.sectionTitle}>
+                                <div className={styles.classIcon}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                {className}
+                                <span className={styles.countBadge}>
+                                    {assignmentsByClass[className].length}
+                                </span>
+                            </h2>
 
-                {upcoming.length === 0 ? (
-                    <p className={styles.empty}>進行中の課題はありません</p>
-                ) : (
-                    <div className={styles.list}>
-                        {upcoming.map(assignment => (
-                            <Link
-                                href={`/assignments/${assignment.id}`}
-                                key={assignment.id}
-                                className={styles.card}
-                            >
-                                <div className={styles.cardMain}>
-                                    <div className="flex justify-between items-start">
-                                        <h3>{assignment.title}</h3>
-                                        <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                            {assignment.class_name}
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-1 truncate">{assignment.description}</p>
-                                </div>
-                                <div className={styles.cardMeta}>
-                                    {assignment.deadline ? (
-                                        <span className={styles.dueDate}>
-                                            締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </span>
-                                    ) : (
-                                        <span className={styles.noDue}>締切なし</span>
-                                    )}
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </section>
-
-            {/* 過去の課題 */}
-            {past.length > 0 && (
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
-                            <path d="M7 10l2 2 4-4" />
-                        </svg>
-                        終了した課題 ({past.length})
-                    </h2>
-
-                    <div className={styles.list}>
-                        {past.map(assignment => (
-                            <Link
-                                href={`/assignments/${assignment.id}`}
-                                key={assignment.id}
-                                className={`${styles.card} ${styles.past}`}
-                            >
-                                <div className={styles.cardMain}>
-                                    <div className="flex justify-between items-start">
-                                        <h3>{assignment.title}</h3>
-                                        <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                            {assignment.class_name}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className={styles.cardMeta}>
-                                    <span className={styles.dueDate}>
-                                        締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP')}
-                                    </span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                            <div className={styles.list}>
+                                {assignmentsByClass[className].map(assignment => (
+                                    <Link
+                                        href={`/assignments/${assignment.id}`}
+                                        key={assignment.id}
+                                        className={styles.card}
+                                    >
+                                        <div className={styles.cardMain}>
+                                            <div className="flex justify-between items-start">
+                                                <h3>{assignment.title}</h3>
+                                                {/* Status Badge based on deadline */}
+                                                {assignment.deadline && new Date(assignment.deadline) < new Date() && (
+                                                    <span className={styles.statusPast}>終了</span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-500 mt-1 truncate">{assignment.description}</p>
+                                        </div>
+                                        <div className={styles.cardMeta}>
+                                            {assignment.deadline ? (
+                                                <span className={styles.dueDate}>
+                                                    締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            ) : (
+                                                <span className={styles.noDue}>締切なし</span>
+                                            )}
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    ))}
+                </div>
             )}
         </div>
     )
