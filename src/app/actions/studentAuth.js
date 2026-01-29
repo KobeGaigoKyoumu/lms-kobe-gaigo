@@ -68,7 +68,8 @@ export async function loginStudent(formData) {
 
     // Redirect needs to be outside try-catch because it throws a special error in Next.js
     // ensure this path is reachable only if no error occurred above
-    redirect('/student/dashboard')
+    // redirect('/student/dashboard') // Causing NEXT_REDIRECT error on client catch
+    return { success: true }
 }
 
 export async function logoutStudent() {

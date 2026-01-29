@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { loginStudent } from '@/app/actions/studentAuth'
 import styles from './login.module.css'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [isInAppBrowser, setIsInAppBrowser] = useState(false)
@@ -59,8 +61,11 @@ export default function LoginPage() {
             if (result?.error) {
                 setError(result.error)
                 setLoading(false)
+            } else if (result?.success) {
+                // Login successful
+                router.refresh() // Refresh Server Components to pick up the cookie
+                router.push('/student/dashboard')
             }
-            // If success, redirect happens on server side
         } catch (e) {
             console.error(e)
             setError('システムエラーが発生しました。')
