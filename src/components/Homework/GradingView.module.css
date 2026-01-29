@@ -1,0 +1,228 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--spacing-6);
+}
+
+.header {
+    margin-bottom: var(--spacing-8);
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.meta {
+    display: flex;
+    gap: var(--spacing-4);
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-4);
+}
+
+.description {
+    background: var(--bg-primary);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.sectionTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.empty {
+    padding: var(--spacing-8);
+    text-align: center;
+    color: var(--text-tertiary);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.submissionRows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.submissionRow {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+}
+
+.rowHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-3);
+}
+
+.studentName {
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+}
+
+.studentClass {
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    color: var(--text-tertiary);
+    margin-left: var(--spacing-2);
+}
+
+.submittedAt {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.statusBadge {
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+}
+
+.statusGraded {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.statusSubmitted {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+.studentComment {
+    background: var(--bg-primary);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-3);
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    font-size: var(--font-size-sm);
+}
+
+.files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.fileLink {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-600);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: background var(--transition-base);
+}
+
+.fileLink:hover {
+    background: var(--bg-secondary);
+}
+
+.gradingForm {
+    display: flex;
+    gap: var(--spacing-4);
+    align-items: flex-start;
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-3);
+    margin-top: var(--spacing-3);
+}
+
+.scoreInputGroup {
+    width: 100px;
+}
+
+.label {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    margin-bottom: var(--spacing-1);
+    color: var(--text-secondary);
+}
+
+.input {
+    width: 100%;
+    padding: var(--spacing-2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-align: right;
+    font-feature-settings: "tnum";
+}
+
+.feedbackGroup {
+    flex: 1;
+}
+
+.textarea {
+    width: 100%;
+    padding: var(--spacing-2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    height: 42px;
+    transition: all var(--transition-base);
+}
+
+.textarea:focus {
+    height: 96px;
+    outline: none;
+    border-color: var(--primary-500);
+}
+
+.saveButton {
+    margin-top: 24px;
+    padding: var(--spacing-2);
+    background: var(--primary-600);
+    color: white;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-base);
+}
+
+.saveButton:hover:not(:disabled) {
+    background: var(--primary-700);
+}
+
+.saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .gradingForm {
+        flex-direction: column;
+    }
+
+    .scoreInputGroup,
+    .feedbackGroup,
+    .saveButton {
+        width: 100%;
+    }
+
+    .saveButton {
+        margin-top: 0;
+    }
+}

@@ -5,7 +5,26 @@
 }
 
 .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--spacing-6);
+}
+
+.createButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    background: var(--primary-600);
+    color: white;
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: background var(--transition-base);
+}
+
+.createButton:hover {
+    background: var(--primary-700);
 }
 
 .title {

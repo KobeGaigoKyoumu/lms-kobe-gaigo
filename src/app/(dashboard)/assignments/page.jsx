@@ -20,7 +20,7 @@ export default async function AssignmentsPage() {
                     <h1 className={styles.title}>課題管理</h1>
                     <p className={styles.subtitle}>課題の作成・配布・採点</p>
                 </div>
-                <Link href="/assignments/new" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-bold flex items-center gap-2 transition-colors">
+                <Link href="/assignments/new" className={styles.createButton}>
                     <Plus size={20} />
                     新規課題作成
                 </Link>
