@@ -33,10 +33,12 @@ export async function updateSession(request) {
     } = await supabase.auth.getUser()
 
     // 未認証ユーザーを login にリダイレクト（公開ページを除く）
+    // NOTE: /student 配下は独自の認証（student_session cookie）を使用するため、ここではリダイレクトしない
     const publicPaths = ['/login', '/auth/callback']
     const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
+    const isStudentPath = request.nextUrl.pathname.startsWith('/student')
 
-    if (!user && !isPublicPath) {
+    if (!user && !isPublicPath && !isStudentPath) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
