@@ -215,6 +215,27 @@ export async function getTeacherAssignments() {
     return assignments
 }
 
+// Fetch assignments for a specific class (Teacher view helper)
+export async function getAssignmentsByClass(className) {
+    const supabase = await createClient()
+
+    // Decode URL component just in case, though usually handled by Next.js params
+    const decodedClassName = decodeURIComponent(className)
+
+    const { data: assignments, error } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('class_name', decodedClassName)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Fetch assignments by class error:', error)
+        return []
+    }
+
+    return assignments
+}
+
 // Fetch assignment with submissions for grading
 export async function getAssignmentSubmissions(assignmentId) {
     // For grading, we need to join student names from 'students' table.

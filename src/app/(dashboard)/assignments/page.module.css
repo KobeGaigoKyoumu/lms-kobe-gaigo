@@ -8,7 +8,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
 }
 
 .createButton {
@@ -38,54 +38,6 @@
     color: var(--text-secondary);
 }
 
-.error {
-    background: var(--error-50);
-    border: 1px solid var(--error-500);
-    color: var(--error-600);
-    padding: var(--spacing-4);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--spacing-4);
-}
-
-
-.classSections {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-8);
-}
-
-.sectionTitle {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-3);
-    font-size: var(--font-size-xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-4);
-    padding-bottom: var(--spacing-2);
-    border-bottom: 2px solid var(--border-color);
-}
-
-.classIcon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: var(--primary-100);
-    color: var(--primary-600);
-    border-radius: var(--radius-full);
-}
-
-.countBadge {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-}
-
 .emptyState {
     padding: var(--spacing-12);
     text-align: center;
@@ -95,92 +47,91 @@
     color: var(--text-tertiary);
 }
 
-.statusPast {
-    font-size: var(--font-size-xs);
-    background: var(--bg-secondary);
-    color: var(--text-tertiary);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    margin-left: var(--spacing-2);
-    font-weight: 500;
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-6);
 }
 
-.list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-3);
-}
-
-.card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-4) var(--spacing-5);
+.classCard {
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    text-decoration: none;
     transition: all var(--transition-base);
-}
-
-.card:hover {
-    transform: translateX(4px);
-    border-color: var(--primary-300);
-    box-shadow: var(--shadow-md);
-}
-
-.card.past {
-    opacity: 0.7;
-}
-
-.card.past:hover {
-    opacity: 1;
-}
-
-.cardMain h3 {
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-1);
-}
-
-.courseName {
-    font-size: var(--font-size-sm);
-    color: var(--text-tertiary);
-}
-
-.cardMeta {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: var(--spacing-1);
+    align-items: center;
+    text-align: center;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
 }
 
-.dueDate {
-    font-size: var(--font-size-sm);
-    color: var(--warning-600);
-    font-weight: 500;
+.classCard:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-300);
+    box-shadow: var(--shadow-lg);
 }
 
-.noDue {
-    font-size: var(--font-size-sm);
-    color: var(--text-tertiary);
+.classCardContent {
+    position: relative;
+    z-index: 1;
+    width: 100%;
 }
 
-.score {
+.classIconLarge {
+    width: 64px;
+    height: 64px;
+    background: var(--primary-50);
+    color: var(--primary-600);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-4);
+}
+
+.className {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    margin-bottom: var(--spacing-4);
+    color: var(--text-primary);
+}
+
+.stats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-3);
+    background: var(--bg-secondary);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-lg);
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.statLabel {
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
+    font-weight: 600;
 }
 
-@media (max-width: 640px) {
-    .card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-3);
-    }
+.statValue {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
 
-    .cardMeta {
-        align-items: flex-start;
-        flex-direction: row;
-        gap: var(--spacing-3);
-    }
+.statDivider {
+    font-size: var(--font-size-xl);
+    color: var(--text-placeholder);
+    font-weight: 300;
 }

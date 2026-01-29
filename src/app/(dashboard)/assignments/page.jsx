@@ -8,26 +8,34 @@ export const dynamic = 'force-dynamic'
 export default async function AssignmentsPage() {
     const assignments = await getTeacherAssignments()
 
-    // Group by class
-    const assignmentsByClass = assignments.reduce((acc, assignment) => {
+    // Extract unique classes and count assignments
+    const classStats = assignments.reduce((acc, assignment) => {
         const className = assignment.class_name || '未分類'
         if (!acc[className]) {
-            acc[className] = []
+            acc[className] = {
+                name: className,
+                count: 0,
+                activeCount: 0
+            }
         }
-        acc[className].push(assignment)
+        acc[className].count++
+        if (!assignment.deadline || new Date(assignment.deadline) >= new Date()) {
+            acc[className].activeCount++
+        }
         return acc
     }, {})
 
-    // Sort classes (optional, e.g., alphabetical)
-    const sortedClasses = Object.keys(assignmentsByClass).sort()
+    // Sort classes
+    const sortedClasses = Object.values(classStats).sort((a, b) => a.name.localeCompare(b.name))
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
                     <h1 className={styles.title}>課題管理</h1>
-                    <p className={styles.subtitle}>課題の作成・配布・採点</p>
+                    <p className={styles.subtitle}>クラスを選択して課題を確認・作成します</p>
                 </div>
+                {/* Note: New Assignment button might need to ask for class first or stay here */}
                 <Link href="/assignments/new" className={styles.createButton}>
                     <Plus size={20} />
                     新規課題作成
@@ -39,59 +47,34 @@ export default async function AssignmentsPage() {
                     <p>課題はまだ作成されていません</p>
                 </div>
             ) : (
-                <div className={styles.classSections}>
-                    {sortedClasses.map(className => (
-                        <section key={className} className={styles.section}>
-                            <h2 className={styles.sectionTitle}>
-                                <div className={styles.classIcon}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="9" cy="7" r="4"></circle>
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                <div className={styles.grid}>
+                    {sortedClasses.map(cls => (
+                        <Link
+                            key={cls.name}
+                            href={`/assignments/class/${encodeURIComponent(cls.name)}`}
+                            className={styles.classCard}
+                        >
+                            <div className={styles.classCardContent}>
+                                <div className={styles.classIconLarge}>
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                                     </svg>
                                 </div>
-                                {className}
-                                <span className={styles.countBadge}>
-                                    {assignmentsByClass[className].length}
-                                </span>
-                            </h2>
-
-                            <div className={styles.list}>
-                                {assignmentsByClass[className].map(assignment => (
-                                    <Link
-                                        href={`/assignments/${assignment.id}`}
-                                        key={assignment.id}
-                                        className={styles.card}
-                                    >
-                                        <div className={styles.cardMain}>
-                                            <div className="flex justify-between items-start">
-                                                <h3>{assignment.title}</h3>
-                                                {/* Status Badge based on deadline */}
-                                                {assignment.deadline && new Date(assignment.deadline) < new Date() && (
-                                                    <span className={styles.statusPast}>終了</span>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-gray-500 mt-1 truncate">{assignment.description}</p>
-                                        </div>
-                                        <div className={styles.cardMeta}>
-                                            {assignment.deadline ? (
-                                                <span className={styles.dueDate}>
-                                                    締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </span>
-                                            ) : (
-                                                <span className={styles.noDue}>締切なし</span>
-                                            )}
-                                        </div>
-                                    </Link>
-                                ))}
+                                <h2 className={styles.className}>{cls.name}</h2>
+                                <div className={styles.stats}>
+                                    <span className={styles.statItem}>
+                                        <span className={styles.statLabel}>進行中</span>
+                                        <span className={styles.statValue}>{cls.activeCount}</span>
+                                    </span>
+                                    <span className={styles.statDivider}>/</span>
+                                    <span className={styles.statItem}>
+                                        <span className={styles.statLabel}>全課題</span>
+                                        <span className={styles.statValue}>{cls.count}</span>
+                                    </span>
+                                </div>
                             </div>
-                        </section>
+                        </Link>
                     ))}
                 </div>
             )}
