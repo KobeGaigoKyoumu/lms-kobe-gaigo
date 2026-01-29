@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { gradeSubmission } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Image as ImageIcon } from 'lucide-react'
+import { Loader2, Save, Image as ImageIcon, X } from 'lucide-react'
 import styles from './GradingView.module.css'
 
 // This component handles the grading logic for a single student row
-function SubmissionRow({ submission, student }) {
+function SubmissionRow({ submission, student, onImageClick }) {
     const [score, setScore] = useState(submission.score ?? '')
     const [feedback, setFeedback] = useState(submission.feedback ?? '')
     const [saving, setSaving] = useState(false)
@@ -25,6 +25,10 @@ function SubmissionRow({ submission, student }) {
     }
 
     const fileUrls = submission.file_urls || []
+
+    const isImage = (filename) => {
+        return /\.(jpg|jpeg|png|gif|webp)$/i.test(filename)
+    }
 
     return (
         <div className={styles.submissionRow}>
@@ -50,16 +54,30 @@ function SubmissionRow({ submission, student }) {
             {fileUrls.length > 0 && (
                 <div className={styles.files}>
                     {fileUrls.map((file, i) => (
-                        <a
-                            key={i}
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.fileLink}
-                        >
-                            <ImageIcon size={16} />
-                            <span className="truncate max-w-[200px]">{file.name}</span>
-                        </a>
+                        <div key={i} className={styles.fileContainer}>
+                            {isImage(file.name) ? (
+                                <div
+                                    className={styles.imageWrapper}
+                                    onClick={() => onImageClick(file)}
+                                >
+                                    <img
+                                        src={file.url}
+                                        alt={file.name}
+                                        className={styles.imageThumbnail}
+                                    />
+                                </div>
+                            ) : null}
+                            <a
+                                href={file.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.fileLink}
+                                style={isImage(file.name) ? { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 } : {}}
+                            >
+                                {!isImage(file.name) && <ImageIcon size={16} />}
+                                <span className="truncate max-w-[200px]">{file.name}</span>
+                            </a>
+                        </div>
                     ))}
                 </div>
             )}
@@ -99,6 +117,8 @@ function SubmissionRow({ submission, student }) {
 }
 
 export default function AssignmentGradingView({ assignment, submissions }) {
+    const [selectedImage, setSelectedImage] = useState(null)
+
     if (!assignment) return <div>課題が見つかりません</div>
 
     return (
@@ -129,8 +149,28 @@ export default function AssignmentGradingView({ assignment, submissions }) {
                             key={sub.id}
                             submission={sub}
                             student={sub.student}
+                            onImageClick={setSelectedImage}
                         />
                     ))}
+                </div>
+            )}
+
+            {/* Lightbox Modal */}
+            {selectedImage && (
+                <div className={styles.modalOverlay} onClick={() => setSelectedImage(null)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <button
+                            className={styles.closeButton}
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            <X size={24} />
+                        </button>
+                        <img
+                            src={selectedImage.url}
+                            alt={selectedImage.name}
+                            className={styles.modalImage}
+                        />
+                    </div>
                 </div>
             )}
         </div>

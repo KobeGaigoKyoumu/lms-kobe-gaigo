@@ -121,18 +121,28 @@
     margin-bottom: var(--spacing-4);
 }
 
+.fileContainer {
+    display: flex;
+    align-items: center;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
 .fileLink {
     display: flex;
     align-items: center;
     gap: var(--spacing-2);
     padding: var(--spacing-2) var(--spacing-3);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    /* background: var(--bg-primary); */
+    /* border: 1px solid var(--border-color); */
+    /* border-radius: var(--radius-md); */
     color: var(--primary-600);
     text-decoration: none;
     font-size: var(--font-size-sm);
     transition: background var(--transition-base);
+    height: 100%;
 }
 
 .fileLink:hover {
@@ -224,5 +234,92 @@
 
     .saveButton {
         margin-top: 0;
+    }
+}
+
+/* Image Preview & Modal Styles */
+.imageWrapper {
+    width: 60px;
+    height: 60px;
+    /* border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md); */
+    overflow: hidden;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
+    cursor: zoom-in;
+    position: relative;
+    background: #000;
+}
+
+.imageThumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.imageThumbnail:hover {
+    transform: scale(1.1);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: var(--spacing-4);
+}
+
+.modalContent {
+    position: relative;
+    max-width: 95vw;
+    max-height: 95vh;
+    animation: zoomIn 0.2s ease-out;
+}
+
+.modalImage {
+    max-width: 100%;
+    max-height: 90vh;
+    display: block;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.closeButton {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
 }
