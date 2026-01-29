@@ -140,3 +140,132 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
     revalidatePath('/student/dashboard')
     return { success: true }
 }
+
+// --- Teacher Actions ---
+
+// Create a new assignment
+export async function createAssignment(formData) {
+    const supabase = createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+        return { error: 'Unauthorized' }
+    }
+
+    const title = formData.get('title')
+    const description = formData.get('description')
+    const className = formData.get('className')
+    const deadline = formData.get('deadline') // ISO string
+
+    if (!title || !className || !deadline) {
+        return { error: '必須項目を入力してください' }
+    }
+
+    const { error } = await supabase
+        .from('homework_assignments')
+        .insert({
+            title,
+            description,
+            class_name: className,
+            deadline,
+            teacher_id: user.id
+        })
+
+    if (error) {
+        console.error('Create assignment error:', error)
+        return { error: '作成に失敗しました' }
+    }
+
+    revalidatePath('/assignments')
+    return { success: true }
+}
+
+// Fetch all assignments for teacher list
+export async function getTeacherAssignments() {
+    const supabase = createClient()
+
+    // We want to get submission counts too.
+    // This might be complex in one query with Supabase depending on foreign keys.
+    // Let's just fetch assignments first.
+
+    const { data: assignments, error } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Fetch teacher assignments error:', error)
+        return []
+    }
+
+    return assignments
+}
+
+// Fetch assignment with submissions for grading
+export async function getAssignmentSubmissions(assignmentId) {
+    // For grading, we need to join student names from 'students' table.
+    // Since 'students' table policies rely on profiles/auth role, an authenticated teacher can read it.
+    // However, the relationship assumes 'students' table is foreign keyed properly. 
+    // If not, we might need a manual join. But let's try the join first if FK exists.
+    // If no FK, we fetch manually.
+
+    const supabase = createClient()
+
+    // 1. Fetch Assignment
+    const { data: assignment, error: assignmentError } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', assignmentId)
+        .single()
+
+    if (assignmentError) return null
+
+    // 2. Fetch Submissions
+    // We can also fetch the student info if joined.
+    // homework_submissions references students(student_id_text).
+
+    const { data: submissions, error: subError } = await supabase
+        .from('homework_submissions')
+        .select(`
+            *,
+            student:students (
+                full_name,
+                class_name
+            )
+        `)
+        .eq('assignment_id', assignmentId)
+        .order('submitted_at', { ascending: false })
+
+    if (subError) {
+        console.error('Fetch submissions error:', subError)
+        return { assignment, submissions: [] }
+    }
+
+    return {
+        assignment,
+        submissions: submissions || []
+    }
+}
+
+// Grade a submission
+export async function gradeSubmission(submissionId, score, feedback) {
+    const supabase = createClient()
+
+    const { error } = await supabase
+        .from('homework_submissions')
+        .update({
+            score: score ? parseInt(score) : null,
+            feedback,
+            status: 'graded',
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', submissionId)
+
+    if (error) {
+        console.error('Grading error:', error)
+        return { error: '保存に失敗しました' }
+    }
+
+    revalidatePath('/assignments/[id]', 'page')
+    return { success: true }
+}
