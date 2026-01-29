@@ -283,3 +283,40 @@ export async function gradeSubmission(submissionId, score, feedback) {
     revalidatePath('/assignments/[id]', 'page')
     return { success: true }
 }
+
+// Upload file securely (for students)
+export async function uploadSubmissionFile(formData) {
+    const session = await getStudentSession()
+    if (!session) return { error: 'Unauthorized' }
+
+    const file = formData.get('file')
+    const assignmentId = formData.get('assignmentId')
+
+    if (!file || !assignmentId) {
+        return { error: 'ファイルまたは課題IDが無効です' }
+    }
+
+    const supabase = createAdminClient()
+
+    // Create unique path: assignmentId/randomString.ext
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
+    const filePath = `${assignmentId}/${fileName}`
+
+    // Upload using Service Role (admin)
+    const { error: uploadError } = await supabase.storage
+        .from('assignments')
+        .upload(filePath, file)
+
+    if (uploadError) {
+        console.error('Server upload error:', uploadError)
+        return { error: 'アップロードに失敗しました' }
+    }
+
+    // Get Public URL
+    const { data: { publicUrl } } = supabase.storage
+        .from('assignments')
+        .getPublicUrl(filePath)
+
+    return { success: true, url: publicUrl, name: file.name }
+}

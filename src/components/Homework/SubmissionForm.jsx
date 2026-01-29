@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { submitHomework } from '@/app/actions/homework'
+import { submitHomework, uploadSubmissionFile } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
 import styles from './SubmissionForm.module.css'
@@ -18,28 +17,21 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
         if (!e.target.files?.length) return
 
         setUploading(true)
-        const supabase = createClient()
         const newFiles = []
 
         try {
             for (const file of e.target.files) {
-                const fileExt = file.name.split('.').pop()
-                const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-                const filePath = `${assignmentId}/${fileName}`
+                const formData = new FormData()
+                formData.append('file', file)
+                formData.append('assignmentId', assignmentId)
 
-                const { error: uploadError } = await supabase.storage
-                    .from('assignments')
-                    .upload(filePath, file)
+                const result = await uploadSubmissionFile(formData)
 
-                if (uploadError) throw uploadError
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('assignments')
-                    .getPublicUrl(filePath)
+                if (result.error) throw new Error(result.error)
 
                 newFiles.push({
-                    name: file.name,
-                    url: publicUrl
+                    name: result.name,
+                    url: result.url
                 })
             }
             setFiles(prev => [...prev, ...newFiles])
