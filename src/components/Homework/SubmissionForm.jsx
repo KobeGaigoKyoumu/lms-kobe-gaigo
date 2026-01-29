@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { submitHomework } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Upload, X, FileText, Image as ImageIcon } from 'lucide-react'
+import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
+import styles from './SubmissionForm.module.css'
 
 export default function SubmissionForm({ assignmentId, initialComment = '', initialFiles = [] }) {
     const [comment, setComment] = useState(initialComment)
@@ -74,35 +75,35 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border shadow-sm">
-            <div>
-                <label className="block text-sm font-medium mb-2">コメント / 回答</label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.group}>
+                <label className={styles.label}>コメント / 回答</label>
                 <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    className="w-full p-3 border rounded-md h-32"
+                    className={styles.textarea}
                     placeholder="先生へのコメントや、テキストでの回答が必要な場合はここに入力してください。"
                 />
             </div>
 
-            <div>
-                <label className="block text-sm font-medium mb-2">ファイル提出 (画像など)</label>
+            <div className={styles.group}>
+                <label className={styles.label}>ファイル提出 (画像など)</label>
 
                 {/* File List */}
                 {files.length > 0 && (
-                    <div className="mb-4 space-y-2">
+                    <div className={styles.fileList}>
                         {files.map((file, i) => (
-                            <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
-                                <div className="flex items-center gap-2 overflow-hidden">
-                                    <ImageIcon size={16} className="text-blue-500 shrink-0" />
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate">
+                            <div key={i} className={styles.fileItem}>
+                                <div className={styles.fileInfo}>
+                                    <ImageIcon size={16} className={styles.fileIcon} />
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className={styles.fileName}>
                                         {file.name}
                                     </a>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => removeFile(i)}
-                                    className="text-gray-400 hover:text-red-500"
+                                    className={styles.removeButton}
                                 >
                                     <X size={16} />
                                 </button>
@@ -112,33 +113,30 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                 )}
 
                 {/* Upload Button */}
-                <div className="flex items-center gap-4">
-                    <label className={`
-                        flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer transition-colors
-                        ${uploading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}
-                    `}>
-                        {uploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
+                <div className={styles.uploadArea}>
+                    <label className={`${styles.uploadLabel} ${uploading ? styles.disabled : ''}`}>
+                        {uploading ? <Loader2 className={styles.spinner} size={20} /> : <Upload size={20} />}
                         <span>{uploading ? 'アップロード中...' : 'ファイルを選択'}</span>
                         <input
                             type="file"
                             multiple
                             accept="image/*,.pdf,.doc,.docx"
                             onChange={handleFileChange}
-                            className="hidden"
+                            className={styles.hiddenInput}
                             disabled={uploading}
                         />
                     </label>
-                    <span className="text-xs text-gray-500">※ 画像、PDFなどをアップロードできます</span>
+                    <span className={styles.hint}>※ 画像、PDFなどをアップロードできます</span>
                 </div>
             </div>
 
-            <div className="pt-4 border-t">
+            <div className={styles.actions}>
                 <button
                     type="submit"
                     disabled={submitting || uploading}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+                    className={styles.submitButton}
                 >
-                    {submitting && <Loader2 className="animate-spin" />}
+                    {submitting && <Loader2 className={styles.spinner} />}
                     {submitting ? '提出中...' : '課題を提出する'}
                 </button>
             </div>
