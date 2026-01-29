@@ -1,0 +1,82 @@
+.container {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+.header {
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.headerContent {
+    max-width: 896px;
+    /* max-w-4xl equivalent */
+    margin: 0 auto;
+    padding: 0 var(--spacing-4);
+    height: 64px;
+    /* h-16 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-600);
+    text-decoration: none;
+}
+
+.userArea {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.userInfo {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .userInfo {
+        display: block;
+    }
+}
+
+.userName {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.className {
+    margin-left: var(--spacing-1);
+    color: var(--text-tertiary);
+}
+
+.logoutButton {
+    background: none;
+    border: none;
+    font-size: var(--font-size-sm);
+    color: var(--error-600);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-base);
+}
+
+.logoutButton:hover {
+    background: var(--error-50);
+}
+
+.main {
+    max-width: 896px;
+    /* max-w-4xl */
+    margin: 0 auto;
+    padding: var(--spacing-8) var(--spacing-4);
+}

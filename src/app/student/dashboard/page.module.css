@@ -1,0 +1,119 @@
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-6);
+    color: var(--text-primary);
+}
+
+.emptyState {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-8);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.card {
+    display: block;
+    background: var(--bg-elevated);
+    padding: var(--spacing-5);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* Status variants */
+.statusSubmitted {
+    border-left-color: var(--success-500);
+}
+
+.statusOverdue {
+    border-left-color: var(--error-500);
+}
+
+.statusPending {
+    border-left-color: var(--primary-500);
+}
+
+.cardContent {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+}
+
+.mainInfo {
+    flex: 1;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    padding: 2px var(--spacing-2);
+    border-radius: var(--radius-full);
+    margin-bottom: var(--spacing-1);
+}
+
+.badgeSubmitted {
+    color: var(--success-700);
+    background: var(--success-50);
+}
+
+.badgeOverdue {
+    color: var(--error-700);
+    background: var(--error-50);
+}
+
+.badgePending {
+    color: var(--primary-700);
+    background: var(--primary-50);
+}
+
+.cardTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.chevron {
+    color: var(--text-tertiary);
+    transition: color var(--transition-base);
+}
+
+.card:hover .chevron {
+    color: var(--primary-500);
+}

@@ -1,6 +1,7 @@
 import { logoutStudent, getStudentSession } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import styles from './layout.module.css'
 
 export default async function StudentLayout({ children }) {
     const session = await getStudentSession()
@@ -10,20 +11,20 @@ export default async function StudentLayout({ children }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className={styles.container}>
             {/* Header */}
-            <header className="bg-white shadow-sm border-b sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/student/dashboard" className="font-bold text-xl text-blue-600">
+            <header className={styles.header}>
+                <div className={styles.headerContent}>
+                    <Link href="/student/dashboard" className={styles.brand}>
                         神戸外語 LMS
                     </Link>
-                    <div className="flex items-center gap-4">
-                        <div className="text-sm text-gray-600 hidden sm:block">
-                            <span className="font-medium text-gray-900">{session.name}</span> さん
-                            <span className="ml-1 text-gray-500">({session.className})</span>
+                    <div className={styles.userArea}>
+                        <div className={styles.userInfo}>
+                            <span className={styles.userName}>{session.name}</span> さん
+                            <span className={styles.className}>({session.className})</span>
                         </div>
                         <form action={logoutStudent}>
-                            <button className="text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded transition-colors">
+                            <button className={styles.logoutButton}>
                                 ログアウト
                             </button>
                         </form>
@@ -32,7 +33,7 @@ export default async function StudentLayout({ children }) {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-4xl mx-auto px-4 py-8">
+            <main className={styles.main}>
                 {children}
             </main>
         </div>
