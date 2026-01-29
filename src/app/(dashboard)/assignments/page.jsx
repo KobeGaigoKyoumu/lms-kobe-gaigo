@@ -1,29 +1,41 @@
+import { getTeacherAssignments, getClassesList } from '@/app/actions/homework'
 import Link from 'next/link'
 import styles from './page.module.css'
-import { getTeacherAssignments } from '@/app/actions/homework'
 import { Plus } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AssignmentsPage() {
-    const assignments = await getTeacherAssignments()
+    const [assignments, classes] = await Promise.all([
+        getTeacherAssignments(),
+        getClassesList()
+    ])
 
-    // Extract unique classes and count assignments
-    const classStats = assignments.reduce((acc, assignment) => {
+    // Initialize stats with all classes
+    const classStats = classes.reduce((acc, cls) => {
+        acc[cls.name] = {
+            name: cls.name,
+            count: 0,
+            activeCount: 0
+        }
+        return acc
+    }, {})
+
+    // Update stats based on assignments
+    assignments.forEach(assignment => {
         const className = assignment.class_name || '未分類'
-        if (!acc[className]) {
-            acc[className] = {
+        if (!classStats[className]) {
+            classStats[className] = {
                 name: className,
                 count: 0,
                 activeCount: 0
             }
         }
-        acc[className].count++
+        classStats[className].count++
         if (!assignment.deadline || new Date(assignment.deadline) >= new Date()) {
-            acc[className].activeCount++
+            classStats[className].activeCount++
         }
-        return acc
-    }, {})
+    })
 
     // Sort classes
     const sortedClasses = Object.values(classStats).sort((a, b) => a.name.localeCompare(b.name))
