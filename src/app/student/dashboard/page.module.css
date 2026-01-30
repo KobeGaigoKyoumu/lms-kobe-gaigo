@@ -117,3 +117,11 @@
 .card:hover .chevron {
     color: var(--primary-500);
 }
+
+.statusRow {
+    margin-bottom: var(--spacing-1);
+}
+
+.icon {
+    margin-right: var(--spacing-1);
+}

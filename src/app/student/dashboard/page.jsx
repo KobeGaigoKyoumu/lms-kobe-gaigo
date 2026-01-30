@@ -46,18 +46,18 @@ export default async function StudentDashboard() {
                             >
                                 <div className={styles.cardContent}>
                                     <div className={styles.mainInfo}>
-                                        <div style={{ marginBottom: '4px' }}>
+                                        <div className={styles.statusRow}>
                                             {isSubmitted ? (
                                                 <span className={`${styles.statusBadge} ${styles.badgeSubmitted}`}>
-                                                    <CheckCircle2 size={12} style={{ marginRight: '4px' }} /> 提出済み
+                                                    <CheckCircle2 size={12} className={styles.icon} /> 提出済み
                                                 </span>
                                             ) : isOverdue ? (
                                                 <span className={`${styles.statusBadge} ${styles.badgeOverdue}`}>
-                                                    <AlertCircle size={12} style={{ marginRight: '4px' }} /> 期限切れ
+                                                    <AlertCircle size={12} className={styles.icon} /> 期限切れ
                                                 </span>
                                             ) : (
                                                 <span className={`${styles.statusBadge} ${styles.badgePending}`}>
-                                                    <Circle size={12} style={{ marginRight: '4px' }} /> 未提出
+                                                    <Circle size={12} className={styles.icon} /> 未提出
                                                 </span>
                                             )}
                                         </div>
