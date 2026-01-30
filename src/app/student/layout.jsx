@@ -13,7 +13,7 @@ export default async function StudentLayout({ children }) {
 
     return (
         <div className={styles.wrapper}>
-            <Sidebar user={session} role="student" />
+            <Sidebar user={session} role="student" dashboardHref="/student/dashboard" />
 
             <div className={styles.contentWrapper}>
                 {/* Header */}
