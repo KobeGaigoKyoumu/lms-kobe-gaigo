@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { logoutStudent } from '@/app/actions/studentAuth'
 import styles from './Sidebar.module.css'
 
 const menuItems = [
@@ -128,9 +129,12 @@ export default function Sidebar({ user, role: userRole }) {
 
     // Build menu items based on role
     const getMenuItems = () => {
+        // Base items with dynamic dashboard link
+        const dashboardHref = userRole === 'student' ? '/student/dashboard' : '/'
+
         const baseItems = [
             {
-                href: '/',
+                href: dashboardHref,
                 label: 'ダッシュボード',
                 icon: (
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -160,6 +164,19 @@ export default function Sidebar({ user, role: userRole }) {
                 {
                     href: '/student/attendance',
                     label: '出席率',
+                    icon: (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                            <path d="M9 16l2 2 4-4" />
+                        </svg>
+                    )
+                },
+                {
+                    href: '/calendar',
+                    label: 'カレンダー',
                     icon: (
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -316,8 +333,12 @@ export default function Sidebar({ user, role: userRole }) {
     }
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
-        window.location.href = '/login'
+        if (userRole === 'student') {
+            await logoutStudent()
+        } else {
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+        }
     }
 
     // ユーザーのイニシャル取得
@@ -325,6 +346,10 @@ export default function Sidebar({ user, role: userRole }) {
         if (!name) return '?'
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     }
+
+    const displayName = user?.user_metadata?.full_name || user?.name || 'ユーザー'
+    const displayDetail = user?.email || (user?.className ? `${user.className}` : '')
+    const avatarUrl = user?.user_metadata?.avatar_url
 
     return (
         <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
@@ -378,17 +403,17 @@ export default function Sidebar({ user, role: userRole }) {
             <div className={styles.userSection}>
                 <div className={styles.userInfo}>
                     <div className={styles.avatar}>
-                        {user?.user_metadata?.avatar_url ? (
-                            <img src={user.user_metadata.avatar_url} alt="" />
+                        {avatarUrl ? (
+                            <img src={avatarUrl} alt="" />
                         ) : (
-                            getInitials(user?.user_metadata?.full_name || user?.email)
+                            getInitials(displayName)
                         )}
                     </div>
                     <div className={styles.userDetails}>
                         <p className={styles.userName}>
-                            {user?.user_metadata?.full_name || 'ユーザー'}
+                            {displayName}
                         </p>
-                        <p className={styles.userEmail}>{user?.email}</p>
+                        <p className={styles.userEmail}>{displayDetail}</p>
                     </div>
                 </div>
                 <button onClick={handleLogout} className={styles.logoutBtn} title="ログアウト">
