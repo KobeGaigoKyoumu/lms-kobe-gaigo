@@ -1,6 +1,7 @@
 import { logoutStudent, getStudentSession } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Sidebar from '@/components/layout/Sidebar'
 import styles from './layout.module.css'
 
 export default async function StudentLayout({ children }) {
@@ -11,31 +12,35 @@ export default async function StudentLayout({ children }) {
     }
 
     return (
-        <div className={styles.container}>
-            {/* Header */}
-            <header className={styles.header}>
-                <div className={styles.headerContent}>
-                    <Link href="/student/dashboard" className={styles.brand}>
-                        神戸外語 LMS
-                    </Link>
-                    <div className={styles.userArea}>
-                        <div className={styles.userInfo}>
-                            <span className={styles.userName}>{session.name}</span> さん
-                            <span className={styles.className}>({session.className})</span>
-                        </div>
-                        <form action={logoutStudent}>
-                            <button className={styles.logoutButton}>
-                                ログアウト
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </header>
+        <div className={styles.wrapper}>
+            <Sidebar user={session} role="student" />
 
-            {/* Main Content */}
-            <main className={styles.main}>
-                {children}
-            </main>
+            <div className={styles.contentWrapper}>
+                {/* Header */}
+                <header className={styles.header}>
+                    <div className={styles.headerContent}>
+                        <Link href="/student/dashboard" className={styles.brand}>
+                            神戸外語 LMS
+                        </Link>
+                        <div className={styles.userArea}>
+                            <div className={styles.userInfo}>
+                                <span className={styles.userName}>{session.name}</span> さん
+                                <span className={styles.className}>({session.className})</span>
+                            </div>
+                            <form action={logoutStudent}>
+                                <button className={styles.logoutButton}>
+                                    ログアウト
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content */}
+                <main className={styles.main}>
+                    {children}
+                </main>
+            </div>
         </div>
     )
 }
