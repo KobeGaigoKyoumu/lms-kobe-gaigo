@@ -85,18 +85,23 @@ export default async function StudentAttendancePage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {monthlyRecords.map(record => (
-                                <tr key={`${record.year}-${record.month}`}>
-                                    <td>{record.year}年 {record.month}月</td>
-                                    <td className={getRateColor(record.attendance_rate)}>
-                                        {formatRate(record.attendance_rate)}
-                                    </td>
-                                    <td>{record.days_total || '-'}</td>
-                                    <td>{record.days_attended || '-'}</td>
-                                    <td>{record.days_absent || '-'}</td>
-                                    <td>{record.days_late || '-'}</td>
-                                </tr>
-                            ))}
+                            {monthlyRecords.map(record => {
+                                // Calculate total days if derived, or use columns if they exist.
+                                // Based on import script: attendance_days, absence_days, late_slots
+                                const totalDays = (record.attendance_days || 0) + (record.absence_days || 0)
+                                return (
+                                    <tr key={`${record.year}-${record.month}`}>
+                                        <td>{record.year}年 {record.month}月</td>
+                                        <td className={getRateColor(record.attendance_rate)}>
+                                            {formatRate(record.attendance_rate)}
+                                        </td>
+                                        <td>{totalDays || '-'}</td>
+                                        <td>{record.attendance_days || '-'}</td>
+                                        <td>{record.absence_days || '-'}</td>
+                                        <td>{record.late_slots || '-'}</td>
+                                    </tr>
+                                )
+                            })}
                         </tbody>
                     </table>
                 )}
