@@ -1,0 +1,302 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-8);
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+}
+
+/* Notice for missing student_id */
+.notice {
+    background-color: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    text-align: center;
+}
+
+.notice h2 {
+    color: var(--primary-800);
+    margin-bottom: var(--spacing-4);
+    font-weight: 700;
+}
+
+.notice p {
+    color: var(--primary-900);
+}
+
+/* Summary Cards */
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-8);
+}
+
+.summaryCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.summaryCard:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.summaryCard .label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.summaryCard .value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.summaryCard .grade {
+    font-size: var(--font-size-3xl);
+    color: var(--primary-600);
+}
+
+/* History Section */
+.historySection {
+    margin-bottom: var(--spacing-8);
+}
+
+.historySection h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.empty {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-10);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.table {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    padding: var(--spacing-3) var(--spacing-4);
+    text-align: left;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.table td {
+    padding: var(--spacing-3) var(--spacing-4);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.examScore {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.reportScore {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.date {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+}
+
+.gradeBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px var(--spacing-3);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    min-width: 40px;
+}
+
+.gradeA {
+    background-color: var(--success-50);
+    color: var(--success-700);
+    border: 1px solid var(--success-200);
+}
+
+.gradeB {
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+    border: 1px solid var(--primary-200);
+}
+
+.gradeC {
+    background-color: var(--warning-50);
+    color: var(--warning-800);
+    border: 1px solid var(--warning-200);
+}
+
+.gradeD {
+    background-color: var(--orange-50);
+    color: var(--orange-700);
+    border: 1px solid var(--orange-200);
+}
+
+.gradeF {
+    background-color: var(--error-50);
+    color: var(--error-700);
+    border: 1px solid var(--error-200);
+}
+
+/* Subject Details */
+.subjectSection {
+    margin-bottom: var(--spacing-8);
+}
+
+.subjectSection h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.subjectGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.subjectCard {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-5);
+    transition: all var(--transition-base);
+}
+
+.subjectCard:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary-200);
+}
+
+.subjectCard h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-3);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.subjectScores {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.scoreItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scoreItem.total {
+    margin-top: var(--spacing-2);
+    padding-top: var(--spacing-2);
+    border-top: 1px solid var(--border-color);
+    font-weight: 700;
+}
+
+.scoreLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.scoreValue {
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.scoreItem.total .scoreValue {
+    font-size: var(--font-size-lg);
+    color: var(--primary-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page {
+        padding: var(--spacing-4);
+    }
+
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .table {
+        overflow-x: auto;
+    }
+
+    .table table {
+        min-width: 600px;
+    }
+
+    .subjectGrid {
+        grid-template-columns: 1fr;
+    }
+}

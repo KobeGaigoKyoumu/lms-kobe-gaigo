@@ -152,7 +152,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
             return [
                 ...baseItems,
                 {
-                    href: '/my-grades',
+                    href: '/student/grades',
                     label: '成績確認',
                     icon: (
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -175,7 +175,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                     )
                 },
                 {
-                    href: '/calendar',
+                    href: '/student/calendar',
                     label: 'カレンダー',
                     icon: (
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -185,7 +185,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                     )
                 },
                 {
-                    href: '/settings',
+                    href: '/student/settings',
                     label: '設定',
                     icon: (
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">

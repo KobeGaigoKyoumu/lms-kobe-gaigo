@@ -33,7 +33,9 @@ try:
     print(f"行数: {len(test_data)}, 列数: {len(test_data.columns)}")
     print(f"列名: {list(test_data.columns)}")
     print("\nデータ:")
-    print(test_data.to_string())
+    print(test_data.head(50).to_string())
+    if len(test_data) > 50:
+        print(f"\n... (残り {len(test_data) - 50} 行は省略されました)")
 except Exception as e:
     print(f"試験回別データ読み込みエラー: {e}")
 
