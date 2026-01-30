@@ -1,47 +1,42 @@
-import { createClient } from '@/lib/supabase/server'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 
 export const dynamic = 'force-dynamic'
 
 export default async function StudentAttendancePage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    // 1. Check Student Session
+    const session = await getStudentSession()
+    if (!session) {
         redirect('/login')
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, student_id_text')
-        .eq('id', user.id)
-        .single()
+    const { studentId } = session
 
-    if (profile?.role !== 'student') {
-        redirect('/')
+    // 2. Create Admin Client (Service Role) to bypass RLS for reading attendance
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+        console.error('Missing Supabase Service Key')
+        return <div className={styles.page}><p className={styles.empty}>システムエラー: 設定を確認してください。</p></div>
     }
 
-    if (!profile?.student_id_text) {
-        return (
-            <div className={styles.page}>
-                <div className={styles.section}>
-                    <p className={styles.empty}>学籍番号が登録されていません。</p>
-                </div>
-            </div>
-        )
-    }
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const studentId = profile.student_id_text
-
-    // Fetch Attendance Records
-    const { data: records } = await supabase
+    // 3. Fetch Attendance Records
+    const { data: records, error } = await supabase
         .from('attendance_records')
         .select('*')
         .eq('student_id', studentId)
         .order('year', { ascending: false })
         .order('month', { ascending: false })
+
+    if (error) {
+        console.error('Fetch attendance error:', error)
+        return <div className={styles.page}><p className={styles.empty}>データの取得に失敗しました。</p></div>
+    }
 
     const cumulativeRecords = records?.filter(r => r.is_cumulative) || []
     const monthlyRecords = records?.filter(r => !r.is_cumulative) || []
@@ -70,7 +65,6 @@ export default async function StudentAttendancePage() {
                         {formatRate(latestRate)}
                     </div>
                 </div>
-                {/* Add more stats if needed, e.g. "Days Present", "Days Absent" if available in schema */}
             </div>
 
             {/* Monthly History */}
