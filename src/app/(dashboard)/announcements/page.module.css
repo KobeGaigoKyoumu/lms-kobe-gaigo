@@ -113,6 +113,41 @@
     white-space: pre-wrap;
 }
 
+.attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.attachmentItem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.attachmentItem:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    color: var(--primary-600);
+}
+
+.attachmentItem svg {
+    color: var(--text-tertiary);
+}
+
+.attachmentItem:hover svg {
+    color: var(--primary-500);
+}
+
 .cardFooter {
     padding-top: var(--spacing-3);
     border-top: 1px solid var(--border-color);
@@ -284,7 +319,94 @@
     background: #b91c1c;
 }
 
+.deliveryOptions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.radioLabel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.radioLabel input[type="radio"] {
+    accent-color: var(--primary-500);
+    width: 16px;
+    height: 16px;
+}
+
 .confirmDeleteBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.fileInput {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.fileInput:hover {
+    border-color: var(--primary-400);
+    background: var(--primary-50);
+}
+
+.selectedFiles,
+.fileList {
+    margin-top: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.fileItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.removeFileBtn {
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.removeFileBtn:hover {
+    text-decoration: underline;
+}
+
+.noFiles {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    font-style: italic;
 }

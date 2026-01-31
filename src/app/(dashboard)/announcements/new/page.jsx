@@ -15,8 +15,11 @@ export default function NewAnnouncementPage() {
         content: '',
         course_id: '',
         is_pinned: false,
-        send_to_messenger: false
+        delivery_method: 'both', // 'announcement', 'messenger', 'both'
+        file_urls: []
     })
+    const [uploading, setUploading] = useState(false)
+    const [selectedFiles, setSelectedFiles] = useState([])
 
     useEffect(() => {
         const loadCourses = async () => {
@@ -43,6 +46,42 @@ export default function NewAnnouncementPage() {
         }))
     }
 
+    const handleFileChange = (e) => {
+        setSelectedFiles(Array.from(e.target.files))
+    }
+
+    const uploadFiles = async (files) => {
+        const supabase = createClient()
+        const uploadedFiles = []
+
+        for (const file of files) {
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+            const filePath = `announcements/${fileName}`
+
+            const { error: uploadError, data } = await supabase.storage
+                .from('announcements')
+                .upload(filePath, file)
+
+            if (uploadError) {
+                console.error('Error uploading file:', uploadError)
+                continue
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('announcements')
+                .getPublicUrl(filePath)
+
+            uploadedFiles.push({
+                name: file.name,
+                url: publicUrl,
+                path: filePath
+            })
+        }
+
+        return uploadedFiles
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
@@ -50,34 +89,62 @@ export default function NewAnnouncementPage() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
-        const { error } = await supabase
-            .from('announcements')
-            .insert({
-                title: formData.title,
-                content: formData.content,
-                course_id: formData.course_id || null,
-                is_pinned: formData.is_pinned,
-                author_id: user?.id
-            })
+        // ファイルアップロード
+        let uploadedFileUrls = []
+        if (selectedFiles.length > 0) {
+            setUploading(true)
+            uploadedFileUrls = await uploadFiles(selectedFiles)
+        }
 
-        if (error) {
+        const isAnnouncement = formData.delivery_method === 'announcement' || formData.delivery_method === 'both'
+        const isMessenger = formData.delivery_method === 'messenger' || formData.delivery_method === 'both'
+
+        let insertError = null
+        if (isAnnouncement) {
+            const { error } = await supabase
+                .from('announcements')
+                .insert({
+                    title: formData.title,
+                    content: formData.content,
+                    course_id: formData.course_id || null,
+                    is_pinned: formData.is_pinned,
+                    author_id: user?.id,
+                    file_urls: uploadedFileUrls
+                })
+            insertError = error
+        }
+
+        if (insertError) {
             alert('お知らせの作成に失敗しました')
-            console.error(error)
+            console.error(insertError)
             setLoading(false)
+            setUploading(false)
             return
         }
 
         // Messenger配信
-        if (formData.send_to_messenger) {
+        if (isMessenger) {
             const targetType = formData.course_id ? 'course' : 'all';
             const targetValue = formData.course_id || null;
-            const message = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
+            let message = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
+
+            // 添付ファイルがあればリンクを追加
+            if (uploadedFileUrls.length > 0) {
+                message += '\n\n【添付ファイル】';
+                uploadedFileUrls.forEach(file => {
+                    message += `\n📎 ${file.name}: ${file.url}`;
+                });
+            }
 
             const result = await sendBroadcast(message, targetType, targetValue);
             if (!result.success) {
                 console.error('Messenger Broadcast Failed:', result.error);
-                // We don't block the UI flow, just log it. Maybe show toast? 
-                // For simplicity, we assume success or silent fail.
+                if (!isAnnouncement) {
+                    alert('Messenger配信に失敗しました')
+                    setLoading(false)
+                    setUploading(false)
+                    return
+                }
             }
         }
 
@@ -144,32 +211,78 @@ export default function NewAnnouncementPage() {
                     </select>
                 </div>
 
-                <div className={styles.checkboxGroup}>
-                    <input
-                        type="checkbox"
-                        id="is_pinned"
-                        name="is_pinned"
-                        checked={formData.is_pinned}
-                        onChange={handleChange}
-                        className={styles.checkbox}
-                    />
-                    <label htmlFor="is_pinned" className={styles.checkboxLabel}>
-                        📌 上部にピン留めする
-                    </label>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>配信方法</label>
+                    <div className={styles.deliveryOptions}>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="delivery_method"
+                                value="announcement"
+                                checked={formData.delivery_method === 'announcement'}
+                                onChange={handleChange}
+                            />
+                            お知らせ掲載のみ
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="delivery_method"
+                                value="messenger"
+                                checked={formData.delivery_method === 'messenger'}
+                                onChange={handleChange}
+                            />
+                            Messenger配信のみ
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="delivery_method"
+                                value="both"
+                                checked={formData.delivery_method === 'both'}
+                                onChange={handleChange}
+                            />
+                            お知らせとMessenger両方
+                        </label>
+                    </div>
                 </div>
 
-                <div className={styles.checkboxGroup}>
-                    <input
-                        type="checkbox"
-                        id="send_to_messenger"
-                        name="send_to_messenger"
-                        checked={formData.send_to_messenger}
-                        onChange={handleChange}
-                        className={styles.checkbox}
-                    />
-                    <label htmlFor="send_to_messenger" className={styles.checkboxLabel}>
-                        ⚡ Messengerでも配信する
+                {(formData.delivery_method === 'announcement' || formData.delivery_method === 'both') && (
+                    <div className={styles.checkboxGroup}>
+                        <input
+                            type="checkbox"
+                            id="is_pinned"
+                            name="is_pinned"
+                            checked={formData.is_pinned}
+                            onChange={handleChange}
+                            className={styles.checkbox}
+                        />
+                        <label htmlFor="is_pinned" className={styles.checkboxLabel}>
+                            📌 上部にピン留めする
+                        </label>
+                    </div>
+                )}
+
+                <div className={styles.formGroup}>
+                    <label htmlFor="files" className={styles.label}>
+                        添付ファイル
                     </label>
+                    <input
+                        type="file"
+                        id="files"
+                        multiple
+                        onChange={handleFileChange}
+                        className={styles.fileInput}
+                    />
+                    {selectedFiles.length > 0 && (
+                        <div className={styles.selectedFiles}>
+                            {selectedFiles.map((file, index) => (
+                                <div key={index} className={styles.fileItem}>
+                                    📎 {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className={styles.actions}>
@@ -182,10 +295,10 @@ export default function NewAnnouncementPage() {
                     </button>
                     <button
                         type="submit"
-                        disabled={loading || !formData.title || !formData.content}
+                        disabled={loading || uploading || !formData.title || !formData.content}
                         className={styles.submitBtn}
                     >
-                        {loading ? '投稿中...' : '投稿する'}
+                        {loading || uploading ? '投稿中...' : '投稿する'}
                     </button>
                 </div>
             </form>
