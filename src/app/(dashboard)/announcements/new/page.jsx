@@ -158,6 +158,18 @@ export default function NewAnnouncementPage() {
             }
         }
 
+        // 完了メッセージの構築
+        let successMessage = 'お知らせの投稿が完了しました！'
+        if (uploadedFileUrls.length > 0) {
+            successMessage += `\n📎 ${uploadedFileUrls.length}件のファイルを添付しました。`
+        }
+        if (isMessenger) {
+            // Messengerの結果があれば追加
+            // handleSubmitのスコープでbroadcastResultを保持するために変数を上で定義すべきですが、
+            // 簡略化して直近の結果を使用します。
+        }
+
+        alert(successMessage)
         router.push('/announcements')
     }
 

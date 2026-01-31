@@ -20,8 +20,7 @@ export default async function StudentAnnouncementsPage() {
     const courseIds = enrollments?.map(e => e.course_id) || []
 
     // 2. お知らせ一覧取得
-    // 条件: course_idが空（全体向け） OR courseIdsに含まれる（受講コース向け）
-    const { data: announcements, error } = await supabase
+    let query = supabase
         .from('announcements')
         .select(`
             *,
@@ -35,7 +34,14 @@ export default async function StudentAnnouncementsPage() {
                 title
             )
         `)
-        .or(`course_id.is.null,course_id.in.(${courseIds.length > 0 ? courseIds.join(',') : '""'})`)
+
+    if (courseIds.length > 0) {
+        query = query.or(`course_id.is.null,course_id.in.(${courseIds.join(',')})`)
+    } else {
+        query = query.is('course_id', null)
+    }
+
+    const { data: announcements, error } = await query
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
 
