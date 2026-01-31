@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { uploadAnnouncementFile } from '@/app/actions/announcements'
 import styles from './page.module.css'
 
 export default function EditAnnouncementPage({ params }) {
@@ -84,38 +85,28 @@ export default function EditAnnouncementPage({ params }) {
     }
 
     const uploadFiles = async (files) => {
-        const supabase = createClient()
         const uploadedFiles = []
         const errors = []
 
         for (const file of files) {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
-            const filePath = `announcements/${fileName}`
+            const formData = new FormData()
+            formData.append('file', file)
 
-            const { error: uploadError } = await supabase.storage
-                .from('announcements')
-                .upload(filePath, file)
+            const result = await uploadAnnouncementFile(formData)
 
-            if (uploadError) {
-                console.error('Error uploading file:', uploadError)
-                errors.push(`${file.name}: ${uploadError.message}`)
+            if (!result.success) {
+                console.error('Server Upload Error:', result.error)
+                errors.push(`${file.name}: ${result.error}`)
                 continue
             }
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('announcements')
-                .getPublicUrl(filePath)
-
-            uploadedFiles.push({
-                name: file.name,
-                url: publicUrl,
-                path: filePath
-            })
+            uploadedFiles.push(result.file)
         }
 
         if (errors.length > 0) {
-            alert(`一部のファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※SupabaseのStorageに「announcements」バケットがPublic設定で作成されているか確認してください。`)
+            const errorMsg = `ファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※バケット「announcements」が作成されているか確認してください。`;
+            alert(errorMsg);
+            throw new Error(errorMsg); // 呼び出し元で中断させるため
         }
 
         return uploadedFiles
