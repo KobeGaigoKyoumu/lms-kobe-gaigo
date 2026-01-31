@@ -53,18 +53,20 @@ export default function NewAnnouncementPage() {
     const uploadFiles = async (files) => {
         const supabase = createClient()
         const uploadedFiles = []
+        const errors = []
 
         for (const file of files) {
             const fileExt = file.name.split('.').pop()
             const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
             const filePath = `announcements/${fileName}`
 
-            const { error: uploadError, data } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
                 .from('announcements')
                 .upload(filePath, file)
 
             if (uploadError) {
                 console.error('Error uploading file:', uploadError)
+                errors.push(`${file.name}: ${uploadError.message}`)
                 continue
             }
 
@@ -77,6 +79,10 @@ export default function NewAnnouncementPage() {
                 url: publicUrl,
                 path: filePath
             })
+        }
+
+        if (errors.length > 0) {
+            alert(`一部のファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※SupabaseのStorageに「announcements」バケットがPublic設定で作成されているか確認してください。`)
         }
 
         return uploadedFiles
@@ -139,8 +145,8 @@ export default function NewAnnouncementPage() {
             const result = await sendBroadcast(message, targetType, targetValue);
             if (!result.success) {
                 console.error('Messenger Broadcast Failed:', result.error);
+                alert(`Messenger配信に失敗しました: ${result.error}`);
                 if (!isAnnouncement) {
-                    alert('Messenger配信に失敗しました')
                     setLoading(false)
                     setUploading(false)
                     return
