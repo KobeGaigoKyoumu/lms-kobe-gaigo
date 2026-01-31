@@ -10,12 +10,14 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Init Admin Client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-/**
- * Get Messenger Connection Status for Current Student
- */
 export async function getMessengerStatus() {
     const session = await getStudentSession();
-    if (!session) return { connected: false, error: 'Unauthorized' };
+    if (!session) {
+        console.log('Messenger Status Check: No student session found.');
+        return { connected: false, error: 'Unauthorized' };
+    }
+
+    console.log(`Checking Messenger status for: ${session.studentId}`);
 
     // Use admin client to query students table securely
     const { data: student, error } = await supabase
@@ -24,15 +26,28 @@ export async function getMessengerStatus() {
         .eq('student_id_text', session.studentId)
         .single();
 
-    if (error || !student) {
-        return { connected: false, error: 'Student not found' };
+    if (error) {
+        console.error('Messenger Status DB Error:', error.message);
+        return {
+            connected: false,
+            studentId: session.studentId, // Always return this to prevent broken links
+            error: error.message
+        };
     }
 
-    console.log(`Checking Messenger status for: ${session.studentId}`);
+    if (!student) {
+        console.log(`Student not found in DB: ${session.studentId}`);
+        return {
+            connected: false,
+            studentId: session.studentId,
+            error: 'Student not found'
+        };
+    }
+
     return {
         connected: !!student.facebook_psid,
         studentId: session.studentId,
-        psid: student.facebook_psid // Added for internal debug linkage check
+        psid: student.facebook_psid
     };
 }
 
