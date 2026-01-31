@@ -37,8 +37,9 @@ export async function updateSession(request) {
     const publicPaths = ['/login', '/auth/callback']
     const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
+    const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    if (!user && !isPublicPath && !isStudentPath) {
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
