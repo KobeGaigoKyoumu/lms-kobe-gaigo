@@ -122,38 +122,46 @@ export default async function StudentGradesPage() {
                 <div className={styles.subjectSection}>
                     <h2>科目別詳細 ({latestRecord.year_term})</h2>
                     <div className={styles.subjectGrid}>
-                        {Object.entries(latestRecord.report_card_data).map(([subject, data]) => (
-                            <div key={subject} className={styles.subjectCard}>
-                                <h3>{subject === 'vocab' ? '語彙' :
-                                    subject === 'listening' ? '聴解' :
-                                        subject === 'reading' ? '読解' :
-                                            subject === 'grammar' ? '文法' :
-                                                subject === 'writing' ? '作文' :
-                                                    subject === 'conversation' ? '会話' :
-                                                        subject === 'overall' ? '総合' :
-                                                            subject === 'attendance' ? '出席' :
-                                                                subject === 'participation' ? '平常点' : subject}
-                                </h3>
-                                <div className={styles.subjectScores}>
-                                    <div className={styles.scoreItem}>
-                                        <span className={styles.scoreLabel}>基礎点</span>
-                                        <span className={styles.scoreValue}>{data.base?.toFixed(1)}</span>
-                                    </div>
-                                    <div className={styles.scoreItem}>
-                                        <span className={styles.scoreLabel}>出席点</span>
-                                        <span className={styles.scoreValue}>{data.attendance || 0}</span>
-                                    </div>
-                                    <div className={styles.scoreItem}>
-                                        <span className={styles.scoreLabel}>平常点</span>
-                                        <span className={styles.scoreValue}>{data.participation || 0}</span>
-                                    </div>
-                                    <div className={`${styles.scoreItem} ${styles.total}`}>
-                                        <span className={styles.scoreLabel}>合計</span>
-                                        <span className={styles.scoreValue}>{data.total?.toFixed(1)}</span>
+                        {Object.entries(latestRecord.report_card_data)
+                            .filter(([subject, data]) =>
+                                subject !== 'attendance' &&
+                                subject !== 'participation' &&
+                                typeof data === 'object'
+                            )
+                            .map(([subject, data]) => (
+                                <div key={subject} className={styles.subjectCard}>
+                                    <h3>{subject === 'vocab' ? '語彙' :
+                                        subject === 'listening' ? '聴解' :
+                                            subject === 'reading' ? '読解' :
+                                                subject === 'grammar' ? '文法' :
+                                                    subject === 'writing' ? '作文' :
+                                                        subject === 'conversation' ? '会話' :
+                                                            subject === 'overall' ? '総合' : subject}
+                                    </h3>
+                                    <div className={styles.subjectScores}>
+                                        <div className={styles.scoreItem}>
+                                            <span className={styles.scoreLabel}>基礎点</span>
+                                            <span className={styles.scoreValue}>{data.base?.toFixed(1)}</span>
+                                        </div>
+                                        <div className={styles.scoreItem}>
+                                            <span className={styles.scoreLabel}>出席点</span>
+                                            <span className={styles.scoreValue}>
+                                                {subject === 'overall' ? '-' : (latestRecord.report_card_data.attendance || 0)}
+                                            </span>
+                                        </div>
+                                        <div className={styles.scoreItem}>
+                                            <span className={styles.scoreLabel}>平常点</span>
+                                            <span className={styles.scoreValue}>
+                                                {subject === 'overall' ? '-' : (latestRecord.report_card_data.participation || 0)}
+                                            </span>
+                                        </div>
+                                        <div className={`${styles.scoreItem} ${styles.total}`}>
+                                            <span className={styles.scoreLabel}>合計</span>
+                                            <span className={styles.scoreValue}>{data.total?.toFixed(1)}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 </div>
             )}
