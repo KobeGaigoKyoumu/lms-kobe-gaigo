@@ -140,23 +140,15 @@ export default async function StudentGradesPage() {
                                     </h3>
                                     <div className={styles.subjectScores}>
                                         <div className={styles.scoreItem}>
-                                            <span className={styles.scoreLabel}>基礎点</span>
-                                            <span className={styles.scoreValue}>{data.base?.toFixed(1)}</span>
-                                        </div>
-                                        <div className={styles.scoreItem}>
-                                            <span className={styles.scoreLabel}>出席点</span>
+                                            <span className={styles.scoreLabel}>期末試験</span>
                                             <span className={styles.scoreValue}>
-                                                {subject === 'overall' ? '-' : (latestRecord.report_card_data.attendance || 0)}
-                                            </span>
-                                        </div>
-                                        <div className={styles.scoreItem}>
-                                            <span className={styles.scoreLabel}>平常点</span>
-                                            <span className={styles.scoreValue}>
-                                                {subject === 'overall' ? '-' : (latestRecord.report_card_data.participation || 0)}
+                                                {subject === 'overall'
+                                                    ? latestRecord.final_exam_total
+                                                    : (latestRecord.final_exam_data?.[subject] || 0)}
                                             </span>
                                         </div>
                                         <div className={`${styles.scoreItem} ${styles.total}`}>
-                                            <span className={styles.scoreLabel}>合計</span>
+                                            <span className={styles.scoreLabel}>合計点</span>
                                             <span className={styles.scoreValue}>{data.total?.toFixed(1)}</span>
                                         </div>
                                     </div>
