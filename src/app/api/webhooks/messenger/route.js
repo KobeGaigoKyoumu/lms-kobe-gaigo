@@ -68,7 +68,7 @@ export async function POST(req) {
                         if (success) {
                             await sendTextMessage(senderPsid, '連携が完了しました！これから重要なお知らせをお届けします。');
                         } else {
-                            await sendTextMessage(senderPsid, '連携に失敗しました。管理者にお問い合わせください。');
+                            await sendTextMessage(senderPsid, `連携に失敗しました。ID: "${studentId}" が見つかりません。管理者にお問い合わせください。`);
                         }
                     } else if (webhookEvent.message && webhookEvent.message.text) {
                         // Debug reply
