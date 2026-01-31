@@ -178,7 +178,9 @@ async function sendToPsid(psid, text) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 recipient: { id: psid },
-                message: { text: text }
+                message: { text: text },
+                messaging_type: "MESSAGE_TAG",
+                tag: "CONFIRMED_EVENT_UPDATE" // Appropriate for school announcements/event updates
             })
         });
 
