@@ -82,7 +82,9 @@ export default function NewAnnouncementPage() {
         }
 
         if (errors.length > 0) {
-            alert(`一部のファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※SupabaseのStorageに「announcements」バケットがPublic設定で作成されているか確認してください。`)
+            const errorMsg = `ファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※SupabaseのStorageに「announcements」バケットがPublic設定で作成されているか確認してください。`;
+            alert(errorMsg);
+            throw new Error(errorMsg); // 呼び出し元で中断させるため
         }
 
         return uploadedFiles
@@ -92,85 +94,91 @@ export default function NewAnnouncementPage() {
         e.preventDefault()
         setLoading(true)
 
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
 
-        // ファイルアップロード
-        let uploadedFileUrls = []
-        if (selectedFiles.length > 0) {
-            setUploading(true)
-            uploadedFileUrls = await uploadFiles(selectedFiles)
-        }
+            // ファイルアップロード
+            let uploadedFileUrls = []
+            if (selectedFiles.length > 0) {
+                setUploading(true)
+                uploadedFileUrls = await uploadFiles(selectedFiles)
+                setUploading(false)
+            }
 
-        const isAnnouncement = formData.delivery_method === 'announcement' || formData.delivery_method === 'both'
-        const isMessenger = formData.delivery_method === 'messenger' || formData.delivery_method === 'both'
+            const isAnnouncement = formData.delivery_method === 'announcement' || formData.delivery_method === 'both'
+            const isMessenger = formData.delivery_method === 'messenger' || formData.delivery_method === 'both'
 
-        let insertError = null
-        if (isAnnouncement) {
-            const { error } = await supabase
-                .from('announcements')
-                .insert({
-                    title: formData.title,
-                    content: formData.content,
-                    course_id: formData.course_id || null,
-                    is_pinned: formData.is_pinned,
-                    author_id: user?.id,
-                    file_urls: uploadedFileUrls
-                })
-            insertError = error
-        }
+            let insertError = null
+            if (isAnnouncement) {
+                const { error } = await supabase
+                    .from('announcements')
+                    .insert({
+                        title: formData.title,
+                        content: formData.content,
+                        course_id: formData.course_id || null,
+                        is_pinned: formData.is_pinned,
+                        author_id: user?.id,
+                        file_urls: uploadedFileUrls
+                    })
+                insertError = error
+            }
 
-        if (insertError) {
-            alert('お知らせの作成に失敗しました')
-            console.error(insertError)
+            if (insertError) {
+                alert('お知らせの作成に失敗しました')
+                console.error(insertError)
+                setLoading(false)
+                return
+            }
+
+            let broadcastResults = null
+            // Messenger配信
+            if (isMessenger) {
+                const targetType = formData.course_id ? 'course' : 'all';
+                const targetValue = formData.course_id || null;
+                let messageString = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
+
+                // 添付ファイルがあればリンクを追加
+                if (uploadedFileUrls.length > 0) {
+                    messageString += '\n\n【添付ファイル】';
+                    uploadedFileUrls.forEach(file => {
+                        messageString += `\n📎 ${file.name}: ${file.url}`;
+                    });
+                }
+
+                const result = await sendBroadcast(messageString, targetType, targetValue);
+                if (!result.success) {
+                    console.error('Messenger Broadcast Failed:', result.error);
+                    alert(`Messenger配信に失敗しました: ${result.error}`);
+                } else {
+                    broadcastResults = result;
+                    if (result.count === 0 && isMessenger && !isAnnouncement) {
+                        alert('Messenger送信対象の学生（連携済み）が見つかりませんでした。');
+                    }
+                }
+            }
+
+            // 完了メッセージの構築
+            let successMessage = 'お知らせの投稿が完了しました！'
+            if (uploadedFileUrls.length > 0) {
+                successMessage += `\n📎 ${uploadedFileUrls.length}件のファイルを添付しました。`
+            }
+            if (broadcastResults) {
+                successMessage += `\n💬 ${broadcastResults.count}人の学生にMessengerを送信しました。`
+                if (broadcastResults.failed > 0) {
+                    successMessage += ` (失敗: ${broadcastResults.failed}人)`
+                }
+            }
+
+            alert(successMessage)
+            router.push('/announcements')
+
+        } catch (err) {
+            console.error('Submit handle error:', err);
+            // uploadFilesでの例外（エラー時の中断）も含めてここでキャッチ
             setLoading(false)
             setUploading(false)
-            return
         }
-
-        // Messenger配信
-        if (isMessenger) {
-            const targetType = formData.course_id ? 'course' : 'all';
-            const targetValue = formData.course_id || null;
-            let message = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
-
-            // 添付ファイルがあればリンクを追加
-            if (uploadedFileUrls.length > 0) {
-                message += '\n\n【添付ファイル】';
-                uploadedFileUrls.forEach(file => {
-                    message += `\n📎 ${file.name}: ${file.url}`;
-                });
-            }
-
-            console.log('Sending broadcast with message:', message);
-            const result = await sendBroadcast(message, targetType, targetValue);
-
-            if (!result.success) {
-                console.error('Messenger Broadcast Failed:', result.error);
-                alert(`Messenger配信に失敗しました: ${result.error}\n※メッセージ送信は失敗しましたが、お知らせ自体が保存されているか確認してください。`);
-                if (!isAnnouncement) {
-                    setLoading(false)
-                    setUploading(false)
-                    return
-                }
-            } else {
-                console.log('Messenger Broadcast Success:', result);
-            }
-        }
-
-        // 完了メッセージの構築
-        let successMessage = 'お知らせの投稿が完了しました！'
-        if (uploadedFileUrls.length > 0) {
-            successMessage += `\n📎 ${uploadedFileUrls.length}件のファイルを添付しました。`
-        }
-        if (isMessenger) {
-            // Messengerの結果があれば追加
-            // handleSubmitのスコープでbroadcastResultを保持するために変数を上で定義すべきですが、
-            // 簡略化して直近の結果を使用します。
-        }
-
-        alert(successMessage)
-        router.push('/announcements')
     }
 
     return (
