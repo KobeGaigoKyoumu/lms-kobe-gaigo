@@ -142,15 +142,19 @@ export default function NewAnnouncementPage() {
                 });
             }
 
+            console.log('Sending broadcast with message:', message);
             const result = await sendBroadcast(message, targetType, targetValue);
+
             if (!result.success) {
                 console.error('Messenger Broadcast Failed:', result.error);
-                alert(`Messenger配信に失敗しました: ${result.error}`);
+                alert(`Messenger配信に失敗しました: ${result.error}\n※メッセージ送信は失敗しましたが、お知らせ自体が保存されているか確認してください。`);
                 if (!isAnnouncement) {
                     setLoading(false)
                     setUploading(false)
                     return
                 }
+            } else {
+                console.log('Messenger Broadcast Success:', result);
             }
         }
 
