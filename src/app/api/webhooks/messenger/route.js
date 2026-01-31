@@ -42,27 +42,40 @@ export async function POST(req) {
         if (body.object === 'page') {
             // Iterate over each entry - there may be multiple if batched
             for (const entry of body.entry) {
-                // Get the webhook event. entry.messaging is an array, but usually contains only one event.
-                const webhookEvent = entry.messaging[0];
-                console.log('Received Webhook Event:', webhookEvent);
+                if (!entry.messaging) continue;
 
-                const senderPsid = webhookEvent.sender.id;
+                for (const webhookEvent of entry.messaging) {
+                    console.log('Received Webhook Event:', JSON.stringify(webhookEvent, null, 2));
 
-                // Check availability of the referral (m.me link with ref param)
-                // This can come in 'referral' event or 'postback.referral'
-                let referral = webhookEvent.referral;
-                if (webhookEvent.postback && webhookEvent.postback.referral) {
-                    referral = webhookEvent.postback.referral;
-                }
+                    const senderPsid = webhookEvent.sender.id;
 
-                if (referral && referral.ref) {
-                    const studentId = referral.ref;
-                    console.log(`Linking Student ID: ${studentId} to PSID: ${senderPsid}`);
-                    await linkStudentToPsid(studentId, senderPsid);
-                    await sendTextMessage(senderPsid, '連携が完了しました！これから重要なお知らせをお届けします。');
-                } else if (webhookEvent.message && webhookEvent.message.text) {
-                    // Handle standard text messages - Reply for debugging
-                    await sendTextMessage(senderPsid, `メッセージを受け取りました: "${webhookEvent.message.text}"\n\nもし連携をしたい場合は、アプリの設定画面から再度ボタンを押して、画面下の「スタート」ボタンを押してください。`);
+                    // 1. Check for Referral (m.me link)
+                    let studentId = null;
+
+                    if (webhookEvent.referral && webhookEvent.referral.ref) {
+                        studentId = webhookEvent.referral.ref;
+                    } else if (webhookEvent.postback && webhookEvent.postback.referral && webhookEvent.postback.referral.ref) {
+                        studentId = webhookEvent.postback.referral.ref;
+                    } else if (webhookEvent.postback && webhookEvent.postback.payload === 'GET_STARTED') {
+                        // If GET_STARTED but no referral? Just log it
+                        console.log('GET_STARTED received but no referral param.');
+                        await sendTextMessage(senderPsid, 'こんにちは！アプリと連携するには、マイページのボタンから再度このチャットを開いてください。');
+                    }
+
+                    if (studentId) {
+                        console.log(`Linking Student ID: ${studentId} to PSID: ${senderPsid}`);
+                        const success = await linkStudentToPsid(studentId, senderPsid);
+                        if (success) {
+                            await sendTextMessage(senderPsid, '連携が完了しました！これから重要なお知らせをお届けします。');
+                        } else {
+                            await sendTextMessage(senderPsid, '連携に失敗しました。管理者にお問い合わせください。');
+                        }
+                    } else if (webhookEvent.message && webhookEvent.message.text) {
+                        // Debug reply
+                        const text = webhookEvent.message.text;
+                        console.log(`Message from ${senderPsid}: ${text}`);
+                        await sendTextMessage(senderPsid, `メッセージを受け取りました: "${text}"\n\nもし連携をしたい場合は、アプリの「連携」ボタンを押し、画面下の「スタート」ボタンを押してください。`);
+                    }
                 }
             }
 
@@ -80,15 +93,22 @@ export async function POST(req) {
  * Link Student ID to Facebook PSID in Supabase
  */
 async function linkStudentToPsid(studentId, psid) {
-    const { error } = await supabase
+    console.log(`Updating student ${studentId} with PSID ${psid}`);
+    const { data, error } = await supabase
         .from('students')
         .update({ facebook_psid: psid })
-        .eq('student_id_text', studentId);
+        .eq('student_id_text', studentId)
+        .select();
 
     if (error) {
         console.error('Error linking student:', error);
+        return false;
+    } else if (data && data.length > 0) {
+        console.log('Successfully linked student:', data[0].full_name);
+        return true;
     } else {
-        console.log('Successfully linked student.');
+        console.log('No student found with ID:', studentId);
+        return false;
     }
 }
 

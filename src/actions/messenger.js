@@ -28,9 +28,11 @@ export async function getMessengerStatus() {
         return { connected: false, error: 'Student not found' };
     }
 
+    console.log(`Checking Messenger status for: ${session.studentId}`);
     return {
         connected: !!student.facebook_psid,
-        studentId: session.studentId
+        studentId: session.studentId,
+        psid: student.facebook_psid // Added for internal debug linkage check
     };
 }
 
@@ -107,12 +109,18 @@ export async function sendBroadcast(message, targetType, targetValue) {
 
         const { data: students, error } = await query;
 
+        console.log(`Broadcast Target Students Found: ${students?.length || 0}`);
+        if (students) {
+            console.log('Target PSIDs:', students.map(s => s.facebook_psid));
+        }
+
         if (error) {
             console.error("Supabase Error:", error);
             return { success: false, error: error.message };
         }
 
         if (!students || students.length === 0) {
+            console.log('No students with PSID found for this target.');
             return { success: true, count: 0, message: 'No linked students found for this target.' };
         }
 
