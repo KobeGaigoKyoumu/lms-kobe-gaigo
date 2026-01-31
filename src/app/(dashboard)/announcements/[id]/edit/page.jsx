@@ -86,6 +86,7 @@ export default function EditAnnouncementPage({ params }) {
     const uploadFiles = async (files) => {
         const supabase = createClient()
         const uploadedFiles = []
+        const errors = []
 
         for (const file of files) {
             const fileExt = file.name.split('.').pop()
@@ -98,6 +99,7 @@ export default function EditAnnouncementPage({ params }) {
 
             if (uploadError) {
                 console.error('Error uploading file:', uploadError)
+                errors.push(`${file.name}: ${uploadError.message}`)
                 continue
             }
 
@@ -110,6 +112,10 @@ export default function EditAnnouncementPage({ params }) {
                 url: publicUrl,
                 path: filePath
             })
+        }
+
+        if (errors.length > 0) {
+            alert(`一部のファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※SupabaseのStorageに「announcements」バケットがPublic設定で作成されているか確認してください。`)
         }
 
         return uploadedFiles
