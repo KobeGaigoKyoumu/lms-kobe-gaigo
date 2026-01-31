@@ -9,12 +9,11 @@ export async function GET() {
 
     const { data: students, error } = await supabase
         .from('students')
-        .select('*')
-        .eq('student_id_text', 'test-student')
+        .select('student_id_text, full_name, class_name, facebook_psid')
+        .limit(20)
 
     return NextResponse.json({
-        checked_id: 'test-student',
-        data: students,
+        students: students,
         error: error
     })
 }
