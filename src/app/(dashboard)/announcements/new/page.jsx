@@ -125,11 +125,11 @@ export default function NewAnnouncementPage() {
             if (isMessenger) {
                 const targetType = formData.course_id ? 'course' : 'all';
                 const targetValue = formData.course_id || null;
-                let messageString = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
+                let messageString = `【お知らせ】\n●「${formData.title}」\n\n${formData.content}`;
 
                 // 添付ファイルがあればリンクを追加
                 if (uploadedFileUrls.length > 0) {
-                    messageString += '\n\n【添付ファイル】';
+                    messageString += '\n\n【添付ファイル】\nこのファイルを見てください。';
                     uploadedFileUrls.forEach(file => {
                         messageString += `\n📎 ${file.name}: ${file.url}`;
                     });
