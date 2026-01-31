@@ -3,12 +3,11 @@
 import { MessageCircle, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function ConnectMessenger({ connected, studentId, pageId = 'YOUR_PAGE_ID' }) {
+export default function ConnectMessenger({ connected, studentId, pageId = '1421716201448413' }) {
     // If we don't have a specific page ID yet, we might need to rely on env or prop.
     // Ideally usage: <ConnectMessenger connected={status.connected} studentId={status.studentId} pageId={process.env.NEXT_PUBLIC_FB_PAGE_ID} />
 
-    // Fallback or use a placeholder if env not set for dev
-    const fbPageId = pageId || 'me';
+    const fbPageId = (pageId && pageId !== 'YOUR_PAGE_ID') ? pageId : '1421716201448413';
     const mMeLink = `https://m.me/${fbPageId}?ref=${studentId}`;
 
     if (connected) {
