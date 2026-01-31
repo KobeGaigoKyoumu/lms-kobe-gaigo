@@ -236,14 +236,14 @@ export default function StudentList({ students }) {
                                             <tbody>
                                                 {jlptHistory.map((record, idx) => (
                                                     <tr key={idx}>
-                                                        <td>{record.session}</td>
-                                                        <td><span className={styles.levelBadge}>{record.level}</span></td>
-                                                        <td>
+                                                        <td data-label="実施回">{record.session}</td>
+                                                        <td data-label="レベル"><span className={styles.levelBadge}>{record.level}</span></td>
+                                                        <td data-label="結果">
                                                             <span className={`${styles.resultBadge} ${record.result === '合格' ? styles.resultPass : styles.resultFail}`}>
                                                                 {record.result}
                                                             </span>
                                                         </td>
-                                                        <td>{record.score || '-'}</td>
+                                                        <td data-label="スコア">{record.score || '-'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>

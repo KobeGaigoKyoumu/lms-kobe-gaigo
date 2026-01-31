@@ -91,14 +91,14 @@ export default async function StudentAttendancePage() {
                                 const totalDays = (record.attendance_days || 0) + (record.absence_days || 0)
                                 return (
                                     <tr key={`${record.year}-${record.month}`}>
-                                        <td>{record.year}年 {record.month}月</td>
-                                        <td className={getRateColor(record.attendance_rate)}>
+                                        <td data-label="年月">{record.year}年 {record.month}月</td>
+                                        <td data-label="出席率" className={getRateColor(record.attendance_rate)}>
                                             {formatRate(record.attendance_rate)}
                                         </td>
-                                        <td>{totalDays || '-'}</td>
-                                        <td>{record.attendance_days || '-'}</td>
-                                        <td>{record.absence_days || '-'}</td>
-                                        <td>{record.late_slots || '-'}</td>
+                                        <td data-label="授業日数">{totalDays || '-'}</td>
+                                        <td data-label="出席日数">{record.attendance_days || '-'}</td>
+                                        <td data-label="欠席日数">{record.absence_days || '-'}</td>
+                                        <td data-label="遅刻・早退">{record.late_slots || '-'}</td>
                                     </tr>
                                 )
                             })}
@@ -123,8 +123,8 @@ export default async function StudentAttendancePage() {
                         <tbody>
                             {cumulativeRecords.map(record => (
                                 <tr key={`${record.year}-${record.month}`}>
-                                    <td>{record.year}年 {record.month}月</td>
-                                    <td className={getRateColor(record.attendance_rate)}>
+                                    <td data-label="年月">{record.year}年 {record.month}月</td>
+                                    <td data-label="累積出席率" className={getRateColor(record.attendance_rate)}>
                                         {formatRate(record.attendance_rate)}
                                     </td>
                                 </tr>

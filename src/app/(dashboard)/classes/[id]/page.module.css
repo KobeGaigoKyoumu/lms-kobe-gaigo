@@ -798,12 +798,11 @@
 .jlptTable table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--font-size-sm);
 }
 
 .jlptTable th,
 .jlptTable td {
-    padding: var(--spacing-2) var(--spacing-3);
+    padding: var(--spacing-3);
     text-align: left;
     border-bottom: 1px solid var(--border-color);
 }

@@ -97,16 +97,16 @@ export default async function StudentGradesPage() {
                             <tbody>
                                 {gradeRecords.map((record) => (
                                     <tr key={record.id}>
-                                        <td>{record.year_term}</td>
-                                        <td>{record.class_name}</td>
-                                        <td className={styles.examScore}>{record.final_exam_total}</td>
-                                        <td className={styles.reportScore}>{record.report_card_total}</td>
-                                        <td>
+                                        <td data-label="学期">{record.year_term}</td>
+                                        <td data-label="クラス">{record.class_name}</td>
+                                        <td data-label="期末試験" className={styles.examScore}>{record.final_exam_total}</td>
+                                        <td data-label="成績評価" className={styles.reportScore}>{record.report_card_total}</td>
+                                        <td data-label="評価">
                                             <span className={`${styles.gradeBadge} ${styles[`grade${calculateGrade(record.report_card_total)}`]}`}>
                                                 {calculateGrade(record.report_card_total)}
                                             </span>
                                         </td>
-                                        <td className={styles.date}>
+                                        <td data-label="登録日" className={styles.date}>
                                             {new Date(record.created_at).toLocaleDateString('ja-JP')}
                                         </td>
                                     </tr>

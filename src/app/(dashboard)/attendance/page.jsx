@@ -601,12 +601,12 @@ export default function AttendancePage() {
                                         <tbody>
                                             {classData.classes?.map(c => (
                                                 <tr key={`${c.grade}-${c.classCode}`}>
-                                                    <td>{c.className}</td>
-                                                    <td>{c.studentCount}名</td>
-                                                    <td className={getRateColor(c.averageRate)}>
+                                                    <td data-label="クラス">{c.className}</td>
+                                                    <td data-label="人数">{c.studentCount}名</td>
+                                                    <td data-label="平均出席率" className={getRateColor(c.averageRate)}>
                                                         {formatRate(c.averageRate)}
                                                     </td>
-                                                    <td>
+                                                    <td data-label="操作">
                                                         <button
                                                             className={styles.detailBtn}
                                                             onClick={() => fetchClassMembers(c.classCode)}
@@ -641,12 +641,12 @@ export default function AttendancePage() {
                                             <tbody>
                                                 {classMembers?.map(s => (
                                                     <tr key={s.student_id}>
-                                                        <td>{s.student_id}</td>
-                                                        <td>{formatStudentName(s)}</td>
-                                                        <td className={getRateColor(s.attendance_rate)}>
+                                                        <td data-label="学籍番号">{s.student_id}</td>
+                                                        <td data-label="氏名">{formatStudentName(s)}</td>
+                                                        <td data-label="出席率" className={getRateColor(s.attendance_rate)}>
                                                             {formatRate(s.attendance_rate)}
                                                         </td>
-                                                        <td>
+                                                        <td data-label="操作">
                                                             <button
                                                                 onClick={() => {
                                                                     // 個別タブへ遷移して詳細を表示
@@ -737,21 +737,21 @@ export default function AttendancePage() {
 
                                                     return paginatedStudents?.map(s => (
                                                         <tr key={s.student_id}>
-                                                            <td style={{ textAlign: 'center' }}>
+                                                            <td style={{ textAlign: 'center' }} data-label="選択">
                                                                 <input
                                                                     type="checkbox"
                                                                     checked={selectedStudents.has(s.student_id)}
                                                                     onChange={() => handleSelectStudent(s.student_id)}
                                                                 />
                                                             </td>
-                                                            <td>{s.student_id}</td>
-                                                            <td>{s.class_name || '-'}</td>
-                                                            <td>{formatStudentName(s)}</td>
-                                                            <td>{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
-                                                            <td className={getRateColor(s.attendance_rate)}>
+                                                            <td data-label="学籍番号">{s.student_id}</td>
+                                                            <td data-label="クラス">{s.class_name || '-'}</td>
+                                                            <td data-label="氏名">{formatStudentName(s)}</td>
+                                                            <td data-label="学年">{s.grade === 0 ? '非在籍者' : `${s.grade}年`}</td>
+                                                            <td data-label="出席率" className={getRateColor(s.attendance_rate)}>
                                                                 {formatRate(s.attendance_rate)}
                                                             </td>
-                                                            <td>
+                                                            <td data-label="操作">
                                                                 <button
                                                                     onClick={() => fetchStudentHistory(s.student_id)}
                                                                     className={styles.detailBtn}

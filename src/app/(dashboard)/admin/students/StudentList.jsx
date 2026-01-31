@@ -641,16 +641,16 @@ export default function StudentList() {
 
                                 return (
                                     <tr key={student.student_id_text} className={isSelected ? styles.selectedRow : ''}>
-                                        <td>
+                                        <td data-label="選択">
                                             <input
                                                 type="checkbox"
                                                 checked={isSelected}
                                                 onChange={() => handleToggleSelect(student.student_id_text)}
                                             />
                                         </td>
-                                        <td className={styles.idCell}>{student.student_id_text}</td>
-                                        <td>{student.full_name}</td>
-                                        <td>
+                                        <td data-label="学籍番号" className={styles.idCell}>{student.student_id_text}</td>
+                                        <td data-label="氏名">{student.full_name}</td>
+                                        <td data-label="学年">
                                             <select
                                                 value={String(studentInfo.grade ?? '')}
                                                 onChange={(e) => handleGradeChange(student.student_id_text, e.target.value)}
@@ -666,8 +666,8 @@ export default function StudentList() {
                                                 {!['1', '2', '0'].includes(String(studentInfo.grade)) && <option value={String(studentInfo.grade)}>その他</option>}
                                             </select>
                                         </td>
-                                        <td>{student.class_name || '-'}</td>
-                                        <td>
+                                        <td data-label="クラス">{student.class_name || '-'}</td>
+                                        <td data-label="ステータス">
                                             <select
                                                 value={student.status}
                                                 onChange={(e) => handleStatusChange(student.student_id_text, e.target.value)}
@@ -680,7 +680,7 @@ export default function StudentList() {
                                                 <option value="withdrawn">退学</option>
                                             </select>
                                         </td>
-                                        <td className={styles.actionCell}>
+                                        <td data-label="操作" className={styles.actionCell}>
                                             <button
                                                 onClick={() => setSelectedStudent(student)}
                                                 className={styles.detailBtn}

@@ -284,16 +284,66 @@
         padding: var(--spacing-4);
     }
 
+    /* Summary: 2 columns on mobile */
     .summary {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
+    .historySection {
+        margin-top: var(--spacing-8);
+    }
+
+    /* Table to Card Transformation */
     .table {
-        overflow-x: auto;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
     }
 
-    .table table {
-        min-width: 600px;
+    .table table,
+    .table thead,
+    .table tbody,
+    .table th,
+    .table td,
+    .table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody tr {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-4);
+        padding: var(--spacing-4);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-2) 0;
+        border-bottom: 1px dashed var(--border-color);
+        text-align: right;
+    }
+
+    .table td:last-child {
+        border-bottom: none;
+    }
+
+    .table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        margin-right: var(--spacing-4);
+        text-align: left;
     }
 
     .subjectGrid {
