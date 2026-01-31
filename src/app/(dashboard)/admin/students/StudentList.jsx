@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx'
 import styles from './page.module.css'
 import StudentDetailModal from './StudentDetailModal'
 import { parseStudentId } from '@/lib/utils/studentId'
+import { getAllStudentSubmissionStats } from '@/app/actions/homework'
 
 export default function StudentList() {
     // Props removed, internal state used for fetching
@@ -24,6 +25,7 @@ export default function StudentList() {
     const [uploadResult, setUploadResult] = useState(null)
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [selectedIds, setSelectedIds] = useState(new Set())
+    const [stats, setStats] = useState(new Map())
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1)
@@ -49,6 +51,14 @@ export default function StudentList() {
                 // Extract Classes
                 const uniqueClasses = [...new Set((studentsData || []).map(s => s.class_name).filter(Boolean))].sort()
                 setClasses(uniqueClasses)
+
+                // Fetch Stats
+                const statsData = await getAllStudentSubmissionStats()
+                const statsMap = new Map()
+                if (Array.isArray(statsData)) {
+                    statsData.forEach(s => statsMap.set(s.student_id_text, s))
+                }
+                setStats(statsMap)
 
             } catch (error) {
                 console.error('Error fetching students:', error)
@@ -624,6 +634,8 @@ export default function StudentList() {
                                 </th>
                                 <th>学籍番号</th>
                                 <th>氏名</th>
+                                <th>提出数</th>
+                                <th>提出点</th>
                                 <th>学年</th>
                                 <th>クラス</th>
                                 <th>ステータス</th>
@@ -634,6 +646,7 @@ export default function StudentList() {
                             {paginatedStudents.map(student => {
                                 const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
                                 const isSelected = selectedIds.has(student.student_id_text)
+                                const stat = stats.get(student.student_id_text) || { submission_count: 0, total_score: 0 }
 
                                 if (student.student_id_text === '2307077') {
                                     // console.log(`Rendering 2307077: AY=${student.academic_year} Grade=${studentInfo.grade}`)
@@ -650,6 +663,8 @@ export default function StudentList() {
                                         </td>
                                         <td data-label="学籍番号" className={styles.idCell}>{student.student_id_text}</td>
                                         <td data-label="氏名">{student.full_name}</td>
+                                        <td data-label="提出数" className={styles.centerAlign}>{stat.submission_count}</td>
+                                        <td data-label="提出点" className={styles.centerAlign}>{stat.total_score}pt</td>
                                         <td data-label="学年">
                                             <select
                                                 value={String(studentInfo.grade ?? '')}

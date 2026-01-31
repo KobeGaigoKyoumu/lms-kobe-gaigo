@@ -23,6 +23,27 @@ export default async function StudentDashboard() {
         <div>
             <h1 className={styles.title}>課題一覧</h1>
 
+            {/* Stats Summary */}
+            <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>全課題数</span>
+                    <span className={styles.statValue}>{assignments.length}</span>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>提出済み</span>
+                    <span className={styles.statValue}>
+                        {assignments.filter(a => !!a.submission).length}
+                    </span>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>獲得ポイント</span>
+                    <span className={styles.statValue}>
+                        {assignments.reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
+                    </span>
+                    <span className={styles.statUnit}>pt</span>
+                </div>
+            </div>
+
             {sortedAssignments.length === 0 ? (
                 <div className={styles.emptyState}>
                     <p>現在、課題はありません。</p>

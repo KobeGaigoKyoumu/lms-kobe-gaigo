@@ -375,6 +375,20 @@
     color: var(--text-tertiary);
 }
 
+.memberStats {
+    display: flex;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-2);
+}
+
+.statTag {
+    font-size: var(--font-size-xs);
+    padding: 2px var(--spacing-2);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
     .content {
         grid-template-columns: 1fr;

@@ -1,12 +1,36 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getClassSubmissionStats } from '@/app/actions/homework'
 import styles from './page.module.css'
 
 export default function StudentList({ students }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [jlptHistory, setJlptHistory] = useState([])
     const [loadingJlpt, setLoadingJlpt] = useState(false)
+    const [stats, setStats] = useState(new Map())
+
+    // Fetch Stats
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (students && students.length > 0) {
+                const className = students[0].class_name
+                if (className) {
+                    try {
+                        const statsData = await getClassSubmissionStats(className)
+                        const statsMap = new Map()
+                        if (Array.isArray(statsData)) {
+                            statsData.forEach(s => statsMap.set(s.student_id_text, s))
+                        }
+                        setStats(statsMap)
+                    } catch (err) {
+                        console.error('Error fetching class stats:', err)
+                    }
+                }
+            }
+        }
+        fetchStats()
+    }, [students])
 
     // Fetch JLPT history when student is selected
     useEffect(() => {
@@ -74,6 +98,14 @@ export default function StudentList({ students }) {
                                     <p className={styles.userMeta}>
                                         <span>学籍番号: {student.student_id_text}</span>
                                     </p>
+                                    <div className={styles.memberStats}>
+                                        <span className={styles.statTag}>
+                                            提出数: {stats.get(student.student_id_text)?.submission_count || 0}
+                                        </span>
+                                        <span className={styles.statTag}>
+                                            提出点: {stats.get(student.student_id_text)?.total_score || 0}pt
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <button
