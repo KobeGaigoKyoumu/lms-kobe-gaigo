@@ -61,9 +61,8 @@ export async function POST(req) {
                     await linkStudentToPsid(studentId, senderPsid);
                     await sendTextMessage(senderPsid, '連携が完了しました！これから重要なお知らせをお届けします。');
                 } else if (webhookEvent.message && webhookEvent.message.text) {
-                    // Handle standard text messages (Keep it simple for now)
-                    // Check if user is already linked?
-                    // Maybe echo back or ignore
+                    // Handle standard text messages - Reply for debugging
+                    await sendTextMessage(senderPsid, `メッセージを受け取りました: "${webhookEvent.message.text}"\n\nもし連携をしたい場合は、アプリの設定画面から再度ボタンを押して、画面下の「スタート」ボタンを押してください。`);
                 }
             }
 
