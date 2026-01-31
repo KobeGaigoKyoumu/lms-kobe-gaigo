@@ -185,6 +185,17 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                     )
                 },
                 {
+                    href: '/student/announcements',
+                    label: 'お知らせ',
+                    icon: (
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M15 6v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                            <path d="M3 6l7-4 7 4" />
+                            <path d="M10 10v4" />
+                        </svg>
+                    )
+                },
+                {
                     href: '/student/settings',
                     label: '設定',
                     icon: (

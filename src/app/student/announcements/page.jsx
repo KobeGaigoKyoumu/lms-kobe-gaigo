@@ -1,0 +1,72 @@
+import { createClient } from '@/lib/supabase/server'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import styles from '@/app/(dashboard)/announcements/page.module.css'
+import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
+
+export const dynamic = 'force-dynamic'
+
+export default async function StudentAnnouncementsPage() {
+    const supabase = await createClient()
+    const session = await getStudentSession()
+
+    if (!session) return null
+
+    // 1. 学生が所属しているコースの一覧を取得
+    const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('course_id')
+        .eq('student_id', session.id)
+
+    const courseIds = enrollments?.map(e => e.course_id) || []
+
+    // 2. お知らせ一覧取得
+    // 条件: course_idが空（全体向け） OR courseIdsに含まれる（受講コース向け）
+    const { data: announcements, error } = await supabase
+        .from('announcements')
+        .select(`
+            *,
+            author:profiles!author_id (
+                id,
+                full_name,
+                avatar_url
+            ),
+            course:courses (
+                id,
+                title
+            )
+        `)
+        .or(`course_id.is.null,course_id.in.(${courseIds.length > 0 ? courseIds.join(',') : '""'})`)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+
+    return (
+        <div className={styles.page}>
+            <header className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>お知らせ</h1>
+                    <p className={styles.subtitle}>学校からの重要なお知らせ</p>
+                </div>
+            </header>
+
+            {error && (
+                <div className={styles.error}>お知らせの取得に失敗しました</div>
+            )}
+
+            {announcements?.length === 0 ? (
+                <div className={styles.empty}>
+                    <p>現在、お知らせはありません。</p>
+                </div>
+            ) : (
+                <div className={styles.list}>
+                    {announcements?.map(announcement => (
+                        <AnnouncementCard
+                            key={announcement.id}
+                            announcement={announcement}
+                            canEdit={false} // 学生は編集不可
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
