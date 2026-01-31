@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { sendBroadcast } from '@/actions/messenger'
 import styles from './page.module.css'
 
 export default function NewAnnouncementPage() {
@@ -13,7 +14,8 @@ export default function NewAnnouncementPage() {
         title: '',
         content: '',
         course_id: '',
-        is_pinned: false
+        is_pinned: false,
+        send_to_messenger: false
     })
 
     useEffect(() => {
@@ -63,6 +65,20 @@ export default function NewAnnouncementPage() {
             console.error(error)
             setLoading(false)
             return
+        }
+
+        // Messenger配信
+        if (formData.send_to_messenger) {
+            const targetType = formData.course_id ? 'course' : 'all';
+            const targetValue = formData.course_id || null;
+            const message = `【お知らせ: ${formData.title}】\n\n${formData.content}`;
+
+            const result = await sendBroadcast(message, targetType, targetValue);
+            if (!result.success) {
+                console.error('Messenger Broadcast Failed:', result.error);
+                // We don't block the UI flow, just log it. Maybe show toast? 
+                // For simplicity, we assume success or silent fail.
+            }
         }
 
         router.push('/announcements')
@@ -139,6 +155,20 @@ export default function NewAnnouncementPage() {
                     />
                     <label htmlFor="is_pinned" className={styles.checkboxLabel}>
                         📌 上部にピン留めする
+                    </label>
+                </div>
+
+                <div className={styles.checkboxGroup}>
+                    <input
+                        type="checkbox"
+                        id="send_to_messenger"
+                        name="send_to_messenger"
+                        checked={formData.send_to_messenger}
+                        onChange={handleChange}
+                        className={styles.checkbox}
+                    />
+                    <label htmlFor="send_to_messenger" className={styles.checkboxLabel}>
+                        ⚡ Messengerでも配信する
                     </label>
                 </div>
 

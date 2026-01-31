@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
+import MessengerConnect from '@/components/messenger/MessengerConnect'
+import { getMessengerStatus, getPageId } from '@/actions/messenger'
 
 export default async function SettingsPage() {
     const supabase = await createClient()
@@ -13,6 +15,10 @@ export default async function SettingsPage() {
         .eq('id', user?.id)
         .single()
 
+    // Messenger連携状態取得
+    const messengerStatus = await getMessengerStatus()
+    const pageId = await getPageId()
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -21,6 +27,12 @@ export default async function SettingsPage() {
             </header>
 
             <div className={styles.content}>
+                {/* Messenger連携 */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>通知設定</h2>
+                    <MessengerConnect initialStatus={messengerStatus} pageId={pageId} />
+                </section>
+
                 {/* プロファイルセクション */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>プロファイル</h2>

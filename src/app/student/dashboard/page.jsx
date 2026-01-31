@@ -1,4 +1,6 @@
 import { getStudentAssignments } from '@/app/actions/homework'
+import { getMessengerStatus } from '@/actions/messenger'
+import ConnectMessenger from './ConnectMessenger'
 import Link from 'next/link'
 import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle } from 'lucide-react'
 import styles from './page.module.css'
@@ -7,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function StudentDashboard() {
     const assignments = await getStudentAssignments()
+    const messengerStatus = await getMessengerStatus()
 
     // Sort: Not submitted first, then by deadline
     const sortedAssignments = Array.isArray(assignments) ? assignments.sort((a, b) => {
@@ -22,6 +25,12 @@ export default async function StudentDashboard() {
     return (
         <div>
             <h1 className={styles.title}>課題一覧</h1>
+
+            <ConnectMessenger
+                connected={messengerStatus.connected}
+                studentId={messengerStatus.studentId}
+                pageId={process.env.NEXT_PUBLIC_FB_PAGE_ID}
+            />
 
             {/* Stats Summary */}
             <div className={styles.statsGrid}>
