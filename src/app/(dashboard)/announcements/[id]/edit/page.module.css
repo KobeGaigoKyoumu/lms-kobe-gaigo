@@ -138,3 +138,96 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* 配信方法 */
+.deliveryOptions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    margin-top: var(--spacing-2);
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.radioLabel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.radioLabel input[type="radio"] {
+    accent-color: var(--primary-500);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* 添付ファイル */
+.fileInput {
+    width: 100%;
+    padding: var(--spacing-4);
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.fileInput:hover {
+    border-color: var(--primary-400);
+    background: var(--primary-50);
+}
+
+.selectedFiles,
+.fileList {
+    margin-top: var(--spacing-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.fileItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.removeFileBtn {
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.removeFileBtn:hover {
+    text-decoration: underline;
+}
+
+.noFiles {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    font-style: italic;
+    padding: var(--spacing-2) 0;
+}
