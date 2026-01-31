@@ -132,7 +132,7 @@ export default async function StudentGradesPage() {
                                                     subject === 'conversation' ? '会話' :
                                                         subject === 'overall' ? '総合' :
                                                             subject === 'attendance' ? '出席' :
-                                                                subject === 'participation' ? '参加' : subject}
+                                                                subject === 'participation' ? '平常点' : subject}
                                 </h3>
                                 <div className={styles.subjectScores}>
                                     <div className={styles.scoreItem}>
@@ -140,11 +140,11 @@ export default async function StudentGradesPage() {
                                         <span className={styles.scoreValue}>{data.base?.toFixed(1)}</span>
                                     </div>
                                     <div className={styles.scoreItem}>
-                                        <span className={styles.scoreLabel}>出席</span>
+                                        <span className={styles.scoreLabel}>出席点</span>
                                         <span className={styles.scoreValue}>{data.attendance || 0}</span>
                                     </div>
                                     <div className={styles.scoreItem}>
-                                        <span className={styles.scoreLabel}>参加</span>
+                                        <span className={styles.scoreLabel}>平常点</span>
                                         <span className={styles.scoreValue}>{data.participation || 0}</span>
                                     </div>
                                     <div className={`${styles.scoreItem} ${styles.total}`}>
