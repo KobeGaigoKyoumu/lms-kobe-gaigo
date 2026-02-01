@@ -71,10 +71,10 @@ export async function POST(req) {
                             await sendTextMessage(senderPsid, `連携に失敗しました。ID: "${studentId}" が見つかりません。管理者にお問い合わせください。`);
                         }
                     } else if (webhookEvent.message && webhookEvent.message.text) {
-                        // Debug reply
+                        // Auto-reply for incoming messages
                         const text = webhookEvent.message.text;
                         console.log(`Message from ${senderPsid}: ${text}`);
-                        await sendTextMessage(senderPsid, `メッセージを受け取りました: "${text}"\n\nもし連携をしたい場合は、アプリの「連携」ボタンを押し、画面下の「スタート」ボタンを押してください。`);
+                        await sendTextMessage(senderPsid, '先生にメッセージしてください');
                     }
                 }
             }
