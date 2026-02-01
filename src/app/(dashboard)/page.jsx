@@ -26,11 +26,16 @@ export default async function DashboardPage() {
             content,
             is_pinned,
             created_at,
+            target_type,
+            target_grade,
+            target_class,
+            target_student_ids,
+            course_id,
             author:profiles!author_id (full_name)
         `)
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(20)
 
     // 2. プロファイルのみ先に待機 (これがロール判定に必要)
     const profileResult = await profilePromise
@@ -70,8 +75,13 @@ export default async function DashboardPage() {
                 .from('assignments')
                 .select('*', { count: 'exact', head: true })
                 .gte('due_date', now.toISOString())
-                .lte('due_date', nextWeek.toISOString())
-        ]).then(async ([enrollmentsResult, submissionsResult, upcomingResult]) => {
+                .lte('due_date', nextWeek.toISOString()),
+            supabase
+                .from('students')
+                .select('student_id_text, class_name, academic_year')
+                .eq('id', user?.id)
+                .single()
+        ]).then(async ([enrollmentsResult, submissionsResult, upcomingResult, studentResult]) => {
             const enrollments = enrollmentsResult.data || []
             const submittedAssignmentIds = (submissionsResult.data || []).map(s => s.assignment_id)
 
@@ -101,7 +111,9 @@ export default async function DashboardPage() {
                     (!a.due_date || new Date(a.due_date) >= now)
                 ).length,
                 completedAssignmentsCount: submittedAssignmentIds.length,
-                recentAssignments: recentAssignmentsData
+                recentAssignments: recentAssignmentsData,
+                studentInfo: studentResult.data,
+                enrolledCourseIds: enrollments.map(e => e.course_id)
             }
         })
 
@@ -319,36 +331,73 @@ export default async function DashboardPage() {
                         </svg>
                         お知らせ
                     </h2>
-                    {!announcements || announcements.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
-                                <path d="M36 14v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V14" />
-                                <path d="M8 14l16-10 16 10" />
-                                <path d="M24 22v10" />
-                            </svg>
-                            <p>お知らせはありません</p>
-                        </div>
-                    ) : (
-                        <div className={styles.announcementList}>
-                            {announcements.map(announcement => (
-                                <div key={announcement.id} className={styles.announcementItem}>
-                                    <div className={styles.announcementHeader}>
-                                        {announcement.is_pinned && (
-                                            <span className={styles.pinBadge}>📌</span>
-                                        )}
-                                        <span className={styles.announcementDate}>
-                                            {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
-                                                month: 'short',
-                                                day: 'numeric'
-                                            })}
-                                        </span>
-                                    </div>
-                                    <h4>{announcement.title}</h4>
-                                    <p>{announcement.content?.slice(0, 60)}...</p>
+                    {(() => {
+                        let filteredAnnouncements = announcements || []
+
+                        if (isStudent) {
+                            // 学生用のフィルタリングロジック
+                            const studentInfo = roleData?.studentInfo
+                            const enrolledCourseIds = roleData?.enrolledCourseIds || []
+
+                            filteredAnnouncements = filteredAnnouncements.filter(ann => {
+                                if (ann.target_type === 'all') return true
+                                if (ann.target_type === 'grade' && studentInfo) {
+                                    const currentYear = new Date().getFullYear()
+                                    const isBeforeApril = new Date().getMonth() < 3
+                                    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+                                    const studentGrade = academicYearBase - studentInfo.academic_year + 1
+                                    return String(studentGrade) === ann.target_grade
+                                }
+                                if (ann.target_type === 'class' && studentInfo) {
+                                    return ann.target_class === studentInfo.class_name
+                                }
+                                if (ann.target_type === 'individual' && studentInfo) {
+                                    return ann.target_student_ids?.includes(studentInfo.student_id_text)
+                                }
+                                if (ann.target_type === 'course') {
+                                    return enrolledCourseIds.includes(ann.course_id)
+                                }
+                                return false
+                            }).slice(0, 3) // 学生は最大3件
+                        } else {
+                            filteredAnnouncements = filteredAnnouncements.slice(0, 5) // 管理者・教師は最大5件
+                        }
+
+                        if (filteredAnnouncements.length === 0) {
+                            return (
+                                <div className={styles.emptyState}>
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
+                                        <path d="M36 14v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V14" />
+                                        <path d="M8 14l16-10 16 10" />
+                                        <path d="M24 22v10" />
+                                    </svg>
+                                    <p>お知らせはありません</p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            )
+                        }
+
+                        return (
+                            <div className={styles.announcementList}>
+                                {filteredAnnouncements.map(announcement => (
+                                    <div key={announcement.id} className={styles.announcementItem}>
+                                        <div className={styles.announcementHeader}>
+                                            {announcement.is_pinned && (
+                                                <span className={styles.pinBadge}>📌</span>
+                                            )}
+                                            <span className={styles.announcementDate}>
+                                                {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
+                                        <h4>{announcement.title}</h4>
+                                        <p>{announcement.content?.slice(0, 60)}...</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                    })()}
                 </section>
             </div>
         </div>
