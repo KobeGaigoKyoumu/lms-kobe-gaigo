@@ -1,3 +1,62 @@
+.container {
+    padding: var(--spacing-4);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.announcementSection {
+    margin-bottom: var(--spacing-8);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-6);
+}
+
+.headerIcon {
+    color: var(--primary-500);
+}
+
+.announcementGrid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.emptyAnnouncements {
+    padding: var(--spacing-8);
+    text-align: center;
+    color: var(--text-tertiary);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-color);
+}
+
+.viewMoreLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    margin-top: var(--spacing-4);
+    color: var(--primary-600);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--transition-base);
+}
+
+.viewMoreLink:hover {
+    color: var(--primary-700);
+}
+
 .title {
     font-size: var(--font-size-2xl);
     font-weight: 700;

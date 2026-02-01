@@ -351,11 +351,16 @@ export default async function DashboardPage() {
                     )}
                     {(() => {
                         let filteredAnnouncements = announcements || []
+                        console.log('Dashboard Debug - Total announcements fetched:', filteredAnnouncements.length)
+                        console.log('Dashboard Debug - roleData available:', !!roleData)
+                        console.log('Dashboard Debug - isStudent:', isStudent, 'isActuallyStudent:', isActuallyStudent)
 
-                        if (isStudent) {
+                        if (isActuallyStudent) {
                             // 学生用のフィルタリングロジック
                             const studentInfo = roleData?.studentInfo
                             const enrolledCourseIds = roleData?.enrolledCourseIds || []
+
+                            console.log('Dashboard Debug - studentInfo:', studentInfo)
 
                             filteredAnnouncements = filteredAnnouncements.filter(ann => {
                                 // target_typeがnull、空、または'all'の場合は全学生に表示
@@ -378,7 +383,9 @@ export default async function DashboardPage() {
                                     return enrolledCourseIds.includes(ann.course_id)
                                 }
                                 return false
-                            }).slice(0, 3) // 学生は最大3件
+                            })
+                            console.log('Dashboard Debug - After student filter:', filteredAnnouncements.length)
+                            filteredAnnouncements = filteredAnnouncements.slice(0, 3)
                         } else {
                             filteredAnnouncements = filteredAnnouncements.slice(0, 5) // 管理者・教師は最大5件
                         }
