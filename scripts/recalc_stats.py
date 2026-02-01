@@ -75,9 +75,18 @@ def calculate_grad_cohort(enroll_date_str):
 
 # Filter Students
 students = hist_data['students']
-graduates = [s for s in students if s.get('source') in ['卒業生', '修了生']]
+target_sources = ['卒業生', '修了生', '在籍生']
+graduates = []
+source_counts = {}
 
-print(f"Total Graduates/Completed in DB: {len(graduates)}")
+for s in students:
+    src = str(s.get('source', '')).strip()
+    if src in target_sources:
+        graduates.append(s)
+        # source_counts[src] = source_counts.get(src, 0) + 1  # Kept logic if needed, but remove print
+
+print(f"Total Graduates/Completed/Current in DB: {len(graduates)}")
+# print(f"Source Breakdown: {source_counts}")
 
 # Process Stats
 stats_by_year = {}
@@ -86,54 +95,71 @@ for s in graduates:
     sid = s['student_id']
     enroll_date = s.get('enrollment_date')
     grad_date_str = s.get('graduation_date')
+    source = str(s.get('source', '')).strip()
     
     # 1. Base: Calculate Cohort Year (FY + 2)
     cohort_year = calculate_grad_cohort(enroll_date)
     
+    # Fallback to Student ID if cohort is Unknown
+    if cohort_year == "Unknown" and sid and str(sid).isdigit() and len(str(sid)) >= 2:
+        try:
+            prefix = int(str(sid)[:2])
+            # Assume 20YY. If prefix > 80, maybe 19YY? Unlikely for this system.
+            # Only apply for reasonable years (e.g., 17-30)
+            if 10 <= prefix <= 30:
+                fy = 2000 + prefix
+                cohort_year = fy + 2
+        except:
+            pass
+            
     if cohort_year == "Unknown":
         continue
+
         
     final_grad_year = cohort_year
     
     # 2. Check for Early Graduation or explicit date
-    if grad_date_str and pd.notna(grad_date_str):
+    # Only trust explicit graduation date if they are NOT '在籍生' (Current)
+    if source != '在籍生' and grad_date_str and pd.notna(grad_date_str):
         try:
             dt = pd.to_datetime(grad_date_str)
-            # March graduation belongs to that year. April graduation belongs to next fiscal?
-            # Typically graduation is March.
-            # 2021-03-31 -> 2021 class.
             actual_year = dt.year
-            
-            # Use actual year if available and logical
-            final_grad_year = actual_year
+            # Use actual year if available and logical (e.g. not drastically different)
+            if actual_year > 2000:
+                final_grad_year = actual_year
         except:
              pass
              
     label = f"{final_grad_year}年3月"
     
+    # Filter out very old years early if possible
+    if final_grad_year < 2019:
+        continue
+
     if label not in stats_by_year:
         stats_by_year[label] = {
+            "year": label, 
             "graduation_date": label,
             "total_graduates": 0,
-            "total": 0,  # Legacy field
-            "matched": 0, # Legacy field
+            "total": 0,  
+            "matched": 0, 
             "n3_plus": 0, 
-            "n3_or_higher": 0, # New field support
-            "rate": 0, # Legacy field
+            "n3_or_higher": 0, 
+            "rate": 0, 
             "matched_with_jlpt": 0,
-            "match_rate": 0, # Legacy field
+            "match_rate": 0, 
             "kanji_stats": {"total": 0, "n3_plus": 0, "rate": 0},
             "non_kanji_stats": {"total": 0, "n3_plus": 0, "rate": 0},
             "students": []
         }
     
-    # Check Kanji Name (Simple check: China/Taiwan/HK)
+    # Check Kanji Name
     nationality = s.get('nationality', 'Unknown')
     is_kanji = nationality in ['中国', '台湾', '香港']
     
     data = stats_by_year[label]
     data["total_graduates"] += 1
-    data["total"] += 1 # Legacy
+    data["total"] += 1 
     
     if is_kanji:
         data["kanji_stats"]["total"] += 1
@@ -146,11 +172,11 @@ for s in graduates:
     
     if has_jlpt_record:
         data["matched_with_jlpt"] += 1
-        data["matched"] += 1 # Legacy
+        data["matched"] += 1 
 
     if level in ['N1', 'N2', 'N3']:
         data["n3_plus"] += 1
-        data["n3_or_higher"] = data["n3_plus"] # New field name support
+        data["n3_or_higher"] = data["n3_plus"] 
         if is_kanji:
             data["kanji_stats"]["n3_plus"] += 1
         else:
@@ -170,6 +196,10 @@ formatted_stats = []
 
 print("\n--- Summary ---")
 for year in year_keys:
+    # Double check filter (though done above)
+    if "2019" > year: # String comparison works for "YYYY年3月" format
+         continue
+
     data = stats_by_year[year]
     count = data['total_graduates']
     n3 = data['n3_plus']

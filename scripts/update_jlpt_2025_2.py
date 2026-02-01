@@ -116,8 +116,9 @@ def main():
                 
                 # Check for "Not Taken" (**)
                 if '**' in raw_score:
-                    raw_result = "未受験"
-                    raw_score = "0"
+                    print(f"Skipping 'Not Taken' record: {raw_name} ({raw_country})")
+                    continue
+
                 
                 # Helper to map section name to key
                 def map_section(name):
