@@ -24,9 +24,12 @@ def normalize_name(name):
     return name.upper()
 
 def parse_fraction(val):
-    """ '25/60' -> 25 """
+    """ '25/60' -> 25, '**' -> 0 """
     if not val: return 0
-    match = re.search(r'(\d+)', str(val))
+    s_val = str(val).strip()
+    if '**' in s_val:
+        return 0
+    match = re.search(r'(\d+)', s_val)
     if match:
         return int(match.group(1))
     return 0
@@ -110,6 +113,11 @@ def main():
                 # Sec2: 13,14 (Reading)
                 # Sec3: 15,16 (Listening)
                 section_scores = {}
+                
+                # Check for "Not Taken" (**)
+                if '**' in raw_score:
+                    raw_result = "未受験"
+                    raw_score = "0"
                 
                 # Helper to map section name to key
                 def map_section(name):
