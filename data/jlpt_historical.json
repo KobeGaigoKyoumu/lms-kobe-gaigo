@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "source": "歴代受験結果データベース.xlsx",
-  "recordCount": 1863,
+  "recordCount": 2219,
   "records": [
     {
       "session": "2017年第1回",
@@ -16769,6 +16769,4949 @@
       "level": "N2",
       "score": 104,
       "result": "合格"
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4773618012482195725",
+      "country": "ミャンマー",
+      "name": "MYA MYA MOE",
+      "level": "N2",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 29,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_9153039223193710559",
+      "country": "ミャンマー",
+      "name": "THAW ZIN HTUN",
+      "level": "N2",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 21,
+        "listening": 53
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6986457032625195668",
+      "country": "ミャンマー",
+      "name": "KYAL SIN LIN",
+      "level": "N2",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 33,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6429655553255522788",
+      "country": "ミャンマー",
+      "name": "SOE NYI HTUT",
+      "level": "N1",
+      "score": 84,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 33,
+        "reading": 17,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2919381945793770323",
+      "country": "ネパール",
+      "name": "NEPALI BIRENDRA",
+      "level": "N3",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 18,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4700012816117244110",
+      "country": "ネパール",
+      "name": "KHATRI JAMUNA",
+      "level": "N4",
+      "score": 64,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 35,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6926212136736348852",
+      "country": "ネパール",
+      "name": "MALLA DIVYA",
+      "level": "N4",
+      "score": 99,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 64,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7763433364323463372",
+      "country": "ネパール",
+      "name": "BUDHATHOKI BINITA",
+      "level": "N4",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 47,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6185820678690570276",
+      "country": "ネパール",
+      "name": "BOHARA NISHA",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 23,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7567045607655435233",
+      "country": "ネパール",
+      "name": "RAI SUSMITA",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 25,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3829222932569908622",
+      "country": "ネパール",
+      "name": "ARYAL SUSMITA",
+      "level": "N3",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 20,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_984904108894149034",
+      "country": "ネパール",
+      "name": "JOGI MILAN KUMAR",
+      "level": "N2",
+      "score": 24,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 0,
+        "reading": 0,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4159339831315594217",
+      "country": "ネパール",
+      "name": "GHARTI KSHETRI BHUWAN BAHADUR",
+      "level": "N4",
+      "score": 101,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 67,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4607943522491604528",
+      "country": "ネパール",
+      "name": "KHANAL SUSAN",
+      "level": "N2",
+      "score": 46,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 15,
+        "reading": 3,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7449766278244676323",
+      "country": "ネパール",
+      "name": "THAPA MAGAR RAJ",
+      "level": "N2",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 12,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4462937501740570832",
+      "country": "ネパール",
+      "name": "PANDEY JYOTI",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 30,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2183823670317793027",
+      "country": "バングラデシュ",
+      "name": "ISLAM MD TARIQUL",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 25,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3971033658526196034",
+      "country": "バングラデシュ",
+      "name": "DEBNATH EMON",
+      "level": "N3",
+      "score": 94,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 24,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2878026144694548484",
+      "country": "バングラデシュ",
+      "name": "MIA MD RAHIM",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 32,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_250831443507108599",
+      "country": "ネパール",
+      "name": "LAMA SANGCHI",
+      "level": "N4",
+      "score": 98,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 61,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2689695657451413074",
+      "country": "中国",
+      "name": "LIN WEIJIAN",
+      "level": "N2",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 28,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4286411776416704109",
+      "country": "バングラデシュ",
+      "name": "KHAN MD SHAKIB",
+      "level": "N3",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 24,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3159467997794595013",
+      "country": "ネパール",
+      "name": "MAHATO SALINA KUMARI",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 27,
+        "listening": 49
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3765797262350932866",
+      "country": "ミャンマー",
+      "name": "SAI KAUNG KHANT AUNG",
+      "level": "N3",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 20,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3494491889168275349",
+      "country": "バングラデシュ",
+      "name": "RAIHAN INTISHAR BIN",
+      "level": "N3",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 32,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4056217540947774626",
+      "country": "中国",
+      "name": "CHEN JIALE",
+      "level": "N2",
+      "score": 93,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 32,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4838114999437457387",
+      "country": "ネパール",
+      "name": "SHRESTHA ASMITA",
+      "level": "N3",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 24,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6111636118293690683",
+      "country": "バングラデシュ",
+      "name": "HAKIM MD ABDUL",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 21,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8098359546985665288",
+      "country": "ネパール",
+      "name": "MALLA HIMAL",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 19,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6548032731004759117",
+      "country": "ネパール",
+      "name": "OLI REKHA",
+      "level": "N3",
+      "score": 118,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 30,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2916976368968463636",
+      "country": "バングラデシュ",
+      "name": "MIAH MUHAMMAD SOHEL",
+      "level": "N4",
+      "score": 136,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 87,
+        "listening": 49
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3296923327594289614",
+      "country": "ネパール",
+      "name": "DHENGA DEB BAHADUR",
+      "level": "N2",
+      "score": 120,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 34,
+        "listening": 58
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6965597069220767152",
+      "country": "バングラデシュ",
+      "name": "AHMED MD SHIPON",
+      "level": "N4",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 49,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4211664215098304740",
+      "country": "ネパール",
+      "name": "GHARTI MAGAR ESTHER",
+      "level": "N2",
+      "score": 111,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 29,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-252061158839520708",
+      "country": "ネパール",
+      "name": "SAUD LOKENDRA",
+      "level": "N3",
+      "score": 180,
+      "result": "退場",
+      "sectionScores": {
+        "vocab": 60,
+        "reading": 60,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8484706238903301252",
+      "country": "ネパール",
+      "name": "MAHARA TILSARA",
+      "level": "N3",
+      "score": 103,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 23,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1879883060983703703",
+      "country": "ネパール",
+      "name": "SHERPA AAYUSHA",
+      "level": "N2",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 17,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3391816117986541542",
+      "country": "ミャンマー",
+      "name": "NAING LIN KHANT",
+      "level": "N2",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 43,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3185728612968112319",
+      "country": "ミャンマー",
+      "name": "ZIN LAY NWE",
+      "level": "N2",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 20,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "2310031",
+      "country": "バングラデシュ",
+      "name": "HASAN MD MEHEDI",
+      "level": "N2",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 21,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5894669050373941232",
+      "country": "ミャンマー",
+      "name": "RITA HLA MOE",
+      "level": "N2",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 22,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7341287967233747984",
+      "country": "バングラデシュ",
+      "name": "HOSSEN MD SHOHAG",
+      "level": "N3",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 25,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6677572538643030557",
+      "country": "バングラデシュ",
+      "name": "SAHA SARAN",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 22,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2155513067491697292",
+      "country": "ミャンマー",
+      "name": "PHU PHU MYAT THU",
+      "level": "N2",
+      "score": 99,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 36,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3271354421765109664",
+      "country": "ミャンマー",
+      "name": "NANG PHWAY WADI OO",
+      "level": "N2",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 21,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1858493494716439118",
+      "country": "ネパール",
+      "name": "KUMAL RAJIL",
+      "level": "N4",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 71,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3894794109600603461",
+      "country": "バングラデシュ",
+      "name": "EMON MD",
+      "level": "N3",
+      "score": 103,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 23,
+        "listening": 54
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5798985882120858258",
+      "country": "バングラデシュ",
+      "name": "RIFAT TAREK CHOWDURY",
+      "level": "N3",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 18,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2913843363678072766",
+      "country": "ネパール",
+      "name": "KARKI DAVISH",
+      "level": "N4",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 44,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2271008045199384023",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN SHAMIM",
+      "level": "N2",
+      "score": 60,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 8,
+        "reading": 20,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3870964473635777227",
+      "country": "ミャンマー",
+      "name": "AUNG MYINT MYAT",
+      "level": "N4",
+      "score": 118,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 80,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7895461462882468194",
+      "country": "バングラデシュ",
+      "name": "ISLAM MD RASEDUL",
+      "level": "N3",
+      "score": 106,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 18,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4557397578488015200",
+      "country": "バングラデシュ",
+      "name": "ISLAM MD ARIFUL",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 25,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8258299952833328637",
+      "country": "ネパール",
+      "name": "THAPA BHASHA",
+      "level": "N4",
+      "score": 180,
+      "result": "欠席(全時限欠席)",
+      "sectionScores": {
+        "vocab": 120,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6887662907214969670",
+      "country": "中国",
+      "name": "HONG ZHIHAO",
+      "level": "N2",
+      "score": 180,
+      "result": "一部時限出席",
+      "sectionScores": {
+        "vocab": 60,
+        "reading": 60,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5900313327924468711",
+      "country": "ミャンマー",
+      "name": "YE MIN HTET",
+      "level": "N2",
+      "score": 90,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 20,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1181037818232910058",
+      "country": "ネパール",
+      "name": "MANDAL GOVIND",
+      "level": "N3",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 25,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4671090630586473869",
+      "country": "ネパール",
+      "name": "LIMBU SUSHIL",
+      "level": "N3",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 24,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5019960277825808849",
+      "country": "ネパール",
+      "name": "SEDAI UPAHAR",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 23,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4813107170791422550",
+      "country": "バングラデシュ",
+      "name": "MD JONAYET",
+      "level": "N2",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 17,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2518299527147672007",
+      "country": "ネパール",
+      "name": "RAWAL RADHA",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 20,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1291297857353877758",
+      "country": "バングラデシュ",
+      "name": "RATUL TANVIR HASAN",
+      "level": "N2",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 27,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3129857645933303867",
+      "country": "ネパール",
+      "name": "THAPA PRAJOL",
+      "level": "N3",
+      "score": 93,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 27,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3341981604238850750",
+      "country": "ネパール",
+      "name": "TAMANG PEMA DORJE",
+      "level": "N3",
+      "score": 128,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 42,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5426888286242455307",
+      "country": "ネパール",
+      "name": "SHRESTHA HIRA LAL",
+      "level": "N3",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 23,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5549913100362291573",
+      "country": "ネパール",
+      "name": "BOHARA TARA KUMARI",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 26,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2151992532124774306",
+      "country": "ネパール",
+      "name": "TAMANG MANJU",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 27,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3398599516113683768",
+      "country": "ネパール",
+      "name": "GURUNG SHANTI",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 21,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8985160923314016312",
+      "country": "ネパール",
+      "name": "BOCHHEN SHREEJALA",
+      "level": "N3",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 19,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5102586404101988988",
+      "country": "ミャンマー",
+      "name": "KYAL SIN NYEIN",
+      "level": "N2",
+      "score": 107,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 36,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5561906970424675426",
+      "country": "バングラデシュ",
+      "name": "PRODHANIA MD JAHID",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 27,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4324395142208471625",
+      "country": "ミャンマー",
+      "name": "ZAYAR OO",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 14,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8445435568019258411",
+      "country": "ミャンマー",
+      "name": "KHIN PYAE SONE",
+      "level": "N2",
+      "score": 112,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 33,
+        "listening": 54
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1773303912470683466",
+      "country": "ネパール",
+      "name": "PYAKUREL ANKIT",
+      "level": "N2",
+      "score": 59,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 9,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4647970656258526224",
+      "country": "中国",
+      "name": "YU GUOKUN",
+      "level": "N2",
+      "score": 94,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 29,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_35043170167123502",
+      "country": "バングラデシュ",
+      "name": "IFTEKHAR MD",
+      "level": "N3",
+      "score": 92,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 20,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6761114781757392293",
+      "country": "バングラデシュ",
+      "name": "SHOWROV MOYAZZEN HOSSAIN",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 26,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1521445783937493190",
+      "country": "中国",
+      "name": "WANG KAI",
+      "level": "N3",
+      "score": 121,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 41,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4307248285970018273",
+      "country": "バングラデシュ",
+      "name": "RAHMAN MD MATIUR",
+      "level": "N2",
+      "score": 106,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 33,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5123085026212011688",
+      "country": "バングラデシュ",
+      "name": "DELWAR HOSHEN SAYED",
+      "level": "N2",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 25,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2854855974774813302",
+      "country": "ネパール",
+      "name": "DONG TAMANG USHA KUMARI",
+      "level": "N2",
+      "score": 57,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 14,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5790801162608380424",
+      "country": "バングラデシュ",
+      "name": "MIRAZ MD SAIKAT ISLAM",
+      "level": "N3",
+      "score": 102,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 28,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5896239314757007855",
+      "country": "ミャンマー",
+      "name": "KYAW ZIN MYINT",
+      "level": "N3",
+      "score": 93,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 31,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2288194753077869301",
+      "country": "ネパール",
+      "name": "TAMANG NIKITA",
+      "level": "N2",
+      "score": 117,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 28,
+        "listening": 57
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7515251602812510645",
+      "country": "ネパール",
+      "name": "DARAI SALINA",
+      "level": "N4",
+      "score": 113,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 73,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1576999913098691268",
+      "country": "ネパール",
+      "name": "RAWAT SURAKSHA",
+      "level": "N4",
+      "score": 57,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 38,
+        "listening": 19
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-250512079900865208",
+      "country": "ネパール",
+      "name": "KATHAYAT YASHODA",
+      "level": "N4",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 47,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6085345510914972617",
+      "country": "パキスタン",
+      "name": "SUBHAN NEAMAT",
+      "level": "N3",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 27,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5207308310801186260",
+      "country": "バングラデシュ",
+      "name": "ISLAM SAIFUL",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 12,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3484052825955727788",
+      "country": "ベトナム",
+      "name": "PHAM THUAN TRI DUNG",
+      "level": "N3",
+      "score": 80,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 18,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3276288640157915740",
+      "country": "バングラデシュ",
+      "name": "ZISAN MD RAIHAN SARIF",
+      "level": "N2",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 17,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4568225954280202786",
+      "country": "バングラデシュ",
+      "name": "ANWAR ZIHAD MD OBAYED BIN",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 14,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4401210327781173431",
+      "country": "バングラデシュ",
+      "name": "MD ATIKUL ISLAM",
+      "level": "N2",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 15,
+        "reading": 19,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-564556602828990645",
+      "country": "ミャンマー",
+      "name": "MI MI ZIN",
+      "level": "N2",
+      "score": 104,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 35,
+        "reading": 27,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8583052583991344940",
+      "country": "ネパール",
+      "name": "MAGAR RUPESH",
+      "level": "N3",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 18,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3303919167484050301",
+      "country": "ネパール",
+      "name": "THAPA RUBI",
+      "level": "N3",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 28,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1518846832517179931",
+      "country": "バングラデシュ",
+      "name": "SABBIR SAJID AHMED",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 19,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7692330904640610283",
+      "country": "バングラデシュ",
+      "name": "AKTER JESMIN",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 20,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3354551920580620473",
+      "country": "ネパール",
+      "name": "MAGAR SANDESH SAMAL",
+      "level": "N3",
+      "score": 104,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 28,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7047610083107475382",
+      "country": "バングラデシュ",
+      "name": "SHOVA MD ARAFAT HOSSAIN",
+      "level": "N2",
+      "score": 90,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 20,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7858205726411247216",
+      "country": "バングラデシュ",
+      "name": "PRODHAN MD RAYHAN",
+      "level": "N2",
+      "score": 96,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 34,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5569845193862423799",
+      "country": "ネパール",
+      "name": "GAUTAM ROSHAN",
+      "level": "N3",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 24,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6692485998597808056",
+      "country": "バングラデシュ",
+      "name": "MIZAN MD",
+      "level": "N2",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 21,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1594341861580865116",
+      "country": "バングラデシュ",
+      "name": "MIA ROMAN",
+      "level": "N3",
+      "score": 104,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 35,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4828609519418319517",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD RAHIM",
+      "level": "N3",
+      "score": 139,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 45,
+        "reading": 34,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7505263431127875279",
+      "country": "ネパール",
+      "name": "THAPA HIMAL",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 33,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1352159243548657873",
+      "country": "ミャンマー",
+      "name": "MI AYE SOE MOE",
+      "level": "N3",
+      "score": 92,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 24,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7750439595710999552",
+      "country": "ミャンマー",
+      "name": "MIN THIHA",
+      "level": "N1",
+      "score": 180,
+      "result": "欠席(全時限欠席)",
+      "sectionScores": {
+        "vocab": 60,
+        "reading": 60,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8765092378433072921",
+      "country": "バングラデシュ",
+      "name": "ISRAFIL MD",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 26,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5781968207117058717",
+      "country": "バングラデシュ",
+      "name": "AZAD ABDULLAH AL",
+      "level": "N3",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 20,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1062071232459433329",
+      "country": "ミャンマー",
+      "name": "NWAY KHET KHET PAN",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 9,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3807758012108658439",
+      "country": "ネパール",
+      "name": "BALAMI RACHINA",
+      "level": "N3",
+      "score": 99,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 33,
+        "reading": 27,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7983705214319527805",
+      "country": "バングラデシュ",
+      "name": "RONY MD RAKEBUL ISLAM",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 17,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7324947168308671135",
+      "country": "ミャンマー",
+      "name": "YEE MON OO",
+      "level": "N1",
+      "score": 66,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 23,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8252507372914935091",
+      "country": "ミャンマー",
+      "name": "KHIN MYAT NOE AYE",
+      "level": "N1",
+      "score": 69,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 20,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8912258462776407233",
+      "country": "バングラデシュ",
+      "name": "MEHE MD MOJAMMEL HOSSAIN",
+      "level": "N3",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 18,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-9143760033777066112",
+      "country": "バングラデシュ",
+      "name": "MIYAJI JABED HOSEN SHISHIR",
+      "level": "N3",
+      "score": 101,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 26,
+        "listening": 53
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2059799236851217617",
+      "country": "ネパール",
+      "name": "KOIRALA SUBHANA",
+      "level": "N4",
+      "score": 112,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 77,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3217071422607926582",
+      "country": "バングラデシュ",
+      "name": "RASHID MD MAMUNUR",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 50,
+        "listening": 18
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1359699274888056930",
+      "country": "バングラデシュ",
+      "name": "AHMED MD JUBAYER",
+      "level": "N2",
+      "score": 51,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 5,
+        "reading": 18,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6848918890429983770",
+      "country": "ネパール",
+      "name": "POUDEL SAMIKSHA",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 21,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7534667853404133813",
+      "country": "バングラデシュ",
+      "name": "SHEIKH MD SABBIR HOSEN",
+      "level": "N3",
+      "score": 99,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 28,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2240682564107624787",
+      "country": "バングラデシュ",
+      "name": "HASAN MD HASIBUL",
+      "level": "N3",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 18,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_624427765194853435",
+      "country": "ネパール",
+      "name": "KARKI TIKA DEVI",
+      "level": "N4",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 44,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1919030360448610412",
+      "country": "中国",
+      "name": "FAN ZEXU",
+      "level": "N2",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 14,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "2504003",
+      "country": "中国",
+      "name": "GAO XING",
+      "level": "N2",
+      "score": 122,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 41,
+        "reading": 50,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1192045583024087277",
+      "country": "バングラデシュ",
+      "name": "HASAN WASIMUL",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 22,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4886731018123663013",
+      "country": "ミャンマー",
+      "name": "MAUNG PHYU",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 22,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4631427844723102872",
+      "country": "ミャンマー",
+      "name": "SOE LIN TUN",
+      "level": "N3",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 20,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6416674194730399806",
+      "country": "バングラデシュ",
+      "name": "SIFAT",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 31,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4235546307672213581",
+      "country": "ミャンマー",
+      "name": "SU SU WIN",
+      "level": "N3",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 19,
+        "listening": 23
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2535864947892192360",
+      "country": "バングラデシュ",
+      "name": "SIYUM MD FERDOUS WAHID",
+      "level": "N4",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 72,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2232403021045835393",
+      "country": "ミャンマー",
+      "name": "SHWE SIN PHYOE",
+      "level": "N2",
+      "score": 94,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 32,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_55507112585009987",
+      "country": "ミャンマー",
+      "name": "MIN AUNG HTET OO",
+      "level": "N3",
+      "score": 69,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 12,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7940884832483435278",
+      "country": "ベトナム",
+      "name": "DUONG THANH TUNG",
+      "level": "N3",
+      "score": 65,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 23,
+        "listening": 23
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8277534742461286974",
+      "country": "ミャンマー",
+      "name": "AUNG THANT",
+      "level": "N3",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 26,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6788006662913143201",
+      "country": "ミャンマー",
+      "name": "HAN HAN HTWE",
+      "level": "N2",
+      "score": 118,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 34,
+        "listening": 52
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6614530145916125998",
+      "country": "ネパール",
+      "name": "CHAUDHARY AADITYA KUMAR",
+      "level": "N3",
+      "score": 100,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 30,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3064924837233380495",
+      "country": "ネパール",
+      "name": "GIRI TAPENDRA RAJ",
+      "level": "N2",
+      "score": 90,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 24,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1579942350527605361",
+      "country": "ネパール",
+      "name": "SHRESTHA YAM KUMAR",
+      "level": "N3",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 17,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_9164974469358309327",
+      "country": "ネパール",
+      "name": "TAMANG SUSMA",
+      "level": "N2",
+      "score": 80,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 15,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6135755849821673998",
+      "country": "ネパール",
+      "name": "BUDHATHOKI BUDDHI BAHADUR",
+      "level": "N2",
+      "score": 109,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 41,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7468733972449426648",
+      "country": "ネパール",
+      "name": "LAMICHHANE RUPESH",
+      "level": "N2",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 30,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2496507653935456194",
+      "country": "ミャンマー",
+      "name": "THURA LINN",
+      "level": "N3",
+      "score": 102,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 34,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5868187393494889835",
+      "country": "ネパール",
+      "name": "POUDEL PRAMINA",
+      "level": "N3",
+      "score": 58,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 15,
+        "listening": 23
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_727224383573876399",
+      "country": "ネパール",
+      "name": "SILWAL SEBIKA",
+      "level": "N4",
+      "score": 126,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 87,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_646332167309100813",
+      "country": "ネパール",
+      "name": "GIRI KALYANI",
+      "level": "N4",
+      "score": 104,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 64,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2577222733716446885",
+      "country": "ネパール",
+      "name": "GURUNG SUPRIYA",
+      "level": "N3",
+      "score": 101,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 33,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2609467990303882800",
+      "country": "ネパール",
+      "name": "MOKTAN ABHISHEK",
+      "level": "N3",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 26,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4290477986854229876",
+      "country": "ネパール",
+      "name": "RAI MANOJ",
+      "level": "N3",
+      "score": 120,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 34,
+        "reading": 26,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_299064467652653330",
+      "country": "ネパール",
+      "name": "DHAKAL LILA MAYA",
+      "level": "N3",
+      "score": 57,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 21,
+        "listening": 18
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1710584062263768904",
+      "country": "ミャンマー",
+      "name": "AYE YADANAR MOE",
+      "level": "N3",
+      "score": 85,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 28,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3084473356317600109",
+      "country": "ネパール",
+      "name": "BK MAMATA",
+      "level": "N3",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 18,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2468177132199736831",
+      "country": "ネパール",
+      "name": "MAGARATI MANISHA",
+      "level": "N3",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 40,
+        "reading": 24,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6074791646379097041",
+      "country": "ネパール",
+      "name": "RIJAL PUSPA",
+      "level": "N3",
+      "score": 111,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 28,
+        "listening": 52
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6677875478506101087",
+      "country": "ネパール",
+      "name": "GIRI RAJ KUMAR",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 26,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1925874626197063832",
+      "country": "ネパール",
+      "name": "B K BHARAT",
+      "level": "N3",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 30,
+        "listening": 26
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5321264084311466356",
+      "country": "ネパール",
+      "name": "SHRESTHA GYANU",
+      "level": "N2",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 24,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5749356637545340536",
+      "country": "ネパール",
+      "name": "GHALAN SANJU MAYA",
+      "level": "N3",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 25,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7079683156086024567",
+      "country": "バングラデシュ",
+      "name": "ARNOB JAHIN SHAHRIAR",
+      "level": "N2",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 19,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1112858629823654148",
+      "country": "ネパール",
+      "name": "RAJGURU DIPENDRA",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 26,
+        "listening": 25
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4991107732702381458",
+      "country": "ネパール",
+      "name": "LOHAR JAINDRA",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 20,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8043070593207539717",
+      "country": "バングラデシュ",
+      "name": "NABID TANJIM",
+      "level": "N1",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 21,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2813163926680566009",
+      "country": "バングラデシュ",
+      "name": "HOSEN MD EMTEAZ",
+      "level": "N2",
+      "score": 53,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 12,
+        "listening": 25
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2177245035509975203",
+      "country": "ミャンマー",
+      "name": "MYA MYA THIN",
+      "level": "N2",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 27,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6155975831114206667",
+      "country": "ネパール",
+      "name": "POKHAREL SURAKSHYA",
+      "level": "N3",
+      "score": 103,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 27,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6565466962178278797",
+      "country": "ネパール",
+      "name": "MOKTAN UJWAL",
+      "level": "N3",
+      "score": 108,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 27,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3703574716247465158",
+      "country": "ミャンマー",
+      "name": "MAY KHIN OO",
+      "level": "N2",
+      "score": 112,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 26,
+        "listening": 55
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2013164118229429383",
+      "country": "ミャンマー",
+      "name": "KHIN SANDI ZAW",
+      "level": "N2",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 26,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1482930333465415267",
+      "country": "ミャンマー",
+      "name": "THAN TOE AUNG",
+      "level": "N2",
+      "score": 91,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 22,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2961410524357475435",
+      "country": "ネパール",
+      "name": "ACHARYA SANJU",
+      "level": "N3",
+      "score": 104,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 29,
+        "listening": 45
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6724971086077140778",
+      "country": "ネパール",
+      "name": "MOKTAN SAMANA",
+      "level": "N3",
+      "score": 84,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 21,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1085072345208161838",
+      "country": "ミャンマー",
+      "name": "KAY KHING LIN",
+      "level": "N3",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 22,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3074238514723379407",
+      "country": "バングラデシュ",
+      "name": "RAHMAN MOSTAFIZUR",
+      "level": "N4",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 46,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2458606460856467826",
+      "country": "ベトナム",
+      "name": "NGUYEN PHUONG LINH",
+      "level": "N3",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 32,
+        "listening": 17
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-9005499325582637113",
+      "country": "ベトナム",
+      "name": "NGUYEN DINH HUYNH",
+      "level": "N3",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 29,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8952978519469252645",
+      "country": "ネパール",
+      "name": "GAMAL SABITA",
+      "level": "N3",
+      "score": 102,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 25,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5698245162031745139",
+      "country": "バングラデシュ",
+      "name": "SHANTO MD MEHEDI HASAN",
+      "level": "N3",
+      "score": 102,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 33,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7559497504165706636",
+      "country": "バングラデシュ",
+      "name": "HOSSEN JABER",
+      "level": "N3",
+      "score": 80,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 27,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6209941694090782667",
+      "country": "バングラデシュ",
+      "name": "KHAN MD EMON",
+      "level": "N2",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 17,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3106983785501788886",
+      "country": "ネパール",
+      "name": "MAGAR SIMA",
+      "level": "N4",
+      "score": 120,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 79,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3695009080198742344",
+      "country": "バングラデシュ",
+      "name": "AHMED BULBUL",
+      "level": "N2",
+      "score": 62,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 7,
+        "reading": 16,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3094668894332128048",
+      "country": "バングラデシュ",
+      "name": "SOHAG MD ABU RAYHAN",
+      "level": "N3",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 22,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_312899675170860553",
+      "country": "ネパール",
+      "name": "PURI ANUSHA",
+      "level": "N3",
+      "score": 106,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 31,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6544709091140001947",
+      "country": "ネパール",
+      "name": "GURUNG YUG",
+      "level": "N2",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 17,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8736513061652805645",
+      "country": "バングラデシュ",
+      "name": "AKHAND MD RAJBIR",
+      "level": "N2",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 22,
+        "listening": 43
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4872238952398306857",
+      "country": "バングラデシュ",
+      "name": "HASAN MD FUAD",
+      "level": "N3",
+      "score": 64,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 17,
+        "listening": 26
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-423247777544445395",
+      "country": "中国",
+      "name": "ZHANG YEHAO",
+      "level": "N2",
+      "score": 51,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 15,
+        "reading": 5,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2985292344048068830",
+      "country": "ネパール",
+      "name": "KHADKA ROSHMA",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 21,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6913968714549530227",
+      "country": "バングラデシュ",
+      "name": "AHMED PARVEZ",
+      "level": "N2",
+      "score": 110,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 29,
+        "listening": 53
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7297962280351116529",
+      "country": "ネパール",
+      "name": "CHAUDHARY AARYAMAN",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 25,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1365244349622921179",
+      "country": "バングラデシュ",
+      "name": "AKASH MD",
+      "level": "N2",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 11,
+        "reading": 21,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3973630273201609964",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD EMRAN",
+      "level": "N2",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 17,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_470908086712091209",
+      "country": "バングラデシュ",
+      "name": "MAHIM AHAD BHUIYAN",
+      "level": "N3",
+      "score": 98,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 26,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3103488194639514603",
+      "country": "バングラデシュ",
+      "name": "JONAYET S M",
+      "level": "N2",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 18,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2658231091961812221",
+      "country": "バングラデシュ",
+      "name": "DAS DURJOY CHANDRA",
+      "level": "N3",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 23,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1501849712659856275",
+      "country": "ネパール",
+      "name": "SAH DHIRAJ",
+      "level": "N4",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 44,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5972979684971558104",
+      "country": "ネパール",
+      "name": "MATE DIPSHIKA",
+      "level": "N4",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 44,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1745699887278578958",
+      "country": "ミャンマー",
+      "name": "THEIN NAING WIN",
+      "level": "N3",
+      "score": 110,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 33,
+        "reading": 23,
+        "listening": 54
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1812913824600454303",
+      "country": "ミャンマー",
+      "name": "LAE YI HTUN",
+      "level": "N2",
+      "score": 65,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 13,
+        "reading": 17,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6513974551168921159",
+      "country": "ミャンマー",
+      "name": "NAY LIN OO",
+      "level": "N2",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 26,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3683112317480159845",
+      "country": "ミャンマー",
+      "name": "KAY ZIN OO",
+      "level": "N2",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 28,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-156381855569993450",
+      "country": "ネパール",
+      "name": "SHIWAKOTI KARISHMA",
+      "level": "N4",
+      "score": 122,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 72,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3096283005866080848",
+      "country": "バングラデシュ",
+      "name": "HOSSEN KAMAL",
+      "level": "N3",
+      "score": 99,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 22,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3476637528977950744",
+      "country": "ミャンマー",
+      "name": "ZUU YEE MOE",
+      "level": "N3",
+      "score": 100,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 35,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3041529968915803752",
+      "country": "ミャンマー",
+      "name": "SAI KWAN PHA",
+      "level": "N2",
+      "score": 98,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 25,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4039585308561896065",
+      "country": "ミャンマー",
+      "name": "KHAY MON CHAN",
+      "level": "N2",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 24,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5413463378431966631",
+      "country": "ネパール",
+      "name": "KHADKA SARASWOTI",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 18,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-205261777892104614",
+      "country": "ネパール",
+      "name": "CHAUDHARY SIRANJAN PRASAD",
+      "level": "N3",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 23,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1362649592863142101",
+      "country": "ネパール",
+      "name": "LAMA MAYA",
+      "level": "N3",
+      "score": 53,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 17,
+        "listening": 18
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_783679048652714784",
+      "country": "バングラデシュ",
+      "name": "HAQUE MD ISMAIL",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 30,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6492165187906717018",
+      "country": "バングラデシュ",
+      "name": "MIA MD RAYHAN",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 14,
+        "listening": 52
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2346513300140209488",
+      "country": "バングラデシュ",
+      "name": "AHOMMED SHAHIN",
+      "level": "N2",
+      "score": 45,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 10,
+        "reading": 8,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5102079484883782247",
+      "country": "バングラデシュ",
+      "name": "FAKIR SHAKIB",
+      "level": "N1",
+      "score": 180,
+      "result": "欠席(全時限欠席)",
+      "sectionScores": {
+        "vocab": 60,
+        "reading": 60,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3398275708303080398",
+      "country": "ミャンマー",
+      "name": "THU THU NYEIN",
+      "level": "N2",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 46,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-834755400082573367",
+      "country": "ミャンマー",
+      "name": "THURA PHYO",
+      "level": "N2",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 35,
+        "reading": 30,
+        "listening": 49
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3194078678575518282",
+      "country": "バングラデシュ",
+      "name": "TUSAR RAGIB SHAHRIAR",
+      "level": "N2",
+      "score": 84,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 26,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2716427410191178027",
+      "country": "バングラデシュ",
+      "name": "ANID MD MASHAYEL KHAN",
+      "level": "N2",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 55,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3294980019970863945",
+      "country": "バングラデシュ",
+      "name": "HOSAIN ARIF",
+      "level": "N2",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 15,
+        "reading": 25,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1726671003150546315",
+      "country": "バングラデシュ",
+      "name": "MIA SAJID",
+      "level": "N3",
+      "score": 64,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 24,
+        "listening": 21
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5977123476937811433",
+      "country": "ミャンマー",
+      "name": "HNIN YU HLAING",
+      "level": "N2",
+      "score": 107,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 23,
+        "listening": 52
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1099346996216677207",
+      "country": "バングラデシュ",
+      "name": "KADER MD ABDUL",
+      "level": "N3",
+      "score": 63,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 23,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8608509765618441695",
+      "country": "ネパール",
+      "name": "SHRESTHA JUKTA",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 22,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6194151493752252608",
+      "country": "バングラデシュ",
+      "name": "AZAD ABUL KALAM",
+      "level": "N3",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 33,
+        "listening": 25
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2329992429755276931",
+      "country": "バングラデシュ",
+      "name": "AHMED MD TANBIR",
+      "level": "N3",
+      "score": 85,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 18,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2448515274352739283",
+      "country": "バングラデシュ",
+      "name": "ASIKUZZAMAN MD",
+      "level": "N2",
+      "score": 100,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 22,
+        "listening": 57
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6045542939353456548",
+      "country": "バングラデシュ",
+      "name": "AHMED MD TANVIR",
+      "level": "N3",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 12,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6798912516486786225",
+      "country": "ネパール",
+      "name": "TAMANG SRISTINA",
+      "level": "N4",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 47,
+        "listening": 26
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8300223680659400883",
+      "country": "ネパール",
+      "name": "KHADKA YOGENDRA",
+      "level": "N3",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 17,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2512925557575672343",
+      "country": "ネパール",
+      "name": "PAHADI GANESH PRASAD",
+      "level": "N3",
+      "score": 51,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 15,
+        "reading": 3,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7428785783414098933",
+      "country": "ネパール",
+      "name": "CHAUDHARY RAJESH",
+      "level": "N4",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 49,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1902553597528599958",
+      "country": "バングラデシュ",
+      "name": "FAHAD TAZNUR AHAMED",
+      "level": "N2",
+      "score": 108,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 46,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2830087166759801992",
+      "country": "バングラデシュ",
+      "name": "SAEM MD",
+      "level": "N2",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 16,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_545711683198243614",
+      "country": "ネパール",
+      "name": "GURUNG MANISH",
+      "level": "N2",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 22,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-478506628744761412",
+      "country": "ネパール",
+      "name": "THAPA AAKRITI",
+      "level": "N2",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 21,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1563767856146065215",
+      "country": "バングラデシュ",
+      "name": "SAGAR NUR UDDIN",
+      "level": "N2",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 31,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5599114934288504065",
+      "country": "ネパール",
+      "name": "SAPKOTA SUNDAR",
+      "level": "N3",
+      "score": 103,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 38,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7896873433534970073",
+      "country": "ネパール",
+      "name": "ACHARYA NARAYAN PRASAD",
+      "level": "N3",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 30,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1691791562081264884",
+      "country": "ネパール",
+      "name": "SAPKOTA UGESH",
+      "level": "N4",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 47,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7251526888415740445",
+      "country": "バングラデシュ",
+      "name": "MIA MD HASAN",
+      "level": "N3",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 19,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6704405602227297083",
+      "country": "バングラデシュ",
+      "name": "MIRAZ MINHAZ HOSSAIN",
+      "level": "N3",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 22,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7500768271499749361",
+      "country": "ネパール",
+      "name": "SHRESTHA AASHISH",
+      "level": "N3",
+      "score": 120,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 34,
+        "reading": 26,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6405783133100900340",
+      "country": "バングラデシュ",
+      "name": "ROBIUL MD",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 35,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_532474706849598725",
+      "country": "バングラデシュ",
+      "name": "CHOWDHURY TANVIR AHMED",
+      "level": "N3",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 22,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3011238013891423704",
+      "country": "ネパール",
+      "name": "KANDEL KABITA",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 32,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7368565213950844350",
+      "country": "バングラデシュ",
+      "name": "MITHU AL MAHAFUZUR RAHMAN",
+      "level": "N3",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 23,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8442961564583146023",
+      "country": "ネパール",
+      "name": "PUDASAINI SITA",
+      "level": "N2",
+      "score": 102,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 21,
+        "listening": 53
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8411211562880382809",
+      "country": "バングラデシュ",
+      "name": "LIMON MD SAKIBUL HAQ",
+      "level": "N1",
+      "score": 92,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 22,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3276950744963620978",
+      "country": "ネパール",
+      "name": "BHUL NARESH",
+      "level": "N3",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 26,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6676042233554144234",
+      "country": "ネパール",
+      "name": "KAFLE GAURAB",
+      "level": "N3",
+      "score": 72,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 13,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5022357326254368718",
+      "country": "バングラデシュ",
+      "name": "SHIHAB MOTIUR RAHMAN",
+      "level": "N1",
+      "score": 57,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 5,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_331553865104867288",
+      "country": "中国",
+      "name": "XU ZHANGSHUAI",
+      "level": "N2",
+      "score": 69,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 21,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5626232118030559056",
+      "country": "中国",
+      "name": "YU TENGJIE",
+      "level": "N2",
+      "score": 80,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 25,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8307828434015736886",
+      "country": "ネパール",
+      "name": "DARAI DURGA BAHADUR",
+      "level": "N3",
+      "score": 107,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 21,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4612290210038761808",
+      "country": "ネパール",
+      "name": "CHAUDHARY RAJ KUMAR",
+      "level": "N3",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 22,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7795256048576852482",
+      "country": "ネパール",
+      "name": "BHUJEL YAMUNA",
+      "level": "N2",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 31,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6823934723859470980",
+      "country": "ネパール",
+      "name": "GURUNG YUNA",
+      "level": "N3",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 26,
+        "listening": 23
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8385884398740875541",
+      "country": "ネパール",
+      "name": "TAMANG ALISHA",
+      "level": "N2",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 32,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5854841045639393068",
+      "country": "ネパール",
+      "name": "SHRESTHA BHUWAN",
+      "level": "N2",
+      "score": 71,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 14,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6343142669312450123",
+      "country": "バングラデシュ",
+      "name": "UDOY MD",
+      "level": "N2",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 20,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-822354712103846228",
+      "country": "ネパール",
+      "name": "GAIRE SUNAM",
+      "level": "N4",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 56,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-9002164395670352588",
+      "country": "バングラデシュ",
+      "name": "HAQUE MD NAJMUL",
+      "level": "N3",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 23,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2319544960868403996",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD YEASIN",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 22,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6637161806588308607",
+      "country": "バングラデシュ",
+      "name": "SADI AL AMIN AL",
+      "level": "N1",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 26,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1924646014298354362",
+      "country": "バングラデシュ",
+      "name": "MAHBUB",
+      "level": "N2",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 17,
+        "reading": 24,
+        "listening": 47
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8550232659021883407",
+      "country": "ネパール",
+      "name": "TAMANG RAMESH",
+      "level": "N3",
+      "score": 52,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 18,
+        "reading": 17,
+        "listening": 17
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4447710585309167828",
+      "country": "ネパール",
+      "name": "RANA GITA KUMARI",
+      "level": "N2",
+      "score": 59,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 17,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5080541629717333648",
+      "country": "ネパール",
+      "name": "DAHAL MANISHA",
+      "level": "N2",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 14,
+        "reading": 24,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5974567990533333215",
+      "country": "ネパール",
+      "name": "KHADKA MANOJ",
+      "level": "N3",
+      "score": 123,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 40,
+        "reading": 32,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4023330796960831009",
+      "country": "バングラデシュ",
+      "name": "AWAL MD",
+      "level": "N3",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 16,
+        "reading": 28,
+        "listening": 23
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3659231512893393083",
+      "country": "バングラデシュ",
+      "name": "RIFAT MD MAHFUJUR RAHMAN",
+      "level": "N3",
+      "score": 106,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 30,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-982272703768626927",
+      "country": "バングラデシュ",
+      "name": "BHUIYAN MD OMAR",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 33,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1074049030931708291",
+      "country": "バングラデシュ",
+      "name": "ISLAM MD MONIRUL",
+      "level": "N3",
+      "score": 66,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 19,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2632095974705818537",
+      "country": "バングラデシュ",
+      "name": "ALI MD KOWSAR",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 27,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1151200896426767435",
+      "country": "ネパール",
+      "name": "GURUNG ASH BAHADUR",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 26,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_647817716875787754",
+      "country": "バングラデシュ",
+      "name": "BHOWMIK JOY",
+      "level": "N4",
+      "score": 85,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 51,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1661970360164218561",
+      "country": "バングラデシュ",
+      "name": "AHAMED MD ASHIK",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 29,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4257109690612195164",
+      "country": "ネパール",
+      "name": "GOLE PAWAN",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 26,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3931836283272211838",
+      "country": "バングラデシュ",
+      "name": "ABDULLAH KM",
+      "level": "N3",
+      "score": 141,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 39,
+        "reading": 42,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4434040099915018994",
+      "country": "バングラデシュ",
+      "name": "AKTER MST SAMIA",
+      "level": "N2",
+      "score": 60,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 13,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_319502185905328095",
+      "country": "ネパール",
+      "name": "BOHARA SAMEER",
+      "level": "N3",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 19,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8488814070779606536",
+      "country": "ネパール",
+      "name": "POUDEL MANISH",
+      "level": "N3",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 26,
+        "listening": 20
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5363129677237971669",
+      "country": "バングラデシュ",
+      "name": "MIA MD SABUZ",
+      "level": "N2",
+      "score": 67,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 12,
+        "reading": 25,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_3482980559613820952",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD SHAMIR",
+      "level": "N3",
+      "score": 78,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 17,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7112502687134667968",
+      "country": "バングラデシュ",
+      "name": "KARIM FAHIM",
+      "level": "N3",
+      "score": 112,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 43,
+        "reading": 32,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4887654621284753026",
+      "country": "パキスタン",
+      "name": "BUTT SHABAN RAFIQUE",
+      "level": "N4",
+      "score": 92,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 59,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6504577510343483782",
+      "country": "バングラデシュ",
+      "name": "RONY MD MAHMUD HASAN",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 24,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6869644312127315465",
+      "country": "バングラデシュ",
+      "name": "UDDIN MD MIRAJ",
+      "level": "N3",
+      "score": 82,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 26,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1405863586510523322",
+      "country": "バングラデシュ",
+      "name": "HOSSEN MD KABIR",
+      "level": "N3",
+      "score": 90,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 27,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4886719011403954351",
+      "country": "バングラデシュ",
+      "name": "HASNAIN MD",
+      "level": "N3",
+      "score": 81,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 22,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3483558642271047037",
+      "country": "バングラデシュ",
+      "name": "HOSSIN MD GIHAD",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 32,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_513416332961209653",
+      "country": "バングラデシュ",
+      "name": "KHAN MD TAREKUL ISLAM",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 24,
+        "reading": 30,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8964202471279263967",
+      "country": "バングラデシュ",
+      "name": "HASAN MD SHEHAB",
+      "level": "N3",
+      "score": 61,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 20,
+        "listening": 19
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7843603769233456885",
+      "country": "ネパール",
+      "name": "SHRESTHA KUSHAL",
+      "level": "N3",
+      "score": 61,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 17,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1839654937839430404",
+      "country": "ネパール",
+      "name": "GURUNG SUJAN",
+      "level": "N3",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 28,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6275291280514754213",
+      "country": "バングラデシュ",
+      "name": "MIAH SALMAN",
+      "level": "N3",
+      "score": 101,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 37,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8023629133673239330",
+      "country": "ネパール",
+      "name": "BASNET NABINA",
+      "level": "N4",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 43,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4912181412634874377",
+      "country": "ネパール",
+      "name": "TAMANG PABITRA",
+      "level": "N3",
+      "score": 128,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 40,
+        "reading": 30,
+        "listening": 58
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2930116450593575646",
+      "country": "バングラデシュ",
+      "name": "DEWAN AKMOL HOSSAIN",
+      "level": "N3",
+      "score": 76,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 22,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-559839525676937022",
+      "country": "バングラデシュ",
+      "name": "SIKDER JAMIL",
+      "level": "N3",
+      "score": 92,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 26,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6897116013486543146",
+      "country": "ネパール",
+      "name": "THAPA SUDIP",
+      "level": "N3",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 34,
+        "reading": 25,
+        "listening": 55
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8502573957793197896",
+      "country": "ネパール",
+      "name": "KABIRATH SUMAN",
+      "level": "N4",
+      "score": 92,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 58,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7500768271499749361",
+      "country": "ネパール",
+      "name": "SHRESTHA AASHISH",
+      "level": "N4",
+      "score": 108,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 75,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2763512534706640706",
+      "country": "ネパール",
+      "name": "KARKI PRAKASH",
+      "level": "N4",
+      "score": 64,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 42,
+        "listening": 22
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2623985744868991735",
+      "country": "中国",
+      "name": "LIU XIAOCONG",
+      "level": "N1",
+      "score": 73,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 16,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5946311345483008525",
+      "country": "バングラデシュ",
+      "name": "HASAN MD SHAKIB",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 24,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5203719871247313450",
+      "country": "ネパール",
+      "name": "MAGAJU ISHWOR",
+      "level": "N3",
+      "score": 119,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 41,
+        "reading": 28,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6263646066171562025",
+      "country": "バングラデシュ",
+      "name": "ISLAM NAZMUL",
+      "level": "N3",
+      "score": 85,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 22,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7220055496422589206",
+      "country": "バングラデシュ",
+      "name": "RAFI MD RASEL ISLAM",
+      "level": "N3",
+      "score": 100,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 40,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-823550424856076816",
+      "country": "ネパール",
+      "name": "THAPA DIPENDRA",
+      "level": "N4",
+      "score": 136,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 101,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8813144043615318774",
+      "country": "ネパール",
+      "name": "NAYAJU AADITYA",
+      "level": "N4",
+      "score": 115,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 79,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2892360118903390452",
+      "country": "ネパール",
+      "name": "KHATRI NABIN",
+      "level": "N4",
+      "score": 134,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 90,
+        "listening": 44
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6663537871388775221",
+      "country": "バングラデシュ",
+      "name": "MONDAL SHIPRA",
+      "level": "N3",
+      "score": 68,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 14,
+        "listening": 31
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8220868328003188158",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN RIMON",
+      "level": "N3",
+      "score": 83,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 22,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8842358755842444253",
+      "country": "バングラデシュ",
+      "name": "NOMAN ABDULLA AL",
+      "level": "N3",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 20,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5052162152420479049",
+      "country": "バングラデシュ",
+      "name": "MIA MD SHIMUL",
+      "level": "N3",
+      "score": 69,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 14,
+        "listening": 32
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3530687177067319949",
+      "country": "ネパール",
+      "name": "KHAND SAMIR",
+      "level": "N3",
+      "score": 75,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 28,
+        "reading": 18,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6193501162985912248",
+      "country": "ネパール",
+      "name": "LAMICHHANE SRIJAN",
+      "level": "N3",
+      "score": 123,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 40,
+        "reading": 35,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3582396052413739754",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN FAHAD",
+      "level": "N3",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 23,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-328015602642557021",
+      "country": "中国",
+      "name": "ZHANG JINGE",
+      "level": "N2",
+      "score": 131,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 40,
+        "reading": 58,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2662516045406146077",
+      "country": "ミャンマー",
+      "name": "SAN SAN NWE",
+      "level": "N2",
+      "score": 105,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 36,
+        "reading": 34,
+        "listening": 35
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-444366177191206773",
+      "country": "ネパール",
+      "name": "NEPALI SUNIL",
+      "level": "N3",
+      "score": 118,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 32,
+        "listening": 56
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6424044631327176993",
+      "country": "ネパール",
+      "name": "GURUNG SOHIT",
+      "level": "N3",
+      "score": 118,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 38,
+        "reading": 32,
+        "listening": 48
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-1246902658378165683",
+      "country": "中国",
+      "name": "WANG ZIHAO",
+      "level": "N2",
+      "score": 131,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 43,
+        "reading": 46,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_4401023710181813279",
+      "country": "ミャンマー",
+      "name": "AUNG THU HEIN",
+      "level": "N3",
+      "score": 126,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 51,
+        "reading": 35,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5220091198083704340",
+      "country": "バングラデシュ",
+      "name": "DEBNATH ROBIN",
+      "level": "N3",
+      "score": 107,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 36,
+        "reading": 29,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5682038611419071626",
+      "country": "バングラデシュ",
+      "name": "TANVIR MOHIUDDIN",
+      "level": "N3",
+      "score": 89,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 23,
+        "reading": 26,
+        "listening": 40
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1724499324186259682",
+      "country": "バングラデシュ",
+      "name": "MRIDHA MD SANVIR",
+      "level": "N3",
+      "score": 96,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 29,
+        "reading": 26,
+        "listening": 41
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8733623392326112517",
+      "country": "ミャンマー",
+      "name": "TUN HLAING WIN",
+      "level": "N3",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 31,
+        "reading": 33,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-7547855946721555298",
+      "country": "バングラデシュ",
+      "name": "DEWAN SADI",
+      "level": "N4",
+      "score": 147,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 96,
+        "listening": 51
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-528963078894052908",
+      "country": "ネパール",
+      "name": "KARKI MANITA",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 22,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_1549235881354719463",
+      "country": "バングラデシュ",
+      "name": "SULTANA SADIA",
+      "level": "N4",
+      "score": 91,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 57,
+        "listening": 34
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2404859177700854906",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD SHUAYEEB",
+      "level": "N3",
+      "score": 70,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 19,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_701060625282816507",
+      "country": "ネパール",
+      "name": "KINGRING MAGAR MANILA",
+      "level": "N3",
+      "score": 97,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 29,
+        "listening": 42
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2376609702387496222",
+      "country": "ネパール",
+      "name": "THARU MAMATA",
+      "level": "N4",
+      "score": 63,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 34,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_39098051949052091",
+      "country": "バングラデシュ",
+      "name": "MIDUL ASHADUZZAMAN",
+      "level": "N3",
+      "score": 60,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 12,
+        "listening": 26
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5979183662069996981",
+      "country": "ネパール",
+      "name": "TIWARI BALKRISHNA",
+      "level": "N4",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 61,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-2199111427049431505",
+      "country": "バングラデシュ",
+      "name": "ORION KAZI MASHRUR HOSSAIN",
+      "level": "N3",
+      "score": 114,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 37,
+        "reading": 31,
+        "listening": 46
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3083042016141673734",
+      "country": "中国",
+      "name": "LI XIAOJUN",
+      "level": "N2",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 29,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-5299701022055664554",
+      "country": "中国",
+      "name": "ZHANG YUHAO",
+      "level": "N2",
+      "score": 77,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 19,
+        "reading": 28,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_9112472387289648787",
+      "country": "ネパール",
+      "name": "GAUTAM LAXMI",
+      "level": "N3",
+      "score": 95,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 34,
+        "reading": 24,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7906720983168162907",
+      "country": "ネパール",
+      "name": "CHAPAGAIN HARIKALA",
+      "level": "N3",
+      "score": 80,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 24,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_5252852867332921112",
+      "country": "バングラデシュ",
+      "name": "MAHMUD SOUMIN",
+      "level": "N2",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 26,
+        "reading": 23,
+        "listening": 39
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_9054195322846365859",
+      "country": "バングラデシュ",
+      "name": "HASAN MD RATUL",
+      "level": "N3",
+      "score": 91,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 22,
+        "listening": 37
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "2107002",
+      "country": "中国",
+      "name": "GU TIANHAO",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 32,
+        "listening": 28
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-8085377326773889500",
+      "country": "バングラデシュ",
+      "name": "KIRTTUNIA SUDIP",
+      "level": "N3",
+      "score": 86,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 28,
+        "listening": 36
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_9185383684970561226",
+      "country": "バングラデシュ",
+      "name": "MOLLA MD SHADHIN",
+      "level": "N3",
+      "score": 54,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 20,
+        "reading": 7,
+        "listening": 27
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-4892232468566345626",
+      "country": "バングラデシュ",
+      "name": "MIAH MD ARIF",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 19,
+        "listening": 30
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_7541436997172561806",
+      "country": "バングラデシュ",
+      "name": "KHAN MD RATUL",
+      "level": "N3",
+      "score": 88,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 22,
+        "reading": 16,
+        "listening": 50
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-675784894271890516",
+      "country": "中国",
+      "name": "SITEGELEDUREN",
+      "level": "N3",
+      "score": 79,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 27,
+        "reading": 31,
+        "listening": 21
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_234137272366330605",
+      "country": "中国",
+      "name": "ZHANG WENZHE",
+      "level": "N2",
+      "score": 101,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 35,
+        "reading": 28,
+        "listening": 38
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_2987998202848173022",
+      "country": "中国",
+      "name": "YU RUIYU",
+      "level": "N3",
+      "score": 87,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 30,
+        "reading": 28,
+        "listening": 29
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_6343104107400913885",
+      "country": "ネパール",
+      "name": "RANA RAJINA",
+      "level": "N3",
+      "score": 116,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 32,
+        "reading": 24,
+        "listening": 60
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-3973630273201609964",
+      "country": "バングラデシュ",
+      "name": "HOSSAIN MD EMRAN",
+      "level": "N3",
+      "score": 74,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 25,
+        "reading": 16,
+        "listening": 33
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_-6325327817608606364",
+      "country": "ネパール",
+      "name": "MAGAR SABITA",
+      "level": "N3",
+      "score": 64,
+      "result": "不合格",
+      "sectionScores": {
+        "vocab": 21,
+        "reading": 19,
+        "listening": 24
+      }
+    },
+    {
+      "session": "2025年第2回",
+      "studentId": "UNKNOWN_8703124792950608148",
+      "country": "ネパール",
+      "name": "BASYAL NIRUTA",
+      "level": "N3",
+      "score": 119,
+      "result": "合格",
+      "sectionScores": {
+        "vocab": 35,
+        "reading": 24,
+        "listening": 60
+      }
     }
   ]
 }
