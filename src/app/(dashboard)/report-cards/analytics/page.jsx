@@ -681,117 +681,164 @@ export default function AnalyticsPage() {
         })
     }
 
-    const sortedFilteredGrades = getSortedGrades()
+    // Memoize Sorted Grades
+    const sortedFilteredGrades = useMemo(() => {
+        return [...rankedGrades].sort((a, b) => { // Create a copy before sorting
+            const { key, direction } = sortConfig
+            const modifier = direction === 'asc' ? 1 : -1
 
-    // Reordered: Low Score (F) -> High Score (A)
-    // Reordered: Low Score (F) -> High Score (A)
-    const gradeDistribution = {
-        labels: ['F (0-49)', 'D (50-59)', 'C (60-69)', 'B (70-79)', 'A (80-100)'],
-        datasets: [{
-            label: '人数',
-            data: [0, 0, 0, 0, 0],
-            backgroundColor: [
-                'rgba(239, 68, 68, 0.6)',   // F - Red
-                'rgba(249, 115, 22, 0.6)',  // D - Orange
-                'rgba(250, 204, 21, 0.6)',  // C - Yellow
-                'rgba(59, 130, 246, 0.6)',  // B - Blue
-                'rgba(34, 197, 94, 0.6)',   // A - Green
-            ],
-            borderWidth: 1,
-        }],
-    }
-
-    // New: Final Exam Total Score Distribution (600 points max)
-    const finalExamDistribution = {
-        labels: ['0-299', '300-399', '400-499', '500-600'],
-        datasets: [{
-            label: '人数',
-            data: [0, 0, 0, 0],
-            backgroundColor: 'rgba(99, 102, 241, 0.6)',
-            borderWidth: 1,
-        }]
-    }
-
-    // New: Final Exam Rating Distribution (A-F based on 600 scale)
-    const finalGradeDistribution = {
-        labels: ['F (0-119)', 'D (120-239)', 'C (240-359)', 'B (360-479)', 'A (480-600)'],
-        datasets: [{
-            label: '人数',
-            data: [0, 0, 0, 0, 0],
-            backgroundColor: [
-                'rgba(239, 68, 68, 0.6)',   // F
-                'rgba(249, 115, 22, 0.6)',  // D
-                'rgba(250, 204, 21, 0.6)',  // C
-                'rgba(59, 130, 246, 0.6)',  // B
-                'rgba(34, 197, 94, 0.6)',   // A
-            ],
-            borderWidth: 1,
-        }]
-    }
-
-    filteredGrades.forEach(g => {
-        // Grade Distribution (Report Card Total)
-        const score = g.report_card_total || 0
-        if (score >= 80) gradeDistribution.datasets[0].data[4]++      // A -> Index 4
-        else if (score >= 70) gradeDistribution.datasets[0].data[3]++ // B -> Index 3
-        else if (score >= 60) gradeDistribution.datasets[0].data[2]++ // C -> Index 2
-        else if (score >= 50) gradeDistribution.datasets[0].data[1]++ // D -> Index 1
-        else gradeDistribution.datasets[0].data[0]++                  // F -> Index 0
-
-        // Final Exam Distribution
-        if (g.final_exam_data) {
-            const scores = Object.values(g.final_exam_data)
-            const total = scores.reduce((a, b) => a + (parseFloat(b) || 0), 0)
-
-            // Range distribution
-            if (total >= 500) finalExamDistribution.datasets[0].data[3]++
-            else if (total >= 400) finalExamDistribution.datasets[0].data[2]++
-            else if (total >= 300) finalExamDistribution.datasets[0].data[1]++
-            else finalExamDistribution.datasets[0].data[0]++
-
-            // Grade distribution (A-F)
-            if (total >= 480) finalGradeDistribution.datasets[0].data[4]++
-            else if (total >= 360) finalGradeDistribution.datasets[0].data[3]++
-            else if (total >= 240) finalGradeDistribution.datasets[0].data[2]++
-            else if (total >= 120) finalGradeDistribution.datasets[0].data[1]++
-            else finalGradeDistribution.datasets[0].data[0]++
-        }
-    })
-
-    const subjectTotals = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
-    const subjectCounts = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
-
-    filteredGrades.forEach(g => {
-        // Use final_exam_data for subject averages
-        if (g.final_exam_data) {
-            Object.keys(subjectTotals).forEach(subj => {
-                // Ensure key exists in final_exam_data
-                const val = parseFloat(g.final_exam_data[subj])
-                if (!isNaN(val)) {
-                    subjectTotals[subj] += val
-                    subjectCounts[subj]++
+            const getVal = (item, k) => {
+                switch (k) {
+                    case 'rank': return item.originalRank || 9999
+                    case 'final_total':
+                        return item.final_exam_data
+                            ? Object.values(item.final_exam_data).reduce((acc, v) => acc + (parseFloat(v) || 0), 0)
+                            : 0
+                    case 'student_id': return item.student_id ? String(item.student_id) : ''
+                    case 'class_name': return item.class_name ? String(item.class_name) : ''
+                    case 'name': return item.student_name ? String(item.student_name) : ''
+                    case 'report_total': return item.report_card_total || 0
+                    case 'attendance': return parseFloat(item.report_card_data?.attendance || 0)
+                    case 'participation': return parseFloat(item.report_card_data?.participation || 0)
+                    case 'vocab': return parseFloat(item.final_exam_data?.vocab || 0)
+                    case 'listening': return parseFloat(item.final_exam_data?.listening || 0)
+                    case 'reading': return parseFloat(item.final_exam_data?.reading || 0)
+                    case 'grammar': return parseFloat(item.final_exam_data?.grammar || 0)
+                    case 'writing': return parseFloat(item.final_exam_data?.writing || 0)
+                    case 'conversation': return parseFloat(item.final_exam_data?.conversation || 0)
+                    default: return 0
                 }
-            })
-        }
-    })
+            }
 
-    const subjectAverages = {
-        labels: ['文字・語彙', '読解', '聴解', '文法', '作文', '会話'],
-        datasets: [{
-            label: '平均点',
-            data: [
-                subjectCounts.vocab ? (subjectTotals.vocab / subjectCounts.vocab).toFixed(1) : 0,
-                subjectCounts.reading ? (subjectTotals.reading / subjectCounts.reading).toFixed(1) : 0,
-                subjectCounts.listening ? (subjectTotals.listening / subjectCounts.listening).toFixed(1) : 0,
-                subjectCounts.grammar ? (subjectTotals.grammar / subjectCounts.grammar).toFixed(1) : 0,
-                subjectCounts.writing ? (subjectTotals.writing / subjectCounts.writing).toFixed(1) : 0,
-                subjectCounts.conversation ? (subjectTotals.conversation / subjectCounts.conversation).toFixed(1) : 0,
-            ],
-            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-        }]
-    }
+            const valA = getVal(a, key)
+            const valB = getVal(b, key)
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                return valA.localeCompare(valB) * modifier
+            }
+            return (valA - valB) * modifier
+        })
+    }, [rankedGrades, sortConfig])
+
+    // Pagination for Grades Table (Performance Optimization)
+    const [page, setPage] = useState(1);
+    const ROWS_PER_PAGE = 50;
+    const paginatedGrades = useMemo(() => {
+        const start = (page - 1) * ROWS_PER_PAGE;
+        return sortedFilteredGrades.slice(start, start + ROWS_PER_PAGE);
+    }, [sortedFilteredGrades, page]);
+
+    const totalPages = Math.ceil(sortedFilteredGrades.length / ROWS_PER_PAGE);
+
+    // Reset page when filter changes
+    useEffect(() => {
+        setPage(1);
+    }, [filteredGrades.length, sortConfig]);
+
+    // --- Grade Analytics Processing ---
+    // Memoize Distribution Calculations
+    const { gradeDistribution, finalExamDistribution, finalGradeDistribution, subjectAverages } = useMemo(() => {
+        // Reordered: Low Score (F) -> High Score (A)
+        const gDist = {
+            labels: ['F (0-49)', 'D (50-59)', 'C (60-69)', 'B (70-79)', 'A (80-100)'],
+            datasets: [{
+                label: '人数',
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.6)',   // F - Red
+                    'rgba(249, 115, 22, 0.6)',  // D - Orange
+                    'rgba(250, 204, 21, 0.6)',  // C - Yellow
+                    'rgba(59, 130, 246, 0.6)',  // B - Blue
+                    'rgba(34, 197, 94, 0.6)',   // A - Green
+                ],
+                borderWidth: 1,
+            }],
+        }
+
+        const fExamDist = {
+            labels: ['0-299', '300-399', '400-499', '500-600'],
+            datasets: [{
+                label: '人数',
+                data: [0, 0, 0, 0],
+                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                borderWidth: 1,
+            }]
+        }
+
+        const fGradeDist = {
+            labels: ['F (0-119)', 'D (120-239)', 'C (240-359)', 'B (360-479)', 'A (480-600)'],
+            datasets: [{
+                label: '人数',
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.6)', 'rgba(249, 115, 22, 0.6)', 'rgba(250, 204, 21, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(34, 197, 94, 0.6)',
+                ],
+                borderWidth: 1,
+            }]
+        }
+
+        const sTotals = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
+        const sCounts = { vocab: 0, reading: 0, listening: 0, grammar: 0, writing: 0, conversation: 0 }
+
+        filteredGrades.forEach(g => {
+            // Grade Distribution
+            const score = g.report_card_total || 0
+            if (score >= 80) gDist.datasets[0].data[4]++
+            else if (score >= 70) gDist.datasets[0].data[3]++
+            else if (score >= 60) gDist.datasets[0].data[2]++
+            else if (score >= 50) gDist.datasets[0].data[1]++
+            else gDist.datasets[0].data[0]++
+
+            if (g.final_exam_data) {
+                const scores = Object.values(g.final_exam_data)
+                const total = scores.reduce((a, b) => a + (parseFloat(b) || 0), 0)
+
+                // Range
+                if (total >= 500) fExamDist.datasets[0].data[3]++
+                else if (total >= 400) fExamDist.datasets[0].data[2]++
+                else if (total >= 300) fExamDist.datasets[0].data[1]++
+                else fExamDist.datasets[0].data[0]++
+
+                // Grade
+                if (total >= 480) fGradeDist.datasets[0].data[4]++
+                else if (total >= 360) fGradeDist.datasets[0].data[3]++
+                else if (total >= 240) fGradeDist.datasets[0].data[2]++
+                else if (total >= 120) fGradeDist.datasets[0].data[1]++
+                else fGradeDist.datasets[0].data[0]++
+
+                // Subjects
+                Object.keys(sTotals).forEach(subj => {
+                    const val = parseFloat(g.final_exam_data[subj])
+                    if (!isNaN(val)) {
+                        sTotals[subj] += val
+                        sCounts[subj]++
+                    }
+                })
+            }
+        })
+
+        const sAverages = {
+            labels: ['文字・語彙', '読解', '聴解', '文法', '作文', '会話'],
+            datasets: [{
+                label: '平均点',
+                data: [
+                    sCounts.vocab ? (sTotals.vocab / sCounts.vocab).toFixed(1) : 0,
+                    sCounts.reading ? (sTotals.reading / sCounts.reading).toFixed(1) : 0,
+                    sCounts.listening ? (sTotals.listening / sCounts.listening).toFixed(1) : 0,
+                    sCounts.grammar ? (sTotals.grammar / sCounts.grammar).toFixed(1) : 0,
+                    sCounts.writing ? (sTotals.writing / sCounts.writing).toFixed(1) : 0,
+                    sCounts.conversation ? (sTotals.conversation / sCounts.conversation).toFixed(1) : 0,
+                ],
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            }]
+        }
+
+        return { gradeDistribution: gDist, finalExamDistribution: fExamDist, finalGradeDistribution: fGradeDist, subjectAverages: sAverages }
+    }, [filteredGrades])
+
 
     // --- JLPT Analytics Processing ---
+
     const totalJlptExaminees = jlptData.reduce((acc, curr) => acc + (curr.examinees || 0), 0)
     const totalJlptPassers = jlptData.reduce((acc, curr) => acc + (curr.passers || 0), 0)
     const overallJlptPassRate = totalJlptExaminees > 0 ? ((totalJlptPassers / totalJlptExaminees) * 100).toFixed(1) : 0
@@ -920,10 +967,10 @@ export default function AnalyticsPage() {
 
     if (loadingGrades && loadingJlpt) {
         return (
-            <div className={styles.loadingContainer}>
+            <div className={styles.loadingContainer} >
                 <div className="spinner"></div>
                 <p>データを読み込んでいます...</p>
-            </div>
+            </div >
         )
     }
 
@@ -1128,7 +1175,7 @@ export default function AnalyticsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sortedFilteredGrades.map((student, index) => {
+                                    {paginatedGrades.map((student, index) => {
                                         const finalTotal = student.final_exam_data
                                             ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0)
                                             : 0
@@ -1201,6 +1248,29 @@ export default function AnalyticsPage() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                                <button
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                    style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #d1d5db', backgroundColor: page === 1 ? '#f3f4f6' : 'white', cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                                >
+                                    前のページ
+                                </button>
+                                <span style={{ fontSize: '14px', color: '#374151' }}>
+                                    {page} / {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                    style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #d1d5db', backgroundColor: page === totalPages ? '#f3f4f6' : 'white', cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
+                                >
+                                    次のページ
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </>
             )}
