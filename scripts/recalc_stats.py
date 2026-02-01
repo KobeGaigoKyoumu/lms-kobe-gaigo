@@ -189,6 +189,25 @@ for s in graduates:
     #     "level": level
     # })
 
+# Force include 2026年3月 (2025 FY) if not present
+if "2026年3月" not in stats_by_year:
+    stats_by_year["2026年3月"] = {
+        "year": "2026年3月",
+        "graduation_date": "2026年3月",
+        "total_graduates": 0,
+        "total": 0,
+        "matched": 0,
+        "n3_plus": 0,
+        "n3_or_higher": 0,
+        "rate": 0,
+        "matched_with_jlpt": 0,
+        "match_rate": 0,
+        "kanji_stats": {"total": 0, "n3_plus": 0, "rate": 0},
+        "non_kanji_stats": {"total": 0, "n3_plus": 0, "rate": 0},
+        "students": [],
+        "n3_pass_rate": 0.0 # Initialize for summary loop consistency expectation
+    }
+
 # Output Summary
 total_processed = 0
 year_keys = sorted(stats_by_year.keys())

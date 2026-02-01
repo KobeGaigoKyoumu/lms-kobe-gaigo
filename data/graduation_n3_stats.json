@@ -160,6 +160,29 @@
         "rate": 65.53191489361701
       },
       "n3_pass_rate": 65.2
+    },
+    {
+      "year": "2026年3月",
+      "graduation_date": "2026年3月",
+      "total_graduates": 0,
+      "total": 0,
+      "matched": 0,
+      "n3_plus": 0,
+      "n3_or_higher": 0,
+      "rate": 0,
+      "matched_with_jlpt": 0,
+      "match_rate": 0,
+      "kanji_stats": {
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0
+      },
+      "non_kanji_stats": {
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0
+      },
+      "n3_pass_rate": 0
     }
   ],
   "summary": {
