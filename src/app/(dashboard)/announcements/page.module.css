@@ -410,3 +410,10 @@
     color: var(--text-tertiary);
     font-style: italic;
 }
+ . s e n d e r N a m e   { 
+         c o l o r :   v a r ( - - t e x t - t e r t i a r y ) ; 
+         f o n t - s i z e :   v a r ( - - f o n t - s i z e - x s ) ; 
+         m a r g i n - l e f t :   v a r ( - - s p a c i n g - 1 ) ; 
+         f o n t - s t y l e :   i t a l i c ; 
+ }  
+ 
