@@ -150,7 +150,7 @@ export default async function StudentDashboard() {
                         </svg>
                     </div>
                     <div className={styles.statContent}>
-                        <p className={styles.statLabel}>獲得ポイント</p>
+                        <p className={styles.statLabel}>課題提出点</p>
                         <p className={styles.statValue}>
                             {completed.reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
                             <span className={styles.statUnit}>pt</span>
