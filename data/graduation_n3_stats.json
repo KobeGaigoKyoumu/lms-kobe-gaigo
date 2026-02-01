@@ -49,48 +49,48 @@
     {
       "year": "2021年3月",
       "graduation_date": "2021年3月",
-      "total_graduates": 58,
-      "total": 58,
-      "matched": 46,
-      "n3_plus": 25,
-      "n3_or_higher": 25,
-      "rate": 43.103448275862064,
-      "matched_with_jlpt": 46,
+      "total_graduates": 59,
+      "total": 59,
+      "matched": 47,
+      "n3_plus": 26,
+      "n3_or_higher": 26,
+      "rate": 44.06779661016949,
+      "matched_with_jlpt": 47,
       "match_rate": 0,
       "kanji_stats": {
-        "total": 20,
-        "n3_plus": 11,
-        "rate": 55.00000000000001
+        "total": 21,
+        "n3_plus": 12,
+        "rate": 57.14285714285714
       },
       "non_kanji_stats": {
         "total": 38,
         "n3_plus": 14,
         "rate": 36.84210526315789
       },
-      "n3_pass_rate": 43.1
+      "n3_pass_rate": 44.07
     },
     {
       "year": "2022年3月",
       "graduation_date": "2022年3月",
-      "total_graduates": 1,
-      "total": 1,
-      "matched": 1,
-      "n3_plus": 1,
-      "n3_or_higher": 1,
-      "rate": 100.0,
-      "matched_with_jlpt": 1,
+      "total_graduates": 0,
+      "total": 0,
+      "matched": 0,
+      "n3_plus": 0,
+      "n3_or_higher": 0,
+      "rate": 0.0,
+      "matched_with_jlpt": 0,
       "match_rate": 0,
       "kanji_stats": {
-        "total": 1,
-        "n3_plus": 1,
-        "rate": 100.0
+        "total": 0,
+        "n3_plus": 0,
+        "rate": 0.0
       },
       "non_kanji_stats": {
         "total": 0,
         "n3_plus": 0,
         "rate": 0
       },
-      "n3_pass_rate": 100.0
+      "n3_pass_rate": 0.0
     },
     {
       "year": "2023年3月",
