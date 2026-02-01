@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { getDashboardData } from '@/actions/dashboard'
 import MobileMenu from '@/components/layout/MobileMenu'
 import Link from 'next/link'
 import styles from './page.module.css'

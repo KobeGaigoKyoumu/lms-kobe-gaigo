@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getMenuItems } from '@/lib/menuItems'
+import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './MobileMenu.module.css'
 
 export default function MobileMenu({ role }) {

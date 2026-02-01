@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
-import { getMenuItems } from '@/lib/menuItems'
+import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './Sidebar.module.css'
 
 export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref }) {
