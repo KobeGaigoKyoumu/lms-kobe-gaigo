@@ -51,17 +51,28 @@ export default async function DashboardPage() {
     // ロール別データのPromiseを格納する変数を準備
     let roleDataPromise = Promise.resolve(null)
 
-    if (isStudent) {
+    // 学生用セッション（クッキー形式）も確認（学生ポータル対応）
+    const { getStudentSession } = await import('@/app/actions/studentAuth')
+    const studentSession = await getStudentSession()
+
+    // ロール判定の補完
+    const isActuallyStudent = isStudent || !!studentSession
+
+    if (isActuallyStudent) {
         // 学生用データを並列取得開始
+        // student_idはプロファイルまたはクッキーから取得
+        const userId = user?.id || studentSession?.userId // Note: studentSession might use different key
+        const studentIdText = profile?.student_id_text || studentSession?.studentId
+
         roleDataPromise = Promise.all([
             supabase
                 .from('course_enrollments')
                 .select('course_id')
-                .eq('user_id', user?.id),
+                .eq('user_id', userId),
             supabase
                 .from('submissions')
                 .select('assignment_id')
-                .eq('student_id', user?.id),
+                .eq('student_id', userId),
             supabase
                 .from('assignments')
                 .select('*', { count: 'exact', head: true })
@@ -70,7 +81,7 @@ export default async function DashboardPage() {
             supabase
                 .from('students')
                 .select('student_id_text, class_name, academic_year')
-                .eq('student_id_text', profile?.student_id_text)
+                .eq('student_id_text', studentIdText)
                 .single()
         ]).then(async ([enrollmentsResult, submissionsResult, upcomingResult, studentResult]) => {
             const enrollments = enrollmentsResult.data || []
