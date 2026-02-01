@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { deleteAnnouncement } from '@/app/actions/announcements'
 
 export default function AnnouncementCard({ announcement, canEdit }) {
     const router = useRouter()
@@ -13,15 +14,11 @@ export default function AnnouncementCard({ announcement, canEdit }) {
 
     const handleDelete = async () => {
         setDeleting(true)
-        const supabase = createClient()
 
-        const { error } = await supabase
-            .from('announcements')
-            .delete()
-            .eq('id', announcement.id)
+        const result = await deleteAnnouncement(announcement.id)
 
-        if (error) {
-            console.error('Delete error:', error)
+        if (!result.success) {
+            alert(`削除に失敗しました: ${result.error}`)
             setDeleting(false)
             return
         }
