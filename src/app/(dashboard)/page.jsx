@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     // 1. プロファイルとお知らせの取得を開始
     const profilePromise = supabase
         .from('profiles')
-        .select('role')
+        .select('role, student_id_text')
         .eq('id', user?.id)
         .single()
 
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         `)
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limit(50)
 
     // 2. プロファイルのみ先に待機 (これがロール判定に必要)
     const profileResult = await profilePromise
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
             supabase
                 .from('students')
                 .select('student_id_text, class_name, academic_year')
-                .eq('id', user?.id)
+                .eq('student_id_text', profile?.student_id_text)
                 .single()
         ]).then(async ([enrollmentsResult, submissionsResult, upcomingResult, studentResult]) => {
             const enrollments = enrollmentsResult.data || []
@@ -194,6 +194,7 @@ export default async function DashboardPage() {
     ])
 
     const announcements = announcementsResult.data
+    const announcementsError = announcementsResult.error
 
     // データ展開
     if (roleData) {
@@ -331,6 +332,12 @@ export default async function DashboardPage() {
                         </svg>
                         お知らせ
                     </h2>
+                    {announcementsError && (
+                        <div className={styles.emptyState}>
+                            <p style={{ color: '#ef4444' }}>お知らせの取得に失敗しました</p>
+                            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{announcementsError.message}</p>
+                        </div>
+                    )}
                     {(() => {
                         let filteredAnnouncements = announcements || []
 
@@ -340,7 +347,9 @@ export default async function DashboardPage() {
                             const enrolledCourseIds = roleData?.enrolledCourseIds || []
 
                             filteredAnnouncements = filteredAnnouncements.filter(ann => {
-                                if (ann.target_type === 'all') return true
+                                // target_typeがnull、空、または'all'の場合は全学生に表示
+                                if (!ann.target_type || ann.target_type === 'all') return true
+
                                 if (ann.target_type === 'grade' && studentInfo) {
                                     const currentYear = new Date().getFullYear()
                                     const isBeforeApril = new Date().getMonth() < 3
@@ -363,7 +372,7 @@ export default async function DashboardPage() {
                             filteredAnnouncements = filteredAnnouncements.slice(0, 5) // 管理者・教師は最大5件
                         }
 
-                        if (filteredAnnouncements.length === 0) {
+                        if (!announcementsError && filteredAnnouncements.length === 0) {
                             return (
                                 <div className={styles.emptyState}>
                                     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
@@ -376,27 +385,30 @@ export default async function DashboardPage() {
                             )
                         }
 
-                        return (
-                            <div className={styles.announcementList}>
-                                {filteredAnnouncements.map(announcement => (
-                                    <div key={announcement.id} className={styles.announcementItem}>
-                                        <div className={styles.announcementHeader}>
-                                            {announcement.is_pinned && (
-                                                <span className={styles.pinBadge}>📌</span>
-                                            )}
-                                            <span className={styles.announcementDate}>
-                                                {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
-                                            </span>
+                        if (filteredAnnouncements.length > 0) {
+                            return (
+                                <div className={styles.announcementList}>
+                                    {filteredAnnouncements.map(announcement => (
+                                        <div key={announcement.id} className={styles.announcementItem}>
+                                            <div className={styles.announcementHeader}>
+                                                {announcement.is_pinned && (
+                                                    <span className={styles.pinBadge}>📌</span>
+                                                )}
+                                                <span className={styles.announcementDate}>
+                                                    {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <h4>{announcement.title}</h4>
+                                            <p>{announcement.content?.slice(0, 60)}...</p>
                                         </div>
-                                        <h4>{announcement.title}</h4>
-                                        <p>{announcement.content?.slice(0, 60)}...</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )
+                                    ))}
+                                </div>
+                            )
+                        }
+                        return null
                     })()}
                 </section>
             </div>
