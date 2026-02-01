@@ -1049,18 +1049,6 @@ export default function AnalyticsPage() {
 
                     <div className={styles.chartsRow}>
                         <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>成績分布</h3>
-                            <div className={styles.chartContainer}>
-                                <Bar data={gradeDistribution} options={chartOptions} />
-                            </div>
-                        </div>
-                        <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>期末試験の判定分布</h3>
-                            <div className={styles.chartContainer}>
-                                <Bar data={finalGradeDistribution} options={chartOptions} />
-                            </div>
-                        </div>
-                        <div className={styles.chartCard}>
                             <h3 className={styles.chartTitle}>期末試験6科目合計点数分布</h3>
                             <div className={styles.chartContainer}>
                                 <Bar data={finalExamDistribution} options={chartOptions} />
@@ -1070,6 +1058,18 @@ export default function AnalyticsPage() {
                             <h3 className={styles.chartTitle}>期末試験科目別平均点</h3>
                             <div className={styles.chartContainer}>
                                 <Bar data={subjectAverages} options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }} />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>成績分布</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar data={gradeDistribution} options={chartOptions} />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>期末試験の判定分布</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar data={finalGradeDistribution} options={chartOptions} />
                             </div>
                         </div>
                     </div>
