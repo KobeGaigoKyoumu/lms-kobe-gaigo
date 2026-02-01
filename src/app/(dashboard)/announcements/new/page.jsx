@@ -164,17 +164,16 @@ export default function NewAnnouncementPage() {
                     targetValue = formData.course_id;
                 }
 
-                let messageString = `【お知らせ：${formData.title}】\n`;
+                let messageString = `【お知らせ：${formData.title}】\n\n${formData.content}`;
                 if (formData.sender_name) {
-                    messageString += `【配信者：${formData.sender_name}】\n`;
+                    messageString += `\n　\n${formData.sender_name}\n　`;
                 }
-                messageString += `\n${formData.content}`;
 
                 // 添付ファイルがあればリンクを追加
                 if (uploadedFileUrls.length > 0) {
                     messageString += '\n\n【添付ファイル】 このファイルを見てください。';
                     uploadedFileUrls.forEach(file => {
-                        messageString += `\n📎 ${file.name}: ${file.url}`;
+                        messageString += ` 📎 ${file.name}: ${file.url}`;
                     });
                 }
 
