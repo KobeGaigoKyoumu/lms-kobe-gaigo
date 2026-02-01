@@ -136,7 +136,7 @@ export default function NewAnnouncementPage() {
 
                 // 添付ファイルがあればリンクを追加
                 if (uploadedFileUrls.length > 0) {
-                    messageString += '\n\n【添付ファイル】\nこのファイルを見てください。';
+                    messageString += '\n\n【添付ファイル】 このファイルを見てください。';
                     uploadedFileUrls.forEach(file => {
                         messageString += `\n📎 ${file.name}: ${file.url}`;
                     });
