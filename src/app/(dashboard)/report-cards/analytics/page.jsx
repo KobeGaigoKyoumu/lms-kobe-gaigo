@@ -65,7 +65,7 @@ function JlptSessionRow({ sessionData }) {
             </div>
 
             {isOpen && (
-                <div className={styles.sessionDetails}>
+                <div className={styles.sessionDetails} style={{ overflowX: 'auto' }}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
@@ -2268,7 +2268,7 @@ export default function AnalyticsPage() {
                                                 {sectionDetailOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                             </div>
                                             {sectionDetailOpen && (
-                                                <div className={styles.sessionDetails}>
+                                                <div className={styles.sessionDetails} style={{ overflowX: 'auto' }}>
                                                     <table className={styles.table}>
                                                         <thead>
                                                             <tr>
