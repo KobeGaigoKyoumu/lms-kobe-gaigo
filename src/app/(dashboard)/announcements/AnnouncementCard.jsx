@@ -92,7 +92,12 @@ export default function AnnouncementCard({ announcement, canEdit }) {
                             announcement.author?.full_name?.[0] || '?'
                         )}
                     </div>
-                    <span>{announcement.author?.full_name || '不明'}</span>
+                    <span>
+                        {announcement.author?.full_name || '不明'}
+                        {announcement.sender_name && (
+                            <span className={styles.senderName}>（配信者：{announcement.sender_name}）</span>
+                        )}
+                    </span>
                 </div>
 
                 {canEdit && (

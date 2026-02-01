@@ -17,7 +17,8 @@ export default function NewAnnouncementPage() {
         course_id: '',
         is_pinned: false,
         delivery_method: 'both', // 'announcement', 'messenger', 'both'
-        file_urls: []
+        file_urls: [],
+        sender_name: ''
     })
     const [uploading, setUploading] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState([])
@@ -108,7 +109,8 @@ export default function NewAnnouncementPage() {
                         course_id: formData.course_id || null,
                         is_pinned: formData.is_pinned,
                         author_id: user?.id,
-                        file_urls: uploadedFileUrls
+                        file_urls: uploadedFileUrls,
+                        sender_name: formData.sender_name || null
                     })
                 insertError = error
             }
@@ -125,7 +127,12 @@ export default function NewAnnouncementPage() {
             if (isMessenger) {
                 const targetType = formData.course_id ? 'course' : 'all';
                 const targetValue = formData.course_id || null;
-                let messageString = `【お知らせ：${formData.title}】\n\n${formData.content}`;
+
+                let messageString = `【お知らせ：${formData.title}】\n`;
+                if (formData.sender_name) {
+                    messageString += `【配信者：${formData.sender_name}】\n`;
+                }
+                messageString += `\n${formData.content}`;
 
                 // 添付ファイルがあればリンクを追加
                 if (uploadedFileUrls.length > 0) {

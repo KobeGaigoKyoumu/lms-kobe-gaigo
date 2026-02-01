@@ -17,7 +17,8 @@ export default function EditAnnouncementPage({ params }) {
         content: '',
         course_id: '',
         is_pinned: false,
-        file_urls: []
+        file_urls: [],
+        sender_name: ''
     })
     const [selectedFiles, setSelectedFiles] = useState([])
     const [uploading, setUploading] = useState(false)
@@ -133,7 +134,8 @@ export default function EditAnnouncementPage({ params }) {
                 content: formData.content,
                 course_id: formData.course_id || null,
                 is_pinned: formData.is_pinned,
-                file_urls: newFileUrls
+                file_urls: newFileUrls,
+                sender_name: formData.sender_name || null
             })
             .eq('id', announcementId)
 
