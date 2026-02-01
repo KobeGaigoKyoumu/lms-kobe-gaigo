@@ -118,13 +118,13 @@
     {
       "year": "2026年3月",
       "graduation_date": "2026年3月",
-      "total_graduates": 238,
-      "total": 238,
-      "matched": 129,
-      "n3_plus": 49,
-      "n3_or_higher": 49,
-      "rate": 20.588235294117645,
-      "matched_with_jlpt": 129,
+      "total_graduates": 240,
+      "total": 240,
+      "matched": 240,
+      "n3_plus": 224,
+      "n3_or_higher": 224,
+      "rate": 93.33333333333333,
+      "matched_with_jlpt": 240,
       "match_rate": 0,
       "kanji_stats": {
         "total": 13,
@@ -136,7 +136,7 @@
         "n3_plus": 47,
         "rate": 20.88888888888889
       },
-      "n3_pass_rate": 20.59
+      "n3_pass_rate": 93.33
     }
   ],
   "summary": {
