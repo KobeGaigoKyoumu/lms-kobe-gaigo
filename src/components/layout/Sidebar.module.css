@@ -237,7 +237,7 @@
 }
 
 @media (max-width: 768px) {
-    .sidebar {
+    .sidebar.mobileHidden {
         display: none;
     }
 }

@@ -8,7 +8,7 @@ import { logoutStudent } from '@/app/actions/studentAuth'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './Sidebar.module.css'
 
-export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref }) {
+export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false }) {
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
@@ -38,7 +38,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const avatarUrl = user?.user_metadata?.avatar_url
 
     return (
-        <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+        <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${hideOnMobile ? styles.mobileHidden : ''}`}>
             {/* ロゴ */}
             <div className={styles.logo}>
                 <svg width="32" height="32" viewBox="0 0 48 48" fill="none">

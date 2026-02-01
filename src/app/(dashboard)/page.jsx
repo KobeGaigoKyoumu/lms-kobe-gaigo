@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import MobileMenu from '@/components/layout/MobileMenu'
 import Link from 'next/link'
 import styles from './page.module.css'
 
@@ -220,7 +219,6 @@ export default async function DashboardPage() {
 
     return (
         <div className={styles.container}>
-            <MobileMenu role={role} />
 
             {/* ヘッダー */}
             <header className={styles.header}>
