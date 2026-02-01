@@ -1,0 +1,183 @@
+import { createClient } from '@supabase/supabase-js'
+import { redirect } from 'next/navigation'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import styles from './page.module.css'
+
+// Helper to create admin client for server-side fetching
+const createAdminClient = () => {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+}
+
+export default async function StudentProfilePage() {
+    const session = await getStudentSession()
+
+    if (!session) {
+        redirect('/login')
+    }
+
+    const supabase = createAdminClient()
+
+    // Fetch student's full profile data
+    const { data: student, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('student_id_text', session.studentId)
+        .single()
+
+    if (error || !student) {
+        console.error('Error fetching student profile:', error)
+        // Fallback or error state could be handled here
+    }
+
+    // Helper to format date
+    const formatDate = (dateString) => {
+        if (!dateString) return <span className={styles.empty}>未登録</span>
+        try {
+            return new Date(dateString).toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+        } catch (e) {
+            return dateString
+        }
+    }
+
+    // Helper for null/empty values
+    const displayValue = (value) => {
+        return value || <span className={styles.empty}>未登録</span>
+    }
+
+    return (
+        <div className={styles.page}>
+            <header className={styles.header}>
+                <h1 className={styles.title}>プロフィール</h1>
+                <p className={styles.subtitle}>学生個人情報</p>
+            </header>
+
+            <div className={styles.content}>
+                {/* 基本情報 */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>基本情報</h2>
+                    <div className={styles.grid}>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>氏名</span>
+                            <span className={styles.value}>{displayValue(student?.full_name)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>フリガナ</span>
+                            <span className={styles.value}>{displayValue(student?.name_kana)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>ローマ字</span>
+                            <span className={styles.value}>{displayValue(student?.name_romaji)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>学籍番号</span>
+                            <span className={styles.value}>{displayValue(student?.student_id_text)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>クラス</span>
+                            <span className={styles.value}>{displayValue(student?.class_name)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>コース</span>
+                            <span className={styles.value}>{displayValue(student?.course)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>ステータス</span>
+                            <span className={styles.value}>
+                                <span className={`${styles.tag} ${student?.status === 'active' ? styles.active : ''}`}>
+                                    {student?.status === 'active' ? '在籍中' :
+                                        student?.status === 'graduated' ? '卒業' :
+                                            student?.status === 'completed' ? '修了' :
+                                                student?.status === 'inactive' ? '休学' :
+                                                    student?.status === 'withdrawn' ? '退学' : student?.status}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 個人情報 */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>個人情報</h2>
+                    <div className={styles.grid}>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>生年月日</span>
+                            <span className={styles.value}>{formatDate(student?.birth_date)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>性別</span>
+                            <span className={styles.value}>{displayValue(student?.gender)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>国籍</span>
+                            <span className={styles.value}>{displayValue(student?.nationality)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>住所</span>
+                            <span className={styles.value}>{displayValue(student?.address)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>電話番号</span>
+                            <span className={styles.value}>{displayValue(student?.phone)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>メールアドレス</span>
+                            <span className={styles.value}>{displayValue(student?.email)}</span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ビザ・身分証明書情報 */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>ビザ・身分証明書</h2>
+                    <div className={styles.grid}>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>在留資格</span>
+                            <span className={styles.value}>{displayValue(student?.visa_status)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>在留カード番号</span>
+                            <span className={styles.value}>{displayValue(student?.residence_card_number)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>在留期限</span>
+                            <span className={styles.value}>{formatDate(student?.visa_expiry)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>パスポート番号</span>
+                            <span className={styles.value}>{displayValue(student?.passport_number)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>入国日</span>
+                            <span className={styles.value}>{formatDate(student?.entry_date)}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>入学・卒業情報</h2>
+                    <div className={styles.grid}>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>入学年月日</span>
+                            <span className={styles.value}>{formatDate(student?.enrollment_date)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>期</span>
+                            <span className={styles.value}>{displayValue(student?.enrollment_period)}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                            <span className={styles.label}>卒業予定日</span>
+                            <span className={styles.value}>{formatDate(student?.graduation_date)}</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    )
+}
