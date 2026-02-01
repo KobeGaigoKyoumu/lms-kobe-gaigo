@@ -166,14 +166,14 @@ export default function NewAnnouncementPage() {
 
                 let messageString = `【お知らせ：${formData.title}】\n\n${formData.content}`;
                 if (formData.sender_name) {
-                    messageString += `\n　\n${formData.sender_name}\n　`;
+                    messageString += `\n　\n（${formData.sender_name}） より\n　`;
                 }
 
                 // 添付ファイルがあればリンクを追加
                 if (uploadedFileUrls.length > 0) {
-                    messageString += '\n\n【添付ファイル】 このファイルを見てください。';
+                    messageString += '\n\n【添付ファイル】\nこのファイルを見てください。';
                     uploadedFileUrls.forEach(file => {
-                        messageString += ` 📎 ${file.name}: ${file.url}`;
+                        messageString += `\n📎 ${file.name}:\n${file.url}`;
                     });
                 }
 
