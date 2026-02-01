@@ -15,11 +15,18 @@ export default function EditAnnouncementPage({ params }) {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
+        target_type: 'all',
+        target_grade: '',
+        target_class: '',
         course_id: '',
         is_pinned: false,
         file_urls: [],
         sender_name: ''
     })
+    const [allStudents, setAllStudents] = useState([])
+    const [allClasses, setAllClasses] = useState([])
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedStudents, setSelectedStudents] = useState([])
     const [selectedFiles, setSelectedFiles] = useState([])
     const [uploading, setUploading] = useState(false)
 
@@ -44,14 +51,35 @@ export default function EditAnnouncementPage({ params }) {
                 return
             }
 
+            // Fetch Students and Classes
+            const { data: studentsData } = await supabase
+                .from('students')
+                .select('student_id_text, full_name, class_name')
+                .eq('status', 'active')
+                .order('full_name')
+            setAllStudents(studentsData || [])
+
+            const uniqueClasses = [...new Set((studentsData || []).map(s => s.class_name).filter(Boolean))].sort()
+            setAllClasses(uniqueClasses)
+
             setFormData({
                 title: announcement.title || '',
                 content: announcement.content || '',
+                target_type: announcement.target_type || 'all',
+                target_grade: announcement.target_grade || '',
+                target_class: announcement.target_class || '',
                 course_id: announcement.course_id || '',
                 is_pinned: announcement.is_pinned || false,
                 file_urls: announcement.file_urls || [],
                 sender_name: announcement.sender_name || ''
             })
+
+            if (announcement.target_type === 'individual' && announcement.target_student_ids) {
+                const selected = (studentsData || []).filter(s =>
+                    announcement.target_student_ids.includes(s.student_id_text)
+                )
+                setSelectedStudents(selected)
+            }
 
             // コース取得
             const { data: coursesData } = await supabase
@@ -133,7 +161,11 @@ export default function EditAnnouncementPage({ params }) {
             .update({
                 title: formData.title,
                 content: formData.content,
-                course_id: formData.course_id || null,
+                target_type: formData.target_type,
+                target_grade: formData.target_type === 'grade' ? formData.target_grade : null,
+                target_class: formData.target_type === 'class' ? formData.target_class : null,
+                target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
+                course_id: formData.target_type === 'course' ? formData.course_id : null,
                 is_pinned: formData.is_pinned,
                 file_urls: newFileUrls,
                 sender_name: formData.sender_name || null
@@ -214,24 +246,171 @@ export default function EditAnnouncementPage({ params }) {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label htmlFor="course_id" className={styles.label}>
-                        対象コース（任意）
-                    </label>
-                    <select
-                        id="course_id"
-                        name="course_id"
-                        value={formData.course_id}
-                        onChange={handleChange}
-                        className={styles.select}
-                    >
-                        <option value="">全体向け（コースを指定しない）</option>
-                        {courses.map(course => (
-                            <option key={course.id} value={course.id}>
-                                {course.title}
-                            </option>
-                        ))}
-                    </select>
+                    <label className={styles.label}>配信対象</label>
+                    <div className={styles.targetOptions}>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="target_type"
+                                value="all"
+                                checked={formData.target_type === 'all'}
+                                onChange={handleChange}
+                            />
+                            全体
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="target_type"
+                                value="grade"
+                                checked={formData.target_type === 'grade'}
+                                onChange={handleChange}
+                            />
+                            学年
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="target_type"
+                                value="class"
+                                checked={formData.target_type === 'class'}
+                                onChange={handleChange}
+                            />
+                            クラス
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="target_type"
+                                value="individual"
+                                checked={formData.target_type === 'individual'}
+                                onChange={handleChange}
+                            />
+                            個人
+                        </label>
+                        <label className={styles.radioLabel}>
+                            <input
+                                type="radio"
+                                name="target_type"
+                                value="course"
+                                checked={formData.target_type === 'course'}
+                                onChange={handleChange}
+                            />
+                            コース
+                        </label>
+                    </div>
                 </div>
+
+                {formData.target_type === 'grade' && (
+                    <div className={styles.formGroup}>
+                        <label htmlFor="target_grade" className={styles.label}>対象学年</label>
+                        <select
+                            id="target_grade"
+                            name="target_grade"
+                            value={formData.target_grade}
+                            onChange={handleChange}
+                            className={styles.select}
+                            required
+                        >
+                            <option value="">学年を選択してください</option>
+                            <option value="1">1年生</option>
+                            <option value="2">2年生</option>
+                        </select>
+                    </div>
+                )}
+
+                {formData.target_type === 'class' && (
+                    <div className={styles.formGroup}>
+                        <label htmlFor="target_class" className={styles.label}>対象クラス</label>
+                        <select
+                            id="target_class"
+                            name="target_class"
+                            value={formData.target_class}
+                            onChange={handleChange}
+                            className={styles.select}
+                            required
+                        >
+                            <option value="">クラスを選択してください</option>
+                            {allClasses.map(cls => (
+                                <option key={cls} value={cls}>{cls}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {formData.target_type === 'individual' && (
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>個人を選択（複数可）</label>
+                        <div className={styles.studentSearchWrapper}>
+                            <input
+                                type="text"
+                                placeholder="名前や学籍番号で検索..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.searchInput}
+                            />
+                            {searchQuery && (
+                                <div className={styles.searchResults}>
+                                    {allStudents
+                                        .filter(s =>
+                                            s.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            s.student_id_text.includes(searchQuery)
+                                        )
+                                        .slice(0, 10)
+                                        .map(s => (
+                                            <div
+                                                key={s.student_id_text}
+                                                className={styles.searchResultItem}
+                                                onClick={() => {
+                                                    if (!selectedStudents.find(ss => ss.student_id_text === s.student_id_text)) {
+                                                        setSelectedStudents([...selectedStudents, s]);
+                                                    }
+                                                    setSearchQuery('');
+                                                }}
+                                            >
+                                                {s.full_name} ({s.student_id_text}) - {s.class_name}
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.selectedStudentsList}>
+                            {selectedStudents.map(s => (
+                                <span key={s.student_id_text} className={styles.selectedStudentTag}>
+                                    {s.full_name}
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedStudents(selectedStudents.filter(ss => ss.student_id_text !== s.student_id_text))}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {formData.target_type === 'course' && (
+                    <div className={styles.formGroup}>
+                        <label htmlFor="course_id" className={styles.label}>対象コース</label>
+                        <select
+                            id="target_course"
+                            name="course_id"
+                            value={formData.course_id}
+                            onChange={handleChange}
+                            className={styles.select}
+                            required
+                        >
+                            <option value="">コースを選択してください</option>
+                            {courses.map(course => (
+                                <option key={course.id} value={course.id}>
+                                    {course.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <div className={styles.checkboxGroup}>
                     <input

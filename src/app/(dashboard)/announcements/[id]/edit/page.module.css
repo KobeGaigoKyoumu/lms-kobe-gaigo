@@ -139,7 +139,92 @@
     cursor: not-allowed;
 }
 
-/* 配信方法 */
+.targetOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: var(--spacing-4);
+}
+
+.studentSearchWrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: var(--spacing-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+}
+
+.searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.searchResultItem {
+    padding: var(--spacing-3) var(--spacing-4);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+}
+
+.searchResultItem:last-child {
+    border-bottom: none;
+}
+
+.searchResultItem:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.selectedStudentsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.selectedStudentTag {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.selectedStudentTag button {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    margin-left: var(--spacing-2);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selectedStudentTag button:hover {
+    color: #ef4444;
+}
+
 .deliveryOptions {
     display: flex;
     flex-direction: column;

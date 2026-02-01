@@ -83,10 +83,22 @@ export async function sendBroadcast(message, targetType, targetValue) {
         // 1. Fetch Target Students
         let query = supabase.from('students').select('student_id_text, facebook_psid, full_name').not('facebook_psid', 'is', null);
 
-        if (targetType === 'class') {
+        if (targetType === 'grade') {
+            // 学年の判定: academic_yearから算出
+            const currentYear = new Date().getFullYear();
+            const today = new Date();
+            const isBeforeApril = today.getMonth() < 3;
+            const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+
+            // targetValueが '1' なら academic_year = academicYearBase
+            // targetValueが '2' なら academic_year = academicYearBase - 1
+            const targetAY = academicYearBase - (parseInt(targetValue) - 1);
+            query = query.eq('academic_year', targetAY);
+        } else if (targetType === 'class') {
             query = query.eq('class_name', targetValue);
-        } else if (targetType === 'students') {
-            query = query.in('student_id_text', targetValue);
+        } else if (targetType === 'students' || targetType === 'individual') {
+            const ids = Array.isArray(targetValue) ? targetValue : [targetValue];
+            query = query.in('student_id_text', ids);
         } else if (targetType === 'course') {
             // Fetch students enrolled in the course
             const { data: enrollments, error: enrollError } = await supabase
