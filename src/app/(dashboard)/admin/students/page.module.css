@@ -134,6 +134,7 @@
     padding: var(--spacing-4);
     border-bottom: 1px solid var(--border-color);
     gap: var(--spacing-4);
+    flex-wrap: wrap;
 }
 
 .filters {

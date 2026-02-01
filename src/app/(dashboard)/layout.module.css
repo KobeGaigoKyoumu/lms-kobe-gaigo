@@ -3,15 +3,15 @@
     min-height: 100vh;
 }
 
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
+}
+
 .main {
     flex: 1;
     margin-left: var(--sidebar-width);
     background: var(--bg-secondary);
     min-height: 100vh;
-}
-
-@media (max-width: 768px) {
-    .main {
-        margin-left: 0;
-    }
 }
