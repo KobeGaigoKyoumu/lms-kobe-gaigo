@@ -114,19 +114,6 @@ export default async function StudentDashboard() {
 
             {/* Stats Cards */}
             <div className={styles.statsGrid}>
-                {/* Courses */}
-                <div className={styles.statCard}>
-                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                            <path d="M4 6h16M4 12h16M4 18h8" />
-                        </svg>
-                    </div>
-                    <div className={styles.statContent}>
-                        <p className={styles.statLabel}>履修コース</p>
-                        <p className={styles.statValue}>1</p> {/* Hardcoded for simplicity or needs join */}
-                    </div>
-                </div>
-
                 {/* Unsubmitted */}
                 <div className={styles.statCard}>
                     <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
@@ -152,6 +139,22 @@ export default async function StudentDashboard() {
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>完了課題</p>
                         <p className={styles.statValue}>{completed.length}</p>
+                    </div>
+                </div>
+
+                {/* Submission Points */}
+                <div className={styles.statCard}>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>獲得ポイント</p>
+                        <p className={styles.statValue}>
+                            {completed.reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
+                            <span className={styles.statUnit}>pt</span>
+                        </p>
                     </div>
                 </div>
 
