@@ -202,6 +202,21 @@ export default function NewAnnouncementPage() {
                 </div>
 
                 <div className={styles.formGroup}>
+                    <label htmlFor="sender_name" className={styles.label}>
+                        配信者（任意）
+                    </label>
+                    <input
+                        type="text"
+                        id="sender_name"
+                        name="sender_name"
+                        value={formData.sender_name}
+                        onChange={handleChange}
+                        className={styles.input}
+                        placeholder="配信者の名前（例：教務課 山田）"
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
                     <label htmlFor="content" className={styles.label}>
                         内容 <span className={styles.required}>*</span>
                     </label>
