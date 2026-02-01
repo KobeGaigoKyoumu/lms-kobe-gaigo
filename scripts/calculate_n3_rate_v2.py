@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from datetime import datetime
 
-repo_root = r'c:\Users\神戸外語03\Desktop\lms-kobe-gaigo-repo'
+repo_root = os.getcwd()
 historical_path = os.path.join(repo_root, 'data', 'historical_students.json')
 jlpt_path = os.path.join(repo_root, 'data', 'jlpt_historical.json')
 output_path = os.path.join(repo_root, 'data', 'graduation_n3_stats.json')
@@ -26,12 +26,15 @@ else:
 print(f"Loaded {len(jlpt_records)} JLPT records.")
 jlpt_df = pd.DataFrame(jlpt_records)
 
+# Pre-compute normalized names
+jlpt_df['norm_name'] = jlpt_df['name'].astype(str).str.strip().str.replace(' ', '').str.upper()
+
 # Define Helper to get Max JLPT Level for a student
-def get_student_jlpt_level(sid):
+def get_student_jlpt_level(sid, name, name_romaji):
     if jlpt_df.empty:
         return None
         
-    # Filter for student (Ensure string comparison)
+    # 1. Filter for student by ID (Ensure string comparison)
     s_records = jlpt_df[jlpt_df['studentId'].astype(str) == str(sid)]
     passed = s_records[s_records['result'] == '合格']
     
