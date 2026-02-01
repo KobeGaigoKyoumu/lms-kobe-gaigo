@@ -634,8 +634,8 @@ export default function StudentList() {
                                 </th>
                                 <th>学籍番号</th>
                                 <th>氏名</th>
-                                <th>提出数</th>
-                                <th>提出点</th>
+
+
                                 <th>学年</th>
                                 <th>クラス</th>
                                 <th>ステータス</th>
@@ -663,8 +663,6 @@ export default function StudentList() {
                                         </td>
                                         <td data-label="学籍番号" className={styles.idCell}>{student.student_id_text}</td>
                                         <td data-label="氏名">{student.full_name}</td>
-                                        <td data-label="提出数" className={styles.centerAlign}>{stat.submission_count}</td>
-                                        <td data-label="提出点" className={styles.centerAlign}>{stat.total_score}pt</td>
                                         <td data-label="学年">
                                             <select
                                                 value={String(studentInfo.grade ?? '')}
