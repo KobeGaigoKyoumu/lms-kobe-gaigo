@@ -235,3 +235,9 @@
     color: var(--primary-500);
     border-color: var(--primary-500);
 }
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}

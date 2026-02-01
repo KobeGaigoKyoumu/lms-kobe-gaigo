@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { getDashboardData } from '@/actions/dashboard'
+import MobileMenu from '@/components/layout/MobileMenu'
 import Link from 'next/link'
 import styles from './page.module.css'
 
@@ -40,6 +42,7 @@ export default async function DashboardPage() {
     // 2. プロファイルのみ先に待機 (これがロール判定に必要)
     const profileResult = await profilePromise
     const profile = profileResult.data
+    const role = profile?.role
 
     // お知らせはまだ待たない (バックグラウンドで進行中)
 
@@ -217,7 +220,9 @@ export default async function DashboardPage() {
     }
 
     return (
-        <div className={styles.page}>
+        <div className={styles.container}>
+            <MobileMenu role={role} />
+
             {/* ヘッダー */}
             <header className={styles.header}>
                 <div>
