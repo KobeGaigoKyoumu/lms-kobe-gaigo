@@ -21,16 +21,7 @@ export default async function DashboardPage() {
     const announcementsPromise = supabase
         .from('announcements')
         .select(`
-            id,
-            title,
-            content,
-            is_pinned,
-            created_at,
-            target_type,
-            target_grade,
-            target_class,
-            target_student_ids,
-            course_id,
+            *,
             author:profiles!author_id (full_name)
         `)
         .order('is_pinned', { ascending: false })
