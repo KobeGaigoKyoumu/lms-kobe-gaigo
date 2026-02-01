@@ -149,6 +149,9 @@
 }
 
 .cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding-top: var(--spacing-3);
     border-top: 1px solid var(--border-color);
 }
@@ -181,14 +184,6 @@
     object-fit: cover;
 }
 
-/* Header with create button */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-6);
-}
-
 .createBtn {
     display: inline-flex;
     align-items: center;
@@ -219,15 +214,6 @@
 
 .emptyBtn:hover {
     background: var(--primary-600);
-}
-
-/* Card Footer with actions */
-.cardFooter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: var(--spacing-3);
-    border-top: 1px solid var(--border-color);
 }
 
 .cardActions {
@@ -410,10 +396,10 @@
     color: var(--text-tertiary);
     font-style: italic;
 }
- . s e n d e r N a m e   { 
-         c o l o r :   v a r ( - - t e x t - t e r t i a r y ) ; 
-         f o n t - s i z e :   v a r ( - - f o n t - s i z e - x s ) ; 
-         m a r g i n - l e f t :   v a r ( - - s p a c i n g - 1 ) ; 
-         f o n t - s t y l e :   i t a l i c ; 
- }  
- 
+
+.senderName {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    margin-left: var(--spacing-1);
+    font-style: italic;
+}

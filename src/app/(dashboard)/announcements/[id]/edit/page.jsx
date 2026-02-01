@@ -49,7 +49,8 @@ export default function EditAnnouncementPage({ params }) {
                 content: announcement.content || '',
                 course_id: announcement.course_id || '',
                 is_pinned: announcement.is_pinned || false,
-                file_urls: announcement.file_urls || []
+                file_urls: announcement.file_urls || [],
+                sender_name: announcement.sender_name || ''
             })
 
             // コース取得
@@ -178,6 +179,21 @@ export default function EditAnnouncementPage({ params }) {
                         className={styles.input}
                         placeholder="お知らせのタイトル"
                         required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label htmlFor="sender_name" className={styles.label}>
+                        配信者（任意）
+                    </label>
+                    <input
+                        type="text"
+                        id="sender_name"
+                        name="sender_name"
+                        value={formData.sender_name}
+                        onChange={handleChange}
+                        className={styles.input}
+                        placeholder="配信者の名前"
                     />
                 </div>
 
