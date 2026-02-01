@@ -3,9 +3,8 @@ import { getMessengerStatus } from '@/actions/messenger'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
 import ConnectMessenger from './ConnectMessenger'
-import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
 import Link from 'next/link'
-import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
 import styles from './page.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -14,14 +13,27 @@ export default async function StudentDashboard() {
     const supabase = await createClient()
     const session = await getStudentSession()
 
-    // データ取得を並列化
+    const now = new Date()
+    const nextWeek = new Date(now)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+
+    // Parallel data fetching
     const [assignments, messengerStatus, announcementsResult, studentResult] = await Promise.all([
         getStudentAssignments(),
         getMessengerStatus(),
         supabase
             .from('announcements')
             .select(`
-                *,
+                id,
+                title,
+                content,
+                is_pinned,
+                created_at,
+                target_type,
+                target_grade,
+                target_class,
+                target_student_ids,
+                course_id,
                 author:profiles!author_id (full_name)
             `)
             .order('is_pinned', { ascending: false })
@@ -36,8 +48,9 @@ export default async function StudentDashboard() {
 
     const announcements = announcementsResult.data || []
     const studentInfo = studentResult.data
+    const firstName = session?.name?.split(' ')[0] || '学生'
 
-    // ターゲットに応じたフィルタリング
+    // Announcement Filtering
     const filteredAnnouncements = announcements.filter(ann => {
         if (!ann.target_type || ann.target_type === 'all') return true
         if (!studentInfo) return false
@@ -58,45 +71,40 @@ export default async function StudentDashboard() {
         return false
     }).slice(0, 3)
 
-    // Sort: Not submitted first, then by deadline
-    const sortedAssignments = Array.isArray(assignments) ? assignments.sort((a, b) => {
+    // Assignment Stats & Sorting
+    const safeAssignments = Array.isArray(assignments) ? assignments : []
+    const unsubmitted = safeAssignments.filter(a => !a.submission)
+    const completed = safeAssignments.filter(a => !!a.submission)
+    const dueThisWeek = safeAssignments.filter(a => {
+        if (!a.deadline) return false
+        const deadline = new Date(a.deadline)
+        return deadline >= now && deadline <= nextWeek
+    })
+
+    const sortedAssignments = safeAssignments.sort((a, b) => {
         const aSubmitted = !!a.submission
         const bSubmitted = !!b.submission
         if (aSubmitted !== bSubmitted) return aSubmitted ? 1 : -1
         return new Date(a.deadline) - new Date(b.deadline)
-    }) : []
+    }).slice(0, 5)
 
     return (
-        <div className={styles.container}>
-            {/* お知らせセクション */}
-            <section className={styles.announcementSection}>
-                <h2 className={styles.sectionHeader}>
-                    <Megaphone size={20} className={styles.headerIcon} />
-                    お知らせ
-                </h2>
-                {filteredAnnouncements.length === 0 ? (
-                    <div className={styles.emptyAnnouncements}>
-                        現在、新しいお知らせはありません。
-                    </div>
-                ) : (
-                    <div className={styles.announcementGrid}>
-                        {filteredAnnouncements.map(ann => (
-                            <AnnouncementCard
-                                key={ann.id}
-                                announcement={ann}
-                                canEdit={false}
-                            />
-                        ))}
-                    </div>
-                )}
-                {filteredAnnouncements.length > 0 && (
-                    <Link href="/student/announcements" className={styles.viewMoreLink}>
-                        すべて見る <ChevronRight size={16} />
-                    </Link>
-                )}
-            </section>
-
-            <h1 className={styles.title}>課題一覧</h1>
+        <div className={styles.page}>
+            {/* Header */}
+            <header className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>おかえりなさい、{firstName}さん</h1>
+                    <p className={styles.subtitle}>今日も頑張りましょう！</p>
+                </div>
+                <div className={styles.date}>
+                    {new Date().toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'long'
+                    })}
+                </div>
+            </header>
 
             <ConnectMessenger
                 connected={messengerStatus.connected}
@@ -104,80 +112,143 @@ export default async function StudentDashboard() {
                 pageId={process.env.NEXT_PUBLIC_FB_PAGE_ID}
             />
 
-            {/* Stats Summary */}
+            {/* Stats Cards */}
             <div className={styles.statsGrid}>
+                {/* Courses */}
                 <div className={styles.statCard}>
-                    <span className={styles.statLabel}>全課題数</span>
-                    <span className={styles.statValue}>{assignments.length}</span>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M4 6h16M4 12h16M4 18h8" />
+                        </svg>
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>履修コース</p>
+                        <p className={styles.statValue}>1</p> {/* Hardcoded for simplicity or needs join */}
+                    </div>
                 </div>
+
+                {/* Unsubmitted */}
                 <div className={styles.statCard}>
-                    <span className={styles.statLabel}>提出済み</span>
-                    <span className={styles.statValue}>
-                        {(Array.isArray(assignments) ? assignments : []).filter(a => !!a.submission).length}
-                    </span>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                            <rect x="9" y="3" width="6" height="4" rx="1" />
+                        </svg>
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>未提出課題</p>
+                        <p className={styles.statValue}>{unsubmitted.length}</p>
+                    </div>
                 </div>
+
+                {/* Completed */}
                 <div className={styles.statCard}>
-                    <span className={styles.statLabel}>獲得ポイント</span>
-                    <span className={styles.statValue}>
-                        {(Array.isArray(assignments) ? assignments : []).reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
-                    </span>
-                    <span className={styles.statUnit}>pt</span>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <path d="M22 4L12 14.01l-3-3" />
+                        </svg>
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>完了課題</p>
+                        <p className={styles.statValue}>{completed.length}</p>
+                    </div>
+                </div>
+
+                {/* Due this week */}
+                <div className={styles.statCard}>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <path d="M16 2v4M8 2v4M3 10h18" />
+                        </svg>
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>今週の締切</p>
+                        <p className={styles.statValue}>{dueThisWeek.length}</p>
+                    </div>
                 </div>
             </div>
 
-            {sortedAssignments.length === 0 ? (
-                <div className={styles.emptyState}>
-                    <p>現在、課題はありません。</p>
-                </div>
-            ) : (
-                <div className={styles.grid}>
-                    {sortedAssignments.map((assignment) => {
-                        const isSubmitted = !!assignment.submission
-                        const deadlineDate = new Date(assignment.deadline)
-                        const isOverdue = !isSubmitted && deadlineDate < new Date()
-
-                        let statusClass = styles.statusPending
-                        if (isSubmitted) statusClass = styles.statusSubmitted
-                        if (isOverdue) statusClass = styles.statusOverdue
-
-                        return (
-                            <Link
-                                key={assignment.id}
-                                href={`/student/homework/${assignment.id}`}
-                                className={`${styles.card} ${statusClass}`}
-                            >
-                                <div className={styles.cardContent}>
-                                    <div className={styles.mainInfo}>
-                                        <div className={styles.statusRow}>
-                                            {isSubmitted ? (
-                                                <span className={`${styles.statusBadge} ${styles.badgeSubmitted}`}>
-                                                    <CheckCircle2 size={12} className={styles.icon} /> 提出済み
-                                                </span>
-                                            ) : isOverdue ? (
-                                                <span className={`${styles.statusBadge} ${styles.badgeOverdue}`}>
-                                                    <AlertCircle size={12} className={styles.icon} /> 期限切れ
-                                                </span>
-                                            ) : (
-                                                <span className={`${styles.statusBadge} ${styles.badgePending}`}>
-                                                    <Circle size={12} className={styles.icon} /> 未提出
-                                                </span>
-                                            )}
-                                        </div>
-                                        <h2 className={styles.cardTitle}>{assignment.title}</h2>
-                                        <div className={styles.meta}>
-                                            <span className={styles.metaItem}>
-                                                <Clock size={14} />
-                                                期限: {deadlineDate.toLocaleDateString('ja-JP')} {deadlineDate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
+            {/* Main Content Grid */}
+            <div className={styles.mainGrid}>
+                {/* Recent Assignments */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                            <rect x="7" y="2" width="6" height="4" rx="1" />
+                        </svg>
+                        最近の課題
+                    </h2>
+                    {sortedAssignments.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
+                                <path d="M18 10H14a4 4 0 0 0-4 4v24a4 4 0 0 0 4 4h20a4 4 0 0 0 4-4V14a4 4 0 0 0-4-4h-4" />
+                                <rect x="16" y="4" width="16" height="8" rx="2" />
+                            </svg>
+                            <p>課題がありません</p>
+                        </div>
+                    ) : (
+                        <div className={styles.assignmentList}>
+                            {sortedAssignments.map(assignment => (
+                                <Link
+                                    href={`/student/homework/${assignment.id}`}
+                                    key={assignment.id}
+                                    className={styles.assignmentItem}
+                                >
+                                    <div className={styles.assignmentInfo}>
+                                        <h4>{assignment.title}</h4>
+                                        <p>{assignment.class_name}</p>
                                     </div>
-                                    <ChevronRight className={styles.chevron} />
+                                    {assignment.deadline && (
+                                        <span className={styles.dueDate}>
+                                            {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Announcements */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>
+                        <Home size={20} strokeWidth={1.5} />
+                        お知らせ
+                    </h2>
+                    {filteredAnnouncements.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <Home size={48} strokeWidth={1.5} opacity={0.3} />
+                            <p>お知らせはありません</p>
+                        </div>
+                    ) : (
+                        <div className={styles.announcementList}>
+                            {filteredAnnouncements.map(announcement => (
+                                <div key={announcement.id} className={styles.announcementItem}>
+                                    <div className={styles.announcementHeader}>
+                                        {announcement.is_pinned && (
+                                            <span className={styles.pinBadge}>📌</span>
+                                        )}
+                                        <span className={styles.announcementDate}>
+                                            {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <h4>{announcement.title}</h4>
+                                    <p>{announcement.content?.slice(0, 60)}...</p>
                                 </div>
-                            </Link>
-                        )
-                    })}
-                </div>
-            )}
+                            ))}
+                        </div>
+                    )}
+                </section>
+            </div>
         </div>
     )
 }
