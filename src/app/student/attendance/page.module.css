@@ -63,8 +63,6 @@
     padding: var(--spacing-6);
     margin-bottom: var(--spacing-8);
     box-shadow: var(--shadow-sm);
-    overflow-x: auto;
-    /* Enable horizontal scroll */
 }
 
 .sectionTitle {
@@ -77,13 +75,11 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
-    /* Force minimum width to ensure layout matches screenshot */
 }
 
 .table th,
 .table td {
-    padding: var(--spacing-4) var(--spacing-4);
+    padding: var(--spacing-3) var(--spacing-4);
     text-align: left;
     border-bottom: 1px solid var(--border-color);
     font-size: var(--font-size-sm);
@@ -92,14 +88,8 @@
 .table th {
     font-weight: 600;
     color: var(--text-secondary);
-    background: transparent;
-    /* Clean background per screenshot */
-    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
     white-space: nowrap;
-}
-
-.table tbody tr:hover {
-    background-color: var(--bg-subtle);
 }
 
 .table tr:last-child td {
@@ -145,8 +135,6 @@
     .section {
         padding: var(--spacing-3);
         margin-bottom: var(--spacing-4);
-        /* Ensure scroll container works */
-        -webkit-overflow-scrolling: touch;
     }
 
     .sectionTitle {
@@ -154,12 +142,65 @@
         margin-bottom: var(--spacing-2);
     }
 
-    /* Keep table as table on mobile, just scrollable */
-    .table th,
+    /* Table to Card Transformation */
+    .table {
+        border: none;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody,
+    .table tr,
     .table td {
-        padding: var(--spacing-3) var(--spacing-2);
+        display: block;
+        width: 100%;
+    }
+
+    .table tr {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-3);
+        padding: var(--spacing-3);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Remove default border from bottom of td since we are in card mode */
+    .table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        border-bottom: 1px dashed var(--border-color);
+        text-align: right;
         font-size: 0.75rem;
     }
 
-    /* Sticky first column for better UX if needed, but simple scroll is often enough for this width */
+    .table tr:last-child td {
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+    .table td:last-child {
+        border-bottom: none;
+    }
+
+    .table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        margin-right: var(--spacing-4);
+        text-align: left;
+    }
+
+    .empty {
+        padding: var(--spacing-4);
+        font-size: 0.75rem;
+    }
 }
