@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { sendBroadcast } from '@/actions/messenger'
-import { Send, Users, UserCheck, AlertCircle } from 'lucide-react'
+import { sendUnifiedBroadcast } from '@/actions/broadcast'
+import { Send, Users, UserCheck, AlertCircle, MessageCircle, Send as SendIcon } from 'lucide-react'
 
 export default function BroadcastForm({ classes }) {
     const [targetType, setTargetType] = useState('class') // 'all', 'class', 'students'
     const [targetValue, setTargetValue] = useState('')
+    const [channels, setChannels] = useState(['messenger', 'telegram'])
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
@@ -19,7 +20,12 @@ export default function BroadcastForm({ classes }) {
         setLoading(true)
         setResult(null)
 
-        const res = await sendBroadcast(message, targetType, targetValue)
+        if (channels.length === 0) return alert('配信先アプリを選択してください')
+
+        setLoading(true)
+        setResult(null)
+
+        const res = await sendUnifiedBroadcast(message, targetType, targetValue, channels)
         setLoading(false)
         setResult(res)
 
@@ -91,6 +97,35 @@ export default function BroadcastForm({ classes }) {
                     )}
                 </div>
 
+                {/* Channel Selection */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>配信アプリ</label>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={channels.includes('messenger')}
+                                onChange={(e) => {
+                                    if (e.target.checked) setChannels([...channels, 'messenger'])
+                                    else setChannels(channels.filter(c => c !== 'messenger'))
+                                }}
+                            />
+                            <span>Messenger</span>
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={channels.includes('telegram')}
+                                onChange={(e) => {
+                                    if (e.target.checked) setChannels([...channels, 'telegram'])
+                                    else setChannels(channels.filter(c => c !== 'telegram'))
+                                }}
+                            />
+                            <span>Telegram</span>
+                        </label>
+                    </div>
+                </div>
+
                 {/* Message Input */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontWeight: '500' }}>メッセージ内容</label>
@@ -153,6 +188,9 @@ export default function BroadcastForm({ classes }) {
                             </div>
                             <div>
                                 送信数: <strong>{result.count}</strong> 件
+                                <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
+                                    (Messenger: {result.results?.messenger?.count || 0}, Telegram: {result.results?.telegram?.count || 0})
+                                </div>
                                 {result.failed > 0 && <span style={{ marginLeft: '12px', color: '#dc2626' }}>失敗: {result.failed} 件</span>}
                             </div>
                             {result.count === 0 && result.failed === 0 && (
