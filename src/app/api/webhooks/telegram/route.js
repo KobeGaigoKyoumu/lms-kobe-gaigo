@@ -55,8 +55,14 @@ export async function POST(req) {
                 await sendTelegramMessage(chatId, `📊 成績はこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/grades`);
             } else if (text === '/attendance') {
                 await sendTelegramMessage(chatId, `📅 出席状況はこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/attendance`);
+            } else if (text === '/announcements') {
+                await sendTelegramMessage(chatId, `📢 お知らせはこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/announcements`);
+            } else if (text === '/profile') {
+                await sendTelegramMessage(chatId, `👤 プロフィールはこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/profile`);
+            } else if (text === '/calendar') {
+                await sendTelegramMessage(chatId, `🗓 カレンダーはこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/calendar`);
             } else if (text === '/help') {
-                await sendTelegramMessage(chatId, `🤖 **コマンド一覧**\n\n/grades - 成績を確認\n/attendance - 出席率を確認\n/unlink - 連携を解除\n/help - このメッセージを表示`);
+                await sendTelegramMessage(chatId, `🤖 **コマンド一覧**\n\n/grades - 成績\n/attendance - 出席率\n/announcements - お知らせ\n/profile - プロフィール\n/calendar - カレンダー`);
             } else if (text === '/my_id') {
                 await sendTelegramMessage(chatId, `🆔 あなたのTelegram Chat IDは:\n\`${chatId}\`\nです。`);
             } else if (text === '/unlink') {
