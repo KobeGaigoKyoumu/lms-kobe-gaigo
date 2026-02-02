@@ -4,6 +4,7 @@ export default function manifest() {
         short_name: 'LMS',
         description: '神戸外語 LMS Application',
         start_url: '/',
+        scope: '/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#3b82f6',

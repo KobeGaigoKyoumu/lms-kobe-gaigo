@@ -3,10 +3,11 @@ import "./globals.css";
 export const metadata = {
   title: "神戸外語 LMS",
   description: "神戸外語日本語学校の学習管理システム",
-  manifest: "/manifest.webmanifest",
-  icons: {
-    icon: "/vercel.svg",
-    apple: "/icon-192.png",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "LMS 神戸外語",
   },
 };
 
