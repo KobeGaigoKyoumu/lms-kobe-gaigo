@@ -57,7 +57,9 @@ export async function loginStudent(formData) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: MAX_AGE,
+            expires: new Date(Date.now() + MAX_AGE * 1000),
             path: '/',
+            sameSite: 'lax',
         })
 
     } catch (e) {

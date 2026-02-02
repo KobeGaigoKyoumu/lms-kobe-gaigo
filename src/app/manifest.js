@@ -7,19 +7,8 @@ export default function manifest() {
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#3b82f6',
-        icons: [
-            {
-                src: '/icon.png',
-                sizes: '192x192',
-                type: 'image/png',
-                purpose: 'any maskable',
-            },
-            {
-                src: '/icon.png',
-                sizes: '512x512',
-                type: 'image/png',
-                purpose: 'any maskable',
-            },
-        ],
+        background_color: '#ffffff',
+        theme_color: '#3b82f6',
     }
+}
 }
