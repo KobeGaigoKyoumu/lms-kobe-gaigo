@@ -51,9 +51,22 @@ export async function POST(req) {
                     // Case: /start (no params)
                     await sendTelegramMessage(chatId, `こんにちは！LMSと連携するには、マイページにある「Telegram連携」ボタンから再度アクセスしてください。`);
                 }
+            } else if (text === '/grades') {
+                await sendTelegramMessage(chatId, `📊 成績はこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/grades`);
+            } else if (text === '/attendance') {
+                await sendTelegramMessage(chatId, `📅 出席状況はこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/attendance`);
+            } else if (text === '/help') {
+                await sendTelegramMessage(chatId, `🤖 **コマンド一覧**\n\n/grades - 成績を確認\n/attendance - 出席率を確認\n/unlink - 連携を解除\n/help - このメッセージを表示`);
+            } else if (text === '/unlink') {
+                const result = await unlinkStudentFromTelegram(chatId);
+                if (result.success) {
+                    await sendTelegramMessage(chatId, `✅ 連携を解除しました。\n再度連携する場合はLMSのマイページから行ってください。`);
+                } else {
+                    await sendTelegramMessage(chatId, `⚠️ 解除に失敗しました。既に解除されている可能性があります。`);
+                }
             } else {
                 // Other messages
-                await sendTelegramMessage(chatId, 'Messengerで先生にメッセージしてください。');
+                await sendTelegramMessage(chatId, 'コマンドが認識されませんでした。メニューから選択するか、 /help でコマンドを確認してください。');
             }
         }
 
@@ -98,6 +111,25 @@ async function linkStudentToTelegram(studentId, chatId) {
 
     console.log('Successfully linked student:', student.full_name);
     return { success: true, studentName: student.full_name };
+}
+
+/**
+ * Unlink Telegram Chat ID
+ */
+async function unlinkStudentFromTelegram(chatId) {
+    console.log(`Unlinking Telegram Chat ID ${chatId}`);
+    const chatIdStr = String(chatId);
+
+    const { error } = await supabase
+        .from('students')
+        .update({ telegram_chat_id: null })
+        .eq('telegram_chat_id', chatIdStr);
+
+    if (error) {
+        console.error('Error unlinking student:', error);
+        return { success: false, error: error.message };
+    }
+    return { success: true };
 }
 
 /**
