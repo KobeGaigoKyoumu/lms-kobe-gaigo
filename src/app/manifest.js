@@ -10,7 +10,13 @@ export default function manifest() {
         icons: [
             {
                 src: '/vercel.svg',
-                sizes: 'any',
+                sizes: '192x192',
+                type: 'image/svg+xml',
+                purpose: 'any maskable',
+            },
+            {
+                src: '/vercel.svg',
+                sizes: '512x512',
                 type: 'image/svg+xml',
                 purpose: 'any maskable',
             },
