@@ -34,6 +34,16 @@ export const getMenuItems = (role) => {
                 )
             },
             {
+                href: '/student/homework',
+                label: '課題',
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <rect x="7" y="2" width="6" height="4" rx="1" />
+                    </svg>
+                )
+            },
+            {
                 href: '/student/attendance',
                 label: '出席率',
                 icon: (
