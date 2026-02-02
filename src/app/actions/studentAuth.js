@@ -18,7 +18,7 @@ const createAdminClient = () => {
 }
 
 const COOKIE_NAME = 'student_session'
-const MAX_AGE = 60 * 60 * 24 * 7 // 1 week
+const MAX_AGE = 60 * 60 * 24 * 90 // 3 months (90 days)
 
 export async function loginStudent(formData) {
     try {
