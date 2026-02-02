@@ -7,7 +7,7 @@ import { Send, Users, UserCheck, AlertCircle, MessageCircle, Send as SendIcon } 
 export default function BroadcastForm({ classes }) {
     const [targetType, setTargetType] = useState('class') // 'all', 'class', 'students'
     const [targetValue, setTargetValue] = useState('')
-    const [channels, setChannels] = useState(['messenger', 'telegram'])
+    const [channels, setChannels] = useState(['telegram'])
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
@@ -104,17 +104,6 @@ export default function BroadcastForm({ classes }) {
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                             <input
                                 type="checkbox"
-                                checked={channels.includes('messenger')}
-                                onChange={(e) => {
-                                    if (e.target.checked) setChannels([...channels, 'messenger'])
-                                    else setChannels(channels.filter(c => c !== 'messenger'))
-                                }}
-                            />
-                            <span>Messenger</span>
-                        </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                            <input
-                                type="checkbox"
                                 checked={channels.includes('telegram')}
                                 onChange={(e) => {
                                     if (e.target.checked) setChannels([...channels, 'telegram'])
@@ -189,7 +178,7 @@ export default function BroadcastForm({ classes }) {
                             <div>
                                 送信数: <strong>{result.count}</strong> 件
                                 <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
-                                    (Messenger: {result.results?.messenger?.count || 0}, Telegram: {result.results?.telegram?.count || 0})
+                                    (Telegram: {result.results?.telegram?.count || 0})
                                 </div>
                                 {result.failed > 0 && <span style={{ marginLeft: '12px', color: '#dc2626' }}>失敗: {result.failed} 件</span>}
                             </div>

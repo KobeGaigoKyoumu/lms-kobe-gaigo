@@ -1,11 +1,9 @@
 'use server'
 
-import { sendBroadcast as sendMessengerBroadcast } from './messenger'
 import { sendTelegramBroadcast } from './telegram'
 
-export async function sendUnifiedBroadcast(message, targetType, targetValue, channels = ['messenger', 'telegram']) {
+export async function sendUnifiedBroadcast(message, targetType, targetValue, channels = ['telegram']) {
     const results = {
-        messenger: null,
         telegram: null,
         totalSent: 0,
         totalFailed: 0,
@@ -14,22 +12,6 @@ export async function sendUnifiedBroadcast(message, targetType, targetValue, cha
 
     // Execute in parallel
     const promises = []
-
-    if (channels.includes('messenger')) {
-        promises.push(
-            sendMessengerBroadcast(message, targetType, targetValue)
-                .then(res => {
-                    results.messenger = res
-                    if (res.success) {
-                        results.totalSent += res.count || 0
-                        results.totalFailed += res.failed || 0
-                        if (res.details) results.errors.push(...res.details.map(d => `[Messenger] ${d.error}`))
-                    } else {
-                        results.errors.push(`[Messenger] ${res.error}`)
-                    }
-                })
-        )
-    }
 
     if (channels.includes('telegram')) {
         promises.push(

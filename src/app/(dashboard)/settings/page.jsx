@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
-import { getMessengerStatus, getPageId } from '@/actions/messenger'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 
 export default async function SettingsPage() {
