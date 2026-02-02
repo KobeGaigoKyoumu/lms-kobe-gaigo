@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/layout/Sidebar'
+import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 
 export default async function DashboardLayout({ children }) {
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children }) {
         <div className={styles.wrapper}>
             <Sidebar user={user} role={userRole} />
             <main className={styles.main}>
+                <MobileMenu role={userRole} />
                 {children}
             </main>
         </div>

@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
 import styles from './page.module.css'
-import MobileMenu from '@/components/layout/MobileMenu'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,9 +87,6 @@ export default async function StudentDashboard() {
 
     return (
         <div className={styles.page}>
-            {/* Header section */}
-            <MobileMenu role="student" />
-
             <header className={styles.header}>
                 <div>
                     <h1 className={styles.title}>おかえりなさい、{firstName}さん</h1>

@@ -2,6 +2,7 @@ import { logoutStudent, getStudentSession } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/layout/Sidebar'
+import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 
 export default async function StudentLayout({ children }) {
@@ -38,6 +39,7 @@ export default async function StudentLayout({ children }) {
 
                 {/* Main Content */}
                 <main className={styles.main}>
+                    <MobileMenu role="student" />
                     {children}
                 </main>
             </div>
