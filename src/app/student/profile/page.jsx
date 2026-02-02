@@ -209,24 +209,24 @@ export default async function StudentProfilePage() {
                     <h2 className={styles.sectionTitle}>JLPT受験履歴</h2>
                     {jlptHistory.length > 0 ? (
                         <div className="overflow-x-auto">
-                            <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                            <table className={styles.table}>
                                 <thead>
-                                    <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
-                                        <th style={{ padding: '8px' }}>実施回</th>
-                                        <th style={{ padding: '8px' }}>レベル</th>
-                                        <th style={{ padding: '8px' }}>合否</th>
-                                        <th style={{ padding: '8px' }}>総合得点</th>
-                                        <th style={{ padding: '8px' }}>言語知識</th>
-                                        <th style={{ padding: '8px' }}>読解</th>
-                                        <th style={{ padding: '8px' }}>聴解</th>
+                                    <tr>
+                                        <th className={styles.th}>実施回</th>
+                                        <th className={styles.th}>レベル</th>
+                                        <th className={styles.th}>合否</th>
+                                        <th className={styles.th}>総合得点</th>
+                                        <th className={styles.th}>言語知識</th>
+                                        <th className={styles.th}>読解</th>
+                                        <th className={styles.th}>聴解</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {jlptHistory.map((record, index) => (
-                                        <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                            <td style={{ padding: '8px' }}>{record.session}</td>
-                                            <td style={{ padding: '8px' }}>{record.level}</td>
-                                            <td style={{ padding: '8px' }}>
+                                        <tr key={index}>
+                                            <td className={styles.td}>{record.session}</td>
+                                            <td className={styles.td}>{record.level}</td>
+                                            <td className={styles.td}>
                                                 <span style={{
                                                     color: record.result === '合格' ? '#10b981' : '#ef4444',
                                                     fontWeight: 'bold'
@@ -234,8 +234,8 @@ export default async function StudentProfilePage() {
                                                     {record.result}
                                                 </span>
                                             </td>
-                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{record.score}</td>
-                                            <td style={{ padding: '8px' }}>
+                                            <td className={styles.td} style={{ fontWeight: 'bold' }}>{record.score}</td>
+                                            <td className={styles.td}>
                                                 <div>{record.sectionScores?.knowledge || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.knowledge) && (
                                                     <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.knowledge)), fontSize: '0.9em', fontWeight: 'bold' }}>
@@ -244,7 +244,7 @@ export default async function StudentProfilePage() {
                                                 )}
                                                 {['N4', 'N5'].includes(record.level) && <span style={{ fontSize: '0.8em', color: '#666' }}>(読解含)</span>}
                                             </td>
-                                            <td style={{ padding: '8px' }}>
+                                            <td className={styles.td}>
                                                 <div>{record.sectionScores?.reading || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.reading) && (
                                                     <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.reading)), fontSize: '0.9em', fontWeight: 'bold' }}>
@@ -252,7 +252,7 @@ export default async function StudentProfilePage() {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td style={{ padding: '8px' }}>
+                                            <td className={styles.td}>
                                                 <div>{record.sectionScores?.listening || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.listening) && (
                                                     <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.listening)), fontSize: '0.9em', fontWeight: 'bold' }}>
