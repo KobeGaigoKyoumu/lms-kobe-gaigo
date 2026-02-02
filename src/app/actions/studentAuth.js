@@ -11,15 +11,15 @@ const createAdminClient = () => {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('Missing Supabase environment variables')
         throw new Error('Server configuration error')
     }
 
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
-const COOKIE_NAME = 'student_id_session'
-const MAX_AGE = 60 * 60 * 24 * 365 // 1 year
+// FRESH COOKIE NAME to clear any previous corrupted state
+const COOKIE_NAME = 'kobe_student_session_v1'
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
 export async function loginStudent(formData) {
     const className = formData.get('className')
@@ -45,14 +45,14 @@ export async function loginStudent(formData) {
         }
 
         const cookieStore = await cookies()
-        const expires = new Date(Date.now() + MAX_AGE * 1000)
+        const expiryDate = new Date(Date.now() + ONE_YEAR_MS)
 
-        // Store ONLY the ID to avoid JSON encoding issues in mobile cookies
+        // Use a simple string value with explicit expires and Max-Age
         cookieStore.set(COOKIE_NAME, student.student_id_text, {
             httpOnly: true,
             secure: true,
-            maxAge: MAX_AGE,
-            expires: expires,
+            maxAge: ONE_YEAR_MS / 1000,
+            expires: expiryDate,
             path: '/',
             sameSite: 'lax',
             priority: 'high'
@@ -68,16 +68,15 @@ export async function loginStudent(formData) {
 export async function logoutStudent() {
     const cookieStore = await cookies()
     cookieStore.delete(COOKIE_NAME)
+    // Clear old versions too
+    cookieStore.delete('student_id_session')
+    cookieStore.delete('student_session')
     redirect('/login')
 }
 
-/**
- * Get the current student session.
- * Cached per-request to avoid multiple DB lookups.
- */
 export const getStudentSession = cache(async () => {
     const cookieStore = await cookies()
-    const studentId = cookieStore.get(COOKIE_NAME)?.value
+    const studentId = cookieStore.get(COOKIE_NAME)?.value || cookieStore.get('student_id_session')?.value
 
     if (!studentId) return null
 

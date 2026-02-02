@@ -27,7 +27,7 @@ export async function updateSession(request) {
         }
     )
 
-    // Supabase session
+    // Verify Supabase session
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -37,29 +37,20 @@ export async function updateSession(request) {
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    // Standardized student session cookie name
-    const COOKIE_NAME = 'student_id_session'
-    const studentSession = request.cookies.get(COOKIE_NAME)
+    // Check for any of our student session cookies
+    const currentSession = request.cookies.get('kobe_student_session_v1')
+    const legacySession = request.cookies.get('student_id_session')
+    const hasStudentSession = !!(currentSession || legacySession)
 
     // Redirect to login if NO session exists and it's a protected path
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !studentSession) {
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !hasStudentSession) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
 
-    // Refresh student session expiration if it exists
-    // This ensures the 1-year window moves forward as the user uses the app
-    if (studentSession) {
-        supabaseResponse.cookies.set(COOKIE_NAME, studentSession.value, {
-            httpOnly: true,
-            secure: true,
-            maxAge: 60 * 60 * 24 * 365,
-            path: '/',
-            sameSite: 'lax',
-            priority: 'high'
-        })
-    }
+    // NOTE: Removed Refresh logic to avoid cookie corruption on mobile browsers
+    // Expiration is handled by the initial cookie set in studentAuth.js
 
     return supabaseResponse
 }
