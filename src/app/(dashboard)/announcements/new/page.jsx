@@ -166,7 +166,7 @@ export default function NewAnnouncementPage() {
 
                 let messageString = `【お知らせ：${formData.title}】\n\n${formData.content}`;
                 if (formData.sender_name) {
-                    messageString += `\n　\n（${formData.sender_name}） より\n　`;
+                    messageString += `\n\n(${formData.sender_name}) より`;
                 }
 
                 // 添付ファイルがあればリンクを追加
