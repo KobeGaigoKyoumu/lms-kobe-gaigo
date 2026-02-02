@@ -57,6 +57,8 @@ export async function POST(req) {
                 await sendTelegramMessage(chatId, `📅 出席状況はこちらから確認できます。\nhttps://lms-kobe-gaigo.vercel.app/student/attendance`);
             } else if (text === '/help') {
                 await sendTelegramMessage(chatId, `🤖 **コマンド一覧**\n\n/grades - 成績を確認\n/attendance - 出席率を確認\n/unlink - 連携を解除\n/help - このメッセージを表示`);
+            } else if (text === '/my_id') {
+                await sendTelegramMessage(chatId, `🆔 あなたのTelegram Chat IDは:\n\`${chatId}\`\nです。`);
             } else if (text === '/unlink') {
                 const result = await unlinkStudentFromTelegram(chatId);
                 if (result.success) {
