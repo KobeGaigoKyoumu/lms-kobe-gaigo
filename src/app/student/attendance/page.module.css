@@ -103,13 +103,44 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     .page {
-        padding: var(--spacing-4);
+        padding: var(--spacing-2);
+    }
+
+    .title {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-4);
     }
 
     .statsGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        /* Try 2 cols for compactness */
+        gap: var(--spacing-2);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .statCard {
+        padding: var(--spacing-3);
+    }
+
+    .statLabel {
+        font-size: 0.65rem;
+        margin-bottom: 2px;
+    }
+
+    .statValue {
+        font-size: 1.25rem;
+    }
+
+    .section {
+        padding: var(--spacing-3);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .sectionTitle {
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-2);
     }
 
     /* Table to Card Transformation */
@@ -132,8 +163,8 @@
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-4);
-        padding: var(--spacing-4);
+        margin-bottom: var(--spacing-3);
+        padding: var(--spacing-3);
         box-shadow: var(--shadow-sm);
     }
 
@@ -146,9 +177,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: var(--spacing-2) 0;
+        padding: 4px 0;
         border-bottom: 1px dashed var(--border-color);
         text-align: right;
+        font-size: 0.75rem;
     }
 
     .table tr:last-child td {
@@ -163,8 +195,13 @@
         content: attr(data-label);
         font-weight: 500;
         color: var(--text-secondary);
-        font-size: var(--font-size-sm);
+        font-size: 0.7rem;
         margin-right: var(--spacing-4);
         text-align: left;
+    }
+
+    .empty {
+        padding: var(--spacing-4);
+        font-size: 0.75rem;
     }
 }

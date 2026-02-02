@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
-import styles from '@/app/(dashboard)/calendar/page.module.css'
+import styles from './page.module.css'
 import CalendarView from '@/app/(dashboard)/calendar/CalendarView'
 
 // Helper to create admin client for server-side fetching

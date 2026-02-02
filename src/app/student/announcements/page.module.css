@@ -1,0 +1,482 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-6);
+}
+
+.title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.error {
+    background: var(--error-50);
+    border: 1px solid var(--error-500);
+    color: var(--error-600);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-4);
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-16);
+    text-align: center;
+    color: var(--text-tertiary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.empty p {
+    margin-top: var(--spacing-4);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-5);
+    transition: all var(--transition-base);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-3);
+    flex-wrap: wrap;
+}
+
+.pinBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--warning-50);
+    color: var(--warning-600);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-full);
+}
+
+.courseBadge {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--primary-50);
+    color: var(--primary-600);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-full);
+}
+
+.date {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-left: auto;
+}
+
+.cardTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-3);
+}
+
+.cardContent {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-4);
+    white-space: pre-wrap;
+}
+
+.attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.attachmentItem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.attachmentItem:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    color: var(--primary-600);
+}
+
+.attachmentItem svg {
+    color: var(--text-tertiary);
+}
+
+.attachmentItem:hover svg {
+    color: var(--primary-500);
+}
+
+.cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-3);
+    border-top: 1px solid var(--border-color);
+}
+
+.author {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.authorAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary-400), var(--secondary-400));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.authorAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Actions and Buttons */
+.createBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.createBtn:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    transform: translateY(-1px);
+}
+
+.emptyBtn {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--primary-500);
+    color: white;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.emptyBtn:hover {
+    background: var(--primary-600);
+}
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.pinBtn {
+    padding: var(--spacing-1);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    transition: transform var(--transition-fast);
+}
+
+.pinBtn:hover {
+    transform: scale(1.1);
+}
+
+.editBtn,
+.deleteBtn {
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.editBtn {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+}
+
+.editBtn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.deleteBtn {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid transparent;
+}
+
+.deleteBtn:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.deleteConfirm {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+    background: #fef2f2;
+    border-radius: var(--radius-lg);
+}
+
+.deleteConfirm span {
+    font-size: var(--font-size-sm);
+    color: #991b1b;
+}
+
+.cancelBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.confirmDeleteBtn {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.confirmDeleteBtn:hover {
+    background: #b91c1c;
+}
+
+.deliveryOptions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.radioLabel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.radioLabel input[type="radio"] {
+    accent-color: var(--primary-500);
+    width: 16px;
+    height: 16px;
+}
+
+.confirmDeleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.fileInput {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.fileInput:hover {
+    border-color: var(--primary-400);
+    background: var(--primary-50);
+}
+
+.selectedFiles,
+.fileList {
+    margin-top: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.fileItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.removeFileBtn {
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.removeFileBtn:hover {
+    text-decoration: underline;
+}
+
+.noFiles {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.senderName {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    margin-left: var(--spacing-1);
+    font-style: italic;
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: var(--spacing-2);
+    }
+
+    .header {
+        margin-bottom: var(--spacing-3);
+    }
+
+    .title {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .subtitle {
+        font-size: 0.75rem;
+    }
+
+    .list {
+        gap: var(--spacing-2);
+    }
+
+    .card {
+        padding: var(--spacing-3);
+    }
+
+    .cardHeader {
+        margin-bottom: var(--spacing-2);
+        gap: 4px;
+    }
+
+    .cardTitle {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-2);
+    }
+
+    .cardContent {
+        font-size: 0.75rem;
+        margin-bottom: var(--spacing-2);
+        line-height: 1.5;
+    }
+
+    .attachments {
+        gap: 4px;
+        margin-bottom: var(--spacing-2);
+    }
+
+    .attachmentItem {
+        padding: 4px 6px;
+        font-size: 0.7rem;
+    }
+
+    .cardFooter {
+        padding-top: var(--spacing-2);
+    }
+
+    .author {
+        font-size: 0.7rem;
+    }
+
+    .authorAvatar {
+        width: 20px;
+        height: 20px;
+    }
+
+    .pinBadge,
+    .courseBadge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    .date {
+        font-size: 0.65rem;
+    }
+}

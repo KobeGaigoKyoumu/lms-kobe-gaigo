@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
-import styles from '@/app/(dashboard)/settings/page.module.css'
+import styles from './page.module.css'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 
