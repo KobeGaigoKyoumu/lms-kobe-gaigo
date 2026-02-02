@@ -18,12 +18,15 @@ export async function getTelegramStatus(injectedSession = null) {
             .eq('user_id', user.id)
             .single()
 
-        if (!student) return { connected: false, studentId: null }
-
-        return {
-            connected: !!student.telegram_chat_id,
-            studentId: student.student_id_text
+        if (student) {
+            return {
+                connected: !!student.telegram_chat_id,
+                studentId: student.student_id_text,
+                debug: { source: 'supabase_auth', userId: user.id }
+            }
         }
+
+        console.log('[TelegramStatus] User found but no student profile. Falling through to session check.')
     }
 
     // 2. Try Student Session (Cookie-based Student)
