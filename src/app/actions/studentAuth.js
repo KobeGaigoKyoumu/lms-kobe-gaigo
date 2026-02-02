@@ -3,6 +3,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { cache } from 'react'
 
 // Helper to create admin client
 const createAdminClient = () => {
@@ -10,16 +11,15 @@ const createAdminClient = () => {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('Missing Supabase environment variables for Service Role')
+        console.error('Missing Supabase environment variables')
         throw new Error('Server configuration error')
     }
 
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
-const COOKIE_NAME = 'student_session'
-// 1 year in seconds
-const MAX_AGE = 60 * 60 * 24 * 365
+const COOKIE_NAME = 'student_id_session'
+const MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
 export async function loginStudent(formData) {
     const className = formData.get('className')
@@ -32,10 +32,10 @@ export async function loginStudent(formData) {
     try {
         const supabase = createAdminClient()
 
-        // 1. Verify existence in students table
+        // Verify student
         const { data: student, error } = await supabase
             .from('students')
-            .select('*')
+            .select('student_id_text, full_name, class_name')
             .eq('student_id_text', studentId.trim())
             .eq('class_name', className.trim())
             .single()
@@ -44,32 +44,25 @@ export async function loginStudent(formData) {
             return { error: 'ログイン情報が正しくありません。' }
         }
 
-        // 2. Create Session Data
-        const sessionData = {
-            studentId: student.student_id_text,
-            name: student.full_name,
-            className: student.class_name,
-            loggedInAt: new Date().toISOString()
-        }
-
         const cookieStore = await cookies()
+        const expires = new Date(Date.now() + MAX_AGE * 1000)
 
-        // Use set with options that are most compatible with mobile browsers
-        cookieStore.set(COOKIE_NAME, JSON.stringify(sessionData), {
+        // Store ONLY the ID to avoid JSON encoding issues in mobile cookies
+        cookieStore.set(COOKIE_NAME, student.student_id_text, {
             httpOnly: true,
             secure: true,
             maxAge: MAX_AGE,
+            expires: expires,
             path: '/',
             sameSite: 'lax',
             priority: 'high'
         })
 
+        return { success: true }
     } catch (e) {
-        console.error('Student Login Critical Error:', e)
+        console.error('Login Error:', e)
         return { error: 'システムエラーが発生しました。' }
     }
-
-    return { success: true }
 }
 
 export async function logoutStudent() {
@@ -78,16 +71,32 @@ export async function logoutStudent() {
     redirect('/login')
 }
 
-export async function getStudentSession() {
+/**
+ * Get the current student session.
+ * Cached per-request to avoid multiple DB lookups.
+ */
+export const getStudentSession = cache(async () => {
     const cookieStore = await cookies()
-    const session = cookieStore.get(COOKIE_NAME)
+    const studentId = cookieStore.get(COOKIE_NAME)?.value
 
-    if (!session) return null
+    if (!studentId) return null
 
     try {
-        // Double check it's a valid JSON
-        return JSON.parse(session.value)
+        const supabase = createAdminClient()
+        const { data: student, error } = await supabase
+            .from('students')
+            .select('student_id_text, full_name, class_name')
+            .eq('student_id_text', studentId)
+            .single()
+
+        if (error || !student) return null
+
+        return {
+            studentId: student.student_id_text,
+            name: student.full_name,
+            className: student.class_name
+        }
     } catch (e) {
         return null
     }
-}
+})

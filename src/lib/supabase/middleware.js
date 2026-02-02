@@ -27,36 +27,27 @@ export async function updateSession(request) {
         }
     )
 
-    // セッションを更新
+    // Verify session
     const {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // 未認証ユーザーを login にリダイレクト（公開ページを除く）
-    // NOTE: /student 配下は独自の認証（student_session cookie）を使用するため、ここではリダイレクトしない
     const publicPaths = ['/login', '/auth/callback']
     const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    const studentSession = request.cookies.get('student_session')
+    // Check for NEW cookie name 'student_id_session'
+    const studentSession = request.cookies.get('student_id_session')
 
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !studentSession) {
+    // Also check for OLD cookie name to avoid immediate logouts for users during transition
+    const oldStudentSession = request.cookies.get('student_session')
+    const hasAnyStudentSession = studentSession || oldStudentSession
+
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !hasAnyStudentSession) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
-    }
-
-    // Refresh student session expiration if it exists
-    if (studentSession) {
-        supabaseResponse.cookies.set('student_session', studentSession.value, {
-            httpOnly: true,
-            secure: true,
-            maxAge: 60 * 60 * 24 * 365,
-            path: '/',
-            sameSite: 'lax',
-            priority: 'high'
-        })
     }
 
     return supabaseResponse
