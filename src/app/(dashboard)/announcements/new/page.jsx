@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { createClient } from '@/lib/supabase/client'
 import { sendTelegramBroadcast } from '@/actions/telegram'
 import { uploadAnnouncementFile } from '@/app/actions/announcements'
 import styles from './page.module.css'
