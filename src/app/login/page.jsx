@@ -196,14 +196,16 @@ export default function LoginPage() {
                 {loginMode === 'student' && (
                     <form action={handleStudentLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
+                            <label htmlFor="className" style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
                                 クラス名 (例: 2-1)
                             </label>
                             <input
+                                id="className"
                                 name="className"
                                 type="text"
                                 placeholder="例: 2-1"
                                 required
+                                autoComplete="on"
                                 style={{
                                     width: '100%',
                                     padding: '10px',
@@ -214,14 +216,16 @@ export default function LoginPage() {
                             />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
+                            <label htmlFor="studentId" style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
                                 学籍番号 (パスコード)
                             </label>
                             <input
+                                id="studentId"
                                 name="studentId"
                                 type="text"
                                 placeholder="例: 2404159"
                                 required
+                                autoComplete="on"
                                 style={{
                                     width: '100%',
                                     padding: '10px',
