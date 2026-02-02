@@ -1,27 +1,50 @@
 'use server'
 
 import { createClient } from "@/lib/supabase/server"
+import { getStudentSession } from "@/app/actions/studentAuth"
 
 export async function getTelegramStatus() {
     const supabase = await createClient()
 
-    // Get current user
+    // 1. Try Supabase Auth (Teacher/Admin)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { connected: false, studentId: null }
 
-    // Get student profile
-    const { data: student } = await supabase
-        .from('students')
-        .select('student_id_text, telegram_chat_id')
-        .eq('user_id', user.id)
-        .single()
+    if (user) {
+        // Authenticated as User (Teacher/Admin/Student with Auth)
+        const { data: student } = await supabase
+            .from('students')
+            .select('student_id_text, telegram_chat_id')
+            .eq('user_id', user.id)
+            .single()
 
-    if (!student) return { connected: false, studentId: null }
+        if (!student) return { connected: false, studentId: null }
 
-    return {
-        connected: !!student.telegram_chat_id,
-        studentId: student.student_id_text
+        return {
+            connected: !!student.telegram_chat_id,
+            studentId: student.student_id_text
+        }
     }
+
+    // 2. Try Student Session (Cookie-based Student)
+    const studentSession = await getStudentSession()
+
+    if (studentSession && studentSession.studentId) {
+        // Use admin client to query by studentId (since RLS might restrict anon access)
+        const { data: student } = await supabase
+            .from('students')
+            .select('student_id_text, telegram_chat_id')
+            .eq('student_id_text', studentSession.studentId)
+            .single()
+
+        if (!student) return { connected: false, studentId: null }
+
+        return {
+            connected: !!student.telegram_chat_id,
+            studentId: student.student_id_text
+        }
+    }
+
+    return { connected: false, studentId: null }
 }
 
 export async function getBotUsername() {
