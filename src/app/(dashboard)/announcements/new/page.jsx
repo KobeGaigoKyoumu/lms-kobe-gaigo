@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { sendBroadcast } from '@/actions/messenger'
+import { createClient } from '@/lib/supabase/client'
+import { sendTelegramBroadcast } from '@/actions/telegram'
 import { uploadAnnouncementFile } from '@/app/actions/announcements'
 import styles from './page.module.css'
 
@@ -116,7 +117,7 @@ export default function NewAnnouncementPage() {
             }
 
             const isAnnouncement = formData.delivery_method === 'announcement' || formData.delivery_method === 'both'
-            const isMessenger = formData.delivery_method === 'messenger' || formData.delivery_method === 'both'
+            const isTelegram = formData.delivery_method === 'telegram' || formData.delivery_method === 'both'
 
             let insertError = null
             if (isAnnouncement) {
@@ -146,8 +147,8 @@ export default function NewAnnouncementPage() {
             }
 
             let broadcastResults = null
-            // Messenger配信
-            if (isMessenger) {
+            // Telegram配信
+            if (isTelegram) {
                 let targetType = formData.target_type;
                 let targetValue = null;
 
@@ -177,14 +178,14 @@ export default function NewAnnouncementPage() {
                     });
                 }
 
-                const result = await sendBroadcast(messageString, targetType, targetValue);
+                const result = await sendTelegramBroadcast(messageString, targetType, targetValue);
                 if (!result.success) {
-                    console.error('Messenger Broadcast Failed:', result.error);
-                    alert(`Messenger配信に失敗しました: ${result.error}`);
+                    console.error('Telegram Broadcast Failed:', result.error);
+                    alert(`Telegram配信に失敗しました: ${result.error}`);
                 } else {
                     broadcastResults = result;
-                    if (result.count === 0 && isMessenger && !isAnnouncement) {
-                        alert('Messenger送信対象の学生（連携済み）が見つかりませんでした。');
+                    if (result.count === 0 && isTelegram && !isAnnouncement) {
+                        alert('Telegram送信対象の学生（連携済み）が見つかりませんでした。');
                     }
                 }
             }
@@ -195,7 +196,7 @@ export default function NewAnnouncementPage() {
                 successMessage += `\n📎 ${uploadedFileUrls.length}件のファイルを添付しました。`
             }
             if (broadcastResults) {
-                successMessage += `\n💬 ${broadcastResults.count}人の学生にMessengerを送信しました。`
+                successMessage += `\n💬 ${broadcastResults.count}人の学生にTelegramを送信しました。`
                 if (broadcastResults.failed > 0) {
                     successMessage += ` (失敗: ${broadcastResults.failed}人)`
                 }
@@ -451,11 +452,11 @@ export default function NewAnnouncementPage() {
                             <input
                                 type="radio"
                                 name="delivery_method"
-                                value="messenger"
-                                checked={formData.delivery_method === 'messenger'}
+                                value="telegram"
+                                checked={formData.delivery_method === 'telegram'}
                                 onChange={handleChange}
                             />
-                            Messenger配信のみ
+                            Telegram配信のみ
                         </label>
                         <label className={styles.radioLabel}>
                             <input
@@ -465,7 +466,7 @@ export default function NewAnnouncementPage() {
                                 checked={formData.delivery_method === 'both'}
                                 onChange={handleChange}
                             />
-                            お知らせとMessenger両方
+                            お知らせとTelegram両方
                         </label>
                     </div>
                 </div>

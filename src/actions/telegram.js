@@ -138,6 +138,30 @@ export async function sendTelegramBroadcast(message, targetType, targetValue) {
         } else if (targetType === 'students' || targetType === 'individual') {
             const ids = Array.isArray(targetValue) ? targetValue : [targetValue]
             query = query.in('student_id_text', ids)
+        } else if (targetType === 'course') {
+            // Fetch students enrolled in the course
+            const { data: enrollments, error: enrollError } = await supabase
+                .from('enrollments')
+                .select('student_id')
+                .eq('course_id', targetValue)
+
+            if (enrollError) throw enrollError
+
+            const studentIds = enrollments.map(e => e.student_id)
+            if (studentIds.length === 0) {
+                return { success: true, count: 0, message: 'No students enrolled in this course.' }
+            }
+
+            // Resolve UUID -> student_id_text
+            const { data: profiles, error: profileError } = await supabase
+                .from('profiles')
+                .select('student_id_text')
+                .in('id', studentIds)
+
+            if (profileError) throw profileError
+
+            const finalStudentIds = profiles.map(p => p.student_id_text).filter(Boolean)
+            query = query.in('student_id_text', finalStudentIds)
         }
 
         const { data: students, error } = await query

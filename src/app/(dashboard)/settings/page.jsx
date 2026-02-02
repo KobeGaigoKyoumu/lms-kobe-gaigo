@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
-import MessengerConnect from '@/components/messenger/MessengerConnect'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getMessengerStatus, getPageId } from '@/actions/messenger'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
@@ -17,9 +16,8 @@ export default async function SettingsPage() {
         .eq('id', user?.id)
         .single()
 
-    // Messenger連携状態取得
-    const messengerStatus = await getMessengerStatus()
-    const pageId = await getPageId()
+        .eq('id', user?.id)
+        .single()
 
     // Telegram連携状態取得
     const telegramStatus = await getTelegramStatus()
@@ -37,7 +35,6 @@ export default async function SettingsPage() {
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>通知設定</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <MessengerConnect initialStatus={messengerStatus} pageId={pageId} />
                         <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
                     </div>
                 </section>
