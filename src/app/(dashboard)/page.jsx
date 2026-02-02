@@ -13,7 +13,7 @@ export default async function DashboardPage() {
     const studentSession = await getStudentSession()
 
     // Redirect students to their portal if they hit the root dashboard
-    if (studentSession && !user) {
+    if (studentSession) {
         redirect('/student/dashboard')
     }
 

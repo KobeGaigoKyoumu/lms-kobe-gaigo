@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
+import { createClient } from '@/lib/supabase/server'
 
 // Helper to create admin client
 const createAdminClient = () => {
@@ -84,22 +85,69 @@ export async function logoutStudent() {
 export const getStudentSession = cache(async () => {
     try {
         const cookieStore = await cookies()
-        const encoded = cookieStore.get(COOKIE_NAME)?.value || cookieStore.get('kobe_student_session_v1')?.value
+        const encoded = cookieStore.get(COOKIE_NAME)?.value ||
+            cookieStore.get('kobe_student_session_v1')?.value ||
+            cookieStore.get('student_id_session')?.value
 
-        if (!encoded) return null
+        // 1. Check Passcode Cookie
+        if (encoded) {
+            try {
+                // If it's the Base64 version
+                const json = Buffer.from(encoded, 'base64').toString('utf8')
+                const data = JSON.parse(json)
+                return {
+                    studentId: data.studentId,
+                    name: data.name,
+                    className: data.className
+                }
+            } catch {
+                // Fallback for ID-only legacy cookies
+                const supabase = createAdminClient()
+                const { data: student } = await supabase
+                    .from('students')
+                    .select('student_id_text, full_name, class_name')
+                    .eq('student_id_text', encoded)
+                    .single()
 
-        // Decode from Base64
-        // If it's the old version (just ID), this might fail, handled by catch
-        const json = Buffer.from(encoded, 'base64').toString('utf8')
-        const data = JSON.parse(json)
-
-        return {
-            studentId: data.studentId,
-            name: data.name,
-            className: data.className
+                if (student) {
+                    return {
+                        studentId: student.student_id_text,
+                        name: student.full_name,
+                        className: student.class_name
+                    }
+                }
+            }
         }
+
+        // 2. Check Supabase User (Google Login)
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, student_id_text, full_name')
+                .eq('id', user.id)
+                .single()
+
+            if (profile?.role === 'student') {
+                // Fetch class info from students master if missing in profile
+                const { data: studentMaster } = await supabase
+                    .from('students')
+                    .select('class_name')
+                    .eq('student_id_text', profile.student_id_text)
+                    .single()
+
+                return {
+                    studentId: profile.student_id_text,
+                    name: profile.full_name,
+                    className: studentMaster?.class_name || '未設定'
+                }
+            }
+        }
+
+        return null
     } catch (e) {
-        // Fallback for simple ID-only cookies or corrupted data
         return null
     }
 })

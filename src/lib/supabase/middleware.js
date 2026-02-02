@@ -42,8 +42,8 @@ export async function updateSession(request) {
         request.cookies.get('kobe_student_session_v1') ||
         request.cookies.get('student_id_session')
 
-    // Redirect to login if NO session exists and it's a student path
-    if (isStudentPath && !studentSession) {
+    // Redirect to login if NO student session AND NO Supabase user exists for a student path
+    if (isStudentPath && !studentSession && !user) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
