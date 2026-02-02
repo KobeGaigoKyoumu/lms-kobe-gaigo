@@ -359,6 +359,9 @@
 .actionCell {
     display: flex;
     gap: var(--spacing-2);
+    white-space: nowrap;
+    min-width: 120px;
+    justify-content: center;
 }
 
 /* Detail Button */

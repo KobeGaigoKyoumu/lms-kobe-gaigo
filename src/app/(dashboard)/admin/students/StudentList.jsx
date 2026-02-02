@@ -639,7 +639,7 @@ export default function StudentList() {
                                 <th>学年</th>
                                 <th>クラス</th>
                                 <th>ステータス</th>
-                                <th>操作</th>
+                                <th style={{ width: '120px' }}>操作</th>
                             </tr>
                         </thead>
                         <tbody>
