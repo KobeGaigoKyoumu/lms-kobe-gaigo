@@ -27,7 +27,7 @@ try {
 
             const buffer = fs.readFileSync(filePath);
             const content = iconv.decode(buffer, 'Shift_JIS');
-            const lines = content.split(/\r?\n/).slice(0, 3);
+            const lines = content.split(/\r?\n/).slice(0, 15);
 
             lines.forEach((line, index) => {
                 const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
@@ -36,8 +36,9 @@ try {
                     for (let i = 10; i < Math.min(parts.length, 30); i++) {
                         console.log(`${i}: ${parts[i]}`);
                     }
-                } else {
-                    console.log(`Line ${index} ID (idx 3): '${parts[3]}'`);
+                } else if (index < 10) {
+                    // console.log(`Line ${index}:`, parts);
+                    console.log(`Line ${index} ID: '${parts[3]}' Name: '${parts[4]}'`);
                 }
             });
             break;

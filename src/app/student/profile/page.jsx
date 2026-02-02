@@ -34,7 +34,7 @@ export default async function StudentProfilePage() {
     }
 
     // JLPT履歴取得
-    const jlptHistory = await getStudentJlptHistory(session.studentId)
+    const jlptHistory = await getStudentJlptHistory(session.studentId, session.name)
 
     // Helper to format date
     const formatDate = (dateString) => {
