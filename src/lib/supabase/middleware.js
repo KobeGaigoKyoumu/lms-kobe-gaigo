@@ -27,30 +27,30 @@ export async function updateSession(request) {
         }
     )
 
-    // Verify Supabase session
+    // Verify Supabase session (Admin/Teacher)
     const {
         data: { user },
     } = await supabase.auth.getUser()
 
+    // Protected paths
     const publicPaths = ['/login', '/auth/callback']
     const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    // Check for any of our student session cookies
-    const currentSession = request.cookies.get('kobe_student_session_v1')
-    const legacySession = request.cookies.get('student_id_session')
-    const hasStudentSession = !!(currentSession || legacySession)
+    // Check for ANY version of student session
+    // v2 is our new Base64 hardened cookie
+    const hasStudentSession =
+        request.cookies.has('kobe_student_session_v2') ||
+        request.cookies.has('kobe_student_session_v1') ||
+        request.cookies.has('student_id_session')
 
-    // Redirect to login if NO session exists and it's a protected path
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !hasStudentSession) {
+    // If NOT authenticated by Supabase AND NOT by our student cookie AND on a protected path
+    if (!user && !hasStudentSession && !isPublicPath && !isStudentPath && !isWebhook) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
-
-    // NOTE: Removed Refresh logic to avoid cookie corruption on mobile browsers
-    // Expiration is handled by the initial cookie set in studentAuth.js
 
     return supabaseResponse
 }
