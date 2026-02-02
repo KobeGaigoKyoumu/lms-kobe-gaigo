@@ -53,7 +53,7 @@ export async function POST(req) {
                 }
             } else {
                 // Other messages
-                await sendTelegramMessage(chatId, 'このボットは送信専用です。お問い合わせは学校の窓口までお願いします。');
+                await sendTelegramMessage(chatId, 'Messengerで先生にメッセージしてください。');
             }
         }
 
