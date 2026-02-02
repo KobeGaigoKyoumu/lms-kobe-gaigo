@@ -399,8 +399,8 @@
     }
 
     .subjectGrid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-3);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-2);
     }
 
     .subjectSection h2 {
