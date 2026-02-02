@@ -9,15 +9,15 @@ export default function manifest() {
         theme_color: '#3b82f6',
         icons: [
             {
-                src: '/vercel.svg',
+                src: '/icon-192.png',
                 sizes: '192x192',
-                type: 'image/svg+xml',
+                type: 'image/png',
                 purpose: 'any maskable',
             },
             {
-                src: '/vercel.svg',
+                src: '/icon-192.png',
                 sizes: '512x512',
-                type: 'image/svg+xml',
+                type: 'image/png',
                 purpose: 'any maskable',
             },
         ],
