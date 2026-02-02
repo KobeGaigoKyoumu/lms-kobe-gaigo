@@ -150,15 +150,37 @@ function parseLine(line) {
 
     if (cleanParts.length < 10) return null; // Not enough data
 
-    return {
+    const level = cleanParts[2];
+    const result = {
         examName: cleanParts[1],
-        level: cleanParts[2],
+        level: level,
         id: cleanParts[3],
         name: cleanParts[4],
         country: cleanParts[5],
         result: cleanParts[8], // "合格" or "不合格"
         totalScore: cleanParts[9], // "79/180"
     };
+
+    // Extract section scores based on level
+    if (level) {
+        if (/^N[1-3]$/.test(level) && cleanParts.length >= 17) {
+            // N1-N3: Knowledge(12), Reading(14), Listening(16)
+            result.sectionScores = {
+                knowledge: cleanParts[12],
+                reading: cleanParts[14],
+                listening: cleanParts[16]
+            };
+        } else if (/^N[4-5]$/.test(level) && cleanParts.length >= 15) {
+            // N4-N5: Knowledge & Reading(12), Listening(14)
+            result.sectionScores = {
+                knowledge: cleanParts[12], // 言語知識・読解
+                reading: '-',              // N4/5 don't have separate reading score
+                listening: cleanParts[14]
+            };
+        }
+    }
+
+    return result;
 }
 
 export async function getJlptData() {
@@ -366,6 +388,7 @@ export async function getJlptByStudentName(studentName, enrollmentDate = null) {
         level: r.level,
         result: r.result,
         score: r.totalScore,
+        sectionScores: r.sectionScores || null,
         country: r.country,
         studentId: r.studentId || null
     }));
@@ -404,6 +427,7 @@ export async function getJlptByStudentId(studentId, enrollmentDate = null) {
         level: r.level,
         result: r.result,
         score: r.totalScore,
+        sectionScores: r.sectionScores || null,
         country: r.country,
         name: r.name
     }));
