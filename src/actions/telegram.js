@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getStudentSession } from "@/app/actions/studentAuth"
 
-export async function getTelegramStatus() {
+export async function getTelegramStatus(injectedSession = null) {
     const supabase = await createClient()
 
     // 1. Try Supabase Auth (Teacher/Admin)
@@ -27,7 +27,8 @@ export async function getTelegramStatus() {
     }
 
     // 2. Try Student Session (Cookie-based Student)
-    const studentSession = await getStudentSession()
+    const studentSession = injectedSession || await getStudentSession()
+    console.log('[TelegramStatus] Student Session:', studentSession)
 
     if (studentSession && studentSession.studentId) {
         // Use admin client to bypass RLS for session-based access
@@ -36,11 +37,13 @@ export async function getTelegramStatus() {
             process.env.SUPABASE_SERVICE_ROLE_KEY
         )
 
-        const { data: student } = await adminSupabase
+        const { data: student, error } = await adminSupabase
             .from('students')
             .select('student_id_text, telegram_chat_id')
             .eq('student_id_text', studentSession.studentId)
             .single()
+
+        console.log('[TelegramStatus] Admin Query Result:', { student, error })
 
         if (!student) return { connected: false, studentId: null }
 
@@ -50,6 +53,7 @@ export async function getTelegramStatus() {
         }
     }
 
+    console.log('[TelegramStatus] No session found')
     return { connected: false, studentId: null }
 }
 

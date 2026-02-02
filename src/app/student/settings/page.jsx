@@ -12,7 +12,7 @@ export default async function StudentSettingsPage() {
     }
 
     // Telegram連携状態取得
-    const telegramStatus = await getTelegramStatus()
+    const telegramStatus = await getTelegramStatus(session)
     const botUsername = await getBotUsername()
 
     return (
