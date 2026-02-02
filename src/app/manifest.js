@@ -2,7 +2,7 @@ export default function manifest() {
     return {
         name: 'LMS 神戸外語',
         short_name: 'LMS',
-        description: '神戸外語 LMS Application',
+        description: '神戸外語日本語学校の学習管理システム',
         start_url: '/',
         scope: '/',
         display: 'standalone',
