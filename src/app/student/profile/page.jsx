@@ -67,6 +67,16 @@ export default async function StudentProfilePage() {
         return 'C'
     }
 
+    // Helper for grade colors
+    const getGradeColor = (grade) => {
+        switch (grade) {
+            case 'A': return '#10b981' // Green
+            case 'B': return '#f59e0b' // Amber/Orange
+            case 'C': return '#ef4444' // Red
+            default: return '#6b7280' // Gray
+        }
+    }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -228,22 +238,16 @@ export default async function StudentProfilePage() {
                                             <td style={{ padding: '8px' }}>
                                                 <div>{record.sectionScores?.knowledge || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.knowledge) && (
-                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                    <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.knowledge)), fontSize: '0.9em', fontWeight: 'bold' }}>
                                                         評価: {calculateGrade(record.sectionScores?.knowledge)}
                                                     </div>
                                                 )}
                                                 {['N4', 'N5'].includes(record.level) && <span style={{ fontSize: '0.8em', color: '#666' }}>(読解含)</span>}
-                                                {record.referenceInfo && (
-                                                    <div style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
-                                                        {record.referenceInfo.vocabulary?.grade && <span>語彙: {record.referenceInfo.vocabulary.grade} </span>}
-                                                        {record.referenceInfo.grammar?.grade && <span>文法: {record.referenceInfo.grammar.grade}</span>}
-                                                    </div>
-                                                )}
                                             </td>
                                             <td style={{ padding: '8px' }}>
                                                 <div>{record.sectionScores?.reading || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.reading) && (
-                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                    <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.reading)), fontSize: '0.9em', fontWeight: 'bold' }}>
                                                         評価: {calculateGrade(record.sectionScores?.reading)}
                                                     </div>
                                                 )}
@@ -251,7 +255,7 @@ export default async function StudentProfilePage() {
                                             <td style={{ padding: '8px' }}>
                                                 <div>{record.sectionScores?.listening || '-'}</div>
                                                 {calculateGrade(record.sectionScores?.listening) && (
-                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                    <div style={{ color: getGradeColor(calculateGrade(record.sectionScores?.listening)), fontSize: '0.9em', fontWeight: 'bold' }}>
                                                         評価: {calculateGrade(record.sectionScores?.listening)}
                                                     </div>
                                                 )}
