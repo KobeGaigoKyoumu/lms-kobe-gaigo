@@ -55,9 +55,9 @@ export async function loginStudent(formData) {
         const cookieStore = await cookies()
         cookieStore.set(COOKIE_NAME, JSON.stringify(sessionData), {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: MAX_AGE,
-            expires: new Date(Date.now() + MAX_AGE * 1000),
+            secure: true, // Force HTTPS
+            maxAge: 60 * 60 * 24 * 400, // 400 days (Max for many browsers)
+            expires: new Date(Date.now() + 60 * 60 * 24 * 400 * 1000),
             path: '/',
             sameSite: 'lax',
         })
