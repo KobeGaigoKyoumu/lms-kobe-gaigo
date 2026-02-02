@@ -7,8 +7,5 @@ export default function manifest() {
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#3b82f6',
-        background_color: '#ffffff',
-        theme_color: '#3b82f6',
     }
-}
 }
