@@ -1,10 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import styles from './TelegramConnect.module.css'
+import { disconnectTelegram } from '@/actions/telegram'
+import { useRouter } from 'next/navigation'
 
 export default function TelegramConnect({ initialStatus, botUsername }) {
-    const [status] = useState(initialStatus)
+    const [status, setStatus] = useState(initialStatus)
+    const [isPending, startTransition] = useTransition()
+    const router = useRouter()
+
+    const handleDisconnect = async () => {
+        if (!confirm('Telegram連携を解除しますか？')) return
+
+        startTransition(async () => {
+            const res = await disconnectTelegram()
+            if (res.success) {
+                setStatus(prev => ({ ...prev, connected: false }))
+                router.refresh()
+            } else {
+                alert('解除に失敗しました: ' + (res.error || 'Unknown error'))
+            }
+        })
+    }
 
     // Bot username fallback
     if (!botUsername) {
@@ -36,11 +54,20 @@ export default function TelegramConnect({ initialStatus, botUsername }) {
 
             <div className={styles.action}>
                 {status.connected ? (
-                    <div className={styles.connectedBadge}>
-                        <svg className={styles.checkIcon} viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        連携済み
+                    <div className={styles.connectedWrapper}>
+                        <div className={styles.connectedBadge}>
+                            <svg className={styles.checkIcon} viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            <span>連携済み</span>
+                        </div>
+                        <button
+                            onClick={handleDisconnect}
+                            disabled={isPending}
+                            className={styles.disconnectBtn}
+                        >
+                            {isPending ? '解除中...' : '解除する'}
+                        </button>
                     </div>
                 ) : (
                     <a

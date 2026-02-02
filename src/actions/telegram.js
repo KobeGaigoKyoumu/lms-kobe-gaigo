@@ -47,6 +47,42 @@ export async function getTelegramStatus() {
     return { connected: false, studentId: null }
 }
 
+export async function disconnectTelegram() {
+    const supabase = await createClient()
+
+    // 1. Try Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+        const { error } = await supabase
+            .from('students')
+            .update({ telegram_chat_id: null })
+            .eq('user_id', user.id)
+
+        if (error) {
+            console.error('Error disconnecting Telegram (User):', error)
+            return { success: false, error: error.message }
+        }
+        return { success: true }
+    }
+
+    // 2. Try Student Session
+    const studentSession = await getStudentSession()
+    if (studentSession && studentSession.studentId) {
+        const { error } = await supabase
+            .from('students')
+            .update({ telegram_chat_id: null })
+            .eq('student_id_text', studentSession.studentId)
+
+        if (error) {
+            console.error('Error disconnecting Telegram (Session):', error)
+            return { success: false, error: error.message }
+        }
+        return { success: true }
+    }
+
+    return { success: false, error: 'User not authenticated' }
+}
+
 export async function getBotUsername() {
     return process.env.TELEGRAM_BOT_USERNAME || null
 }
