@@ -33,6 +33,15 @@ export default function TelegramConnect({ initialStatus, botUsername }) {
         )
     }
 
+    // Missing Student ID check
+    if (!status?.studentId && !status?.connected) {
+        return (
+            <div className={styles.container}>
+                <p className={styles.error} style={{ color: 'red' }}>エラー: 学生IDが取得できませんでした。再ログインしてください。</p>
+            </div>
+        )
+    }
+
     const connectUrl = `https://t.me/${botUsername}?start=${status.studentId}`
 
     return (

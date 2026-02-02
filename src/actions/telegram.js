@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getStudentSession } from "@/app/actions/studentAuth"
 
 export async function getTelegramStatus() {
@@ -29,8 +30,13 @@ export async function getTelegramStatus() {
     const studentSession = await getStudentSession()
 
     if (studentSession && studentSession.studentId) {
-        // Use admin client to query by studentId (since RLS might restrict anon access)
-        const { data: student } = await supabase
+        // Use admin client to bypass RLS for session-based access
+        const adminSupabase = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY
+        )
+
+        const { data: student } = await adminSupabase
             .from('students')
             .select('student_id_text, telegram_chat_id')
             .eq('student_id_text', studentSession.studentId)
