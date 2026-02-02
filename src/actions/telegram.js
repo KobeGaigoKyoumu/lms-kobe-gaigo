@@ -57,7 +57,15 @@ export async function getTelegramStatus(injectedSession = null) {
     }
 
     console.log('[TelegramStatus] No session found')
-    return { connected: false, studentId: null }
+    return {
+        connected: false,
+        studentId: null,
+        debug: {
+            message: 'No session found (final fallback)',
+            injected: !!injectedSession,
+            sessionFound: !!studentSession
+        }
+    }
 }
 
 export async function disconnectTelegram() {
