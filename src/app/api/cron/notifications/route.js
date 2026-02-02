@@ -13,120 +13,132 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
-    // 1. Verify Vercel Cron Signature (Optional for security, skipping for now to ease testing)
-    // const authHeader = request.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    //     return new NextResponse('Unauthorized', { status: 401 });
-    // }
-
     if (!TELEGRAM_BOT_TOKEN) {
         return NextResponse.json({ error: 'Telegram Token missing' }, { status: 500 });
     }
 
     try {
         const results = {
-            grades: 0,
             announcements: 0,
-            attendance: 0,
+            assignments_new: 0,
+            assignments_due: 0,
             errors: []
         };
 
-        // Time window: Last 24 hours
-        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+
+        // Target Date for deadlines (e.g., due tomorrow)
+        // Check for deadlines falling within the next 24 to 48 hours? 
+        // Or strictly "Tomorrow". Let's say due between now and +24h (Imminent) or +24h and +48h (Tomorrow).
+        // Let's go with "Due within 2 days" to be safe.
+        const tomorrowStart = new Date(now);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+        tomorrowStart.setHours(0, 0, 0, 0);
+
+        const tomorrowEnd = new Date(tomorrowStart);
+        tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
 
         // ---------------------------------------------------------
-        // 1. New Announcements Check
+        // 1. New Announcements Check (Keep)
         // ---------------------------------------------------------
         const { data: newAnnouncements, error: annError } = await supabase
             .from('announcements')
-            .select('id, title, content, course_id')
+            .select('id, title, content')
             .gt('created_at', oneDayAgo);
 
         if (annError) {
             results.errors.push(`Announcement Error: ${annError.message}`);
         } else if (newAnnouncements?.length > 0) {
+            // Broadcast to all linked students
+            // Optimization: Fetch all valid linked students once
+            const { data: students } = await supabase
+                .from('students')
+                .select('telegram_chat_id')
+                .not('telegram_chat_id', 'is', null);
+
             for (const ann of newAnnouncements) {
-                // Broadcast to all linked students (or filter by course if needed)
-                // For simplicity, we broadcast to ALL linked users for general announcements
-                // and filter by course for course-specific ones.
-
-                let query = supabase.from('students').select('telegram_chat_id').not('telegram_chat_id', 'is', null);
-
-                if (ann.course_id) {
-                    // If course specific, we would need to join enrollments.
-                    // Skipping complex join for now, sending to all or implementing simpler logic later.
-                    // For now, let's just send to all as a "General Notification" to avoid missing anyone.
-                }
-
-                const { data: students } = await query;
-                if (students) {
-                    const message = `📢 **新しいお知らせ**\n\n**${ann.title}**\n${ann.content.substring(0, 50)}...\n\n[詳細を見る](https://lms-kobe-gaigo.vercel.app/student/announcements)`;
-                    await broadcastMessage(students, message);
-                    results.announcements++;
-                }
+                const message = `📢 **新しいお知らせ**\n\n**${ann.title}**\n${ann.content.substring(0, 50)}...\n\n[詳細を見る](https://lms-kobe-gaigo.vercel.app/student/announcements)`;
+                await broadcastMessage(students, message);
+                results.announcements++;
             }
         }
 
         // ---------------------------------------------------------
-        // 2. New Grades Check
+        // 2. New Assignments Check
         // ---------------------------------------------------------
-        // Assuming grade_records has created_at
-        const { data: newGrades, error: gradeError } = await supabase
-            .from('grade_records')
-            .select('student_id_text, year_term')
+        const { data: newAssignments, error: newAssError } = await supabase
+            .from('assignments')
+            .select('id, title, course_id')
             .gt('created_at', oneDayAgo);
 
-        if (gradeError) {
-            results.errors.push(`Grade Error: ${gradeError.message}`);
-        } else if (newGrades?.length > 0) {
-            // Group by student to send 1 message per student
-            const studentGrades = {}; // { student_id: [terms] }
-            newGrades.forEach(g => {
-                if (!studentGrades[g.student_id_text]) studentGrades[g.student_id_text] = new Set();
-                studentGrades[g.student_id_text].add(g.year_term);
-            });
+        if (newAssError) {
+            // created_at checks might fail if column doesn't exist, but it's standard default.
+            results.errors.push(`New Assignment Error: ${newAssError.message}`);
+        } else if (newAssignments?.length > 0) {
+            // For each new assignment, find enrolled students and notify
+            for (const ass of newAssignments) {
+                const message = `🆕 **新しい課題が追加されました**\n\n**${ass.title}**\n\n[確認する](https://lms-kobe-gaigo.vercel.app/student/calendar)`;
 
-            for (const [studentId, terms] of Object.entries(studentGrades)) {
-                // Get Telegram Chat ID
-                const { data: student } = await supabase
-                    .from('students')
-                    .select('telegram_chat_id, full_name')
-                    .eq('student_id_text', studentId)
-                    .single();
+                // Get students enrolled in this course with Telegram linked
+                const { data: enrolledStudents } = await supabase
+                    .from('enrollments')
+                    .select('student_id, students!inner(telegram_chat_id)')
+                    .eq('course_id', ass.course_id)
+                    .not('students.telegram_chat_id', 'is', null);
 
-                if (student?.telegram_chat_id) {
-                    const termList = Array.from(terms).join(', ');
-                    const message = `💯 **成績公開のお知らせ**\n\n${student.full_name}さん\n${termList} の成績が公開（または更新）されました。\n\n[成績を確認する](https://lms-kobe-gaigo.vercel.app/student/grades)`;
-                    await sendTelegramMessage(student.telegram_chat_id, message);
-                    results.grades++;
+                if (enrolledStudents && enrolledStudents.length > 0) {
+                    // Flatten structure: enrollments -> students object
+                    const targets = enrolledStudents.map(e => ({ telegram_chat_id: e.students.telegram_chat_id }));
+                    await broadcastMessage(targets, message);
+                    results.assignments_new++;
                 }
             }
         }
 
         // ---------------------------------------------------------
-        // 3. Low Attendance Alert
+        // 3. Deadline Alerts (Unsubmitted & Due Tomorrow)
         // ---------------------------------------------------------
-        // Logic: Find attendance records created/updated in last 24h where rate < 80%
-        // Note: attendance_records might not have 'created_at'. We'll try. 
-        // If it fails, we catch the error.
-        const { data: lowAttendance, error: attError } = await supabase
-            .from('attendance_records')
-            .select('student_id, attendance_rate, month, year')
-            .lt('attendance_rate', 80)
-            .eq('is_cumulative', true) // Only check cumulative rate for alerts
-            // .gt('created_at', oneDayAgo) // Uncomment if table has created_at
-            // If no created_at, we might verify if this is the 'current' month's record
-            // .eq('month', new Date().getMonth() + 1) 
-            // .eq('year', new Date().getFullYear())
-            .limit(100); // Safety limit
+        const { data: dueAssignments, error: dueError } = await supabase
+            .from('assignments')
+            .select('id, title, due_date, course_id')
+            .gte('due_date', tomorrowStart.toISOString())
+            .lt('due_date', tomorrowEnd.toISOString());
 
-        if (attError) {
-            results.errors.push(`Attendance Error: ${attError.message}`);
-        } else if (lowAttendance?.length > 0) {
-            // Use a cache or check logic here? 
-            // For this iteration, we rely on the fact that the import usually happens once a month.
-            // But CRON runs daily. This WILL spam if we don't have a 'created_at' filter.
-            // I will try to use created_at. If it fails, the query errors out and we log it.
+        if (dueError) {
+            results.errors.push(`Due Assignment Error: ${dueError.message}`);
+        } else if (dueAssignments?.length > 0) {
+            for (const ass of dueAssignments) {
+                // 1. Get all enrolled students for this course
+                const { data: enrolled } = await supabase
+                    .from('enrollments')
+                    .select('student_id, students!inner(telegram_chat_id)')
+                    .eq('course_id', ass.course_id)
+                    .not('students.telegram_chat_id', 'is', null);
+
+                if (!enrolled || enrolled.length === 0) continue;
+
+                // 2. Get students who HAVE submitted
+                const { data: submitted } = await supabase
+                    .from('submissions')
+                    .select('student_id')
+                    .eq('assignment_id', ass.id)
+                    .in('status', ['submitted', 'graded']); // Draft is not submitted
+
+                const submittedIds = new Set(submitted?.map(s => s.student_id));
+
+                // 3. Filter: Enrolled BUT NOT Submitted
+                const unsubmittedStudents = enrolled
+                    .filter(e => !submittedIds.has(e.student_id))
+                    .map(e => ({ telegram_chat_id: e.students.telegram_chat_id }));
+
+                if (unsubmittedStudents.length > 0) {
+                    const dateStr = new Date(ass.due_date).toLocaleDateString('ja-JP');
+                    const message = `⚠️ **課題の締切が近づいています**\n\n**${ass.title}**\n締切: ${dateStr}\n\nまだ提出されていません。お早むに対応してください。\n\n[提出する](https://lms-kobe-gaigo.vercel.app/student/calendar)`;
+                    await broadcastMessage(unsubmittedStudents, message);
+                    results.assignments_due++;
+                }
+            }
         }
 
         return NextResponse.json({ success: true, results });
@@ -138,12 +150,30 @@ export async function GET(request) {
 }
 
 async function broadcastMessage(students, text) {
-    if (!students) return;
-    const promises = students.map(s => {
-        if (s.telegram_chat_id) return sendTelegramMessage(s.telegram_chat_id, text);
-        return Promise.resolve();
-    });
-    await Promise.all(promises);
+    if (!students || students.length === 0) return;
+
+    // Batch processing to respect Telegram rate limits (approx 30 msg/sec)
+    const BATCH_SIZE = 25;
+    const DELAY_MS = 1000;
+
+    const chunks = [];
+    for (let i = 0; i < students.length; i += BATCH_SIZE) {
+        chunks.push(students.slice(i, i + BATCH_SIZE));
+    }
+
+    for (const chunk of chunks) {
+        const promises = chunk.map(s => {
+            if (s.telegram_chat_id) return sendTelegramMessage(s.telegram_chat_id, text);
+            return Promise.resolve();
+        });
+
+        await Promise.all(promises);
+
+        // Wait before next batch
+        if (chunks.indexOf(chunk) < chunks.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+        }
+    }
 }
 
 async function sendTelegramMessage(chatId, text) {
