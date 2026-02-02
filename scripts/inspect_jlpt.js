@@ -3,11 +3,11 @@ const path = require('path');
 const iconv = require('iconv-lite');
 
 // Try to find a CSV file in data/JLPT結果
-const baseDir = path.join(process.cwd(), 'data', 'JLPT結果');
+const JLPT_BASE_DIR = path.join(__dirname, '../data/JLPT結果');
 
 try {
-    const sessions = fs.readdirSync(baseDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
+    const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
+        .filter(d => d.isDirectory() && d.name.includes('2025年第2回'))
         .map(d => d.name);
 
     if (sessions.length === 0) {
@@ -17,31 +17,29 @@ try {
 
     // Try a few sessions until we find a CSV
     for (const session of sessions) {
-        const sessionDir = path.join(baseDir, session);
+        const sessionDir = path.join(JLPT_BASE_DIR, session);
         const files = fs.readdirSync(sessionDir).filter(f => f.endsWith('.csv'));
 
         if (files.length > 0) {
-            const csvFile = files[0];
-            const filePath = path.join(sessionDir, csvFile);
+            const file = files[0];
+            const filePath = path.join(JLPT_BASE_DIR, sessions[0], file);
             console.log(`Inspecting file: ${filePath}`);
 
             const buffer = fs.readFileSync(filePath);
             const content = iconv.decode(buffer, 'Shift_JIS');
-            const lines = content.split(/\r?\n/).slice(0, 15);
+            const lines = content.split(/\r?\n/);
 
             lines.forEach((line, index) => {
                 const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
-                if (index === 0) {
-                    console.log('HEADER MAPPING (10-30):');
-                    for (let i = 10; i < Math.min(parts.length, 30); i++) {
-                        console.log(`${i}: ${parts[i]}`);
+                if (index > 0) {
+                    const result = parts[8]; // Result column
+                    if (result === '合格') {
+                        console.log(`PASS RECORD: Line ${index} ID=${parts[3]} Total=${parts[9]} K=${parts[12]} R=${parts[14]} L=${parts[16]}`);
                     }
-                } else if (index < 10) {
-                    // console.log(`Line ${index}:`, parts);
-                    console.log(`Line ${index} ID: '${parts[3]}' Name: '${parts[4]}'`);
                 }
             });
-            break;
+            // Don't break loop, just scan file.
+            break; // Stop after first file
         }
     }
 } catch (e) {

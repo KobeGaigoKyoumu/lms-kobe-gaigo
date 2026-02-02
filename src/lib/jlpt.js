@@ -271,9 +271,19 @@ function processStatistics(rawData) {
  */
 export async function getAllRawJlptData() {
     try {
+        // Check for CSV data directories
+        let csvSessions = new Set();
+        if (fs.existsSync(JLPT_BASE_DIR)) {
+            const dirs = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name);
+            csvSessions = new Set(dirs);
+        }
+
         // First, load historical data from JSON (has student IDs)
-        const historicalData = loadHistoricalJlptData();
-        console.log(`Loaded ${historicalData.length} records from historical JSON`);
+        // BUT ignore sessions that strictly exist in CSV folders (prefer CSV data)
+        const historicalData = loadHistoricalJlptData().filter(record => !csvSessions.has(record.session));
+        console.log(`Loaded ${historicalData.length} records from historical JSON (filtered by CSV availability)`);
 
         // Create sets to track seen records (avoid duplicates)
         const seenIds = new Set();
@@ -290,21 +300,9 @@ export async function getAllRawJlptData() {
 
         const allData = [...historicalData];
 
-        // Get sessions that already exist in historical data
-        const historicalSessions = new Set();
-        historicalData.forEach(record => {
-            if (record.session) {
-                historicalSessions.add(record.session);
-            }
-        });
-
-        // Then load CSV data (may not have student IDs)
-        // Skip sessions that are already in historical data to avoid duplicates
-        if (fs.existsSync(JLPT_BASE_DIR)) {
-            const sessions = fs.readdirSync(JLPT_BASE_DIR, { withFileTypes: true })
-                .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name)
-                .filter(session => !historicalSessions.has(session)); // Skip sessions in historical data
+        // Then load CSV data
+        if (csvSessions.size > 0) {
+            const sessions = Array.from(csvSessions);
 
             for (const session of sessions) {
                 const sessionDir = path.join(JLPT_BASE_DIR, session);
