@@ -45,7 +45,10 @@ export async function getTelegramStatus(injectedSession = null) {
 
         console.log('[TelegramStatus] Admin Query Result:', { student, error })
 
-        if (!student) return { connected: false, studentId: null }
+        if (!student) {
+            console.warn('[TelegramStatus] Student not found in DB via session ID. Fallback to session ID.')
+            return { connected: false, studentId: studentSession.studentId }
+        }
 
         return {
             connected: !!student.telegram_chat_id,
