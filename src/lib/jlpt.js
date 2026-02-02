@@ -507,6 +507,17 @@ function parseStudentIdForEnrollment(studentId, firstExamSession = null) {
         const yearShort = parseInt(prefix, 10);
         if (!isNaN(yearShort) && yearShort >= 19 && yearShort <= 30) {
             const enrollmentYear = 2000 + yearShort;
+
+            // Special Case: 2501 (Jan 2025) -> March 2026 Grad (1.3 years)
+            if (prefix === '25' && monthPart === 1) {
+                return {
+                    enrollmentYear,
+                    enrollmentMonth: month,
+                    graduationYear: 2026
+                };
+            }
+
+            // Standard 2-year calculation
             return {
                 enrollmentYear,
                 enrollmentMonth: month,
@@ -870,7 +881,7 @@ export async function getEnhancedJlptStats(students = []) {
             gradYear = idInfo.graduationYear;
             foundEnrollment = true;
 
-            // Check if exam is before enrollment
+            // Check if exam is before enrollment (existing logic)
             const isFirstRound = record.session.includes('第1回');
             const examMonth = isFirstRound ? 6 : 11;
             const examDate = new Date(examYear, examMonth, 1);
@@ -915,10 +926,16 @@ export async function getEnhancedJlptStats(students = []) {
 
         // Priority 4: Last resort - estimate from exam year
         if (!foundEnrollment) {
-            gradYear = examYear + 1;
+            // DISABLED: User confirmed we should heavily rely on Student ID (2024 enrollees).
+            // Estimation creates massive false positives for students without IDs in CSV.
+            // gradYear = examYear + 1;
+            // debugReason = 'Estimated_From_Exam_Year';
         }
 
         if (isFirstYearData) return; // SKIP pre-enrollment data
+
+        // If we still don't have a graduation year, skipping this student for the graduation stats
+        if (!gradYear) return;
 
         if (!studentExamHistory[name]) {
             const isKanjiCountry = ['中国', '台湾', '韓国'].includes(record.country);
@@ -930,12 +947,13 @@ export async function getEnhancedJlptStats(students = []) {
             };
         } else {
             // Update graduation year if we found better info
-            if (foundEnrollment && record.studentId) {
+            // Priority: ID > Name > Estimate
+            // If current is Estimate and new is ID/Name, update.
+            // If current is Name and new is ID, update.
+            // Simplified Upgrade Logic: Just prioritize ID.
+            if (record.studentId && !studentExamHistory[name].studentId) {
                 studentExamHistory[name].graduationYear = gradYear;
                 studentExamHistory[name].studentId = record.studentId;
-            } else if (!studentExamHistory[name].studentId) {
-                // Keep max grad year for unmatched
-                studentExamHistory[name].graduationYear = Math.max(studentExamHistory[name].graduationYear, gradYear);
             }
         }
 
@@ -988,7 +1006,18 @@ export async function getEnhancedJlptStats(students = []) {
             n3PlusStudents: stats.n3Plus,
             rate: stats.total > 0 ? ((stats.n3Plus / stats.total) * 100).toFixed(1) : 0,
             kanjiRate: stats.kanjiTotal > 0 ? ((stats.kanjiN3Plus / stats.kanjiTotal) * 100).toFixed(1) : '-',
-            nonKanjiRate: stats.nonKanjiTotal > 0 ? ((stats.nonKanjiN3Plus / stats.nonKanjiTotal) * 100).toFixed(1) : '-'
+            nonKanjiRate: stats.nonKanjiTotal > 0 ? ((stats.nonKanjiN3Plus / stats.nonKanjiTotal) * 100).toFixed(1) : '-',
+            // Detailed stats for JSON generation
+            kanji_stats: {
+                total: stats.kanjiTotal,
+                n3_plus: stats.kanjiN3Plus,
+                rate: stats.kanjiTotal > 0 ? (stats.kanjiN3Plus / stats.kanjiTotal) * 100 : 0
+            },
+            non_kanji_stats: {
+                total: stats.nonKanjiTotal,
+                n3_plus: stats.nonKanjiN3Plus,
+                rate: stats.nonKanjiTotal > 0 ? (stats.nonKanjiN3Plus / stats.nonKanjiTotal) * 100 : 0
+            }
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 

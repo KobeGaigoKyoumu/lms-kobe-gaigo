@@ -14,7 +14,7 @@
       "kanji_stats": {
         "total": 7,
         "n3_plus": 0,
-        "rate": 0.0
+        "rate": 0
       },
       "non_kanji_stats": {
         "total": 269,
@@ -65,7 +65,7 @@
       "non_kanji_stats": {
         "total": 32,
         "n3_plus": 16,
-        "rate": 50.0
+        "rate": 50
       },
       "n3_pass_rate": 47.92
     },
@@ -77,7 +77,7 @@
       "matched": 229,
       "n3_plus": 119,
       "n3_or_higher": 119,
-      "rate": 50.0,
+      "rate": 50,
       "matched_with_jlpt": 229,
       "match_rate": 0,
       "kanji_stats": {
@@ -90,7 +90,7 @@
         "n3_plus": 91,
         "rate": 47.39583333333333
       },
-      "n3_pass_rate": 50.0
+      "n3_pass_rate": 50
     },
     {
       "year": "2025年3月",
@@ -106,7 +106,7 @@
       "kanji_stats": {
         "total": 15,
         "n3_plus": 9,
-        "rate": 60.0
+        "rate": 60
       },
       "non_kanji_stats": {
         "total": 235,
@@ -121,22 +121,22 @@
       "total_graduates": 240,
       "total": 240,
       "matched": 240,
-      "n3_plus": 224,
-      "n3_or_higher": 224,
-      "rate": 93.33333333333333,
+      "n3_plus": 170,
+      "n3_or_higher": 170,
+      "rate": 70.8,
       "matched_with_jlpt": 240,
       "match_rate": 0,
       "kanji_stats": {
         "total": 13,
-        "n3_plus": 2,
-        "rate": 15.384615384615385
+        "n3_plus": 7,
+        "rate": 53.84615384615385
       },
       "non_kanji_stats": {
-        "total": 225,
-        "n3_plus": 47,
-        "rate": 20.88888888888889
+        "total": 227,
+        "n3_plus": 163,
+        "rate": 71.80616740088107
       },
-      "n3_pass_rate": 93.33
+      "n3_pass_rate": 70.8
     }
   ],
   "summary": {
