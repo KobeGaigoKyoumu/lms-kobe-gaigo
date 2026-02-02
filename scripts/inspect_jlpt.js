@@ -36,6 +36,8 @@ try {
                     for (let i = 10; i < Math.min(parts.length, 30); i++) {
                         console.log(`${i}: ${parts[i]}`);
                     }
+                } else {
+                    console.log(`Line ${index} ID (idx 3): '${parts[3]}'`);
                 }
             });
             break;
