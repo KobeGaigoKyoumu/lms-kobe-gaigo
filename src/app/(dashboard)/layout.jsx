@@ -22,6 +22,11 @@ export default async function DashboardLayout({ children }) {
 
     const userRole = profile?.role
 
+    // Safety: If a student somehow ends up in the teacher layout, send them to the student portal
+    if (userRole === 'student') {
+        redirect('/student/dashboard')
+    }
+
     return (
         <div className={styles.wrapper}>
             <Sidebar user={user} role={userRole} />
