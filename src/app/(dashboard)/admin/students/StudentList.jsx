@@ -693,19 +693,21 @@ export default function StudentList() {
                                                 <option value="withdrawn">退学</option>
                                             </select>
                                         </td>
-                                        <td data-label="操作" className={styles.actionCell}>
-                                            <button
-                                                onClick={() => setSelectedStudent(student)}
-                                                className={styles.detailBtn}
-                                            >
-                                                詳細
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(student.student_id_text)}
-                                                className={styles.deleteBtn}
-                                            >
-                                                削除
-                                            </button>
+                                        <td data-label="操作">
+                                            <div className={styles.actionCell}>
+                                                <button
+                                                    onClick={() => setSelectedStudent(student)}
+                                                    className={styles.detailBtn}
+                                                >
+                                                    詳細
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(student.student_id_text)}
+                                                    className={styles.deleteBtn}
+                                                >
+                                                    削除
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 )

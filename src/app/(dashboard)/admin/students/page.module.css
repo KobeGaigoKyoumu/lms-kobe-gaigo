@@ -360,8 +360,9 @@
     display: flex;
     gap: var(--spacing-2);
     white-space: nowrap;
-    min-width: 120px;
     justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 /* Detail Button */
