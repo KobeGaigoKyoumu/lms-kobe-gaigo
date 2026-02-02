@@ -1,4 +1,5 @@
 import "./globals.css";
+import PWARegistry from "./PWARegistry";
 
 export const metadata = {
   title: "神戸外語 LMS",
@@ -20,29 +21,14 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                    console.log('SW OK');
-                  }).catch(function(err) {
-                    console.log('SW Fail', err);
-                  });
-                });
-              }
-            `,
-          }}
-        />
-      </head>
       <body>
+        <PWARegistry />
         {children}
       </body>
     </html>
