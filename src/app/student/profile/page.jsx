@@ -55,6 +55,18 @@ export default async function StudentProfilePage() {
         return value || <span className={styles.empty}>未登録</span>
     }
 
+    // Helper to calculate A/B/C grade from score (e.g. "30/60")
+    const calculateGrade = (scoreStr) => {
+        if (!scoreStr || !scoreStr.includes('/')) return null
+        const score = parseInt(scoreStr.split('/')[0])
+        if (isNaN(score)) return null
+
+        // Logic: A=40-60, B=20-39, C=0-19
+        if (score >= 40) return 'A'
+        if (score >= 20) return 'B'
+        return 'C'
+    }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -215,6 +227,11 @@ export default async function StudentProfilePage() {
                                             <td style={{ padding: '8px', fontWeight: 'bold' }}>{record.score}</td>
                                             <td style={{ padding: '8px' }}>
                                                 <div>{record.sectionScores?.knowledge || '-'}</div>
+                                                {calculateGrade(record.sectionScores?.knowledge) && (
+                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                        評価: {calculateGrade(record.sectionScores?.knowledge)}
+                                                    </div>
+                                                )}
                                                 {['N4', 'N5'].includes(record.level) && <span style={{ fontSize: '0.8em', color: '#666' }}>(読解含)</span>}
                                                 {record.referenceInfo && (
                                                     <div style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
@@ -224,10 +241,20 @@ export default async function StudentProfilePage() {
                                                 )}
                                             </td>
                                             <td style={{ padding: '8px' }}>
-                                                {record.sectionScores?.reading || '-'}
+                                                <div>{record.sectionScores?.reading || '-'}</div>
+                                                {calculateGrade(record.sectionScores?.reading) && (
+                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                        評価: {calculateGrade(record.sectionScores?.reading)}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td style={{ padding: '8px' }}>
-                                                {record.sectionScores?.listening || '-'}
+                                                <div>{record.sectionScores?.listening || '-'}</div>
+                                                {calculateGrade(record.sectionScores?.listening) && (
+                                                    <div style={{ color: '#4b5563', fontSize: '0.9em', fontWeight: 'bold' }}>
+                                                        評価: {calculateGrade(record.sectionScores?.listening)}
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
