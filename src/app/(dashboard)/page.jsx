@@ -68,10 +68,14 @@ export default async function DashboardPage() {
     // ロール判定の補完
     const isActuallyStudent = isStudent || !!studentSession
 
+    if (!!studentSession && !user) {
+        const { redirect } = await import('next/navigation')
+        redirect('/student/dashboard')
+    }
     if (isActuallyStudent) {
         // 学生用データを並列取得開始
         // student_idはプロファイルまたはクッキーから取得
-        const userId = user?.id || studentSession?.userId // Note: studentSession might use different key
+        const userId = user?.id || studentSession?.userId
         const studentIdText = profile?.student_id_text || studentSession?.studentId
 
         roleDataPromise = Promise.all([

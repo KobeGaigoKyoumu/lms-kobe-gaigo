@@ -53,13 +53,16 @@ export async function loginStudent(formData) {
         }
 
         const cookieStore = await cookies()
+        const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
+
         cookieStore.set(COOKIE_NAME, JSON.stringify(sessionData), {
             httpOnly: true,
-            secure: true, // Force HTTPS
-            maxAge: 60 * 60 * 24 * 400, // 400 days (Max for many browsers)
-            expires: new Date(Date.now() + 60 * 60 * 24 * 400 * 1000),
+            secure: true,
+            maxAge: ONE_YEAR_IN_SECONDS,
+            expires: new Date(Date.now() + ONE_YEAR_IN_SECONDS * 1000),
             path: '/',
             sameSite: 'lax',
+            priority: 'high',
         })
 
     } catch (e) {

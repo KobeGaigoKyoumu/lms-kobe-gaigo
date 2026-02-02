@@ -39,7 +39,9 @@ export async function updateSession(request) {
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook) {
+    const isStudentSession = request.cookies.get('student_session')
+
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !isStudentSession) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
