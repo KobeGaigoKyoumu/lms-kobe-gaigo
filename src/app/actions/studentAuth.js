@@ -18,33 +18,33 @@ const createAdminClient = () => {
 }
 
 const COOKIE_NAME = 'student_session'
-const MAX_AGE = 60 * 60 * 24 * 90 // 3 months (90 days)
+// 1 year in seconds
+const MAX_AGE = 60 * 60 * 24 * 365
 
 export async function loginStudent(formData) {
+    const className = formData.get('className')
+    const studentId = formData.get('studentId')
+
+    if (!className || !studentId) {
+        return { error: 'クラス名と学籍番号を入力してください。' }
+    }
+
     try {
-        const className = formData.get('className') // .trim()?
-        const studentId = formData.get('studentId')
-
-        if (!className || !studentId) {
-            return { error: 'クラス名と学籍番号を入力してください。' }
-        }
-
         const supabase = createAdminClient()
 
         // 1. Verify existence in students table
         const { data: student, error } = await supabase
             .from('students')
             .select('*')
-            .eq('student_id_text', studentId.trim()) // Trim whitespace from ID
+            .eq('student_id_text', studentId.trim())
             .eq('class_name', className.trim())
             .single()
 
         if (error || !student) {
-            console.error('Login Query Failed:', error)
-            return { error: 'ログイン情報が正しくありません。クラス名と学籍番号を確認してください。' }
+            return { error: 'ログイン情報が正しくありません。' }
         }
 
-        // 2. Create Session (Cookie)
+        // 2. Create Session Data
         const sessionData = {
             studentId: student.student_id_text,
             name: student.full_name,
@@ -53,27 +53,22 @@ export async function loginStudent(formData) {
         }
 
         const cookieStore = await cookies()
-        const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
 
+        // Use set with options that are most compatible with mobile browsers
         cookieStore.set(COOKIE_NAME, JSON.stringify(sessionData), {
             httpOnly: true,
             secure: true,
-            maxAge: ONE_YEAR_IN_SECONDS,
-            expires: new Date(Date.now() + ONE_YEAR_IN_SECONDS * 1000),
+            maxAge: MAX_AGE,
             path: '/',
             sameSite: 'lax',
-            priority: 'high',
+            priority: 'high'
         })
 
     } catch (e) {
         console.error('Student Login Critical Error:', e)
-        // DEBUG: Return the actual error message to the client to verify if it is Env var issue or redirect issue
-        return { error: `システムエラー: ${e.message}` }
+        return { error: 'システムエラーが発生しました。' }
     }
 
-    // Redirect needs to be outside try-catch because it throws a special error in Next.js
-    // ensure this path is reachable only if no error occurred above
-    // redirect('/student/dashboard') // Causing NEXT_REDIRECT error on client catch
     return { success: true }
 }
 
@@ -90,6 +85,7 @@ export async function getStudentSession() {
     if (!session) return null
 
     try {
+        // Double check it's a valid JSON
         return JSON.parse(session.value)
     } catch (e) {
         return null

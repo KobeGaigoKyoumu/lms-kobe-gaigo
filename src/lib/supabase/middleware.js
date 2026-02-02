@@ -39,12 +39,24 @@ export async function updateSession(request) {
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    const isStudentSession = request.cookies.get('student_session')
+    const studentSession = request.cookies.get('student_session')
 
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !isStudentSession) {
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !studentSession) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
+    }
+
+    // Refresh student session expiration if it exists
+    if (studentSession) {
+        supabaseResponse.cookies.set('student_session', studentSession.value, {
+            httpOnly: true,
+            secure: true,
+            maxAge: 60 * 60 * 24 * 365,
+            path: '/',
+            sameSite: 'lax',
+            priority: 'high'
+        })
     }
 
     return supabaseResponse
