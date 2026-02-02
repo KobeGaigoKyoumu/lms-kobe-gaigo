@@ -1,8 +1,10 @@
 {
+    "id": "/",
     "name": "LMS 神戸外語",
     "short_name": "LMS",
     "description": "神戸外語日本語学校の学習管理システム",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#3b82f6",

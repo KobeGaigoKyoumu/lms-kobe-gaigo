@@ -7,12 +7,15 @@ export async function middleware(request) {
 export const config = {
     matcher: [
         /*
-         * 以下のパスを除くすべてのリクエストにマッチ:
-         * - _next/static (静的ファイル)
-         * - _next/image (画像最適化)
-         * - favicon.ico, sitemap.xml, robots.txt
-         * - 画像ファイル
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - manifest.json / manifest.webmanifest (PWA manifest)
+         * - sw.js (Service Worker)
+         * - icon-192.png / icon-512.png (PWA icons)
+         * - all image extensions (svg, png, jpg, etc)
          */
-        '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|sw.js|icon-192.png|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|manifest\\.json|manifest\\.webmanifest|sw\\.js|icon-192\\.png|icon-512\\.png|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
