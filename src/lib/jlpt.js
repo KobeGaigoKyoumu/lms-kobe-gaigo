@@ -161,21 +161,34 @@ function parseLine(line) {
         totalScore: cleanParts[9], // "79/180"
     };
 
-    // Extract section scores based on level
+    // Extract section scores and reference info based on level
     if (level) {
-        if (/^N[1-3]$/.test(level) && cleanParts.length >= 17) {
-            // N1-N3: Knowledge(12), Reading(14), Listening(16)
+        if (/^N[1-3]$/.test(level)) {
+            // N1-N3: 
+            // Scores: Knowledge(12), Reading(14), Listening(16)
+            // Reference: Vocab(22), Grammar(24)
             result.sectionScores = {
                 knowledge: cleanParts[12],
                 reading: cleanParts[14],
                 listening: cleanParts[16]
             };
-        } else if (/^N[4-5]$/.test(level) && cleanParts.length >= 15) {
-            // N4-N5: Knowledge & Reading(12), Listening(14)
+            result.referenceInfo = {
+                vocabulary: { grade: cleanParts[22], name: cleanParts[21] }, // 文字・語彙
+                grammar: { grade: cleanParts[24], name: cleanParts[23] }     // 文法
+            };
+        } else if (/^N[4-5]$/.test(level)) {
+            // N4-N5: 
+            // Scores: Knowledge & Reading(12), Listening(14)
+            // Reference: Vocab(22), Grammar(24) - Need to verify if N4/N5 has this. 
+            // Assuming structure is consistent enough or we check content.
             result.sectionScores = {
                 knowledge: cleanParts[12], // 言語知識・読解
-                reading: '-',              // N4/5 don't have separate reading score
+                reading: '-',              // Combined in knowledge
                 listening: cleanParts[14]
+            };
+            result.referenceInfo = {
+                vocabulary: { grade: cleanParts[22], name: cleanParts[21] },
+                grammar: { grade: cleanParts[24], name: cleanParts[23] }
             };
         }
     }
@@ -389,6 +402,7 @@ export async function getJlptByStudentName(studentName, enrollmentDate = null) {
         result: r.result,
         score: r.totalScore,
         sectionScores: r.sectionScores || null,
+        referenceInfo: r.referenceInfo || null,
         country: r.country,
         studentId: r.studentId || null
     }));
@@ -428,6 +442,7 @@ export async function getJlptByStudentId(studentId, enrollmentDate = null) {
         result: r.result,
         score: r.totalScore,
         sectionScores: r.sectionScores || null,
+        referenceInfo: r.referenceInfo || null,
         country: r.country,
         name: r.name
     }));

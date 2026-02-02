@@ -1,8 +1,6 @@
 import { getStudentAssignments } from '@/app/actions/homework'
-import { getMessengerStatus } from '@/actions/messenger'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
-import ConnectMessenger from './ConnectMessenger'
 import Link from 'next/link'
 import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
 import styles from './page.module.css'
@@ -19,9 +17,8 @@ export default async function StudentDashboard() {
     nextWeek.setDate(nextWeek.getDate() + 7)
 
     // Parallel data fetching
-    const [assignments, messengerStatus, announcementsResult, studentResult] = await Promise.all([
+    const [assignments, announcementsResult, studentResult] = await Promise.all([
         getStudentAssignments(),
-        getMessengerStatus(),
         supabase
             .from('announcements')
             .select(`
@@ -108,12 +105,6 @@ export default async function StudentDashboard() {
                     })}
                 </div>
             </header>
-
-            <ConnectMessenger
-                connected={messengerStatus.connected}
-                studentId={messengerStatus.studentId}
-                pageId={process.env.NEXT_PUBLIC_FB_PAGE_ID}
-            />
 
             {/* Stats Cards */}
             <div className={styles.statsGrid}>

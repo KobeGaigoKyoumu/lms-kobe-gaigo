@@ -63,8 +63,14 @@ export default async function StudentSettingsPage() {
                                             </td>
                                             <td style={{ padding: '8px', fontWeight: 'bold' }}>{record.score}</td>
                                             <td style={{ padding: '8px' }}>
-                                                {record.sectionScores?.knowledge || '-'}
-                                                {['N4', 'N5'].includes(record.level) && <span style={{ fontSize: '0.8em', color: '#666' }}> (読解含)</span>}
+                                                <div>{record.sectionScores?.knowledge || '-'}</div>
+                                                {['N4', 'N5'].includes(record.level) && <span style={{ fontSize: '0.8em', color: '#666' }}>(読解含)</span>}
+                                                {record.referenceInfo && (
+                                                    <div style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
+                                                        {record.referenceInfo.vocabulary?.grade && <span>語彙: {record.referenceInfo.vocabulary.grade} </span>}
+                                                        {record.referenceInfo.grammar?.grade && <span>文法: {record.referenceInfo.grammar.grade}</span>}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td style={{ padding: '8px' }}>
                                                 {record.sectionScores?.reading || '-'}
