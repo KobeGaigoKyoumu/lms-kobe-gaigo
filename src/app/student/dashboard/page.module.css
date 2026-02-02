@@ -230,25 +230,115 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     .page {
-        padding: var(--spacing-4);
+        padding: var(--spacing-2);
     }
 
     .header {
         flex-direction: column;
-        gap: var(--spacing-3);
+        gap: var(--spacing-2);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .title {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .subtitle {
+        font-size: 0.75rem;
+    }
+
+    .date {
+        padding: 4px 8px;
+        font-size: 0.7rem;
     }
 
     .statsGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        /* Keep 2 cols for density if possible, or 1 if content too wide. Try 2 first with small font */
+        gap: var(--spacing-2);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .statCard {
+        padding: var(--spacing-3);
+        gap: var(--spacing-2);
+        border-radius: var(--radius-lg);
+    }
+
+    .statIcon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-md);
+    }
+
+    .statIcon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .statLabel {
+        font-size: 0.65rem;
+        margin-bottom: 0;
+    }
+
+    .statValue {
+        font-size: 1.1rem;
+    }
+
+    .statUnit {
+        font-size: 0.65rem;
     }
 
     .mainGrid {
         grid-template-columns: 1fr;
+        gap: var(--spacing-3);
     }
 
-    .title {
-        font-size: var(--font-size-2xl);
+    .section {
+        padding: var(--spacing-3);
+        border-radius: var(--radius-lg);
+    }
+
+    .sectionTitle {
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-2);
+    }
+
+    .assignmentItem {
+        padding: var(--spacing-2);
+        gap: var(--spacing-2);
+    }
+
+    /* Keep assignment layout but compact it */
+    .assignmentInfo h4 {
+        font-size: 0.8rem;
+    }
+
+    .assignmentInfo p {
+        font-size: 0.65rem;
+    }
+
+    .dueDate {
+        padding: 2px 6px;
+        font-size: 0.65rem;
+    }
+
+    .announcementItem {
+        padding: var(--spacing-2);
+    }
+
+    .announcementItem h4 {
+        font-size: 0.8rem;
+    }
+
+    .announcementItem p {
+        font-size: 0.65rem;
+    }
+
+    .announcementHeader {
+        margin-bottom: 2px;
     }
 }
