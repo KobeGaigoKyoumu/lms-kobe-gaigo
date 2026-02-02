@@ -2,13 +2,13 @@ import "./globals.css";
 import PWARegistry from "./PWARegistry";
 
 export const metadata = {
-  title: "神戸外語 LMS",
+  title: "神戸外語LMS",
   description: "神戸外語日本語学校の学習管理システム",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "LMS 神戸外語",
+    title: "神戸外語LMS",
   },
   icons: {
     icon: "/favicon.ico",
