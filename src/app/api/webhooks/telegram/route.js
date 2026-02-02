@@ -31,12 +31,21 @@ export async function POST(req) {
                     const studentId = params[1];
                     console.log(`Linking Student ID: ${studentId} to Telegram Chat ID: ${chatId}`);
 
-                    const success = await linkStudentToTelegram(studentId, chatId);
+                    const result = await linkStudentToTelegram(studentId, chatId);
 
-                    if (success) {
-                        await sendTelegramMessage(chatId, `こんにちは、${firstName}さん！\nLMSとの連携が完了しました。重要なお知らせをこちらでお届けします。✅`);
+                    if (result.success) {
+                        await sendTelegramMessage(chatId, `こんにちは、${result.studentName}さん！\nLMSとの連携が完了しました。重要なお知らせをこちらでお届けします。✅`);
                     } else {
-                        await sendTelegramMessage(chatId, `連携に失敗しました。\n指定された学生ID "${studentId}" が見つからないか、エラーが発生しました。`);
+                        let errorMessage = `連携に失敗しました。\n指定された学生ID "${studentId}" が見つからないか、エラーが発生しました。`;
+
+                        // Add detail for debugging
+                        if (result.reason === 'student_not_found') {
+                            errorMessage += `\n(エラー: データベースに学生が見つかりません: ${result.detail || 'N/A'})`;
+                        } else if (result.reason === 'update_failed') {
+                            errorMessage += `\n(エラー: データの更新に失敗しました: ${result.detail || 'N/A'})`;
+                        }
+
+                        await sendTelegramMessage(chatId, errorMessage);
                     }
                 } else {
                     // Case: /start (no params)
@@ -62,25 +71,33 @@ export async function POST(req) {
 async function linkStudentToTelegram(studentId, chatId) {
     console.log(`Updating student ${studentId} with Telegram Chat ID ${chatId}`);
 
-    // Convert chatId to string to ensure consistency with DB schema
     const chatIdStr = String(chatId);
 
-    const { data, error } = await supabase
+    // 1. Verify student exists first
+    const { data: student, error: searchError } = await supabase
+        .from('students')
+        .select('student_id_text, full_name')
+        .eq('student_id_text', studentId)
+        .single();
+
+    if (searchError || !student) {
+        console.error('Student Verification Failed:', searchError);
+        return { success: false, reason: 'student_not_found', detail: searchError?.message };
+    }
+
+    // 2. Update Telegram Chat ID
+    const { error: updateError } = await supabase
         .from('students')
         .update({ telegram_chat_id: chatIdStr })
-        .eq('student_id_text', studentId)
-        .select();
+        .eq('student_id_text', studentId);
 
-    if (error) {
-        console.error('Error linking student:', error);
-        return false;
-    } else if (data && data.length > 0) {
-        console.log('Successfully linked student:', data[0].full_name);
-        return true;
-    } else {
-        console.log('No student found with ID:', studentId);
-        return false;
+    if (updateError) {
+        console.error('Error linking student:', updateError);
+        return { success: false, reason: 'update_failed', detail: updateError.message };
     }
+
+    console.log('Successfully linked student:', student.full_name);
+    return { success: true, studentName: student.full_name };
 }
 
 /**

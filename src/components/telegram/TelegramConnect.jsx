@@ -37,18 +37,10 @@ export default function TelegramConnect({ initialStatus, botUsername }) {
     // Missing Student ID check
     if (!status?.studentId && !status?.connected) {
         return (
-            <div className={styles.container} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
-                <p className={styles.error} style={{ color: 'red', fontWeight: 'bold' }}>
-                    エラー: 学生IDが取得できませんでした (v4)
+            <div className={styles.container}>
+                <p className={styles.error} style={{ color: 'red' }}>
+                    エラー: 学生IDが取得できませんでした。再ログインしてください。
                 </p>
-                <details style={{ fontSize: '0.75rem', color: '#666', width: '100%' }}>
-                    <summary>Debug Info</summary>
-                    <pre style={{ whiteSpace: 'pre-wrap', background: '#eee', padding: '8px', borderRadius: '4px' }}>
-                        Path: {pathname}{'\n'}
-                        Status: {JSON.stringify(status, null, 2)}{'\n'}
-                        Bot: {botUsername}
-                    </pre>
-                </details>
             </div>
         )
     }
