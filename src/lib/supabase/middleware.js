@@ -38,17 +38,23 @@ export async function updateSession(request) {
     const isStudentPath = request.nextUrl.pathname.startsWith('/student')
     const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
 
-    // Check for ANY version of student session
-    // v2 is our new Base64 hardened cookie
-    const hasStudentSession =
-        request.cookies.has('kobe_student_session_v2') ||
-        request.cookies.has('kobe_student_session_v1') ||
-        request.cookies.has('student_id_session')
+    const studentSession = request.cookies.get('kobe_student_session_v2') ||
+        request.cookies.get('kobe_student_session_v1') ||
+        request.cookies.get('student_id_session')
 
-    // If NOT authenticated by Supabase AND NOT by our student cookie AND on a protected path
-    if (!user && !hasStudentSession && !isPublicPath && !isStudentPath && !isWebhook) {
+    // Redirect to login if NO session exists and it's a student path
+    if (isStudentPath && !studentSession) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
+        url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
+        return NextResponse.redirect(url)
+    }
+
+    // Redirect to login if NO Supabase session exists and it's an admin/teacher path
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
         return NextResponse.redirect(url)
     }
 

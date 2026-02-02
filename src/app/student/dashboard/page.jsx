@@ -156,8 +156,10 @@ export default async function StudentDashboard() {
                 <div className={styles.statCard}>
                     <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <path d="M16 2v4M8 2v4M3 10h18" />
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
                     </div>
                     <div className={styles.statContent}>
@@ -171,13 +173,16 @@ export default async function StudentDashboard() {
             <div className={styles.mainGrid}>
                 {/* Recent Assignments */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                            <rect x="7" y="2" width="6" height="4" rx="1" />
-                        </svg>
-                        最近の課題
-                    </h2>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                                <rect x="7" y="2" width="6" height="4" rx="1" />
+                            </svg>
+                            最近の課題
+                        </h2>
+                        <Link href="/student/homework" className={styles.viewAll}>すべて見る <ChevronRight size={16} /></Link>
+                    </div>
                     {sortedAssignments.length === 0 ? (
                         <div className={styles.emptyState}>
                             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3">
@@ -214,10 +219,13 @@ export default async function StudentDashboard() {
 
                 {/* Announcements */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        <Home size={20} strokeWidth={1.5} />
-                        お知らせ
-                    </h2>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <Home size={20} strokeWidth={1.5} />
+                            お知らせ
+                        </h2>
+                        <Link href="/student/announcements" className={styles.viewAll}>すべて見る <ChevronRight size={16} /></Link>
+                    </div>
                     {filteredAnnouncements.length === 0 ? (
                         <div className={styles.emptyState}>
                             <Home size={48} strokeWidth={1.5} opacity={0.3} />
@@ -226,7 +234,11 @@ export default async function StudentDashboard() {
                     ) : (
                         <div className={styles.announcementList}>
                             {filteredAnnouncements.map(announcement => (
-                                <div key={announcement.id} className={styles.announcementItem}>
+                                <Link
+                                    href={`/student/announcements/${announcement.id}`}
+                                    key={announcement.id}
+                                    className={styles.announcementItem}
+                                >
                                     <div className={styles.announcementHeader}>
                                         {announcement.is_pinned && (
                                             <span className={styles.pinBadge}>📌</span>
@@ -240,7 +252,7 @@ export default async function StudentDashboard() {
                                     </div>
                                     <h4>{announcement.title}</h4>
                                     <p>{announcement.content?.slice(0, 60)}...</p>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}

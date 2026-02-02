@@ -103,6 +103,13 @@
     padding: var(--spacing-5);
 }
 
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+}
+
 .sectionTitle {
     display: flex;
     align-items: center;
@@ -110,8 +117,24 @@
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-4);
+    margin-bottom: 0;
 }
+
+.viewAll {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--font-size-sm);
+    color: var(--primary-500);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+.viewAll:hover {
+    color: var(--primary-600);
+}
+
 
 .emptyState {
     display: flex;
