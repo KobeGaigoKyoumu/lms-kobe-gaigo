@@ -1,0 +1,32 @@
+.container {
+    padding: 1.5rem;
+    height: calc(100vh - 64px);
+    /* Adjust based on sidebar/header */
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.content {
+    flex: 1;
+    min-height: 0;
+    /* Important for nested scroll */
+}
+
+.listWrapper {
+    height: 100%;
+}
+
+.empty {
+    color: #64748b;
+    padding: 1rem;
+}
