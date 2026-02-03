@@ -3,62 +3,72 @@
     gap: 12px;
     margin-bottom: 24px;
     padding-bottom: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    /* Hide scrollbar Firefox */
-}
-
-.mobileMenu::-webkit-scrollbar {
-    display: none;
-    /* Hide scrollbar Chrome/Safari */
+    /* Grid Layout for Mobile */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 }
 
 .menuItem {
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 10px 16px;
+    padding: 16px;
+    /* Increased padding */
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Horizontal layout for item content */
     align-items: center;
-    justify-content: center;
-    gap: 4px;
+    justify-content: flex-start;
+    /* Align left */
+    gap: 12px;
     text-decoration: none;
     color: var(--text-secondary);
     box-shadow: var(--shadow-sm);
     transition: all 0.2s;
-    min-width: 85px;
-    flex-shrink: 0;
+    /* No width/shrink constraints */
 }
 
 .menuItem:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
     background: var(--bg-tertiary);
 }
 
 .menuItem.active {
-    background: var(--primary-50);
+    background: white;
     border-color: var(--primary-200);
-    color: var(--primary-600);
+    box-shadow: 0 0 0 1px var(--primary-100);
 }
 
 .iconWrapper {
     color: var(--primary-500);
+    /* Fallback */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: var(--bg-primary);
+    /* Slight background for icon */
 }
 
 .label {
-    font-size: 10px;
+    font-size: 14px;
+    /* Larger font */
     font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+@media (min-width: 769px) {
+    .mobileMenu {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
     .mobileMenu {
-        display: flex;
-        padding-left: var(--spacing-2);
-        padding-right: var(--spacing-2);
-        margin: 0 calc(-1 * var(--spacing-2)) 20px;
+        /* Already defined above, but ensure it's visible */
+        display: grid;
+        padding: 0;
+        margin-bottom: 24px;
     }
 }

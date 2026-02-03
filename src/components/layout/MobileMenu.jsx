@@ -22,7 +22,10 @@ export default function MobileMenu({ role }) {
                         href={item.href}
                         className={`${styles.menuItem} ${isActive ? styles.active : ''}`}
                     >
-                        <div className={styles.iconWrapper}>
+                        <div
+                            className={styles.iconWrapper}
+                            style={{ color: item.color }}
+                        >
                             {item.icon}
                         </div>
                         <span className={styles.label}>{item.label}</span>
