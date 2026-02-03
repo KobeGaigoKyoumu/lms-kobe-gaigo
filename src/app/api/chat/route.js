@@ -15,6 +15,7 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url)
         const targetStudentId = searchParams.get('studentId')
+        const limit = parseInt(searchParams.get('limit') || '50')
         const before = searchParams.get('before') // timestamp for pagination
         const after = searchParams.get('after') // timestamp for polling new messages
 
