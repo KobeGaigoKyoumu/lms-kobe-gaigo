@@ -297,6 +297,7 @@ export default function AnalyticsPage() {
         fetchGrades()
         fetchJlptData()
         setCareerStats(careerStatsData)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Database Search and Category Filter Effect

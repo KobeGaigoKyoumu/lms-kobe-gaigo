@@ -62,10 +62,9 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
     }
 
     const handleChange = (e) => {
-        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
         setFormData(prev => ({
             ...prev,
-            [e.target.name]: value
+            [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value
         }))
     }
 

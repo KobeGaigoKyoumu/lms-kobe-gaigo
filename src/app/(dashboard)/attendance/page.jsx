@@ -59,6 +59,7 @@ export default function AttendancePage() {
     useEffect(() => {
         fetchUserRole()
         fetchAvailableFiles()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {

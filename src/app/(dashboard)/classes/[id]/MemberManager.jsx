@@ -26,6 +26,7 @@ export default function MemberManager({ classId, members, className }) {
         if (mode === 'master' || mode === 'bulk') {
             loadMasterStudents()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode])
 
     const loadMasterStudents = async () => {
