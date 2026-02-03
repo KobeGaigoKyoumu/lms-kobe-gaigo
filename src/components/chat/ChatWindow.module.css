@@ -414,3 +414,68 @@
 .downloadButton:hover {
     opacity: 1;
 }
+
+/* Chat Actions */
+.messageBubble:hover .actionButtons {
+    opacity: 1;
+}
+
+.messageFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* Time and icons to the right */
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.actionButtons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+/* Mobile: always show actions or on tap? For now, keep hover logic or tap */
+@media (max-width: 768px) {
+    .actionButtons {
+        opacity: 1;
+    }
+}
+
+.actionButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.actionButton:hover {
+    opacity: 1;
+}
+
+.deleteButton:hover {
+    color: #ef4444;
+    /* Red for delete */
+}
+
+/* Mention */
+.mention {
+    color: #2563eb;
+    font-weight: 500;
+    background-color: rgba(37, 99, 235, 0.1);
+    padding: 0 2px;
+    border-radius: 4px;
+}
+
+/* Deleted Message */
+.deletedMessage {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.85rem;
+}

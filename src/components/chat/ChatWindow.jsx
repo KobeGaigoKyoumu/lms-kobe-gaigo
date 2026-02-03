@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download } from 'lucide-react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Globe } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
 export default function ChatWindow({
@@ -336,11 +336,66 @@ export default function ChatWindow({
                     {messages.map((msg) => {
                         const isMe = msg.sender_type === currentUserRole
                         return (
+                        return (
                             <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
-                                {msg.content && <div className={styles.messageText}>{msg.content}</div>}
-                                {renderAttachment(msg)}
-                                <span className={styles.timestamp}>{formatTime(msg.created_at)}</span>
+                                {msg.deleted_at ? (
+                                    <div className={styles.deletedMessage}>送信取り消しされました</div>
+                                ) : (
+                                    <>
+                                        {msg.content && (
+                                            <div className={styles.messageText}>
+                                                {/* Mention Highlighting */}
+                                                {msg.content.split(/(@[^\s]+)/g).map((part, i) =>
+                                                    part.startsWith('@') ? <span key={i} className={styles.mention}>{part}</span> : part
+                                                )}
+                                            </div>
+                                        )}
+                                        {renderAttachment(msg)}
+                                        <div className={styles.messageFooter}>
+                                            <span className={styles.timestamp}>{formatTime(msg.created_at)}</span>
+
+                                            {/* Action Buttons */}
+                                            <div className={styles.actionButtons}>
+                                                {/* Translate Button */}
+                                                {msg.content && (
+                                                    <button
+                                                        className={styles.actionButton}
+                                                        onClick={() => window.open(`https://translate.google.com/?sl=auto&tl=ja&text=${encodeURIComponent(msg.content)}`, '_blank')}
+                                                        title="翻訳"
+                                                    >
+                                                        <Globe size={14} />
+                                                    </button>
+                                                )}
+
+                                                {/* Delete Button (Only for own messages) */}
+                                                {isMe && (
+                                                    <button
+                                                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                                                        onClick={async () => {
+                                                            if (!confirm('メッセージを削除しますか？')) return
+                                                            try {
+                                                                const res = await fetch(`/api/chat?id=${msg.id}`, { method: 'DELETE' })
+                                                                if (res.ok) {
+                                                                    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, deleted_at: new Date().toISOString() } : m))
+                                                                } else {
+                                                                    alert('削除に失敗しました')
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(e)
+                                                                alert('エラーが発生しました')
+                                                            }
+                                                        }}
+                                                        title="削除"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
+                        )
                         )
                     })}
                     <div ref={messagesEndRef} />

@@ -147,3 +147,56 @@ export async function POST(request) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
+
+export async function DELETE(request) {
+    try {
+        const { searchParams } = new URL(request.url)
+        const messageId = searchParams.get('id')
+
+        if (!messageId) {
+            return NextResponse.json({ error: 'Message ID required' }, { status: 400 })
+        }
+
+        // 1. Identify User
+        const supabase = await createServerClient()
+        const { data: { user: teacherUser } } = await supabase.auth.getUser()
+        const studentSession = await getStudentSession()
+
+        // 2. Fetch the message to verify ownership
+        const { data: message, error: fetchError } = await adminSupabase
+            .from('messages')
+            .select('*')
+            .eq('id', messageId)
+            .single()
+
+        if (fetchError || !message) {
+            return NextResponse.json({ error: 'Message not found' }, { status: 404 })
+        }
+
+        // 3. Verify Ownership
+        let isOwner = false
+        if (teacherUser && message.sender_type === 'teacher' && message.teacher_id === teacherUser.id) {
+            isOwner = true
+        } else if (studentSession && message.sender_type === 'student' && message.student_id === studentSession.studentId) {
+            isOwner = true
+        }
+
+        if (!isOwner) {
+            return NextResponse.json({ error: 'Unauthorized to delete this message' }, { status: 403 })
+        }
+
+        // 4. Soft Delete
+        const { error: updateError } = await adminSupabase
+            .from('messages')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', messageId)
+
+        if (updateError) throw updateError
+
+        return NextResponse.json({ success: true })
+
+    } catch (error) {
+        console.error('Delete Error:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
