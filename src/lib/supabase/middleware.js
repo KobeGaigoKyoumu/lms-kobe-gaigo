@@ -50,8 +50,10 @@ export async function updateSession(request) {
         return NextResponse.redirect(url)
     }
 
+    const isChatApi = request.nextUrl.pathname.startsWith('/api/chat')
+
     // Redirect to login if NO Supabase session exists and it's an admin/teacher path
-    if (!user && !isPublicPath && !isStudentPath && !isWebhook) {
+    if (!user && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
