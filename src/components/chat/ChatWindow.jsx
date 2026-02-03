@@ -351,7 +351,6 @@ export default function ChatWindow({
                                         {/* Reply Context (Parent Message Preview) */}
                                         {msg.reply_to_id && (
                                             <div className={styles.replyContext}>
-                                                <div className={styles.replyBar}></div>
                                                 <div className={styles.replyContent}>
                                                     {replyParent ? (
                                                         <>

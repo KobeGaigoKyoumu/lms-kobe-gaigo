@@ -484,13 +484,7 @@
     align-items: center;
 }
 
-.replyBar {
-    width: 2px;
-    height: 100%;
-    background-color: #cbd5e1;
-    margin-right: 8px;
-    border-radius: 2px;
-}
+
 
 .replyContent {
     display: flex;
@@ -509,6 +503,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 200px;
+}
+
+/* Visibility fix for replies in own messages (Blue background) */
+.mine .replyContext {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+
+
+.mine .replyContent {
+    border-left-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Reply Preview (Input Area) */
