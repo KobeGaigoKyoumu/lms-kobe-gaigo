@@ -397,3 +397,20 @@
 .closeModalButton:hover {
     opacity: 1;
 }
+
+.downloadButton {
+    position: absolute;
+    top: -40px;
+    right: 40px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.downloadButton:hover {
+    opacity: 1;
+}

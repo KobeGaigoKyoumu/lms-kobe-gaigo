@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp } from 'lucide-react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
 export default function ChatWindow({
@@ -402,6 +402,29 @@ export default function ChatWindow({
             {previewImage && (
                 <div className={styles.modalOverlay} onClick={() => setPreviewImage(null)}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <button
+                            className={styles.downloadButton}
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch(previewImage);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `image-${Date.now()}.png`; // Simple fallback name
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    window.URL.revokeObjectURL(url);
+                                    document.body.removeChild(a);
+                                } catch (error) {
+                                    console.error('Download failed', error);
+                                    alert('ダウンロードに失敗しました');
+                                }
+                            }}
+                            title="ダウンロード"
+                        >
+                            <Download size={24} />
+                        </button>
                         <button
                             className={styles.closeModalButton}
                             onClick={() => setPreviewImage(null)}
