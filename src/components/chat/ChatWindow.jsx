@@ -137,24 +137,32 @@ export default function ChatWindow({
         if (!msg.attachment_url) return null
 
         const isImage = msg.attachment_type?.startsWith('image/')
+        const fileName = msg.attachment_name || '添付ファイル'
 
         if (isImage) {
             return (
                 <div className={styles.attachmentImage}>
                     <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer">
-                        <img src={msg.attachment_url} alt="attachment" />
+                        <img src={msg.attachment_url} alt="thumbnail" />
                     </a>
                 </div>
             )
         }
 
         return (
-            <div className={styles.attachmentFile}>
-                <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className={styles.fileLink}>
-                    <FileText size={16} />
-                    <span>{msg.attachment_name || '添付ファイル'}</span>
-                </a>
-            </div>
+            <a
+                href={msg.attachment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.attachmentCard}
+            >
+                <div className={styles.cardThumbnail}>
+                    <FileText size={24} className={styles.cardIcon} />
+                </div>
+                <div className={styles.cardInfo}>
+                    <span className={styles.cardFileName}>{fileName}</span>
+                </div>
+            </a>
         )
     }
 
