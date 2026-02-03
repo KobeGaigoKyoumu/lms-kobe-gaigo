@@ -80,27 +80,35 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 
-  /* Typography - Reduced for high density */
-  --font-size-xs: 0.7rem;
-  --font-size-sm: 0.8rem;
-  --font-size-base: 0.875rem;
-  --font-size-lg: 1rem;
-  --font-size-xl: 1.125rem;
-  --font-size-2xl: 1.25rem;
-  --font-size-3xl: 1.5rem;
-  --font-size-4xl: 1.875rem;
+  /* Typography - Extreme High Density */
+  --font-size-xs: 0.55rem;
+  /* ~8px */
+  --font-size-sm: 0.65rem;
+  /* ~9px */
+  --font-size-base: 0.7rem;
+  /* ~10px */
+  --font-size-lg: 0.8rem;
+  /* ~11px */
+  --font-size-xl: 0.9rem;
+  /* ~13px */
+  --font-size-2xl: 1rem;
+  /* ~14px */
+  --font-size-3xl: 1.15rem;
+  /* ~16px */
+  --font-size-4xl: 1.4rem;
+  /* ~20px */
 
-  /* Spacing - Reduced for high density */
-  --spacing-1: 0.15rem;
-  --spacing-2: 0.3rem;
-  --spacing-3: 0.5rem;
-  --spacing-4: 0.75rem;
-  --spacing-5: 1rem;
-  --spacing-6: 1.25rem;
-  --spacing-8: 1.5rem;
-  --spacing-10: 2rem;
-  --spacing-12: 2.5rem;
-  --spacing-16: 3rem;
+  /* Spacing - Extreme High Density */
+  --spacing-1: 1px;
+  --spacing-2: 2px;
+  --spacing-3: 4px;
+  --spacing-4: 6px;
+  --spacing-5: 8px;
+  --spacing-6: 12px;
+  --spacing-8: 16px;
+  --spacing-10: 20px;
+  --spacing-12: 24px;
+  --spacing-16: 32px;
 
   /* Border Radius */
   --radius-sm: 0.25rem;
@@ -116,9 +124,9 @@
   --transition-slow: 300ms ease;
 
   /* Layout */
-  --sidebar-width: 220px;
-  --header-height: 50px;
-  --max-content-width: 1200px;
+  --sidebar-width: 180px;
+  --header-height: 32px;
+  --max-content-width: 100%;
 }
 
 /* Dark Theme */
@@ -155,7 +163,8 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 14px;
+  /* Reduced base rem */
   scroll-behavior: smooth;
   color-scheme: light dark;
 }
@@ -510,17 +519,14 @@ img {
    Responsive
    ===================================================== */
 @media (max-width: 768px) {
-  :root {
-    --sidebar-width: 0px;
-    --header-height: 48px;
-  }
 
-  .sidebar {
-    display: none !important;
-  }
-
-  .main-content {
+  .main-content,
+  [class*="main"],
+  main {
     margin-left: 0 !important;
+    padding-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   /* Force tables to be scrollable and compact on mobile */
@@ -530,23 +536,86 @@ img {
   }
 }
 
-/* Global Table Density */
+/* Aggressive Table & UI Density */
 table th,
 table td {
-  padding: var(--spacing-2) var(--spacing-3) !important;
+  padding: 2px 4px !important;
+  /* Minimum padding */
+  line-height: 1.2 !important;
 }
 
-.card-body {
+.card,
+[class*="card"] {
+  border-radius: 4px !important;
+  /* Sharper corners */
+}
+
+.card-body,
+[class*="cardBody"],
+[class*="card-body"] {
+  padding: var(--spacing-2) !important;
+}
+
+.page-content,
+[class*="pageContent"],
+[class*="page-content"] {
   padding: var(--spacing-3) !important;
 }
 
-.page-content {
-  padding: var(--spacing-4) !important;
+.btn,
+.button {
+  padding: 2px 8px !important;
+  font-size: var(--font-size-xs) !important;
 }
 
 h1,
+.h1 {
+  font-size: var(--font-size-xl) !important;
+  margin-bottom: 4px !important;
+}
+
 h2,
+.h2 {
+  font-size: var(--font-size-lg) !important;
+  margin-bottom: 4px !important;
+}
+
 h3,
-h4 {
-  margin-bottom: var(--spacing-2) !important;
+.h3 {
+  font-size: var(--font-size-base) !important;
+  margin-bottom: 4px !important;
+}
+
+/* Global charts container density */
+.recharts-responsive-container {
+  min-height: 120px !important;
+  /* Extremely small charts */
+  max-height: 180px !important;
+}
+
+/* Force Recharts fonts to be smaller if possible */
+.recharts-text {
+  font-size: 10px !important;
+}
+
+.recharts-legend-item-text {
+  font-size: 9px !important;
+}
+
+/* Make table columns as narrow as possible */
+table th,
+table td {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  /* Prevent wide columns */
+}
+
+/* Ultra-compact Table Header */
+table thead th {
+  background-color: var(--bg-tertiary) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }

@@ -238,6 +238,12 @@
 
 @media (max-width: 768px) {
     .sidebar.mobileHidden {
-        display: none;
+        display: none !important;
+        width: 0 !important;
+        visibility: hidden !important;
     }
+
+    /* .collapseBtn {
+        display: none !important;
+    } */
 }
