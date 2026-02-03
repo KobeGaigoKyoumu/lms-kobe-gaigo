@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Globe, Reply } from 'lucide-react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Reply } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
 export default function ChatWindow({
@@ -396,15 +396,7 @@ export default function ChatWindow({
                                                 </button>
 
                                                 {/* Translate Button */}
-                                                {msg.content && (
-                                                    <button
-                                                        className={styles.actionButton}
-                                                        onClick={() => window.open(`https://translate.google.com/?sl=auto&tl=ja&text=${encodeURIComponent(msg.content)}`, '_blank')}
-                                                        title="翻訳"
-                                                    >
-                                                        <Globe size={14} />
-                                                    </button>
-                                                )}
+
 
                                                 {/* Delete Button (Only for own messages) */}
                                                 {isMe && (
@@ -417,7 +409,8 @@ export default function ChatWindow({
                                                                 if (res.ok) {
                                                                     setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, deleted_at: new Date().toISOString() } : m))
                                                                 } else {
-                                                                    alert('削除に失敗しました')
+                                                                    const data = await res.json()
+                                                                    alert(`削除に失敗しました: ${data.error || '不明なエラー'}`)
                                                                 }
                                                             } catch (e) {
                                                                 console.error(e)
