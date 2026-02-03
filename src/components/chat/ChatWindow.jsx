@@ -14,6 +14,7 @@ export default function ChatWindow({
     const [attachment, setAttachment] = useState(null) // { url, name, type }
     const [isUploading, setIsUploading] = useState(false)
     const [hasMore, setHasMore] = useState(true)
+    const [previewImage, setPreviewImage] = useState(null)
 
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
