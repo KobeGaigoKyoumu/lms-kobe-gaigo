@@ -62,9 +62,9 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         const body = await request.json()
-        const { content, studentId } = body
+        const { content, studentId, attachment_url, attachment_name, attachment_type } = body
 
-        if (!content) return NextResponse.json({ error: 'Missing content' }, { status: 400 })
+        if (!content && !attachment_url) return NextResponse.json({ error: 'Missing content or attachment' }, { status: 400 })
 
         // 1. Identify User
         const supabase = await createServerClient()
@@ -81,7 +81,10 @@ export async function POST(request) {
                 student_id: studentId,
                 teacher_id: teacherUser.id,
                 sender_type: 'teacher',
-                content: content,
+                content: content || '',
+                attachment_url,
+                attachment_name,
+                attachment_type,
                 read: false
             }
         } else if (studentSession) {
@@ -89,7 +92,10 @@ export async function POST(request) {
                 student_id: studentSession.studentId,
                 teacher_id: null, // Students don't send TO a specific teacher ID usually, just to the "system/school"
                 sender_type: 'student',
-                content: content,
+                content: content || '',
+                attachment_url,
+                attachment_name,
+                attachment_type,
                 read: false
             }
         } else {
