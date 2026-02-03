@@ -70,7 +70,7 @@ export async function GET(request) {
         if (studentIds.length > 0) {
             const { data: students } = await adminSupabase
                 .from('students')
-                .select('student_id_text, name, class_name')
+                .select('student_id_text, full_name, class_name')
                 .in('student_id_text', studentIds)
 
             // Merge details
@@ -79,7 +79,7 @@ export async function GET(request) {
             conversationList.forEach(conv => {
                 const details = studentMap.get(conv.student_id_text)
                 if (details) {
-                    conv.name = details.name
+                    conv.name = details.full_name
                     conv.class_name = details.class_name
                 } else {
                     conv.name = `Unknown (${conv.student_id_text})`
