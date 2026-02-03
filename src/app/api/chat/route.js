@@ -91,7 +91,7 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         const body = await request.json()
-        const { content, studentId, attachment_url, attachment_name, attachment_type } = body
+        const { content, studentId, attachment_url, attachment_name, attachment_type, replyToId } = body
 
         if (!content && !attachment_url) return NextResponse.json({ error: 'Missing content or attachment' }, { status: 400 })
 
@@ -100,9 +100,9 @@ export async function POST(request) {
         const { data: { user: teacherUser } } = await supabase.auth.getUser()
         const studentSession = await getStudentSession()
 
+        // 2. Construct Payload based on Role
         let payload = null
 
-        // 2. Construct Payload based on Role
         if (teacherUser) {
             if (!studentId) return NextResponse.json({ error: 'Target student required' }, { status: 400 })
 
@@ -114,17 +114,19 @@ export async function POST(request) {
                 attachment_url,
                 attachment_name,
                 attachment_type,
+                reply_to_id: replyToId || null,
                 read: false
             }
         } else if (studentSession) {
             payload = {
                 student_id: studentSession.studentId,
-                teacher_id: null, // Students don't send TO a specific teacher ID usually, just to the "system/school"
+                teacher_id: null,
                 sender_type: 'student',
                 content: content || '',
                 attachment_url,
                 attachment_name,
                 attachment_type,
+                reply_to_id: replyToId || null,
                 read: false
             }
         } else {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Globe } from 'lucide-react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Globe, Reply } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
 export default function ChatWindow({
@@ -15,6 +15,7 @@ export default function ChatWindow({
     const [isUploading, setIsUploading] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [previewImage, setPreviewImage] = useState(null)
+    const [replyingTo, setReplyingTo] = useState(null) // { id, content, sender_type }
 
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
@@ -243,7 +244,8 @@ export default function ChatWindow({
                     studentId: studentId,
                     attachment_url: attachment?.url,
                     attachment_name: attachment?.name,
-                    attachment_type: attachment?.type
+                    attachment_type: attachment?.type,
+                    replyToId: replyingTo?.id
                 })
             })
 
@@ -256,6 +258,7 @@ export default function ChatWindow({
 
             setInputText('')
             setAttachment(null)
+            setReplyingTo(null)
             setTimeout(scrollToBottom, 50)
         } catch (error) {
             alert('送信に失敗しました')
@@ -333,15 +336,39 @@ export default function ChatWindow({
                     )}
 
 
+
                     {messages.map((msg) => {
                         const isMe = msg.sender_type === currentUserRole
-                        return (
+                        // Find parent message if this is a reply
+                        const replyParent = msg.reply_to_id ? messages.find(m => m.id === msg.reply_to_id) : null
+
                         return (
                             <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
                                 {msg.deleted_at ? (
                                     <div className={styles.deletedMessage}>送信取り消しされました</div>
                                 ) : (
                                     <>
+                                        {/* Reply Context (Parent Message Preview) */}
+                                        {msg.reply_to_id && (
+                                            <div className={styles.replyContext}>
+                                                <div className={styles.replyBar}></div>
+                                                <div className={styles.replyContent}>
+                                                    {replyParent ? (
+                                                        <>
+                                                            <span className={styles.replySender}>
+                                                                {replyParent.sender_type === 'teacher' ? '先生' : '学生'}
+                                                            </span>
+                                                            <span className={styles.replyTextSnippet}>
+                                                                {replyParent.content || (replyParent.attachment_url ? '添付ファイル' : '...')}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className={styles.replyTextSnippet}>メッセージが見つかりません</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {msg.content && (
                                             <div className={styles.messageText}>
                                                 {/* Mention Highlighting */}
@@ -356,6 +383,18 @@ export default function ChatWindow({
 
                                             {/* Action Buttons */}
                                             <div className={styles.actionButtons}>
+                                                {/* Reply Button */}
+                                                <button
+                                                    className={styles.actionButton}
+                                                    onClick={() => {
+                                                        setReplyingTo(msg)
+                                                        fileInputRef.current?.focus()
+                                                    }}
+                                                    title="返信"
+                                                >
+                                                    <Reply size={14} />
+                                                </button>
+
                                                 {/* Translate Button */}
                                                 {msg.content && (
                                                     <button
@@ -396,12 +435,34 @@ export default function ChatWindow({
                                 )}
                             </div>
                         )
-                        )
                     })}
                     <div ref={messagesEndRef} />
                 </div>
 
                 <div className={styles.inputContainer}>
+                    {/* Reply Preview Banner */}
+                    {replyingTo && (
+                        <div className={styles.replyPreviewBanner}>
+                            <div className={styles.replyPreviewContent}>
+                                <Reply size={14} className={styles.replyIcon} />
+                                <div className={styles.replyInfo}>
+                                    <span className={styles.replyingToName}>
+                                        {replyingTo.sender_type === 'teacher' ? '先生' : '学生'}への返信
+                                    </span>
+                                    <span className={styles.replyingToText}>
+                                        {replyingTo.content || (replyingTo.attachment_url ? '添付ファイル' : '')}
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                className={styles.closeReplyButton}
+                                onClick={() => setReplyingTo(null)}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    )}
+
                     {attachment && (
                         <div className={styles.attachmentPreview}>
                             <div className={styles.previewContent}>

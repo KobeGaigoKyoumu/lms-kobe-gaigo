@@ -474,8 +474,94 @@
 }
 
 /* Deleted Message */
-.deletedMessage {
+
+/* Reply Context in Message Bubble */
+.replyContext {
+    margin-bottom: 4px;
+    display: flex;
+    font-size: 0.8rem;
+    color: #64748b;
+    align-items: center;
+}
+
+.replyBar {
+    width: 2px;
+    height: 100%;
+    background-color: #cbd5e1;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+.replyContent {
+    display: flex;
+    flex-direction: column;
+    padding-left: 8px;
+    border-left: 2px solid #cbd5e1;
+}
+
+.replySender {
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.replyTextSnippet {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Reply Preview (Input Area) */
+.replyPreviewBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.replyPreviewContent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.replyIcon {
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.replyInfo {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.replyingToName {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #334155;
+}
+
+.replyingToText {
+    color: #64748b;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.closeReplyButton {
+    background: none;
+    border: none;
+    cursor: pointer;
     color: #94a3b8;
-    font-style: italic;
-    font-size: 0.85rem;
+    padding: 4px;
+}
+
+.closeReplyButton:hover {
+    color: #64748b;
 }
