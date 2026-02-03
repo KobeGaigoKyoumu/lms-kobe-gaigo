@@ -1,31 +1,30 @@
 .mobileMenu {
     display: none;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 24px;
     padding-bottom: 8px;
-    /* Grid Layout for Mobile */
+    /* Grid Layout: 5 columns */
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(5, 1fr);
 }
 
 .menuItem {
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 16px;
-    /* Increased padding */
+    padding: 8px 4px;
+    /* Reduced padding */
     display: flex;
-    flex-direction: row;
-    /* Horizontal layout for item content */
+    flex-direction: column;
+    /* Vertical stack */
     align-items: center;
-    justify-content: flex-start;
-    /* Align left */
-    gap: 12px;
+    justify-content: center;
+    gap: 6px;
     text-decoration: none;
     color: var(--text-secondary);
     box-shadow: var(--shadow-sm);
     transition: all 0.2s;
-    /* No width/shrink constraints */
+    height: 100%;
 }
 
 .menuItem:active {
@@ -52,10 +51,17 @@
 }
 
 .label {
-    font-size: 14px;
-    /* Larger font */
+    font-size: 10px;
+    /* Smaller font for 5-col layout */
     font-weight: 600;
     color: var(--text-primary);
+    text-align: center;
+    line-height: 1.2;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* white-space: nowrap;  Might want wrapping or ellipsis */
+    display: block;
 }
 
 @media (min-width: 769px) {
