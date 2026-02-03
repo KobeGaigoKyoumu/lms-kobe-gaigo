@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+
 // Environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-// Init Supabase Admin Client
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 /**
  * POST: Handle incoming Telegram updates
@@ -16,6 +14,9 @@ export async function POST(req) {
     try {
         const body = await req.json();
         console.log('Received Telegram Update:', JSON.stringify(body, null, 2));
+
+        // Init Supabase Admin Client
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
         if (body.message && body.message.text) {
             const chatId = body.message.chat.id;
@@ -31,7 +32,7 @@ export async function POST(req) {
                     const studentId = params[1];
                     console.log(`Linking Student ID: ${studentId} to Telegram Chat ID: ${chatId}`);
 
-                    const result = await linkStudentToTelegram(studentId, chatId);
+                    const result = await linkStudentToTelegram(supabase, studentId, chatId);
 
                     if (result.success) {
                         await sendTelegramMessage(chatId, `こんにちは、${result.studentName}さん！\nLMSとの連携が完了しました。重要なお知らせをこちらでお届けします。✅`);
@@ -66,7 +67,7 @@ export async function POST(req) {
             } else if (text === '/my_id') {
                 await sendTelegramMessage(chatId, `🆔 あなたのTelegram Chat IDは:\n\`${chatId}\`\nです。`);
             } else if (text === '/unlink') {
-                const result = await unlinkStudentFromTelegram(chatId);
+                const result = await unlinkStudentFromTelegram(supabase, chatId);
                 if (result.success) {
                     await sendTelegramMessage(chatId, `✅ 連携を解除しました。\n再度連携する場合はLMSのマイページから行ってください。`);
                 } else {
@@ -89,7 +90,7 @@ export async function POST(req) {
 /**
  * Link Student ID to Telegram Chat ID in Supabase
  */
-async function linkStudentToTelegram(studentId, chatId) {
+async function linkStudentToTelegram(supabase, studentId, chatId) {
     console.log(`Updating student ${studentId} with Telegram Chat ID ${chatId}`);
 
     const chatIdStr = String(chatId);
@@ -124,7 +125,7 @@ async function linkStudentToTelegram(studentId, chatId) {
 /**
  * Unlink Telegram Chat ID
  */
-async function unlinkStudentFromTelegram(chatId) {
+async function unlinkStudentFromTelegram(supabase, chatId) {
     console.log(`Unlinking Telegram Chat ID ${chatId}`);
     const chatIdStr = String(chatId);
 
