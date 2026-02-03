@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
 export default function ChatWindow({
@@ -9,31 +9,107 @@ export default function ChatWindow({
     const [messages, setMessages] = useState([])
     const [inputText, setInputText] = useState('')
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [attachment, setAttachment] = useState(null) // { url, name, type }
     const [isUploading, setIsUploading] = useState(false)
+    const [hasMore, setHasMore] = useState(true)
 
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
+    const topOfChatRef = useRef(null)
 
     const POLL_INTERVAL = 5000
 
-    const fetchMessages = async () => {
+    // Initial fetch (latest 50)
+    const fetchInitialMessages = useCallback(async () => {
+        setIsLoading(true)
         try {
             const params = new URLSearchParams()
             if (studentId) params.append('studentId', studentId)
+            params.append('limit', '50')
 
             const res = await fetch(`/api/chat?${params.toString()}`)
             if (!res.ok) throw new Error('Failed to fetch')
 
             const data = await res.json()
             setMessages(data.messages || [])
+            if ((data.messages || []).length < 50) {
+                setHasMore(false)
+            }
         } catch (error) {
             console.error('Fetch error:', error)
         } finally {
             setIsLoading(false)
+            // Scroll to bottom on initial load
+            setTimeout(scrollToBottom, 100)
+        }
+    }, [studentId])
+
+    // Load older messages
+    const loadMoreMessages = async () => {
+        if (!hasMore || isLoadingMore || messages.length === 0) return
+
+        setIsLoadingMore(true)
+        const oldestMessage = messages[0]
+        const scrollHeightBefore = topOfChatRef.current?.scrollHeight
+
+        try {
+            const params = new URLSearchParams()
+            if (studentId) params.append('studentId', studentId)
+            params.append('limit', '50')
+            params.append('before', oldestMessage.created_at)
+
+            const res = await fetch(`/api/chat?${params.toString()}`)
+            if (!res.ok) throw new Error('Failed to load more')
+
+            const data = await res.json()
+            const newMessages = data.messages || []
+
+            if (newMessages.length < 50) {
+                setHasMore(false)
+            }
+
+            if (newMessages.length > 0) {
+                setMessages(prev => [...newMessages, ...prev])
+                // Maintain scroll position (roughly) - explicit scroll adjustment might be needed in real DOM
+            }
+        } catch (error) {
+            console.error('Load more error:', error)
+        } finally {
+            setIsLoadingMore(false)
         }
     }
+
+    // Poll for new messages
+    const pollNewMessages = useCallback(async () => {
+        if (messages.length === 0) return
+
+        const latestMessage = messages[messages.length - 1]
+
+        try {
+            const params = new URLSearchParams()
+            if (studentId) params.append('studentId', studentId)
+            params.append('after', latestMessage.created_at)
+
+            const res = await fetch(`/api/chat?${params.toString()}`)
+            if (!res.ok) return // Silent fail on poll
+
+            const data = await res.json()
+            const newMessages = data.messages || []
+
+            if (newMessages.length > 0) {
+                // Filter out any duplicates just in case (though API should handle)
+                const uniqueNew = newMessages.filter(nm => !messages.some(m => m.id === nm.id))
+                if (uniqueNew.length > 0) {
+                    setMessages(prev => [...prev, ...uniqueNew])
+                    setTimeout(scrollToBottom, 100)
+                }
+            }
+        } catch (error) {
+            // Silent error
+        }
+    }, [studentId, messages])
 
     const markRead = async () => {
         if (messages.length === 0) return
@@ -52,15 +128,19 @@ export default function ChatWindow({
     }
 
     useEffect(() => {
-        fetchMessages()
-        const interval = setInterval(fetchMessages, POLL_INTERVAL)
+        fetchInitialMessages()
+    }, [fetchInitialMessages])
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!isLoading) pollNewMessages()
+        }, POLL_INTERVAL)
         return () => clearInterval(interval)
-    }, [studentId])
+    }, [pollNewMessages, isLoading])
 
     useEffect(() => {
         markRead()
-        scrollToBottom()
-    }, [messages])
+    }, [messages.length]) // Trigger on length change mostly
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -118,9 +198,14 @@ export default function ChatWindow({
 
             if (!res.ok) throw new Error('Send failed')
 
+            const data = await res.json()
+            // Optimistically add or just poll immediately
+            // Let's add manually to feel instant
+            setMessages(prev => [...prev, data.message])
+
             setInputText('')
             setAttachment(null)
-            await fetchMessages()
+            setTimeout(scrollToBottom, 50)
         } catch (error) {
             alert('送信に失敗しました')
         } finally {
@@ -168,8 +253,22 @@ export default function ChatWindow({
 
     return (
         <div className={styles.chatContainer}>
-            <div className={styles.messageArea}>
+            <div className={styles.messageArea} ref={topOfChatRef}>
                 {isLoading && <div className={styles.loading}>読み込み中...</div>}
+
+                {!isLoading && hasMore && (
+                    <div className={styles.loadMoreContainer}>
+                        <button
+                            onClick={loadMoreMessages}
+                            disabled={isLoadingMore}
+                            className={styles.loadMoreButton}
+                        >
+                            {isLoadingMore ? <Loader2 size={16} className={styles.spin} /> : <ArrowUp size={16} />}
+                            <span>過去のメッセージを読み込む</span>
+                        </button>
+                    </div>
+                )}
+
                 {!isLoading && messages.length === 0 && (
                     <div className={styles.emptyState}>メッセージはまだありません</div>
                 )}
@@ -177,7 +276,7 @@ export default function ChatWindow({
                 {messages.map((msg) => {
                     const isMe = msg.sender_type === currentUserRole
                     return (
-                        <div key={msg.id} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
+                        <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
                             {msg.content && <div className={styles.messageText}>{msg.content}</div>}
                             {renderAttachment(msg)}
                             <span className={styles.timestamp}>{formatTime(msg.created_at)}</span>

@@ -15,6 +15,8 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url)
         const targetStudentId = searchParams.get('studentId')
+        const before = searchParams.get('before') // timestamp for pagination
+        const after = searchParams.get('after') // timestamp for polling new messages
 
         // 1. Identify User (Teacher vs Student)
         const supabase = await createServerClient()
@@ -43,15 +45,41 @@ export async function GET(request) {
         }
 
         // 3. Fetch Messages
-        const { data, error } = await adminSupabase
+        let query = adminSupabase
             .from('messages')
             .select('*')
             .eq('student_id', effectiveStudentId)
-            .order('created_at', { ascending: true })
+
+        // If 'after' is present, we want messages NEWER than 'after'
+        // We want them in ascending order (oldest to newest) typically for appending
+        if (after) {
+            query = query
+                .gt('created_at', after)
+                .order('created_at', { ascending: true })
+        } else {
+            // Default / Pagination: Fetch newest first
+            query = query
+                .order('created_at', { ascending: false })
+                .limit(limit)
+
+            if (before) {
+                query = query.lt('created_at', before)
+            }
+        }
+
+        const { data, error } = await query
 
         if (error) throw error
 
-        return NextResponse.json({ messages: data })
+        let resultMessages = data
+
+        // If 'after' was NOT used (pagination mode), we fetched descending. 
+        // We need to reverse to return ascending (oldest -> newest).
+        if (!after) {
+            resultMessages = data.reverse()
+        }
+
+        return NextResponse.json({ messages: resultMessages })
 
     } catch (error) {
         console.error('Chat API Error:', error)
