@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp } from 'lucide-react'
 import styles from './ChatWindow.module.css'
 
@@ -18,8 +18,25 @@ export default function ChatWindow({
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
     const topOfChatRef = useRef(null)
+    const scrollContainerRef = useRef(null)
+    const observerTarget = useRef(null)
+    const prevScrollHeight = useRef(0)
+    const wasLoadingMoreRef = useRef(false)
 
     const POLL_INTERVAL = 5000
+
+    // Scroll restoration logic
+    useLayoutEffect(() => {
+        if (wasLoadingMoreRef.current && scrollContainerRef.current) {
+            const container = scrollContainerRef.current
+            const newScrollHeight = container.scrollHeight
+            const diff = newScrollHeight - prevScrollHeight.current
+            if (diff > 0) {
+                container.scrollTop += diff
+            }
+            wasLoadingMoreRef.current = false
+        }
+    }, [messages])
 
     // Initial fetch (latest 50)
     const fetchInitialMessages = useCallback(async () => {
@@ -51,8 +68,14 @@ export default function ChatWindow({
         if (!hasMore || isLoadingMore || messages.length === 0) return
 
         setIsLoadingMore(true)
+        wasLoadingMoreRef.current = true
+
+        // Capture scroll height before loading
+        if (scrollContainerRef.current) {
+            prevScrollHeight.current = scrollContainerRef.current.scrollHeight
+        }
+
         const oldestMessage = messages[0]
-        const scrollHeightBefore = topOfChatRef.current?.scrollHeight
 
         try {
             const params = new URLSearchParams()
@@ -72,14 +95,35 @@ export default function ChatWindow({
 
             if (newMessages.length > 0) {
                 setMessages(prev => [...newMessages, ...prev])
-                // Maintain scroll position (roughly) - explicit scroll adjustment might be needed in real DOM
+            } else {
+                wasLoadingMoreRef.current = false
             }
         } catch (error) {
             console.error('Load more error:', error)
+            wasLoadingMoreRef.current = false
         } finally {
             setIsLoadingMore(false)
         }
     }
+
+    // Intersection Observer for Infinite Scroll
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const target = entries[0]
+                if (target.isIntersecting && hasMore && !isLoadingMore && messages.length > 0) {
+                    loadMoreMessages()
+                }
+            },
+            { threshold: 0.1, rootMargin: '50px' }
+        )
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current)
+        }
+
+        return () => observer.disconnect()
+    }, [hasMore, isLoadingMore, loadMoreMessages, messages.length])
 
     // Poll for new messages
     const pollNewMessages = useCallback(async () => {
@@ -99,11 +143,17 @@ export default function ChatWindow({
             const newMessages = data.messages || []
 
             if (newMessages.length > 0) {
-                // Filter out any duplicates just in case (though API should handle)
                 const uniqueNew = newMessages.filter(nm => !messages.some(m => m.id === nm.id))
                 if (uniqueNew.length > 0) {
+                    // Check if user is at bottom before update
+                    const isAtBottom = scrollContainerRef.current &&
+                        (scrollContainerRef.current.scrollTop + scrollContainerRef.current.clientHeight >= scrollContainerRef.current.scrollHeight - 50)
+
                     setMessages(prev => [...prev, ...uniqueNew])
-                    setTimeout(scrollToBottom, 100)
+
+                    if (isAtBottom) {
+                        setTimeout(scrollToBottom, 100)
+                    }
                 }
             }
         } catch (error) {
@@ -226,10 +276,18 @@ export default function ChatWindow({
 
         if (isImage) {
             return (
-                <div className={styles.attachmentImage}>
-                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer">
-                        <img src={msg.attachment_url} alt="thumbnail" />
-                    </a>
+                <div
+                    className={styles.imageWrapper}
+                    onClick={() => setPreviewImage(msg.attachment_url)}
+                >
+                    <img
+                        src={msg.attachment_url}
+                        alt="attachment"
+                        className={styles.chatImageThumbnail}
+                    />
+                    <div className={styles.magnifierOverlay}>
+                        <ImageIcon size={24} className={styles.magnifierIcon} />
+                    </div>
                 </div>
             )
         }
@@ -252,90 +310,107 @@ export default function ChatWindow({
     }
 
     return (
-        <div className={styles.chatContainer}>
-            <div className={styles.messageArea} ref={topOfChatRef}>
-                {isLoading && <div className={styles.loading}>読み込み中...</div>}
+        <>
+            <div className={styles.chatContainer}>
+                <div
+                    className={styles.messageArea}
+                    ref={scrollContainerRef}
+                >
+                    {/* Top Sentinel for Infinite Scroll */}
+                    <div ref={observerTarget} style={{ height: '10px' }} />
 
-                {!isLoading && hasMore && (
-                    <div className={styles.loadMoreContainer}>
+                    {isLoadingMore && (
+                        <div className={styles.loadingMoreSpinner}>
+                            <Loader2 size={20} className={styles.spin} />
+                        </div>
+                    )}
+
+                    {isLoading && <div className={styles.loading}>読み込み中...</div>}
+
+                    {!isLoading && messages.length === 0 && (
+                        <div className={styles.emptyState}>メッセージはまだありません</div>
+                    )}
+
+
+                    {messages.map((msg) => {
+                        const isMe = msg.sender_type === currentUserRole
+                        return (
+                            <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
+                                {msg.content && <div className={styles.messageText}>{msg.content}</div>}
+                                {renderAttachment(msg)}
+                                <span className={styles.timestamp}>{formatTime(msg.created_at)}</span>
+                            </div>
+                        )
+                    })}
+                    <div ref={messagesEndRef} />
+                </div>
+
+                <div className={styles.inputContainer}>
+                    {attachment && (
+                        <div className={styles.attachmentPreview}>
+                            <div className={styles.previewContent}>
+                                {attachment.type?.startsWith('image/') ? (
+                                    <ImageIcon size={16} className={styles.previewIcon} />
+                                ) : (
+                                    <FileText size={16} className={styles.previewIcon} />
+                                )}
+                                <span className={styles.previewName}>{attachment.name}</span>
+                            </div>
+                            <button onClick={() => setAttachment(null)} className={styles.removeAttachment}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )}
+
+                    <form className={styles.inputArea} onSubmit={handleSend}>
                         <button
-                            onClick={loadMoreMessages}
-                            disabled={isLoadingMore}
-                            className={styles.loadMoreButton}
+                            type="button"
+                            className={styles.attachButton}
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isSending || isUploading}
                         >
-                            {isLoadingMore ? <Loader2 size={16} className={styles.spin} /> : <ArrowUp size={16} />}
-                            <span>過去のメッセージを読み込む</span>
+                            {isUploading ? <Loader2 size={18} className={styles.spin} /> : <Paperclip size={18} />}
                         </button>
-                    </div>
-                )}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileSelect}
+                            style={{ display: 'none' }}
+                            disabled={isSending || isUploading}
+                        />
 
-                {!isLoading && messages.length === 0 && (
-                    <div className={styles.emptyState}>メッセージはまだありません</div>
-                )}
-
-                {messages.map((msg) => {
-                    const isMe = msg.sender_type === currentUserRole
-                    return (
-                        <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
-                            {msg.content && <div className={styles.messageText}>{msg.content}</div>}
-                            {renderAttachment(msg)}
-                            <span className={styles.timestamp}>{formatTime(msg.created_at)}</span>
-                        </div>
-                    )
-                })}
-                <div ref={messagesEndRef} />
+                        <input
+                            className={styles.input}
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="メッセージを入力..."
+                            disabled={isSending}
+                        />
+                        <button
+                            type="submit"
+                            className={styles.sendButton}
+                            disabled={isSending || isUploading || (!inputText.trim() && !attachment)}
+                        >
+                            送信
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div className={styles.inputContainer}>
-                {attachment && (
-                    <div className={styles.attachmentPreview}>
-                        <div className={styles.previewContent}>
-                            {attachment.type?.startsWith('image/') ? (
-                                <ImageIcon size={16} className={styles.previewIcon} />
-                            ) : (
-                                <FileText size={16} className={styles.previewIcon} />
-                            )}
-                            <span className={styles.previewName}>{attachment.name}</span>
-                        </div>
-                        <button onClick={() => setAttachment(null)} className={styles.removeAttachment}>
-                            <X size={14} />
+            {/* Lightbox Modal */}
+            {previewImage && (
+                <div className={styles.modalOverlay} onClick={() => setPreviewImage(null)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <button
+                            className={styles.closeModalButton}
+                            onClick={() => setPreviewImage(null)}
+                        >
+                            <X size={24} />
                         </button>
+                        <img src={previewImage} alt="Full size" className={styles.fullSizeImage} />
                     </div>
-                )}
-
-                <form className={styles.inputArea} onSubmit={handleSend}>
-                    <button
-                        type="button"
-                        className={styles.attachButton}
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isSending || isUploading}
-                    >
-                        {isUploading ? <Loader2 size={18} className={styles.spin} /> : <Paperclip size={18} />}
-                    </button>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileSelect}
-                        style={{ display: 'none' }}
-                        disabled={isSending || isUploading}
-                    />
-
-                    <input
-                        className={styles.input}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="メッセージを入力..."
-                        disabled={isSending}
-                    />
-                    <button
-                        type="submit"
-                        className={styles.sendButton}
-                        disabled={isSending || isUploading || (!inputText.trim() && !attachment)}
-                    >
-                        送信
-                    </button>
-                </form>
-            </div>
-        </div>
+                </div>
+            )}
+        </>
     )
 }
