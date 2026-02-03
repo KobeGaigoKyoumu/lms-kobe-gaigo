@@ -16,9 +16,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
     useEffect(() => {
         // Prevent JS override if on mobile (handled by CSS)
-        if (window.innerWidth > 768) {
-            document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '200px')
-        }
+        document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')
     }, [isCollapsed])
 
     const handleLogout = async () => {
