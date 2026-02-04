@@ -1,7 +1,13 @@
 .container {
-    padding: 1rem;
+    padding: var(--spacing-8) var(--spacing-4);
     max-width: 800px;
     margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: var(--spacing-5) var(--spacing-4);
+    }
 }
 
 .title {

@@ -153,7 +153,22 @@ export async function POST(request) {
                         process.env.VAPID_PRIVATE_KEY
                     )
 
-                    const recipientId = payload.sender_type === 'teacher' ? payload.student_id : 'admin_placeholder' // For now, assume admin receives student messages
+                    let recipientId = null
+                    if (payload.sender_type === 'teacher') {
+                        recipientId = payload.student_id
+                    } else {
+                        // For student messages, find the last teacher who messaged them
+                        const { data: lastTeacherMsg } = await adminSupabase
+                            .from('messages')
+                            .select('teacher_id')
+                            .eq('student_id', payload.student_id)
+                            .eq('sender_type', 'teacher')
+                            .order('created_at', { ascending: false })
+                            .limit(1)
+                            .single()
+
+                        recipientId = lastTeacherMsg?.teacher_id || 'admin_user' // Fallback
+                    }
 
                     // Fetch unread count for the recipient
                     const { count: unreadCount } = await adminSupabase

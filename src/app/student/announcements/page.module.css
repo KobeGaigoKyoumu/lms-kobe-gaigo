@@ -407,7 +407,7 @@
 
 @media (max-width: 640px) {
     .page {
-        padding: var(--spacing-2);
+        padding: var(--spacing-5) var(--spacing-4);
     }
 
     .header {
