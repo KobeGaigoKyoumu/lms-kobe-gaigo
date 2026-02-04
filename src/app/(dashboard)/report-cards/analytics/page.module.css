@@ -254,8 +254,8 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: clamp(8px, 1vw, 12px);
-    /* Fluid: Max 12px, shrinks to 8px */
+    font-size: clamp(9px, 1.25vw, 13px);
+    /* Fluid: Matches graph logic (1.25vw ~ width/80) */
 }
 
 .table th,
