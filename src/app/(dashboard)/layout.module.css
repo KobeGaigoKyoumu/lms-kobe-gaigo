@@ -16,4 +16,5 @@
     background: var(--bg-secondary);
     min-height: 100vh;
     padding: var(--spacing-4);
+    min-width: 0;
 }
