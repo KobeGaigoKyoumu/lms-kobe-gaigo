@@ -114,32 +114,23 @@
     }
 
     .statsGrid {
+        /* Allow wrapping if screen is very narrow, otherwise 2 cols */
         grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-2);
-        margin-bottom: var(--spacing-4);
+        gap: var(--spacing-3);
+        margin-bottom: var(--spacing-6);
     }
 
     .statCard {
-        padding: var(--spacing-3);
+        padding: var(--spacing-4) var(--spacing-3);
     }
 
     .statLabel {
-        font-size: 0.65rem;
-        margin-bottom: 2px;
+        font-size: 0.75rem;
+        margin-bottom: 4px;
     }
 
     .statValue {
-        font-size: 1.25rem;
-    }
-
-    .section {
-        padding: var(--spacing-3);
-        margin-bottom: var(--spacing-4);
-    }
-
-    .sectionTitle {
-        font-size: 0.9rem;
-        margin-bottom: var(--spacing-2);
+        font-size: 1.5rem;
     }
 
     /* Table to Card Transformation */
@@ -158,49 +149,47 @@
         width: 100%;
     }
 
+    .table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+    }
+
     .table tr {
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-3);
-        padding: var(--spacing-3);
+        padding: var(--spacing-4);
         box-shadow: var(--shadow-sm);
     }
 
-    .table tr:last-child {
-        margin-bottom: 0;
-    }
-
-    /* Remove default border from bottom of td since we are in card mode */
     .table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 0;
+        padding: 8px 0;
         border-bottom: 1px dashed var(--border-color);
         text-align: right;
-        font-size: 0.75rem;
-    }
-
-    .table tr:last-child td {
-        border-bottom: 1px dashed var(--border-color);
+        font-size: 0.875rem;
     }
 
     .table td:last-child {
         border-bottom: none;
+        padding-bottom: 0;
     }
 
     .table td::before {
         content: attr(data-label);
         font-weight: 500;
         color: var(--text-secondary);
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         margin-right: var(--spacing-4);
         text-align: left;
+        flex-shrink: 0;
     }
 
     .empty {
         padding: var(--spacing-4);
-        font-size: 0.75rem;
+        font-size: 0.875rem;
     }
 }

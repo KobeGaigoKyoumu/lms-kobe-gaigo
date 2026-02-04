@@ -281,77 +281,48 @@
 /* Responsive */
 @media (max-width: 640px) {
     .page {
-        padding: var(--spacing-5) var(--spacing-4);
-    }
-
-    .header {
-        margin-bottom: var(--spacing-4);
-    }
-
-    .title {
-        font-size: 1.25rem;
-        margin-bottom: 0;
-    }
-
-    .subtitle {
-        font-size: 0.75rem;
-    }
-
-    .notice {
         padding: var(--spacing-4);
     }
 
-    .notice h2 {
-        font-size: 1rem;
-        margin-bottom: var(--spacing-2);
-    }
-
-    .notice p {
-        font-size: 0.75rem;
-    }
-
-    /* Summary: 2 columns on mobile, compacted */
-    .summary {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-2);
-        margin-bottom: var(--spacing-4);
-    }
-
-    .summaryCard {
-        padding: var(--spacing-3);
-        gap: 0;
-    }
-
-    .summaryCard .label {
-        font-size: 0.65rem;
-    }
-
-    .summaryCard .value {
-        font-size: 1.1rem;
-    }
-
-    .summaryCard .grade {
-        font-size: 1.5rem;
-    }
-
-    .historySection {
-        margin-top: var(--spacing-6);
+    .header {
         margin-bottom: var(--spacing-6);
     }
 
-    .historySection h2 {
-        font-size: 1rem;
-        margin-bottom: var(--spacing-2);
+    .title {
+        font-size: 1.5rem;
     }
 
-    /* Table to Card Transformation */
-    .table {
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        overflow: visible;
+    /* Summary: Flexible grid for better spacing */
+    .summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-3);
+        margin-bottom: var(--spacing-6);
     }
 
+    /* Full width for grade summary on extra small screens */
+    @media (max-width: 380px) {
+        .summary {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .summaryCard {
+        padding: var(--spacing-4);
+    }
+
+    .summaryCard .label {
+        font-size: 0.75rem;
+    }
+
+    .summaryCard .value {
+        font-size: 1.25rem;
+    }
+
+    .historySection {
+        margin-top: var(--spacing-8);
+    }
+
+    /* Table to Card */
     .table table,
     .table thead,
     .table tbody,
@@ -366,12 +337,23 @@
         display: none;
     }
 
+    .table {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+    }
+
     .table tbody tr {
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-3);
-        padding: var(--spacing-3);
+        padding: var(--spacing-4);
         box-shadow: var(--shadow-sm);
     }
 
@@ -379,54 +361,33 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 0;
+        padding: 8px 0;
         border-bottom: 1px dashed var(--border-color);
         text-align: right;
-        font-size: 0.75rem;
+        font-size: 0.875rem;
     }
 
     .table td:last-child {
         border-bottom: none;
+        padding-bottom: 0;
     }
 
     .table td::before {
         content: attr(data-label);
         font-weight: 500;
         color: var(--text-secondary);
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         margin-right: var(--spacing-4);
         text-align: left;
     }
 
     .subjectGrid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-2);
-    }
-
-    .subjectSection h2 {
-        font-size: 1rem;
-        margin-bottom: var(--spacing-2);
+        grid-template-columns: 1fr;
+        /* Stack vertically on mobile for clarity */
+        gap: var(--spacing-3);
     }
 
     .subjectCard {
-        padding: var(--spacing-3);
-    }
-
-    .subjectCard h3 {
-        font-size: 0.9rem;
-        margin-bottom: var(--spacing-2);
-        padding-bottom: var(--spacing-1);
-    }
-
-    .scoreLabel {
-        font-size: 0.7rem;
-    }
-
-    .scoreValue {
-        font-size: 0.8rem;
-    }
-
-    .scoreItem.total .scoreValue {
-        font-size: 1rem;
+        padding: var(--spacing-4);
     }
 }
