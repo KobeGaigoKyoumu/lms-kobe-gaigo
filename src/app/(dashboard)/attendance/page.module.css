@@ -582,37 +582,49 @@
         display: none;
     }
 
-    /* Allow wrapping for Name field - force to full width with proper text wrap */
+    /* Name field - full width on its own row with proper wrapping */
     .table td[data-label="氏名"] {
-        flex: 0 0 100%;
-        order: -2;
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 0;
-        overflow: visible;
+        flex-basis: 100%;
+        width: 100%;
+        max-width: 100%;
+        order: -3;
+        display: block;
         white-space: normal;
         overflow-wrap: break-word;
         word-break: break-word;
         line-height: 1.4;
         font-weight: 500;
         padding-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        margin-bottom: 0.25rem;
     }
 
     .table td[data-label="氏名"]::before {
         display: block;
         margin-bottom: 0.15rem;
-        flex-shrink: 0;
+        font-size: 0.7rem;
     }
 
-    /* Student ID on second line (after name) */
+    /* Student ID on second row */
     .table td[data-label="学籍番号"] {
-        flex: 0 0 100%;
+        flex: 0 0 auto;
+        order: -2;
+    }
+
+    /* Class next to student ID */
+    .table td[data-label="クラス"] {
+        flex: 0 0 auto;
         order: -1;
     }
 
-    /* Class on same line as attendance rate */
-    .table td[data-label="クラス"] {
+    /* Selection checkbox at the start */
+    .table td[data-label="選択"] {
+        order: -4;
         flex: 0 0 auto;
+    }
+
+    .table td[data-label="選択"]::before {
+        display: none;
     }
 
     /* Detail Button in card view */

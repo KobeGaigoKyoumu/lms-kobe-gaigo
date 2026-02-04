@@ -521,6 +521,10 @@
 }
 
 @media (max-width: 768px) {
+    .page {
+        padding: var(--spacing-3);
+    }
+
     .header {
         flex-direction: column;
         gap: var(--spacing-4);
@@ -604,38 +608,42 @@
         display: none;
     }
 
-    /* Name field - full width, wrapping */
+    /* Name field - full width on its own row with proper wrapping */
     .table td[data-label="氏名"] {
-        flex: 0 0 100%;
-        order: -2;
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 0;
+        flex-basis: 100%;
+        width: 100%;
+        max-width: 100%;
+        order: -3;
+        display: block;
         white-space: normal;
         overflow-wrap: break-word;
         word-break: break-word;
         line-height: 1.4;
         font-weight: 500;
-        padding-bottom: 0.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        margin-bottom: 0.25rem;
     }
 
     .table td[data-label="氏名"]::before {
         display: block;
         margin-bottom: 0.1rem;
+        font-size: 0.7rem;
     }
 
-    /* Student ID on its own line */
+    /* Student ID on second row */
     .table td[data-label="学籍番号"] {
         flex: 0 0 auto;
-        order: -1;
+        order: -2;
         font-family: monospace;
     }
 
-    /* Small inline fields */
+    /* Small inline fields - ensure they're visible */
     .table td[data-label="学年"],
     .table td[data-label="クラス"],
     .table td[data-label="ステータス"] {
         flex: 0 0 auto;
+        order: 0;
     }
 
     /* Action cell at the end */
@@ -645,11 +653,12 @@
 
     .table td[data-label="操作"] {
         margin-left: auto;
+        order: 1;
     }
 
     /* Checkbox at start */
     .table td[data-label="選択"] {
-        order: -3;
+        order: -4;
         flex: 0 0 auto;
     }
 
