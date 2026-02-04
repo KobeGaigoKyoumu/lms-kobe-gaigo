@@ -169,6 +169,10 @@
     /* Hidden on mobile usually */
     --header-height: 48px;
   }
+
+  html {
+    font-size: 13px;
+  }
 }
 
 /* Dark Theme */
@@ -205,7 +209,7 @@
 }
 
 html {
-  font-size: 13px;
+  font-size: 14px;
   scroll-behavior: smooth;
   color-scheme: light dark;
 }

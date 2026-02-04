@@ -422,6 +422,14 @@
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+
+    .chartsRow,
+    .chartGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 350px) {
     /* Lowered to 350px per user request for max density */
 

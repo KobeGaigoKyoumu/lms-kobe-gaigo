@@ -775,7 +775,12 @@ export default function AnalyticsPage() {
             datasets: [{
                 label: '人数',
                 data: [0, 0, 0, 0],
-                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.6)',   // 0-299: Red
+                    'rgba(250, 204, 21, 0.6)',  // 300-399: Yellow
+                    'rgba(59, 130, 246, 0.6)',  // 400-499: Blue
+                    'rgba(34, 197, 94, 0.6)',   // 500-600: Green
+                ],
                 borderWidth: 1,
             }]
         }
