@@ -188,7 +188,7 @@
 /* Charts Layout */
 .chartsRow {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--spacing-6);
     margin-bottom: var(--spacing-6);
 }
@@ -196,7 +196,7 @@
 /* Chart Grid for National Comparison Section */
 .chartGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--spacing-8);
     margin-bottom: var(--spacing-8);
     margin-top: var(--spacing-6);
@@ -208,6 +208,7 @@
     padding: var(--spacing-5);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
+    min-width: 0;
 }
 
 .chartTitle {
