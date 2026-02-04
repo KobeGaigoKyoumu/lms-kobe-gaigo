@@ -90,12 +90,13 @@
     }
 }
 
-.mobileMenu {
-    /* Already defined above, but ensure it's visible */
-    display: grid;
-    padding: var(--spacing-4) var(--spacing-4) 8px;
-    margin-bottom: 24px;
-}
+@media (max-width: 768px) {
+    .mobileMenu {
+        /* Already defined above, but ensure it's visible */
+        display: grid;
+        padding: var(--spacing-4) var(--spacing-4) 8px;
+        margin-bottom: 24px;
+    }
 }
 
 @keyframes shine {
