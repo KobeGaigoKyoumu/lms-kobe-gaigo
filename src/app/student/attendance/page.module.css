@@ -114,7 +114,7 @@
     }
 
     .statsGrid {
-        /* Allow wrapping if screen is very narrow, otherwise 2 cols */
+        /* Keep the fix: 2 cols is fine, flexible */
         grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-3);
         margin-bottom: var(--spacing-6);
@@ -133,59 +133,19 @@
         font-size: 1.5rem;
     }
 
-    /* Table to Card Transformation */
+    /* Table Horizontal Scroll */
     .table {
-        border: none;
-    }
-
-    .table thead {
-        display: none;
-    }
-
-    .table tbody,
-    .table tr,
-    .table td {
         display: block;
-        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        /* Prevent wrapping inside cells */
     }
 
-    .table tbody {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-3);
-    }
-
-    .table tr {
-        background: var(--bg-elevated);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-4);
-        box-shadow: var(--shadow-sm);
-    }
-
+    .table th,
     .table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px dashed var(--border-color);
-        text-align: right;
-        font-size: 0.875rem;
-    }
-
-    .table td:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .table td::before {
-        content: attr(data-label);
-        font-weight: 500;
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        margin-right: var(--spacing-4);
-        text-align: left;
-        flex-shrink: 0;
+        padding: var(--spacing-2) var(--spacing-3);
+        /* Tighter padding on mobile */
     }
 
     .empty {
