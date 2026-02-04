@@ -2,6 +2,8 @@
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
+    padding: 0 var(--spacing-4);
+    /* Added padding for mobile */
 }
 
 .header {
