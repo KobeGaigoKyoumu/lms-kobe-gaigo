@@ -533,6 +533,14 @@
         text-align: left;
     }
 
+    /* Allow wrapping for Name field */
+    .table td[data-label="氏名"] {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.4;
+    }
+
     /* Detail Button in card view */
     .detailBtn {
         width: auto;

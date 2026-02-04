@@ -575,8 +575,8 @@ img {
   /* Aggressive Table & UI Density for Mobile Only */
   table th,
   table td {
-    padding: 2px 4px !important;
-    line-height: 1.2 !important;
+    padding: 8px 8px !important;
+    line-height: 1.4 !important;
   }
 
   .card,
