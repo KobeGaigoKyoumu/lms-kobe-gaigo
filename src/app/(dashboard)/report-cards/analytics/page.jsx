@@ -77,28 +77,33 @@ function JlptSessionRow({ sessionData }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {sessionData.items.map((row, index) => {
-                                const failed = row.examinees - row.passers;
-                                return (
-                                    <tr key={`${row.session}-${row.level}-${index}`}>
-                                        <td>
-                                            <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
-                                                {row.level}
-                                            </span>
-                                        </td>
-                                        <td>{row.examinees}名</td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ color: COLOR_PASS, fontWeight: 600 }}>{row.passers}</span>
-                                                <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
-                                                <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>{failed}</span>
-                                            </div>
-                                        </td>
-                                        <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
-                                        <td>{row.averageScore}</td>
-                                    </tr>
-                                );
-                            })}
+                            {[...sessionData.items]
+                                .sort((a, b) => {
+                                    const levelOrder = { N1: 1, N2: 2, N3: 3, N4: 4, N5: 5 };
+                                    return (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                                })
+                                .map((row, index) => {
+                                    const failed = row.examinees - row.passers;
+                                    return (
+                                        <tr key={`${row.session}-${row.level}-${index}`}>
+                                            <td>
+                                                <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                    {row.level}
+                                                </span>
+                                            </td>
+                                            <td>{row.examinees}名</td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span style={{ color: COLOR_PASS, fontWeight: 600 }}>{row.passers}</span>
+                                                    <span style={{ color: COLOR_MUTED, fontSize: '0.8em' }}>/</span>
+                                                    <span style={{ color: COLOR_FAIL, fontWeight: 600 }}>{failed}</span>
+                                                </div>
+                                            </td>
+                                            <td style={{ fontWeight: 600 }}>{row.passRate}%</td>
+                                            <td>{row.averageScore}</td>
+                                        </tr>
+                                    );
+                                })}
                         </tbody>
                     </table>
                 </div>
