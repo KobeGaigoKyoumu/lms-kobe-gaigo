@@ -492,9 +492,14 @@
 
     .table tbody {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
         width: 100%;
+    }
+
+    /* Student list inside class detail should be 1 column */
+    .studentDetail .table tbody {
+        grid-template-columns: 1fr;
     }
 
     .table tr {
