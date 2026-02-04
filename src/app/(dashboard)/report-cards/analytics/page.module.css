@@ -174,7 +174,8 @@
 }
 
 .statValue {
-    font-size: var(--font-size-2xl);
+    font-size: clamp(20px, 2vw, 24px);
+    /* Fluid font size */
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.2;
@@ -213,7 +214,8 @@
 }
 
 .chartTitle {
-    font-size: var(--font-size-lg);
+    font-size: clamp(14px, 1.2vw, 18px);
+    /* Fluid font size */
     font-weight: 600;
     margin-bottom: var(--spacing-4);
     color: var(--text-primary);
