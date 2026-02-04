@@ -1090,7 +1090,7 @@ export default function AnalyticsPage() {
                                 <thead style={{ position: 'relative', zIndex: 100 }}>
                                     <tr style={{ borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
                                         <th onClick={() => handleSort('rank')} data-tooltip={getSortTooltip('rank')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #e5e7eb' }}>順位</th>
-                                        <th onClick={() => handleSort('student_id')} data-tooltip={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '100px', borderRight: '1px solid #e5e7eb' }}>
+                                        <th onClick={() => handleSort('student_id')} data-tooltip={getSortTooltip('student_id')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'left', minWidth: '60px', borderRight: '1px solid #e5e7eb' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>学籍番号</div>
                                         </th>
                                         <th onClick={() => handleSort('class_name')} data-tooltip={getSortTooltip('class_name')} className={styles.sortableHeader} style={{ padding: '12px', textAlign: 'center', minWidth: '50px', borderRight: '1px solid #e5e7eb' }}>
