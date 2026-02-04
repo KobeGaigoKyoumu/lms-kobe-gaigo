@@ -253,8 +253,8 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: clamp(9px, 0.8vw, 14px);
-    /* Fluid font size - reduced min */
+    font-size: clamp(8px, 1.5vw, 14px);
+    /* Fluid: 14px on desktop, shrinks to 8px */
 }
 
 .table th,
@@ -270,8 +270,8 @@
     font-weight: 600;
     color: var(--text-secondary);
     white-space: nowrap;
-    /* Reverted to nowrap */
-    /* word-break removed */
+    /* Prevent wrapping */
+    /* min-width removed */
 }
 
 .table tr:last-child td {
