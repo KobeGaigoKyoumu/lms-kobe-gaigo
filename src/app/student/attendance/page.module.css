@@ -114,7 +114,6 @@
     }
 
     .statsGrid {
-        /* Keep the fix: 2 cols is fine, flexible */
         grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-3);
         margin-bottom: var(--spacing-6);
@@ -133,19 +132,155 @@
         font-size: 1.5rem;
     }
 
-    /* Table Horizontal Scroll */
-    .table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
-        /* Prevent wrapping inside cells */
+    .section {
+        padding: var(--spacing-3);
+        margin-bottom: var(--spacing-4);
     }
 
-    .table th,
+    .sectionTitle {
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-2);
+    }
+
+    /* Table: Compact Stacked Rows for Attendance */
+    .table {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        display: block;
+    }
+
+    .table table,
+    .table tbody,
+    .table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        /* Card gap */
+    }
+
+    /* Grid Layout for Attendance Row */
+    .table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* Two columns mainly */
+        grid-template-rows: auto auto auto;
+        /* Header Row, Detail Row */
+        gap: 8px 12px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-4);
+        box-shadow: var(--shadow-sm);
+    }
+
     .table td {
-        padding: var(--spacing-2) var(--spacing-3);
-        /* Tighter padding on mobile */
+        display: block;
+        padding: 0;
+        border: none;
+        text-align: right;
+    }
+
+    /* 1. Year/Month: Top Left (Span 1 or 2 depending on layout) */
+    .table td:nth-of-type(1) {
+        grid-column: 1 / -1;
+        text-align: left;
+        font-weight: 700;
+        font-size: 1rem;
+        border-bottom: 1px dashed var(--border-color);
+        padding-bottom: 8px;
+        margin-bottom: 4px;
+    }
+
+    .table td:nth-of-type(1)::before {
+        content: none;
+    }
+
+    /* 2. Monthly Rate: Row 2, Col 1 */
+    .table td:nth-of-type(2) {
+        text-align: left;
+    }
+
+    .table td:nth-of-type(2)::before {
+        content: "月間: ";
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+
+    /* 3. Cumulative Rate: Row 2, Col 2 */
+    .table td:nth-of-type(3) {
+        text-align: right;
+    }
+
+    .table td:nth-of-type(3)::before {
+        content: "累積: ";
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+
+    /* Layout correction: 
+       Row 1: YearMonth
+       Row 2: Rates (Monthly | Cumulative)
+       Row 3: Days (Class | Attend | Absent | Late) -> Use simple list/flex or continue grid
+    */
+
+    /* Let's use specific grid assignments for clarity */
+    .table td:nth-of-type(4) {
+        grid-row: 3;
+        grid-column: 1;
+        text-align: left;
+    }
+
+    .table td:nth-of-type(5) {
+        grid-row: 3;
+        grid-column: 2;
+        text-align: right;
+    }
+
+    .table td:nth-of-type(6) {
+        grid-row: 4;
+        grid-column: 1;
+        text-align: left;
+    }
+
+    .table td:nth-of-type(7) {
+        grid-row: 4;
+        grid-column: 2;
+        text-align: right;
+    }
+
+    .table td:nth-of-type(4)::before {
+        content: "授業: ";
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+    }
+
+    .table td:nth-of-type(5)::before {
+        content: "出席: ";
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+    }
+
+    .table td:nth-of-type(6)::before {
+        content: "欠席: ";
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+    }
+
+    .table td:nth-of-type(7)::before {
+        content: "遅刻: ";
+        color: var(--text-secondary);
+        font-size: 0.7rem;
     }
 
     .empty {

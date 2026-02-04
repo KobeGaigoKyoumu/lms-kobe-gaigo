@@ -322,26 +322,186 @@
         margin-top: var(--spacing-6);
     }
 
-    /* Table Horizontal Scroll */
+    /* Table: Compact Stacked Rows (No Scroll, Multi-line) */
     .table {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        display: block;
     }
 
-    /* Unset block display if it was inherited, force table layout */
-    .table table {
-        min-width: 600px;
-        /* Force minimum width to trigger scroll if needed */
+    .table table,
+    .table tbody,
+    .table tr {
+        display: block;
+        width: 100%;
     }
 
-    /* Revert Subject Grid to default behavior (auto-fit handles it) */
-    .subjectGrid {
-        /* No specific overwrite needed if standard grid works, 
-           but ensuring compact gap */
+    .table thead {
+        display: none;
+    }
+
+    .table tbody {
+        display: flex;
+        flex-direction: column;
         gap: var(--spacing-3);
     }
 
-    .subjectCard {
+    .table tbody tr {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        /* Term | Class */
+        grid-template-areas:
+            "term class"
+            "stats stats"
+            "date date";
+        gap: 8px 12px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         padding: var(--spacing-4);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table td {
+        display: block;
+        padding: 0;
+        border: none;
+        text-align: left;
+    }
+
+    /* Term: Top Left */
+    .table td:nth-of-type(1) {
+        grid-area: term;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .table td:nth-of-type(1)::before {
+        content: none;
+    }
+
+    /* Class: Top Right */
+    .table td:nth-of-type(2) {
+        grid-area: class;
+        text-align: right;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .table td:nth-of-type(2)::before {
+        content: "Class ";
+        font-weight: normal;
+        margin-right: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* Scores & Grade: Middle (Flex Row or Grid Area 'stats') */
+    .table tbody tr {
+        grid-template-columns: 1fr 1fr 1fr;
+        /* 3-col grid */
+        grid-template-areas:
+            "term term class"
+            "exam report grade"
+            "date date date";
+    }
+
+    .table td:nth-of-type(1) {
+        grid-area: term;
+    }
+
+    .table td:nth-of-type(2) {
+        grid-area: class;
+        text-align: right;
+    }
+
+    /* Stats Row */
+    .table td:nth-of-type(3) {
+        grid-area: exam;
+    }
+
+    .table td:nth-of-type(4) {
+        grid-area: report;
+        text-align: center;
+    }
+
+    .table td:nth-of-type(5) {
+        grid-area: grade;
+        text-align: right;
+    }
+
+    .table td:nth-of-type(3)::before {
+        display: block;
+        content: "期末試験";
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-bottom: 2px;
+    }
+
+    .table td:nth-of-type(4)::before {
+        display: block;
+        content: "成績評価";
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-bottom: 2px;
+    }
+
+    .table td:nth-of-type(5)::before {
+        display: block;
+        content: "評価";
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-bottom: 2px;
+    }
+
+    /* Date: Bottom */
+    .table td:nth-of-type(6) {
+        grid-area: date;
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        margin-top: 4px;
+        border-top: 1px dashed var(--border-color);
+        padding-top: 8px;
+    }
+
+    .table td:nth-of-type(6)::before {
+        content: "登録日: ";
+    }
+
+    /* Subject Details: Force 2 Columns & Compact padding */
+    .subjectGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        /* Tighter gap */
+    }
+
+    .subjectCard {
+        padding: 10px;
+        /* Compact padding */
+    }
+
+    .subjectCard h3 {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+    }
+
+    .scoreItem {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .scoreLabel {
+        font-size: 0.7rem;
+    }
+
+    .scoreValue {
+        font-size: 0.8rem;
+    }
+
+    .scoreItem.total .scoreValue {
+        font-size: 0.9rem;
     }
 }
