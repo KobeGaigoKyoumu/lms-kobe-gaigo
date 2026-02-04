@@ -590,8 +590,13 @@
         font-weight: 500;
     }
 
-    /* Make student ID and class on same line */
-    .table td[data-label="学籍番号"],
+    /* Student ID on second line (after name) */
+    .table td[data-label="学籍番号"] {
+        flex: 0 0 100%;
+        order: -1;
+    }
+
+    /* Class on same line as attendance rate */
     .table td[data-label="クラス"] {
         flex: 0 0 auto;
     }
