@@ -253,8 +253,8 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: clamp(8px, 1.5vw, 14px);
-    /* Fluid: 14px on desktop, shrinks to 8px */
+    font-size: clamp(8px, 1vw, 12px);
+    /* Fluid: Max 12px, shrinks to 8px */
 }
 
 .table th,
