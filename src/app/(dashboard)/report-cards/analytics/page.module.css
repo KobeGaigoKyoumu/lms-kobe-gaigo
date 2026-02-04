@@ -209,6 +209,7 @@
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     min-width: 0;
+    overflow: hidden;
 }
 
 .chartTitle {
@@ -222,6 +223,8 @@
     position: relative;
     height: 300px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 /* Data Table */
