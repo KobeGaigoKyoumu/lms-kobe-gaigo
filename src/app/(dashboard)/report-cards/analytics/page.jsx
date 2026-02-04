@@ -293,6 +293,20 @@ export default function AnalyticsPage() {
     const [expandedSchoolId, setExpandedSchoolId] = useState(null)
     const [expandedPast5YearsSchoolId, setExpandedPast5YearsSchoolId] = useState(null)
 
+    // Responsive Chart Font Size
+    const [chartFontSize, setChartFontSize] = useState(12)
+
+    useEffect(() => {
+        const handleResize = () => {
+            // Fluid font size: 9px to 13px based on width
+            const newSize = Math.max(9, Math.min(13, window.innerWidth / 80))
+            setChartFontSize(newSize)
+        }
+        handleResize()
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
     useEffect(() => {
         fetchGrades()
         fetchJlptData()
@@ -953,15 +967,24 @@ export default function AnalyticsPage() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
+            legend: {
+                display: false,
+                labels: { font: { size: chartFontSize } }
+            },
+            tooltip: {
+                titleFont: { size: chartFontSize + 1 },
+                bodyFont: { size: chartFontSize }
+            }
         },
         scales: {
             y: {
                 beginAtZero: true,
-                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { font: { size: chartFontSize } }
             },
             x: {
-                grid: { display: false }
+                grid: { display: false },
+                ticks: { font: { size: chartFontSize } }
             }
         }
     }

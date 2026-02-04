@@ -226,7 +226,8 @@
 
 .chartContainer {
     position: relative;
-    height: 300px;
+    height: clamp(200px, 30vw, 350px);
+    /* Fluid height */
     width: 100%;
     max-width: 100%;
     min-width: 0;
