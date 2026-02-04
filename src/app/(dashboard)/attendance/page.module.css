@@ -490,6 +490,35 @@
         display: none;
     }
 
+    /* Show headers for history tables */
+    .historySection .table thead {
+        display: table-header-group;
+    }
+
+    .historySection .table tbody {
+        display: table-row-group;
+    }
+
+    .historySection .table tr {
+        display: table-row;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .historySection .table td {
+        display: table-cell;
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.85rem;
+    }
+
+    .historySection .table td::before {
+        display: none;
+    }
+
     .table tbody {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
