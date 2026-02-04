@@ -1,25 +1,28 @@
 .container {
-    padding: 1.5rem;
-    height: calc(100vh - 64px);
-    /* Adjust based on sidebar/header */
+    padding: 2rem;
+    height: calc(100vh - 80px);
+    /* Adjust based on your layout's header height */
     display: flex;
     flex-direction: column;
+    gap: 1.5rem;
 }
 
 .header {
-    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .title {
+    margin: 0;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 800;
     color: #1e293b;
 }
 
 .content {
     flex: 1;
     min-height: 0;
-    /* Important for nested scroll */
 }
 
 .listWrapper {
@@ -27,6 +30,35 @@
 }
 
 .empty {
-    color: #64748b;
-    padding: 1rem;
+    text-align: center;
+    padding: 4rem;
+    color: #94a3b8;
+    background: white;
+    border-radius: 1rem;
+    border: 1px dashed #e2e8f0;
+}
+
+.broadcastButton {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.broadcastButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+.broadcastButton:active {
+    transform: translateY(0);
 }

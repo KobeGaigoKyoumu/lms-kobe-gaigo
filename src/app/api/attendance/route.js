@@ -12,7 +12,7 @@ const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
 
-// Grade Calculation Logic (Synced with import_attendance.js but with '23' fix)
+// Grade Calculation Logic (Synced with April 1st promo rule)
 function calculateGrade(studentId, year, month) {
     if (!studentId || studentId.length < 2) return 0
 
@@ -22,7 +22,7 @@ function calculateGrade(studentId, year, month) {
     const enrollmentYearShort = parseInt(studentId.substring(0, 2), 10)
     const enrollmentYear = 2000 + enrollmentYearShort
 
-    // Academic Year Calculation (Starts in April)
+    // Academic Year Calculation (Starts on April 1st)
     const academicYear = month >= 4 ? year : year - 1
 
     let grade = academicYear - enrollmentYear + 1

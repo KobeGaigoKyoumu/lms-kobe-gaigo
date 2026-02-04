@@ -142,6 +142,58 @@ export async function POST(request) {
 
         if (error) throw error
 
+            // 4. Send Push Notifications (Background)
+            // We do this asynchronously to not block the chat response
+            (async () => {
+                try {
+                    const webpush = require('web-push')
+                    webpush.setVapidDetails(
+                        'mailto:admin@lms-kobe-gaigo.vercel.app',
+                        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                        process.env.VAPID_PRIVATE_KEY
+                    )
+
+                    const recipientId = payload.sender_type === 'teacher' ? payload.student_id : 'admin_placeholder' // For now, assume admin receives student messages
+
+                    // Fetch unread count for the recipient
+                    const { count: unreadCount } = await adminSupabase
+                        .from('messages')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('student_id', payload.student_id)
+                        .eq('read', false)
+                        .eq('sender_type', payload.sender_type === 'teacher' ? 'teacher' : 'student')
+
+                    // Fetch recipient subscriptions
+                    const { data: subs } = await adminSupabase
+                        .from('push_subscriptions')
+                        .select('*')
+                        .eq('user_id', recipientId)
+
+                    if (subs && subs.length > 0) {
+                        const pushPayload = JSON.stringify({
+                            title: payload.sender_type === 'teacher' ? '先生からのメッセージ' : '学生からのメッセージ',
+                            body: payload.content || (payload.attachment_url ? 'ファイルを送信しました' : ''),
+                            url: payload.sender_type === 'teacher' ? '/student/communication' : `/communication/${payload.student_id}`,
+                            badge: unreadCount || 1
+                        })
+
+                        await Promise.all(subs.map(sub =>
+                            webpush.sendNotification({
+                                endpoint: sub.endpoint,
+                                keys: { p256dh: sub.p256dh, auth: sub.auth }
+                            }, pushPayload).catch(e => {
+                                if (e.statusCode === 410 || e.statusCode === 404) {
+                                    // Remove expired subscriptions
+                                    return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                                }
+                            })
+                        ))
+                    }
+                } catch (e) {
+                    console.error('Push sending error:', e)
+                }
+            })()
+
         return NextResponse.json({ message: data })
 
     } catch (error) {

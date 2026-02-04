@@ -4,10 +4,14 @@
     height: 600px;
     max-height: 85vh;
     border: 1px solid #e2e8f0;
-    border-radius: 1rem;
+    border-radius: 1.25rem;
     background-color: white;
     overflow: hidden;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    box-shadow:
+        0 0 0 1px rgba(99, 102, 241, 0.05),
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .messageArea {
@@ -526,6 +530,12 @@
     display: flex;
     font-size: 0.85rem;
     align-items: center;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.replyContext:hover {
+    opacity: 0.8;
 }
 
 .replyContent {
@@ -634,4 +644,20 @@
 .closeReplyButton:hover {
     background-color: #e2e8f0;
     color: #0f172a;
+}
+
+.highlighted {
+    animation: highlightFade 2s ease-out;
+}
+
+@keyframes highlightFade {
+    0% {
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+        transform: scale(1.02);
+    }
+
+    100% {
+        box-shadow: none;
+        transform: scale(1);
+    }
 }

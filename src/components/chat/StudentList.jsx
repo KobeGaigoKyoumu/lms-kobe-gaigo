@@ -1,9 +1,10 @@
-'use client'
-
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import styles from './StudentList.module.css'
 
 export default function StudentList({ students }) {
+    const [filterClass, setFilterClass] = useState('ALL');
+
     // Curated gradient palettes for avatars
     const avatarGradients = [
         'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', // Indigo
@@ -19,15 +20,43 @@ export default function StudentList({ students }) {
         return { background: avatarGradients[index] };
     };
 
+    const uniqueClasses = useMemo(() => {
+        const classes = [...new Set(students.map(s => s.class_name).filter(Boolean))];
+        return classes.sort();
+    }, [students]);
+
+    const filteredStudents = useMemo(() => {
+        if (filterClass === 'ALL') return students;
+        return students.filter(s => s.class_name === filterClass);
+    }, [students, filterClass]);
+
     return (
         <div className={styles.listContainer}>
             <div className={styles.header}>
                 <h3 className={styles.headerTitle}>学生一覧</h3>
-                <span className={styles.studentCount}>{students.length} 名</span>
+                <span className={styles.studentCount}>{filteredStudents.length} 名</span>
+            </div>
+
+            <div className={styles.filterContainer}>
+                <button
+                    className={`${styles.filterChip} ${filterClass === 'ALL' ? styles.activeFilter : ''}`}
+                    onClick={() => setFilterClass('ALL')}
+                >
+                    すべて
+                </button>
+                {uniqueClasses.map(cls => (
+                    <button
+                        key={cls}
+                        className={`${styles.filterChip} ${filterClass === cls ? styles.activeFilter : ''}`}
+                        onClick={() => setFilterClass(cls)}
+                    >
+                        {cls}
+                    </button>
+                ))}
             </div>
 
             <div className={styles.list}>
-                {students.map(student => (
+                {filteredStudents.map(student => (
                     <Link
                         key={student.student_id_text}
                         href={`/communication/${student.student_id_text}`}

@@ -47,10 +47,12 @@ export function parseStudentId(studentId, baseDate = new Date(), academicYearOve
     const enrollmentMonth = parseInt(idStr.substring(2, 4), 10)
     const enrollmentPeriod = `${enrollmentMonth}月期`
 
-    // 基準日の年度を計算（4月始まり）
+    // 基準日の年度を計算（4月1日始まり）
     const currentYear = baseDate.getFullYear()
     const currentMonth = baseDate.getMonth() + 1
     let academicYear
+
+    // 4月1日から新年度として扱う（ご指示通り）
     if (currentMonth >= 4) {
         academicYear = currentYear
     } else {

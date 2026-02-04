@@ -16,6 +16,7 @@ export default function ChatWindow({
     const [hasMore, setHasMore] = useState(true)
     const [previewImage, setPreviewImage] = useState(null)
     const [replyingTo, setReplyingTo] = useState(null) // { id, content, sender_type }
+    const [highlightedMessageId, setHighlightedMessageId] = useState(null)
 
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
@@ -198,6 +199,18 @@ export default function ChatWindow({
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
+    const scrollToMessage = (messageId) => {
+        const element = document.getElementById(`msg-${messageId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setHighlightedMessageId(messageId);
+            setTimeout(() => setHighlightedMessageId(null), 2000);
+        } else {
+            // If message not in currently loaded messages, maybe fetch or just alert
+            console.log('Message element not found');
+        }
+    }
+
     const handleFileSelect = async (e) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -343,14 +356,25 @@ export default function ChatWindow({
                         const replyParent = msg.reply_to_id ? messages.find(m => m.id === msg.reply_to_id) : null
 
                         return (
-                            <div key={msg.id || msg.created_at} className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs}`}>
+                            <div
+                                key={msg.id || msg.created_at}
+                                className={`${styles.messageBubbleContainer} ${isMe ? styles.myMessage : styles.theirMessage}`}
+                            >
                                 {msg.deleted_at ? (
-                                    <div className={styles.deletedMessage}>送信取り消しされました</div>
+                                    <div className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs} ${styles.deletedMessage}`}>
+                                        送信取り消しされました
+                                    </div>
                                 ) : (
-                                    <>
+                                    <div
+                                        id={`msg-${msg.id}`}
+                                        className={`${styles.messageBubble} ${isMe ? styles.mine : styles.theirs} ${highlightedMessageId === msg.id ? styles.highlighted : ''}`}
+                                    >
                                         {/* Reply Context (Parent Message Preview) */}
                                         {msg.reply_to_id && (
-                                            <div className={styles.replyContext}>
+                                            <div
+                                                className={styles.replyContext}
+                                                onClick={() => scrollToMessage(msg.reply_to_id)}
+                                            >
                                                 <div className={styles.replyContent}>
                                                     {replyParent ? (
                                                         <>
@@ -423,7 +447,7 @@ export default function ChatWindow({
                                                 )}
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         )
@@ -504,45 +528,47 @@ export default function ChatWindow({
                         </button>
                     </form>
                 </div>
-            </div>
+            </div >
 
             {/* Lightbox Modal */}
-            {previewImage && (
-                <div className={styles.modalOverlay} onClick={() => setPreviewImage(null)}>
-                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <button
-                            className={styles.downloadButton}
-                            onClick={async () => {
-                                try {
-                                    const response = await fetch(previewImage);
-                                    const blob = await response.blob();
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `image-${Date.now()}.png`; // Simple fallback name
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    document.body.removeChild(a);
-                                } catch (error) {
-                                    console.error('Download failed', error);
-                                    alert('ダウンロードに失敗しました');
-                                }
-                            }}
-                            title="ダウンロード"
-                        >
-                            <Download size={24} />
-                        </button>
-                        <button
-                            className={styles.closeModalButton}
-                            onClick={() => setPreviewImage(null)}
-                        >
-                            <X size={24} />
-                        </button>
-                        <img src={previewImage} alt="Full size" className={styles.fullSizeImage} />
+            {
+                previewImage && (
+                    <div className={styles.modalOverlay} onClick={() => setPreviewImage(null)}>
+                        <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                            <button
+                                className={styles.downloadButton}
+                                onClick={async () => {
+                                    try {
+                                        const response = await fetch(previewImage);
+                                        const blob = await response.blob();
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `image-${Date.now()}.png`; // Simple fallback name
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+                                    } catch (error) {
+                                        console.error('Download failed', error);
+                                        alert('ダウンロードに失敗しました');
+                                    }
+                                }}
+                                title="ダウンロード"
+                            >
+                                <Download size={24} />
+                            </button>
+                            <button
+                                className={styles.closeModalButton}
+                                onClick={() => setPreviewImage(null)}
+                            >
+                                <X size={24} />
+                            </button>
+                            <img src={previewImage} alt="Full size" className={styles.fullSizeImage} />
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </>
     )
 }
