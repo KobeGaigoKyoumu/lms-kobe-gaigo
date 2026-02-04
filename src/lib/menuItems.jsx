@@ -119,10 +119,23 @@ export const getMenuItems = (role) => {
 
     // Teacher / Admin items
     return [
-        ...baseItems,
+        {
+            href: '/',
+            label: 'ダッシュボード',
+            color: '#3b82f6', // Blue
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="6" height="6" rx="1" />
+                    <rect x="11" y="3" width="6" height="6" rx="1" />
+                    <rect x="3" y="11" width="6" height="6" rx="1" />
+                    <rect x="11" y="11" width="6" height="6" rx="1" />
+                </svg>
+            )
+        },
         {
             href: '/courses',
             label: 'コース',
+            color: '#6366f1', // Indigo
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M4 5h12M4 10h12M4 15h8" />
@@ -132,6 +145,7 @@ export const getMenuItems = (role) => {
         {
             href: '/classes',
             label: 'クラス',
+            color: '#8b5cf6', // Violet
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <circle cx="10" cy="7" r="3" />
@@ -142,6 +156,7 @@ export const getMenuItems = (role) => {
         {
             href: '/admin/students',
             label: '学生マスター',
+            color: '#06b6d4', // Cyan
             icon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -154,6 +169,7 @@ export const getMenuItems = (role) => {
         {
             href: '/assignments',
             label: '課題',
+            color: '#ec4899', // Pink
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
@@ -164,6 +180,7 @@ export const getMenuItems = (role) => {
         {
             href: '/grades',
             label: '課題評価',
+            color: '#f43f5e', // Rose
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
@@ -174,6 +191,7 @@ export const getMenuItems = (role) => {
         {
             href: '/report-cards',
             label: '成績管理',
+            color: '#f97316', // Orange
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M3 17V7l7-5 7 5v10" />
@@ -184,6 +202,7 @@ export const getMenuItems = (role) => {
         {
             href: '/attendance',
             label: '出席率',
+            color: '#22c55e', // Green
             icon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -197,6 +216,7 @@ export const getMenuItems = (role) => {
         {
             href: '/report-cards/analytics',
             label: '統計・分析',
+            color: '#a855f7', // Purple
             icon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M18 20V10" />
@@ -208,6 +228,7 @@ export const getMenuItems = (role) => {
         {
             href: '/calendar',
             label: 'カレンダー',
+            color: '#eab308', // Yellow
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="4" width="14" height="13" rx="2" />
@@ -218,6 +239,7 @@ export const getMenuItems = (role) => {
         {
             href: '/announcements',
             label: 'お知らせ',
+            color: '#ef4444', // Red
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M15 6v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
@@ -229,6 +251,7 @@ export const getMenuItems = (role) => {
         {
             href: '/communication',
             label: 'コミュニケーション',
+            color: '#0ea5e9', // Sky Blue
             icon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -238,6 +261,7 @@ export const getMenuItems = (role) => {
         {
             href: '/settings',
             label: '設定',
+            color: '#64748b', // Slate
             icon: (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <circle cx="10" cy="10" r="3" />
