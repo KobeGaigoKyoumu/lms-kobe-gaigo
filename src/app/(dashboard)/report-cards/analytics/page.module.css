@@ -428,6 +428,11 @@
     .chartGrid {
         grid-template-columns: 1fr;
     }
+
+    /* Fix overflow for stats grid */
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 350px) {

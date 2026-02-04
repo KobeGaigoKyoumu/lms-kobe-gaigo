@@ -492,7 +492,7 @@
 
     .table tbody {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 1rem;
         width: 100%;
     }
@@ -537,8 +537,10 @@
     .table td[data-label="氏名"] {
         white-space: normal;
         overflow-wrap: anywhere;
-        word-break: break-word;
+        word-break: break-all;
         line-height: 1.4;
+        width: 100%;
+        max-width: 100%;
     }
 
     /* Detail Button in card view */
