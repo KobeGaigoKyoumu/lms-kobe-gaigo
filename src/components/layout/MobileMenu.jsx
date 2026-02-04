@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getUnreadCount } from '@/app/actions/messageActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './MobileMenu.module.css'
 
@@ -15,40 +16,32 @@ export default function MobileMenu({ role, user }) {
     const [unreadCount, setUnreadCount] = React.useState(0)
 
     React.useEffect(() => {
+        let pollingInterval
+
         const fetchUnreadCount = async () => {
-            // For Admin/Teacher, use passed user object or auth.getUser if missing (though layout should pass it)
-            // For Student, user object (session) is required for studentId
-
-            let effectiveId = null
-            if (role === 'student') {
-                effectiveId = user?.studentId || user?.student_id_text
-            }
-
-            let countQuery = supabase
-                .from('messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('read', false)
-
-            if (role === 'student') {
-                if (!effectiveId) return
-                countQuery = countQuery.eq('student_id', effectiveId).eq('sender_type', 'teacher')
-            } else {
-                // Teachers/Admins count unread messages from students
-                countQuery = countQuery.eq('sender_type', 'student')
-            }
-
-            const { count, error } = await countQuery
-            if (!error) setUnreadCount(count || 0)
+            const count = await getUnreadCount()
+            setUnreadCount(count)
         }
 
         fetchUnreadCount()
-        const channel = supabase
-            .channel('mobile-unread')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
-            .subscribe()
+
+        if (role === 'student') {
+            // Polling for students (every 30s)
+            pollingInterval = setInterval(fetchUnreadCount, 30000)
+        } else {
+            // Real-time for Teachers/Admins
+            const channel = supabase
+                .channel('mobile-unread')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .subscribe()
+
+            return () => {
+                supabase.removeChannel(channel)
+            }
+        }
 
         return () => {
-            supabase.removeChannel(channel)
+            if (pollingInterval) clearInterval(pollingInterval)
         }
     }, [role, user, supabase])
 

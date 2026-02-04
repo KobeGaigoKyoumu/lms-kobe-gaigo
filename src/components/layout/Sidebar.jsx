@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
+import { getUnreadCount } from '@/app/actions/messageActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './Sidebar.module.css'
 
@@ -16,36 +17,33 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const menuItems = getMenuItems(userRole)
 
     useEffect(() => {
+        let pollingInterval
+
         const fetchUnreadCount = async () => {
-            if (!user) return
-
-            let countQuery = supabase
-                .from('messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('read', false)
-
-            if (userRole === 'student') {
-                // Student counts unread messages from teachers
-                countQuery = countQuery.eq('student_id', user.studentId).eq('sender_type', 'teacher')
-            } else {
-                // Teachers/Admins count unread messages from students
-                countQuery = countQuery.eq('sender_type', 'student')
-            }
-
-            const { count, error } = await countQuery
-            if (!error) setUnreadCount(count || 0)
+            const count = await getUnreadCount()
+            setUnreadCount(count)
         }
 
         fetchUnreadCount()
 
-        // Real-time subscription for message updates
-        const channel = supabase
-            .channel('unread-counts')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
-            .subscribe()
+        // Real-time strategy
+        if (userRole === 'student') {
+            // Polling for students (every 30s)
+            pollingInterval = setInterval(fetchUnreadCount, 30000)
+        } else {
+            // Real-time for Teachers/Admins (who have supabase session)
+            const channel = supabase
+                .channel('unread-counts')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .subscribe()
+
+            return () => {
+                supabase.removeChannel(channel)
+            }
+        }
 
         return () => {
-            supabase.removeChannel(channel)
+            if (pollingInterval) clearInterval(pollingInterval)
         }
     }, [user, userRole, supabase])
 
