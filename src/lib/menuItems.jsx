@@ -84,7 +84,7 @@ export const getMenuItems = (role) => {
             },
             {
                 href: '/student/communication',
-                label: '問い合わせ',
+                label: 'メッセージ',
                 color: '#0ea5e9', // Sky Blue
                 icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

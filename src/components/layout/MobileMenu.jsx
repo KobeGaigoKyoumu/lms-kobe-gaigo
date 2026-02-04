@@ -10,7 +10,55 @@ import styles from './MobileMenu.module.css'
 export default function MobileMenu({ role }) {
     const pathname = usePathname()
     const router = useRouter()
+    const supabase = createClient()
     const menuItems = getMenuItems(role)
+    const [unreadCount, setUnreadCount] = React.useState(0)
+
+    React.useEffect(() => {
+        const fetchUnreadCount = async () => {
+            // Since we don't have user object here easily, we fetch session first or rely on prop
+            // Assuming we need to fetch user session metadata for counts
+            const { data: { user: authUser } } = await supabase.auth.getUser()
+
+            let studentId = null
+            if (role === 'student') {
+                // For students, we might need to get their studentId from a different source
+                // but usually it's in a cookie session. For now, let's try to get it if possible.
+                // In StudentLayout, it's passed. In MobileMenu, we might need a better way.
+                // Let's assume the session logic as in Chat API.
+                const { data: student } = await supabase
+                    .from('students')
+                    .select('student_id_text')
+                    .eq('email', authUser?.email)
+                    .single()
+                studentId = student?.student_id_text
+            }
+
+            let countQuery = supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('read', false)
+
+            if (role === 'student' && studentId) {
+                countQuery = countQuery.eq('student_id', studentId).eq('sender_type', 'teacher')
+            } else if (role !== 'student') {
+                countQuery = countQuery.eq('sender_type', 'student')
+            } else {
+                return // Cannot determine student context
+            }
+
+            const { count, error } = await countQuery
+            if (!error) setUnreadCount(count || 0)
+        }
+
+        fetchUnreadCount()
+        const channel = supabase
+            .channel('mobile-unread')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+            .subscribe()
+
+        return () => supabase.removeChannel(channel)
+    }, [role, supabase])
 
     const handleLogout = async () => {
         const supabase = createClient()
@@ -36,6 +84,9 @@ export default function MobileMenu({ role }) {
                             style={{ color: item.color }}
                         >
                             {item.icon}
+                            {item.href.includes('communication') && unreadCount > 0 && (
+                                <span className={styles.badge}>{unreadCount}</span>
+                            )}
                         </div>
                         <span className={styles.label}>{item.label}</span>
                     </Link>

@@ -12,7 +12,42 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [unreadCount, setUnreadCount] = useState(0)
     const menuItems = getMenuItems(userRole)
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            if (!user) return
+
+            let countQuery = supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('read', false)
+
+            if (userRole === 'student') {
+                // Student counts unread messages from teachers
+                countQuery = countQuery.eq('student_id', user.studentId).eq('sender_type', 'teacher')
+            } else {
+                // Teachers/Admins count unread messages from students
+                countQuery = countQuery.eq('sender_type', 'student')
+            }
+
+            const { count, error } = await countQuery
+            if (!error) setUnreadCount(count || 0)
+        }
+
+        fetchUnreadCount()
+
+        // Real-time subscription for message updates
+        const channel = supabase
+            .channel('unread-counts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [user, userRole, supabase])
 
     useEffect(() => {
         // Prevent JS override if on mobile (handled by CSS)
@@ -80,7 +115,12 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                         href={item.href}
                         className={`${styles.navItem} ${pathname === item.href ? styles.active : ''}`}
                     >
-                        {item.icon}
+                        <div className={styles.iconContainer}>
+                            {item.icon}
+                            {(item.href.includes('communication') && unreadCount > 0) && (
+                                <span className={styles.badge}>{unreadCount}</span>
+                            )}
+                        </div>
                         <span>{item.label}</span>
                     </Link>
                 ))}
