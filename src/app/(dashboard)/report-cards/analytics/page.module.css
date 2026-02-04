@@ -138,7 +138,8 @@
 /* Stats Overview Cards */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+    /* Fixed 4 columns for smooth shrinking */
     gap: var(--spacing-5);
     margin-bottom: var(--spacing-6);
 }
@@ -189,7 +190,8 @@
 /* Charts Layout */
 .chartsRow {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    /* Fixed 2 columns for smooth shrinking */
     gap: var(--spacing-6);
     margin-bottom: var(--spacing-6);
 }
@@ -197,7 +199,8 @@
 /* Chart Grid for National Comparison Section */
 .chartGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    /* Fixed 2 columns for smooth shrinking */
     gap: var(--spacing-8);
     margin-bottom: var(--spacing-8);
     margin-top: var(--spacing-6);
@@ -419,7 +422,9 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .chartsRow {
+
+    .chartsRow,
+    .chartGrid {
         grid-template-columns: 1fr;
     }
 
