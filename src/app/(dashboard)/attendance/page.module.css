@@ -579,13 +579,15 @@
         display: none;
     }
 
-    /* Allow wrapping for Name field */
+    /* Allow wrapping for Name field - force to new line */
     .table td[data-label="氏名"] {
         white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-all;
+        overflow-wrap: break-word;
+        word-break: break-word;
         line-height: 1.3;
-        flex: 1 1 100%;
+        flex: 0 0 100%;
+        order: -1;
+        font-weight: 500;
     }
 
     /* Make student ID and class on same line */
