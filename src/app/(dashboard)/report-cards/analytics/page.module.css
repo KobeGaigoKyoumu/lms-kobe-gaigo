@@ -174,8 +174,8 @@
 }
 
 .statValue {
-    font-size: clamp(20px, 2vw, 24px);
-    /* Fluid font size */
+    font-size: clamp(16px, 1.8vw, 24px);
+    /* Fluid font size - reduced min */
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.2;
@@ -214,8 +214,8 @@
 }
 
 .chartTitle {
-    font-size: clamp(14px, 1.2vw, 18px);
-    /* Fluid font size */
+    font-size: clamp(11px, 1.0vw, 18px);
+    /* Fluid font size - reduced min */
     font-weight: 600;
     margin-bottom: var(--spacing-4);
     color: var(--text-primary);
@@ -250,14 +250,14 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: clamp(11px, 0.9vw, 14px);
-    /* Fluid font size */
+    font-size: clamp(9px, 0.8vw, 14px);
+    /* Fluid font size - reduced min */
 }
 
 .table th,
 .table td {
-    padding: var(--spacing-3) clamp(4px, 0.5vw, 16px);
-    /* Fluid padding */
+    padding: var(--spacing-3) clamp(2px, 0.4vw, 16px);
+    /* Fluid padding - reduced min */
     text-align: left;
     border-bottom: 1px solid var(--border-color);
 }
