@@ -141,28 +141,26 @@
 
 /* Mobile / Tablet - High Density (Preserved) */
 @media (max-width: 768px) {
-  /* Typography - Extreme High Density */
-  --font-size-xs: 0.55rem;
-  --font-size-sm: 0.65rem;
-  --font-size-base: 0.7rem;
-  --font-size-lg: 0.8rem;
-  --font-size-xl: 0.9rem;
-  --font-size-2xl: 1rem;
-  --font-size-3xl: 1.15rem;
-  --font-size-4xl: 1.4rem;
+  :root {
+    /* Typography - Extreme High Density */
+    --font-size-xs: 0.55rem;
+    --font-size-sm: 0.65rem;
+    --font-size-base: 0.7rem;
+    --font-size-lg: 0.8rem;
+    --font-size-xl: 0.9rem;
+    --font-size-2xl: 1rem;
+    --font-size-3xl: 1.15rem;
+    --font-size-4xl: 1.4rem;
 
+    /* Layout */
+    --sidebar-width: 0px;
+    /* Hidden on mobile usually */
+    --header-height: 48px;
+  }
 
-
-
-  /* Layout */
-  --sidebar-width: 0px;
-  /* Hidden on mobile usually */
-  --header-height: 48px;
-}
-
-html {
-  font-size: 13px;
-}
+  html {
+    font-size: 13px;
+  }
 }
 
 /* Dark Theme */
