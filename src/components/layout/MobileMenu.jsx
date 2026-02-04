@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './MobileMenu.module.css'
 
-export default function MobileMenu({ role }) {
+export default function MobileMenu({ role, user }) {
     const pathname = usePathname()
     const router = useRouter()
     const supabase = createClient()
@@ -16,22 +16,12 @@ export default function MobileMenu({ role }) {
 
     React.useEffect(() => {
         const fetchUnreadCount = async () => {
-            // Since we don't have user object here easily, we fetch session first or rely on prop
-            // Assuming we need to fetch user session metadata for counts
-            const { data: { user: authUser } } = await supabase.auth.getUser()
+            // For Admin/Teacher, use passed user object or auth.getUser if missing (though layout should pass it)
+            // For Student, user object (session) is required for studentId
 
-            let studentId = null
+            let effectiveId = null
             if (role === 'student') {
-                // For students, we might need to get their studentId from a different source
-                // but usually it's in a cookie session. For now, let's try to get it if possible.
-                // In StudentLayout, it's passed. In MobileMenu, we might need a better way.
-                // Let's assume the session logic as in Chat API.
-                const { data: student } = await supabase
-                    .from('students')
-                    .select('student_id_text')
-                    .eq('email', authUser?.email)
-                    .single()
-                studentId = student?.student_id_text
+                effectiveId = user?.studentId || user?.student_id_text
             }
 
             let countQuery = supabase
@@ -39,12 +29,12 @@ export default function MobileMenu({ role }) {
                 .select('*', { count: 'exact', head: true })
                 .eq('read', false)
 
-            if (role === 'student' && studentId) {
-                countQuery = countQuery.eq('student_id', studentId).eq('sender_type', 'teacher')
-            } else if (role !== 'student') {
-                countQuery = countQuery.eq('sender_type', 'student')
+            if (role === 'student') {
+                if (!effectiveId) return
+                countQuery = countQuery.eq('student_id', effectiveId).eq('sender_type', 'teacher')
             } else {
-                return // Cannot determine student context
+                // Teachers/Admins count unread messages from students
+                countQuery = countQuery.eq('sender_type', 'student')
             }
 
             const { count, error } = await countQuery
@@ -57,8 +47,10 @@ export default function MobileMenu({ role }) {
             .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
             .subscribe()
 
-        return () => supabase.removeChannel(channel)
-    }, [role, supabase])
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [role, user, supabase])
 
     const handleLogout = async () => {
         const supabase = createClient()

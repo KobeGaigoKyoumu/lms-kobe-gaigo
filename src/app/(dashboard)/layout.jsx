@@ -31,7 +31,7 @@ export default async function DashboardLayout({ children }) {
         <div className={styles.wrapper}>
             <Sidebar user={user} role={userRole} hideOnMobile={true} />
             <main className={styles.main}>
-                <MobileMenu role={userRole} />
+                <MobileMenu role={userRole} user={user} />
                 {children}
             </main>
         </div>

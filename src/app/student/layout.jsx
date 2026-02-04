@@ -39,7 +39,7 @@ export default async function StudentLayout({ children }) {
 
                 {/* Main Content */}
                 <main className={styles.main}>
-                    <MobileMenu role="student" />
+                    <MobileMenu role="student" user={session} />
                     {children}
                 </main>
             </div>
