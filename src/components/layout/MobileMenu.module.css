@@ -90,11 +90,29 @@
     }
 }
 
-@media (max-width: 768px) {
-    .mobileMenu {
-        /* Already defined above, but ensure it's visible */
-        display: grid;
-        padding: var(--spacing-4) var(--spacing-4) 8px;
-        margin-bottom: 24px;
+.mobileMenu {
+    /* Already defined above, but ensure it's visible */
+    display: grid;
+    padding: var(--spacing-4) var(--spacing-4) 8px;
+    margin-bottom: 24px;
+}
+}
+
+@keyframes shine {
+    0% {
+        background-position: 200% center;
     }
+
+    100% {
+        background-position: -200% center;
+    }
+}
+
+.shineEffect {
+    background: linear-gradient(120deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.4) 50%,
+            transparent 70%);
+    background-size: 200% 100%;
+    animation: shine 4s infinite linear;
 }

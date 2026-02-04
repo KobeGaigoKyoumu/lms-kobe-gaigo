@@ -17,8 +17,6 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const menuItems = getMenuItems(userRole)
 
     useEffect(() => {
-        let pollingInterval
-
         const fetchUnreadCount = async () => {
             const count = await getUnreadCount()
             setUnreadCount(count)
@@ -26,24 +24,27 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
         fetchUnreadCount()
 
-        // Real-time strategy
-        if (userRole === 'student') {
-            // Polling for students (every 30s)
-            pollingInterval = setInterval(fetchUnreadCount, 30000)
-        } else {
-            // Real-time for Teachers/Admins (who have supabase session)
-            const channel = supabase
-                .channel('unread-counts')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
-                .subscribe()
-
-            return () => {
-                supabase.removeChannel(channel)
+        // Visibility Change strategy (Refetch when tab becomes visible)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchUnreadCount()
             }
         }
 
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        // Real-time strategy (keep only for non-students or strict realtime reqs)
+        let channel
+        if (userRole !== 'student') {
+            channel = supabase
+                .channel('unread-counts')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .subscribe()
+        }
+
         return () => {
-            if (pollingInterval) clearInterval(pollingInterval)
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+            if (channel) supabase.removeChannel(channel)
         }
     }, [user, userRole, supabase])
 
@@ -107,21 +108,26 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
             {/* ナビゲーション */}
             <nav className={styles.nav}>
-                {menuItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`${styles.navItem} ${pathname === item.href ? styles.active : ''}`}
-                    >
-                        <div className={styles.iconContainer}>
-                            {item.icon}
-                            {(item.href.includes('communication') && unreadCount > 0) && (
-                                <span className={styles.badge}>{unreadCount}</span>
-                            )}
-                        </div>
-                        <span>{item.label}</span>
-                    </Link>
-                ))}
+                {menuItems.map((item) => {
+                    const isCommunication = item.href.includes('communication')
+                    const showShimmer = isCommunication && unreadCount > 0
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`${styles.navItem} ${pathname === item.href ? styles.active : ''} ${showShimmer ? styles.shineEffect : ''}`}
+                        >
+                            <div className={styles.iconContainer}>
+                                {item.icon}
+                                {(isCommunication && unreadCount > 0) && (
+                                    <span className={styles.badge}>{unreadCount}</span>
+                                )}
+                            </div>
+                            <span>{item.label}</span>
+                        </Link>
+                    )
+                })}
             </nav>
 
             {/* ユーザー情報 */}

@@ -16,8 +16,6 @@ export default function MobileMenu({ role, user }) {
     const [unreadCount, setUnreadCount] = React.useState(0)
 
     React.useEffect(() => {
-        let pollingInterval
-
         const fetchUnreadCount = async () => {
             const count = await getUnreadCount()
             setUnreadCount(count)
@@ -25,23 +23,27 @@ export default function MobileMenu({ role, user }) {
 
         fetchUnreadCount()
 
-        if (role === 'student') {
-            // Polling for students (every 30s)
-            pollingInterval = setInterval(fetchUnreadCount, 30000)
-        } else {
-            // Real-time for Teachers/Admins
-            const channel = supabase
-                .channel('mobile-unread')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
-                .subscribe()
-
-            return () => {
-                supabase.removeChannel(channel)
+        // Visibility Change strategy
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchUnreadCount()
             }
         }
 
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        let channel
+        if (role !== 'student') {
+            // Real-time for Teachers/Admins
+            channel = supabase
+                .channel('mobile-unread')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .subscribe()
+        }
+
         return () => {
-            if (pollingInterval) clearInterval(pollingInterval)
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+            if (channel) supabase.removeChannel(channel)
         }
     }, [role, user, supabase])
 
@@ -58,18 +60,21 @@ export default function MobileMenu({ role, user }) {
         <nav className={styles.mobileMenu}>
             {menuItems.map((item) => {
                 const isActive = pathname === item.href
+                const isCommunication = item.href.includes('communication')
+                const showShimmer = isCommunication && unreadCount > 0
+
                 return (
                     <Link
                         key={item.href}
                         href={item.href}
-                        className={`${styles.menuItem} ${isActive ? styles.active : ''}`}
+                        className={`${styles.menuItem} ${isActive ? styles.active : ''} ${showShimmer ? styles.shineEffect : ''}`}
                     >
                         <div
                             className={styles.iconWrapper}
                             style={{ color: item.color }}
                         >
                             {item.icon}
-                            {item.href.includes('communication') && unreadCount > 0 && (
+                            {(isCommunication && unreadCount > 0) && (
                                 <span className={styles.badge}>{unreadCount}</span>
                             )}
                         </div>
