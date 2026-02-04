@@ -80,13 +80,15 @@
 .studentItem {
     display: flex;
     align-items: center;
-    padding: 1rem 1.25rem;
-    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 1rem;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    margin-bottom: 0.75rem;
 }
 
 .studentItem:hover {

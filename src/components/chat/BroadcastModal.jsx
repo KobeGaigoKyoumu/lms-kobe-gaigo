@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { X, Search, Users, Check, Filter, Send, Loader2 } from 'lucide-react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { X, Search, Users, Check, Filter, Send, Loader2, Paperclip, FileText, Image as ImageIcon } from 'lucide-react'
 import styles from './BroadcastModal.module.css'
 
 export default function BroadcastModal({ isOpen, onClose, onSent }) {
@@ -12,7 +12,11 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedIds, setSelectedIds] = useState(new Set())
     const [messageContent, setMessageContent] = useState('')
+    const [attachment, setAttachment] = useState(null) // { url, name, type }
+    const [isUploading, setIsUploading] = useState(false)
     const [isSending, setIsSending] = useState(false)
+
+    const fileInputRef = useRef(null)
 
     useEffect(() => {
         if (!isOpen) return
@@ -66,6 +70,37 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
         }
     }
 
+    const handleFileSelect = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setIsUploading(true)
+        const formData = new FormData()
+        formData.append('file', file)
+
+        try {
+            const res = await fetch('/api/chat/upload', {
+                method: 'POST',
+                body: formData
+            })
+
+            if (!res.ok) throw new Error('Upload failed')
+
+            const data = await res.json()
+            setAttachment({
+                url: data.url,
+                name: data.name,
+                type: data.type
+            })
+        } catch (error) {
+            console.error('Upload error:', error)
+            alert('ファイルのアップロードに失敗しました')
+        } finally {
+            setIsUploading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }
+
     const handleSend = async () => {
         if (selectedIds.size === 0 || !messageContent.trim()) return
         if (!confirm(`${selectedIds.size}名にメッセージを送信しますか？`)) return
@@ -77,13 +112,17 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     studentIds: Array.from(selectedIds),
-                    content: messageContent
+                    content: messageContent,
+                    attachment_url: attachment?.url,
+                    attachment_name: attachment?.name,
+                    attachment_type: attachment?.type
                 })
             })
 
             if (res.ok) {
                 alert('一斉送信が完了しました。')
                 setMessageContent('')
+                setAttachment(null)
                 setSelectedIds(new Set())
                 onSent?.()
                 onClose()
@@ -134,7 +173,6 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
                                         <option value="ALL">すべて</option>
                                         <option value="1">1年生</option>
                                         <option value="2">2年生</option>
-                                        <option value="0">その他/卒業</option>
                                     </select>
                                 </div>
                                 <div className={styles.filterItem}>
@@ -191,13 +229,48 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
                                 onChange={(e) => setMessageContent(e.target.value)}
                                 className={styles.textarea}
                             />
-                            <div className={styles.selectedSummary}>
-                                <strong>対象学生:</strong> {selectedIds.size} 名
+
+                            {attachment && (
+                                <div className={styles.attachmentPreview}>
+                                    <div className={styles.previewContent}>
+                                        {attachment.type?.startsWith('image/') ? (
+                                            <ImageIcon size={16} className={styles.previewIcon} />
+                                        ) : (
+                                            <FileText size={16} className={styles.previewIcon} />
+                                        )}
+                                        <span className={styles.previewName}>{attachment.name}</span>
+                                    </div>
+                                    <button onClick={() => setAttachment(null)} className={styles.removeAttachment}>
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className={styles.actionRow}>
+                                <button
+                                    type="button"
+                                    className={styles.attachButton}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isSending || isUploading}
+                                >
+                                    {isUploading ? <Loader2 size={18} className={styles.spin} /> : <Paperclip size={18} />}
+                                    添付
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    style={{ display: 'none' }}
+                                    disabled={isSending || isUploading}
+                                />
+                                <div className={styles.selectedSummary}>
+                                    <strong>対象学生:</strong> {selectedIds.size} 名
+                                </div>
                             </div>
                             <button
                                 className={styles.sendButton}
                                 onClick={handleSend}
-                                disabled={isSending || selectedIds.size === 0 || !messageContent.trim()}
+                                disabled={isSending || selectedIds.size === 0 || (!messageContent.trim() && !attachment)}
                             >
                                 {isSending ? <Loader2 className={styles.spin} /> : <Send size={18} />}
                                 {isSending ? '送信中...' : 'メッセージを送信'}
