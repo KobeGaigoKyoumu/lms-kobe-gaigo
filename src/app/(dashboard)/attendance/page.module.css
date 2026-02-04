@@ -521,12 +521,15 @@
 
     .table tbody {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 0.75rem;
         width: 100%;
     }
 
-    /* Student list inside class detail should be 1 column */
+    /* Class list (when not viewing class members) should be 2 columns */
+    /* Note: Individual student list uses 1 column for better readability */
+
+    /* Student list inside class detail should be 1 column (same as base) */
     .studentDetail .table tbody {
         grid-template-columns: 1fr;
     }
@@ -579,26 +582,26 @@
         display: none;
     }
 
-    /* Allow wrapping for Name field - force to new line with label on top */
+    /* Allow wrapping for Name field - force to full width with proper text wrap */
     .table td[data-label="氏名"] {
         flex: 0 0 100%;
         order: -2;
         flex-direction: column;
         align-items: flex-start;
+        min-width: 0;
+        overflow: visible;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.4;
+        font-weight: 500;
+        padding-bottom: 0.5rem;
     }
 
     .table td[data-label="氏名"]::before {
         display: block;
         margin-bottom: 0.15rem;
-    }
-
-    /* Name text wrapping */
-    .table td[data-label="氏名"] {
-        white-space: normal;
-        overflow-wrap: break-word;
-        word-break: break-word;
-        line-height: 1.3;
-        font-weight: 500;
+        flex-shrink: 0;
     }
 
     /* Student ID on second line (after name) */

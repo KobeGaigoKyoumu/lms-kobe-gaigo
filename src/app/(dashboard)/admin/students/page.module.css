@@ -562,44 +562,95 @@
         display: none;
     }
 
-    .table tbody,
-    .table tr,
-    .table td {
-        display: block;
+    .table tbody {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
         width: 100%;
     }
 
     .table tr {
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-4);
-        padding: var(--spacing-4);
+        border-radius: 8px;
+        padding: 0.75rem;
         box-shadow: var(--shadow-sm);
-        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.75rem;
+        align-items: center;
     }
 
     .table td {
         display: flex;
-        justify-content: space-between;
+        flex-direction: row;
         align-items: center;
-        padding: var(--spacing-2) 0;
-        border-bottom: 1px dashed var(--border-color);
-        text-align: right;
-    }
-
-    .table td:last-child {
+        gap: 0.25rem;
+        padding: 0.15rem 0;
         border-bottom: none;
-        justify-content: flex-end;
+        font-size: 0.85rem;
     }
 
     .table td::before {
-        content: attr(data-label);
+        content: attr(data-label) ":";
         font-weight: 500;
         color: var(--text-secondary);
-        font-size: var(--font-size-sm);
-        margin-right: var(--spacing-4);
-        text-align: left;
+        font-size: 0.75rem;
+        display: inline;
+    }
+
+    /* Hide checkbox label */
+    .table td[data-label="選択"]::before {
+        display: none;
+    }
+
+    /* Name field - full width, wrapping */
+    .table td[data-label="氏名"] {
+        flex: 0 0 100%;
+        order: -2;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.4;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .table td[data-label="氏名"]::before {
+        display: block;
+        margin-bottom: 0.1rem;
+    }
+
+    /* Student ID on its own line */
+    .table td[data-label="学籍番号"] {
+        flex: 0 0 auto;
+        order: -1;
+        font-family: monospace;
+    }
+
+    /* Small inline fields */
+    .table td[data-label="学年"],
+    .table td[data-label="クラス"],
+    .table td[data-label="ステータス"] {
+        flex: 0 0 auto;
+    }
+
+    /* Action cell at the end */
+    .table td[data-label="操作"]::before {
+        display: none;
+    }
+
+    .table td[data-label="操作"] {
+        margin-left: auto;
+    }
+
+    /* Checkbox at start */
+    .table td[data-label="選択"] {
+        order: -3;
+        flex: 0 0 auto;
     }
 
     /* Adjust specific inputs in card view */
@@ -607,11 +658,18 @@
     .gradeSelect {
         padding: var(--spacing-1) var(--spacing-2);
         height: auto;
+        font-size: 0.75rem;
     }
 
     .actionCell {
         justify-content: flex-end;
-        padding-top: var(--spacing-2);
+        gap: 0.25rem;
+    }
+
+    .detailBtn,
+    .deleteBtn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
     }
 }
 
