@@ -360,12 +360,12 @@
         grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
         align-items: center;
         /* Align items vertically in their rows */
-        gap: 6px 16px;
+        gap: 4px 16px;
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
         /* Restore tile appearance */
         border-radius: var(--radius-lg);
-        padding: 10px 16px;
+        padding: 6px 16px;
         box-shadow: var(--shadow-sm);
         /* Restore shadow */
     }
