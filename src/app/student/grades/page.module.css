@@ -386,8 +386,8 @@
         /* Changed from 1 / span 2 */
         grid-row: 1;
         font-weight: 700;
-        font-size: calc(1rem + 1pt);
-        /* Increased by 1pt */
+        font-size: 1rem;
+        /* Decreased by 1pt (back to original base) */
         color: var(--text-primary);
         white-space: normal;
         /* Allow wrapping to prevent truncation */
@@ -430,7 +430,8 @@
     }
 
     .table td:nth-of-type(3)::before {
-        content: "期末試験得点: ";
+        content: "期末試験: ";
+        /* Renamed from 期末試験得点: */
         font-weight: bold;
         color: var(--text-secondary);
         font-size: calc(0.7rem + 1pt);
@@ -441,8 +442,8 @@
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
-        font-size: calc(0.875rem + 1pt);
-        /* Total +1pt after reduction */
+        font-size: calc(0.875rem + 2pt);
+        /* Increased by 1pt (Total +2pt) */
         font-weight: bold;
         text-align: center;
         padding-top: 0;
@@ -453,18 +454,18 @@
         content: "評価点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 1pt);
-        /* Total +1pt after reduction */
+        font-size: calc(0.7rem + 2pt);
+        /* Increased by 1pt (Total +2pt) */
     }
 
     /* Grade */
     .table td:nth-of-type(5) {
         grid-column: 3;
         grid-row: 2;
-        font-size: calc(0.875rem + 1pt);
-        /* Total +1pt after reduction */
-        text-align: right;
-        font-weight: bold;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
         padding-top: 0;
         border-top: none;
     }
@@ -477,9 +478,32 @@
         /* Total +1pt after reduction */
     }
 
+    .table td:nth-of-type(5) .gradeBadge {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
     /* Registration Date (Removed as requested) */
     .table td:nth-of-type(6) {
         display: none;
+    }
+
+    /* Summary Grade specific rounding */
+    .summaryCard .grade {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-50);
+        margin-top: 4px;
     }
 
     /* Subject Details: Force 2 Columns */
