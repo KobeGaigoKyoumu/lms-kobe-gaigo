@@ -378,7 +378,8 @@
         grid-column: 1 / span 2;
         grid-row: 1;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: calc(1rem + 2pt);
+        /* Increase by 2pt */
         color: var(--text-primary);
     }
 
@@ -389,8 +390,8 @@
         text-align: left;
         /* Shifted to left-align as requested */
         font-weight: 700;
-        font-size: calc(0.8rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.8rem + 3pt);
+        /* Total +3pt */
         color: var(--text-secondary);
     }
 
@@ -398,8 +399,8 @@
         content: "クラス ";
         font-weight: bold;
         margin-right: 4px;
-        font-size: calc(0.75rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.75rem + 3pt);
+        /* Total +3pt */
     }
 
     /* --- Line 2: Details (Exam, Report, Grade) --- */
@@ -408,7 +409,8 @@
     .table td:nth-of-type(3) {
         grid-column: 1;
         grid-row: 2;
-        font-size: calc(0.875rem + 1pt);
+        font-size: calc(0.875rem + 3pt);
+        /* Total +3pt */
         font-weight: bold;
         padding-top: 0;
         border-top: none;
@@ -418,15 +420,16 @@
         content: "期末試験得点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 1pt);
+        font-size: calc(0.7rem + 3pt);
+        /* Total +3pt */
     }
 
     /* Report Card Total */
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
-        font-size: calc(0.875rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.875rem + 3pt);
+        /* Total +3pt */
         font-weight: bold;
         text-align: center;
         padding-top: 0;
@@ -437,16 +440,16 @@
         content: "評価点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.7rem + 3pt);
+        /* Total +3pt */
     }
 
     /* Grade */
     .table td:nth-of-type(5) {
         grid-column: 3;
         grid-row: 2;
-        font-size: calc(0.875rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.875rem + 3pt);
+        /* Total +3pt */
         text-align: right;
         font-weight: bold;
         padding-top: 0;
@@ -457,8 +460,8 @@
         content: "評価 ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 1pt);
-        /* Increase font size by 1pt */
+        font-size: calc(0.7rem + 3pt);
+        /* Total +3pt */
     }
 
     /* Registration Date (Removed as requested) */
