@@ -442,8 +442,8 @@
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
-        font-size: calc(0.875rem + 3pt);
-        /* Total +3pt (Increased by 1pt) */
+        font-size: calc(0.875rem + 2pt);
+        /* Total +2pt (Decreased by 1pt) */
         font-weight: bold;
         text-align: center;
         padding-top: 0;
@@ -454,8 +454,8 @@
         content: "評価点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 3pt);
-        /* Total +3pt (Increased by 1pt) */
+        font-size: calc(0.7rem + 2pt);
+        /* Total +2pt (Decreased by 1pt) */
     }
 
     /* Grade */
