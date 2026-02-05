@@ -467,13 +467,13 @@
 
     /* Add compact labels for Line 2 */
     .table td:nth-of-type(3)::before {
-        content: "試験:";
+        content: "期末試験点:";
         color: var(--text-secondary);
         margin-right: 2px;
     }
 
     .table td:nth-of-type(4)::before {
-        content: "評価:";
+        content: "評価点:";
         color: var(--text-secondary);
         margin-right: 2px;
     }
