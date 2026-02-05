@@ -382,11 +382,12 @@
 
     /* Term (Left) */
     .table td:nth-of-type(1) {
-        grid-column: 1 / span 2;
+        grid-column: 1;
+        /* Changed from 1 / span 2 */
         grid-row: 1;
         font-weight: 700;
-        font-size: 1rem;
-        /* Decreased by 2pt */
+        font-size: calc(1rem + 1pt);
+        /* Increased by 1pt */
         color: var(--text-primary);
         white-space: normal;
         /* Allow wrapping to prevent truncation */
@@ -394,15 +395,16 @@
         text-overflow: clip;
     }
 
-    /* Class (Right - Now Left Aligned within its column) */
+    /* Class (Center - Now above Report Score) */
     .table td:nth-of-type(2) {
-        grid-column: 3;
+        grid-column: 2;
+        /* Moved from 3 to 2 */
         grid-row: 1;
-        text-align: left;
-        /* Shifted to left-align as requested */
+        text-align: center;
+        /* Align with Report Score */
         font-weight: 700;
-        font-size: calc(0.8rem + 1pt);
-        /* Total +1pt after reduction */
+        font-size: calc(0.8rem + 2pt);
+        /* Increased by 1pt (Total +2pt) */
         color: var(--text-secondary);
     }
 
@@ -410,8 +412,8 @@
         content: "クラス ";
         font-weight: bold;
         margin-right: 4px;
-        font-size: calc(0.75rem + 1pt);
-        /* Total +1pt after reduction */
+        font-size: calc(0.75rem + 2pt);
+        /* Increased by 1pt (Total +2pt) */
     }
 
     /* --- Line 2: Details (Exam, Report, Grade) --- */
