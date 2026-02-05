@@ -99,8 +99,8 @@ export default async function StudentGradesPage() {
                                     <tr key={record.id}>
                                         <td data-label="学期">{record.year_term}</td>
                                         <td data-label="クラス">{record.class_name}</td>
-                                        <td data-label="期末試験" className={styles.examScore}>{record.final_exam_total} / 600</td>
-                                        <td data-label="成績評価" className={styles.reportScore}>{record.report_card_total} / 100</td>
+                                        <td data-label="期末試験" className={styles.examScore}>{record.final_exam_total}</td>
+                                        <td data-label="成績評価" className={styles.reportScore}>{record.report_card_total}</td>
                                         <td data-label="評価">
                                             <span className={`${styles.gradeBadge} ${styles[`grade${calculateGrade(record.report_card_total)}`]}`}>
                                                 {calculateGrade(record.report_card_total)}
