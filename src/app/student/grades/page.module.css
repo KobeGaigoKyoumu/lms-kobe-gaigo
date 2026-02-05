@@ -351,14 +351,16 @@
     /* 2-Line Row Layout */
     .table tbody tr {
         display: grid;
-        grid-template-columns: 1fr auto;
-        /* Left side | Right side */
+        grid-template-rows: auto auto;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         gap: 8px 12px;
         background: var(--bg-elevated);
-        border: 1px solid var(--border-color);
+        border: none;
+        /* Remove grid lines (borders) */
         border-radius: var(--radius-lg);
         padding: var(--spacing-4);
-        box-shadow: var(--shadow-sm);
+        box-shadow: none;
+        /* Make it more minimal as requested */
     }
 
     /* Reset default td styles */
@@ -373,125 +375,96 @@
 
     /* Term (Left) */
     .table td:nth-of-type(1) {
-        grid-column: 1;
+        grid-column: 1 / span 3;
         grid-row: 1;
         font-weight: 700;
         font-size: 1rem;
         color: var(--text-primary);
     }
 
-    .table td:nth-of-type(1)::before {
-        content: none;
-    }
-
     /* Class (Right) */
-    .table td:nth-of-type(2) {
-        grid-column: 2;
-        grid-row: 1;
-        text-align: right;
-        font-weight: 600;
-        color: var(--text-secondary);
-    }
-
-    .table td:nth-of-type(2)::before {
-        content: "Class ";
-        font-weight: normal;
-        margin-right: 4px;
-        font-size: 0.75rem;
-    }
-
-    /* --- Line 2: Details (Exam, Report, Grade, Date) --- */
-    /* We'll use a pseudo-flex layout by creating a subgrid or just using grid placement */
-
-    /* Can't create a real container <div> without JS. 
-       Let's use grid-row 2 for everything and flow correctly. */
-
-    /* Revisit grid definition for the Row */
-    .table tbody tr {
-        grid-template-rows: auto auto;
-        /* 2 Rows */
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        /* 4 cols for bottom row? */
-    }
-
-    /* Fix Line 1 spanning */
-    .table td:nth-of-type(1) {
-        grid-column: 1 / span 3;
-        grid-row: 1;
-    }
-
     .table td:nth-of-type(2) {
         grid-column: 4;
         grid-row: 1;
         text-align: right;
+        font-weight: 700;
+        /* Bold Class value */
+        color: var(--text-secondary);
     }
 
-    /* Fix Line 2 spanning */
-    /* Order: Exam | Report | Grade | Date */
-    /* Due to text width, we might need flexible fitting. 
-       Let's try to fit 2 items on Left, and 2 on Right? 
-       Or just 4 equal cols */
+    .table td:nth-of-type(2)::before {
+        content: "クラス ";
+        /* Updated label */
+        font-weight: bold;
+        /* Bold "クラス" text */
+        margin-right: 4px;
+        font-size: 0.75rem;
+    }
 
+    /* --- Line 2: Details (Exam, Report, Grade) --- */
+
+    /* 期末試験得点 (Exam) */
     .table td:nth-of-type(3) {
         grid-column: 1;
         grid-row: 2;
-        font-size: 0.8rem;
+        font-size: calc(0.8rem + 1pt);
+        /* Increase font size by 1pt */
+        font-weight: bold;
+        /* Bold Exam score */
     }
 
-    /* Exam */
+    .table td:nth-of-type(3)::before {
+        content: "期末試験得点: ";
+        /* Updated label */
+        font-weight: bold;
+        /* Bold "期末試験得点" text */
+        color: var(--text-secondary);
+        margin-right: 2px;
+        font-size: calc(0.7rem + 1pt);
+        /* Match increased size */
+    }
+
+    /* 評価点 (Report Card Total) */
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
         font-size: 0.8rem;
+        font-weight: bold;
+        /* Bold Report score */
     }
 
-    /* Report */
+    .table td:nth-of-type(4)::before {
+        content: "評価点: ";
+        /* Updated label */
+        font-weight: bold;
+        /* Bold "評価点" text */
+        color: var(--text-secondary);
+        margin-right: 2px;
+    }
+
+    /* 評価 (Grade Badge) */
     .table td:nth-of-type(5) {
         grid-column: 3;
         grid-row: 2;
         font-size: 0.8rem;
         text-align: center;
-    }
-
-    /* Grade */
-    .table td:nth-of-type(6) {
-        grid-column: 4;
-        grid-row: 2;
-        font-size: 0.75rem;
-        text-align: right;
-        color: var(--text-tertiary);
-        margin-top: 2px;
-    }
-
-    /* Date */
-
-    /* Add compact labels for Line 2 */
-    .table td:nth-of-type(3)::before {
-        content: "試:";
-        color: var(--text-secondary);
-        margin-right: 2px;
-    }
-
-    .table td:nth-of-type(4)::before {
-        content: "評:";
-        color: var(--text-secondary);
-        margin-right: 2px;
+        font-weight: bold;
+        /* Bold Grade */
     }
 
     .table td:nth-of-type(5)::before {
-        content: "";
-        margin-right: 0px;
+        content: "評価 ";
+        /* Bold "評価" label */
+        font-weight: bold;
+        color: var(--text-secondary);
+        margin: 0;
     }
 
-    /* Grade badge handles itself? */
-
-    /* Just in case grade badge is not inside the TD directly? 
-       JSX: <td data-label="評価"><span className=... */
-
-    /* Date Label: Hidden or brief */
-    .table td:nth-of-type(6)::before {
-        content: "";
+    /* 登録日 (Remove Registration Date as requested) */
+    .table td:nth-of-type(6) {
+        display: none;
     }
+
 
     /* Subject Details: Force 2 Columns */
     .subjectGrid {
