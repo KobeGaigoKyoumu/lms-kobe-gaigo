@@ -322,6 +322,11 @@
         margin-top: var(--spacing-6);
     }
 
+    .historySection h2 {
+        font-size: calc(var(--font-size-xl) + 1pt);
+        /* Increase heading font size by 1pt */
+    }
+
     /* Table: Card-like Layout for Mobile */
     .table {
         background: transparent;
