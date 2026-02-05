@@ -394,7 +394,7 @@
     }
 
     .table td:nth-of-type(2)::before {
-        content: "Class ";
+        content: "クラス ";
         font-weight: normal;
         margin-right: 4px;
         font-size: 0.75rem;
@@ -423,7 +423,7 @@
     .table td:nth-of-type(2) {
         grid-column: 4;
         grid-row: 1;
-        text-align: right;
+        text-align: left;
     }
 
     /* Fix Line 2 spanning */
@@ -450,7 +450,7 @@
         grid-column: 3;
         grid-row: 2;
         font-size: 0.8rem;
-        text-align: center;
+        text-align: left;
     }
 
     /* Grade */
@@ -458,7 +458,7 @@
         grid-column: 4;
         grid-row: 2;
         font-size: 0.75rem;
-        text-align: right;
+        text-align: left;
         color: var(--text-tertiary);
         margin-top: 2px;
     }
@@ -467,13 +467,13 @@
 
     /* Add compact labels for Line 2 */
     .table td:nth-of-type(3)::before {
-        content: "試:";
+        content: "試験:";
         color: var(--text-secondary);
         margin-right: 2px;
     }
 
     .table td:nth-of-type(4)::before {
-        content: "評:";
+        content: "評価:";
         color: var(--text-secondary);
         margin-right: 2px;
     }
