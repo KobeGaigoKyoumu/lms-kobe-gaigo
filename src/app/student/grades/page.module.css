@@ -386,8 +386,8 @@
         /* Changed from 1 / span 2 */
         grid-row: 1;
         font-weight: 700;
-        font-size: calc(1rem + 1pt);
-        /* Increased by 1pt */
+        font-size: calc(1rem - 1pt);
+        /* Decreased by 2pt */
         color: var(--text-primary);
         white-space: normal;
         /* Allow wrapping to prevent truncation */
@@ -403,8 +403,8 @@
         text-align: center;
         /* Align with Report Score */
         font-weight: 700;
-        font-size: calc(0.8rem + 3pt);
-        /* Total +3pt (Increased by 1pt) */
+        font-size: calc(0.8rem + 1pt);
+        /* Decreased by 2pt (Total +1pt) */
         color: var(--text-secondary);
     }
 
@@ -412,8 +412,8 @@
         content: "クラス ";
         font-weight: bold;
         margin-right: 4px;
-        font-size: calc(0.75rem + 3pt);
-        /* Total +3pt (Increased by 1pt) */
+        font-size: calc(0.75rem + 1pt);
+        /* Decreased by 2pt (Total +1pt) */
     }
 
     /* --- Line 2: Details (Exam, Report, Grade) --- */
@@ -422,8 +422,8 @@
     .table td:nth-of-type(3) {
         grid-column: 1;
         grid-row: 2;
-        font-size: calc(0.875rem + 2pt);
-        /* Total +2pt (Increased by 1pt) */
+        font-size: 0.875rem;
+        /* Decreased by 2pt (Back to base) */
         font-weight: bold;
         padding-top: 0;
         border-top: none;
@@ -434,16 +434,16 @@
         /* Renamed from 期末試験得点: */
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 2pt);
-        /* Total +2pt (Increased by 1pt) */
+        font-size: 0.7rem;
+        /* Decreased by 2pt (Back to base) */
     }
 
     /* Report Card Total */
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
-        font-size: calc(0.875rem + 2pt);
-        /* Total +2pt (Decreased by 1pt) */
+        font-size: 0.875rem;
+        /* Decreased by 2pt (Back to base) */
         font-weight: bold;
         text-align: center;
         padding-top: 0;
@@ -454,8 +454,8 @@
         content: "評価点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 2pt);
-        /* Total +2pt (Decreased by 1pt) */
+        font-size: 0.7rem;
+        /* Decreased by 2pt (Back to base) */
     }
 
     /* Grade */
@@ -474,8 +474,8 @@
         content: "評価 ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: calc(0.7rem + 2pt);
-        /* Total +2pt (Increased by 1pt) */
+        font-size: 0.7rem;
+        /* Decreased by 2pt (Back to base) */
     }
 
     .table td:nth-of-type(5) .gradeBadge {
@@ -486,8 +486,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: calc(0.875rem + 1pt);
-        /* Increased by 1pt */
+        font-size: calc(0.875rem - 1pt);
+        /* Decreased by 2pt */
     }
 
     /* Registration Date (Removed as requested) */
