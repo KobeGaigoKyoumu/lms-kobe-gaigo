@@ -400,97 +400,103 @@
         font-size: 0.75rem;
     }
 
-    /* --- Line 2: Details (Exam, Report, Grade, Date) --- */
-    /* We'll use a pseudo-flex layout by creating a subgrid or just using grid placement */
-
-    /* Can't create a real container <div> without JS. 
-       Let's use grid-row 2 for everything and flow correctly. */
+    /* --- Line 1: Term, Class & Date --- */
+    /* --- Line 2: Details (Exam, Report, Grade) --- */
 
     /* Revisit grid definition for the Row */
     .table tbody tr {
         grid-template-rows: auto auto;
         /* 2 Rows */
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        /* 4 cols for bottom row? */
+        grid-template-columns: 1fr 1fr 1fr;
+        /* 3 cols for bottom row */
+        row-gap: 8px;
+        border: 1px solid var(--border-color);
     }
 
     /* Fix Line 1 spanning */
+    /* Term (Left) */
     .table td:nth-of-type(1) {
-        grid-column: 1 / span 3;
-        grid-row: 1;
-    }
-
-    .table td:nth-of-type(2) {
-        grid-column: 4;
-        grid-row: 1;
-        text-align: left;
-    }
-
-    /* Fix Line 2 spanning */
-    /* Order: Exam | Report | Grade | Date */
-    /* Due to text width, we might need flexible fitting. 
-       Let's try to fit 2 items on Left, and 2 on Right? 
-       Or just 4 equal cols */
-
-    .table td:nth-of-type(3) {
         grid-column: 1;
-        grid-row: 2;
-        font-size: 0.8rem;
+        grid-row: 1;
+    }
+
+    /* Class (Center) */
+    .table td:nth-of-type(2) {
+        grid-column: 2;
+        grid-row: 1;
+        text-align: center;
+    }
+
+    /* Date (Right, moved to Line 1) */
+    .table td:nth-of-type(6) {
+        grid-column: 3;
+        grid-row: 1;
+        font-size: 0.75rem;
+        text-align: right;
+        color: var(--text-tertiary);
+    }
+
+    .table td:nth-of-type(6)::before {
+        content: "";
+    }
+
+    /* --- Line 2: Exam | Report | Grade --- */
+    /* Grid line separator between Line 1 and Line 2 */
+    .table td:nth-of-type(3),
+    .table td:nth-of-type(4),
+    .table td:nth-of-type(5) {
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
     }
 
     /* Exam */
-    .table td:nth-of-type(4) {
-        grid-column: 2;
+    .table td:nth-of-type(3) {
+        grid-column: 1;
         grid-row: 2;
-        font-size: 0.8rem;
+        font-size: 0.875rem;
+        /* 1pt larger */
     }
 
     /* Report */
-    .table td:nth-of-type(5) {
-        grid-column: 3;
+    .table td:nth-of-type(4) {
+        grid-column: 2;
         grid-row: 2;
-        font-size: 0.8rem;
-        text-align: left;
+        font-size: 0.875rem;
+        /* 1pt larger */
+        text-align: center;
     }
 
     /* Grade */
-    .table td:nth-of-type(6) {
-        grid-column: 4;
+    .table td:nth-of-type(5) {
+        grid-column: 3;
         grid-row: 2;
-        font-size: 0.75rem;
-        text-align: left;
-        color: var(--text-tertiary);
-        margin-top: 2px;
+        font-size: 0.875rem;
+        text-align: right;
     }
-
-    /* Date */
 
     /* Add compact labels for Line 2 */
     .table td:nth-of-type(3)::before {
-        content: "期末試験点:";
+        content: "期末試験得点: ";
+        display: block;
         color: var(--text-secondary);
-        margin-right: 2px;
+        font-size: 0.7rem;
+        margin-bottom: 2px;
     }
 
     .table td:nth-of-type(4)::before {
-        content: "評価点:";
+        content: "評価点: ";
+        display: block;
         color: var(--text-secondary);
-        margin-right: 2px;
+        font-size: 0.7rem;
+        margin-bottom: 2px;
     }
 
     .table td:nth-of-type(5)::before {
-        content: "";
-        margin-right: 0px;
-    }
-
-    /* Grade badge handles itself? */
-
-    /* Just in case grade badge is not inside the TD directly? 
-       JSX: <td data-label="評価"><span className=... */
-
-    /* Date Label: Hidden or brief */
-    .table td:nth-of-type(6)::before {
-        content: "";
+        content: "評価";
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        margin-bottom: 2px;
     }
 
     /* Subject Details: Force 2 Columns */
