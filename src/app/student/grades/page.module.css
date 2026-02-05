@@ -534,10 +534,12 @@
     }
 
     .scoreValue {
-        font-size: 0.8rem;
+        font-size: calc(0.8rem + 1pt);
+        /* Increased by 1pt */
     }
 
     .scoreItem.total .scoreValue {
-        font-size: 0.9rem;
+        font-size: calc(0.9rem + 1pt);
+        /* Increased by 1pt */
     }
 }

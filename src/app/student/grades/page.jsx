@@ -126,6 +126,7 @@ export default async function StudentGradesPage() {
                             .filter(([subject, data]) =>
                                 subject !== 'attendance' &&
                                 subject !== 'participation' &&
+                                subject !== 'overall' &&
                                 typeof data === 'object'
                             )
                             .map(([subject, data]) => (
@@ -135,8 +136,7 @@ export default async function StudentGradesPage() {
                                             subject === 'reading' ? '読解' :
                                                 subject === 'grammar' ? '文法' :
                                                     subject === 'writing' ? '作文' :
-                                                        subject === 'conversation' ? '会話' :
-                                                            subject === 'overall' ? '総合' : subject}
+                                                        subject === 'conversation' ? '会話' : subject}
                                     </h3>
                                     <div className={styles.subjectScores}>
                                         <div className={styles.scoreItem}>
@@ -148,7 +148,7 @@ export default async function StudentGradesPage() {
                                             </span>
                                         </div>
                                         <div className={`${styles.scoreItem} ${styles.total}`}>
-                                            <span className={styles.scoreLabel}>合計点</span>
+                                            <span className={styles.scoreLabel}>評価点</span>
                                             <span className={styles.scoreValue}>{data.total?.toFixed(1)}</span>
                                         </div>
                                     </div>
