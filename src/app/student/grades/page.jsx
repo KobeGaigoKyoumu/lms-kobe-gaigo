@@ -154,7 +154,7 @@ export default async function StudentGradesPage() {
                                                     </span>
                                                 </div>
                                                 <div className={`${styles.scoreItem} ${styles.total}`}>
-                                                    <span className={styles.scoreLabel}>評価点</span>
+                                                    <span className={styles.scoreLabel}>成績評価</span>
                                                     <span className={styles.scoreValue}>
                                                         <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(data.total)}`]}`}>
                                                             {calculateGrade(data.total)}
