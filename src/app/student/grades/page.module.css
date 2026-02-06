@@ -81,6 +81,11 @@
     color: var(--primary-600);
 }
 
+.gradeCard {
+    align-items: center;
+    justify-content: center;
+}
+
 /* History Section */
 .historySection {
     margin-bottom: var(--spacing-8);
@@ -386,7 +391,7 @@
         /* Changed from 1 / span 2 */
         grid-row: 1;
         font-weight: 700;
-        font-size: calc(1rem - 1pt);
+        font-size: calc(1rem - 2pt);
         /* Decreased by 2pt */
         color: var(--text-primary);
         white-space: normal;
@@ -403,7 +408,7 @@
         text-align: center;
         /* Align with Report Score */
         font-weight: 700;
-        font-size: calc(0.8rem + 1pt);
+        font-size: 0.8rem;
         /* Decreased by 2pt (Total +1pt) */
         color: var(--text-secondary);
     }
@@ -412,7 +417,7 @@
         content: "クラス ";
         font-weight: bold;
         margin-right: 4px;
-        font-size: calc(0.75rem + 1pt);
+        font-size: 0.75rem;
         /* Decreased by 2pt (Total +1pt) */
     }
 
@@ -422,7 +427,7 @@
     .table td:nth-of-type(3) {
         grid-column: 1;
         grid-row: 2;
-        font-size: 0.875rem;
+        font-size: calc(0.875rem - 1pt);
         /* Decreased by 2pt (Back to base) */
         font-weight: bold;
         padding-top: 0;
@@ -434,7 +439,7 @@
         /* Renamed from 期末試験得点: */
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: 0.7rem;
+        font-size: calc(0.7rem - 1pt);
         /* Decreased by 2pt (Back to base) */
     }
 
@@ -442,7 +447,7 @@
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
-        font-size: 0.875rem;
+        font-size: calc(0.875rem - 1pt);
         /* Decreased by 2pt (Back to base) */
         font-weight: bold;
         text-align: center;
@@ -454,7 +459,7 @@
         content: "評価点: ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: 0.7rem;
+        font-size: calc(0.7rem - 1pt);
         /* Decreased by 2pt (Back to base) */
     }
 
@@ -474,7 +479,7 @@
         content: "評価 ";
         font-weight: bold;
         color: var(--text-secondary);
-        font-size: 0.7rem;
+        font-size: calc(0.7rem - 1pt);
         /* Decreased by 2pt (Back to base) */
     }
 
@@ -486,7 +491,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: calc(0.875rem - 1pt);
+        font-size: calc(0.875rem - 2pt);
         /* Decreased by 2pt */
     }
 

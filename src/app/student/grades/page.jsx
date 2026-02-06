@@ -63,9 +63,9 @@ export default async function StudentGradesPage() {
                     </div>
                     <div className={styles.summaryCard}>
                         <span className={styles.label}>成績評価</span>
-                        <span className={styles.value}>{latestRecord.report_card_total}/100</span>
+                        <span className={styles.value}>{latestRecord.report_card_total}</span>
                     </div>
-                    <div className={styles.summaryCard}>
+                    <div className={`${styles.summaryCard} ${styles.gradeCard}`}>
                         <span className={styles.label}>評価</span>
                         <span className={`${styles.value} ${styles.grade}`}>
                             {calculateGrade(latestRecord.report_card_total)}
