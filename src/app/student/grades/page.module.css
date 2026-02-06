@@ -322,7 +322,12 @@
         margin-top: var(--spacing-6);
     }
 
-    /* Table: 2-Line Stack Layout (Compact Row) */
+    .historySection h2 {
+        font-size: calc(var(--font-size-xl) + 1pt);
+        /* Increase heading font size by 1pt */
+    }
+
+    /* Table: Card-like Layout for Mobile */
     .table {
         background: transparent;
         border: none;
@@ -348,23 +353,27 @@
         gap: var(--spacing-3);
     }
 
-    /* 2-Line Row Layout */
+    /* Card Row Layout */
     .table tbody tr {
         display: grid;
-        grid-template-columns: 1fr auto;
-        /* Left side | Right side */
-        gap: 8px 12px;
+        grid-template-rows: auto auto;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        /* Align items vertically in their rows */
+        gap: 4px 16px !important;
         background: var(--bg-elevated);
         border: 1px solid var(--border-color);
+        /* Restore tile appearance */
         border-radius: var(--radius-lg);
-        padding: var(--spacing-4);
+        padding: 6px 16px !important;
         box-shadow: var(--shadow-sm);
+        /* Restore shadow */
     }
 
     /* Reset default td styles */
     .table td {
         display: block;
-        padding: 0;
+        padding: 0 !important;
         border: none;
         text-align: left;
     }
@@ -374,129 +383,128 @@
     /* Term (Left) */
     .table td:nth-of-type(1) {
         grid-column: 1;
+        /* Changed from 1 / span 2 */
         grid-row: 1;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: calc(1rem - 1pt);
+        /* Decreased by 2pt */
         color: var(--text-primary);
+        white-space: normal;
+        /* Allow wrapping to prevent truncation */
+        overflow: visible;
+        text-overflow: clip;
     }
 
-    .table td:nth-of-type(1)::before {
-        content: none;
-    }
-
-    /* Class (Right) */
+    /* Class (Center - Now above Report Score) */
     .table td:nth-of-type(2) {
         grid-column: 2;
+        /* Moved from 3 to 2 */
         grid-row: 1;
-        text-align: right;
-        font-weight: 600;
+        text-align: center;
+        /* Align with Report Score */
+        font-weight: 700;
+        font-size: calc(0.8rem + 1pt);
+        /* Decreased by 2pt (Total +1pt) */
         color: var(--text-secondary);
     }
 
     .table td:nth-of-type(2)::before {
         content: "クラス ";
-        font-weight: normal;
+        font-weight: bold;
         margin-right: 4px;
-        font-size: 0.75rem;
+        font-size: calc(0.75rem + 1pt);
+        /* Decreased by 2pt (Total +1pt) */
     }
 
-    /* --- Line 1: Term, Class & Date --- */
     /* --- Line 2: Details (Exam, Report, Grade) --- */
 
-    /* Revisit grid definition for the Row */
-    .table tbody tr {
-        grid-template-rows: auto auto;
-        /* 2 Rows */
-        grid-template-columns: 1fr 1fr 1fr;
-        /* 3 cols for bottom row */
-        row-gap: 8px;
-        border: 1px solid var(--border-color);
-    }
-
-    /* Fix Line 1 spanning */
-    /* Term (Left) */
-    .table td:nth-of-type(1) {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    /* Class (Center) */
-    .table td:nth-of-type(2) {
-        grid-column: 2;
-        grid-row: 1;
-        text-align: center;
-    }
-
-    /* Date (Right, moved to Line 1) */
-    .table td:nth-of-type(6) {
-        grid-column: 3;
-        grid-row: 1;
-        font-size: 0.75rem;
-        text-align: right;
-        color: var(--text-tertiary);
-    }
-
-    .table td:nth-of-type(6)::before {
-        content: "";
-    }
-
-    /* --- Line 2: Exam | Report | Grade --- */
-    /* Grid line separator between Line 1 and Line 2 */
-    .table td:nth-of-type(3),
-    .table td:nth-of-type(4),
-    .table td:nth-of-type(5) {
-        padding-top: 8px;
-        border-top: 1px solid var(--border-color);
-    }
-
-    /* Exam */
+    /* Exam Score */
     .table td:nth-of-type(3) {
         grid-column: 1;
         grid-row: 2;
         font-size: 0.875rem;
-        /* 1pt larger */
+        /* Decreased by 2pt (Back to base) */
+        font-weight: bold;
+        padding-top: 0;
+        border-top: none;
     }
 
-    /* Report */
+    .table td:nth-of-type(3)::before {
+        content: "期末試験: ";
+        /* Renamed from 期末試験得点: */
+        font-weight: bold;
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        /* Decreased by 2pt (Back to base) */
+    }
+
+    /* Report Card Total */
     .table td:nth-of-type(4) {
         grid-column: 2;
         grid-row: 2;
         font-size: 0.875rem;
-        /* 1pt larger */
+        /* Decreased by 2pt (Back to base) */
+        font-weight: bold;
         text-align: center;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .table td:nth-of-type(4)::before {
+        content: "評価点: ";
+        font-weight: bold;
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        /* Decreased by 2pt (Back to base) */
     }
 
     /* Grade */
     .table td:nth-of-type(5) {
         grid-column: 3;
         grid-row: 2;
-        font-size: 0.875rem;
-        text-align: right;
-    }
-
-    /* Add compact labels for Line 2 */
-    .table td:nth-of-type(3)::before {
-        content: "期末試験得点: ";
-        display: block;
-        color: var(--text-secondary);
-        font-size: 0.7rem;
-        margin-bottom: 2px;
-    }
-
-    .table td:nth-of-type(4)::before {
-        content: "評価点: ";
-        display: block;
-        color: var(--text-secondary);
-        font-size: 0.7rem;
-        margin-bottom: 2px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
+        padding-top: 0;
+        border-top: none;
     }
 
     .table td:nth-of-type(5)::before {
-        content: "評価";
-        display: block;
+        content: "評価 ";
+        font-weight: bold;
         color: var(--text-secondary);
         font-size: 0.7rem;
-        margin-bottom: 2px;
+        /* Decreased by 2pt (Back to base) */
+    }
+
+    .table td:nth-of-type(5) .gradeBadge {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(0.875rem - 1pt);
+        /* Decreased by 2pt */
+    }
+
+    /* Registration Date (Removed as requested) */
+    .table td:nth-of-type(6) {
+        display: none;
+    }
+
+    /* Summary Grade specific rounding */
+    .summaryCard .grade {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-50);
+        margin-top: 4px;
     }
 
     /* Subject Details: Force 2 Columns */
@@ -526,10 +534,12 @@
     }
 
     .scoreValue {
-        font-size: 0.8rem;
+        font-size: calc(0.8rem + 1pt);
+        /* Increased by 1pt */
     }
 
     .scoreItem.total .scoreValue {
-        font-size: 0.9rem;
+        font-size: calc(0.9rem + 1pt);
+        /* Increased by 1pt */
     }
 }
