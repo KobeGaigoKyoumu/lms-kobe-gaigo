@@ -65,11 +65,13 @@ export default async function StudentGradesPage() {
                         <span className={styles.label}>成績評価</span>
                         <span className={styles.value}>{latestRecord.report_card_total}</span>
                     </div>
-                    <div className={`${styles.summaryCard} ${styles.gradeCard}`}>
+                    <div className={styles.summaryCard}>
                         <span className={styles.label}>評価</span>
-                        <span className={`${styles.value} ${styles.grade}`}>
-                            {calculateGrade(latestRecord.report_card_total)}
-                        </span>
+                        <div className={styles.centeredContent}>
+                            <span className={`${styles.value} ${styles.grade}`}>
+                                {calculateGrade(latestRecord.report_card_total)}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -142,6 +144,9 @@ export default async function StudentGradesPage() {
                                         <div className={styles.scoreItem}>
                                             <span className={styles.scoreLabel}>期末試験</span>
                                             <span className={styles.scoreValue}>
+                                                <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(data.total)}`]}`}>
+                                                    {calculateGrade(data.total)}
+                                                </span>
                                                 {subject === 'overall'
                                                     ? latestRecord.final_exam_total
                                                     : (latestRecord.final_exam_data?.[subject] || 0)}

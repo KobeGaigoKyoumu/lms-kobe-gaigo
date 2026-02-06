@@ -81,9 +81,20 @@
     color: var(--primary-600);
 }
 
-.gradeCard {
+.centeredContent {
+    flex: 1;
+    display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+}
+
+.miniBadge {
+    padding: 1px 6px;
+    font-size: 0.7rem;
+    min-width: 24px;
+    height: 24px;
+    margin-right: var(--spacing-2);
 }
 
 /* History Section */
