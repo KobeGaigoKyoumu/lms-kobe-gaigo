@@ -140,28 +140,31 @@ export default async function StudentGradesPage() {
                                                     subject === 'writing' ? '作文' :
                                                         subject === 'conversation' ? '会話' : subject}
                                     </h3>
-                                    <div className={styles.subjectScores}>
-                                        <div className={styles.scoreItem}>
-                                            <span className={styles.scoreLabel}>期末試験</span>
-                                            <span className={styles.scoreValue}>
-                                                <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(data.total)}`]}`}>
-                                                    {calculateGrade(data.total)}
-                                                </span>
-                                                {subject === 'overall'
-                                                    ? latestRecord.final_exam_total
-                                                    : (latestRecord.final_exam_data?.[subject] || 0)}
-                                            </span>
-                                        </div>
-                                        <div className={`${styles.scoreItem} ${styles.total}`}>
-                                            <span className={styles.scoreLabel}>評価点</span>
-                                            <span className={styles.scoreValue}>
-                                                <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(data.total)}`]}`}>
-                                                    {calculateGrade(data.total)}
-                                                </span>
-                                                {data.total?.toFixed(1)}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    {(() => {
+                                        const subjectExamScore = latestRecord.final_exam_data?.[subject] || 0;
+                                        return (
+                                            <div className={styles.subjectScores}>
+                                                <div className={styles.scoreItem}>
+                                                    <span className={styles.scoreLabel}>期末試験</span>
+                                                    <span className={styles.scoreValue}>
+                                                        <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(subjectExamScore)}`]}`}>
+                                                            {calculateGrade(subjectExamScore)}
+                                                        </span>
+                                                        {subjectExamScore}
+                                                    </span>
+                                                </div>
+                                                <div className={`${styles.scoreItem} ${styles.total}`}>
+                                                    <span className={styles.scoreLabel}>評価点</span>
+                                                    <span className={styles.scoreValue}>
+                                                        <span className={`${styles.gradeBadge} ${styles.miniBadge} ${styles[`grade${calculateGrade(data.total)}`]}`}>
+                                                            {calculateGrade(data.total)}
+                                                        </span>
+                                                        {data.total?.toFixed(1)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             ))}
                     </div>
