@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "source": "歴代受験結果データベース.xlsx",
-  "recordCount": 2214,
+  "recordCount": 2216,
   "records": [
     {
       "session": "2017年第1回",
@@ -21643,6 +21643,24 @@
         "reading": 24,
         "listening": 60
       }
+    },
+    {
+      "session": "2024年第2回",
+      "studentId": "2501991",
+      "country": "中国",
+      "name": "田中 裕二",
+      "level": "N2",
+      "score": 145,
+      "result": "合格"
+    },
+    {
+      "session": "2024年第1回",
+      "studentId": "2501992",
+      "country": "中国",
+      "name": "中井 彩乃",
+      "level": "N3",
+      "score": 110,
+      "result": "合格"
     }
   ]
 }
