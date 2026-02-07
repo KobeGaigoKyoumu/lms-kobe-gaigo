@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
     // 1. ブラウザ通知を表示 (デスクトップ・スマホ共通)
     const options = {
         body: data.body,
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/badge-72x72.png',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
         data: { url: data.url },
         vibrate: [100, 50, 100],
         tag: 'chat-notification', // 同一タグは最新のみ表示
