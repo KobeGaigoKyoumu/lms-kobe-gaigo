@@ -39,6 +39,12 @@ export async function POST(request) {
             read: false
         }))
 
+        // 3. Insert Messages
+        const { data, error } = await adminSupabase
+            .from('messages')
+            .insert(payloads)
+            .select()
+
         if (error) throw error
 
             // 4. Send Push Notifications (Background)
