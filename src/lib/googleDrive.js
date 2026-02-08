@@ -73,7 +73,25 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
     try {
         const drive = await getDriveClient();
 
-        console.log('Attempting upload to Google Drive folder:', folderId);
+        console.log('--- Google Drive Upload Diagnostic ---');
+        console.log('Target Folder ID:', folderId);
+
+        // 1. まずフォルダにアクセス可能か直接確認する
+        try {
+            const folderInfo = await drive.files.get({
+                fileId: folderId,
+                fields: 'id, name, owners',
+                supportsAllDrives: true
+            });
+            console.log('Folder access confirmed:', folderInfo.data.name);
+        } catch (fErr) {
+            console.error('Folder check failed! The service account cannot "SEE" this folder ID.');
+            console.error('Error details:', fErr.message);
+            if (fErr.status === 404) {
+                throw new Error(`The folder ID "${folderId}" was not found or the service account lacks permission to see it. Please double check the ID and sharing settings.`);
+            }
+            throw fErr;
+        }
 
         const fileMetadata = {
             name: fileName,
@@ -84,19 +102,24 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
             body: Readable.from(buffer),
         };
 
+        // 2. アップロード実行
         const response = await drive.files.create({
             requestBody: fileMetadata,
             media: media,
             fields: 'id, name, webViewLink, webContentLink',
+            supportsAllDrives: true, // 共有ドライブや共有フォルダ対応
         });
 
-        // 閲覧権限の設定
+        console.log('Upload successful! File ID:', response.data.id);
+
+        // 3. 閲覧権限の設定
         await drive.permissions.create({
             fileId: response.data.id,
             requestBody: {
                 role: 'reader',
                 type: 'anyone',
             },
+            supportsAllDrives: true,
         });
 
         return {
