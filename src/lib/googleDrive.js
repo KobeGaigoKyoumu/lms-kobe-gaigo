@@ -74,40 +74,6 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
         const drive = await getDriveClient();
         const safeFolderId = folderId?.trim();
 
-        console.log('--- Google Drive Upload Diagnostic ---');
-        console.log('Target Folder ID:', safeFolderId);
-
-        // 【診断】サービスアカウントが現在「見えている」全ファイルを表示してみる
-        try {
-            const listResponse = await drive.files.list({
-                pageSize: 10,
-                fields: 'files(id, name)',
-                supportsAllDrives: true,
-                includeItemsFromAllDrives: true
-            });
-            console.log('Accessible files/folders for this service account:',
-                listResponse.data.files.map(f => `${f.name} (${f.id})`).join(', ') || 'None');
-        } catch (lErr) {
-            console.warn('Diagnostic list failed:', lErr.message);
-        }
-
-        // 1. フォルダにアクセス可能か確認
-        try {
-            const folderInfo = await drive.files.get({
-                fileId: safeFolderId,
-                fields: 'id, name',
-                supportsAllDrives: true
-            });
-            console.log('Folder access confirmed:', folderInfo.data.name);
-        } catch (fErr) {
-            console.error('Folder check failed! Service account cannot find ID:', safeFolderId);
-            console.error('Raw Error:', fErr.message);
-            if (fErr.status === 404) {
-                throw new Error(`Folder "${safeFolderId}" not found. Possible causes: 1. Wrong ID 2. Not shared with ${process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL}`);
-            }
-            throw fErr;
-        }
-
         const fileMetadata = {
             name: fileName,
             parents: [safeFolderId],
@@ -117,7 +83,7 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
             body: Readable.from(buffer),
         };
 
-        // 2. アップロード実行
+        // アップロード実行
         const response = await drive.files.create({
             requestBody: fileMetadata,
             media: media,
@@ -125,9 +91,7 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
             supportsAllDrives: true,
         });
 
-        console.log('Upload successful! File ID:', response.data.id);
-
-        // 3. 閲覧権限の設定
+        // 閲覧権限の設定（誰でもリンクを知っていれば閲覧可能）
         await drive.permissions.create({
             fileId: response.data.id,
             requestBody: {
@@ -143,7 +107,7 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
             url: response.data.webContentLink || response.data.webViewLink,
         };
     } catch (error) {
-        console.error('Google Drive Upload logic error:', error);
+        console.error('Google Drive Upload Error:', error);
         throw error;
     }
 }
