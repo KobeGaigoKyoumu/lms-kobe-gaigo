@@ -97,9 +97,9 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
         return {
             id: response.data.id,
             name: response.data.name,
-            // サーバー負荷を考慮し、プロキシ方式を廃止して直接リンク形式（uc?id=）に戻しました。
-            // フォルダが公開設定になっているため、ブラウザから直接この URL で表示可能です。
-            url: `https://drive.google.com/uc?id=${response.data.id}`,
+            // Google 直営の画像配信用ドメイン (lh3.googleusercontent.com) を使用。
+            // これにより、通常の drive.google.com ドメインよりも埋め込み表示が圧倒的に安定します。
+            url: `https://lh3.googleusercontent.com/d/${response.data.id}`,
         };
     } catch (error) {
         console.error('Google Drive Upload Error:', error);

@@ -297,14 +297,36 @@ export default function ChatWindow({
         const isImage = msg.attachment_type?.startsWith('image/')
         const fileName = msg.attachment_name || '添付ファイル'
 
+        // Google Drive のURLを表示に強い lh3 形式に変換するヘルパー
+        const getDisplayUrl = (url) => {
+            if (!url) return ''
+            if (url.startsWith('https://lh3.googleusercontent.com')) return url
+
+            const drivePatterns = [
+                /drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]{25,})/,
+                /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{25,})/,
+                /drive\.google\.com\/open\?.*id=([a-zA-Z0-9_-]{25,})/
+            ]
+
+            for (const pattern of drivePatterns) {
+                const match = url.match(pattern)
+                if (match && match[1]) {
+                    return `https://lh3.googleusercontent.com/d/${match[1]}`
+                }
+            }
+            return url
+        }
+
+        const displayUrl = getDisplayUrl(msg.attachment_url)
+
         if (isImage) {
             return (
                 <div
                     className={styles.imageWrapper}
-                    onClick={() => setPreviewImage(msg.attachment_url)}
+                    onClick={() => setPreviewImage(displayUrl)}
                 >
                     <img
-                        src={msg.attachment_url}
+                        src={displayUrl}
                         alt="attachment"
                         className={styles.chatImageThumbnail}
                     />
