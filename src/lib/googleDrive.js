@@ -11,31 +11,43 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
  * Google Drive API クライアントを取得する (OAuth2 方式)
  */
 async function getDriveClient() {
-    const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
-    const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+    const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID?.trim();
+    const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET?.trim();
+    const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN?.trim();
 
     if (!clientId || !clientSecret || !refreshToken) {
         throw new Error('Missing Google Drive OAuth2 credentials (ID, Secret, or Refresh Token)');
     }
 
+    // 診断ログ (エラー時のみ詳細表示)
+    const logInfo = {
+        clIdLen: clientId?.length,
+        clSecLen: clientSecret?.length,
+        rtLen: refreshToken?.length,
+        clIdStart: clientId?.substring(0, 10),
+        rtStart: refreshToken?.substring(0, 5)
+    };
+
     try {
         const oauth2Client = new google.auth.OAuth2(
             clientId,
-            clientSecret,
-            'https://developers.google.com/oauthplayground/'
+            clientSecret
+            // リダイレクトURIはトークン取得時のみ必要で、通常のAPI利用（リフレッシュ）には不要
         );
 
         oauth2Client.setCredentials({
             refresh_token: refreshToken
         });
 
-        // 認証テスト (アクセストークンの取得テスト)
+        // 認証テスト
         await oauth2Client.getAccessToken();
 
         return google.drive({ version: 'v3', auth: oauth2Client });
     } catch (err) {
-        console.error('Google Drive OAuth2 Auth Error:', err.message);
+        console.error('Google Drive OAuth2 Auth Critical Error:', {
+            message: err.message,
+            ...logInfo
+        });
         throw new Error(`OAuth2 Auth Error: ${err.message}`);
     }
 }
