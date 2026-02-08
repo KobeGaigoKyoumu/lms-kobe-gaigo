@@ -25,6 +25,9 @@
     box-shadow: var(--shadow-sm);
     transition: all 0.2s;
     height: 100%;
+    position: relative;
+    overflow: visible;
+    /* To allow glow to spread */
 }
 
 .menuItem:active {
@@ -49,6 +52,7 @@
     background-color: var(--bg-primary);
     /* Slight background for icon */
     position: relative;
+    z-index: 2;
 }
 
 .badge {
@@ -68,6 +72,7 @@
     padding: 0 3px;
     border: 1.5px solid var(--bg-elevated);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
 .label {
@@ -82,6 +87,8 @@
     text-overflow: ellipsis;
     /* white-space: nowrap;  Might want wrapping or ellipsis */
     display: block;
+    position: relative;
+    z-index: 2;
 }
 
 @media (min-width: 769px) {
@@ -99,39 +106,50 @@
     }
 }
 
-@keyframes pulse-blue-mobile {
+/* Enhanced Dynamic Glow Effect for Mobile */
+@keyframes pulse-glow-mobile {
     0% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+        box-shadow: inset 0 0 0 0 rgba(59, 130, 246, 0.4);
+        background: rgba(59, 130, 246, 0.05);
     }
 
-    70% {
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    50% {
+        box-shadow: inset 0 0 10px 0 rgba(59, 130, 246, 0.2);
+        background: rgba(59, 130, 246, 0.15);
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+        box-shadow: inset 0 0 0 0 rgba(59, 130, 246, 0.4);
+        background: rgba(59, 130, 246, 0.05);
     }
 }
 
-@keyframes shine-mobile {
+@keyframes ring-expand-mobile {
     0% {
-        background-position: 200% center;
+        transform: scale(0.6);
+        opacity: 0.8;
     }
 
     100% {
-        background-position: -200% center;
+        transform: scale(1.4);
+        opacity: 0;
     }
 }
 
 .shineEffect {
     border-color: #3b82f6 !important;
-    background: linear-gradient(120deg,
-            transparent 25%,
-            rgba(59, 130, 246, 0.3) 50%,
-            transparent 75%) !important;
-    background-size: 200% 100% !important;
-    animation:
-        shine-mobile 3s infinite linear,
-        pulse-blue-mobile 2s infinite ease-in-out !important;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.2) !important;
+    animation: pulse-glow-mobile 2s infinite ease-in-out !important;
+}
+
+.shineEffect .iconWrapper::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    z-index: 1;
+    animation: ring-expand-mobile 1.5s infinite ease-out;
+    pointer-events: none;
 }

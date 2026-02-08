@@ -44,6 +44,9 @@
     transition: all var(--transition-fast);
     font-size: var(--font-size-sm);
     font-weight: 500;
+    position: relative;
+    overflow: visible;
+    /* To allow glow to spread */
 }
 
 .navItem:hover {
@@ -59,6 +62,8 @@
 
 .navItem svg {
     flex-shrink: 0;
+    position: relative;
+    z-index: 2;
 }
 
 .iconContainer {
@@ -85,6 +90,7 @@
     padding: 0 4px;
     border: 2px solid var(--bg-elevated);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
 .active .badge {
@@ -278,43 +284,64 @@
     } */
 }
 
-@keyframes pulse-blue {
+/* Enhanced Dynamic Glow Effect */
+@keyframes pulse-glow {
     0% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+        opacity: 0.6;
     }
 
-    70% {
-        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-        border-color: rgba(59, 130, 246, 0.8);
+    50% {
+        box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.3);
+        opacity: 1;
     }
 
     100% {
         box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-        border-color: rgba(59, 130, 246, 0.4);
+        opacity: 0.6;
     }
 }
 
-@keyframes shine-enhanced {
+@keyframes ring-expand {
     0% {
-        background-position: 200% center;
+        transform: scale(0.6);
+        opacity: 1;
     }
 
     100% {
-        background-position: -200% center;
+        transform: scale(1.6);
+        opacity: 0;
     }
 }
 
 .shineEffect {
-    border-color: #3b82f6 !important;
-    background: linear-gradient(120deg,
-            transparent 25%,
-            rgba(59, 130, 246, 0.25) 50%,
-            transparent 75%) !important;
-    background-size: 200% 100% !important;
-    animation:
-        shine-enhanced 3s infinite linear,
-        pulse-blue 2s infinite ease-in-out !important;
     position: relative;
+}
+
+.shineEffect::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: var(--radius-lg);
+    z-index: 0;
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.iconContainer::after {
+    /* Only applied when parent is .shineEffect */
+    display: none;
+}
+
+.shineEffect .iconContainer::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
     z-index: 1;
+    animation: ring-expand 1.5s infinite ease-out;
+    pointer-events: none;
 }
