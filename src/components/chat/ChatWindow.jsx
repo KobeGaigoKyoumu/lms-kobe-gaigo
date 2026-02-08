@@ -146,18 +146,21 @@ export default function ChatWindow({
             const newMessages = data.messages || []
 
             if (newMessages.length > 0) {
-                const uniqueNew = newMessages.filter(nm => !messages.some(m => m.id === nm.id))
-                if (uniqueNew.length > 0) {
+                setMessages(prev => {
+                    const uniqueNew = newMessages.filter(nm => !prev.some(m => m.id === nm.id))
+                    if (uniqueNew.length === 0) return prev
+
                     // Check if user is at bottom before update
                     const isAtBottom = scrollContainerRef.current &&
                         (scrollContainerRef.current.scrollTop + scrollContainerRef.current.clientHeight >= scrollContainerRef.current.scrollHeight - 50)
 
-                    setMessages(prev => [...prev, ...uniqueNew])
+                    const updated = [...prev, ...uniqueNew]
 
                     if (isAtBottom) {
                         setTimeout(scrollToBottom, 100)
                     }
-                }
+                    return updated
+                })
             }
         } catch (error) {
             // Silent error
@@ -266,8 +269,11 @@ export default function ChatWindow({
 
             const data = await res.json()
             // Optimistically add or just poll immediately
-            // Let's add manually to feel instant
-            setMessages(prev => [...prev, data.message])
+            // Prevent duplicate if poll already picked it up
+            setMessages(prev => {
+                if (prev.some(m => m.id === data.message.id)) return prev
+                return [...prev, data.message]
+            })
 
             setInputText('')
             setAttachment(null)
