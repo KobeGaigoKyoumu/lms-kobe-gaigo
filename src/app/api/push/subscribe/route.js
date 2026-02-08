@@ -17,16 +17,18 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Subscription data required' }, { status: 400 })
         }
 
-        // 1. ユーザーを特定
-        const supabase = await createServerClient()
-        const { data: { user: teacherUser } } = await supabase.auth.getUser()
+        // 1. Identify User
         const studentSession = await getStudentSession()
+        const supabase = await createServerClient()
+        const { data: { user: authUser } } = await supabase.auth.getUser()
 
         let userId = null
-        if (teacherUser) {
-            userId = teacherUser.id
-        } else if (studentSession) {
+        if (studentSession) {
+            // Priority 1: Student (always use student number)
             userId = studentSession.studentId
+        } else if (authUser) {
+            // Priority 2: Teacher/Admin (use Supabase UUID)
+            userId = authUser.id
         } else {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
