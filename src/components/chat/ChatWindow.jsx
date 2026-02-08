@@ -297,37 +297,14 @@ export default function ChatWindow({
         const isImage = msg.attachment_type?.startsWith('image/')
         const fileName = msg.attachment_name || '添付ファイル'
 
-        // Google Drive のURLをプロキシURLに変換するヘルパー
-        const getDisplayUrl = (url) => {
-            if (!url) return ''
-            if (url.startsWith('/api/chat/image')) return url
-
-            const drivePatterns = [
-                /drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]{25,})/,
-                /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{25,})/,
-                /lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,})/,
-                /drive\.google\.com\/open\?.*id=([a-zA-Z0-9_-]{25,})/
-            ]
-
-            for (const pattern of drivePatterns) {
-                const match = url.match(pattern)
-                if (match && match[1]) {
-                    return `/api/chat/image?id=${match[1]}`
-                }
-            }
-            return url
-        }
-
-        const displayUrl = getDisplayUrl(msg.attachment_url)
-
         if (isImage) {
             return (
                 <div
                     className={styles.imageWrapper}
-                    onClick={() => setPreviewImage(displayUrl)}
+                    onClick={() => setPreviewImage(msg.attachment_url)}
                 >
                     <img
-                        src={displayUrl}
+                        src={msg.attachment_url}
                         alt="attachment"
                         className={styles.chatImageThumbnail}
                     />
