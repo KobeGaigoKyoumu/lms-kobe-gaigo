@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { getUnreadCount } from '@/app/actions/messageActions'
+import { getAppNewStatus } from '@/app/actions/statusActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './MobileMenu.module.css'
 
@@ -13,20 +13,23 @@ export default function MobileMenu({ role, user }) {
     const router = useRouter()
     const supabase = createClient()
     const menuItems = getMenuItems(role)
-    const [unreadCount, setUnreadCount] = React.useState(0)
+    const [statuses, setStatuses] = React.useState({
+        hasNewAnnouncement: false,
+        hasNewAssignment: false,
+        unreadMessageCount: 0
+    })
 
     React.useEffect(() => {
-        const fetchUnreadCount = async () => {
-            const count = await getUnreadCount()
-            setUnreadCount(count)
+        const fetchStatuses = async () => {
+            const data = await getAppNewStatus()
+            setStatuses(data)
         }
 
-        fetchUnreadCount()
+        fetchStatuses()
 
-        // Visibility Change strategy
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                fetchUnreadCount()
+                fetchStatuses()
             }
         }
 
@@ -34,10 +37,9 @@ export default function MobileMenu({ role, user }) {
 
         let channel
         if (role !== 'student') {
-            // Real-time for Teachers/Admins
             channel = supabase
                 .channel('mobile-unread')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
                 .subscribe()
         }
 
@@ -61,7 +63,20 @@ export default function MobileMenu({ role, user }) {
             {menuItems.map((item) => {
                 const isActive = pathname === item.href
                 const isCommunication = item.href.includes('communication')
-                const showShimmer = isCommunication && unreadCount > 0
+                const isAnnouncement = item.href.includes('announcements')
+                const isHomework = item.href.includes('homework')
+
+                let showShimmer = false
+                let count = 0
+
+                if (isCommunication) {
+                    showShimmer = statuses.unreadMessageCount > 0
+                    count = statuses.unreadMessageCount
+                } else if (isAnnouncement) {
+                    showShimmer = statuses.hasNewAnnouncement
+                } else if (isHomework) {
+                    showShimmer = statuses.hasNewAssignment
+                }
 
                 return (
                     <Link
@@ -74,8 +89,8 @@ export default function MobileMenu({ role, user }) {
                             style={{ color: item.color }}
                         >
                             {item.icon}
-                            {(isCommunication && unreadCount > 0) && (
-                                <span className={styles.badge}>{unreadCount}</span>
+                            {count > 0 && (
+                                <span className={styles.badge}>{count}</span>
                             )}
                         </div>
                         <span className={styles.label}>{item.label}</span>

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
-import { getUnreadCount } from '@/app/actions/messageActions'
+import { getAppNewStatus } from '@/app/actions/statusActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import styles from './Sidebar.module.css'
 
@@ -13,32 +13,35 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
-    const [unreadCount, setUnreadCount] = useState(0)
+    const [statuses, setStatuses] = useState({
+        hasNewAnnouncement: false,
+        hasNewAssignment: false,
+        unreadMessageCount: 0
+    })
     const menuItems = getMenuItems(userRole)
 
     useEffect(() => {
-        const fetchUnreadCount = async () => {
-            const count = await getUnreadCount()
-            setUnreadCount(count)
+        const fetchStatuses = async () => {
+            const data = await getAppNewStatus()
+            setStatuses(data)
         }
 
-        fetchUnreadCount()
+        fetchStatuses()
 
-        // Visibility Change strategy (Refetch when tab becomes visible)
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                fetchUnreadCount()
+                fetchStatuses()
             }
         }
 
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
-        // Real-time strategy (keep only for non-students or strict realtime reqs)
+        // Real-time for messages (only for non-students)
         let channel
         if (userRole !== 'student') {
             channel = supabase
                 .channel('unread-counts')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchUnreadCount)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
                 .subscribe()
         }
 
@@ -49,7 +52,6 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     }, [user, userRole, supabase])
 
     useEffect(() => {
-        // Prevent JS override if on mobile (handled by CSS)
         document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')
     }, [isCollapsed])
 
@@ -62,7 +64,6 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
         }
     }
 
-    // ユーザーのイニシャル取得
     const getInitials = (name) => {
         if (!name) return '?'
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -110,7 +111,20 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
             <nav className={styles.nav}>
                 {menuItems.map((item) => {
                     const isCommunication = item.href.includes('communication')
-                    const showShimmer = isCommunication && unreadCount > 0
+                    const isAnnouncement = item.href.includes('announcements')
+                    const isHomework = item.href.includes('homework')
+
+                    let showShimmer = false
+                    let count = 0
+
+                    if (isCommunication) {
+                        showShimmer = statuses.unreadMessageCount > 0
+                        count = statuses.unreadMessageCount
+                    } else if (isAnnouncement) {
+                        showShimmer = statuses.hasNewAnnouncement
+                    } else if (isHomework) {
+                        showShimmer = statuses.hasNewAssignment
+                    }
 
                     return (
                         <Link
@@ -120,8 +134,8 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                         >
                             <div className={styles.iconContainer}>
                                 {item.icon}
-                                {(isCommunication && unreadCount > 0) && (
-                                    <span className={styles.badge}>{unreadCount}</span>
+                                {count > 0 && (
+                                    <span className={styles.badge}>{count}</span>
                                 )}
                             </div>
                             <span>{item.label}</span>
