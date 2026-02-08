@@ -47,45 +47,43 @@ export async function POST(request) {
 
         if (error) throw error
 
-            // 4. Send Push Notifications (Background)
-            (async () => {
-                try {
-                    const webpush = require('web-push')
-                    webpush.setVapidDetails(
-                        'mailto:admin@lms-kobe-gaigo.vercel.app',
-                        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                        process.env.VAPID_PRIVATE_KEY
-                    )
+        // 4. Send Push Notifications (Wait for completion)
+        try {
+            const webpush = require('web-push')
+            webpush.setVapidDetails(
+                'mailto:admin@lms-kobe-gaigo.vercel.app',
+                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                process.env.VAPID_PRIVATE_KEY
+            )
 
-                    // Fetch subscriptions for all targeted students
-                    const { data: subs } = await adminSupabase
-                        .from('push_subscriptions')
-                        .select('*')
-                        .in('user_id', studentIds)
+            // Fetch subscriptions for all targeted students
+            const { data: subs } = await adminSupabase
+                .from('push_subscriptions')
+                .select('*')
+                .in('user_id', studentIds)
 
-                    if (subs && subs.length > 0) {
-                        const pushPayload = JSON.stringify({
-                            title: '先生からのメッセージ',
-                            body: content || (attachment_url ? 'ファイルを送信しました' : 'メッセージが届きました'),
-                            url: '/student/communication',
-                            badge: 1 // Single unread for a new message
-                        })
+            if (subs && subs.length > 0) {
+                const pushPayload = JSON.stringify({
+                    title: '先生からのメッセージ',
+                    body: content || (attachment_url ? 'ファイルを送信しました' : 'メッセージが届きました'),
+                    url: '/student/communication',
+                    badge: 1 // Single unread for a new message
+                })
 
-                        await Promise.all(subs.map(sub =>
-                            webpush.sendNotification({
-                                endpoint: sub.endpoint,
-                                keys: { p256dh: sub.p256dh, auth: sub.auth }
-                            }, pushPayload).catch(e => {
-                                if (e.statusCode === 410 || e.statusCode === 404) {
-                                    return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
-                                }
-                            })
-                        ))
-                    }
-                } catch (e) {
-                    console.error('Broadcast push error:', e)
-                }
-            })()
+                await Promise.all(subs.map(sub =>
+                    webpush.sendNotification({
+                        endpoint: sub.endpoint,
+                        keys: { p256dh: sub.p256dh, auth: sub.auth }
+                    }, pushPayload).catch(e => {
+                        if (e.statusCode === 410 || e.statusCode === 404) {
+                            return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                        }
+                    })
+                ))
+            }
+        } catch (e) {
+            console.error('Broadcast push error:', e)
+        }
 
         return NextResponse.json({ success: true, count: data.length })
 

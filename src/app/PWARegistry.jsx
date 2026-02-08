@@ -8,13 +8,15 @@ export default function PWARegistry() {
     const [showBanner, setShowBanner] = useState(false);
 
     const checkPermission = () => {
-        if (!('Notification' in window)) return 'unsupported';
+        if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
         return Notification.permission;
     };
 
     useEffect(() => {
         const currentPermission = checkPermission();
+        console.log('Current notification permission:', currentPermission);
         setStatus(currentPermission);
+
         if (currentPermission === 'default') {
             setShowBanner(true);
         }
@@ -25,8 +27,8 @@ export default function PWARegistry() {
                     const registration = await navigator.serviceWorker.register('/sw.js');
                     console.log('SW registered:', registration.scope);
 
-                    // もし既に許可されているなら、自動的に購読処理を行う
                     if (Notification.permission === 'granted') {
+                        console.log('Permission already granted, ensuring subscription...');
                         await subscribeUser(registration);
                     }
                 } catch (err) {
@@ -46,7 +48,11 @@ export default function PWARegistry() {
         try {
             let subscription = await registration.pushManager.getSubscription();
             const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-            if (!VAPID_PUBLIC_KEY) return;
+
+            if (!VAPID_PUBLIC_KEY) {
+                console.error('NEXT_PUBLIC_VAPID_PUBLIC_KEY is missing');
+                return;
+            }
 
             const urlBase64ToUint8Array = (base64String) => {
                 const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -74,41 +80,51 @@ export default function PWARegistry() {
                 }
 
                 if (!isSameKey) {
+                    console.log('Old VAPID key detected, un-subscribing...');
                     await subscription.unsubscribe();
                     subscription = null;
                 }
             }
 
             if (!subscription) {
+                console.log('Creating new subscription...');
                 subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: convertedVapidKey
                 });
             }
 
-            await fetch('/api/push/subscribe', {
+            console.log('Sending subscription to server:', subscription.endpoint);
+            const res = await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscription })
             });
 
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Server failed to save subscription');
+            }
+            console.log('Subscription saved successfully');
+
         } catch (err) {
-            console.error('Push subscription failed:', err);
+            console.error('Push subscription process failed:', err);
         }
     };
 
     const handleEnableNotifications = async () => {
         try {
+            console.log('Requesting permission...');
             const permission = await Notification.requestPermission();
             setStatus(permission);
             if (permission === 'granted') {
+                console.log('Permission granted by user');
                 setShowBanner(false);
                 if ('serviceWorker' in navigator) {
                     const registration = await navigator.serviceWorker.ready;
                     await subscribeUser(registration);
                 }
             } else {
-                // denied の場合は案内を表示し続けるか、一定期間隠す
                 alert('通知がブロックされました。ブラウザの設定から通知を許可してください。');
             }
         } catch (err) {

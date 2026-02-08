@@ -15,9 +15,13 @@ self.addEventListener('push', (event) => {
         icon: '/icon-192.png',
         badge: '/icon-192.png',
         data: { url: data.url },
-        vibrate: [100, 50, 100],
-        tag: 'chat-notification', // 同一タグは最新のみ表示
-        renotify: true
+        vibrate: [200, 100, 200],
+        tag: 'chat-notification',
+        renotify: true,
+        requireInteraction: true,
+        actions: [
+            { action: 'open', title: '表示する' }
+        ]
     };
 
     event.waitUntil(
