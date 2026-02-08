@@ -1,3 +1,7 @@
+/**
+ * Google Drive 連携ユーティリティ
+ * 環境変数の GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL と GOOGLE_DRIVE_PRIVATE_KEY を使用して認証します。
+ */
 import { google } from 'googleapis';
 import { Readable } from 'stream';
 
