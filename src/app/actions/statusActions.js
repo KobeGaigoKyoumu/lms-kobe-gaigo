@@ -6,26 +6,26 @@ import { getUnreadCount } from './messageActions'
 
 /**
  * アプリ全体の「新着」状態をまとめて取得する
- * @returns {Promise<{ hasNewAnnouncement: boolean, hasNewAssignment: boolean, unreadMessageCount: number }>}
+ * @returns {Promise<{ hasNewAnnouncement: boolean, unsubmittedAssignmentCount: number, unreadMessageCount: number }>}
  */
 export async function getAppNewStatus() {
     try {
         const session = await getStudentSession()
-        if (!session) return { hasNewAnnouncement: false, hasNewAssignment: false, unreadMessageCount: 0 }
+        if (!session) return { hasNewAnnouncement: false, unsubmittedAssignmentCount: 0, unreadMessageCount: 0 }
 
         const supabase = await createClient()
 
         // 1. 未読メッセージ数 (既存ロジック流用)
         const unreadMessageCount = await getUnreadCount()
 
-        // 2. 課題 (未提出があるか)
+        // 2. 課題 (未提出の件数)
         const { data: assignments } = await supabase
             .from('homework_assignments')
             .select('id')
             .eq('class_name', session.className)
 
         const assignmentIds = assignments?.map(a => a.id) || []
-        let hasNewAssignment = false
+        let unsubmittedAssignmentCount = 0
 
         if (assignmentIds.length > 0) {
             const { data: submissions } = await supabase
@@ -35,7 +35,7 @@ export async function getAppNewStatus() {
                 .in('assignment_id', assignmentIds)
 
             const submittedIds = new Set(submissions?.map(s => s.assignment_id) || [])
-            hasNewAssignment = assignmentIds.some(id => !submittedIds.has(id))
+            unsubmittedAssignmentCount = assignmentIds.filter(id => !submittedIds.has(id)).length
         }
 
         // 3. お知らせ (直近3日以内の新着があるか)
@@ -81,11 +81,11 @@ export async function getAppNewStatus() {
 
         return {
             hasNewAnnouncement,
-            hasNewAssignment,
+            unsubmittedAssignmentCount,
             unreadMessageCount
         }
     } catch (error) {
         console.error('getAppNewStatus error:', error)
-        return { hasNewAnnouncement: false, hasNewAssignment: false, unreadMessageCount: 0 }
+        return { hasNewAnnouncement: false, unsubmittedAssignmentCount: 0, unreadMessageCount: 0 }
     }
 }

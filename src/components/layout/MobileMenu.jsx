@@ -15,7 +15,7 @@ export default function MobileMenu({ role, user }) {
     const menuItems = getMenuItems(role)
     const [statuses, setStatuses] = React.useState({
         hasNewAnnouncement: false,
-        hasNewAssignment: false,
+        unsubmittedAssignmentCount: 0,
         unreadMessageCount: 0
     })
 
@@ -75,7 +75,8 @@ export default function MobileMenu({ role, user }) {
                 } else if (isAnnouncement) {
                     showShimmer = statuses.hasNewAnnouncement
                 } else if (isHomework) {
-                    showShimmer = statuses.hasNewAssignment
+                    showShimmer = statuses.unsubmittedAssignmentCount > 0
+                    count = statuses.unsubmittedAssignmentCount
                 }
 
                 return (

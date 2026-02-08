@@ -15,7 +15,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [statuses, setStatuses] = useState({
         hasNewAnnouncement: false,
-        hasNewAssignment: false,
+        unsubmittedAssignmentCount: 0,
         unreadMessageCount: 0
     })
     const menuItems = getMenuItems(userRole)
@@ -123,7 +123,8 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                     } else if (isAnnouncement) {
                         showShimmer = statuses.hasNewAnnouncement
                     } else if (isHomework) {
-                        showShimmer = statuses.hasNewAssignment
+                        showShimmer = statuses.unsubmittedAssignmentCount > 0
+                        count = statuses.unsubmittedAssignmentCount
                     }
 
                     return (
