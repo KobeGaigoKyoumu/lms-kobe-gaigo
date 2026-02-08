@@ -117,3 +117,16 @@
     background-size: 200% 100%;
     animation: shine 4s infinite linear;
 }
+
+.unreadDot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    border: 1px solid white;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+    z-index: 10;
+}

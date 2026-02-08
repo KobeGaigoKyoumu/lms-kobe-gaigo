@@ -35,7 +35,7 @@
 /* Stats Grid */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-4);
     margin-bottom: var(--spacing-8);
 }
@@ -119,14 +119,14 @@
 }
 
 .shineEffect {
-    border-color: var(--primary-400);
+    border-color: var(--primary-400) !important;
     background: linear-gradient(120deg,
             var(--bg-elevated) 30%,
-            rgba(59, 130, 246, 0.1) 50%,
-            var(--bg-elevated) 70%);
-    background-size: 200% 100%;
-    animation: shine 3s infinite linear;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+            rgba(59, 130, 246, 0.2) 50%,
+            var(--bg-elevated) 70%) !important;
+    background-size: 200% 100% !important;
+    animation: shine 3s infinite linear !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2) !important;
 }
 
 /* Main Grid */
