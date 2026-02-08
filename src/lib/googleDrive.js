@@ -29,7 +29,9 @@ async function getDriveClient() {
         .replace(/\s/g, '')      // スペース、タブ、実際の改行をすべて削除
         .replace(/["']/g, '');   // 引用符を削除
 
-    const normalizedKey = `${header}\n${base64Part}\n${footer}\n`;
+    // PEM標準に従い、64文字ごとに改行を入れる
+    const lines = base64Part.match(/.{1,64}/g) || [];
+    const normalizedKey = `${header}\n${lines.join('\n')}\n${footer}\n`;
 
     try {
         // JWT 直接指定ではなく、推奨される GoogleAuth オブジェクトを使用
