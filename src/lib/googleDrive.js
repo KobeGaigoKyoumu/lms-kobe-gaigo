@@ -97,7 +97,9 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
         return {
             id: response.data.id,
             name: response.data.name,
-            url: response.data.webContentLink || response.data.webViewLink,
+            // 自前のプロキシ API 経由の URL を返却
+            // これにより、ブラウザの制限や Google のログイン状態に関わらず、確実に画像が表示されます。
+            url: `/api/chat/image?id=${response.data.id}`,
         };
     } catch (error) {
         console.error('Google Drive Upload Error:', error);
