@@ -11,27 +11,33 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
  * Google Drive API クライアントを取得する (OAuth2 方式)
  */
 async function getDriveClient() {
-    const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID?.trim();
-    const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET?.trim();
-    const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN?.trim();
+    // 環境変数の余計な引用符やスペースを徹底的に除去
+    const clean = (val) => val?.trim()?.replace(/["']/g, '') || '';
+
+    const clientId = clean(process.env.GOOGLE_DRIVE_CLIENT_ID);
+    const clientSecret = clean(process.env.GOOGLE_DRIVE_CLIENT_SECRET);
+    const refreshToken = clean(process.env.GOOGLE_DRIVE_REFRESH_TOKEN);
 
     if (!clientId || !clientSecret || !refreshToken) {
         throw new Error('Missing Google Drive OAuth2 credentials (ID, Secret, or Refresh Token)');
     }
 
-    // 診断ログ (エラー時のみ詳細表示)
+    // 診断ログ
     const logInfo = {
-        clIdLen: clientId?.length,
-        clSecLen: clientSecret?.length,
-        rtLen: refreshToken?.length,
-        clIdEnd: clientId?.slice(-4),
-        clSecEnd: clientSecret?.slice(-4),
-        rtEnd: refreshToken?.slice(-4)
+        clIdLen: clientId.length,
+        clSecLen: clientSecret.length,
+        rtLen: refreshToken.length,
+        clIdEnd: clientId.slice(-4),
+        rtEnd: refreshToken.slice(-4)
     };
 
     try {
-        // リフレッシュトークンを使用する場合、コンストラクタには ID と Secret だけで十分
-        const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+        // トークン発行時と1文字も違わないリダイレクトURIを指定
+        const oauth2Client = new google.auth.OAuth2(
+            clientId,
+            clientSecret,
+            'https://developers.google.com/oauthplayground/'
+        );
 
         oauth2Client.setCredentials({
             refresh_token: refreshToken
