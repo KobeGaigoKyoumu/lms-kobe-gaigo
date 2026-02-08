@@ -6,10 +6,18 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
  * Google Drive API クライアントを取得する
  */
 async function getDriveClient() {
+    const privateKey = process.env.GOOGLE_DRIVE_PRIVATE_KEY
+        ? process.env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/^"|"$/g, '')
+        : undefined;
+
+    if (!privateKey) {
+        console.error('Error: GOOGLE_DRIVE_PRIVATE_KEY is missing');
+    }
+
     const auth = new google.auth.JWT(
         process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL,
         null,
-        process.env.GOOGLE_DRIVE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        privateKey,
         SCOPES
     );
     return google.drive({ version: 'v3', auth });
