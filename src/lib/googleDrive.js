@@ -24,23 +24,24 @@ async function getDriveClient() {
         clIdLen: clientId?.length,
         clSecLen: clientSecret?.length,
         rtLen: refreshToken?.length,
-        clIdStart: clientId?.substring(0, 10),
-        rtStart: refreshToken?.substring(0, 5)
+        clIdEnd: clientId?.slice(-4),
+        clSecEnd: clientSecret?.slice(-4),
+        rtEnd: refreshToken?.slice(-4)
     };
 
     try {
-        const oauth2Client = new google.auth.OAuth2(
-            clientId,
-            clientSecret,
-            'https://developers.google.com/oauthplayground/'
-        );
+        // リフレッシュトークンを使用する場合、コンストラクタには ID と Secret だけで十分
+        const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
 
         oauth2Client.setCredentials({
             refresh_token: refreshToken
         });
 
         // 認証テスト
-        await oauth2Client.getAccessToken();
+        const tokenRes = await oauth2Client.getAccessToken();
+        if (!tokenRes.token) {
+            throw new Error('Failed to retrieve access token');
+        }
 
         return google.drive({ version: 'v3', auth: oauth2Client });
     } catch (err) {
@@ -48,7 +49,7 @@ async function getDriveClient() {
             message: err.message,
             ...logInfo
         });
-        throw new Error(`OAuth2 Auth Error: ${err.message}`);
+        throw new Error(`OAuth2 Auth Error: ${err.message} (Check IDs/Secret)`);
     }
 }
 
