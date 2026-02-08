@@ -23,7 +23,7 @@ async function getDriveClient() {
         const oauth2Client = new google.auth.OAuth2(
             clientId,
             clientSecret,
-            'https://developers.google.com/oauthplayground'
+            'https://developers.google.com/oauthplayground/'
         );
 
         oauth2Client.setCredentials({
