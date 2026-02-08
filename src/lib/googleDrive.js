@@ -18,37 +18,37 @@ async function getDriveClient() {
         throw new Error(`Missing Google Drive credentials (Email: ${!!email}, Key: ${!!privateKey})`);
     }
 
-    // 秘密鍵のクリーニングを徹底する
-    // 1. 前後の空白と全ての種類の引用符（" や '）を削除
-    privateKey = privateKey.trim().replace(/^["']+|["']+$/g, '');
+    // 秘密鍵の再構築 (PEMフォーマットの正規化)
+    const header = '-----BEGIN PRIVATE KEY-----';
+    const footer = '-----END PRIVATE KEY-----';
 
-    // 2. リテラルの \n (2文字) を実際の改行コードに変換
-    //    同時に \r が混じっている場合も考慮して正規化
-    privateKey = privateKey.replace(/\\n/g, '\n').replace(/\r/g, '');
+    let base64Part = privateKey
+        .replace(header, '')
+        .replace(footer, '')
+        .replace(/\\n/g, '')    // リテラルの \n を削除
+        .replace(/\s/g, '')      // スペース、タブ、実際の改行をすべて削除
+        .replace(/["']/g, '');   // 引用符を削除
+
+    const normalizedKey = `${header}\n${base64Part}\n${footer}\n`;
 
     try {
         // JWT 直接指定ではなく、推奨される GoogleAuth オブジェクトを使用
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: email,
-                private_key: privateKey,
+                private_key: normalizedKey,
             },
             scopes: SCOPES,
         });
 
         const client = await auth.getClient();
-
-        // 念のためこの段階で認証が通るかチェック
-        // (client.authorize() は非推奨だが、内部状態を確認するために利用)
-
         return google.drive({ version: 'v3', auth: client });
     } catch (err) {
         console.error('Google Drive Auth Critical Error:', {
             message: err.message,
             email: email,
-            keyLength: privateKey.length,
-            keyStart: privateKey.substring(0, 40),
-            keyEnd: privateKey.substring(privateKey.length - 40)
+            keyLength: normalizedKey.length,
+            keyStart: normalizedKey.substring(0, 40),
         });
         throw new Error(`Authentication Config Error: ${err.message}`);
     }
