@@ -19,22 +19,20 @@ async function getDriveClient() {
     }
 
     // 秘密鍵の再構築 (PEMフォーマットの正規化)
-    const header = '-----BEGIN PRIVATE KEY-----';
-    const footer = '-----END PRIVATE KEY-----';
-
+    // どんな形式で環境変数に入っていても、Base64部分だけを抜き出してPEM形式に組み直します
     let base64Part = privateKey
-        .replace(header, '')
-        .replace(footer, '')
+        .replace(/-----BEGIN[^-]+-----/g, '')
+        .replace(/-----END[^-]+-----/g, '')
         .replace(/\\n/g, '')    // リテラルの \n を削除
-        .replace(/\s/g, '')      // スペース、タブ、実際の改行をすべて削除
+        .replace(/\s/g, '')      // スペース、タブ、改行をすべて削除
         .replace(/["']/g, '');   // 引用符を削除
 
-    // PEM標準に従い、64文字ごとに改行を入れる
+    const header = '-----BEGIN PRIVATE KEY-----';
+    const footer = '-----END PRIVATE KEY-----';
     const lines = base64Part.match(/.{1,64}/g) || [];
     const normalizedKey = `${header}\n${lines.join('\n')}\n${footer}\n`;
 
     try {
-        // JWT 直接指定ではなく、推奨される GoogleAuth オブジェクトを使用
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: email,
@@ -44,6 +42,10 @@ async function getDriveClient() {
         });
 
         const client = await auth.getClient();
+
+        // 実際のアップロード前に認証をテストして、エラーを明確にする
+        await client.authorize();
+
         return google.drive({ version: 'v3', auth: client });
     } catch (err) {
         console.error('Google Drive Auth Critical Error:', {
@@ -51,8 +53,9 @@ async function getDriveClient() {
             email: email,
             keyLength: normalizedKey.length,
             keyStart: normalizedKey.substring(0, 40),
+            keyEnd: normalizedKey.substring(normalizedKey.length - 20)
         });
-        throw new Error(`Authentication Config Error: ${err.message}`);
+        throw new Error(`Auth Error: ${err.message}`);
     }
 }
 
