@@ -31,8 +31,8 @@ async function getDriveClient() {
     try {
         const oauth2Client = new google.auth.OAuth2(
             clientId,
-            clientSecret
-            // リダイレクトURIはトークン取得時のみ必要で、通常のAPI利用（リフレッシュ）には不要
+            clientSecret,
+            'https://developers.google.com/oauthplayground/'
         );
 
         oauth2Client.setCredentials({
