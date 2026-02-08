@@ -72,30 +72,45 @@ async function getDriveClient() {
 export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = process.env.GOOGLE_DRIVE_FOLDER_ID) {
     try {
         const drive = await getDriveClient();
+        const safeFolderId = folderId?.trim();
 
         console.log('--- Google Drive Upload Diagnostic ---');
-        console.log('Target Folder ID:', folderId);
+        console.log('Target Folder ID:', safeFolderId);
 
-        // 1. まずフォルダにアクセス可能か直接確認する
+        // 【診断】サービスアカウントが現在「見えている」全ファイルを表示してみる
+        try {
+            const listResponse = await drive.files.list({
+                pageSize: 10,
+                fields: 'files(id, name)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true
+            });
+            console.log('Accessible files/folders for this service account:',
+                listResponse.data.files.map(f => `${f.name} (${f.id})`).join(', ') || 'None');
+        } catch (lErr) {
+            console.warn('Diagnostic list failed:', lErr.message);
+        }
+
+        // 1. フォルダにアクセス可能か確認
         try {
             const folderInfo = await drive.files.get({
-                fileId: folderId,
-                fields: 'id, name, owners',
+                fileId: safeFolderId,
+                fields: 'id, name',
                 supportsAllDrives: true
             });
             console.log('Folder access confirmed:', folderInfo.data.name);
         } catch (fErr) {
-            console.error('Folder check failed! The service account cannot "SEE" this folder ID.');
-            console.error('Error details:', fErr.message);
+            console.error('Folder check failed! Service account cannot find ID:', safeFolderId);
+            console.error('Raw Error:', fErr.message);
             if (fErr.status === 404) {
-                throw new Error(`The folder ID "${folderId}" was not found or the service account lacks permission to see it. Please double check the ID and sharing settings.`);
+                throw new Error(`Folder "${safeFolderId}" not found. Possible causes: 1. Wrong ID 2. Not shared with ${process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL}`);
             }
             throw fErr;
         }
 
         const fileMetadata = {
             name: fileName,
-            parents: [folderId],
+            parents: [safeFolderId],
         };
         const media = {
             mimeType: mimeType,
@@ -107,7 +122,7 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
             requestBody: fileMetadata,
             media: media,
             fields: 'id, name, webViewLink, webContentLink',
-            supportsAllDrives: true, // 共有ドライブや共有フォルダ対応
+            supportsAllDrives: true,
         });
 
         console.log('Upload successful! File ID:', response.data.id);
