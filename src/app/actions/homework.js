@@ -177,7 +177,7 @@ export async function createAssignment(formData) {
         return { error: '必須項目を入力してください' }
     }
 
-    const { error } = await supabase
+    const { data: newAssignment, error } = await supabase
         .from('homework_assignments')
         .insert({
             title,
@@ -186,6 +186,8 @@ export async function createAssignment(formData) {
             deadline,
             teacher_id: user.id
         })
+        .select('id')
+        .single()
 
     if (error) {
         console.error('Create assignment error:', error)
@@ -193,7 +195,7 @@ export async function createAssignment(formData) {
     }
 
     revalidatePath('/assignments')
-    return { success: true }
+    return { success: true, id: newAssignment.id }
 }
 
 // Fetch all assignments for teacher list

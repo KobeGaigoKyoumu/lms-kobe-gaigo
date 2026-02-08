@@ -1,14 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createAssignment } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Check, Copy, ExternalLink, Plus } from 'lucide-react'
+import Link from 'next/link'
 import styles from '@/app/(dashboard)/assignments/new/page.module.css'
 
 export default function AssignmentForm({ classes = [] }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [createdAssignmentId, setCreatedAssignmentId] = useState(null)
+    const [copied, setCopied] = useState(false)
+    const [origin, setOrigin] = useState('')
+
+    useEffect(() => {
+        setOrigin(window.location.origin)
+    }, [])
+
+    const handleCopy = () => {
+        const url = `${origin}/student/homework/${createdAssignmentId}`
+        navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
 
     const handleSubmit = async (formData) => {
         setLoading(true)
@@ -18,10 +33,51 @@ export default function AssignmentForm({ classes = [] }) {
             alert(result.error)
             setLoading(false)
         } else {
-            alert('課題を作成しました')
-            router.push('/assignments')
+            setCreatedAssignmentId(result.id)
+            setLoading(false)
             router.refresh()
         }
+    }
+
+    if (createdAssignmentId) {
+        const studentUrl = `${origin}/student/homework/${createdAssignmentId}`
+
+        return (
+            <div className={styles.successContainer}>
+                <div className={styles.successIcon}>
+                    <Check size={32} />
+                </div>
+                <h2 className={styles.successTitle}>課題を作成しました！</h2>
+
+                <div className={styles.linkBox}>
+                    <label className={styles.linkLabel}>学生用提出ページURL</label>
+                    <div className={styles.urlWrapper}>
+                        <div className={styles.urlInput}>{studentUrl}</div>
+                        <button
+                            onClick={handleCopy}
+                            className={`${styles.copyButton} ${copied ? styles.copied : ''}`}
+                        >
+                            {copied ? <Check size={16} /> : <Copy size={16} />}
+                            {copied ? 'コピーしました' : 'コピー'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className={styles.successActions}>
+                    <button
+                        onClick={() => setCreatedAssignmentId(null)}
+                        className={styles.secondaryButton}
+                    >
+                        <Plus size={18} />
+                        別の課題を作成
+                    </button>
+                    <Link href="/assignments" className={styles.primaryButtonFull}>
+                        <ExternalLink size={18} />
+                        課題一覧へ移動
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     return (
