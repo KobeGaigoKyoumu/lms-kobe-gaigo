@@ -1,6 +1,6 @@
 /**
  * Google Drive 連携ユーティリティ
- * 環境変数の GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL と GOOGLE_DRIVE_PRIVATE_KEY を使用して認証します。
+ * Vercel の環境変数反映をトリガーするための更新
  */
 import { google } from 'googleapis';
 import { Readable } from 'stream';
@@ -12,10 +12,17 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
  */
 async function getDriveClient() {
     const email = process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL?.trim();
-    let privateKey = process.env.GOOGLE_DRIVE_PRIVATE_KEY;
+    const rawKey = process.env.GOOGLE_DRIVE_PRIVATE_KEY || '';
+    const rawLength = rawKey.length;
+    let privateKey = rawKey;
 
     if (!email || !privateKey) {
         throw new Error(`Missing Google Drive credentials (Email: ${!!email}, Key: ${!!privateKey})`);
+    }
+
+    // 診断ログ
+    if (rawLength < 1000) {
+        console.warn('WARNING: GOOGLE_DRIVE_PRIVATE_KEY seems too short:', rawLength);
     }
 
     // 秘密鍵の再構築 (PEMフォーマットの正規化)
