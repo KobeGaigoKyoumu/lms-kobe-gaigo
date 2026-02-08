@@ -73,6 +73,8 @@ export async function uploadFileToDrive(buffer, fileName, mimeType, folderId = p
     try {
         const drive = await getDriveClient();
 
+        console.log('Attempting upload to Google Drive folder:', folderId);
+
         const fileMetadata = {
             name: fileName,
             parents: [folderId],
