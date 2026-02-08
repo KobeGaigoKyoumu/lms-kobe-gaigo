@@ -28,7 +28,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ja">
       <body>
-        <PWARegistry />
         {children}
       </body>
     </html>

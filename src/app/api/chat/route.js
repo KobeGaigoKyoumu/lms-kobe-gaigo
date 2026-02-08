@@ -142,7 +142,7 @@ export async function POST(request) {
 
         if (error) throw error
 
-        // 4. Send Push Notifications (Wait for completion on Vercel)
+        /* 通知機能を一時停止中
         try {
             const webpush = require('web-push')
             webpush.setVapidDetails(
@@ -204,6 +204,7 @@ export async function POST(request) {
         } catch (e) {
             console.error('Push sending error:', e)
         }
+        */
 
         return NextResponse.json({ message: data })
 
