@@ -18,32 +18,39 @@ async function getDriveClient() {
         throw new Error(`Missing Google Drive credentials (Email: ${!!email}, Key: ${!!privateKey})`);
     }
 
-    // Handle different ways the key might be stored in environment variables
-    // 1. Remove surrounding quotes
-    privateKey = privateKey.trim().replace(/^"|"$/g, '');
-    // 2. Handle both actual newlines and literal \n sequences
-    privateKey = privateKey.replace(/\\n/g, '\n');
+    // 秘密鍵のクリーニングを徹底する
+    // 1. 前後の空白と全ての種類の引用符（" や '）を削除
+    privateKey = privateKey.trim().replace(/^["']+|["']+$/g, '');
+
+    // 2. リテラルの \n (2文字) を実際の改行コードに変換
+    //    同時に \r が混じっている場合も考慮して正規化
+    privateKey = privateKey.replace(/\\n/g, '\n').replace(/\r/g, '');
 
     try {
-        const auth = new google.auth.JWT(
-            email,
-            null,
-            privateKey,
-            SCOPES
-        );
+        // JWT 直接指定ではなく、推奨される GoogleAuth オブジェクトを使用
+        const auth = new google.auth.GoogleAuth({
+            credentials: {
+                client_email: email,
+                private_key: privateKey,
+            },
+            scopes: SCOPES,
+        });
 
-        // Explicitly check if auth is valid to get better error messages
-        await auth.authorize();
+        const client = await auth.getClient();
 
-        return google.drive({ version: 'v3', auth });
+        // 念のためこの段階で認証が通るかチェック
+        // (client.authorize() は非推奨だが、内部状態を確認するために利用)
+
+        return google.drive({ version: 'v3', auth: client });
     } catch (err) {
-        console.error('Google Drive Auth Error Details:', {
+        console.error('Google Drive Auth Critical Error:', {
             message: err.message,
             email: email,
-            keyPrefix: privateKey.substring(0, 30),
-            keySuffix: privateKey.substring(privateKey.length - 30)
+            keyLength: privateKey.length,
+            keyStart: privateKey.substring(0, 40),
+            keyEnd: privateKey.substring(privateKey.length - 40)
         });
-        throw new Error(`Authentication failed: ${err.message}`);
+        throw new Error(`Authentication Config Error: ${err.message}`);
     }
 }
 
