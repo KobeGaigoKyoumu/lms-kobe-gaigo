@@ -8,61 +8,35 @@ import { Readable } from 'stream';
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 /**
- * Google Drive API クライアントを取得する
+ * Google Drive API クライアントを取得する (OAuth2 方式)
  */
 async function getDriveClient() {
-    const email = process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL?.trim();
-    const rawKey = process.env.GOOGLE_DRIVE_PRIVATE_KEY || '';
-    const rawLength = rawKey.length;
-    let privateKey = rawKey;
+    const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+    const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
 
-    if (!email || !privateKey) {
-        throw new Error(`Missing Google Drive credentials (Email: ${!!email}, Key: ${!!privateKey})`);
+    if (!clientId || !clientSecret || !refreshToken) {
+        throw new Error('Missing Google Drive OAuth2 credentials (ID, Secret, or Refresh Token)');
     }
-
-    // 診断ログ
-    if (rawLength < 1000) {
-        console.warn('WARNING: GOOGLE_DRIVE_PRIVATE_KEY seems too short:', rawLength);
-    }
-
-    // 秘密鍵の再構築 (PEMフォーマットの正規化)
-    // どんな形式で環境変数に入っていても、Base64部分だけを抜き出してPEM形式に組み直します
-    let base64Part = privateKey
-        .replace(/-----BEGIN[^-]+-----/g, '')
-        .replace(/-----END[^-]+-----/g, '')
-        .replace(/\\n/g, '')    // リテラルの \n を削除
-        .replace(/\s/g, '')      // スペース、タブ、改行をすべて削除
-        .replace(/["']/g, '');   // 引用符を削除
-
-    const header = '-----BEGIN PRIVATE KEY-----';
-    const footer = '-----END PRIVATE KEY-----';
-    const lines = base64Part.match(/.{1,64}/g) || [];
-    const normalizedKey = `${header}\n${lines.join('\n')}\n${footer}\n`;
 
     try {
-        const auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: email,
-                private_key: normalizedKey,
-            },
-            scopes: SCOPES,
+        const oauth2Client = new google.auth.OAuth2(
+            clientId,
+            clientSecret,
+            'https://developers.google.com/oauthplayground'
+        );
+
+        oauth2Client.setCredentials({
+            refresh_token: refreshToken
         });
 
-        const client = await auth.getClient();
+        // 認証テスト (アクセストークンの取得テスト)
+        await oauth2Client.getAccessToken();
 
-        // 実際のアップロード前に認証をテストして、エラーを明確にする
-        await client.authorize();
-
-        return google.drive({ version: 'v3', auth: client });
+        return google.drive({ version: 'v3', auth: oauth2Client });
     } catch (err) {
-        console.error('Google Drive Auth Critical Error:', {
-            message: err.message,
-            email: email,
-            keyLength: normalizedKey.length,
-            keyStart: normalizedKey.substring(0, 40),
-            keyEnd: normalizedKey.substring(normalizedKey.length - 20)
-        });
-        throw new Error(`Auth Error: ${err.message}`);
+        console.error('Google Drive OAuth2 Auth Error:', err.message);
+        throw new Error(`OAuth2 Auth Error: ${err.message}`);
     }
 }
 
