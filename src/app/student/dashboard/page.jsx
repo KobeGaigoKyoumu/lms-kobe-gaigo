@@ -1,8 +1,9 @@
 import { getStudentAssignments } from '@/app/actions/homework'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getUnreadCount } from '@/app/actions/messageActions'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home, MessageSquare } from 'lucide-react'
 import styles from './page.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +17,7 @@ export default async function StudentDashboard() {
     nextWeek.setDate(nextWeek.getDate() + 7)
 
     // Parallel data fetching
-    const [assignments, announcementsResult, studentResult] = await Promise.all([
+    const [assignments, announcementsResult, studentResult, unreadCount] = await Promise.all([
         getStudentAssignments(),
         supabase
             .from('announcements')
@@ -40,7 +41,8 @@ export default async function StudentDashboard() {
             .from('students')
             .select('student_id_text, class_name, academic_year')
             .eq('student_id_text', session.studentId)
-            .single() : Promise.resolve({ data: null })
+            .single() : Promise.resolve({ data: null }),
+        getUnreadCount()
     ])
 
     const announcements = announcementsResult.data || []
@@ -163,6 +165,23 @@ export default async function StudentDashboard() {
                         <p className={styles.statValue}>{dueThisWeek.length}</p>
                     </div>
                 </div>
+
+                {/* Messages Tile */}
+                <Link
+                    href="/student/communication"
+                    className={`${styles.statCard} ${styles.messageTile} ${unreadCount > 0 ? styles.shineEffect : ''}`}
+                >
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #0ea5e9, #0284c7)' }}>
+                        <MessageSquare width="24" height="24" stroke="white" strokeWidth="2" />
+                    </div>
+                    <div className={styles.statContent}>
+                        <p className={styles.statLabel}>未読メッセージ</p>
+                        <p className={styles.statValue}>
+                            {unreadCount}
+                            {unreadCount > 0 && <span className={styles.unreadDot} />}
+                        </p>
+                    </div>
+                </Link>
             </div>
 
             {/* Main Content Grid */}
