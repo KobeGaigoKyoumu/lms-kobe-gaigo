@@ -99,7 +99,21 @@
     }
 }
 
-@keyframes shine {
+@keyframes pulse-blue-mobile {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes shine-mobile {
     0% {
         background-position: 200% center;
     }
@@ -112,10 +126,12 @@
 .shineEffect {
     border-color: #3b82f6 !important;
     background: linear-gradient(120deg,
-            transparent 30%,
-            rgba(59, 130, 246, 0.15) 50%,
-            transparent 70%) !important;
+            transparent 25%,
+            rgba(59, 130, 246, 0.3) 50%,
+            transparent 75%) !important;
     background-size: 200% 100% !important;
-    animation: shine 3s infinite linear !important;
+    animation:
+        shine-mobile 3s infinite linear,
+        pulse-blue-mobile 2s infinite ease-in-out !important;
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.2) !important;
 }
