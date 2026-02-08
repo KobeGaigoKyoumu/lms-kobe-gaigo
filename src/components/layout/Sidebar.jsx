@@ -121,10 +121,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                             <div className={styles.iconContainer}>
                                 {item.icon}
                                 {(isCommunication && unreadCount > 0) && (
-                                    <>
-                                        <span className={styles.badge}>{unreadCount}</span>
-                                        {!isCollapsed && <span className={styles.unreadDot} />}
-                                    </>
+                                    <span className={styles.badge}>{unreadCount}</span>
                                 )}
                             </div>
                             <span>{item.label}</span>

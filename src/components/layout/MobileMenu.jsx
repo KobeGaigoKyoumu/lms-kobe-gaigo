@@ -75,10 +75,7 @@ export default function MobileMenu({ role, user }) {
                         >
                             {item.icon}
                             {(isCommunication && unreadCount > 0) && (
-                                <>
-                                    <span className={styles.badge}>{unreadCount}</span>
-                                    <span className={styles.unreadDot} title="未読メッセージがあります" />
-                                </>
+                                <span className={styles.badge}>{unreadCount}</span>
                             )}
                         </div>
                         <span className={styles.label}>{item.label}</span>
