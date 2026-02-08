@@ -46,7 +46,6 @@
     font-weight: 500;
     position: relative;
     overflow: visible;
-    /* To allow glow to spread */
 }
 
 .navItem:hover {
@@ -302,18 +301,6 @@
     }
 }
 
-@keyframes ring-expand {
-    0% {
-        transform: scale(0.6);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1.6);
-        opacity: 0;
-    }
-}
-
 .shineEffect {
     position: relative;
 }
@@ -326,22 +313,4 @@
     border-radius: var(--radius-lg);
     z-index: 0;
     animation: pulse-glow 2s infinite ease-in-out;
-}
-
-.iconContainer::after {
-    /* Only applied when parent is .shineEffect */
-    display: none;
-}
-
-.shineEffect .iconContainer::after {
-    content: '';
-    display: block;
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    border: 2px solid #3b82f6;
-    border-radius: 50%;
-    z-index: 1;
-    animation: ring-expand 1.5s infinite ease-out;
-    pointer-events: none;
 }

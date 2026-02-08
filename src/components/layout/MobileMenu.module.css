@@ -27,7 +27,6 @@
     height: 100%;
     position: relative;
     overflow: visible;
-    /* To allow glow to spread */
 }
 
 .menuItem:active {
@@ -124,32 +123,7 @@
     }
 }
 
-@keyframes ring-expand-mobile {
-    0% {
-        transform: scale(0.6);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(1.4);
-        opacity: 0;
-    }
-}
-
 .shineEffect {
     border-color: #3b82f6 !important;
     animation: pulse-glow-mobile 2s infinite ease-in-out !important;
-}
-
-.shineEffect .iconWrapper::after {
-    content: '';
-    display: block;
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    border: 2px solid #3b82f6;
-    border-radius: 50%;
-    z-index: 1;
-    animation: ring-expand-mobile 1.5s infinite ease-out;
-    pointer-events: none;
 }
