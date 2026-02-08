@@ -1,3 +1,6 @@
+import { NextResponse } from 'next/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { getStudentSession } from '@/app/actions/studentAuth'
 import { uploadFileToDrive } from '@/lib/googleDrive'
 
 export async function POST(request) {
@@ -9,7 +12,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
         }
 
-        // 1. Auth Check - Using same logic as before to verify user session
+        // 1. Auth Check
         const supabase = await createServerClient()
         const { data: { user: teacherUser } } = await supabase.auth.getUser()
         const studentSession = await getStudentSession()
@@ -28,18 +31,11 @@ export async function POST(request) {
             file.type
         )
 
-        return {
-            success: true,
-            url: uploadedFile.url,
-            name: uploadedFile.name,
-            type: file.type,
-            path: uploadedFile.id // ID for potential future use
-        }
-
         return NextResponse.json({
             url: uploadedFile.url,
             name: uploadedFile.name,
-            type: file.type
+            type: file.type,
+            id: uploadedFile.id
         })
 
     } catch (error) {
