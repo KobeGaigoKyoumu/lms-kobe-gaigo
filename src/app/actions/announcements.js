@@ -5,24 +5,20 @@ import { createClient } from '@supabase/supabase-js'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+import { r2Client, R2_BUCKET_NAME, getR2PublicUrl } from '@/lib/r2'
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+
 /**
  * お知らせ用のファイルをアップロードする（サーバーサイドで実行）
- * サービスロールキーを使用するため、ストレージのRLS設定（SQL）が不要になります。
  * 
  * @param {FormData} formData - ファイルを含むFormData
  * @returns {Promise<{success: boolean, file: object, error: string}>}
  */
 export async function uploadAnnouncementFile(formData) {
-    if (!SUPABASE_SERVICE_KEY) {
-        return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY is missing' }
-    }
-
     const file = formData.get('file')
     if (!file) {
         return { success: false, error: 'ファイルが見つかりません' }
     }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
@@ -32,21 +28,18 @@ export async function uploadAnnouncementFile(formData) {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        const { data, error: uploadError } = await supabase.storage
-            .from('announcements')
-            .upload(filePath, buffer, {
-                contentType: file.type,
-                upsert: true
-            })
+        // Upload to Cloudflare R2
+        const command = new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: filePath,
+            Body: buffer,
+            ContentType: file.type,
+        })
 
-        if (uploadError) {
-            console.error('Server Upload Error:', uploadError)
-            return { success: false, error: uploadError.message }
-        }
+        await r2Client.send(command)
 
-        const { data: { publicUrl } } = supabase.storage
-            .from('announcements')
-            .getPublicUrl(filePath)
+        // Get Public URL via R2 Domain
+        const publicUrl = getR2PublicUrl(filePath)
 
         return {
             success: true,
@@ -57,8 +50,8 @@ export async function uploadAnnouncementFile(formData) {
             }
         }
     } catch (err) {
-        console.error('Unexpected Upload Error:', err)
-        return { success: false, error: err.message }
+        console.error('R2 Announcement Upload Error:', err)
+        return { success: false, error: 'アップロードに失敗しました (R2)' }
     }
 }
 
@@ -99,16 +92,21 @@ export async function deleteAnnouncement(id) {
             return { success: false, error: deleteError.message }
         }
 
-        // 3. ストレージ内のファイルも削除（オプショナルだがクリーンアップのため）
+        // 3. ストレージ内のファイルも削除
         if (announcement.file_urls && announcement.file_urls.length > 0) {
-            const paths = announcement.file_urls
+            const keys = announcement.file_urls
                 .map(f => f.path)
                 .filter(Boolean)
 
-            if (paths.length > 0) {
-                await supabase.storage
-                    .from('announcements')
-                    .remove(paths)
+            if (keys.length > 0) {
+                const { DeleteObjectsCommand } = require("@aws-sdk/client-s3")
+                const deleteCommand = new DeleteObjectsCommand({
+                    Bucket: R2_BUCKET_NAME,
+                    Delete: {
+                        Objects: keys.map(k => ({ Key: k }))
+                    }
+                })
+                await r2Client.send(deleteCommand)
             }
         }
 

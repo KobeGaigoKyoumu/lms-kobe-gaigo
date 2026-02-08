@@ -308,6 +308,9 @@ export async function gradeSubmission(submissionId, score, feedback) {
 }
 
 // Upload file securely (for students)
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { r2Client, R2_BUCKET_NAME, getR2PublicUrl } from '@/lib/r2'
+
 export async function uploadSubmissionFile(formData) {
     const session = await getStudentSession()
     if (!session) return { error: 'Unauthorized' }
@@ -319,29 +322,33 @@ export async function uploadSubmissionFile(formData) {
         return { error: 'ファイルまたは課題IDが無効です' }
     }
 
-    const supabase = createAdminClient()
+    try {
+        // Create unique path: assignmentId/randomString.ext
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
+        const filePath = `submissions/${assignmentId}/${fileName}`
 
-    // Create unique path: assignmentId/randomString.ext
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
-    const filePath = `${assignmentId}/${fileName}`
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
 
-    // Upload using Service Role (admin)
-    const { error: uploadError } = await supabase.storage
-        .from('assignments')
-        .upload(filePath, file)
+        // Upload to Cloudflare R2
+        const command = new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: filePath,
+            Body: buffer,
+            ContentType: file.type,
+        })
 
-    if (uploadError) {
-        console.error('Server upload error:', uploadError)
-        return { error: 'アップロードに失敗しました' }
+        await r2Client.send(command)
+
+        // Get Public URL via R2 Domain
+        const publicUrl = getR2PublicUrl(filePath)
+
+        return { success: true, url: publicUrl, name: file.name }
+    } catch (err) {
+        console.error('R2 upload error:', err)
+        return { error: 'アップロードに失敗しました (R2)' }
     }
-
-    // Get Public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from('assignments')
-        .getPublicUrl(filePath)
-
-    return { success: true, url: publicUrl, name: file.name }
 }
 
 // --- Stats Helpers ---
