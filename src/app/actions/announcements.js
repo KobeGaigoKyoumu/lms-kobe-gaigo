@@ -5,8 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-import { r2Client, R2_BUCKET_NAME, getR2PublicUrl } from '@/lib/r2'
-import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { uploadFileToDrive } from '@/lib/googleDrive'
 
 /**
  * お知らせ用のファイルをアップロードする（サーバーサイドで実行）
@@ -20,38 +19,28 @@ export async function uploadAnnouncementFile(formData) {
         return { success: false, error: 'ファイルが見つかりません' }
     }
 
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
-    const filePath = `announcements/${fileName}`
-
     try {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        // Upload to Cloudflare R2
-        const command = new PutObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: filePath,
-            Body: buffer,
-            ContentType: file.type,
-        })
-
-        await r2Client.send(command)
-
-        // Get Public URL via R2 Domain
-        const publicUrl = getR2PublicUrl(filePath)
+        // Upload to Google Drive
+        const uploadedFile = await uploadFileToDrive(
+            buffer,
+            file.name,
+            file.type
+        )
 
         return {
             success: true,
             file: {
-                name: file.name,
-                url: publicUrl,
-                path: filePath
+                name: uploadedFile.name,
+                url: uploadedFile.url,
+                path: uploadedFile.id // Google Drive では ID を path として扱う
             }
         }
     } catch (err) {
-        console.error('R2 Announcement Upload Error:', err)
-        return { success: false, error: 'アップロードに失敗しました (R2)' }
+        console.error('Google Drive Announcement Upload Error:', err)
+        return { success: false, error: 'アップロードに失敗しました (Google Drive)' }
     }
 }
 
@@ -94,19 +83,11 @@ export async function deleteAnnouncement(id) {
 
         // 3. ストレージ内のファイルも削除
         if (announcement.file_urls && announcement.file_urls.length > 0) {
-            const keys = announcement.file_urls
-                .map(f => f.path)
-                .filter(Boolean)
-
-            if (keys.length > 0) {
-                const { DeleteObjectsCommand } = require("@aws-sdk/client-s3")
-                const deleteCommand = new DeleteObjectsCommand({
-                    Bucket: R2_BUCKET_NAME,
-                    Delete: {
-                        Objects: keys.map(k => ({ Key: k }))
-                    }
-                })
-                await r2Client.send(deleteCommand)
+            const { deleteFileFromDrive } = require('@/lib/googleDrive')
+            for (const fileObj of announcement.file_urls) {
+                if (fileObj.path) { // path に Google Drive の ID が入っている想定
+                    await deleteFileFromDrive(fileObj.path)
+                }
             }
         }
 

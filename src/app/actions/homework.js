@@ -308,8 +308,7 @@ export async function gradeSubmission(submissionId, score, feedback) {
 }
 
 // Upload file securely (for students)
-import { PutObjectCommand } from "@aws-sdk/client-s3"
-import { r2Client, R2_BUCKET_NAME, getR2PublicUrl } from '@/lib/r2'
+import { uploadFileToDrive } from '@/lib/googleDrive'
 
 export async function uploadSubmissionFile(formData) {
     const session = await getStudentSession()
@@ -323,31 +322,25 @@ export async function uploadSubmissionFile(formData) {
     }
 
     try {
-        // Create unique path: assignmentId/randomString.ext
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
-        const filePath = `submissions/${assignmentId}/${fileName}`
-
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        // Upload to Cloudflare R2
-        const command = new PutObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: filePath,
-            Body: buffer,
-            ContentType: file.type,
-        })
+        // Upload to Google Drive
+        const uploadedFile = await uploadFileToDrive(
+            buffer,
+            file.name,
+            file.type
+        )
 
-        await r2Client.send(command)
-
-        // Get Public URL via R2 Domain
-        const publicUrl = getR2PublicUrl(filePath)
-
-        return { success: true, url: publicUrl, name: file.name }
+        return {
+            success: true,
+            url: uploadedFile.url,
+            name: uploadedFile.name,
+            driveId: uploadedFile.id // 将来的な削除用
+        }
     } catch (err) {
-        console.error('R2 upload error:', err)
-        return { error: 'アップロードに失敗しました (R2)' }
+        console.error('Google Drive upload error:', err)
+        return { error: 'アップロードに失敗しました (Google Drive)' }
     }
 }
 
