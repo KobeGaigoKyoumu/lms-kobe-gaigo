@@ -199,6 +199,24 @@ export default function StudentList() {
         }
     }
 
+    const handleResetGrades = async () => {
+        if (!confirm('全ての学生の学年データを自動計算（学籍番号ベース）に戻しますか？\n※手動で設定した学年もリセットされます。')) return
+
+        const { error } = await supabase
+            .from('students')
+            .update({ academic_year: null })
+            .neq('student_id_text', '______') // Matches all valid IDs
+
+        if (!error) {
+            setStudents(prev => prev.map(s => ({ ...s, academic_year: null })))
+            router.refresh()
+            alert('学年データをリセットしました')
+        } else {
+            console.error('Reset error:', error)
+            alert('リセットに失敗しました')
+        }
+    }
+
 
 
     const handleFileUpload = async (e) => {
@@ -549,6 +567,9 @@ export default function StudentList() {
                                 hidden
                             />
                         </label>
+                        <button onClick={handleResetGrades} className={styles.templateBtn} style={{ marginLeft: '10px', color: '#666' }}>
+                            学年リセット
+                        </button>
 
                     </div>
                     {uploadResult && (
