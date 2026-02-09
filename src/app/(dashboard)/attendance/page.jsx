@@ -877,7 +877,7 @@ export default function AttendancePage() {
                                                                 <th>出席日数</th>
                                                                 <th>欠席日数</th>
                                                                 <th>遅刻・早退</th>
-                                                                <th>出席率</th>
+                                                                <th>月次出席率</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
