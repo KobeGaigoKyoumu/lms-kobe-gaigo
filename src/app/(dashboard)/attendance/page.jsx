@@ -854,7 +854,7 @@ export default function AttendancePage() {
                                                             {studentHistory.cumulativeData?.slice().reverse().map(d => (
                                                                 <tr key={`${d.year}-${d.month}`}>
                                                                     <td>{d.year}年{d.month}月</td>
-                                                                    <td>{d.attendance_slots ?? '-'}</td>
+                                                                    <td>{(d.attendance_days || 0) + (d.absence_days || 0)}</td>
                                                                     <td>{d.attendance_days}</td>
                                                                     <td>{d.absence_days}</td>
                                                                     <td>{d.late_slots ?? '-'}</td>
@@ -884,7 +884,7 @@ export default function AttendancePage() {
                                                             {studentHistory.monthlyData?.slice().reverse().map(d => (
                                                                 <tr key={`${d.year}-${d.month}`}>
                                                                     <td>{d.year}年{d.month}月</td>
-                                                                    <td>{d.attendance_slots ?? '-'}</td>
+                                                                    <td>{(d.attendance_days || 0) + (d.absence_days || 0)}</td>
                                                                     <td>{d.attendance_days}</td>
                                                                     <td>{d.absence_days}</td>
                                                                     <td>{d.late_slots ?? '-'}</td>

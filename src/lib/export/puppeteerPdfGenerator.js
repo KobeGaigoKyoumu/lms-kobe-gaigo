@@ -411,7 +411,7 @@ function generateAttendanceHTML(data) {
     return {
       year: c.year,
       month: c.month,
-      attendance_slots: c.attendance_slots,  // 授業日数
+      class_days: (c.attendance_days || 0) + (c.absence_days || 0),  // 授業日数 = 出席日数 + 欠席日数
       attendance_days: c.attendance_days,
       absence_days: c.absence_days,
       late_slots: c.late_slots,  // 遅刻・早退
@@ -449,7 +449,7 @@ function generateAttendanceHTML(data) {
     return `
       <tr class="${rowClass}">
         <td>${row.year}年${row.month}月</td>
-        <td>${row.attendance_slots !== undefined ? row.attendance_slots : '-'}</td>
+        <td>${row.class_days}</td>
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
