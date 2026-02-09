@@ -847,32 +847,22 @@ export default function AttendancePage() {
                                                                 <th>出席日数</th>
                                                                 <th>欠席日数</th>
                                                                 <th>遅刻・早退</th>
-                                                                <th>月間出席率</th>
                                                                 <th>累計出席率</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {studentHistory.cumulativeData?.slice().reverse().map(d => {
-                                                                // Find matching monthly data for this month
-                                                                const monthlyMatch = studentHistory.monthlyData?.find(
-                                                                    m => m.year === d.year && m.month === d.month
-                                                                )
-                                                                return (
-                                                                    <tr key={`${d.year}-${d.month}`}>
-                                                                        <td>{d.year}年{d.month}月</td>
-                                                                        <td>{d.attendance_slots ?? '-'}</td>
-                                                                        <td>{d.attendance_days}</td>
-                                                                        <td>{d.absence_days}</td>
-                                                                        <td>{d.late_slots ?? '-'}</td>
-                                                                        <td className={monthlyMatch ? getRateColor(monthlyMatch.attendance_rate) : ''}>
-                                                                            {monthlyMatch ? formatRate(monthlyMatch.attendance_rate) : '-'}
-                                                                        </td>
-                                                                        <td className={getRateColor(d.attendance_rate)}>
-                                                                            {formatRate(d.attendance_rate)}
-                                                                        </td>
-                                                                    </tr>
-                                                                )
-                                                            })}
+                                                            {studentHistory.cumulativeData?.slice().reverse().map(d => (
+                                                                <tr key={`${d.year}-${d.month}`}>
+                                                                    <td>{d.year}年{d.month}月</td>
+                                                                    <td>{d.attendance_slots ?? '-'}</td>
+                                                                    <td>{d.attendance_days}</td>
+                                                                    <td>{d.absence_days}</td>
+                                                                    <td>{d.late_slots ?? '-'}</td>
+                                                                    <td className={getRateColor(d.attendance_rate)}>
+                                                                        {formatRate(d.attendance_rate)}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -883,8 +873,10 @@ export default function AttendancePage() {
                                                         <thead>
                                                             <tr>
                                                                 <th>年月</th>
+                                                                <th>授業日数</th>
                                                                 <th>出席日数</th>
                                                                 <th>欠席日数</th>
+                                                                <th>遅刻・早退</th>
                                                                 <th>出席率</th>
                                                             </tr>
                                                         </thead>
@@ -892,8 +884,10 @@ export default function AttendancePage() {
                                                             {studentHistory.monthlyData?.slice().reverse().map(d => (
                                                                 <tr key={`${d.year}-${d.month}`}>
                                                                     <td>{d.year}年{d.month}月</td>
+                                                                    <td>{d.attendance_slots ?? '-'}</td>
                                                                     <td>{d.attendance_days}</td>
                                                                     <td>{d.absence_days}</td>
+                                                                    <td>{d.late_slots ?? '-'}</td>
                                                                     <td className={getRateColor(d.attendance_rate)}>
                                                                         {formatRate(d.attendance_rate)}
                                                                     </td>
