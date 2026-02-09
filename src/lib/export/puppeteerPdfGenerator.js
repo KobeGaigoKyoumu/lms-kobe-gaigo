@@ -440,8 +440,8 @@ function generateAttendanceHTML(data) {
     const mRate = row.monthly_rate;
     const cRate = row.cumulative_rate;
 
-    // 月間出席率の文字色
-    let mRateClass = 'text-normal';
+    // 月間出席率の文字色（95%以上は黒）
+    let mRateClass = '';
     if (mRate <= 0.80) mRateClass = 'text-danger';
     else if (mRate <= 0.85) mRateClass = 'text-warning';
     else if (mRate <= 0.90) mRateClass = 'text-caution';
@@ -454,8 +454,8 @@ function generateAttendanceHTML(data) {
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
-        <td class="${mRateClass}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
         <td>${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+        <td class="${mRateClass}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
   }).join('\n');
@@ -665,8 +665,8 @@ function generateAttendanceHTML(data) {
         <th width="12%">出席日数</th>
         <th width="12%">欠席日数</th>
         <th width="12%">遅刻・早退</th>
-        <th width="22%">月間出席率</th>
         <th width="18%">累計出席率</th>
+        <th width="22%">月間出席率</th>
       </tr>
     </thead>
     <tbody>
