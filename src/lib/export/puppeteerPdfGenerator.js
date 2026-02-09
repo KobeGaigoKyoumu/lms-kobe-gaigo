@@ -405,16 +405,18 @@ function generateAttendanceHTML(data) {
   const monthlyData = [...(history.monthlyData || [])];
   const cumulativeData = [...(history.cumulativeData || [])];
 
-  // マージデータの作成
-  let combinedRows = monthlyData.map(m => {
-    const c = cumulativeData.find(cum => cum.year === m.year && cum.month === m.month) || {};
+  // マージデータの作成（累計データを基準にして月別を結合）
+  let combinedRows = cumulativeData.map(c => {
+    const m = monthlyData.find(mon => mon.year === c.year && mon.month === c.month) || {};
     return {
-      year: m.year,
-      month: m.month,
-      attendance_days: m.attendance_days,
-      absence_days: m.absence_days,
-      monthly_rate: m.attendance_rate,
-      cumulative_rate: c.attendance_rate // 未定義ならundefined
+      year: c.year,
+      month: c.month,
+      attendance_slots: c.attendance_slots,  // 授業日数
+      attendance_days: c.attendance_days,
+      absence_days: c.absence_days,
+      late_slots: c.late_slots,  // 遅刻・早退
+      monthly_rate: m.attendance_rate,  // 月間出席率
+      cumulative_rate: c.attendance_rate  // 累計出席率
     };
   });
 
@@ -447,9 +449,11 @@ function generateAttendanceHTML(data) {
     return `
       <tr class="${rowClass}">
         <td>${row.year}年${row.month}月</td>
+        <td>${row.attendance_slots !== undefined ? row.attendance_slots : '-'}</td>
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
-        <td>${(mRate * 100).toFixed(1)}%</td>
+        <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
+        <td>${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
         <td class="col-cumulative">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
@@ -649,11 +653,13 @@ function generateAttendanceHTML(data) {
   <table class="data-table">
     <thead>
       <tr>
-        <th width="20%">年月</th>
-        <th width="15%">出席日数</th>
-        <th width="15%">欠席日数</th>
-        <th width="25%">出席率</th>
-        <th width="25%">累計出席率</th>
+        <th width="14%">年月</th>
+        <th width="10%">授業日数</th>
+        <th width="12%">出席日数</th>
+        <th width="12%">欠席日数</th>
+        <th width="12%">遅刻・早退</th>
+        <th width="18%">月間出席率</th>
+        <th width="22%">累計出席率</th>
       </tr>
     </thead>
     <tbody>
