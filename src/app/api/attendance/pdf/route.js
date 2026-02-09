@@ -24,10 +24,10 @@ export async function POST(request) {
             latestMonth = sorted[0].month
         }
 
-        // ファイル名を生成: _クラス名_学生名_〇年〇月出席率.pdf
+        // ファイル名を生成: クラス名_学生名_〇年〇月出席率.pdf
         const className = student.className || ''
         const studentName = student.name || student.id
-        const fileName = `_${className}_${studentName}_${latestYear}年${latestMonth}月出席率.pdf`
+        const fileName = `${className}_${studentName}_${latestYear}年${latestMonth}月出席率.pdf`
         const encodedFileName = encodeURIComponent(fileName)
 
         return new NextResponse(buffer, {
