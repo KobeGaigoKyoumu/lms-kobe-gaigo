@@ -447,6 +447,13 @@ function generateAttendanceHTML(data) {
     else if (mRate <= 0.90) mRateClass = 'text-caution';
     else if (mRate <= 0.95) mRateClass = 'text-notice';
 
+    // 累計出席率の文字色（95%以上は黒）
+    let cRateClass = '';
+    if (cRate <= 0.80) cRateClass = 'text-danger';
+    else if (cRate <= 0.85) cRateClass = 'text-warning';
+    else if (cRate <= 0.90) cRateClass = 'text-caution';
+    else if (cRate <= 0.95) cRateClass = 'text-notice';
+
     return `
       <tr>
         <td>${row.year}年${row.month}月</td>
@@ -454,7 +461,7 @@ function generateAttendanceHTML(data) {
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
-        <td>${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+        <td class="${cRateClass}">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
         <td class="${mRateClass}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
