@@ -273,7 +273,16 @@ export default function AttendancePage() {
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = 'attendance_' + selectedStudent + '.pdf'
+            // ファイル名: _クラス名_学生名_〇年〇月出席率.pdf
+            const latestMonthlyData = studentHistory.monthlyData || []
+            let latestYear = new Date().getFullYear()
+            let latestMonth = new Date().getMonth() + 1
+            if (latestMonthlyData.length > 0) {
+                const sorted = [...latestMonthlyData].sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month))
+                latestYear = sorted[0].year
+                latestMonth = sorted[0].month
+            }
+            a.download = `_${className}_${name}_${latestYear}年${latestMonth}月出席率.pdf`
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
@@ -341,7 +350,18 @@ export default function AttendancePage() {
 
                 if (pdfRes.ok) {
                     const blob = await pdfRes.blob()
-                    folder.file(`${student.student_id}_${student.full_name || student.student_name || student.name}.pdf`, blob)
+                    // ファイル名: _クラス名_学生名_〇年〇月出席率.pdf
+                    const monthlyData = studentHistoryData.monthlyData || []
+                    let latestYear = new Date().getFullYear()
+                    let latestMonth = new Date().getMonth() + 1
+                    if (monthlyData.length > 0) {
+                        const sorted = [...monthlyData].sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month))
+                        latestYear = sorted[0].year
+                        latestMonth = sorted[0].month
+                    }
+                    const studentName = student.full_name || student.student_name || student.name
+                    const fileName = `_${student.class_name || ''}_${studentName}_${latestYear}年${latestMonth}月出席率.pdf`
+                    folder.file(fileName, blob)
                 } else {
                     console.warn(`Failed to generate PDF for student ${student.student_id}: ${pdfRes.statusText}`)
                 }
