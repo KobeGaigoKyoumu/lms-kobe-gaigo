@@ -439,12 +439,19 @@ function generateAttendanceHTML(data) {
     const mRate = row.monthly_rate;
     const cRate = row.cumulative_rate;
 
-    // 条件付き書式（月別出席率に基づく）
+    // 条件付き書式（月別出席率に基づく行の背景色）
     let rowClass = '';
     if (mRate <= 0.80) rowClass = 'bg-danger';
     else if (mRate <= 0.85) rowClass = 'bg-warning';
     else if (mRate <= 0.90) rowClass = 'bg-caution';
     else if (mRate <= 0.95) rowClass = 'bg-notice';
+
+    // 累計出席率の文字色
+    let cRateClass = 'text-normal';
+    if (cRate <= 0.80) cRateClass = 'text-danger';
+    else if (cRate <= 0.85) cRateClass = 'text-warning';
+    else if (cRate <= 0.90) cRateClass = 'text-caution';
+    else if (cRate <= 0.95) cRateClass = 'text-notice';
 
     return `
       <tr class="${rowClass}">
@@ -454,7 +461,7 @@ function generateAttendanceHTML(data) {
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
         <td>${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
-        <td class="col-cumulative">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+        <td class="col-cumulative ${cRateClass}">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
   }).join('\n');
@@ -586,15 +593,21 @@ function generateAttendanceHTML(data) {
     }
 
     .col-cumulative {
-      background-color: #f9fbfd;
       font-weight: bold;
     }
 
-    /* Backgrounds */
-    .bg-danger { background-color: #ffebee !important; }
-    .bg-warning { background-color: #fff3e0 !important; }
-    .bg-caution { background-color: #fffde7 !important; }
-    .bg-notice { background-color: #e1f5fe !important; }
+    /* Row Backgrounds - standard colors */
+    .bg-danger { background-color: #ffcdd2 !important; }
+    .bg-warning { background-color: #ffe0b2 !important; }
+    .bg-caution { background-color: #fff9c4 !important; }
+    .bg-notice { background-color: #b3e5fc !important; }
+
+    /* Text Colors for cumulative rate */
+    .text-danger { color: #c62828 !important; }
+    .text-warning { color: #e65100 !important; }
+    .text-caution { color: #f9a825 !important; }
+    .text-notice { color: #0277bd !important; }
+    .text-normal { color: #2e7d32 !important; }
 
     /* Legend */
     .legend {
