@@ -602,12 +602,12 @@ function generateAttendanceHTML(data) {
     .bg-caution { background-color: #fff9c4 !important; }
     .bg-notice { background-color: #b3e5fc !important; }
 
-    /* Text Colors for cumulative rate */
-    .text-danger { color: #c62828 !important; }
-    .text-warning { color: #e65100 !important; }
-    .text-caution { color: #f9a825 !important; }
-    .text-notice { color: #0277bd !important; }
-    .text-normal { color: #2e7d32 !important; }
+    /* Text Colors for rates (all bold) */
+    .text-danger { color: #c62828 !important; font-weight: bold; }
+    .text-warning { color: #e65100 !important; font-weight: bold; }
+    .text-caution { color: #f9a825 !important; font-weight: bold; }
+    .text-notice { color: #0277bd !important; font-weight: bold; }
+    .text-normal { color: #2e7d32 !important; font-weight: bold; }
 
     /* Legend */
     .legend {
