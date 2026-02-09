@@ -124,7 +124,10 @@ async function run() {
                 enrollment_date: excelDateToISO(getValue(row, ['入学年月日'])) || '1900-01-01',
                 graduation_date: excelDateToISO(getValue(row, ['卒業年月', '卒業日'])),
                 course: getValue(row, ['コース']),
-                academic_year: parseInt(studentIdText.substring(0, 2)) + 2000 || new Date().getFullYear(),
+                academic_year: (() => {
+                    let y = parseInt(studentIdText.substring(0, 2));
+                    return (!isNaN(y)) ? y + 2000 : new Date().getFullYear();
+                })(),
                 status: STATUS_MAP[item.status] || 'inactive',
                 destination: careerMap.get(studentIdText) || null,
                 updated_at: new Date().toISOString()
