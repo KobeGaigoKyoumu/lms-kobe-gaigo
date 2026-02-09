@@ -405,16 +405,16 @@ function generateAttendanceHTML(data) {
   const monthlyData = [...(history.monthlyData || [])];
   const cumulativeData = [...(history.cumulativeData || [])];
 
-  // マージデータの作成（累計データを基準にして月別を結合）
-  let combinedRows = cumulativeData.map(c => {
-    const m = monthlyData.find(mon => mon.year === c.year && mon.month === c.month) || {};
+  // マージデータの作成（月別データを基準にして累計を結合）
+  let combinedRows = monthlyData.map(m => {
+    const c = cumulativeData.find(cum => cum.year === m.year && cum.month === m.month) || {};
     return {
-      year: c.year,
-      month: c.month,
-      class_days: (c.attendance_days || 0) + (c.absence_days || 0),  // 授業日数 = 出席日数 + 欠席日数
-      attendance_days: c.attendance_days,
-      absence_days: c.absence_days,
-      late_slots: c.late_slots,  // 遅刻・早退
+      year: m.year,
+      month: m.month,
+      class_days: (m.attendance_days || 0) + (m.absence_days || 0),  // 授業日数 = 出席日数 + 欠席日数
+      attendance_days: m.attendance_days,
+      absence_days: m.absence_days,
+      late_slots: m.late_slots,  // 遅刻・早退
       monthly_rate: m.attendance_rate,  // 月間出席率
       cumulative_rate: c.attendance_rate  // 累計出席率
     };
@@ -434,17 +434,17 @@ function generateAttendanceHTML(data) {
   else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
   else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
 
-  // 行HTML生成
+  // 行HTML生成（背景色なし、文字色のみ）
   const rowsHtml = combinedRows.map(row => {
     const mRate = row.monthly_rate;
     const cRate = row.cumulative_rate;
 
-    // 条件付き書式（月別出席率に基づく行の背景色）
-    let rowClass = '';
-    if (mRate <= 0.80) rowClass = 'bg-danger';
-    else if (mRate <= 0.85) rowClass = 'bg-warning';
-    else if (mRate <= 0.90) rowClass = 'bg-caution';
-    else if (mRate <= 0.95) rowClass = 'bg-notice';
+    // 月間出席率の文字色
+    let mRateClass = 'text-normal';
+    if (mRate <= 0.80) mRateClass = 'text-danger';
+    else if (mRate <= 0.85) mRateClass = 'text-warning';
+    else if (mRate <= 0.90) mRateClass = 'text-caution';
+    else if (mRate <= 0.95) mRateClass = 'text-notice';
 
     // 累計出席率の文字色
     let cRateClass = 'text-normal';
@@ -454,13 +454,13 @@ function generateAttendanceHTML(data) {
     else if (cRate <= 0.95) cRateClass = 'text-notice';
 
     return `
-      <tr class="${rowClass}">
+      <tr>
         <td>${row.year}年${row.month}月</td>
         <td>${row.class_days}</td>
         <td>${row.attendance_days}</td>
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
-        <td>${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
+        <td class="${mRateClass}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
         <td class="col-cumulative ${cRateClass}">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
@@ -682,20 +682,16 @@ function generateAttendanceHTML(data) {
 
   <div class="legend">
     <div class="legend-item">
-      <div class="legend-color bg-notice"></div>
-      95%以下
+      <span class="text-notice">■</span> 95%以下
     </div>
     <div class="legend-item">
-      <div class="legend-color bg-caution"></div>
-      90%以下
+      <span class="text-caution">■</span> 90%以下
     </div>
     <div class="legend-item">
-      <div class="legend-color bg-warning"></div>
-      85%以下
+      <span class="text-warning">■</span> 85%以下
     </div>
     <div class="legend-item">
-      <div class="legend-color bg-danger"></div>
-      80%以下
+      <span class="text-danger">■</span> 80%以下
     </div>
   </div>
 
