@@ -424,17 +424,18 @@ function generateAttendanceHTML(data) {
   combinedRows.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
 
   // 最新データの年月取得（ボックス表示用）
-  const latestData = combinedRows.length > 0 ? combinedRows[0] : { year: '----', month: '--' };
-  const latestRatePercent = (currentStats.rate * 100).toFixed(1);
+  const latestData = combinedRows.length > 0 ? combinedRows[0] : { year: '----', month: '--', monthly_rate: 0 };
+  const latestMonthlyRate = latestData.monthly_rate !== undefined ? latestData.monthly_rate : 0;
+  const latestRatePercent = (latestMonthlyRate * 100).toFixed(1);
 
-  // 評価ボックスの色判定
+  // 評価ボックスの色判定（月間出席率に基づく）
   let rateClass = 'rate-normal';
-  if (currentStats.rate <= 0.80) rateClass = 'rate-danger';
-  else if (currentStats.rate <= 0.85) rateClass = 'rate-warning';
-  else if (currentStats.rate <= 0.90) rateClass = 'rate-caution';
-  else if (currentStats.rate <= 0.95) rateClass = 'rate-notice';
+  if (latestMonthlyRate <= 0.80) rateClass = 'rate-danger';
+  else if (latestMonthlyRate <= 0.85) rateClass = 'rate-warning';
+  else if (latestMonthlyRate <= 0.90) rateClass = 'rate-caution';
+  else if (latestMonthlyRate <= 0.95) rateClass = 'rate-notice';
 
-  // 行HTML生成（背景色なし、文字色のみ）
+  // 行 HTML生成（背景色なし、月間のみ文字色）
   const rowsHtml = combinedRows.map(row => {
     const mRate = row.monthly_rate;
     const cRate = row.cumulative_rate;
@@ -446,13 +447,6 @@ function generateAttendanceHTML(data) {
     else if (mRate <= 0.90) mRateClass = 'text-caution';
     else if (mRate <= 0.95) mRateClass = 'text-notice';
 
-    // 累計出席率の文字色
-    let cRateClass = 'text-normal';
-    if (cRate <= 0.80) cRateClass = 'text-danger';
-    else if (cRate <= 0.85) cRateClass = 'text-warning';
-    else if (cRate <= 0.90) cRateClass = 'text-caution';
-    else if (cRate <= 0.95) cRateClass = 'text-notice';
-
     return `
       <tr>
         <td>${row.year}年${row.month}月</td>
@@ -461,7 +455,7 @@ function generateAttendanceHTML(data) {
         <td>${row.absence_days}</td>
         <td>${row.late_slots !== undefined ? row.late_slots : '-'}</td>
         <td class="${mRateClass}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
-        <td class="col-cumulative ${cRateClass}">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
+        <td>${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
       </tr>
     `;
   }).join('\n');
@@ -671,8 +665,8 @@ function generateAttendanceHTML(data) {
         <th width="12%">出席日数</th>
         <th width="12%">欠席日数</th>
         <th width="12%">遅刻・早退</th>
-        <th width="18%">月間出席率</th>
-        <th width="22%">累計出席率</th>
+        <th width="22%">月間出席率</th>
+        <th width="18%">累計出席率</th>
       </tr>
     </thead>
     <tbody>
