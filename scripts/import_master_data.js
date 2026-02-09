@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const MASTER_DIR = 'e:/デスクトップ/LMS(神戸外語)/在籍者と過去在籍者';
+const MASTER_DIR = 'C:/Users/神戸外語03/Desktop/lms-kobe-gaigo';
 const CONFIG = [
     { file: '在籍者.xlsx', status: '在籍' },
     { file: '卒業者.xlsx', status: '卒業' },
@@ -52,7 +52,7 @@ const STATUS_MAP = {
     '修了': 'completed'
 };
 
-const CAREER_DIR = 'e:/デスクトップ/LMS(神戸外語)/卒業生進路一覧';
+const CAREER_DIR = 'C:/Users/神戸外語03/Desktop/lms-kobe-gaigo/卒業生進路一覧';
 
 async function run() {
     console.log('Starting master data re-import...');
