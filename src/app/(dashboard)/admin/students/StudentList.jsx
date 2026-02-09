@@ -72,7 +72,7 @@ export default function StudentList() {
     }, [])
 
     const filteredStudents = students.filter(student => {
-        const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year) // Pass academic_year for accurate grade calc
+        const studentInfo = parseStudentId(student.student_id_text, new Date()) // Ignore DB academic_year to fix display issue
 
         const matchesStatus = filter === 'all' || student.status === filter
         const matchesGrade = !gradeFilter || String(studentInfo.grade) === gradeFilter
@@ -644,7 +644,7 @@ export default function StudentList() {
                         </thead>
                         <tbody>
                             {paginatedStudents.map(student => {
-                                const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
+                                const studentInfo = parseStudentId(student.student_id_text, new Date())
                                 const isSelected = selectedIds.has(student.student_id_text)
                                 const stat = stats.get(student.student_id_text) || { submission_count: 0, total_score: 0 }
 
