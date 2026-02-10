@@ -9,6 +9,9 @@
    CSS Variables
    ===================================================== */
 :root {
+  /* Typography - Font Family */
+  --font-family: "Noto Sans JP", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+
   /* Colors - Primary */
   --primary-50: #eff6ff;
   --primary-100: #dbeafe;
