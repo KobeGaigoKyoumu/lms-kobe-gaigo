@@ -203,7 +203,7 @@ export default function GradeHistoryBoard() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const filename = exportType === 'final_exam' ? (record.year_term?.startsWith('JLPT') ? `JLPT結果_${student.name}.pdf` : `期末試験結果_${student.name}.pdf`) : `成績通知表_${student.name}.pdf`;
+            const filename = exportType === 'final_exam' ? (record.year_term?.startsWith('JLPT') ? `JLPT模試${record.final_exam_data?.level || ''}結果_${student.name}.pdf` : `期末試験結果_${student.name}.pdf`) : `成績通知表_${student.name}.pdf`;
             a.download = filename;
             document.body.appendChild(a);
             a.click();

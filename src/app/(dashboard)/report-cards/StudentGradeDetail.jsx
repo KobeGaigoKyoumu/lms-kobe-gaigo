@@ -418,7 +418,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 const url = window.URL.createObjectURL(blob);
                                 const a = document.createElement('a');
                                 a.href = url;
-                                const filename = viewMode === 'exam' ? `期末試験結果_${student.name}_${student.id}.pdf` : `成績通知表_${student.name}_${student.id}.pdf`;
+                                const filename = isJlpt ? `JLPT模試${finalExam.level || ''}結果_${student.name}.pdf` : (viewMode === 'exam' ? `期末試験結果_${student.name}_${student.id}.pdf` : `成績通知表_${student.name}_${student.id}.pdf`);
                                 a.download = filename;
                                 document.body.appendChild(a);
                                 a.click();
