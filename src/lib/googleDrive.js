@@ -27,6 +27,7 @@ async function getDriveClient() {
         clIdLen: clientId.length,
         clSecLen: clientSecret.length,
         rtLen: refreshToken.length,
+        clIdStart: clientId.slice(0, 5),
         clIdEnd: clientId.slice(-4),
         rtEnd: refreshToken.slice(-4)
     };
