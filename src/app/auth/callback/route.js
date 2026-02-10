@@ -6,9 +6,6 @@ export async function GET(request) {
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
 
-    // Debug cookies
-    const allCookies = request.cookies.getAll()
-    console.log('Auth Callback Cookies:', allCookies.map(c => `${c.name}=${c.value.substring(0, 10)}...`).join(', '))
 
     // Check for error parameters from Supabase/Google
     const errorParam = searchParams.get('error')
