@@ -1140,12 +1140,12 @@ function generateFinalExamHTML(data, yearTerm) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @page { size: A4; margin: 15mm; }
+    @page { size: A4; margin: 8mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: "Noto Sans JP", sans-serif;
-      font-size: 10pt;
-      line-height: 1.4;
+      font-size: 8.5pt;
+      line-height: 1.25;
       color: #334155;
       background: #fff;
     }
@@ -1153,74 +1153,72 @@ function generateFinalExamHTML(data, yearTerm) {
     .header-info {
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 20px;
+        border-radius: 6px;
+        padding: 6px 12px;
+        margin-bottom: 10px;
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
-        font-size: 0.9rem;
+        gap: 15px;
     }
     .header-info table { width: 100%; border: none; }
-    .header-info td { border: none; padding: 2px 0; text-align: left; font-size: 8.5pt; color: #475569; }
+    .header-info td { border: none; padding: 1px 0; text-align: left; font-size: 7.5pt; color: #475569; }
     .header-info strong { color: #334155; }
 
     .main-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
-        padding: 15px 20px;
-        border-left: 5px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
+        align-items: center;
+        padding: 8px 15px;
+        border-left: 4px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
         background-color: #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        border-radius: 0 8px 8px 0;
-        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
+        border-radius: 6px;
+        margin-bottom: 10px;
     }
     .student-data { flex: 1; }
-    .class-name { font-size: 8.5pt; color: #64748b; margin-bottom: 4px; }
-    .student-name { font-size: 16pt; font-weight: bold; color: #1e293b; margin: 0; }
-    .student-id { font-size: 10pt; color: #64748b; font-weight: normal; margin-left: 8px; }
-    .exam-name { font-size: 9pt; color: #6b7280; margin-top: 4px; }
+    .class-name { font-size: 7.5pt; color: #64748b; margin-bottom: 1px; }
+    .student-name { font-size: 13pt; font-weight: bold; color: #1e293b; margin: 0; }
+    .student-id { font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px; }
+    .exam-name { font-size: 8pt; color: #6b7280; margin-top: 1px; }
 
-    .result-tiles { display: flex; gap: 12px; }
+    .result-tiles { display: flex; gap: 8px; }
     .tile {
         text-align: center;
-        padding: 10px 18px;
-        border-radius: 8px;
-        min-width: 100px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        min-width: 80px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .score-tile { background-color: #fff; border: 1px solid #000; }
     .judge-tile { 
         background-color: ${finalExam.result === '合' || finalExam.result === '○' ? '#f0fdf4' : '#fef2f2'};
         border: 1px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
     }
-    .tile-label { font-size: 7.5pt; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .score-tile .tile-label { color: #64748b; }
+    .tile-label { font-size: 6.5pt; color: #64748b; margin-bottom: 1px; font-weight: 500; }
     .judge-tile .tile-label { color: ${finalExam.result === '合' || finalExam.result === '○' ? '#166534' : '#991b1b'}; }
-    .tile-value { font-size: 14pt; font-weight: bold; }
-    .result-text { font-size: 14pt; font-weight: 800; color: ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; }
-    .score-sm { font-size: 10pt; color: #64748b; font-weight: normal; }
+    .tile-value { font-size: 11pt; font-weight: bold; }
+    .result-text { font-size: 11pt; font-weight: 800; color: ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; }
+    .score-sm { font-size: 8.5pt; color: #64748b; font-weight: normal; }
 
     .score-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
     }
     .score-table th {
         background-color: #f9fafb;
-        padding: 10px;
-        font-size: 9pt;
+        padding: 6px;
+        font-size: 8pt;
         font-weight: 600;
         border: 1px solid #e5e7eb;
         text-align: left;
     }
     .score-table td {
-        padding: 12px 10px;
-        font-size: 9.5pt;
+        padding: 6px;
+        font-size: 8.5pt;
         border: 1px solid #e5e7eb;
     }
     .subject-cell { font-weight: 500; width: 35%; }
@@ -1230,9 +1228,9 @@ function generateFinalExamHTML(data, yearTerm) {
     .eval-cell { text-align: center; width: 15%; }
     
     .eval-badge {
-        padding: 3px 10px;
+        padding: 1px 8px;
         border-radius: 9999px;
-        font-size: 8pt;
+        font-size: 7pt;
         font-weight: 700;
         display: inline-block;
     }
@@ -1241,35 +1239,35 @@ function generateFinalExamHTML(data, yearTerm) {
     .answer-details {
         background-color: #f9fafb;
         border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 8px;
+        padding: 10px;
     }
-    .details-title { font-size: 11pt; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; display: inline-block; }
-    .answer-category { margin-bottom: 20px; }
+    .details-title { font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 8px; border-bottom: 2px solid #3b82f6; padding-bottom: 2px; display: inline-block; }
+    .answer-category { margin-bottom: 8px; }
     .answer-category:last-child { margin-bottom: 0; }
-    .category-title { font-size: 9.5pt; font-weight: bold; color: #334155; margin-bottom: 10px; padding-left: 8px; border-left: 3px solid #64748b; }
-    .category-count { font-size: 8pt; color: #64748b; font-weight: normal; margin-left: 5px; }
+    .category-title { font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b; }
+    .category-count { font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px; }
     
     .question-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 4px;
     }
     .question-item {
-        width: 45px;
-        padding: 6px 2px;
+        width: 38px;
+        padding: 3px 1px;
         border: 1px solid #e5e7eb;
-        border-radius: 4px;
+        border-radius: 3px;
         text-align: center;
         background-color: #fff;
     }
-    .q-no { font-size: 7.5pt; font-weight: bold; color: #64748b; margin-bottom: 2px; }
-    .q-ans { font-size: 9pt; font-weight: 700; color: #1e293b; }
-    .q-correct { font-size: 7pt; color: #94a3b8; }
+    .q-no { font-size: 6.5pt; font-weight: bold; color: #64748b; margin-bottom: 1px; }
+    .q-ans { font-size: 8pt; font-weight: 700; color: #1e293b; }
+    .q-correct { font-size: 6pt; color: #94a3b8; }
     .correct { background-color: #f0fdf4; border-color: #bbf7d0; }
     .incorrect { background-color: #fef2f2; border-color: #fecaca; }
 
-    .footer-report { margin-top: 20px; text-align: right; font-size: 8pt; color: #94a3b8; }
+    .footer-report { margin-top: 8px; text-align: right; font-size: 7.5pt; color: #94a3b8; }
   </style>
 </head>
 <body>

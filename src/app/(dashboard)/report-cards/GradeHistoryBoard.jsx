@@ -727,10 +727,20 @@ export default function GradeHistoryBoard() {
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>学籍番号</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>氏名</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>クラス</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>期末試験(600)</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>期末評価</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
+                                        {selectedTerm?.startsWith('JLPT') ? (
+                                            <>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>合計点(180)</th>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>合格判定</th>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>期末試験(600)</th>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>期末評価</th>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
+                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
+                                            </>
+                                        )}
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>操作</th>
                                     </tr>
@@ -754,38 +764,80 @@ export default function GradeHistoryBoard() {
                                             <td style={{ padding: '12px 16px', fontWeight: '500' }}>{record.student_id_text}</td>
                                             <td style={{ padding: '12px 16px' }}>{record.student_name}</td>
                                             <td style={{ padding: '12px 16px' }}>{record.class_name}</td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <span style={{
-                                                    display: 'inline-block',
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    lineHeight: '24px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: '#eff6ff',
-                                                    color: '#1d4ed8',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 'bold'
-                                                }}>
-                                                    {calculateFinalExamGrade(record.final_exam_total)}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <span style={{
-                                                    display: 'inline-block',
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    lineHeight: '24px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: record.report_card_total >= 60 ? '#dcfce7' : '#fee2e2',
-                                                    color: record.report_card_total >= 60 ? '#166534' : '#991b1b',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 'bold'
-                                                }}>
-                                                    {calculateGrade(record.report_card_total)}
-                                                </span>
-                                            </td>
+                                            {selectedTerm?.startsWith('JLPT') ? (
+                                                <>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6', fontWeight: 'bold' }}>{record.final_exam_total}</td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            lineHeight: '24px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: '#eff6ff',
+                                                            color: '#1d4ed8',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {(() => {
+                                                                const percent = (record.final_exam_total / 180) * 100;
+                                                                if (percent >= 80) return 'A';
+                                                                if (percent >= 60) return 'B';
+                                                                if (percent >= 40) return 'C';
+                                                                if (percent >= 20) return 'D';
+                                                                return 'F';
+                                                            })()}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '2px 8px',
+                                                            borderRadius: '12px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 'bold',
+                                                            backgroundColor: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#dcfce7' : '#fee2e2',
+                                                            color: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#166534' : '#991b1b'
+                                                        }}>
+                                                            {(record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '合格' : '不合格'}
+                                                        </span>
+                                                    </td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            lineHeight: '24px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: '#eff6ff',
+                                                            color: '#1d4ed8',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {calculateFinalExamGrade(record.final_exam_total)}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            lineHeight: '24px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: record.report_card_total >= 60 ? '#dcfce7' : '#fee2e2',
+                                                            color: record.report_card_total >= 60 ? '#166534' : '#991b1b',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {calculateGrade(record.report_card_total)}
+                                                        </span>
+                                                    </td>
+                                                </>
+                                            )}
                                             <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: '0.875rem' }}>
                                                 {new Date(record.created_at).toLocaleString('ja-JP')}
                                             </td>
