@@ -85,7 +85,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                             <div style={{
                                 textAlign: 'center',
                                 padding: '8px 16px',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #000',
                                 borderRadius: '8px',
                                 backgroundColor: '#fff',
                                 boxShadow: '0 1px 2px rgba(0,0,0,0.05)',

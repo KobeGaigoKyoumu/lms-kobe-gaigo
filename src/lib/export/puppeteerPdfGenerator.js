@@ -1193,7 +1193,7 @@ function generateFinalExamHTML(data, yearTerm) {
         justify-content: center;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    .score-tile { background-color: #fff; border: 1px solid #e2e8f0; }
+    .score-tile { background-color: #fff; border: 1px solid #000; }
     .judge-tile { 
         background-color: ${finalExam.result === '合' || finalExam.result === '○' ? '#f0fdf4' : '#fef2f2'};
         border: 1px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
