@@ -517,75 +517,232 @@ export default function GradeUploader() {
                 const data = await file.arrayBuffer()
                 const workbook = XLSX.read(data)
 
-                let targetSheet = null
-                let headerRowIndex = -1
+                // --- 1. 設定シートから使用教材名を読み取る ---
+                let textbookName = ''
+                const settingsSheet = workbook.Sheets['設定']
+                if (settingsSheet) {
+                    const settingsRows = XLSX.utils.sheet_to_json(settingsSheet, { header: 1 })
+                    if (settingsRows.length >= 2 && settingsRows[1] && settingsRows[1][0]) {
+                        textbookName = String(settingsRows[1][0]).trim()
+                    }
+                }
 
-                // Iterate through all sheets to find the one with the header
-                for (const sheetName of workbook.SheetNames) {
-                    const sheet = workbook.Sheets[sheetName]
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+                // --- 2. レベル別情報シートから合格点・基準点を読み取る ---
+                let levelInfo = {}
+                const levelSheet = workbook.Sheets['レベル別情報']
+                if (levelSheet) {
+                    const levelRows = XLSX.utils.sheet_to_json(levelSheet, { header: 1 })
+                    for (let i = 1; i < levelRows.length; i++) {
+                        const row = levelRows[i]
+                        if (!row || !row[0]) continue
+                        levelInfo[String(row[0]).trim()] = {
+                            level: String(row[0]).trim(),
+                            criteria1Name: row[1] || '',
+                            criteria1Score: parseFloat(row[2]) || 0,
+                            criteria2Name: row[3] || '',
+                            criteria2Score: parseFloat(row[4]) || 0,
+                            criteria3Name: row[5] || '',
+                            criteria3Score: parseFloat(row[6]) || 0,
+                            passingScore: parseFloat(row[7]) || 0,
+                        }
+                    }
+                }
 
-                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                        const rowStr = JSON.stringify(rows[i])
-                        if (rowStr && (rowStr.includes('学籍番号') || rowStr.includes('名前'))) {
-                            headerRowIndex = i
-                            targetSheet = rows // Keep the rows of the valid sheet
+                // --- 3. 集計シートからレベルとスコアを読み取る ---
+                const summarySheet = workbook.Sheets['集計']
+                if (!summarySheet) {
+                    errors.push(`${file.name}: 集計シートが見つかりませんでした。`)
+                    continue
+                }
+                const summaryRows = XLSX.utils.sheet_to_json(summarySheet, { header: 1 })
+
+                let level = ''
+                if (summaryRows[0] && summaryRows[0][1]) {
+                    level = String(summaryRows[0][1]).trim()
+                }
+
+                // ヘッダーから動的に列を特定
+                const headerRow = summaryRows[1] || []
+                const findCol = (keywords) => {
+                    for (let c = 0; c < headerRow.length; c++) {
+                        const h = String(headerRow[c] || '')
+                        if (keywords.every(kw => h.includes(kw))) return c
+                    }
+                    return -1
+                }
+
+                const vocabCorrectCol = findCol(['文字', '語彙', '正解'])
+                const vocabScoreCol = vocabCorrectCol >= 0 ? vocabCorrectCol + 1 : findCol(['文字', '語彙'])
+                const grammarCorrectCol = findCol(['文法', '正解'])
+                const grammarScoreCol = grammarCorrectCol >= 0 ? grammarCorrectCol + 1 : -1
+                const readingCorrectCol = findCol(['読解', '正解'])
+                const readingScoreCol = readingCorrectCol >= 0 ? readingCorrectCol + 1 : -1
+                const gramReadCorrectCol = findCol(['文法', '読解', '正解'])
+                const gramReadScoreCol = gramReadCorrectCol >= 0 ? gramReadCorrectCol + 1 : -1
+                const listeningCorrectCol = findCol(['聴解', '正解'])
+                const listeningScoreCol = listeningCorrectCol >= 0 ? listeningCorrectCol + 1 : -1
+                const totalCol = findCol(['合計'])
+                const resultCol = findCol(['合否'])
+                const rankCol = findCol(['順位'])
+                const judgment1Col = findCol(['判定1'])
+                const judgment2Col = findCol(['判定2'])
+                const judgment3Col = findCol(['判定3'])
+
+                // --- 4. 受験者シートから学生情報を読み取る ---
+                const examineesSheet = workbook.Sheets['受験者']
+                const examineesMap = new Map()
+                if (examineesSheet) {
+                    const examineesRows = XLSX.utils.sheet_to_json(examineesSheet, { header: 1 })
+                    for (let i = 1; i < examineesRows.length; i++) {
+                        const row = examineesRows[i]
+                        if (!row || !row[0]) continue
+                        const sid = String(row[0]).trim()
+                        examineesMap.set(sid, {
+                            student_id: sid,
+                            class_name: row[1] ? String(row[1]).trim() : '',
+                            attendance_no: row[2] ? String(row[2]).trim() : '',
+                            name: row[3] ? String(row[3]).trim() : '',
+                        })
+                    }
+                }
+
+                // --- 5. 解答入力シートから問題別解答を読み取る ---
+                const answerSheet = workbook.Sheets['解答入力']
+                let answerDetails = []
+                if (answerSheet) {
+                    const answerRows = XLSX.utils.sheet_to_json(answerSheet, { header: 1 })
+                    const row1 = answerRows[1] || []
+                    let correctAnswerCol = -1
+                    for (let c = 0; c < row1.length; c++) {
+                        if (String(row1[c] || '') === '正答') {
+                            correctAnswerCol = c
                             break
                         }
                     }
-                    if (targetSheet) break
+
+                    const studentColMap = new Map()
+                    const examineesArr = Array.from(examineesMap.values())
+                    for (let c = 0; c < row1.length; c++) {
+                        const cellVal = String(row1[c] || '').trim()
+                        if (!cellVal) continue
+                        const matchStudent = examineesArr.find(s => s.name === cellVal)
+                        if (matchStudent && !studentColMap.has(matchStudent.student_id)) {
+                            studentColMap.set(matchStudent.student_id, c)
+                        }
+                    }
+
+                    for (let i = 2; i < answerRows.length; i++) {
+                        const row = answerRows[i]
+                        if (!row || row.length < 2) continue
+                        const subject = String(row[0] || '').trim()
+                        const questionNo = row[1]
+                        if (!subject || questionNo === undefined || questionNo === null || questionNo === '') continue
+
+                        const correctAnswer = correctAnswerCol >= 0 ? row[correctAnswerCol] : null
+                        const studentAnswers = {}
+                        for (const [sid, col] of studentColMap.entries()) {
+                            const selected = row[col]
+                            const isCorrect = selected !== undefined && selected !== null && selected !== '' &&
+                                correctAnswer !== undefined && correctAnswer !== null &&
+                                String(selected) === String(correctAnswer)
+                            studentAnswers[sid] = {
+                                selected: selected !== undefined && selected !== null ? String(selected) : '',
+                                isCorrect
+                            }
+                        }
+                        answerDetails.push({
+                            subject,
+                            questionNo: String(questionNo),
+                            correctAnswer: correctAnswer !== undefined && correctAnswer !== null ? String(correctAnswer) : '',
+                            studentAnswers,
+                        })
+                    }
                 }
 
-                if (!targetSheet || headerRowIndex === -1) {
-                    errors.push(`${file.name}: ヘッダー(学籍番号/名前)が見つかりませんでした。正しいシートが含まれているか確認してください。`)
-                    continue
+                // --- 6. 集計シートのデータ行をパース ---
+                const fileNameParts = file.name.split('_')
+                const dateStr = fileNameParts[0]
+                const examName = fileNameParts.length > 2 ? fileNameParts.slice(2).join('_').replace('.xlsx', '').replace('.xlsm', '') : 'JLPT Mock'
+                const formattedDate = dateStr.length >= 8
+                    ? `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`
+                    : dateStr
+
+                const getSubjectCorrectCounts = (studentId) => {
+                    const subjects = {}
+                    for (const detail of answerDetails) {
+                        const subName = detail.subject
+                        if (!subjects[subName]) subjects[subName] = { correct: 0, total: 0 }
+                        subjects[subName].total++
+                        if (detail.studentAnswers[studentId]?.isCorrect) subjects[subName].correct++
+                    }
+                    return subjects
                 }
 
-                const rows = targetSheet
+                const currentLevelInfo = levelInfo[level] || null
 
-                // Indices based on inspection
-                // 0: ID, 1: Name, 2: Vocab, 5: Grammar, 8: Reading, 11: Listening, 15: Total, 16: Result
-                const COLS = {
-                    id: 0,
-                    name: 1,
-                    vocab: 2,
-                    grammar: 5,
-                    reading: 8,
-                    listening: 11,
-                    total: 15,
-                    result: 16
-                }
+                for (let i = 2; i < summaryRows.length; i++) {
+                    const row = summaryRows[i]
+                    if (!row || !row[0]) continue
+                    const sid = String(row[0]).trim()
+                    if (!sid || isNaN(parseInt(sid))) continue
 
-                // Parse Data
-                for (let i = headerRowIndex + 1; i < rows.length; i++) {
-                    const row = rows[i]
-                    if (!row || !row[COLS.id]) continue
+                    const studentInfo = examineesMap.get(sid) || {}
+                    const vocabScore = vocabScoreCol >= 0 ? (parseFloat(row[vocabScoreCol]) || 0) : 0
+                    const grammarScore = grammarScoreCol >= 0 ? (parseFloat(row[grammarScoreCol]) || 0) : 0
+                    const readingScore = readingScoreCol >= 0 ? (parseFloat(row[readingScoreCol]) || 0) : 0
+                    const gramReadScore = gramReadScoreCol >= 0 ? (parseFloat(row[gramReadScoreCol]) || 0) : 0
+                    const listeningScore = listeningScoreCol >= 0 ? (parseFloat(row[listeningScoreCol]) || 0) : 0
+                    const totalScore = totalCol >= 0 ? (parseFloat(row[totalCol]) || 0) : 0
+                    const resultVal = resultCol >= 0 ? (row[resultCol] || '-') : '-'
+                    const rank = rankCol >= 0 ? (row[rankCol] || '-') : '-'
+                    const j1 = judgment1Col >= 0 ? (row[judgment1Col] || '') : ''
+                    const j2 = judgment2Col >= 0 ? (row[judgment2Col] || '') : ''
+                    const j3 = judgment3Col >= 0 ? (row[judgment3Col] || '') : ''
+                    const vocabCorrect = vocabCorrectCol >= 0 ? (parseFloat(row[vocabCorrectCol]) || 0) : 0
+                    const grammarCorrect = grammarCorrectCol >= 0 ? (parseFloat(row[grammarCorrectCol]) || 0) : 0
+                    const readingCorrect = readingCorrectCol >= 0 ? (parseFloat(row[readingCorrectCol]) || 0) : 0
+                    const gramReadCorrect = gramReadCorrectCol >= 0 ? (parseFloat(row[gramReadCorrectCol]) || 0) : 0
+                    const listeningCorrect = listeningCorrectCol >= 0 ? (parseFloat(row[listeningCorrectCol]) || 0) : 0
+                    const subjectCorrectCounts = getSubjectCorrectCounts(sid)
 
-                    const id = String(row[COLS.id]).trim()
-                    if (!id) continue
+                    const getEval = (score, maxScore) => {
+                        if (!maxScore || maxScore <= 0) return '-'
+                        const rate = score / maxScore
+                        if (rate <= 1 / 3) return 'C'
+                        if (rate <= 2 / 3) return 'B'
+                        return 'A'
+                    }
 
-                    // Parse Date/Name from Filename: YYYYMMDD_Class_Name
-                    // e.g. 20250205_1-13_N4再々試験①.xlsx
-                    const fileNameParts = file.name.split('_')
-                    const dateStr = fileNameParts[0] // 20250205
-                    const className = fileNameParts.length > 1 ? fileNameParts[1] : 'Unknown'
-                    const examName = fileNameParts.length > 2 ? fileNameParts.slice(2).join('_').replace('.xlsx', '') : 'JLPT Mock'
+                    let vocabMax = 60, grammarMax = 60, readingMax = 60, listeningMax = 60
+                    if (level === 'N4' || level === 'N5') {
+                        vocabMax = 120; grammarMax = 0; readingMax = 0; listeningMax = 60
+                    }
 
-                    // Format Date YYYY-MM-DD
-                    const formattedDate = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`
+                    const studentAnswerDetails = answerDetails.map(d => ({
+                        subject: d.subject, questionNo: d.questionNo, correctAnswer: d.correctAnswer,
+                        selected: d.studentAnswers[sid]?.selected || '',
+                        isCorrect: d.studentAnswers[sid]?.isCorrect || false,
+                    }))
 
                     allResults.push({
-                        student_id: id,
-                        name: row[COLS.name],
-                        class_name: className,
-                        exam_date: formattedDate,
-                        exam_name: examName,
-                        vocab: parseFloat(row[COLS.vocab]) || 0,
-                        grammar: parseFloat(row[COLS.grammar]) || 0,
-                        reading: parseFloat(row[COLS.reading]) || 0,
-                        listening: parseFloat(row[COLS.listening]) || 0,
-                        total: parseFloat(row[COLS.total]) || 0,
-                        result: row[COLS.result] || '-',
+                        student_id: sid,
+                        name: studentInfo.name || row[3] || '',
+                        class_name: studentInfo.class_name || row[1] || '',
+                        attendance_no: studentInfo.attendance_no || row[2] || '',
+                        exam_date: formattedDate, exam_name: examName, level, textbook: textbookName,
+                        vocab: vocabScore, vocabCorrect,
+                        grammar: grammarScore, grammarCorrect,
+                        reading: readingScore, readingCorrect,
+                        grammarReading: gramReadScore, grammarReadingCorrect: gramReadCorrect,
+                        listening: listeningScore, listeningCorrect,
+                        total: totalScore, result: resultVal, rank,
+                        judgments: [j1, j2, j3], levelInfo: currentLevelInfo,
+                        subjectCorrectCounts, answerDetails: studentAnswerDetails,
+                        vocabEval: getEval(vocabScore, vocabMax),
+                        grammarEval: getEval(grammarScore, grammarMax > 0 ? grammarMax : 60),
+                        readingEval: getEval(readingScore, readingMax > 0 ? readingMax : 60),
+                        grammarReadingEval: getEval(gramReadScore, level === 'N4' || level === 'N5' ? 120 : 60),
+                        listeningEval: getEval(listeningScore, listeningMax),
                         filename: file.name
                     })
                 }
@@ -614,21 +771,22 @@ export default function GradeUploader() {
         try {
             let successCount = 0
             for (const record of jlptData) {
-                // Use 'grade_records' but with a special year_term to distinguish?
-                // Or maybe create a new table is better? User asked for "Report Card".
-                // If I reuse grade_records:
-                // year_term = "JLPT [Date] [Name]"
                 const termKey = `JLPT ${record.exam_date} ${record.exam_name}`
 
-                // Store JLPT scores in final_exam_data structure (mapped)
                 const jlptScores = {
-                    vocab: record.vocab,
-                    grammar: record.grammar,
-                    reading: record.reading,
-                    listening: record.listening,
-                    total: record.total,
-                    result: record.result,
-                    type: 'JLPT'
+                    vocab: record.vocab, vocabCorrect: record.vocabCorrect, vocabEval: record.vocabEval,
+                    grammar: record.grammar, grammarCorrect: record.grammarCorrect, grammarEval: record.grammarEval,
+                    reading: record.reading, readingCorrect: record.readingCorrect, readingEval: record.readingEval,
+                    grammarReading: record.grammarReading, grammarReadingCorrect: record.grammarReadingCorrect, grammarReadingEval: record.grammarReadingEval,
+                    listening: record.listening, listeningCorrect: record.listeningCorrect, listeningEval: record.listeningEval,
+                    total: record.total, result: record.result, rank: record.rank,
+                    judgments: record.judgments, level: record.level, textbook: record.textbook,
+                    levelInfo: record.levelInfo, type: 'JLPT'
+                }
+
+                const detailData = {
+                    answerDetails: record.answerDetails,
+                    subjectCorrectCounts: record.subjectCorrectCounts,
                 }
 
                 const { error } = await supabase
@@ -639,7 +797,7 @@ export default function GradeUploader() {
                         class_name: record.class_name || 'JLPT',
                         year_term: termKey,
                         final_exam_data: jlptScores,
-                        report_card_data: {}, // Empty for JLPT
+                        report_card_data: detailData,
                         final_exam_total: record.total,
                         report_card_total: 0,
                         updated_at: new Date().toISOString()
@@ -1015,7 +1173,7 @@ export default function GradeUploader() {
                 </div>
             )}
 
-            {/* --- JLPT RESULTS (NEW) --- */}
+            {/* --- JLPT RESULTS (NEW/REWRITTEN) --- */}
             {jlptData.length > 0 && (
                 <div className={styles.resultsSection}>
                     <div className={styles.resultsHeader}>
@@ -1042,45 +1200,186 @@ export default function GradeUploader() {
                         </div>
                     </div>
 
+                    {/* Common Info Bar */}
+                    {jlptData[0] && (
+                        <div style={{
+                            padding: '12px 16px',
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '6px',
+                            marginBottom: '20px',
+                            fontSize: '0.9rem',
+                            color: '#475569'
+                        }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                                {jlptData[0].level && <div><strong>レベル:</strong> {jlptData[0].level}</div>}
+                                {jlptData[0].textbook && <div><strong>使用教材:</strong> {jlptData[0].textbook}</div>}
+                                {jlptData[0].exam_date && <div><strong>試験日:</strong> {jlptData[0].exam_date}</div>}
+                                {jlptData[0].levelInfo && (
+                                    <>
+                                        <div><strong>合格点:</strong> {jlptData[0].levelInfo.passingScore}点</div>
+                                        <div>
+                                            <strong>基準点:</strong> {jlptData[0].levelInfo.criteria1Name}({jlptData[0].levelInfo.criteria1Score})
+                                            {jlptData[0].levelInfo.criteria2Name && ` / ${jlptData[0].levelInfo.criteria2Name}(${jlptData[0].levelInfo.criteria2Score})`}
+                                            {jlptData[0].levelInfo.criteria3Name && ` / ${jlptData[0].levelInfo.criteria3Name}(${jlptData[0].levelInfo.criteria3Score})`}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div className={styles.studentList}>
                         {jlptData.map((result, i) => (
-                            <div key={i} className={styles.studentRow} style={{ borderLeft: result.result === 'Pass' ? '4px solid #10b981' : '4px solid #ef4444' }}>
+                            <div key={i} className={styles.studentRow} style={{ borderLeft: result.result === '○' ? '4px solid #10b981' : '4px solid #ef4444' }}>
                                 <div className={styles.studentHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
+                                            {result.class_name} {result.attendance_no && `${result.attendance_no}番`}
+                                        </div>
                                         <h3 className={styles.studentName}>
                                             {result.name}
                                             <span className={styles.studentId}>({result.student_id})</span>
                                         </h3>
-                                        <p className={styles.className}>{result.exam_name} ({result.exam_date})</p>
+                                        <p className={styles.className} style={{ fontSize: '0.85rem' }}>{result.exam_name} ({result.exam_date})</p>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: result.result === 'Pass' ? '#10b981' : '#ef4444' }}>
-                                            {result.result}
+                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: result.result === '○' ? '#10b981' : '#ef4444' }}>
+                                            {result.result === '○' ? '合格' : result.result === '×' ? '不合格' : result.result}
                                         </div>
-                                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1f2937' }}>
                                             合計: {result.total}点
+                                            {result.levelInfo && <span style={{ fontSize: '0.8rem', color: '#6b7280' }}> / {result.levelInfo.passingScore}点</span>}
                                         </div>
+                                        {result.rank && result.rank !== '-' && (
+                                            <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>順位: {result.rank}位</div>
+                                        )}
                                     </div>
                                 </div>
 
-                                <table style={{ width: '100%', marginTop: '15px', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
-                                    <thead style={{ backgroundColor: '#f9fafb' }}>
-                                        <tr>
-                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>文字・語彙</th>
-                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>文法</th>
-                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>読解</th>
-                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>聴解</th>
+                                {/* Subject Scores Table */}
+                                <table style={{ width: '100%', marginTop: '15px', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ backgroundColor: '#f9fafb', textAlign: 'left' }}>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>科目</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>得点</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>正答数</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>判定</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>評価</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {result.level === 'N4' || result.level === 'N5' ? (
+                                            <>
+                                                <tr>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>言語知識（文字・語彙・文法）・読解</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{result.grammarReading} / 120</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.grammarReadingCorrect || (result.vocabCorrect + result.grammarCorrect + result.readingCorrect)} / {result.subjectCorrectCounts?.['文字・語彙']?.total + result.subjectCorrectCounts?.['文法']?.total + result.subjectCorrectCounts?.['読解']?.total || 100}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.judgments?.[0] || result.judgments?.[1] || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                            backgroundColor: result.grammarReadingEval === 'A' ? '#dcfce7' : result.grammarReadingEval === 'B' ? '#fef9c3' : '#fee2e2',
+                                                            color: result.grammarReadingEval === 'A' ? '#166534' : result.grammarReadingEval === 'B' ? '#854d0e' : '#991b1b'
+                                                        }}>{result.grammarReadingEval}</span>
+                                                    </td>
+                                                </tr>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <tr>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>言語知識（文字・語彙・文法）</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{result.vocab + result.grammar} / 60</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.vocabCorrect + result.grammarCorrect} / {result.subjectCorrectCounts?.['文字・語彙']?.total + result.subjectCorrectCounts?.['文法']?.total || 60}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.judgments?.[0] || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                            backgroundColor: result.vocabEval === 'A' ? '#dcfce7' : result.vocabEval === 'B' ? '#fef9c3' : '#fee2e2',
+                                                            color: result.vocabEval === 'A' ? '#166534' : result.vocabEval === 'B' ? '#854d0e' : '#991b1b'
+                                                        }}>{result.vocabEval}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>読解</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{result.reading} / 60</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.readingCorrect} / {result.subjectCorrectCounts?.['読解']?.total || 25}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.judgments?.[1] || '-'}</td>
+                                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                            backgroundColor: result.readingEval === 'A' ? '#dcfce7' : result.readingEval === 'B' ? '#fef9c3' : '#fee2e2',
+                                                            color: result.readingEval === 'A' ? '#166534' : result.readingEval === 'B' ? '#854d0e' : '#991b1b'
+                                                        }}>{result.readingEval}</span>
+                                                    </td>
+                                                </tr>
+                                            </>
+                                        )}
                                         <tr>
-                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.vocab}</td>
-                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.grammar}</td>
-                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.reading}</td>
-                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.listening}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>聴解</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{result.listening} / 60</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.listeningCorrect} / {result.subjectCorrectCounts?.['聴解']?.total || 25}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.judgments?.[result.level === 'N4' || result.level === 'N5' ? 1 : 2] || '-'}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                                <span style={{
+                                                    padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                    backgroundColor: result.listeningEval === 'A' ? '#dcfce7' : result.listeningEval === 'B' ? '#fef9c3' : '#fee2e2',
+                                                    color: result.listeningEval === 'A' ? '#166534' : result.listeningEval === 'B' ? '#854d0e' : '#991b1b'
+                                                }}>{result.listeningEval}</span>
+                                            </td>
+                                        </tr>
+                                        <tr style={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>合計</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{result.total} / 180</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                                {Object.values(result.subjectCorrectCounts || {}).reduce((acc, cur) => acc + cur.correct, 0)} / {Object.values(result.subjectCorrectCounts || {}).reduce((acc, cur) => acc + cur.total, 0)}
+                                            </td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.result === '○' ? '合格' : '不合格'}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>-</td>
                                         </tr>
                                     </tbody>
                                 </table>
+
+                                {/* Answer Details Table */}
+                                {result.answerDetails && result.answerDetails.length > 0 && (
+                                    <details style={{ marginTop: '15px' }}>
+                                        <summary style={{ cursor: 'pointer', color: '#3b82f6', fontWeight: 'bold', fontSize: '0.9rem', padding: '8px 0' }}>
+                                            解答詳細を表示
+                                        </summary>
+                                        <div style={{ overflowX: 'auto', marginTop: '10px' }}>
+                                            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                                                {['文字・語彙', '文法', '読解', '聴解'].map(sub => {
+                                                    const subDetails = result.answerDetails.filter(d => d.subject === sub)
+                                                    if (subDetails.length === 0) return null
+                                                    return (
+                                                        <div key={sub} style={{ minWidth: '200px', flex: '1' }}>
+                                                            <h4 style={{ fontSize: '0.85rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px' }}>
+                                                                {sub} ({result.subjectCorrectCounts?.[sub]?.correct} / {result.subjectCorrectCounts?.[sub]?.total})
+                                                            </h4>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))', gap: '4px' }}>
+                                                                {subDetails.map((d, idx) => (
+                                                                    <div key={idx} style={{
+                                                                        padding: '4px',
+                                                                        fontSize: '0.7rem',
+                                                                        border: '1px solid #e5e7eb',
+                                                                        textAlign: 'center',
+                                                                        backgroundColor: d.isCorrect ? '#dcfce7' : '#fee2e2',
+                                                                        display: 'flex',
+                                                                        flexDirection: 'column'
+                                                                    }}>
+                                                                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{d.questionNo}</div>
+                                                                        <div>{d.selected || '-'}</div>
+                                                                        <div style={{ fontSize: '0.6rem', color: '#666' }}>({d.correctAnswer})</div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    </details>
+                                )}
                             </div>
                         ))}
                     </div>
