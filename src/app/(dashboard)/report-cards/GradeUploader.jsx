@@ -517,24 +517,31 @@ export default function GradeUploader() {
                 const data = await file.arrayBuffer()
                 const workbook = XLSX.read(data)
 
-                // Assume 1st sheet has data
-                const sheet = workbook.Sheets[workbook.SheetNames[0]]
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
-
-                // Find header
+                let targetSheet = null
                 let headerRowIndex = -1
-                for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                    const rowStr = JSON.stringify(rows[i])
-                    if (rowStr && (rowStr.includes('学籍番号') || rowStr.includes('名前'))) {
-                        headerRowIndex = i
-                        break
+
+                // Iterate through all sheets to find the one with the header
+                for (const sheetName of workbook.SheetNames) {
+                    const sheet = workbook.Sheets[sheetName]
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                        const rowStr = JSON.stringify(rows[i])
+                        if (rowStr && (rowStr.includes('学籍番号') || rowStr.includes('名前'))) {
+                            headerRowIndex = i
+                            targetSheet = rows // Keep the rows of the valid sheet
+                            break
+                        }
                     }
+                    if (targetSheet) break
                 }
 
-                if (headerRowIndex === -1) {
-                    errors.push(`${file.name}: ヘッダーが見つかりませんでした`)
+                if (!targetSheet || headerRowIndex === -1) {
+                    errors.push(`${file.name}: ヘッダー(学籍番号/名前)が見つかりませんでした。正しいシートが含まれているか確認してください。`)
                     continue
                 }
+
+                const rows = targetSheet
 
                 // Indices based on inspection
                 // 0: ID, 1: Name, 2: Vocab, 5: Grammar, 8: Reading, 11: Listening, 15: Total, 16: Result
