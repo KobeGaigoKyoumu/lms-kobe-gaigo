@@ -18,6 +18,18 @@ export default function LoginForm() {
     const [loginMode, setLoginMode] = useState('google')
 
     useEffect(() => {
+        // Handle error from URL parameters (e.g., from auth callback)
+        const errorType = searchParams.get('error')
+        if (errorType) {
+            if (errorType === 'auth_failed') {
+                setError('認証に失敗しました。Googleアカウントの設定や権限を確認してください。')
+            } else if (errorType === 'access_denied') {
+                setError('アクセスが拒否されました。ログインをキャンセルしたか、権限がありません。')
+            } else {
+                setError(`エラーが発生しました: ${errorType}`)
+            }
+        }
+
         const ua = navigator.userAgent || navigator.vendor || window.opera
         // Detect LINE, Instagram, Facebook, or generic WebView (Android)
         const isInApp = /Line\//i.test(ua) ||
@@ -26,7 +38,7 @@ export default function LoginForm() {
             /; wv/.test(ua)
 
         setIsInAppBrowser(isInApp)
-    }, [])
+    }, [searchParams])
 
     const copyCurrentUrl = () => {
         navigator.clipboard.writeText(window.location.href)
