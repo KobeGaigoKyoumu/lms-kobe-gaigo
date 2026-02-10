@@ -780,12 +780,10 @@ export default function GradeHistoryBoard() {
                                                             fontWeight: 'bold'
                                                         }}>
                                                             {(() => {
-                                                                const percent = (record.final_exam_total / 180) * 100;
-                                                                if (percent >= 80) return 'A';
-                                                                if (percent >= 60) return 'B';
-                                                                if (percent >= 40) return 'C';
-                                                                if (percent >= 20) return 'D';
-                                                                return 'F';
+                                                                const score = record.final_exam_total;
+                                                                if (score > 120) return 'A';
+                                                                if (score > 60) return 'B';
+                                                                return 'C';
                                                             })()}
                                                         </span>
                                                     </td>

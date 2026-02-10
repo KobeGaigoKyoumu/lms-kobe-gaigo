@@ -1001,10 +1001,10 @@ function generateFinalExamHTML(data, yearTerm) {
     const finalExamSum = data.final_exam_total;
 
     const getEvalStr = (score, max) => {
-      const rate = score / (max || 60);
-      if (rate <= 1 / 3) return 'C';
-      if (rate <= 2 / 3) return 'B';
-      return 'A';
+      // 1/3 and 2/3 thresholds
+      if (score > (max * 2 / 3)) return 'A';
+      if (score > (max / 3)) return 'B';
+      return 'C';
     };
 
     const getEvalStyle = (val) => {

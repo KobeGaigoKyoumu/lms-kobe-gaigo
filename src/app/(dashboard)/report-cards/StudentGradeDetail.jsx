@@ -17,12 +17,9 @@ const StudentGradeDetail = ({ student, viewMode }) => {
     // Calculate Final Exam Letter Grade
     const calculateFinalExamGrade = (score, isJlpt = false) => {
         if (isJlpt) {
-            const percent = (score / 180) * 100;
-            if (percent >= 80) return 'A'
-            if (percent >= 60) return 'B'
-            if (percent >= 40) return 'C'
-            if (percent >= 20) return 'D'
-            return 'F'
+            if (score > 120) return 'A'
+            if (score > 60) return 'B'
+            return 'C'
         }
         if (score >= 80) return 'A'
         if (score >= 60) return 'B'
