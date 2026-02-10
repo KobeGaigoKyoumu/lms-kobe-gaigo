@@ -471,12 +471,194 @@ export default function GradeUploader() {
         }
     }
 
+    // ... (Existing variables)
+    const [jlptFiles, setJlptFiles] = useState([])
+    const [jlptData, setJlptData] = useState([])
+    const [jlptLoading, setJlptLoading] = useState(false)
+    const [jlptSaving, setJlptSaving] = useState(false)
+    const [jlptSaveMessage, setJlptSaveMessage] = useState('')
+    const jlptFileInputRef = useRef(null)
+
+    // ... (Existing handlers)
+
+    const handleJlptDrop = (e) => {
+        e.preventDefault()
+        const droppedFiles = Array.from(e.dataTransfer.files)
+        const validFiles = droppedFiles.filter(f => f.name.endsWith('.xlsx'))
+        if (validFiles.length > 0) {
+            setJlptFiles(prev => [...prev, ...validFiles])
+            setError('')
+        }
+    }
+
+    const handleJlptFileSelect = (e) => {
+        const selectedFiles = Array.from(e.target.files)
+        if (selectedFiles.length > 0) {
+            setJlptFiles(prev => [...prev, ...selectedFiles])
+            setError('')
+        }
+    }
+
+    const removeJlptFile = (index) => {
+        setJlptFiles(prev => prev.filter((_, i) => i !== index))
+    }
+
+    const parseJlptExcel = async () => {
+        if (jlptFiles.length === 0) return
+        setJlptLoading(true)
+        setError('')
+        setJlptData([])
+
+        let allResults = []
+        let errors = []
+
+        try {
+            for (const file of jlptFiles) {
+                const data = await file.arrayBuffer()
+                const workbook = XLSX.read(data)
+
+                // Assume 1st sheet has data
+                const sheet = workbook.Sheets[workbook.SheetNames[0]]
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+                // Find header
+                let headerRowIndex = -1
+                for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                    const rowStr = JSON.stringify(rows[i])
+                    if (rowStr && (rowStr.includes('学籍番号') || rowStr.includes('名前'))) {
+                        headerRowIndex = i
+                        break
+                    }
+                }
+
+                if (headerRowIndex === -1) {
+                    errors.push(`${file.name}: ヘッダーが見つかりませんでした`)
+                    continue
+                }
+
+                // Indices based on inspection
+                // 0: ID, 1: Name, 2: Vocab, 5: Grammar, 8: Reading, 11: Listening, 15: Total, 16: Result
+                const COLS = {
+                    id: 0,
+                    name: 1,
+                    vocab: 2,
+                    grammar: 5,
+                    reading: 8,
+                    listening: 11,
+                    total: 15,
+                    result: 16
+                }
+
+                // Parse Data
+                for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                    const row = rows[i]
+                    if (!row || !row[COLS.id]) continue
+
+                    const id = String(row[COLS.id]).trim()
+                    if (!id) continue
+
+                    // Parse Date/Name from Filename: YYYYMMDD_Class_Name
+                    // e.g. 20250205_1-13_N4再々試験①.xlsx
+                    const fileNameParts = file.name.split('_')
+                    const dateStr = fileNameParts[0] // 20250205
+                    const className = fileNameParts.length > 1 ? fileNameParts[1] : 'Unknown'
+                    const examName = fileNameParts.length > 2 ? fileNameParts.slice(2).join('_').replace('.xlsx', '') : 'JLPT Mock'
+
+                    // Format Date YYYY-MM-DD
+                    const formattedDate = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`
+
+                    allResults.push({
+                        student_id: id,
+                        name: row[COLS.name],
+                        class_name: className,
+                        exam_date: formattedDate,
+                        exam_name: examName,
+                        vocab: parseFloat(row[COLS.vocab]) || 0,
+                        grammar: parseFloat(row[COLS.grammar]) || 0,
+                        reading: parseFloat(row[COLS.reading]) || 0,
+                        listening: parseFloat(row[COLS.listening]) || 0,
+                        total: parseFloat(row[COLS.total]) || 0,
+                        result: row[COLS.result] || '-',
+                        filename: file.name
+                    })
+                }
+            }
+
+            if (allResults.length === 0) {
+                setError('有効なデータが見つかりませんでした')
+            } else {
+                setJlptData(allResults)
+            }
+            if (errors.length > 0) setError(errors.join('\n'))
+
+        } catch (err) {
+            console.error(err)
+            setError('解析エラー: ' + err.message)
+        } finally {
+            setJlptLoading(false)
+        }
+    }
+
+    const saveJlptToDatabase = async () => {
+        if (!jlptData || jlptData.length === 0) return
+        setJlptSaving(true)
+        setJlptSaveMessage('')
+
+        try {
+            let successCount = 0
+            for (const record of jlptData) {
+                // Use 'grade_records' but with a special year_term to distinguish?
+                // Or maybe create a new table is better? User asked for "Report Card".
+                // If I reuse grade_records:
+                // year_term = "JLPT [Date] [Name]"
+                const termKey = `JLPT ${record.exam_date} ${record.exam_name}`
+
+                // Store JLPT scores in final_exam_data structure (mapped)
+                const jlptScores = {
+                    vocab: record.vocab,
+                    grammar: record.grammar,
+                    reading: record.reading,
+                    listening: record.listening,
+                    total: record.total,
+                    result: record.result,
+                    type: 'JLPT'
+                }
+
+                const { error } = await supabase
+                    .from('grade_records')
+                    .upsert({
+                        student_id_text: record.student_id,
+                        student_name: record.name,
+                        class_name: record.class_name || 'JLPT',
+                        year_term: termKey,
+                        final_exam_data: jlptScores,
+                        report_card_data: {}, // Empty for JLPT
+                        final_exam_total: record.total,
+                        report_card_total: 0,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'student_id_text, year_term'
+                    })
+
+                if (error) console.error(error)
+                else successCount++
+            }
+            setJlptSaveMessage(`${successCount}件のJLPTデータを保存しました`)
+        } catch (err) {
+            console.error(err)
+            setJlptSaveMessage('保存エラー')
+        } finally {
+            setJlptSaving(false)
+        }
+    }
+
     return (
         <div>
+            {/* --- EXISTING GRADE UPLOAD SECTION --- */}
             <div className={styles.uploadSection}>
                 <h2>成績評価シートをアップロード</h2>
-
-                {/* Year and Term Selectors */}
+                {/* ... existing code ... */}
+                {/* (Keep existing JSX for Grade Upload) */}
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <label style={{ fontSize: '0.9em', marginBottom: '5px', fontWeight: 'bold' }}>年度</label>
@@ -561,21 +743,72 @@ export default function GradeUploader() {
                 >
                     {loading ? '解析中...' : '成績データを読み込む'}
                 </button>
-
-                {error && <div className={styles.error}>{error}</div>}
-
-                {/* Debug Info: 開発完了に伴い非表示化、必要なら復活させる */}
-                {/* {debugInfo && ( ... )} */}
-
-                <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                    <Link href="/report-cards/history" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                        保存済みデータの履歴を見る
-                    </Link>
-                </div>
             </div>
 
+            {/* --- JLPT UPLOAD SECTION (NEW) --- */}
+            <div className={styles.uploadSection} style={{ marginTop: '40px', borderTop: '2px dashed #eee', paddingTop: '40px' }}>
+                <h2>JLPT模擬試験スコアシートをアップロード</h2>
+                <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>
+                    ファイル名形式: YYYYMMDD_クラス_試験名.xlsx (例: 20250205_1-13_N4再々試験①.xlsx)
+                </p>
+
+                <div
+                    className={`${styles.dropzone} ${jlptFiles.length > 0 ? styles.active : ''}`}
+                    onDrop={handleJlptDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    onClick={() => jlptFileInputRef.current?.click()}
+                    style={{ borderColor: '#10b981', backgroundColor: jlptFiles.length > 0 ? '#ecfdf5' : 'white' }}
+                >
+                    <input
+                        ref={jlptFileInputRef}
+                        type="file"
+                        accept=".xlsx"
+                        multiple
+                        onChange={handleJlptFileSelect}
+                        style={{ display: 'none' }}
+                    />
+                    <svg className={styles.dropzoneIcon} viewBox="0 0 48 48" fill="none" stroke="#10b981" strokeWidth="1.5">
+                        <path d="M14 24l10-10 10 10" />
+                        <path d="M24 14v20" />
+                        <path d="M8 40h32" />
+                    </svg>
+                    <p className={styles.dropzoneText}>
+                        JLPTファイルをドラッグ＆ドロップ または クリック
+                    </p>
+                </div>
+
+                {jlptFiles.length > 0 && (
+                    <div className={styles.fileList} style={{ marginTop: '15px' }}>
+                        {jlptFiles.map((f, i) => (
+                            <div key={i} className={styles.fileName} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#ecfdf5', marginBottom: '5px', borderRadius: '4px' }}>
+                                <span>{f.name}</span>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); removeJlptFile(i); }}
+                                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <button
+                    onClick={parseJlptExcel}
+                    disabled={jlptFiles.length === 0 || jlptLoading}
+                    className={styles.parseBtn}
+                    style={{ backgroundColor: '#10b981' }}
+                >
+                    {jlptLoading ? '解析中...' : 'JLPTデータを読み込む'}
+                </button>
+            </div>
+
+            {error && <div className={styles.error}>{error}</div>}
+
+            {/* --- RESULTS SECTION (EXISTING) --- */}
             {grades.length > 0 && (
                 <div className={styles.resultsSection}>
+                    {/* ... (Existing Results UI) ... */}
                     <div className={styles.resultsHeader}>
                         <h2>成績処理結果</h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -631,7 +864,6 @@ export default function GradeUploader() {
                     <div className={styles.studentList}>
                         {grades.map((student, index) => (
                             <div key={index} className={styles.studentRow}>
-                                {/* Header (Keep existing tweaked layout) */}
                                 <div className={styles.studentHeader} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                                     <div>
                                         <h3 className={styles.studentName}>
@@ -640,7 +872,7 @@ export default function GradeUploader() {
                                         </h3>
                                         <p className={styles.className}>{student.class}</p>
                                     </div>
-
+                                    {/* ... badge ... */}
                                     <div className={styles.totalScoreBadge} style={{ marginLeft: 'auto' }}>
                                         {viewMode === 'exam' ? (
                                             <>
@@ -665,20 +897,13 @@ export default function GradeUploader() {
                                         )}
                                     </div>
                                 </div>
-
-                                {/* CONTENT AREA BASED ON TAB */}
+                                {/* ... content (charts/tables) ... */}
                                 <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', padding: '20px 0' }}>
-
                                     {/* CHART */}
                                     <div style={{ flex: '1', maxWidth: '500px' }}>
                                         {viewMode === 'exam' ? (
                                             <div className={styles.chartWrapper}>
-                                                <h4 className={styles.chartTitle}>
-                                                    期末試験結果
-                                                    <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                        (合計: {student.finalExamSum}/600)
-                                                    </span>
-                                                </h4>
+                                                <h4 className={styles.chartTitle}>期末試験結果</h4>
                                                 <div className={styles.chartContainer}>
                                                     <RadarChart
                                                         labels={categories}
@@ -690,12 +915,7 @@ export default function GradeUploader() {
                                             </div>
                                         ) : (
                                             <div className={styles.chartWrapper}>
-                                                <h4 className={styles.chartTitle}>
-                                                    成績通知表 (総合成績)
-                                                    <span style={{ fontSize: '0.8em', marginLeft: '8px', color: '#6b7280' }}>
-                                                        (合計: {student.reportDetails.overall.total.toFixed(1)})
-                                                    </span>
-                                                </h4>
+                                                <h4 className={styles.chartTitle}>総合成績</h4>
                                                 <div className={styles.chartContainer}>
                                                     <RadarChart
                                                         labels={categories}
@@ -714,6 +934,7 @@ export default function GradeUploader() {
                                     <div style={{ flex: '1', paddingTop: '40px' }}>
                                         {viewMode === 'exam' ? (
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                {/* ... exam table ... */}
                                                 <thead>
                                                     <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left', backgroundColor: '#f3f4f6' }}>
                                                         <th style={{ padding: '8px' }}>科目</th>
@@ -723,7 +944,6 @@ export default function GradeUploader() {
                                                 </thead>
                                                 <tbody>
                                                     {categories.map((cat, i) => {
-                                                        // Map category name to key
                                                         const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
                                                         const val = student.finalExam[keyMap[i]] || 0
                                                         return (
@@ -743,6 +963,7 @@ export default function GradeUploader() {
                                             </table>
                                         ) : (
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                {/* ... report table ... */}
                                                 <thead>
                                                     <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'center', backgroundColor: '#f3f4f6' }}>
                                                         <th style={{ padding: '8px', textAlign: 'left' }}>科目</th>
@@ -754,7 +975,6 @@ export default function GradeUploader() {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {/* Subjects */}
                                                     {categories.map((cat, i) => {
                                                         const keyMap = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation']
                                                         const details = student.reportDetails[keyMap[i]]
@@ -769,8 +989,6 @@ export default function GradeUploader() {
                                                             </tr>
                                                         )
                                                     })}
-
-                                                    {/* Total */}
                                                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e5e7eb', backgroundColor: '#f0fdf4' }}>
                                                         <td style={{ padding: '12px 8px' }}>総合</td>
                                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
@@ -784,6 +1002,78 @@ export default function GradeUploader() {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* --- JLPT RESULTS (NEW) --- */}
+            {jlptData.length > 0 && (
+                <div className={styles.resultsSection}>
+                    <div className={styles.resultsHeader}>
+                        <h2>JLPT処理結果</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span className={styles.studentCount}>{jlptData.length}件</span>
+                            <button
+                                onClick={saveJlptToDatabase}
+                                disabled={jlptSaving}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: jlptSaving ? '#ccc' : '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: jlptSaving ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                {jlptSaving ? '保存中...' : 'JLPT成績を保存'}
+                            </button>
+                            {jlptSaveMessage && <span style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>{jlptSaveMessage}</span>}
+                        </div>
+                    </div>
+
+                    <div className={styles.studentList}>
+                        {jlptData.map((result, i) => (
+                            <div key={i} className={styles.studentRow} style={{ borderLeft: result.result === 'Pass' ? '4px solid #10b981' : '4px solid #ef4444' }}>
+                                <div className={styles.studentHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <h3 className={styles.studentName}>
+                                            {result.name}
+                                            <span className={styles.studentId}>({result.student_id})</span>
+                                        </h3>
+                                        <p className={styles.className}>{result.exam_name} ({result.exam_date})</p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: result.result === 'Pass' ? '#10b981' : '#ef4444' }}>
+                                            {result.result}
+                                        </div>
+                                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                                            合計: {result.total}点
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table style={{ width: '100%', marginTop: '15px', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
+                                    <thead style={{ backgroundColor: '#f9fafb' }}>
+                                        <tr>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>文字・語彙</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>文法</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>読解</th>
+                                            <th style={{ padding: '8px', border: '1px solid #e5e7eb' }}>聴解</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.vocab}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.grammar}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.reading}</td>
+                                            <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{result.listening}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         ))}
                     </div>
