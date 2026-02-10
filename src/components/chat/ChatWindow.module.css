@@ -372,21 +372,15 @@
     position: relative;
     cursor: pointer;
     margin-top: 8px;
-    display: block;
-    /* Changed from inline-block for better mobile layout */
+    display: inline-block;
     border-radius: 12px;
     overflow: hidden;
     line-height: 0;
-    max-width: 100%;
-    width: fit-content;
 }
 
 .chatImageThumbnail {
     max-height: 240px;
     max-width: 100%;
-    height: auto;
-    /* Ensure aspect ratio */
-    width: auto;
     object-fit: cover;
     border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.05);
