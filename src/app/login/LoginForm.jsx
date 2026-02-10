@@ -20,14 +20,25 @@ export default function LoginForm() {
     useEffect(() => {
         // Handle error from URL parameters (e.g., from auth callback)
         const errorType = searchParams.get('error')
+        const errorMsg = searchParams.get('msg')
+        const errorDesc = searchParams.get('desc')
+
         if (errorType) {
-            if (errorType === 'auth_failed') {
-                setError('認証に失敗しました。Googleアカウントの設定や権限を確認してください。')
+            let fullError = ''
+            if (errorType === 'auth_failed' || errorType === 'no_code') {
+                fullError = '認証に失敗しました。'
             } else if (errorType === 'access_denied') {
-                setError('アクセスが拒否されました。ログインをキャンセルしたか、権限がありません。')
+                fullError = 'アクセスが拒否されました。'
             } else {
-                setError(`エラーが発生しました: ${errorType}`)
+                fullError = `エラーが発生しました (${errorType})。`
             }
+
+            if (errorMsg || errorDesc) {
+                fullError += ` 詳細: ${errorMsg || ''} ${errorDesc || ''}`
+            } else if (errorType === 'auth_failed') {
+                fullError += ' Googleアカウントの設定や権限を確認してください。'
+            }
+            setError(fullError)
         }
 
         const ua = navigator.userAgent || navigator.vendor || window.opera
