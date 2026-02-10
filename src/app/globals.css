@@ -148,6 +148,11 @@
     /* Typography - Extreme High Density */
     --font-size-xs: 0.55rem;
     --font-size-sm: 0.65rem;
+
+    /* Background Colors */
+    --bg-primary: #eff6ff;
+    /* Light pastel blue (Primary-50) */
+
     --font-size-base: 0.7rem;
     --font-size-lg: 0.8rem;
     --font-size-xl: 0.9rem;
