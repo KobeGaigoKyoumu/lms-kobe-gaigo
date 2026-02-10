@@ -150,10 +150,8 @@
     --font-size-sm: 0.65rem;
 
     /* Background Colors */
-    --bg-primary: #dbeafe;
-    /* Vivid pastel blue (Primary-100) */
-    --bg-elevated: #ffffff;
-    /* Ensure cards remain white */
+    /* Reverted to default (white) */
+
 
     --font-size-base: 0.7rem;
     --font-size-lg: 0.8rem;
