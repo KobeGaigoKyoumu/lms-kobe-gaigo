@@ -110,10 +110,12 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
                                         {reportDetails?.subjectCorrectCounts
                                             ? (() => {
-                                                const vocab = reportDetails.subjectCorrectCounts['文字・語彙'] || reportDetails.subjectCorrectCounts['文字語彙'] || { correct: 0, total: 0 };
+                                                const vocab = reportDetails.subjectCorrectCounts['文字・語彙'] || reportDetails.subjectCorrectCounts['文字語彙'] || reportDetails.subjectCorrectCounts['語彙'] || { correct: 0, total: 0 };
                                                 const grammar = reportDetails.subjectCorrectCounts['文法'] || { correct: 0, total: 0 };
                                                 const reading = reportDetails.subjectCorrectCounts['読解'] || { correct: 0, total: 0 };
-                                                return `${vocab.correct + grammar.correct + reading.correct} / ${vocab.total + grammar.total + reading.total}`;
+                                                const totalCorrect = vocab.correct + grammar.correct + reading.correct;
+                                                const totalQuestions = vocab.total + grammar.total + reading.total;
+                                                return `${totalCorrect} / ${totalQuestions}`;
                                             })()
                                             : (finalExam.grammarReadingCorrect || '-')}
                                     </td>
@@ -186,7 +188,14 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{finalExam.total || finalExamSum} / 180</td>
                                 <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
                                     {reportDetails?.subjectCorrectCounts
-                                        ? `${Object.values(reportDetails.subjectCorrectCounts).reduce((acc, cur) => acc + (cur.correct || 0), 0)} / ${Object.values(reportDetails.subjectCorrectCounts).reduce((acc, cur) => acc + (cur.total || 0), 0)}`
+                                        ? (() => {
+                                            const counts = reportDetails.subjectCorrectCounts;
+                                            const vocab = counts['文字・語彙'] || counts['文字語彙'] || counts['語彙'] || { correct: 0, total: 0 };
+                                            const grammar = counts['文法'] || { correct: 0, total: 0 };
+                                            const reading = counts['読解'] || { correct: 0, total: 0 };
+                                            const listening = counts['聴解'] || { correct: 0, total: 0 };
+                                            return `${vocab.correct + grammar.correct + reading.correct + listening.correct} / ${vocab.total + grammar.total + reading.total + listening.total}`;
+                                        })()
                                         : '-'}
                                 </td>
                                 <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
