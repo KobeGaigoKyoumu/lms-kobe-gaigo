@@ -268,24 +268,29 @@ export default function GradeHistoryBoard() {
     }
 
     // Convert record to student object format expected by StudentGradeDetail
-    const recordToStudent = (r) => ({
-        id: r.student_id_text,
-        name: r.student_name,
-        class: r.class_name,
-        yearTerm: r.year_term,
-        finalExam: r.final_exam_data,
-        reportDetails: r.report_card_data,
-        reportCard: { // Reconstruct reportCard summary for chart if needed, or use report_card_data structure if it matches
-            vocab: r.report_card_data?.vocab?.total || 0,
-            listening: r.report_card_data?.listening?.total || 0,
-            reading: r.report_card_data?.reading?.total || 0,
-            grammar: r.report_card_data?.grammar?.total || 0,
-            writing: r.report_card_data?.writing?.total || 0,
-            conversation: r.report_card_data?.conversation?.total || 0,
-        },
-        finalExamSum: r.final_exam_total,
-        reportCardTotal: r.report_card_total
-    })
+    const recordToStudent = (r) => {
+        const isJlpt = r.final_exam_data?.type === 'JLPT';
+
+        return {
+            id: r.student_id_text,
+            name: r.student_name,
+            class: r.class_name,
+            yearTerm: r.year_term,
+            finalExam: r.final_exam_data,
+            reportDetails: r.report_card_data,
+            reportCard: isJlpt ? {} : {
+                vocab: r.report_card_data?.vocab?.total || 0,
+                listening: r.report_card_data?.listening?.total || 0,
+                reading: r.report_card_data?.reading?.total || 0,
+                grammar: r.report_card_data?.grammar?.total || 0,
+                writing: r.report_card_data?.writing?.total || 0,
+                conversation: r.report_card_data?.conversation?.total || 0,
+            },
+            finalExamSum: r.final_exam_total,
+            reportCardTotal: r.report_card_total,
+            isJlpt: isJlpt
+        }
+    }
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>

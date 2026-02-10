@@ -41,9 +41,58 @@ const StudentGradeDetail = ({ student, viewMode }) => {
     }
 
     const { reportDetails, finalExam, reportCard, finalExamSum, reportCardTotal } = student
+    const isJlpt = student.isJlpt || finalExam?.type === 'JLPT'
 
-    // Handle case where reportDetails/finalExam might be missing if data integrity issue
-    if (!reportDetails || !finalExam) return null;
+    // Handle case where important data might be missing
+    if (!finalExam) return null;
+
+    // --- JLPT SPECIFIC VIEW ---
+    if (isJlpt) {
+        return (
+            <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px', marginBottom: '30px', backgroundColor: '#f9fafb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <div>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                            {student.name} <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'normal' }}>({student.id})</span>
+                        </h3>
+                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                            {finalExam.level} - {finalExam.textbook} ({student.class})
+                        </div>
+                    </div>
+                    <div style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: finalExam.result === '合' ? '#dcfce7' : '#fee2e2', color: finalExam.result === '合' ? '#166534' : '#991b1b', fontWeight: 'bold' }}>
+                        {finalExam.result === '合' ? '合格' : '不合格'} ({finalExam.total}点 / Rank: {finalExam.rank})
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                    {[
+                        { label: '文字・語彙', score: finalExam.vocab, correct: finalExam.vocabCorrect, eval: finalExam.vocabEval },
+                        { label: '文法', score: finalExam.grammar, correct: finalExam.grammarCorrect, eval: finalExam.grammarEval },
+                        { label: '読解', score: finalExam.reading, correct: finalExam.readingCorrect, eval: finalExam.readingEval },
+                        { label: '言語知識(文・言・読)', score: finalExam.grammarReading, correct: finalExam.grammarReadingCorrect, eval: finalExam.grammarReadingEval },
+                        { label: '聴解', score: finalExam.listening, correct: finalExam.listeningCorrect, eval: finalExam.listeningEval },
+                    ].filter(item => item.score !== undefined).map((item, idx) => (
+                        <div key={idx} style={{ padding: '12px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '4px' }}>{item.label}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{item.score} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>点</span></div>
+                                <div style={{ fontSize: '0.9rem', color: '#374151' }}>{item.correct} / {item.eval}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {reportDetails?.answerDetails && (
+                    <div style={{ marginTop: '15px', fontSize: '0.8rem', color: '#6b7280' }}>
+                        ※ 正誤詳細データあり
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    // --- NORMAL GRADE VIEW ---
+    if (!reportDetails) return null;
 
     return (
         <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px', marginBottom: '30px', backgroundColor: '#fff' }}>
@@ -177,12 +226,12 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 <RadarChart
                                     labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
                                     data={[
-                                        finalExam.vocab,
-                                        finalExam.listening,
-                                        finalExam.reading,
-                                        finalExam.grammar,
-                                        finalExam.writing,
-                                        finalExam.conversation
+                                        finalExam?.vocab || 0,
+                                        finalExam?.listening || 0,
+                                        finalExam?.reading || 0,
+                                        finalExam?.grammar || 0,
+                                        finalExam?.writing || 0,
+                                        finalExam?.conversation || 0
                                     ]}
                                     title="期末試験"
                                     color="blue"
@@ -201,12 +250,12 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 </thead>
                                 <tbody>
                                     {[
-                                        { label: '文字・語彙', val: finalExam.vocab },
-                                        { label: '聴解', val: finalExam.listening },
-                                        { label: '読解', val: finalExam.reading },
-                                        { label: '文法', val: finalExam.grammar },
-                                        { label: '作文', val: finalExam.writing },
-                                        { label: '会話', val: finalExam.conversation },
+                                        { label: '文字・語彙', val: finalExam?.vocab || 0 },
+                                        { label: '聴解', val: finalExam?.listening || 0 },
+                                        { label: '読解', val: finalExam?.reading || 0 },
+                                        { label: '文法', val: finalExam?.grammar || 0 },
+                                        { label: '作文', val: finalExam?.writing || 0 },
+                                        { label: '会話', val: finalExam?.conversation || 0 },
                                     ].map((cat, idx) => (
                                         <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                             <td style={{ padding: '12px 10px' }}>{cat.label}</td>
@@ -235,12 +284,12 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 <RadarChart
                                     labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
                                     data={[
-                                        reportCard.vocab,
-                                        reportCard.listening,
-                                        reportCard.reading,
-                                        reportCard.grammar,
-                                        reportCard.writing,
-                                        reportCard.conversation
+                                        reportCard?.vocab || 0,
+                                        reportCard?.listening || 0,
+                                        reportCard?.reading || 0,
+                                        reportCard?.grammar || 0,
+                                        reportCard?.writing || 0,
+                                        reportCard?.conversation || 0
                                     ]}
                                     title="成績通知表"
                                     color="green"
@@ -272,25 +321,25 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         { label: '作文', key: 'writing' },
                                         { label: '会話', key: 'conversation' },
                                     ].map((cat) => {
-                                        const d = reportDetails[cat.key]
+                                        const d = reportDetails[cat.key] || {}
                                         return (
                                             <tr key={cat.key} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                 <td style={{ padding: '8px' }}>{cat.label}</td>
                                                 {/* Weighted Scores (Corrected View) */}
                                                 <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {d.base?.toFixed(1)}
+                                                    {d.base?.toFixed(1) || '0.0'}
                                                 </td>
                                                 <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {reportDetails.attendance?.toFixed(1)}
+                                                    {reportDetails.attendance?.toFixed(1) || '0.0'}
                                                 </td>
                                                 <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {reportDetails.participation?.toFixed(1)}
+                                                    {reportDetails.participation?.toFixed(1) || '0.0'}
                                                 </td>
                                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                                                    {d.total?.toFixed(1)}
+                                                    {d.total?.toFixed(1) || '0.0'}
                                                 </td>
                                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#059669' }}>
-                                                    {calculateGrade(d.total)}
+                                                    {calculateGrade(d.total || 0)}
                                                 </td>
                                             </tr>
                                         )
@@ -301,10 +350,10 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center' }}></td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#047857' }}>
-                                            {reportCardTotal.toFixed(1)} <span style={{ fontSize: '0.8rem' }}>/ 100</span>
+                                            {(reportCardTotal || 0).toFixed(1)} <span style={{ fontSize: '0.8rem' }}>/ 100</span>
                                         </td>
                                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#047857' }}>
-                                            {calculateGrade(reportCardTotal)}
+                                            {calculateGrade(reportCardTotal || 0)}
                                         </td>
                                     </tr>
                                 </tbody>
