@@ -578,32 +578,50 @@ export default function GradeHistoryBoard() {
                 historyViewMode === 'details' && (
                     <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                                onClick={() => setDetailSubMode('exam')}
-                                style={{
-                                    padding: '6px 14px',
-                                    backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
-                                    color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
-                                    borderRadius: '20px', border: '1px solid',
-                                    borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
-                                    cursor: 'pointer', fontSize: '0.85rem'
-                                }}
-                            >
-                                期末試験結果を表示
-                            </button>
-                            <button
-                                onClick={() => setDetailSubMode('report')}
-                                style={{
-                                    padding: '6px 14px',
-                                    backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
-                                    color: detailSubMode === 'report' ? '#047857' : '#4b5563',
-                                    borderRadius: '20px', border: '1px solid',
-                                    borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
-                                    cursor: 'pointer', fontSize: '0.85rem'
-                                }}
-                            >
-                                成績通知表を表示
-                            </button>
+                            {selectedTerm?.startsWith('JLPT') ? (
+                                <button
+                                    onClick={() => setDetailSubMode('exam')}
+                                    style={{
+                                        padding: '6px 14px',
+                                        backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
+                                        color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
+                                        borderRadius: '20px', border: '1px solid',
+                                        borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
+                                        cursor: 'pointer', fontSize: '0.85rem'
+                                    }}
+                                >
+                                    JLPT模擬試験結果詳細を表示
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setDetailSubMode('exam')}
+                                        style={{
+                                            padding: '6px 14px',
+                                            backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
+                                            color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
+                                            borderRadius: '20px', border: '1px solid',
+                                            borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
+                                            cursor: 'pointer', fontSize: '0.85rem'
+                                        }}
+                                    >
+                                        期末試験結果を表示
+                                    </button>
+                                    <button
+                                        onClick={() => setDetailSubMode('report')}
+                                        style={{
+                                            padding: '6px 14px',
+                                            backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
+                                            color: detailSubMode === 'report' ? '#047857' : '#4b5563',
+                                            borderRadius: '20px', border: '1px solid',
+                                            borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
+                                            cursor: 'pointer', fontSize: '0.85rem'
+                                        }}
+                                    >
+                                        成績通知表を表示
+                                    </button>
+                                </>
+                            )}
                         </div>
 
                         {/* Batch Export Button */}
@@ -625,7 +643,11 @@ export default function GradeHistoryBoard() {
                                 fontSize: '0.85rem'
                             }}
                         >
-                            {generating ? '生成中...' : (detailSubMode === 'exam' ? '一括PDF出力 (期末試験)' : '一括PDF出力 (通知表)')}
+                            {generating ? '生成中...' : (
+                                selectedTerm?.startsWith('JLPT')
+                                    ? '一括PDF出力 (JLPT)'
+                                    : (detailSubMode === 'exam' ? '一括PDF出力 (期末試験)' : '一括PDF出力 (通知表)')
+                            )}
                         </button>
                     </div>
                 )

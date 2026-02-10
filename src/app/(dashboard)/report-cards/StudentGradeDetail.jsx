@@ -6,23 +6,6 @@ import styles from './page.module.css'
 // export { exportStudentGradeToPDF } removed - using server-side API
 
 const StudentGradeDetail = ({ student, viewMode }) => {
-    // Helper used in GradeUploader
-    const getGradeColor = (score) => {
-        if (score >= 80) return '#166534' // Green
-        if (score >= 60) return '#1e40af' // Blue
-        if (score >= 40) return '#b45309' // Yellow-Orange
-        if (score >= 20) return '#991b1b' // Red
-        return '#7f1d1d' // Dark Red
-    }
-
-    const getGradeBg = (score) => {
-        if (score >= 80) return '#dcfce7'
-        if (score >= 60) return '#eff6ff'
-        if (score >= 40) return '#fef3c7'
-        if (score >= 20) return '#fee2e2'
-        return '#fecaca'
-    }
-
     const calculateGrade = (score) => {
         if (score >= 80) return 'A'
         if (score >= 70) return 'B'
@@ -32,7 +15,16 @@ const StudentGradeDetail = ({ student, viewMode }) => {
     }
 
     // Calculate Final Exam Letter Grade
-    const calculateFinalExamGrade = (score) => {
+    const calculateFinalExamGrade = (score, isJlpt = false) => {
+        if (isJlpt) {
+            // For JLPT, we don't usually use A-F like this, but if reuse requested:
+            const percent = (score / 180) * 100;
+            if (percent >= 80) return 'A'
+            if (percent >= 60) return 'B'
+            if (percent >= 40) return 'C'
+            if (percent >= 20) return 'D'
+            return 'F'
+        }
         if (score >= 80) return 'A'
         if (score >= 60) return 'B'
         if (score >= 40) return 'C'
@@ -46,79 +38,56 @@ const StudentGradeDetail = ({ student, viewMode }) => {
     // Handle case where important data might be missing
     if (!finalExam) return null;
 
-    // --- JLPT SPECIFIC VIEW ---
-    if (isJlpt) {
-        return (
-            <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px', marginBottom: '30px', backgroundColor: '#f9fafb' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <div>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                            {student.name} <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'normal' }}>({student.id})</span>
-                        </h3>
-                        <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                            {finalExam.level} - {finalExam.textbook} ({student.class})
-                        </div>
-                    </div>
-                    <div style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: finalExam.result === '合' ? '#dcfce7' : '#fee2e2', color: finalExam.result === '合' ? '#166534' : '#991b1b', fontWeight: 'bold' }}>
-                        {finalExam.result === '合' ? '合格' : '不合格'} ({finalExam.total}点 / Rank: {finalExam.rank})
-                    </div>
-                </div>
+    // Adapt Categories for Table and Chart
+    const examCategories = isJlpt ? [
+        { label: '文字・語彙', val: finalExam?.vocab || 0, key: 'vocab' },
+        { label: '文法', val: finalExam?.grammar || 0, key: 'grammar' },
+        { label: '読解', val: finalExam?.reading || 0, key: 'reading' },
+        { label: '聴解', val: finalExam?.listening || 0, key: 'listening' },
+        { label: '言語知識(文・言・読)', val: finalExam?.grammarReading || 0, key: 'grammarReading' },
+    ].filter(c => c.val !== undefined && c.val !== null) : [
+        { label: '文字・語彙', val: finalExam?.vocab || 0, key: 'vocab' },
+        { label: '聴解', val: finalExam?.listening || 0, key: 'listening' },
+        { label: '読解', val: finalExam?.reading || 0, key: 'reading' },
+        { label: '文法', val: finalExam?.grammar || 0, key: 'grammar' },
+        { label: '作文', val: finalExam?.writing || 0, key: 'writing' },
+        { label: '会話', val: finalExam?.conversation || 0, key: 'conversation' },
+    ];
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                    {[
-                        { label: '文字・語彙', score: finalExam.vocab, correct: finalExam.vocabCorrect, eval: finalExam.vocabEval },
-                        { label: '文法', score: finalExam.grammar, correct: finalExam.grammarCorrect, eval: finalExam.grammarEval },
-                        { label: '読解', score: finalExam.reading, correct: finalExam.readingCorrect, eval: finalExam.readingEval },
-                        { label: '言語知識(文・言・読)', score: finalExam.grammarReading, correct: finalExam.grammarReadingCorrect, eval: finalExam.grammarReadingEval },
-                        { label: '聴解', score: finalExam.listening, correct: finalExam.listeningCorrect, eval: finalExam.listeningEval },
-                    ].filter(item => item.score !== undefined).map((item, idx) => (
-                        <div key={idx} style={{ padding: '12px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '4px' }}>{item.label}</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{item.score} <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>点</span></div>
-                                <div style={{ fontSize: '0.9rem', color: '#374151' }}>{item.correct} / {item.eval}</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {reportDetails?.answerDetails && (
-                    <div style={{ marginTop: '15px', fontSize: '0.8rem', color: '#6b7280' }}>
-                        ※ 正誤詳細データあり
-                    </div>
-                )}
-            </div>
-        )
-    }
-
-    // --- NORMAL GRADE VIEW ---
-    if (!reportDetails) return null;
+    const reportCategories = [
+        { label: '文字・語彙', key: 'vocab' },
+        { label: '聴解', key: 'listening' },
+        { label: '読解', key: 'reading' },
+        { label: '文法', key: 'grammar' },
+        { label: '作文', key: 'writing' },
+        { label: '会話', key: 'conversation' },
+    ];
 
     return (
         <div style={{ padding: '20px', border: '1px solid #e5e7eb', borderRadius: '12px', marginBottom: '30px', backgroundColor: '#fff' }}>
-            {/* Header: Name & Final Exam Badge */}
+            {/* Header: Name & Badge */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
                 <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         {student.name} <span style={{ fontSize: '0.9rem', color: '#6b7280', fontWeight: 'normal' }}>({student.id})</span>
                     </h3>
                     <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                        {student.class}
+                        {isJlpt ? `${finalExam.level} - ${finalExam.textbook} (${student.class})` : student.class}
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div style={{ textAlign: 'center', padding: '5px 15px', border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: '#fff' }}>
                         <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '2px' }}>
-                            {viewMode === 'exam' ? '期末試験 (合計)' : '総合評価 (合計)'}
+                            {isJlpt ? '模擬試験結果' : (viewMode === 'exam' ? '期末試験 (合計)' : '総合評価 (合計)')}
                         </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: viewMode === 'exam' ? '#3b82f6' : '#059669' }}>
-                            {viewMode === 'exam'
-                                ? calculateFinalExamGrade(finalExamSum / 6)
-                                : calculateGrade(reportCardTotal)
+                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: (isJlpt || viewMode === 'exam') ? '#3b82f6' : '#059669' }}>
+                            {isJlpt
+                                ? (finalExam.result === '合' ? '合格' : '不合格')
+                                : (viewMode === 'exam' ? calculateFinalExamGrade(finalExamSum / 6) : calculateGrade(reportCardTotal))
                             }
                             <span style={{ fontSize: '1rem', color: '#6b7280', marginLeft: '4px' }}>
-                                ({viewMode === 'exam' ? finalExamSum : reportCardTotal.toFixed(1)})
+                                ({isJlpt ? finalExamSum : (viewMode === 'exam' ? finalExamSum : (reportCardTotal || 0).toFixed(1))})
                             </span>
                         </div>
                     </div>
@@ -134,29 +103,18 @@ const StudentGradeDetail = ({ student, viewMode }) => {
 
                                 const payload = {
                                     yearTerm: student.yearTerm || '',
-                                    type: viewMode === 'exam' ? 'final_exam' : 'report_card'
+                                    type: isJlpt ? 'jlpt' : (viewMode === 'exam' ? 'final_exam' : 'report_card')
                                 };
 
-                                if (viewMode === 'exam') {
-                                    // Payload for Final Exam PDF (only exam data needed)
-                                    payload.student = {
-                                        student_id_text: student.id,
-                                        student_name: student.name,
-                                        class_name: student.class,
-                                        final_exam_total: finalExamSum,
-                                        final_exam_data: finalExam // Use finalExam object directly
-                                    };
-                                } else {
-                                    // Payload for Report Card PDF (needs everything)
-                                    payload.student = {
-                                        student_id_text: student.id,
-                                        student_name: student.name,
-                                        class_name: student.class,
-                                        final_exam_total: finalExamSum,
-                                        report_card_total: reportCardTotal,
-                                        report_card_data: reportDetails
-                                    };
-                                }
+                                payload.student = {
+                                    student_id_text: student.id,
+                                    student_name: student.name,
+                                    class_name: student.class,
+                                    final_exam_total: finalExamSum,
+                                    final_exam_data: finalExam,
+                                    report_card_total: reportCardTotal,
+                                    report_card_data: reportDetails
+                                };
 
                                 const response = await fetch('/api/grades/report/generate', {
                                     method: 'POST',
@@ -170,9 +128,9 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 const url = window.URL.createObjectURL(blob);
                                 const a = document.createElement('a');
                                 a.href = url;
-                                const filename = viewMode === 'exam'
-                                    ? `期末試験結果_${student.name}_${student.id}.pdf`
-                                    : `成績通知表_${student.name}_${student.id}.pdf`;
+                                const filename = isJlpt
+                                    ? `JLPT結果_${student.name}_${student.id}.pdf`
+                                    : (viewMode === 'exam' ? `期末試験結果_${student.name}_${student.id}.pdf` : `成績通知表_${student.name}_${student.id}.pdf`);
                                 a.download = filename;
                                 document.body.appendChild(a);
                                 a.click();
@@ -218,22 +176,15 @@ const StudentGradeDetail = ({ student, viewMode }) => {
 
             {/* Content Body */}
             <div className={styles.chartsGrid}>
-                {viewMode === 'exam' ? (
+                {(isJlpt || viewMode === 'exam') ? (
                     <>
                         <div className={styles.chartWrapper}>
-                            <h4 className={styles.chartTitle}>期末試験結果 (合計: {finalExamSum}/600)</h4>
+                            <h4 className={styles.chartTitle}>{isJlpt ? 'JLPT結果詳細' : '期末試験結果'} (合計: {finalExamSum}/{isJlpt ? 180 : 600})</h4>
                             <div className={styles.chartContainer}>
                                 <RadarChart
-                                    labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
-                                    data={[
-                                        finalExam?.vocab || 0,
-                                        finalExam?.listening || 0,
-                                        finalExam?.reading || 0,
-                                        finalExam?.grammar || 0,
-                                        finalExam?.writing || 0,
-                                        finalExam?.conversation || 0
-                                    ]}
-                                    title="期末試験"
+                                    labels={examCategories.map(c => c.label)}
+                                    data={examCategories.map(c => c.val)}
+                                    title={isJlpt ? "JLPT模試" : "期末試験"}
                                     color="blue"
                                 />
                             </div>
@@ -244,32 +195,25 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 <thead>
                                     <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #e5e7eb' }}>
                                         <th style={{ padding: '10px', textAlign: 'left' }}>科目</th>
-                                        <th style={{ padding: '10px', textAlign: 'right' }}>点数 (100点満点)</th>
+                                        <th style={{ padding: '10px', textAlign: 'right' }}>点数 {isJlpt ? '' : '(100点満点)'}</th>
                                         <th style={{ padding: '10px', textAlign: 'center' }}>判定</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        { label: '文字・語彙', val: finalExam?.vocab || 0 },
-                                        { label: '聴解', val: finalExam?.listening || 0 },
-                                        { label: '読解', val: finalExam?.reading || 0 },
-                                        { label: '文法', val: finalExam?.grammar || 0 },
-                                        { label: '作文', val: finalExam?.writing || 0 },
-                                        { label: '会話', val: finalExam?.conversation || 0 },
-                                    ].map((cat, idx) => (
+                                    {examCategories.map((cat, idx) => (
                                         <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                             <td style={{ padding: '12px 10px' }}>{cat.label}</td>
                                             <td style={{ padding: '12px 10px', textAlign: 'right' }}>{cat.val}</td>
                                             <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 'bold' }}>
-                                                {calculateFinalExamGrade(cat.val)}
+                                                {isJlpt ? (finalExam[cat.key + 'Eval'] || '-') : calculateFinalExamGrade(cat.val)}
                                             </td>
                                         </tr>
                                     ))}
                                     <tr style={{ borderTop: '2px solid #e5e7eb', backgroundColor: '#eff6ff', fontWeight: 'bold' }}>
                                         <td style={{ padding: '12px 10px' }}>合計</td>
-                                        <td style={{ padding: '12px 10px', textAlign: 'right' }}>{finalExamSum} / 600</td>
+                                        <td style={{ padding: '12px 10px', textAlign: 'right' }}>{finalExamSum} / {isJlpt ? 180 : 600}</td>
                                         <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                                            {calculateFinalExamGrade(finalExamSum / 6)}
+                                            {isJlpt ? (finalExam.result === '合' ? '合格' : '不合格') : calculateFinalExamGrade(finalExamSum / 6)}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -278,11 +222,12 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                     </>
                 ) : (
                     <>
+                        {/* Normal Report Card View (Already refined in previous step) */}
                         <div className={styles.chartWrapper}>
                             <h4 className={styles.chartTitle}>成績通知表 (総合成績: {reportCardTotal})</h4>
                             <div className={styles.chartContainer}>
                                 <RadarChart
-                                    labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
+                                    labels={reportCategories.map(c => c.label)}
                                     data={[
                                         reportCard?.vocab || 0,
                                         reportCard?.listening || 0,
@@ -300,7 +245,6 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                         </div>
 
                         <div style={{ width: '100%', overflowX: 'auto' }}>
-                            {/* Report Card Detailed Table */}
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                                 <thead>
                                     <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #e5e7eb' }}>
@@ -313,34 +257,16 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        { label: '文字・語彙', key: 'vocab' },
-                                        { label: '聴解', key: 'listening' },
-                                        { label: '読解', key: 'reading' },
-                                        { label: '文法', key: 'grammar' },
-                                        { label: '作文', key: 'writing' },
-                                        { label: '会話', key: 'conversation' },
-                                    ].map((cat) => {
-                                        const d = reportDetails[cat.key] || {}
+                                    {reportCategories.map((cat) => {
+                                        const d = reportDetails?.[cat.key] || {}
                                         return (
                                             <tr key={cat.key} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                                 <td style={{ padding: '8px' }}>{cat.label}</td>
-                                                {/* Weighted Scores (Corrected View) */}
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {d.base?.toFixed(1) || '0.0'}
-                                                </td>
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {reportDetails.attendance?.toFixed(1) || '0.0'}
-                                                </td>
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    {reportDetails.participation?.toFixed(1) || '0.0'}
-                                                </td>
-                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                                                    {d.total?.toFixed(1) || '0.0'}
-                                                </td>
-                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#059669' }}>
-                                                    {calculateGrade(d.total || 0)}
-                                                </td>
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>{d.base?.toFixed(1) || '0.0'}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>{reportDetails?.attendance?.toFixed(1) || '0.0'}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>{reportDetails?.participation?.toFixed(1) || '0.0'}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>{d.total?.toFixed(1) || '0.0'}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#059669' }}>{calculateGrade(d.total || 0)}</td>
                                             </tr>
                                         )
                                     })}
