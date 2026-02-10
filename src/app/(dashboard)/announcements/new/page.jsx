@@ -71,13 +71,82 @@ export default function NewAnnouncementPage() {
         setSelectedFiles(Array.from(e.target.files))
     }
 
+    // Image Compression Utility
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Max dimensions
+                    const MAX_WIDTH = 1280;
+                    const MAX_HEIGHT = 1280;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Canvas is empty'));
+                            return;
+                        }
+                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    }, 'image/jpeg', 0.7); // 70% quality
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
     const uploadFiles = async (files) => {
         const uploadedFiles = []
         const errors = []
 
         for (const file of files) {
+            let processedFile = file;
+
+            // Compress if image
+            if (file.type.startsWith('image/')) {
+                try {
+                    processedFile = await compressImage(file);
+                } catch (e) {
+                    console.error('Compression failed', e);
+                }
+            }
+
+            // Check size (1MB)
+            if (processedFile.size > 1024 * 1024) {
+                errors.push(`${file.name}: サイズが大きすぎます (最大1MB)`);
+                continue;
+            }
+
             const formData = new FormData()
-            formData.append('file', file)
+            formData.append('file', processedFile)
 
             const result = await uploadAnnouncementFile(formData)
 
@@ -91,9 +160,11 @@ export default function NewAnnouncementPage() {
         }
 
         if (errors.length > 0) {
-            const errorMsg = `ファイルのアップロードに失敗しました:\n${errors.join('\n')}\n\n※バケット「announcements」が作成されているか確認してください。`;
+            const errorMsg = `一部のファイルのアップロードに失敗しました:\n${errors.join('\n')}`;
             alert(errorMsg);
-            throw new Error(errorMsg); // 呼び出し元で中断させるため
+            if (uploadedFiles.length === 0) { // All failed
+                throw new Error(errorMsg);
+            }
         }
 
         return uploadedFiles

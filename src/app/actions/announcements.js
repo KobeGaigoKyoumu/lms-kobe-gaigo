@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-import { uploadFileToDrive } from '@/lib/googleDrive'
+// Initialize Admin Client
+const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 /**
  * お知らせ用のファイルをアップロードする（サーバーサイドで実行）
@@ -20,27 +21,41 @@ export async function uploadAnnouncementFile(formData) {
     }
 
     try {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const bucketName = 'chat-attachments' // Share the same bucket
+
+        // ArrayBuffer to Buffer
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        // Upload to Google Drive
-        const uploadedFile = await uploadFileToDrive(
-            buffer,
-            file.name,
-            file.type
-        )
+        const { data, error } = await adminSupabase
+            .storage
+            .from(bucketName)
+            .upload(fileName, buffer, {
+                contentType: file.type,
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (error) throw error
+
+        const { data: { publicUrl } } = adminSupabase
+            .storage
+            .from(bucketName)
+            .getPublicUrl(fileName)
 
         return {
             success: true,
             file: {
-                name: uploadedFile.name,
-                url: uploadedFile.url,
-                path: uploadedFile.id // Google Drive では ID を path として扱う
+                name: file.name,
+                url: publicUrl,
+                path: fileName // Store filename as path for deletion
             }
         }
     } catch (err) {
-        console.error('Google Drive Announcement Upload Error:', err)
-        return { success: false, error: 'アップロードに失敗しました (Google Drive)' }
+        console.error('Supabase Announcement Upload Error:', err)
+        return { success: false, error: `アップロードに失敗しました: ${err.message}` }
     }
 }
 
@@ -55,11 +70,9 @@ export async function deleteAnnouncement(id) {
         return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY is missing' }
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
     try {
-        // 1. お知らせのデータを取得して、ファイル添付を確認（あとでStorageから消すため）
-        const { data: announcement, error: fetchError } = await supabase
+        // 1. お知らせのデータを取得して、ファイル添付を確認
+        const { data: announcement, error: fetchError } = await adminSupabase
             .from('announcements')
             .select('file_urls')
             .eq('id', id)
@@ -71,7 +84,7 @@ export async function deleteAnnouncement(id) {
         }
 
         // 2. お知らせを削除
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await adminSupabase
             .from('announcements')
             .delete()
             .eq('id', id)
@@ -83,11 +96,17 @@ export async function deleteAnnouncement(id) {
 
         // 3. ストレージ内のファイルも削除
         if (announcement.file_urls && announcement.file_urls.length > 0) {
-            const { deleteFileFromDrive } = require('@/lib/googleDrive')
-            for (const fileObj of announcement.file_urls) {
-                if (fileObj.path) { // path に Google Drive の ID が入っている想定
-                    await deleteFileFromDrive(fileObj.path)
-                }
+            const filesToDelete = announcement.file_urls
+                .map(f => f.path) // path is the filename
+                .filter(Boolean);
+
+            if (filesToDelete.length > 0) {
+                const { error: storageError } = await adminSupabase
+                    .storage
+                    .from('chat-attachments')
+                    .remove(filesToDelete)
+
+                if (storageError) console.error('Storage Delete Error:', storageError)
             }
         }
 
