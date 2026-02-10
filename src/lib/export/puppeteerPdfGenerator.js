@@ -990,10 +990,358 @@ async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
  * 期末試験結果通知書 HTMLを生成 (日本語版・公的文書スタイル)
  */
 function generateFinalExamHTML(data, yearTerm) {
-  const { student_name, student_id_text, class_name, final_exam_total, final_exam_data } = data;
+  const { student_name, student_id_text, class_name, final_exam_total, final_exam_data, report_card_data } = data;
   const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+  const isJlpt = final_exam_data?.type === 'JLPT';
 
-  // 評価判定 (100点満点)
+  // --- JLPT SPECIFIC TEMPLATE ---
+  if (isJlpt) {
+    const finalExam = final_exam_data;
+    const reportDetails = report_card_data || {};
+    const finalExamSum = data.final_exam_total;
+
+    const getEvalStr = (score, max) => {
+      const rate = score / (max || 60);
+      if (rate <= 1 / 3) return 'C';
+      if (rate <= 2 / 3) return 'B';
+      return 'A';
+    };
+
+    const getEvalStyle = (val) => {
+      if (val === 'A') return 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
+      if (val === 'B') return 'background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a;';
+      return 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
+    };
+
+    let subjectRows = '';
+    if (finalExam.level === 'N4' || finalExam.level === 'N5') {
+      const vocab = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+      const grammar = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+      const reading = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+      const combinedScore = (finalExam.vocab || 0) + (finalExam.grammarReading || 0);
+      const combinedCorrect = vocab.correct + grammar.correct + reading.correct;
+      const combinedTotalQ = vocab.total + grammar.total + reading.total;
+      const eStr = getEvalStr(combinedScore, 120);
+
+      subjectRows = `
+        <tr>
+          <td class="subject-cell">言語知識（文字・語彙・文法）・読解</td>
+          <td class="score-cell">${combinedScore} / 120</td>
+          <td class="ratio-cell">${combinedCorrect} / ${combinedTotalQ}</td>
+          <td class="judge-cell">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
+          <td class="eval-cell"><span class="eval-badge" style="${getEvalStyle(eStr)}">${eStr}</span></td>
+        </tr>
+      `;
+    } else {
+      const vocabScore = (finalExam.vocab || 0) + (finalExam.grammar || 0);
+      const vocabCounts = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+      const grammarCounts = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+      const vCorrect = vocabCounts.correct + grammarCounts.correct;
+      const vTotal = vocabCounts.total + grammarCounts.total;
+      const vEval = getEvalStr(vocabScore, 60);
+
+      const rScore = finalExam.reading || 0;
+      const rCounts = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+      const rEval = getEvalStr(rScore, 60);
+
+      subjectRows = `
+        <tr>
+          <td class="subject-cell">言語知識（文字・語彙・文法）</td>
+          <td class="score-cell">${vocabScore} / 60</td>
+          <td class="ratio-cell">${vCorrect} / ${vTotal}</td>
+          <td class="judge-cell">${finalExam.judgments?.[0] || '-'}</td>
+          <td class="eval-cell"><span class="eval-badge" style="${getEvalStyle(vEval)}">${vEval}</span></td>
+        </tr>
+        <tr>
+          <td class="subject-cell">読解</td>
+          <td class="score-cell">${rScore} / 60</td>
+          <td class="ratio-cell">${rCounts.correct} / ${rCounts.total}</td>
+          <td class="judge-cell">${finalExam.judgments?.[1] || '-'}</td>
+          <td class="eval-cell"><span class="eval-badge" style="${getEvalStyle(rEval)}">${rEval}</span></td>
+        </tr>
+      `;
+    }
+
+    // Listening Row
+    const lScore = finalExam.listening || 0;
+    const lCounts = reportDetails.subjectCorrectCounts?.['聴解'] || { correct: 0, total: 0 };
+    const lEval = getEvalStr(lScore, 60);
+    const lJudgeIdx = (finalExam.level === 'N4' || finalExam.level === 'N5') ? 1 : 2;
+
+    subjectRows += `
+      <tr>
+        <td class="subject-cell">聴解</td>
+        <td class="score-cell">${lScore} / 60</td>
+        <td class="ratio-cell">${lCounts.correct} / ${lCounts.total}</td>
+        <td class="judge-cell">${finalExam.judgments?.[lJudgeIdx] || '-'}</td>
+        <td class="eval-cell"><span class="eval-badge" style="${getEvalStyle(lEval)}">${lEval}</span></td>
+      </tr>
+    `;
+
+    // Total Row
+    const totalScore = finalExam.total || finalExamSum;
+    const totalEval = getEvalStr(totalScore, 180);
+    const counts = reportDetails.subjectCorrectCounts || {};
+    const vC = counts['文字・語彙'] || counts['文字語彙'] || counts['語彙'] || { correct: 0, total: 0 };
+    const gC = counts['文法'] || { correct: 0, total: 0 };
+    const rC = counts['読解'] || { correct: 0, total: 0 };
+    const lC = counts['聴解'] || { correct: 0, total: 0 };
+    const allC = vC.correct + gC.correct + rC.correct + lC.correct;
+    const allT = vC.total + gC.total + rC.total + lC.total;
+
+    subjectRows += `
+      <tr class="total-row">
+        <td class="subject-cell">合計</td>
+        <td class="score-cell">${totalScore} / 180</td>
+        <td class="ratio-cell">${allC} / ${allT}</td>
+        <td class="judge-cell">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
+        <td class="eval-cell"><span class="eval-badge" style="${getEvalStyle(totalEval)}">${totalEval}</span></td>
+      </tr>
+    `;
+
+    // Answer Details HTML
+    let detailsHtml = '';
+    if (reportDetails.answerDetails && reportDetails.answerDetails.length > 0) {
+      const categories = ['文字・語彙', '文法', '読解', '聴解'];
+      detailsHtml = categories.map(sub => {
+        const subDetails = reportDetails.answerDetails.filter(d => {
+          if (sub === '文字・語彙') return d.subject === '文字・語彙' || d.subject === '文字語彙' || d.subject === '語彙';
+          return d.subject === sub;
+        });
+        if (subDetails.length === 0) return '';
+
+        const catCounts = sub === '文字・語彙'
+          ? (reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'])
+          : reportDetails.subjectCorrectCounts?.[sub];
+
+        return `
+          <div class="answer-category">
+            <h4 class="category-title">${sub} <span class="category-count">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></h4>
+            <div class="question-grid">
+              ${subDetails.map(d => `
+                <div class="question-item ${d.isCorrect ? 'correct' : 'incorrect'}">
+                  <div class="q-no">${d.questionNo}</div>
+                  <div class="q-ans">${d.selected || '-'}</div>
+                  <div class="q-correct">(${d.correctAnswer})</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>JLPT模擬試験結果</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: A4; margin: 15mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: 10pt;
+      line-height: 1.4;
+      color: #334155;
+      background: #fff;
+    }
+    
+    .header-info {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 0.9rem;
+    }
+    .header-info table { width: 100%; border: none; }
+    .header-info td { border: none; padding: 2px 0; text-align: left; font-size: 8.5pt; color: #475569; }
+    .header-info strong { color: #334155; }
+
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 15px 20px;
+        border-left: 5px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
+        background-color: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 25px;
+    }
+    .student-data { flex: 1; }
+    .class-name { font-size: 8.5pt; color: #64748b; margin-bottom: 4px; }
+    .student-name { font-size: 16pt; font-weight: bold; color: #1e293b; margin: 0; }
+    .student-id { font-size: 10pt; color: #64748b; font-weight: normal; margin-left: 8px; }
+    .exam-name { font-size: 9pt; color: #6b7280; margin-top: 4px; }
+
+    .result-tiles { display: flex; gap: 12px; }
+    .tile {
+        text-align: center;
+        padding: 10px 18px;
+        border-radius: 8px;
+        min-width: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .score-tile { background-color: #fff; border: 1px solid #e2e8f0; }
+    .judge-tile { 
+        background-color: ${finalExam.result === '合' || finalExam.result === '○' ? '#f0fdf4' : '#fef2f2'};
+        border: 1px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};
+    }
+    .tile-label { font-size: 7.5pt; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .score-tile .tile-label { color: #64748b; }
+    .judge-tile .tile-label { color: ${finalExam.result === '合' || finalExam.result === '○' ? '#166534' : '#991b1b'}; }
+    .tile-value { font-size: 14pt; font-weight: bold; }
+    .result-text { font-size: 14pt; font-weight: 800; color: ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; }
+    .score-sm { font-size: 10pt; color: #64748b; font-weight: normal; }
+
+    .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+    .score-table th {
+        background-color: #f9fafb;
+        padding: 10px;
+        font-size: 9pt;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+        text-align: left;
+    }
+    .score-table td {
+        padding: 12px 10px;
+        font-size: 9.5pt;
+        border: 1px solid #e5e7eb;
+    }
+    .subject-cell { font-weight: 500; width: 35%; }
+    .score-cell { text-align: right; width: 20%; font-weight: 600; }
+    .ratio-cell { text-align: center; width: 15%; color: #475569; }
+    .judge-cell { text-align: center; width: 15%; font-weight: 600; }
+    .eval-cell { text-align: center; width: 15%; }
+    
+    .eval-badge {
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 8pt;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .total-row { background-color: #f8fafc; font-weight: bold !important; }
+
+    .answer-details {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .details-title { font-size: 11pt; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; display: inline-block; }
+    .answer-category { margin-bottom: 20px; }
+    .answer-category:last-child { margin-bottom: 0; }
+    .category-title { font-size: 9.5pt; font-weight: bold; color: #334155; margin-bottom: 10px; padding-left: 8px; border-left: 3px solid #64748b; }
+    .category-count { font-size: 8pt; color: #64748b; font-weight: normal; margin-left: 5px; }
+    
+    .question-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .question-item {
+        width: 45px;
+        padding: 6px 2px;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        text-align: center;
+        background-color: #fff;
+    }
+    .q-no { font-size: 7.5pt; font-weight: bold; color: #64748b; margin-bottom: 2px; }
+    .q-ans { font-size: 9pt; font-weight: 700; color: #1e293b; }
+    .q-correct { font-size: 7pt; color: #94a3b8; }
+    .correct { background-color: #f0fdf4; border-color: #bbf7d0; }
+    .incorrect { background-color: #fef2f2; border-color: #fecaca; }
+
+    .footer-report { margin-top: 20px; text-align: right; font-size: 8pt; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="header-info">
+      <table>
+        <tr>
+            <td><strong>レベル:</strong> ${finalExam.level || '-'}</td>
+            <td><strong>使用教材:</strong> ${finalExam.textbook || '-'}</td>
+            <td><strong>試験名/学期:</strong> ${yearTerm || '-'}</td>
+        </tr>
+        ${finalExam.levelInfo ? `
+        <tr>
+            <td><strong>合格点:</strong> ${finalExam.levelInfo.passingScore}点</td>
+            <td colspan="2">
+                <strong>基準点:</strong> ${finalExam.levelInfo.criteria1Name}(${finalExam.levelInfo.criteria1Score})
+                ${finalExam.levelInfo.criteria2Name ? ` / ${finalExam.levelInfo.criteria2Name}(${finalExam.levelInfo.criteria2Score})` : ''}
+                ${finalExam.levelInfo.criteria3Name ? ` / ${finalExam.levelInfo.criteria3Name}(${finalExam.levelInfo.criteria3Score})` : ''}
+            </td>
+        </tr>
+        ` : ''}
+      </table>
+  </div>
+
+  <div class="main-header">
+    <div class="student-data">
+        <div class="class-name">${class_name}</div>
+        <h3 class="student-name">${student_name}<span class="student-id">(${student_id_text})</span></h3>
+        <div class="exam-name">${yearTerm}</div>
+    </div>
+    <div class="result-tiles">
+        <div class="tile score-tile">
+            <div class="tile-label">合計点</div>
+            <div class="tile-value">${totalScore}点 <span class="score-sm">/ 180</span></div>
+        </div>
+        <div class="tile judge-tile">
+            <div class="tile-label">判定</div>
+            <div class="result-text">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div>
+        </div>
+    </div>
+  </div>
+
+  <table class="score-table">
+    <thead>
+        <tr>
+            <th>科目</th>
+            <th style="text-align:right">得点</th>
+            <th style="text-align:center">正答数</th>
+            <th style="text-align:center">判定</th>
+            <th style="text-align:center">評価</th>
+        </tr>
+    </thead>
+    <tbody>
+        ${subjectRows}
+    </tbody>
+  </table>
+
+  ${detailsHtml ? `
+  <div class="answer-details">
+    <h3 class="details-title">解答詳細</h3>
+    ${detailsHtml}
+  </div>
+  ` : ''}
+
+  <div class="footer-report">
+    神戸外語教育学院 | 発行日: ${today}
+  </div>
+
+</body>
+</html>`;
+  }
+
+  // --- STANDARD FINAL EXAM TEMPLATE (Legacy) ---
   const calculateGrade = (score) => {
     if (score >= 80) return 'A';
     if (score >= 60) return 'B';
@@ -1002,7 +1350,6 @@ function generateFinalExamHTML(data, yearTerm) {
     return 'F';
   };
 
-  // 評価判定 (600点満点 -> 平均100点換算)
   const calculateTotalGrade = (totalScore) => {
     return calculateGrade(totalScore / 6);
   };
@@ -1016,13 +1363,9 @@ function generateFinalExamHTML(data, yearTerm) {
     'conversation': '会話'
   };
 
-  // Define order
   const subjects = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'];
-
   const subjectRows = subjects.map(key => {
-    // final_exam_data structure is simple: { vocab: 85, grammar: 70 ... }
     const score = final_exam_data[key];
-
     return `
       <tr>
         <td class="subject-name">${subjectNames[key]}</td>
@@ -1053,21 +1396,18 @@ function generateFinalExamHTML(data, yearTerm) {
       background: #fff;
     }
     
-    /* Header */
     .header-area {
         position: relative;
         margin-bottom: 10mm;
         height: 25mm;
         border-bottom: 2px solid #000;
     }
-    
     .date-right {
         position: absolute;
         top: -10mm;
         right: 0;
         font-size: 10pt;
     }
-    
     h1 {
       text-align: center;
       font-size: 22pt;
@@ -1076,125 +1416,34 @@ function generateFinalExamHTML(data, yearTerm) {
       margin-top: 5mm;
       font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
     }
-
-    /* Info Table */
     .info-table {
         width: 100%;
         border-collapse: collapse;
         border: 1px solid #000;
         margin-bottom: 8mm;
     }
-    .info-table td {
-        border: 1px solid #000;
-        padding: 5px 10px;
-        font-size: 11pt;
-    }
-    .info-label {
-        background-color: #f5f5f5;
-        text-align: center;
-        width: 15%;
-        font-weight: normal;
-        font-size: 10pt;
-    }
-    .info-value {
-        width: 35%;
-        text-align: left;
-        font-weight: bold;
-    }
-    
-    /* Grade Table */
-    .grade-table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 2px solid #000;
-        margin-bottom: 8mm;
-    }
-    .grade-table th, .grade-table td {
-        border: 1px solid #000;
-        padding: 6px 4px;
-        text-align: center;
-        font-size: 10pt;
-    }
-    .grade-table th {
-        background-color: #f0f0f0;
-        font-weight: bold;
-        height: 10mm;
-    }
-    .grade-table td {
-        height: 9mm;
-    }
-    .subject-name {
-        font-weight: bold;
-        text-align: center !important;
-    }
-    
-    /* Summary Section */
-    .summary-section {
-        margin-top: 5mm;
-        border: 1px solid #000;
-        padding: 4mm;
-        overflow: hidden;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-    }
-    .summary-item {
-        font-size: 12pt;
-        text-align: center;
-    }
-    .summary-val {
-        font-size: 16pt;
-        font-weight: bold;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-    .grade-circle {
-        display: inline-block;
-        width: 40px; 
-        height: 40px; 
-        line-height: 36px;
-        border: 2px solid #000; 
-        border-radius: 50%;
-        text-align: center;
-        font-size: 18pt;
-        font-weight: bold;
-    }
-    .grade-square {
-        display: inline-block;
-        width: 40px; 
-        height: 40px; 
-        line-height: 36px;
-        border: 2px solid #000; 
-        text-align: center;
-        font-size: 18pt;
-        font-weight: bold;
-    }
-
-    /* Footer */
-    .footer {
-        margin-top: 15mm;
-        text-align: right;
-        font-size: 11pt;
-    }
-    .school-name {
-        font-size: 16pt;
-        font-weight: bold;
-        margin-bottom: 5px;
-        font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif;
-    }
-    
-    /* Utility */
+    .info-table td { border: 1px solid #000; padding: 5px 10px; font-size: 11pt; }
+    .info-label { background-color: #f5f5f5; text-align: center; width: 15%; font-weight: normal; font-size: 10pt; }
+    .info-value { width: 35%; text-align: left; font-weight: bold; }
+    .grade-table { width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 8mm; }
+    .grade-table th, .grade-table td { border: 1px solid #000; padding: 6px 4px; text-align: center; font-size: 10pt; }
+    .grade-table th { background-color: #f0f0f0; font-weight: bold; height: 10mm; }
+    .grade-table td { height: 9mm; }
+    .subject-name { font-weight: bold; text-align: center !important; }
+    .summary-section { margin-top: 5mm; border: 1px solid #000; padding: 4mm; overflow: hidden; display: flex; justify-content: space-around; align-items: center; }
+    .summary-item { font-size: 12pt; text-align: center; }
+    .summary-val { font-size: 16pt; font-weight: bold; margin-left: 5px; margin-right: 5px; }
+    .footer { margin-top: 15mm; text-align: right; font-size: 11pt; }
+    .school-name { font-size: 16pt; font-weight: bold; margin-bottom: 5px; font-family: "Noto Serif CJK JP", "Noto Serif JP", "ＭＳ ゴシック", "MS Gothic", sans-serif; }
     .bold { font-weight: bold; }
     .note { margin-top: 2mm; font-size: 9pt; }
   </style>
 </head>
 <body>
-  
   <div class="header-area">
       <div class="date-right">発行日：${today}</div>
       <h1>期末試験結果通知書</h1>
   </div>
-
   <table class="info-table">
     <tr>
       <td class="info-label">学籍番号</td>
@@ -1209,11 +1458,7 @@ function generateFinalExamHTML(data, yearTerm) {
       <td class="info-value">${yearTerm}</td>
     </tr>
   </table>
-
-  <div style="margin-bottom: 3mm; font-size: 10.5pt;">
-    今学期の期末試験の結果を下記の通り通知致します。
-  </div>
-
+  <div style="margin-bottom: 3mm; font-size: 10.5pt;">今学期の期末試験の結果を下記の通り通知致します。</div>
   <table class="grade-table">
     <thead>
       <tr>
@@ -1227,7 +1472,6 @@ function generateFinalExamHTML(data, yearTerm) {
       ${subjectRows}
     </tbody>
   </table>
-
   <div class="summary-section">
     <div class="summary-item">
         <div>総得点</div>
@@ -1242,16 +1486,10 @@ function generateFinalExamHTML(data, yearTerm) {
         <div style="margin-top:0px; font-size: 20pt; font-weight: bold;">${calculateTotalGrade(final_exam_total)}</div>
     </div>
   </div>
-
   <div class="note">
     <p>＊評価基準： A (80点以上), B (79-60点), C (59-40点), D (39-20点), F (19点以下)</p>
   </div>
-
-  <div class="footer">
-    <div class="school-name">神戸外語教育学院</div>
-
-  </div>
-
+  <div class="footer"><div class="school-name">神戸外語教育学院</div></div>
 </body>
 </html>`;
 }
