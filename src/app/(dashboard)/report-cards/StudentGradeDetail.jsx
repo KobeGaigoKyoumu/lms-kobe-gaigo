@@ -80,15 +80,54 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                             </h3>
                             <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#6b7280' }}>{student.yearTerm}</p>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444' }}>
-                                {finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            {/* Score Tile */}
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '8px 16px',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                backgroundColor: '#fff',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center'
+                            }}>
+                                <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '2px', fontWeight: '500' }}>合計点</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1f2937', lineHeight: '1.2' }}>
+                                    {finalExam.total || finalExamSum}<span style={{ fontSize: '0.9rem', marginLeft: '2px' }}>点</span>
+                                    {finalExam.levelInfo && <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}> / {finalExam.levelInfo.passingScore}点</span>}
+                                </div>
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1f2937' }}>
-                                合計: {finalExam.total || finalExamSum}点
-                                {finalExam.levelInfo && <span style={{ fontSize: '0.8rem', color: '#6b7280' }}> / {finalExam.levelInfo.passingScore}点</span>}
+
+                            {/* Result Tile */}
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '8px 16px',
+                                border: `1px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}`,
+                                borderRadius: '8px',
+                                backgroundColor: finalExam.result === '合' || finalExam.result === '○' ? '#f0fdf4' : '#fef2f2',
+                                minWidth: '100px',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center'
+                            }}>
+                                <div style={{
+                                    fontSize: '0.7rem',
+                                    color: finalExam.result === '合' || finalExam.result === '○' ? '#166534' : '#991b1b',
+                                    marginBottom: '2px',
+                                    fontWeight: '500'
+                                }}>判定</div>
+                                <div style={{
+                                    fontSize: '1.2rem',
+                                    fontWeight: 'extrabold',
+                                    color: finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444',
+                                    lineHeight: '1.2'
+                                }}>
+                                    {finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}
+                                </div>
                             </div>
-                            {/* Rank hidden */}
                         </div>
                     </div>
 
