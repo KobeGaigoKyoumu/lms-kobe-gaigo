@@ -121,11 +121,26 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                     </td>
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-                                        <span style={{
-                                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
-                                            backgroundColor: finalExam.grammarReadingEval === 'A' ? '#dcfce7' : finalExam.grammarReadingEval === 'B' ? '#fef9c3' : '#fee2e2',
-                                            color: finalExam.grammarReadingEval === 'A' ? '#166534' : finalExam.grammarReadingEval === 'B' ? '#854d0e' : '#991b1b'
-                                        }}>{finalExam.grammarReadingEval}</span>
+                                        {(() => {
+                                            const combinedScore = (finalExam.vocab || 0) + (finalExam.grammarReading || 0);
+                                            const rate = combinedScore / 120;
+                                            let evalStr = '-';
+                                            if (rate <= 1 / 3) evalStr = 'C';
+                                            else if (rate <= 2 / 3) evalStr = 'B';
+                                            else evalStr = 'A';
+
+                                            const style = evalStr === 'A' ? { bg: '#dcfce7', text: '#166534' } :
+                                                evalStr === 'B' ? { bg: '#fef9c3', text: '#854d0e' } :
+                                                    evalStr === 'C' ? { bg: '#fee2e2', text: '#991b1b' } :
+                                                        { bg: '#f3f4f6', text: '#64748b' };
+
+                                            return (
+                                                <span style={{
+                                                    padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                    backgroundColor: style.bg, color: style.text
+                                                }}>{evalStr}</span>
+                                            );
+                                        })()}
                                     </td>
                                 </tr>
                             ) : (
@@ -140,11 +155,26 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         </td>
                                         <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{finalExam.judgments?.[0] || '-'}</td>
                                         <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-                                            <span style={{
-                                                padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
-                                                backgroundColor: finalExam.vocabEval === 'A' ? '#dcfce7' : finalExam.vocabEval === 'B' ? '#fef9c3' : '#fee2e2',
-                                                color: finalExam.vocabEval === 'A' ? '#166534' : finalExam.vocabEval === 'B' ? '#854d0e' : '#991b1b'
-                                            }}>{finalExam.vocabEval}</span>
+                                            {(() => {
+                                                const combinedScore = (finalExam.vocab || 0) + (finalExam.grammar || 0);
+                                                const rate = combinedScore / 60;
+                                                let evalStr = '-';
+                                                if (rate <= 1 / 3) evalStr = 'C';
+                                                else if (rate <= 2 / 3) evalStr = 'B';
+                                                else evalStr = 'A';
+
+                                                const style = evalStr === 'A' ? { bg: '#dcfce7', text: '#166534' } :
+                                                    evalStr === 'B' ? { bg: '#fef9c3', text: '#854d0e' } :
+                                                        evalStr === 'C' ? { bg: '#fee2e2', text: '#991b1b' } :
+                                                            { bg: '#f3f4f6', text: '#64748b' };
+
+                                                return (
+                                                    <span style={{
+                                                        padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                        backgroundColor: style.bg, color: style.text
+                                                    }}>{evalStr}</span>
+                                                );
+                                            })()}
                                         </td>
                                     </tr>
                                     <tr>
