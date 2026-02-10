@@ -106,10 +106,15 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                             {finalExam.level === 'N4' || finalExam.level === 'N5' ? (
                                 <tr>
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb' }}>言語知識（文字・語彙・文法）・読解</td>
-                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{finalExam.grammarReading} / 120</td>
+                                    <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{(finalExam.vocab || 0) + (finalExam.grammarReading || 0)} / 120</td>
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-                                        {reportDetails?.subjectCorrectCounts?.['文字・語彙']
-                                            ? `${reportDetails.subjectCorrectCounts['文字・語彙'].correct + (reportDetails.subjectCorrectCounts['文法']?.correct || 0) + (reportDetails.subjectCorrectCounts['読解']?.correct || 0)} / ${reportDetails.subjectCorrectCounts['文字・語彙'].total + (reportDetails.subjectCorrectCounts['文法']?.total || 0) + (reportDetails.subjectCorrectCounts['読解']?.total || 0)}`
+                                        {reportDetails?.subjectCorrectCounts
+                                            ? (() => {
+                                                const vocab = reportDetails.subjectCorrectCounts['文字・語彙'] || reportDetails.subjectCorrectCounts['文字語彙'] || { correct: 0, total: 0 };
+                                                const grammar = reportDetails.subjectCorrectCounts['文法'] || { correct: 0, total: 0 };
+                                                const reading = reportDetails.subjectCorrectCounts['読解'] || { correct: 0, total: 0 };
+                                                return `${vocab.correct + grammar.correct + reading.correct} / ${vocab.total + grammar.total + reading.total}`;
+                                            })()
                                             : (finalExam.grammarReadingCorrect || '-')}
                                     </td>
                                     <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
@@ -198,12 +203,24 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                             <div style={{ overflowX: 'auto', marginTop: '10px', padding: '15px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
                                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                                     {['文字・語彙', '文法', '読解', '聴解'].map(sub => {
-                                        const subDetails = reportDetails.answerDetails.filter(d => d.subject === sub)
+                                        const subDetails = reportDetails.answerDetails.filter(d => {
+                                            if (sub === '文字・語彙') {
+                                                return d.subject === '文字・語彙' || d.subject === '文字語彙' || d.subject === '語彙';
+                                            }
+                                            return d.subject === sub;
+                                        })
                                         if (subDetails.length === 0) return null
                                         return (
                                             <div key={sub} style={{ minWidth: '200px', flex: '1' }}>
                                                 <h4 style={{ fontSize: '0.85rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px', color: '#334155' }}>
-                                                    {sub} ({reportDetails.subjectCorrectCounts?.[sub]?.correct} / {reportDetails.subjectCorrectCounts?.[sub]?.total})
+                                                    {sub} ({
+                                                        (() => {
+                                                            const count = sub === '文字・語彙'
+                                                                ? (reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'])
+                                                                : reportDetails.subjectCorrectCounts?.[sub];
+                                                            return `${count?.correct || 0} / ${count?.total || 0}`;
+                                                        })()
+                                                    })
                                                 </h4>
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))', gap: '4px' }}>
                                                     {subDetails.map((d, idx) => (
@@ -475,6 +492,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                 )}
             </div>
         </div>
+    )
 }
 
 export default StudentGradeDetail
