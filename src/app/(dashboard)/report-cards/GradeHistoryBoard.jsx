@@ -101,6 +101,9 @@ export default function GradeHistoryBoard() {
 
     // Batch PDF Export Handler for Exam/Report (New)
     const handleBatchPdfExport = async (type, targetIds = null) => {
+        // If it's a JLPT term, always use 'final_exam' type to trigger the JLPT template
+        const exportType = selectedTerm?.startsWith('JLPT') ? 'final_exam' : type;
+
         // Filter records: defaults to all filteredRecords, or subset if targetIds provided
         let targetRecords = filteredRecords;
         if (targetIds && targetIds.length > 0) {
@@ -112,13 +115,14 @@ export default function GradeHistoryBoard() {
         // Prepare payload for target students
         const studentsPayload = targetRecords.map(r => {
             const s = recordToStudent(r);
-            if (type === 'final_exam') {
+            if (exportType === 'final_exam') {
                 return {
                     student_id_text: s.id,
                     student_name: s.name,
                     class_name: s.class,
                     final_exam_total: s.finalExamSum,
                     final_exam_data: s.finalExam,
+                    report_card_data: s.reportDetails, // Include report_card_data for JLPT answer details
                     yearTerm: s.yearTerm
                 }
             } else {
@@ -141,7 +145,7 @@ export default function GradeHistoryBoard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     students: studentsPayload,
-                    type: type,
+                    type: exportType,
                     yearTerm: selectedTerm // Fallback
                 })
             });
@@ -152,7 +156,7 @@ export default function GradeHistoryBoard() {
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = type === 'final_exam' ? '期末試験結果_一括.zip' : '成績通知表_一括.zip'
+            a.download = exportType === 'final_exam' ? (selectedTerm?.startsWith('JLPT') ? 'JLPT模擬試験結果_一括.zip' : '期末試験結果_一括.zip') : '成績通知表_一括.zip'
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
@@ -163,6 +167,53 @@ export default function GradeHistoryBoard() {
             alert('PDFの一括出力に失敗しました: ' + err.message)
         } finally {
             setGenerating(false)
+        }
+    }
+
+    // Individual PDF Export Handler
+    const handleSinglePdfExport = async (record, type) => {
+        const exportType = record.year_term?.startsWith('JLPT') ? 'final_exam' : type;
+        const student = recordToStudent(record);
+
+        setGenerating(true);
+        try {
+            const payload = {
+                yearTerm: student.yearTerm || '',
+                type: exportType,
+                student: {
+                    student_id_text: student.id,
+                    student_name: student.name,
+                    class_name: student.class,
+                    final_exam_total: student.finalExamSum,
+                    final_exam_data: student.finalExam,
+                    report_card_total: student.reportCardTotal,
+                    report_card_data: student.reportDetails
+                }
+            };
+
+            const response = await fetch('/api/grades/report/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error('PDF生成に失敗しました');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = exportType === 'final_exam' ? (record.year_term?.startsWith('JLPT') ? `JLPT結果_${student.name}.pdf` : `期末試験結果_${student.name}.pdf`) : `成績通知表_${student.name}.pdf`;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            console.error(err);
+            alert('PDFの出力中にエラーが発生しました');
+        } finally {
+            setGenerating(false);
         }
     }
 
@@ -681,6 +732,7 @@ export default function GradeHistoryBoard() {
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
                                         <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
+                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody style={{ divideY: '1px solid #e5e7eb' }}>
@@ -736,6 +788,25 @@ export default function GradeHistoryBoard() {
                                             </td>
                                             <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: '0.875rem' }}>
                                                 {new Date(record.created_at).toLocaleString('ja-JP')}
+                                            </td>
+                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                <button
+                                                    onClick={() => handleSinglePdfExport(record, 'final_exam')}
+                                                    disabled={generating}
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        backgroundColor: '#ef4444',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 'bold',
+                                                        cursor: generating ? 'not-allowed' : 'pointer',
+                                                        opacity: generating ? 0.7 : 1
+                                                    }}
+                                                >
+                                                    PDF
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}

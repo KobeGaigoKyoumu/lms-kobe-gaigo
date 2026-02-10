@@ -396,7 +396,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
 
                                 const payload = {
                                     yearTerm: student.yearTerm || '',
-                                    type: viewMode === 'exam' ? 'final_exam' : 'report_card'
+                                    type: isJlpt ? 'final_exam' : (viewMode === 'exam' ? 'final_exam' : 'report_card')
                                 };
 
                                 payload.student = {
