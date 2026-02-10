@@ -199,7 +199,29 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                         : '-'}
                                 </td>
                                 <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
-                                <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>-</td>
+                                <td style={{ padding: '8px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    {(() => {
+                                        const score = finalExam.total || finalExamSum;
+                                        const maxScore = 180;
+                                        const rate = score / maxScore;
+                                        let evalStr = '-';
+                                        if (rate <= 1 / 3) evalStr = 'C';
+                                        else if (rate <= 2 / 3) evalStr = 'B';
+                                        else evalStr = 'A';
+
+                                        const style = evalStr === 'A' ? { bg: '#dcfce7', text: '#166534' } :
+                                            evalStr === 'B' ? { bg: '#fef9c3', text: '#854d0e' } :
+                                                evalStr === 'C' ? { bg: '#fee2e2', text: '#991b1b' } :
+                                                    { bg: '#f3f4f6', text: '#64748b' };
+
+                                        return (
+                                            <span style={{
+                                                padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                backgroundColor: style.bg, color: style.text
+                                            }}>{evalStr}</span>
+                                        );
+                                    })()}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
