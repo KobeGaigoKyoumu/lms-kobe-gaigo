@@ -28,9 +28,14 @@ export async function updateSession(request) {
     )
 
     // Verify Supabase session (Admin/Teacher)
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    // SKIP for auth callback to avoid PKCE cookie issues
+    let user = null
+    const isCallback = request.nextUrl.pathname.startsWith('/auth/callback')
+
+    if (!isCallback) {
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        user = authUser
+    }
 
     // Protected paths
     const publicPaths = ['/login', '/auth/callback']
