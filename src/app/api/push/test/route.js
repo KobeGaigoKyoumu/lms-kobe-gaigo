@@ -55,7 +55,8 @@ export async function POST(request) {
             title: 'テスト通知',
             body: 'これはテスト通知です。通知機能は正常に動作しています。',
             url: '/',
-            badge: 1
+            badge: 1,
+            icon: '/icon-192.png'
         })
 
         const results = await Promise.allSettled(subs.map(sub =>

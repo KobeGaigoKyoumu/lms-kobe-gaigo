@@ -10,10 +10,11 @@ self.addEventListener('push', (event) => {
     const data = event.data ? event.data.json() : { title: '新着メッセージ', body: 'メッセージが届きました' };
 
     // 1. ブラウザ通知を表示 (デスクトップ・スマホ共通)
+    const iconUrl = new URL('/icon-192.png', self.registration.scope).href;
     const options = {
         body: data.body,
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
+        icon: iconUrl,
+        badge: iconUrl,
         data: { url: data.url },
         vibrate: [200, 100, 200],
         tag: 'chat-notification',

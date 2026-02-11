@@ -193,7 +193,8 @@ export async function POST(request) {
                         title: payload.sender_type === 'teacher' ? '先生からのメッセージ' : '学生からのメッセージ',
                         body: payload.content || (payload.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
                         url: payload.sender_type === 'teacher' ? `/student/communication` : `/communication/${payload.student_id}`,
-                        badge: unreadCount || 1
+                        badge: unreadCount || 1,
+                        icon: '/icon-192.png'
                     })
 
                     await Promise.all(subs.map(sub =>
