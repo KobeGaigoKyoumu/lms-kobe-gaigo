@@ -501,7 +501,8 @@ export default function ChatWindow({
                                             alert(`テスト送信失敗: ${data.error}`)
                                         }
                                     } catch (e) {
-                                        alert('エラーが発生しました')
+                                        console.error(e)
+                                        alert(`エラー詳細: ${e.message || JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
                                     }
                                 }}
                                 style={{
