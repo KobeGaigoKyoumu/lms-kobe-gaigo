@@ -5,9 +5,16 @@
 
 const fs = require('fs');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
 // Determine environment
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
+
+// Supabase helper for storage
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 async function getBrowser() {
   if (isProduction) {
@@ -355,18 +362,39 @@ function countLength(str) {
  */
 async function generateTranscriptPDF(data, issueDate, outputPath = null) {
   const html = generateTranscriptHTML(data, issueDate);
-  return await htmlToPdf(html, outputPath);
+  const cacheKey = `transcripts/${data.studentId}_${data.name}.pdf`;
+  return await htmlToPdf(html, outputPath, cacheKey);
 }
 
 /**
- * PuppeteerでHTMLをPDFに変換
+ * PuppeteerでHTMLをPDFに変換 (Supabase Storage キャッシュ対応)
  * @param {string} html
  * @param {string|null} outputPath - Path to save PDF (optional)
+ * @param {string|null} cacheKey - Storage path for caching (e.g. 'transcripts/STUDENT_ID.pdf')
  * @returns {Promise<Buffer>} PDF Buffer
  */
-async function htmlToPdf(html, outputPath = null) {
-  const browser = await getBrowser();
+async function htmlToPdf(html, outputPath = null, cacheKey = null) {
+  // 1. Check Cache first
+  if (cacheKey) {
+    try {
+      const { data, error } = await supabaseAdmin.storage
+        .from('reports-pdf')
+        .download(cacheKey);
 
+      if (data && !error) {
+        console.log('PDF Cache Hit:', cacheKey);
+        const arrayBuffer = await data.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        if (outputPath) fs.writeFileSync(outputPath, buffer);
+        return buffer;
+      }
+    } catch (e) {
+      console.warn('Cache check failed, generating new PDF:', e.message);
+    }
+  }
+
+  // 2. Generate PDF using Puppeteer
+  const browser = await getBrowser();
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -382,6 +410,20 @@ async function htmlToPdf(html, outputPath = null) {
     }
 
     const buffer = await page.pdf(options);
+
+    // 3. Store in Cache asynchronously (don't block the response)
+    if (cacheKey) {
+      supabaseAdmin.storage
+        .from('reports-pdf')
+        .upload(cacheKey, buffer, {
+          contentType: 'application/pdf',
+          upsert: true
+        })
+        .then(({ error }) => {
+          if (error) console.error('PDF Cache Upload Failed:', error.message);
+          else console.log('PDF Cache Updated:', cacheKey);
+        });
+    }
 
     if (outputPath) {
       console.log('PDF生成完了:', outputPath);
@@ -711,7 +753,8 @@ function generateAttendanceHTML(data) {
  */
 async function generateAttendancePDF(data, outputPath = null) {
   const html = generateAttendanceHTML(data);
-  return await htmlToPdf(html, outputPath);
+  const cacheKey = `attendance/${data.student.id}_${data.student.name}.pdf`;
+  return await htmlToPdf(html, outputPath, cacheKey);
 }
 
 /**
@@ -1138,7 +1181,7 @@ function generateFinalExamHTML(data, yearTerm) {
   <title>JLPT模擬試験結果</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=block" rel="stylesheet">
   <style>
     @page { size: A4; margin: 8mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1493,14 +1536,24 @@ function generateFinalExamHTML(data, yearTerm) {
 }
 
 /**
+ * 成績通知表PDFを生成 (Japanese Edition)
+ */
+async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
+  const html = generateGradeReportHTML(data, yearTerm);
+  const cacheKey = `report-cards/${data.student_id_text}_${yearTerm}.pdf`;
+  return await htmlToPdf(html, outputPath, cacheKey);
+}
+
+/**
  * 期末試験結果PDFを生成
  */
 async function generateFinalExamPDF(data, yearTerm, outputPath = null) {
   const html = generateFinalExamHTML(data, yearTerm);
-  return await htmlToPdf(html, outputPath);
+  const cacheKey = `final-exams/${data.student_id_text}_${yearTerm}.pdf`;
+  return await htmlToPdf(html, outputPath, cacheKey);
 }
 
-export {
+module.exports = {
   generateTranscriptHTML,
   htmlToPdf,
   generateTranscriptPDF,

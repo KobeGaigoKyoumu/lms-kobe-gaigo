@@ -198,11 +198,30 @@ function parseLine(line) {
 
 export async function getJlptData() {
     try {
-        // Use the combined data source (CSV + Historical JSON)
-        const allData = await getAllRawJlptData();
-        return processStatistics(allData);
+        const { createClient } = await import('@/lib/supabase/server');
+        const supabase = await createClient();
+
+        // Use the optimized view created in Phase 1
+        const { data, error } = await supabase
+            .from('jlpt_session_summaries')
+            .select('*');
+
+        if (error) {
+            console.error("Database error in getJlptData:", error);
+            // Fallback to empty if DB fails
+            return [];
+        }
+
+        // Sort by session date logic maintained in Database View but 
+        // we can double check/sort here if needed for specific UI order
+        return data.sort((a, b) => {
+            const yearA = parseInt(a.session.substring(5, 9)); // "JLPT 2024年..."
+            const yearB = parseInt(b.session.substring(5, 9));
+            if (yearA !== yearB) return yearA - yearB;
+            return a.session.localeCompare(b.session);
+        });
     } catch (error) {
-        console.error("Error reading JLPT data:", error);
+        console.error("Error fetching JLPT data from DB:", error);
         return [];
     }
 }
@@ -650,69 +669,55 @@ export async function getEnhancedJlptStats(students = []) {
     console.log(`Student map size: ${studentMap.size}, StudentId map size: ${studentIdMap.size}`);
 
 
-    // 1. Nationality breakdown
-    const byNationality = {};
-    validData.forEach(record => {
-        const country = record.country || 'Unknown';
-        if (!byNationality[country]) {
-            byNationality[country] = { total: 0, passed: 0 };
-        }
-        byNationality[country].total++;
-        if (record.result === '合格') byNationality[country].passed++;
-    });
+    // 1. Nationality breakdown - Use optimized SQL View
+    const { data: nationalityData, error: natError } = await (await import('@/lib/supabase/server')).createClient()
+        .then(s => s.from('jlpt_nationality_summaries').select('*'));
 
-    const nationalityStats = Object.entries(byNationality)
-        .map(([country, stats]) => ({
-            country,
+    let nationalityStats = [];
+    if (!natError && nationalityData) {
+        nationalityStats = nationalityData.map(stats => ({
+            country: stats.country,
             total: stats.total,
             passed: stats.passed,
-            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
-        }))
-        .sort((a, b) => parseFloat(b.passRate) - parseFloat(a.passRate));
+            passRate: stats.pass_rate.toString()
+        })).sort((a, b) => parseFloat(b.passRate) - parseFloat(a.passRate));
+    }
 
-    // 2. Level breakdown
-    const byLevel = {};
-    validData.forEach(record => {
-        const level = record.level;
-        if (!byLevel[level]) {
-            byLevel[level] = { total: 0, passed: 0 };
-        }
-        byLevel[level].total++;
-        if (record.result === '合格') byLevel[level].passed++;
-    });
+    // 2. Level breakdown - Use optimized SQL View (aggregated by session, needs summing here)
+    const { data: levelDataRaw, error: lvError } = await (await import('@/lib/supabase/server')).createClient()
+        .then(s => s.from('jlpt_session_summaries').select('*'));
 
-    const levelStats = Object.entries(byLevel)
-        .map(([level, stats]) => ({
+    let levelStats = [];
+    if (!lvError && levelDataRaw) {
+        const lvGroup = {};
+        levelDataRaw.forEach(r => {
+            if (!lvGroup[r.level]) lvGroup[r.level] = { total: 0, passed: 0 };
+            lvGroup[r.level].total += r.examinees;
+            lvGroup[r.level].passed += r.passers;
+        });
+        levelStats = Object.entries(lvGroup).map(([level, stats]) => ({
             level,
             total: stats.total,
             passed: stats.passed,
-            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
-        }))
-        .sort((a, b) => a.level.localeCompare(b.level));
+            passRate: stats.total > 0 ? ((stats.passed / stats.total) * 100).toFixed(1) : "0.0"
+        })).sort((a, b) => a.level.localeCompare(b.level));
+    }
 
-    // 3. Yearly Trend (Pass Rate)
-    // 3. Yearly Trend (Pass Rate)
+    // 3. Yearly Trend (Pass Rate) - Use optimized SQL View
+    const { data: trendData, error: trendError } = await (await import('@/lib/supabase/server')).createClient()
+        .then(s => s.from('jlpt_yearly_trends').select('*'));
+
     const byYear = {};
-    validData.forEach(record => {
-        const year = record.session.substring(0, 4);
-        if (!byYear[year]) {
-            byYear[year] = {
-                total: 0, // Total sessions (for pass rate calc)
-                passed: 0, // Total passed sessions
-                unique_students: new Set() // For Calculate Exam Rate
+    if (!trendError && trendData) {
+        trendData.forEach(r => {
+            byYear[r.year] = {
+                total: r.total,
+                passed: r.passed,
+                passRate: r.pass_rate,
+                unique_students: new Set() // Legacy field maintained for compatibility, though calculation is now in SQL
             };
-        }
-        byYear[year].total++;
-        if (record.studentId) {
-            byYear[year].unique_students.add(String(record.studentId));
-        } else {
-            // If no ID, use name + country as unique key (without level to avoid double counting)
-            const key = `${record.name}:${record.country}`;
-            byYear[year].unique_students.add(key);
-        }
-
-        if (record.result === '合格') byYear[year].passed++;
-    });
+        });
+    }
 
     // Calculate enrollment by year for Exam Rate
     const enrollmentByYear = {};

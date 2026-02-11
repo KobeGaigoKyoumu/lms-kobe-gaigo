@@ -3,6 +3,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createClientJs } from '@supabase/supabase-js'
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData, getJlptSectionScoreStats } from '@/lib/jlpt'
+import { unstable_cache } from 'next/cache'
+
+// Use unstable_cache to offload calculations for 1 hour
+const getCachedEnhancedStats = unstable_cache(
+    async (allStudents) => {
+        return await getEnhancedJlptStats(allStudents);
+    },
+    ['jlpt-enhanced-stats'],
+    { revalidate: 3600, tags: ['jlpt-analytics'] }
+);
+
+const getCachedJlptData = unstable_cache(
+    async () => {
+        return await getJlptData();
+    },
+    ['jlpt-session-data'],
+    { revalidate: 3600, tags: ['jlpt-analytics'] }
+);
 
 export async function fetchJlptAnalyticsData() {
     console.log('Server Action: Fetching JLPT Analytics Data...');
@@ -32,7 +50,10 @@ export async function fetchJlptAnalyticsData() {
                 { auth: { persistSession: false } }
             );
 
-            const adminResult = await adminSupabase.from('students').select('*').range(0, 9999);
+            const adminResult = await adminSupabase
+                .from('students')
+                .select('student_id_text, full_name, class_name, status, enrollment_date, student_id')
+                .range(0, 9999);
 
             if (adminResult.data) {
                 data = adminResult.data;
@@ -52,7 +73,10 @@ export async function fetchJlptAnalyticsData() {
             const { data: userUser, error: authError } = await supabase.auth.getUser();
             authDebug = { hasUser: !!userUser?.user, userId: userUser?.user?.id, error: authError?.message };
 
-            let res = await supabase.from('students').select('*').range(0, 9999);
+            let res = await supabase
+                .from('students')
+                .select('student_id_text, full_name, class_name, status, enrollment_date, student_id')
+                .range(0, 9999);
             data = res.data;
             error = res.error; // Keep error if this also fails
 
@@ -103,24 +127,15 @@ export async function fetchJlptAnalyticsData() {
         },
         sectionScores: null, // 科目別得点データ
         error: fetchError,
-        debug: {
-            studentsFound: students.length,
-            totalFetched,
-            statusDistribution,
-            dataSource,
-            auth: authDebug,
-            env: envDebug
-        }
     }
 
     try {
-        // 1. Basic Stats (for charts)
-        const jlptData = await getJlptData();
-        result.stats = jlptData;
+        // 1. Basic Stats (for charts) - CACHED
+        result.stats = await getCachedJlptData();
 
-        // 2. Enhanced Stats (Overall & Class Analysis)
+        // 2. Enhanced Stats (Overall & Class Analysis) - CACHED
         // We pass ALL fetched students (including inactive) for accurate historical stats calculation
-        const enhancedStats = await getEnhancedJlptStats(allFetchedData || []);
+        const enhancedStats = await getCachedEnhancedStats(allFetchedData || []);
 
         // 3. Student Summaries (Class Analysis)
         if (students.length > 0) {
@@ -172,6 +187,9 @@ export async function fetchJlptAnalyticsData() {
         console.error('Server Action: Calculation Error', calcError);
         result.error = result.error || 'Calculation Error: ' + calcError.message;
     }
+
+    // Clean up allFetchedData to save memory/bandwidth if still reference
+    allFetchedData = null;
 
     // Serialize to ensure it can be passed to client
     return JSON.parse(JSON.stringify(result));
