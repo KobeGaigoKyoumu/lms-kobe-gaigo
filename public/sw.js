@@ -1,3 +1,4 @@
+// SW Version: 2026-02-12-v3
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -29,7 +30,7 @@ self.addEventListener('push', (event) => {
         Promise.all([
             self.registration.showNotification(data.title, options),
             // 2. アプリアイコンのバッジを更新 (PWA)
-            'setAppBadge' in navigator ? navigator.setAppBadge(data.badge) : Promise.resolve()
+            'setAppBadge' in navigator ? navigator.setAppBadge(parseInt(data.badge) || 1).catch(e => console.error('Badge error', e)) : Promise.resolve()
         ])
     );
 });
