@@ -10,11 +10,21 @@ const { createClient } = require('@supabase/supabase-js');
 // Determine environment
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
 
-// Supabase helper for storage
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Supabase helper for storage (Lazy initialization)
+let _supabaseAdmin = null;
+function getSupabaseAdmin() {
+  if (!_supabaseAdmin) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn('Supabase Admin: URL or Service Role Key missing');
+      return null;
+    }
+    _supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+  return _supabaseAdmin;
+}
 
 async function getBrowser() {
   if (isProduction) {
@@ -377,7 +387,10 @@ async function htmlToPdf(html, outputPath = null, cacheKey = null) {
   // 1. Check Cache first
   if (cacheKey) {
     try {
-      const { data, error } = await supabaseAdmin.storage
+      const admin = getSupabaseAdmin();
+      if (!admin) throw new Error('Supabase Admin client not available');
+
+      const { data, error } = await admin.storage
         .from('reports-pdf')
         .download(cacheKey);
 
@@ -413,16 +426,19 @@ async function htmlToPdf(html, outputPath = null, cacheKey = null) {
 
     // 3. Store in Cache asynchronously (don't block the response)
     if (cacheKey) {
-      supabaseAdmin.storage
-        .from('reports-pdf')
-        .upload(cacheKey, buffer, {
-          contentType: 'application/pdf',
-          upsert: true
-        })
-        .then(({ error }) => {
-          if (error) console.error('PDF Cache Upload Failed:', error.message);
-          else console.log('PDF Cache Updated:', cacheKey);
-        });
+      const admin = getSupabaseAdmin();
+      if (admin) {
+        admin.storage
+          .from('reports-pdf')
+          .upload(cacheKey, buffer, {
+            contentType: 'application/pdf',
+            upsert: true
+          })
+          .then(({ error }) => {
+            if (error) console.error('PDF Cache Upload Failed:', error.message);
+            else console.log('PDF Cache Updated:', cacheKey);
+          });
+      }
     }
 
     if (outputPath) {
