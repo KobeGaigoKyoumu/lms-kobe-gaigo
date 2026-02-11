@@ -64,7 +64,7 @@ export async function subscribeUserToPush() {
             throw new Error('Failed to save subscription on server');
         }
 
-        console.log('Push subscription successful');
+        console.log('Push subscription successful', subscription);
         return true;
 
     } catch (error) {

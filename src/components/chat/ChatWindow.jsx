@@ -467,7 +467,7 @@ export default function ChatWindow({
                         <div className={styles.emptyState}>メッセージはまだありません</div>
                     )}
 
-                    {!pushEnabled && (
+                    {!pushEnabled ? (
                         <div style={{ textAlign: 'center', padding: '10px' }}>
                             <button
                                 onClick={handleEnablePush}
@@ -486,6 +486,39 @@ export default function ChatWindow({
                             >
                                 <Bell size={16} />
                                 通知を有効にする
+                            </button>
+                        </div>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '10px' }}>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch('/api/push/test', { method: 'POST' })
+                                        const data = await res.json()
+                                        if (res.ok) {
+                                            alert(data.message)
+                                        } else {
+                                            alert(`テスト送信失敗: ${data.error}`)
+                                        }
+                                    } catch (e) {
+                                        alert('エラーが発生しました')
+                                    }
+                                }}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '6px 12px',
+                                    borderRadius: '16px',
+                                    border: '1px solid #e5e7eb',
+                                    backgroundColor: '#f9fafb',
+                                    color: '#6b7280',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <Bell size={14} />
+                                通知テスト
                             </button>
                         </div>
                     )}
