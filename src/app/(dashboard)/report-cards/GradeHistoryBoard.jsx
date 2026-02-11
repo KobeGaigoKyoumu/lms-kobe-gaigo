@@ -768,24 +768,38 @@ export default function GradeHistoryBoard() {
                                                 <>
                                                     <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6', fontWeight: 'bold' }}>{record.final_exam_total}</td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#eff6ff',
-                                                            color: '#1d4ed8',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {(() => {
-                                                                const score = record.final_exam_total;
-                                                                if (score > 120) return 'A';
-                                                                if (score > 60) return 'B';
-                                                                return 'C';
-                                                            })()}
-                                                        </span>
+                                                        {(() => {
+                                                            const score = record.final_exam_total;
+                                                            let grade = 'C';
+                                                            let bg = '#fee2e2';
+                                                            let color = '#991b1b';
+
+                                                            if (score > 120) {
+                                                                grade = 'A';
+                                                                bg = '#dcfce7';
+                                                                color = '#166534';
+                                                            } else if (score > 60) {
+                                                                grade = 'B';
+                                                                bg = '#ffedd5';
+                                                                color = '#9a3412';
+                                                            }
+
+                                                            return (
+                                                                <span style={{
+                                                                    display: 'inline-block',
+                                                                    width: '24px',
+                                                                    height: '24px',
+                                                                    lineHeight: '24px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: bg,
+                                                                    color: color,
+                                                                    fontSize: '0.875rem',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    {grade}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                     </td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                                                         <span style={{
@@ -804,35 +818,67 @@ export default function GradeHistoryBoard() {
                                                 <>
                                                     <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#eff6ff',
-                                                            color: '#1d4ed8',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {calculateFinalExamGrade(record.final_exam_total)}
-                                                        </span>
+                                                        {(() => {
+                                                            const validGrade = calculateFinalExamGrade(record.final_exam_total);
+                                                            let bg = '#fee2e2';
+                                                            let color = '#991b1b';
+
+                                                            if (validGrade === 'A') {
+                                                                bg = '#dcfce7';
+                                                                color = '#166534';
+                                                            } else if (validGrade === 'B') {
+                                                                bg = '#ffedd5';
+                                                                color = '#9a3412';
+                                                            }
+
+                                                            return (
+                                                                <span style={{
+                                                                    display: 'inline-block',
+                                                                    width: '24px',
+                                                                    height: '24px',
+                                                                    lineHeight: '24px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: bg,
+                                                                    color: color,
+                                                                    fontSize: '0.875rem',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    {validGrade}
+                                                                </span>
+                                                            )
+                                                        })()}
                                                     </td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: record.report_card_total >= 60 ? '#dcfce7' : '#fee2e2',
-                                                            color: record.report_card_total >= 60 ? '#166534' : '#991b1b',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {calculateGrade(record.report_card_total)}
-                                                        </span>
+                                                        {(() => {
+                                                            const validGrade = calculateGrade(record.report_card_total);
+                                                            let bg = '#fee2e2';
+                                                            let color = '#991b1b';
+
+                                                            if (validGrade === 'A') {
+                                                                bg = '#dcfce7';
+                                                                color = '#166534';
+                                                            } else if (validGrade === 'B') {
+                                                                bg = '#ffedd5';
+                                                                color = '#9a3412';
+                                                            }
+
+                                                            return (
+                                                                <span style={{
+                                                                    display: 'inline-block',
+                                                                    width: '24px',
+                                                                    height: '24px',
+                                                                    lineHeight: '24px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: bg,
+                                                                    color: color,
+                                                                    fontSize: '0.875rem',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    {validGrade}
+                                                                </span>
+                                                            )
+                                                        })()}
                                                     </td>
                                                 </>
                                             )}
