@@ -3,10 +3,12 @@ import { cookies } from 'next/headers'
 
 export async function createClient() {
     const cookieStore = await cookies()
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '')
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, ''),
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        supabaseUrl,
+        supabaseKey,
         {
             cookies: {
                 getAll() {
@@ -18,13 +20,10 @@ export async function createClient() {
                             cookieStore.set(name, value, options)
                         )
                     } catch {
-                        // Server Component内での呼び出し時は無視
+                        // ignore
                     }
                 },
             },
-            auth: {
-                flowType: 'pkce'
-            }
         }
     )
 }
