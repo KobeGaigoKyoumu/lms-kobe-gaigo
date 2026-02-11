@@ -3,10 +3,13 @@ import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download,
 import styles from './ChatWindow.module.css'
 import { subscribeUserToPush } from '@/lib/pushNotification'
 
+import { createClient } from '@/lib/supabase/client'
+
 export default function ChatWindow({
     studentId,
     currentUserRole = 'student'
 }) {
+    const supabase = createClient()
     const [messages, setMessages] = useState([])
     const [inputText, setInputText] = useState('')
     const [isLoading, setIsLoading] = useState(true)
@@ -46,7 +49,55 @@ export default function ChatWindow({
         }
     }
 
-    const POLL_INTERVAL = 5000
+    // Realtime Subscription & Polling Fallback
+    const POLL_INTERVAL = 60000 // 60 seconds (fallback)
+
+    useEffect(() => {
+        if (!studentId) return
+
+        // Supabase Realtime Subscription
+        const channel = supabase
+            .channel(`chat:${studentId}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `student_id=eq.${studentId}`
+            }, (payload) => {
+                const newMessage = payload.new
+                // Prevent duplicates if already added by optimistic UI or poll
+                setMessages(prev => {
+                    if (prev.some(m => m.id === newMessage.id)) return prev
+
+                    // Note: If user is scrolled up, we might want to show "New Message" banner instead of auto-scrolling
+                    // For now, we just append.
+                    const isAtBottom = scrollContainerRef.current &&
+                        (scrollContainerRef.current.scrollTop + scrollContainerRef.current.clientHeight >= scrollContainerRef.current.scrollHeight - 50)
+
+                    if (isAtBottom) {
+                        setTimeout(scrollToBottom, 100)
+                    }
+
+                    return [...prev, newMessage]
+                })
+
+                // If message is from the other party, mark as read immediately
+                if (newMessage.sender_type !== currentUserRole) {
+                    // We can't easily call valid markRead here because 'messages' state in closure might be stale
+                    // But we can trigger a separate effect or call API directly
+                    fetch('/api/chat/mark-read', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId })
+                    }).catch(e => console.error('Realtime mark read error', e))
+                }
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [studentId, currentUserRole])
 
     // Scroll restoration logic
     useLayoutEffect(() => {
