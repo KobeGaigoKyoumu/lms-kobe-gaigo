@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
 
+// 24時間キャッシュ（ISR）
+export const revalidate = 86400
+
 export default async function CoursesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

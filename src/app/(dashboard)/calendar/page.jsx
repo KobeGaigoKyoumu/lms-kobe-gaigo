@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import CalendarView from './CalendarView'
 
+// 24時間キャッシュ（ISR）
+export const revalidate = 86400
+
 export default async function CalendarPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

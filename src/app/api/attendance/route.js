@@ -2,7 +2,17 @@ import { NextResponse } from 'next/server'
 // import { createClient } from '@/lib/supabase/server' // RLS制限にかかるため一時的に無効化
 import { createClient } from '@supabase/supabase-js'
 
-export const dynamic = 'force-dynamic' // Disable caching
+// Cache-Control: Vercelエッジキャッシュを24時間有効化
+// s-maxage=86400: CDNで24時間キャッシュ（出席率データは月1回更新のため）
+// stale-while-revalidate: キャッシュ期限切れ後も古いデータを返しつつバックグラウンドで更新
+function cachedJson(data, status = 200) {
+    return NextResponse.json(data, {
+        status,
+        headers: {
+            'Cache-Control': 's-maxage=86400, stale-while-revalidate'
+        }
+    })
+}
 
 // Service Role Keyを使用してRLSをバイパスするクライアントを作成
 // 注意: 本来は環境変数(SUPABASE_SERVICE_ROLE_KEY)で管理すべきですが、緊急対応としてimportスクリプトと同じキーを使用
@@ -132,14 +142,9 @@ export async function GET(request) {
                 return b.month - a.month
             })
 
-            return NextResponse.json({
+            return cachedJson({
                 monthlyFiles,
-                cumulativeFiles,
-                debug: {
-                    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-                    timestamp: new Date().toISOString(),
-                    scan_pages: page
-                }
+                cumulativeFiles
             })
         }
 
@@ -212,12 +217,12 @@ export async function GET(request) {
                 return a.grade - b.grade
             })
 
-            return NextResponse.json({
+            return cachedJson({
                 totalStudents: students.length,
                 averageRate: avgRate,
                 minRate: sortedRates[0],
                 maxRate: sortedRates[sortedRates.length - 1],
-                grades: grades, // Added grades data
+                grades: grades,
                 year: targetYear,
                 month: targetMonth,
                 isCumulative: cumulative
@@ -286,7 +291,7 @@ export async function GET(request) {
                 return (a.classCode || '').localeCompare(b.classCode || '', undefined, { numeric: true })
             })
 
-            return NextResponse.json({
+            return cachedJson({
                 classes,
                 year: targetYear,
                 month: targetMonth,
@@ -322,7 +327,7 @@ export async function GET(request) {
 
                 if (monthlyError || cumError) throw monthlyError || cumError
 
-                return NextResponse.json({
+                return cachedJson({
                     monthlyData: monthlyData || [],
                     cumulativeData: cumulativeData || [],
                     studentInfo
@@ -382,7 +387,7 @@ export async function GET(request) {
                 processedStudents = processedStudents.filter(s => s.class_name === classCodeParam)
             }
 
-            return NextResponse.json({
+            return cachedJson({
                 students: processedStudents,
                 year: targetYear,
                 month: targetMonth,
