@@ -18,6 +18,12 @@ export async function GET(request) {
 
     if (code) {
         const supabase = await createClient()
+
+        // Debug: Log cookies to see if code-verifier is present
+        const cookieStore = await cookies();
+        const allCookies = cookieStore.getAll();
+        console.log('Auth Callback: Cookies detected:', allCookies.map(c => c.name).join(', '));
+
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (error) {
