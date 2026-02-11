@@ -37,7 +37,7 @@ export default async function MyGradesPage() {
     // Fetch student's grade records
     const { data: gradeRecords } = await supabase
         .from('grade_records')
-        .select('*')
+        .select('id, year_term, class_name, final_exam_total, report_card_total, final_exam_data, report_card_data, created_at')
         .eq('student_id_text', profile.student_id_text)
         .order('year_term', { ascending: false })
 

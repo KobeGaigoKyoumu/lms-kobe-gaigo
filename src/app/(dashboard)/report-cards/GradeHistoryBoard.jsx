@@ -227,7 +227,7 @@ export default function GradeHistoryBoard() {
         try {
             const { data, error } = await supabase
                 .from('grade_records')
-                .select('*')
+                .select('id, student_id_text, student_name, class_name, year_term, final_exam_total, report_card_total, final_exam_data, report_card_data, created_at')
                 .order('created_at', { ascending: false })
 
             if (error) throw error
