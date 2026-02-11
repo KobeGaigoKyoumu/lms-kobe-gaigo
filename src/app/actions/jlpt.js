@@ -3,24 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createClientJs } from '@supabase/supabase-js'
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData, getJlptSectionScoreStats } from '@/lib/jlpt'
-import { unstable_cache } from 'next/cache'
-
-// Use unstable_cache to offload calculations for 1 hour
-const getCachedEnhancedStats = unstable_cache(
-    async (allStudents) => {
-        return await getEnhancedJlptStats(allStudents);
-    },
-    ['jlpt-enhanced-stats'],
-    { revalidate: 3600, tags: ['jlpt-analytics'] }
-);
-
-const getCachedJlptData = unstable_cache(
-    async () => {
-        return await getJlptData();
-    },
-    ['jlpt-session-data'],
-    { revalidate: 3600, tags: ['jlpt-analytics'] }
-);
 
 export async function fetchJlptAnalyticsData() {
     console.log('Server Action: Fetching JLPT Analytics Data...');
@@ -130,12 +112,12 @@ export async function fetchJlptAnalyticsData() {
     }
 
     try {
-        // 1. Basic Stats (for charts) - CACHED
-        result.stats = await getCachedJlptData();
+        // 1. Basic Stats (for charts)
+        result.stats = await getJlptData();
 
-        // 2. Enhanced Stats (Overall & Class Analysis) - CACHED
+        // 2. Enhanced Stats (Overall & Class Analysis)
         // We pass ALL fetched students (including inactive) for accurate historical stats calculation
-        const enhancedStats = await getCachedEnhancedStats(allFetchedData || []);
+        const enhancedStats = await getEnhancedJlptStats(allFetchedData || []);
 
         // 3. Student Summaries (Class Analysis)
         if (students.length > 0) {
