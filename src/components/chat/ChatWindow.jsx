@@ -69,6 +69,13 @@ export default function ChatWindow({
             if (studentId) params.append('studentId', studentId)
             params.append('limit', '50')
 
+            // Clear App Badge when opening chat
+            if ('setAppBadge' in navigator) {
+                navigator.setAppBadge(0).catch(e => console.error('Failed to clear badge', e))
+            } else if ('clearAppBadge' in navigator) {
+                navigator.clearAppBadge().catch(e => console.error('Failed to clear badge', e))
+            }
+
             const res = await fetch(`/api/chat?${params.toString()}`)
             if (!res.ok) throw new Error('Failed to fetch')
 
