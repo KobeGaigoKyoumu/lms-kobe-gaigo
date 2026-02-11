@@ -780,8 +780,8 @@ export default function GradeHistoryBoard() {
                                                                 color = '#166534';
                                                             } else if (score > 60) {
                                                                 grade = 'B';
-                                                                bg = '#ffedd5';
-                                                                color = '#9a3412';
+                                                                bg = '#fef9c3'; // Yellow-100
+                                                                color = '#854d0e'; // Yellow-800
                                                             }
 
                                                             return (
@@ -827,8 +827,8 @@ export default function GradeHistoryBoard() {
                                                                 bg = '#dcfce7';
                                                                 color = '#166534';
                                                             } else if (validGrade === 'B') {
-                                                                bg = '#ffedd5';
-                                                                color = '#9a3412';
+                                                                bg = '#fef9c3'; // Yellow-100
+                                                                color = '#854d0e'; // Yellow-800
                                                             }
 
                                                             return (
@@ -859,8 +859,8 @@ export default function GradeHistoryBoard() {
                                                                 bg = '#dcfce7';
                                                                 color = '#166534';
                                                             } else if (validGrade === 'B') {
-                                                                bg = '#ffedd5';
-                                                                color = '#9a3412';
+                                                                bg = '#fef9c3'; // Yellow-100
+                                                                color = '#854d0e'; // Yellow-800
                                                             }
 
                                                             return (
