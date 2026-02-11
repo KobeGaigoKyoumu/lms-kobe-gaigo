@@ -109,6 +109,15 @@ export async function fetchJlptAnalyticsData() {
         },
         sectionScores: null, // 科目別得点データ
         error: fetchError,
+        debug: {
+            dataSource,
+            totalFetched,
+            statusDistribution,
+            activeCount: students.length,
+            hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+            authDebug,
+            fetchError: fetchError || null
+        }
     }
 
     try {
