@@ -79,6 +79,8 @@ export async function updateSession(request) {
             return NextResponse.redirect(url)
         }
 
+        return supabaseResponse
+
     } catch (e) {
         console.error('CRITICAL: Middleware failed', e);
         return NextResponse.next({ request });
