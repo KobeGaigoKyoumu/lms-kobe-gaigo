@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
-import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Reply } from 'lucide-react'
+import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Reply, Bell } from 'lucide-react'
 import styles from './ChatWindow.module.css'
+import { subscribeUserToPush } from '@/lib/pushNotification'
 
 export default function ChatWindow({
     studentId,
@@ -17,6 +18,7 @@ export default function ChatWindow({
     const [previewImage, setPreviewImage] = useState(null)
     const [replyingTo, setReplyingTo] = useState(null) // { id, content, sender_type }
     const [highlightedMessageId, setHighlightedMessageId] = useState(null)
+    const [pushEnabled, setPushEnabled] = useState(false)
 
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
@@ -25,6 +27,24 @@ export default function ChatWindow({
     const observerTarget = useRef(null)
     const prevScrollHeight = useRef(0)
     const wasLoadingMoreRef = useRef(false)
+
+    // Push Notification Subscription
+    useEffect(() => {
+        // Try to subscribe quietly first, or check if already subscribed
+        if ('Notification' in window && Notification.permission === 'granted') {
+            subscribeUserToPush().then(success => setPushEnabled(success))
+        }
+    }, [])
+
+    const handleEnablePush = async () => {
+        const success = await subscribeUserToPush()
+        setPushEnabled(success)
+        if (success) {
+            alert('通知を有効にしました')
+        } else {
+            alert('通知の有効化に失敗しました。ブラウザの設定を確認してください。')
+        }
+    }
 
     const POLL_INTERVAL = 5000
 
@@ -445,6 +465,29 @@ export default function ChatWindow({
 
                     {!isLoading && messages.length === 0 && (
                         <div className={styles.emptyState}>メッセージはまだありません</div>
+                    )}
+
+                    {!pushEnabled && (
+                        <div style={{ textAlign: 'center', padding: '10px' }}>
+                            <button
+                                onClick={handleEnablePush}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    border: '1px solid #e5e7eb',
+                                    backgroundColor: '#fff',
+                                    color: '#4b5563',
+                                    fontSize: '0.875rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <Bell size={16} />
+                                通知を有効にする
+                            </button>
+                        </div>
                     )}
 
 

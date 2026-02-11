@@ -142,69 +142,78 @@ export async function POST(request) {
 
         if (error) throw error
 
-        /* 通知機能を一時停止中
+        // 4. Send Push Notification
         try {
             const webpush = require('web-push')
-            webpush.setVapidDetails(
-                'mailto:admin@lms-kobe-gaigo.vercel.app',
-                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                process.env.VAPID_PRIVATE_KEY
-            )
 
-            let recipientId = null
-            if (payload.sender_type === 'teacher') {
-                recipientId = payload.student_id
-            } else {
-                // For student messages, find the last teacher who messaged them
-                const { data: lastTeacherMsg } = await adminSupabase
+            if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+                webpush.setVapidDetails(
+                    'mailto:admin@lms-kobe-gaigo.vercel.app',
+                    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                    process.env.VAPID_PRIVATE_KEY
+                )
+
+                let recipientId = null
+                if (payload.sender_type === 'teacher') {
+                    recipientId = payload.student_id
+                } else {
+                    // For student messages, find the last teacher who messaged them, or default to admin
+                    // Ideally, we should notify all teachers or specific assigned teachers.
+                    // For now, we'll try to find a teacher who recently interacted.
+                    const { data: lastTeacherMsg } = await adminSupabase
+                        .from('messages')
+                        .select('teacher_id')
+                        .eq('student_id', payload.student_id)
+                        .eq('sender_type', 'teacher')
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single()
+
+                    recipientId = lastTeacherMsg?.teacher_id || 'admin_user' // Fallback to a generic admin ID or handle differently
+                }
+
+                // Fetch unread count for the recipient
+                const { count: unreadCount } = await adminSupabase
                     .from('messages')
-                    .select('teacher_id')
+                    .select('*', { count: 'exact', head: true })
                     .eq('student_id', payload.student_id)
-                    .eq('sender_type', 'teacher')
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single()
+                    .eq('read', false)
+                    .eq('sender_type', payload.sender_type === 'teacher' ? 'teacher' : 'student')
 
-                recipientId = lastTeacherMsg?.teacher_id || 'admin_user' // Fallback
-            }
+                // Fetch recipient subscriptions
+                // Note: user_id in push_subscriptions might be student_id (string) or auth.uid() (uuid)
+                // We need to ensure we query correctly.
+                const { data: subs } = await adminSupabase
+                    .from('push_subscriptions')
+                    .select('*')
+                    .eq('user_id', recipientId)
 
-            // Fetch unread count for the recipient
-            const { count: unreadCount } = await adminSupabase
-                .from('messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('student_id', payload.student_id)
-                .eq('read', false)
-                .eq('sender_type', payload.sender_type === 'teacher' ? 'teacher' : 'student')
-
-            // Fetch recipient subscriptions
-            const { data: subs } = await adminSupabase
-                .from('push_subscriptions')
-                .select('*')
-                .eq('user_id', recipientId)
-
-            if (subs && subs.length > 0) {
-                const pushPayload = JSON.stringify({
-                    title: payload.sender_type === 'teacher' ? '先生からのメッセージ' : '学生からのメッセージ',
-                    body: payload.content || (payload.attachment_url ? 'ファイルを送信しました' : ''),
-                    url: payload.sender_type === 'teacher' ? '/student/communication' : `/communication/${payload.student_id}`,
-                    badge: unreadCount || 1
-                })
-
-                await Promise.all(subs.map(sub =>
-                    webpush.sendNotification({
-                        endpoint: sub.endpoint,
-                        keys: { p256dh: sub.p256dh, auth: sub.auth }
-                    }, pushPayload).catch(e => {
-                        if (e.statusCode === 410 || e.statusCode === 404) {
-                            return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
-                        }
+                if (subs && subs.length > 0) {
+                    const pushPayload = JSON.stringify({
+                        title: payload.sender_type === 'teacher' ? '先生からのメッセージ' : '学生からのメッセージ',
+                        body: payload.content || (payload.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
+                        url: payload.sender_type === 'teacher' ? `/student/communication` : `/communication/${payload.student_id}`,
+                        badge: unreadCount || 1
                     })
-                ))
+
+                    await Promise.all(subs.map(sub =>
+                        webpush.sendNotification({
+                            endpoint: sub.endpoint,
+                            keys: { p256dh: sub.p256dh, auth: sub.auth }
+                        }, pushPayload).catch(async e => {
+                            if (e.statusCode === 410 || e.statusCode === 404) {
+                                await adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                            }
+                            console.error('Push send failed for one sub:', e.statusCode)
+                        })
+                    ))
+                }
+            } else {
+                console.warn('VAPID keys not configured, skipping push notification')
             }
         } catch (e) {
             console.error('Push sending error:', e)
         }
-        */
 
         return NextResponse.json({ message: data })
 
