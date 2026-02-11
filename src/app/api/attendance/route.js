@@ -311,7 +311,7 @@ export async function GET(request) {
                     .single()
                 const { data: monthlyData, error: monthlyError } = await supabase
                     .from('attendance_records')
-                    .select('year, month, attendance_rate, prescribed_days, attended_days, absent_days, late_days, early_leave_days, public_absent_days')
+                    .select('year, month, attendance_rate, attendance_days, absence_days, late_slots')
                     .eq('student_id', studentId)
                     .eq('is_cumulative', false)
                     .order('year', { ascending: true })
@@ -319,7 +319,7 @@ export async function GET(request) {
 
                 const { data: cumulativeData, error: cumError } = await supabase
                     .from('attendance_records')
-                    .select('year, month, attendance_rate, prescribed_days, attended_days, absent_days, late_days, early_leave_days, public_absent_days')
+                    .select('year, month, attendance_rate, attendance_days, absence_days, late_slots')
                     .eq('student_id', studentId)
                     .eq('is_cumulative', true)
                     .order('year', { ascending: true })
