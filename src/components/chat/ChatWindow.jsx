@@ -216,7 +216,9 @@ export default function ChatWindow({
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if (!isLoading) pollNewMessages()
+            if (!isLoading && document.visibilityState === 'visible') {
+                pollNewMessages()
+            }
         }, POLL_INTERVAL)
         return () => clearInterval(interval)
     }, [pollNewMessages, isLoading])
