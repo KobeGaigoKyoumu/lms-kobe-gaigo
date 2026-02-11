@@ -32,7 +32,8 @@
     flex-wrap: wrap;
 }
 
-.viewBtn, .analyticsBtn {
+.viewBtn,
+.analyticsBtn {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-2);
@@ -71,25 +72,36 @@
 }
 
 /* Upload Section */
-.uploadSection {
-    padding: var(--spacing-6);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+/* Upload Section */
+.uploadContainer {
+    display: flex;
+    gap: var(--spacing-4);
+    align-items: stretch;
     margin-bottom: var(--spacing-6);
 }
 
+.uploadSection {
+    flex: 1;
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    /* margin-bottom removed as it's handled by container gap/margin */
+}
+
 .uploadSection h2 {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
+    /* Reduced font size */
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
 }
 
 .dropzone {
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-8);
+    padding: var(--spacing-4);
+    /* Reduced padding */
     text-align: center;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -106,10 +118,17 @@
 }
 
 .dropzoneIcon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto var(--spacing-3);
+    width: 32px;
+    /* Reduced icon size */
+    height: 32px;
+    margin: 0 auto var(--spacing-2);
     color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+    .uploadContainer {
+        flex-direction: column;
+    }
 }
 
 .dropzoneText {

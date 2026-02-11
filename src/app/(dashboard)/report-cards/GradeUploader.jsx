@@ -819,153 +819,155 @@ export default function GradeUploader() {
 
     return (
         <div>
-            {/* --- EXISTING GRADE UPLOAD SECTION --- */}
-            <div className={styles.uploadSection}>
-                <h2>成績評価シートをアップロード</h2>
-                {/* ... existing code ... */}
-                {/* (Keep existing JSX for Grade Upload) */}
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <label style={{ fontSize: '0.9em', marginBottom: '5px', fontWeight: 'bold' }}>年度</label>
-                        <select
-                            value={selectedYear}
-                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '100px' }}
-                        >
-                            {Array.from({ length: new Date().getFullYear() + 2 - 2020 + 1 }, (_, i) => 2020 + i).map(y => (
-                                <option key={y} value={y}>{y}年度</option>
-                            ))}
-                        </select>
+            <div className={styles.uploadContainer}>
+                {/* --- EXISTING GRADE UPLOAD SECTION --- */}
+                <div className={styles.uploadSection}>
+                    <h2>成績評価シートをアップロード</h2>
+                    {/* ... existing code ... */}
+                    {/* (Keep existing JSX for Grade Upload) */}
+                    <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <label style={{ fontSize: '0.9em', marginBottom: '5px', fontWeight: 'bold' }}>年度</label>
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '100px' }}
+                            >
+                                {Array.from({ length: new Date().getFullYear() + 2 - 2020 + 1 }, (_, i) => 2020 + i).map(y => (
+                                    <option key={y} value={y}>{y}年度</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <label style={{ fontSize: '0.9em', marginBottom: '5px', fontWeight: 'bold' }}>学期</label>
+                            <select
+                                value={selectedTerm}
+                                onChange={(e) => setSelectedTerm(e.target.value)}
+                                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '100px' }}
+                            >
+                                <option value="前期">前期</option>
+                                <option value="後期">後期</option>
+                                <option value="通算">通算</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <label style={{ fontSize: '0.9em', marginBottom: '5px', fontWeight: 'bold' }}>学期</label>
-                        <select
-                            value={selectedTerm}
-                            onChange={(e) => setSelectedTerm(e.target.value)}
-                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '100px' }}
-                        >
-                            <option value="前期">前期</option>
-                            <option value="後期">後期</option>
-                            <option value="通算">通算</option>
-                        </select>
+                    <div
+                        className={`${styles.dropzone} ${files.length > 0 ? styles.active : ''}`}
+                        onDrop={handleDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".xlsx,.xlsm,.xls"
+                            multiple
+                            onChange={handleFileSelect}
+                            style={{ display: 'none' }}
+                        />
+                        <svg className={styles.dropzoneIcon} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M8 32l8-8 8 8M24 24l8-8 8 8" />
+                            <path d="M16 24v16h16V24" />
+                            <path d="M8 8h32v8" />
+                        </svg>
+                        <p className={styles.dropzoneText}>
+                            ファイルをドラッグ＆ドロップ または クリックして選択
+                        </p>
+                        <p className={styles.dropzoneHint}>
+                            対応形式: .xlsx, .xlsm, .xls (複数選択可)
+                        </p>
                     </div>
-                </div>
 
-                <div
-                    className={`${styles.dropzone} ${files.length > 0 ? styles.active : ''}`}
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".xlsx,.xlsm,.xls"
-                        multiple
-                        onChange={handleFileSelect}
-                        style={{ display: 'none' }}
-                    />
-                    <svg className={styles.dropzoneIcon} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M8 32l8-8 8 8M24 24l8-8 8 8" />
-                        <path d="M16 24v16h16V24" />
-                        <path d="M8 8h32v8" />
-                    </svg>
-                    <p className={styles.dropzoneText}>
-                        ファイルをドラッグ＆ドロップ または クリックして選択
-                    </p>
-                    <p className={styles.dropzoneHint}>
-                        対応形式: .xlsx, .xlsm, .xls (複数選択可)
-                    </p>
-                </div>
-
-                {files.length > 0 && (
-                    <div className={styles.fileList} style={{ marginTop: '15px' }}>
-                        {files.map((f, i) => (
-                            <div key={i} className={styles.fileName} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', marginBottom: '5px', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: '8px' }}>
-                                        <path d="M4 4a2 2 0 0 1 2-2h6l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z" />
-                                        <path d="M12 2v4h4" />
-                                    </svg>
-                                    {f.name}
+                    {files.length > 0 && (
+                        <div className={styles.fileList} style={{ marginTop: '15px' }}>
+                            {files.map((f, i) => (
+                                <div key={i} className={styles.fileName} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', marginBottom: '5px', borderRadius: '4px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: '8px' }}>
+                                            <path d="M4 4a2 2 0 0 1 2-2h6l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z" />
+                                            <path d="M12 2v4h4" />
+                                        </svg>
+                                        {f.name}
+                                    </div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.2em', padding: '0 5px' }}
+                                    >
+                                        ×
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.2em', padding: '0 5px' }}
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
 
-                <button
-                    onClick={parseExcel}
-                    disabled={files.length === 0 || loading}
-                    className={styles.parseBtn}
-                >
-                    {loading ? '解析中...' : '成績データを読み込む'}
-                </button>
-            </div>
-
-            {/* --- JLPT UPLOAD SECTION (NEW) --- */}
-            <div className={styles.uploadSection} style={{ marginTop: '40px', borderTop: '2px dashed #eee', paddingTop: '40px' }}>
-                <h2>JLPT模擬試験スコアシートをアップロード</h2>
-                <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>
-                    ファイル名形式: YYYYMMDD_クラス_試験名.xlsx (例: 20250205_1-13_N4再々試験①.xlsx)
-                </p>
-
-                <div
-                    className={`${styles.dropzone} ${jlptFiles.length > 0 ? styles.active : ''}`}
-                    onDrop={handleJlptDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    onClick={() => jlptFileInputRef.current?.click()}
-                    style={{ borderColor: '#10b981', backgroundColor: jlptFiles.length > 0 ? '#ecfdf5' : 'white' }}
-                >
-                    <input
-                        ref={jlptFileInputRef}
-                        type="file"
-                        accept=".xlsx"
-                        multiple
-                        onChange={handleJlptFileSelect}
-                        style={{ display: 'none' }}
-                    />
-                    <svg className={styles.dropzoneIcon} viewBox="0 0 48 48" fill="none" stroke="#10b981" strokeWidth="1.5">
-                        <path d="M14 24l10-10 10 10" />
-                        <path d="M24 14v20" />
-                        <path d="M8 40h32" />
-                    </svg>
-                    <p className={styles.dropzoneText}>
-                        JLPTファイルをドラッグ＆ドロップ または クリック
-                    </p>
+                    <button
+                        onClick={parseExcel}
+                        disabled={files.length === 0 || loading}
+                        className={styles.parseBtn}
+                    >
+                        {loading ? '解析中...' : '成績データを読み込む'}
+                    </button>
                 </div>
 
-                {jlptFiles.length > 0 && (
-                    <div className={styles.fileList} style={{ marginTop: '15px' }}>
-                        {jlptFiles.map((f, i) => (
-                            <div key={i} className={styles.fileName} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#ecfdf5', marginBottom: '5px', borderRadius: '4px' }}>
-                                <span>{f.name}</span>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); removeJlptFile(i); }}
-                                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                {/* --- JLPT UPLOAD SECTION (NEW) --- */}
+                <div className={styles.uploadSection}>
+                    <h2>JLPT模擬試験スコアシートをアップロード</h2>
+                    <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>
+                        ファイル名形式: YYYYMMDD_クラス_試験名.xlsx (例: 20250205_1-13_N4再々試験①.xlsx)
+                    </p>
 
-                <button
-                    onClick={parseJlptExcel}
-                    disabled={jlptFiles.length === 0 || jlptLoading}
-                    className={styles.parseBtn}
-                    style={{ backgroundColor: '#10b981' }}
-                >
-                    {jlptLoading ? '解析中...' : 'JLPTデータを読み込む'}
-                </button>
+                    <div
+                        className={`${styles.dropzone} ${jlptFiles.length > 0 ? styles.active : ''}`}
+                        onDrop={handleJlptDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                        onClick={() => jlptFileInputRef.current?.click()}
+                        style={{ borderColor: '#10b981', backgroundColor: jlptFiles.length > 0 ? '#ecfdf5' : 'white' }}
+                    >
+                        <input
+                            ref={jlptFileInputRef}
+                            type="file"
+                            accept=".xlsx"
+                            multiple
+                            onChange={handleJlptFileSelect}
+                            style={{ display: 'none' }}
+                        />
+                        <svg className={styles.dropzoneIcon} viewBox="0 0 48 48" fill="none" stroke="#10b981" strokeWidth="1.5">
+                            <path d="M14 24l10-10 10 10" />
+                            <path d="M24 14v20" />
+                            <path d="M8 40h32" />
+                        </svg>
+                        <p className={styles.dropzoneText}>
+                            JLPTファイルをドラッグ＆ドロップ または クリック
+                        </p>
+                    </div>
+
+                    {jlptFiles.length > 0 && (
+                        <div className={styles.fileList} style={{ marginTop: '15px' }}>
+                            {jlptFiles.map((f, i) => (
+                                <div key={i} className={styles.fileName} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#ecfdf5', marginBottom: '5px', borderRadius: '4px' }}>
+                                    <span>{f.name}</span>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); removeJlptFile(i); }}
+                                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <button
+                        onClick={parseJlptExcel}
+                        disabled={jlptFiles.length === 0 || jlptLoading}
+                        className={styles.parseBtn}
+                        style={{ backgroundColor: '#10b981' }}
+                    >
+                        {jlptLoading ? '解析中...' : 'JLPTデータを読み込む'}
+                    </button>
+                </div>
             </div>
 
             {error && <div className={styles.error}>{error}</div>}
