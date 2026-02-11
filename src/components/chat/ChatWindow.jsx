@@ -32,17 +32,17 @@ export default function ChatWindow({
     useEffect(() => {
         // Try to subscribe quietly first, or check if already subscribed
         if ('Notification' in window && Notification.permission === 'granted') {
-            subscribeUserToPush().then(success => setPushEnabled(success))
+            subscribeUserToPush().then(result => setPushEnabled(result.success))
         }
     }, [])
 
     const handleEnablePush = async () => {
-        const success = await subscribeUserToPush()
-        setPushEnabled(success)
-        if (success) {
+        const result = await subscribeUserToPush()
+        setPushEnabled(result.success)
+        if (result.success) {
             alert('通知を有効にしました')
         } else {
-            alert('通知の有効化に失敗しました。ブラウザの設定を確認してください。')
+            alert(`通知の有効化に失敗しました: ${result.error}`)
         }
     }
 

@@ -20,12 +20,12 @@ function urlBase64ToUint8Array(base64String) {
 export async function subscribeUserToPush() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         console.warn('Push messaging is not supported');
-        return false;
+        return { success: false, error: 'このブラウザはプッシュ通知に対応していません' };
     }
 
     if (!publicVapidKey) {
         console.error('VAPID Public Key is missing');
-        return false;
+        return { success: false, error: 'サーバー設定エラー: VAPID Keyがありません' };
     }
 
     try {
@@ -42,7 +42,7 @@ export async function subscribeUserToPush() {
 
         if (permission !== 'granted') {
             console.log('Notification permission not granted');
-            return false;
+            return { success: false, error: '通知の権限が許可されていません' };
         }
 
         // Subscribe
@@ -61,14 +61,15 @@ export async function subscribeUserToPush() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to save subscription on server');
+            const errData = await response.json();
+            throw new Error(errData.error || 'サーバーへの保存に失敗しました');
         }
 
         console.log('Push subscription successful', subscription);
-        return true;
+        return { success: true };
 
     } catch (error) {
         console.error('Error subscribing to push:', error);
-        return false;
+        return { success: false, error: error.message || '不明なエラーが発生しました' };
     }
 }
