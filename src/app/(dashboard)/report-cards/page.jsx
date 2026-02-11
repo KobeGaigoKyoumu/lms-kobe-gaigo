@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import GradeUploader from './GradeUploader'
+import GradeHistoryBoard from './GradeHistoryBoard'
 import Link from 'next/link'
 
 export default async function ReportCardsPage() {
@@ -28,12 +29,6 @@ export default async function ReportCardsPage() {
                     </div>
                     {isTeacherOrAdmin && (
                         <div className={styles.headerActions}>
-                            <Link href="/report-cards/history" className={styles.viewBtn}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                アップロード履歴を閲覧
-                            </Link>
                             <Link href="/report-cards/analytics" className={styles.analyticsBtn}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 20V10" />
@@ -48,7 +43,12 @@ export default async function ReportCardsPage() {
             </header>
 
             {isTeacherOrAdmin ? (
-                <GradeUploader />
+                <>
+                    <GradeUploader />
+                    <div style={{ marginTop: '40px', borderTop: '1px solid #e5e7eb', paddingTop: '40px' }}>
+                        <GradeHistoryBoard />
+                    </div>
+                </>
             ) : (
                 <div className={styles.studentView}>
                     <p>成績の閲覧権限がありません。担当教師にお問い合わせください。</p>
@@ -57,3 +57,4 @@ export default async function ReportCardsPage() {
         </div>
     )
 }
+
