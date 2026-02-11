@@ -61,8 +61,15 @@ export async function subscribeUserToPush() {
         });
 
         if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || 'サーバーへの保存に失敗しました');
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.indexOf('application/json') !== -1) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'サーバーへの保存に失敗しました');
+            } else {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error(`サーバーエラー (Status: ${response.status})`);
+            }
         }
 
         console.log('Push subscription successful', subscription);
