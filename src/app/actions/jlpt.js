@@ -34,7 +34,7 @@ export async function fetchJlptAnalyticsData() {
 
             const adminResult = await adminSupabase
                 .from('students')
-                .select('student_id_text, full_name, class_name, status, enrollment_date, student_id')
+                .select('student_id_text, full_name, class_name, status, enrollment_date')
                 .range(0, 9999);
 
             if (adminResult.data) {
@@ -57,7 +57,7 @@ export async function fetchJlptAnalyticsData() {
 
             let res = await supabase
                 .from('students')
-                .select('student_id_text, full_name, class_name, status, enrollment_date, student_id')
+                .select('student_id_text, full_name, class_name, status, enrollment_date')
                 .range(0, 9999);
             data = res.data;
             error = res.error; // Keep error if this also fails
@@ -134,7 +134,7 @@ export async function fetchJlptAnalyticsData() {
             enhancedStats.studentStats = studentSummaries;
 
             enhancedStats.students = students.map(s => ({
-                id: s.student_id_text || s.student_id,
+                id: s.student_id_text,
                 name: s.full_name,
                 class: s.class_name
             }));
