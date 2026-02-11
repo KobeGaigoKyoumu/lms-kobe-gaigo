@@ -499,10 +499,17 @@ export default function AnalyticsPage() {
 
             if (error) throw error
 
-            setGrades(data || [])
+            // Filter out JLPT data
+            const filteredData = (data || []).filter(item => {
+                const isJlptTerm = item.year_term?.startsWith('JLPT')
+                const isJlptType = item.final_exam_data?.type === 'JLPT'
+                return !isJlptTerm && !isJlptType
+            })
 
-            const uniqueTerms = [...new Set(data.map(item => item.year_term))].sort().reverse()
-            const uniqueClasses = [...new Set(data.map(item => item.class_name))].sort()
+            setGrades(filteredData)
+
+            const uniqueTerms = [...new Set(filteredData.map(item => item.year_term))].sort().reverse()
+            const uniqueClasses = [...new Set(filteredData.map(item => item.class_name))].sort()
 
             setTerms(uniqueTerms)
             setClasses(uniqueClasses)
