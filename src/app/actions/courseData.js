@@ -3,10 +3,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+
+const getSupabaseAdmin = () => {
+    return createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+}
+
 export const getCachedCourses = unstable_cache(
     async () => {
-        const supabase = await createClient()
-        console.log('Cache MISS: Fetching Courses...')
+        const supabase = getSupabaseAdmin()
+        console.log('Cache MISS: Fetching Courses (Admin)...')
 
         const { data, error } = await supabase
             .from('courses')
@@ -32,5 +41,10 @@ export const getCachedCourses = unstable_cache(
 )
 
 export async function fetchCachedCourses() {
+    // Auth Check
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
     return await getCachedCourses()
 }

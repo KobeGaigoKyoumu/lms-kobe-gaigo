@@ -380,6 +380,24 @@ export default function AttendancePage() {
         { id: 'individual', label: '個別' }
     ]
 
+    const getRateColor = (rate) => {
+        if (!rate && rate !== 0) return ''
+        const r = parseFloat(rate)
+        if (r < 0.8) return styles.danger
+        if (r < 0.9) return styles.warning
+        return styles.success
+    }
+
+    const formatRate = (rate) => {
+        if (!rate && rate !== 0) return '-'
+        return `${(parseFloat(rate) * 100).toFixed(1)}%`
+    }
+
+    const formatStudentName = (student) => {
+        if (!student) return ''
+        return student.full_name || student.name || ''
+    }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>

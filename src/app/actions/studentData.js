@@ -17,7 +17,6 @@ export const getCachedStudentList = unstable_cache(
         const { data, error } = await supabase
             .from('students')
             .select(`
-                id,
                 student_id_text,
                 full_name,
                 name_kana,
