@@ -60,6 +60,12 @@ export default function MobileMenu({ role, user }) {
         router.push('/login')
     }
 
+    React.useEffect(() => {
+        if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
+            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error(e))
+        }
+    }, [statuses.unreadMessageCount])
+
     if (!role) return null
 
     return (

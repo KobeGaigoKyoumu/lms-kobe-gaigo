@@ -29,6 +29,12 @@ export function StudentStatusProvider({ children, role, user }) {
     }
 
     useEffect(() => {
+        if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
+            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error('Badge Error:', e))
+        }
+    }, [statuses.unreadMessageCount])
+
+    useEffect(() => {
         // Initial fetch
         fetchStatuses()
 

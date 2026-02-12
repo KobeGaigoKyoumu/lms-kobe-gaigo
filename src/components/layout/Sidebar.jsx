@@ -62,6 +62,12 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
         document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')
     }, [isCollapsed])
 
+    useEffect(() => {
+        if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
+            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error(e))
+        }
+    }, [statuses.unreadMessageCount])
+
     const handleLogout = async () => {
         if (userRole === 'student') {
             await logoutStudent()
