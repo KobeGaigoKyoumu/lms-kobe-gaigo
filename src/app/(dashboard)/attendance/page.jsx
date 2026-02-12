@@ -231,37 +231,22 @@ export default function AttendancePage() {
 
             // However, in my previous edit I exported getStudentListAttendance = _getCachedStudentListAttendance.
             // So it returns { students: [...all...], ... }
-            const fullListData = await getPaginatedAttendance({ // Using Paginated but likely want ALL for this class?
+            const fullListData = await getPaginatedAttendance({
                 year: selectedYear,
                 month: selectedMonth,
                 isCumulative,
-                limit: 10000 // Large limit to get all class members
+                limit: 10000 // Get all to filter client side
             })
-            // Wait, the previous code called "getStudentListAttendance" which was the full fetch.
-            // In my new file, "getStudentListAttendance" is the internal cached one.
-            // So if I import it, I can use it.
-            // Let's use getStudentListAttendance (the raw one) to get all students and filter by class client-side here?
-            // Or use Paginated with class filter? I didn't add class filter to PaginatedAction.
 
-            // Let's stick to using getPaginatedAttendance but I haven't added 'class' filter to it.
-            // Maybe I should just use the raw getStudentListAttendance for this specific "Class Detail" view 
-            // since it's only one class, but wait, getStudentListAttendance returns ALL students.
-            // If I want to avoid sending 5MB, I should add 'class' filter to getPaginatedAttendance or create getClassMembers.
-            // But for now, let's assume the previous getStudentListAttendance (which I kept exported) is usable.
+            const members = fullListData.students.filter(s => s.class_name === className)
+            members.sort((a, b) => a.student_id_text?.localeCompare(b.student_id_text))
 
-            // Actually, in the code below I use getStudentListAttendance from imports.
-            // Since I aliased it to _getCachedStudentListAttendance and exported it, it returns all students.
-            // So the existing logic:
-            // const fullListData = await getStudentListAttendance(...)
-            // const members = fullListData.students.filter(...)
-            // This works, but it sends ALL students to client then filters.
-
-            // To optimize, I should really invoke a server action that returns only that class.
-            // But for this task (Phase 2), let's stick to optimizing the INDIVIDUAL tab.
-
-            // Resume editing handleSelectAll
+            setClassMembers(members)
         } catch (err) {
             console.error(err)
+            alert('クラス情報の取得に失敗しました')
+        } finally {
+            setLoading(false) // Wait, is loading state shared? Yes usually.
         }
     }
 

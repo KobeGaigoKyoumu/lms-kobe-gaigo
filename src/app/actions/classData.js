@@ -46,8 +46,8 @@ export const getCachedClasses = unstable_cache(
 
 export const getCachedStudentClassCounts = unstable_cache(
     async () => {
-        const supabase = await createClient()
-        console.log('Cache MISS: Fetching Student Class Counts...')
+        const supabase = getSupabaseAdmin()
+        console.log('Cache MISS: Fetching Student Class Counts (Admin)...')
 
         const { data, error } = await supabase
             .from('students')
