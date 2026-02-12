@@ -193,6 +193,22 @@
     color: #dc2626 !important;
 }
 
+/* JS mapping classes */
+.success {
+    color: #059669 !important;
+    font-weight: 700;
+}
+
+.warning {
+    color: #f59e0b !important;
+    font-weight: 700;
+}
+
+.danger {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
 /* 学年別 */
 .gradeStats {
     padding: 1rem 0;
