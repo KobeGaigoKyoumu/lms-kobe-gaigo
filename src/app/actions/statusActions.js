@@ -19,6 +19,7 @@ export async function getAppNewStatus() {
         const unreadMessageCount = await getUnreadCount()
 
         // 2. 課題 (未提出の件数)
+        // Optimize: Fetch only necessary IDs
         const { data: assignments } = await supabase
             .from('homework_assignments')
             .select('id')
@@ -44,20 +45,25 @@ export async function getAppNewStatus() {
 
         const { data: announcements } = await supabase
             .from('announcements')
-            .select('*')
+            .select('target_type, target_grade, target_class, target_student_ids')
             .gte('created_at', threeDaysAgo.toISOString())
             .order('created_at', { ascending: false })
 
         let hasNewAnnouncement = false
         if (announcements && announcements.length > 0) {
-            // 学生情報の詳細を取得 (ダッシュボードと同様のフィルタリングのため)
-            const { data: studentInfo } = await supabase
-                .from('students')
-                .select('student_id_text, class_name, academic_year')
-                .eq('student_id_text', session.studentId)
-                .single()
+            // Use academic_year from session if available, otherwise fallback to fetch (for legacy sessions)
+            let academicYear = session.academicYear
 
-            if (studentInfo) {
+            if (!academicYear) {
+                const { data: studentInfo } = await supabase
+                    .from('students')
+                    .select('academic_year')
+                    .eq('student_id_text', session.studentId)
+                    .single()
+                academicYear = studentInfo?.academic_year
+            }
+
+            if (academicYear) {
                 hasNewAnnouncement = announcements.some(ann => {
                     if (!ann.target_type || ann.target_type === 'all') return true
 
@@ -65,14 +71,14 @@ export async function getAppNewStatus() {
                         const currentYear = new Date().getFullYear()
                         const isBeforeApril = new Date().getMonth() < 3
                         const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-                        const studentGrade = academicYearBase - studentInfo.academic_year + 1
+                        const studentGrade = academicYearBase - academicYear + 1
                         return String(studentGrade) === ann.target_grade
                     }
                     if (ann.target_type === 'class') {
-                        return ann.target_class === studentInfo.class_name
+                        return ann.target_class === session.className
                     }
                     if (ann.target_type === 'individual') {
-                        return ann.target_student_ids?.includes(studentInfo.student_id_text)
+                        return ann.target_student_ids?.includes(session.studentId)
                     }
                     return false
                 })

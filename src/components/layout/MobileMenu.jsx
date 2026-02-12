@@ -4,8 +4,8 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { getAppNewStatus } from '@/app/actions/statusActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './MobileMenu.module.css'
 
 export default function MobileMenu({ role, user }) {
@@ -13,18 +13,25 @@ export default function MobileMenu({ role, user }) {
     const router = useRouter()
     const supabase = createClient()
     const menuItems = getMenuItems(role)
-    const [statuses, setStatuses] = React.useState({
+
+    // Use Context for student, local state for others
+    const contextStatuses = useStudentStatus()
+    const [localStatuses, setLocalStatuses] = React.useState({
         hasNewAnnouncement: false,
         unsubmittedAssignmentCount: 0,
         unreadMessageCount: 0
     })
 
+    const statuses = role === 'student' ? contextStatuses : localStatuses
+
     React.useEffect(() => {
+        if (role === 'student') return
+
+        const { getAppNewStatus } = require('@/app/actions/statusActions')
         const fetchStatuses = async () => {
             const data = await getAppNewStatus()
-            setStatuses(data)
+            setLocalStatuses(data)
         }
-
         fetchStatuses()
 
         const handleVisibilityChange = () => {
@@ -32,16 +39,13 @@ export default function MobileMenu({ role, user }) {
                 fetchStatuses()
             }
         }
-
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
         let channel
-        if (role !== 'student') {
-            channel = supabase
-                .channel('mobile-unread')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
-                .subscribe()
-        }
+        channel = supabase
+            .channel('mobile-unread')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
+            .subscribe()
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange)

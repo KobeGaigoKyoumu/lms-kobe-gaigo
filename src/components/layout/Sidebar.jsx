@@ -1,31 +1,40 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
-import { getAppNewStatus } from '@/app/actions/statusActions'
 import { getMenuItems } from '@/lib/menuItems.jsx'
+import models from './Sidebar.module.css'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './Sidebar.module.css'
 
 export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false }) {
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
-    const [statuses, setStatuses] = useState({
+
+    // Use Context for status data
+    const contextStatuses = useStudentStatus()
+    // Fallback for non-student roles (who don't have the provider)
+    const [localStatuses, setLocalStatuses] = useState({
         hasNewAnnouncement: false,
         unsubmittedAssignmentCount: 0,
         unreadMessageCount: 0
     })
+
+    const statuses = userRole === 'student' ? contextStatuses : localStatuses
+
     const menuItems = getMenuItems(userRole)
 
     useEffect(() => {
+        if (userRole === 'student') return // Handled by Context
+
+        // Legacy logic for Admin/Teacher
+        const { getAppNewStatus } = require('@/app/actions/statusActions')
         const fetchStatuses = async () => {
             const data = await getAppNewStatus()
-            setStatuses(data)
+            setLocalStatuses(data)
         }
-
         fetchStatuses()
 
         const handleVisibilityChange = () => {
@@ -33,17 +42,13 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                 fetchStatuses()
             }
         }
-
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
-        // Real-time for messages (only for non-students)
         let channel
-        if (userRole !== 'student') {
-            channel = supabase
-                .channel('unread-counts')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
-                .subscribe()
-        }
+        channel = supabase
+            .channel('unread-counts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
+            .subscribe()
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange)

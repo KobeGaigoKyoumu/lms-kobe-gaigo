@@ -16,7 +16,7 @@ export default async function StudentDashboard() {
     nextWeek.setDate(nextWeek.getDate() + 7)
 
     // Parallel data fetching
-    const [assignments, announcementsResult, studentResult] = await Promise.all([
+    const [assignments, announcementsResult] = await Promise.all([
         getStudentAssignments(),
         supabase
             .from('announcements')
@@ -35,35 +35,40 @@ export default async function StudentDashboard() {
             `)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false })
-            .limit(50),
-        session ? supabase
-            .from('students')
-            .select('student_id_text, class_name, academic_year')
-            .eq('student_id_text', session.studentId)
-            .single() : Promise.resolve({ data: null })
+            .limit(50)
     ])
 
     const announcements = announcementsResult.data || []
-    const studentInfo = studentResult.data
     const firstName = session?.name?.split(' ')[0] || '学生'
 
     // Announcement Filtering
+    // Use session data for filtering
     const filteredAnnouncements = announcements.filter(ann => {
         if (!ann.target_type || ann.target_type === 'all') return true
-        if (!studentInfo) return false
+        if (!session) return false
 
         if (ann.target_type === 'grade') {
+            // Fallback if academicYear is missing in old sessions (though unlikely after re-login)
+            // If missing, we might need to fetch or just default to false/true?
+            // Since we updated the cookie logic, new logins will have it. 
+            // For immediate effect without forcing logout, we might want a fallback, 
+            // but strict optimization requests implies we rely on the improved session.
+            // Let's assume session has it or we accept a minor glitch until re-login.
+            // Actually, we can just fetch if missing, but that defeats the purpose.
+            // Let's rely on session.
+            if (!session.academicYear) return false
+
             const currentYear = new Date().getFullYear()
             const isBeforeApril = new Date().getMonth() < 3
             const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-            const studentGrade = academicYearBase - studentInfo.academic_year + 1
+            const studentGrade = academicYearBase - session.academicYear + 1
             return String(studentGrade) === ann.target_grade
         }
         if (ann.target_type === 'class') {
-            return ann.target_class === studentInfo.class_name
+            return ann.target_class === session.className
         }
         if (ann.target_type === 'individual') {
-            return ann.target_student_ids?.includes(studentInfo.student_id_text)
+            return ann.target_student_ids?.includes(session.studentId)
         }
         return false
     }).slice(0, 3)

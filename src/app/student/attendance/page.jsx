@@ -28,7 +28,7 @@ export default async function StudentAttendancePage() {
     // 3. Fetch Attendance Records
     const { data: records, error } = await supabase
         .from('attendance_records')
-        .select('*')
+        .select('year, month, is_cumulative, attendance_rate, attendance_days, absence_days, late_slots')
         .eq('student_id', studentId)
         .order('year', { ascending: false })
         .order('month', { ascending: false })

@@ -30,7 +30,7 @@ export async function loginStudent(formData) {
         const supabase = createAdminClient()
         const { data: student, error } = await supabase
             .from('students')
-            .select('student_id_text, full_name, class_name')
+            .select('student_id_text, full_name, class_name, academic_year')
             .eq('student_id_text', studentId.trim())
             .eq('class_name', className.trim())
             .single()
@@ -43,6 +43,7 @@ export async function loginStudent(formData) {
             studentId: student.student_id_text,
             name: student.full_name,
             className: student.class_name,
+            academicYear: student.academic_year, // Added for optimization
             at: Date.now()
         }
 
@@ -98,14 +99,15 @@ export const getStudentSession = cache(async () => {
                 return {
                     studentId: data.studentId,
                     name: data.name,
-                    className: data.className
+                    className: data.className,
+                    academicYear: data.academicYear // Restore from session
                 }
             } catch {
                 // Fallback for ID-only legacy cookies
                 const supabase = createAdminClient()
                 const { data: student } = await supabase
                     .from('students')
-                    .select('student_id_text, full_name, class_name')
+                    .select('student_id_text, full_name, class_name, academic_year')
                     .eq('student_id_text', encoded)
                     .single()
 
@@ -113,7 +115,8 @@ export const getStudentSession = cache(async () => {
                     return {
                         studentId: student.student_id_text,
                         name: student.full_name,
-                        className: student.class_name
+                        className: student.class_name,
+                        academicYear: student.academic_year
                     }
                 }
             }
@@ -134,14 +137,15 @@ export const getStudentSession = cache(async () => {
                 // Fetch class info from students master if missing in profile
                 const { data: studentMaster } = await supabase
                     .from('students')
-                    .select('class_name')
+                    .select('class_name, academic_year')
                     .eq('student_id_text', profile.student_id_text)
                     .single()
 
                 return {
                     studentId: profile.student_id_text,
                     name: profile.full_name,
-                    className: studentMaster?.class_name || '未設定'
+                    className: studentMaster?.class_name || '未設定',
+                    academicYear: studentMaster?.academic_year
                 }
             }
         }
