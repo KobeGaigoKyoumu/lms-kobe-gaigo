@@ -8,6 +8,14 @@ import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import styles from './page.module.css'
 
+import {
+    getAvailableAttendanceFiles,
+    getSchoolAttendanceStats,
+    getClassAttendanceStats,
+    getStudentListAttendance,
+    getStudentAttendanceHistory
+} from '@/app/actions/attendanceData'
+
 export default function AttendancePage() {
     const supabase = createClient()
     const [activeTab, setActiveTab] = useState('school')
@@ -119,8 +127,8 @@ export default function AttendancePage() {
 
     const fetchAvailableFiles = async () => {
         try {
-            const res = await fetch('/api/attendance?type=files', { cache: 'no-store' })
-            const data = await res.json()
+            // Use Server Action
+            const data = await getAvailableAttendanceFiles()
             setAvailableFiles(data)
 
             // 最新の年月を選択
@@ -138,75 +146,87 @@ export default function AttendancePage() {
 
     const fetchData = async () => {
         setLoading(true)
-        const cacheKey = `${activeTab}-${selectedYear}-${selectedMonth}-${isCumulative}-${activeTab === 'individual' ? studentSearch : ''}`
+        const cacheKey = `${activeTab}-${selectedYear}-${selectedMonth}-${isCumulative}`
 
-        // Check Cache
+        // Check Cache (Local State Cache)
         if (dataCache.current[cacheKey]) {
-            // Fast path: use cache
             const data = dataCache.current[cacheKey]
-            setOriginalData(data)
-            setAttendanceData(data)
-
-            switch (activeTab) {
-                case 'school':
-                    setSchoolData(data)
-                    break
-                case 'class':
-                    setClassData(data)
-                    break
-                case 'individual':
-                    setIndividualData(data)
-                    break
-            }
+            applyDataToState(data, activeTab, studentSearch)
             setLoading(false)
             return
         }
 
         try {
-            const params = new URLSearchParams({
-                type: activeTab,
-                year: selectedYear,
-                month: selectedMonth,
-                cumulative: isCumulative
-            })
+            let data = null
 
-            if (activeTab === 'individual' && studentSearch) {
-                params.append('search', studentSearch)
-            }
-
-            const res = await fetch(`/api/attendance?${params}`, { cache: 'no-store' })
-            const data = await res.json()
-
-            // Save to Cache
-            dataCache.current[cacheKey] = data
-
-            setOriginalData(data) // Store original data
-            setAttendanceData(data) // Initialize filtered data
-
+            // Call appropriate Server Action
             switch (activeTab) {
                 case 'school':
-                    setSchoolData(data)
+                    data = await getSchoolAttendanceStats(selectedYear, selectedMonth, isCumulative)
                     break
                 case 'class':
-                    setClassData(data)
+                    data = await getClassAttendanceStats(selectedYear, selectedMonth, isCumulative)
                     break
                 case 'individual':
-                    setIndividualData(data)
+                    data = await getStudentListAttendance(selectedYear, selectedMonth, isCumulative)
                     break
             }
+
+            if (!data) throw new Error('Data not found')
+
+            // Save to Local Cache
+            dataCache.current[cacheKey] = data
+
+            applyDataToState(data, activeTab, studentSearch)
+
         } catch (err) {
+            console.error(err)
             setError('データの取得に失敗しました')
         } finally {
             setLoading(false)
         }
     }
 
+    // Helper to apply data and filter if necessary
+    const applyDataToState = (data, tab, search) => {
+        setOriginalData(data)
+
+        // Initial set (will be filtered by useEffect later for rates, but handle search here)
+        let filteredData = { ...data }
+
+        if (tab === 'individual' && search) {
+            const lowerSearch = search.toLowerCase()
+            if (filteredData.students) {
+                filteredData.students = filteredData.students.filter(s =>
+                    (s.student_id && s.student_id.toLowerCase().includes(lowerSearch)) ||
+                    (s.student_name && s.student_name.toLowerCase().includes(lowerSearch)) ||
+                    (s.name_kana && s.name_kana.toLowerCase().includes(lowerSearch))
+                )
+            }
+        }
+
+        setAttendanceData(filteredData)
+
+        switch (tab) {
+            case 'school': setSchoolData(data); break;
+            case 'class': setClassData(data); break;
+            case 'individual': setIndividualData(data); break;
+        }
+    }
+
+    // Watch search change to re-apply filter on existing data
+    useEffect(() => {
+        if (activeTab === 'individual' && originalData) {
+            applyDataToState(originalData, activeTab, studentSearch)
+        }
+    }, [studentSearch])
+
+
     const fetchStudentHistory = async (studentId) => {
         setHistoryLoading(true)
         setSelectedStudent(studentId)
         try {
-            const res = await fetch(`/api/attendance?type=individual&studentId=${studentId}`, { cache: 'no-store' })
-            const data = await res.json()
+            const data = await getStudentAttendanceHistory(studentId)
             setStudentHistory(data)
         } catch (err) {
             console.error('Failed to fetch student history:', err)
@@ -217,17 +237,21 @@ export default function AttendancePage() {
 
     const fetchClassMembers = async (className) => {
         setSelectedClass(className)
+        // Re-use individual list logic but filter by class
+        // Note: For efficiency we could cache the full list and just filter it here
+        // But to keep it simple, we can call the list action again (it's cached) and filter.
+
         try {
-            const params = new URLSearchParams({
-                type: 'individual',
-                year: selectedYear,
-                month: selectedMonth,
-                cumulative: isCumulative,
-                class: className
-            })
-            const res = await fetch(`/api/attendance?${params}`, { cache: 'no-store' })
-            const data = await res.json()
-            setClassMembers(data.students || [])
+            // Check if we already have the full individual list for this period in cache?
+            // If not, fetch it.
+            const fullListData = await getStudentListAttendance(selectedYear, selectedMonth, isCumulative)
+
+            if (fullListData && fullListData.students) {
+                const members = fullListData.students.filter(s => s.class_name === className)
+                setClassMembers(members)
+            } else {
+                setClassMembers([])
+            }
         } catch (err) {
             console.error('Failed to fetch class members:', err)
         }
