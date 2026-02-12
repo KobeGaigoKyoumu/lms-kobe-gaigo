@@ -81,16 +81,17 @@ export default function ChatWindow({
                     return [...prev, newMessage]
                 })
 
-                // If message is from the other party, mark as read immediately
+                // If message is from the other party, mark as read logic is handled by the useEffect
+                // to batch/debounce updates.
+                /* 
                 if (newMessage.sender_type !== currentUserRole) {
-                    // We can't easily call valid markRead here because 'messages' state in closure might be stale
-                    // But we can trigger a separate effect or call API directly
                     fetch('/api/chat/mark-read', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ studentId })
                     }).catch(e => console.error('Realtime mark read error', e))
                 }
+                */
             })
             .subscribe()
 
@@ -112,13 +113,13 @@ export default function ChatWindow({
         }
     }, [messages])
 
-    // Initial fetch (latest 50)
+    // Initial fetch (latest 30 - Reduced from 50 for optimization)
     const fetchInitialMessages = useCallback(async () => {
         setIsLoading(true)
         try {
             const params = new URLSearchParams()
             if (studentId) params.append('studentId', studentId)
-            params.append('limit', '50')
+            params.append('limit', '30')
 
             // Clear App Badge when opening chat
             if ('setAppBadge' in navigator) {
@@ -132,7 +133,7 @@ export default function ChatWindow({
 
             const data = await res.json()
             setMessages(data.messages || [])
-            if ((data.messages || []).length < 50) {
+            if ((data.messages || []).length < 30) {
                 setHasMore(false)
             }
         } catch (error) {
@@ -161,7 +162,7 @@ export default function ChatWindow({
         try {
             const params = new URLSearchParams()
             if (studentId) params.append('studentId', studentId)
-            params.append('limit', '50')
+            params.append('limit', '30')
             params.append('before', oldestMessage.created_at)
 
             const res = await fetch(`/api/chat?${params.toString()}`)
@@ -170,7 +171,7 @@ export default function ChatWindow({
             const data = await res.json()
             const newMessages = data.messages || []
 
-            if (newMessages.length < 50) {
+            if (newMessages.length < 30) {
                 setHasMore(false)
             }
 
@@ -245,19 +246,35 @@ export default function ChatWindow({
         }
     }, [studentId, messages])
 
+    // Debounced Mark Read
+    const markReadTimeoutRef = useRef(null)
+
     const markRead = async () => {
         if (messages.length === 0) return
         const hasUnread = messages.some(m => !m.read && m.sender_type !== currentUserRole)
+
         if (hasUnread) {
-            try {
-                await fetch('/api/chat/mark-read', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ studentId })
-                })
-            } catch (e) {
-                console.error('Mark read error', e)
+            // Clear existing timeout to debounce
+            if (markReadTimeoutRef.current) {
+                clearTimeout(markReadTimeoutRef.current)
             }
+
+            // Set new timeout (e.g., 2 seconds debounce)
+            markReadTimeoutRef.current = setTimeout(async () => {
+                try {
+                    await fetch('/api/chat/mark-read', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId })
+                    })
+                    // Optimistically update local state to avoid re-triggering
+                    setMessages(prev => prev.map(m =>
+                        (!m.read && m.sender_type !== currentUserRole) ? { ...m, read: true } : m
+                    ))
+                } catch (e) {
+                    console.error('Mark read error', e)
+                }
+            }, 2000)
         }
     }
 

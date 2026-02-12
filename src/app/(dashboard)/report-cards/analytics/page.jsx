@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
+import { fetchGradeAnalytics } from '@/app/actions/gradeAnalytics'
 import careerStatsData from '@/data/career_stats_v2.json'
 import { Bar, Line } from 'react-chartjs-2'
 import {
@@ -492,24 +493,16 @@ export default function AnalyticsPage() {
 
     const fetchGrades = async () => {
         try {
-            const { data, error } = await supabase
-                .from('grade_records')
-                .select('id, student_id_text, student_name, class_name, year_term, final_exam_total, report_card_total, final_exam_data, report_card_data')
-                .order('year_term', { ascending: false })
+            // Use Cached Server Action
+            const result = await fetchGradeAnalytics()
 
-            if (error) throw error
+            if (result.error) throw new Error(result.error)
 
-            // Filter out JLPT data
-            const filteredData = (data || []).filter(item => {
-                const isJlptTerm = item.year_term?.startsWith('JLPT')
-                const isJlptType = item.final_exam_data?.type === 'JLPT'
-                return !isJlptTerm && !isJlptType
-            })
+            const data = result.data || []
+            setGrades(data)
 
-            setGrades(filteredData)
-
-            const uniqueTerms = [...new Set(filteredData.map(item => item.year_term))].sort().reverse()
-            const uniqueClasses = [...new Set(filteredData.map(item => item.class_name))].sort()
+            const uniqueTerms = [...new Set(data.map(item => item.year_term))].sort().reverse()
+            const uniqueClasses = [...new Set(data.map(item => item.class_name))].sort()
 
             setTerms(uniqueTerms)
             setClasses(uniqueClasses)
