@@ -250,7 +250,52 @@ export default function AttendancePage() {
         }
     }
 
-    // ... handleDownloadPDF ...
+    // --- PDF Download Logic ---
+    const handleDownloadPDF = async () => {
+        if (!selectedStudent || !studentHistory) return
+        setIsPdfGenerating(true)
+
+        try {
+            const studentInfo = studentHistory.studentInfo || attendanceData?.students?.find(s => s.student_id === selectedStudent)
+
+            // Latest cumulative rate
+            const latestCumulative = studentHistory.cumulativeData?.length > 0
+                ? studentHistory.cumulativeData[studentHistory.cumulativeData.length - 1]
+                : { attendance_rate: 0 }
+
+            const response = await fetch('/api/attendance/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student: {
+                        id: selectedStudent,
+                        name: formatStudentName(studentInfo),
+                        className: studentInfo?.class_name
+                    },
+                    history: studentHistory,
+                    currentStats: {
+                        rate: latestCumulative.attendance_rate
+                    }
+                })
+            })
+
+            if (!response.ok) throw new Error('PDF generation failed')
+
+            const blob = await response.blob()
+            const studentName = formatStudentName(studentInfo)
+            const fileName = `${studentInfo?.class_name || ''}_${studentName}_出席率詳細.pdf`
+
+            saveAs(blob, fileName)
+
+        } catch (error) {
+            console.error('PDF Download Error:', error)
+            alert('PDFの生成に失敗しました')
+        } finally {
+            setIsPdfGenerating(false)
+        }
+    }
+
+    // --- Bulk Export Logic ---
 
     // --- Bulk Export Logic ---
     const handleSelectAll = async (e) => {
