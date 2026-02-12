@@ -55,9 +55,63 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
         }
     }, [initialStudents, initialStats])
 
-    // ... (filteredStudents logic remains) ...
+    // Filter Students
+    const filteredStudents = students.filter(student => {
+        // Status Filter
+        if (filter !== 'all' && student.status !== filter) return false
 
-    // ... (rest of filtering logic) ...
+        // Grade Filter
+        if (gradeFilter) {
+            const info = parseStudentId(student.student_id_text, new Date(), student.academic_year)
+            if (String(info.grade) !== gradeFilter) return false
+        }
+
+        // Class Filter
+        if (classFilter && student.class_name !== classFilter) return false
+
+        // Search Filter
+        if (search) {
+            const lowerSearch = search.toLowerCase()
+            const matchId = student.student_id_text.toLowerCase().includes(lowerSearch)
+            const matchName = student.full_name.toLowerCase().includes(lowerSearch)
+            const matchEmail = (student.email || '').toLowerCase().includes(lowerSearch)
+            if (!matchId && !matchName && !matchEmail) return false
+        }
+
+        return true
+    })
+
+    // Pagination
+    const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE)
+    const paginatedStudents = filteredStudents.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [filter, gradeFilter, classFilter, search])
+
+    // Selection Handlers
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = new Set(filteredStudents.map(s => s.student_id_text))
+            setSelectedIds(allIds)
+        } else {
+            setSelectedIds(new Set())
+        }
+    }
+
+    const handleToggleSelect = (studentId) => {
+        const newSet = new Set(selectedIds)
+        if (newSet.has(studentId)) {
+            newSet.delete(studentId)
+        } else {
+            newSet.add(studentId)
+        }
+        setSelectedIds(newSet)
+    }
 
     // Handler for Grade Change
     const handleGradeChange = async (studentId, newGrade) => {
