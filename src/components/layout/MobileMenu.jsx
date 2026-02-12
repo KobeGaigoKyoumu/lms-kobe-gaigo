@@ -11,7 +11,7 @@ import styles from './MobileMenu.module.css'
 export default function MobileMenu({ role, user }) {
     const pathname = usePathname()
     const router = useRouter()
-    const [supabase] = React.useState(() => createClient())
+    const supabase = createClient()
     const menuItems = getMenuItems(role)
     const [statuses, setStatuses] = React.useState({
         hasNewAnnouncement: false,
