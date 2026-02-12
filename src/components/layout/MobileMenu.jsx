@@ -110,6 +110,34 @@ export default function MobileMenu({ role, user }) {
             })}
 
             <button
+                onClick={async () => {
+                    try {
+                        if (!('setAppBadge' in navigator)) {
+                            alert('対応していないブラウザです (setAppBadgeなし)')
+                            return
+                        }
+                        if (Notification.permission !== 'granted') {
+                            const p = await Notification.requestPermission()
+                            if (p !== 'granted') {
+                                alert('通知権限がありません')
+                                return
+                            }
+                        }
+                        await navigator.setAppBadge(5)
+                        alert('バッジを5に設定しました。ホーム画面を確認してください。')
+                    } catch (e) {
+                        alert(`エラー: ${e.message}`)
+                    }
+                }}
+                className={styles.menuItem}
+                style={{ marginTop: 'auto', borderTop: '1px solid #eee' }}
+            >
+                <div className={styles.iconWrapper} style={{ color: '#aaa' }}>
+                    <span>🔔</span>
+                </div>
+                <span className={styles.label}>バッジテスト</span>
+            </button>
+            <button
                 onClick={handleLogout}
                 className={styles.menuItem}
                 type="button"
