@@ -269,6 +269,12 @@ export default function AttendancePage() {
         }
     }
 
+    const tabs = [
+        { id: 'school', label: '全体概要' },
+        { id: 'class', label: 'クラス別' },
+        { id: 'individual', label: '個別' }
+    ]
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
