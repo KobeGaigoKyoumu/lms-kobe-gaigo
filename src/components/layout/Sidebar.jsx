@@ -11,7 +11,7 @@ import styles from './Sidebar.module.css'
 
 export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false }) {
     const pathname = usePathname()
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [statuses, setStatuses] = useState({
         hasNewAnnouncement: false,
