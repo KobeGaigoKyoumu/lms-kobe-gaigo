@@ -17,12 +17,6 @@ export async function GET(request) {
     }
 
     if (code) {
-        // Debug: Log cookies to see if verifier is present
-        const { cookies } = require('next/headers')
-        const cookieStore = await cookies()
-        const allCookies = cookieStore.getAll().map(c => c.name)
-        console.log('Auth Callback Cookies:', allCookies)
-
         const supabase = await createClient()
 
         const { error } = await supabase.auth.exchangeCodeForSession(code)
