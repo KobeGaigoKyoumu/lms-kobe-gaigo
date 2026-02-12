@@ -217,93 +217,92 @@ export default function GradeHistoryBoard() {
         }
     }
 
+    // State for initial filter loading
+    const [filtersLoaded, setFiltersLoaded] = useState(false)
+
     useEffect(() => {
-        fetchRecords()
+        const initialize = async () => {
+            setLoading(true)
+            await fetchFilters()
+            // filtering done inside fetchFilters -> fetchTermData chain
+        }
+        initialize()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const fetchRecords = async () => {
+    // Trigger fetch when selectedTerm changes (but only after initial load)
+    useEffect(() => {
+        if (filtersLoaded && selectedTerm) {
+            fetchTermData(selectedTerm)
+        }
+    }, [selectedTerm, filtersLoaded])
+
+    // 1. Fetch lightweight metadata for filters
+    const fetchFilters = async () => {
+        try {
+            // Only fetch columns needed for filters
+            const { data, error } = await supabase
+                .from('grade_records')
+                .select('year_term, class_name')
+
+            if (error) throw error
+
+            if (data) {
+                // Extract unique terms (exclude JLPT official exams)
+                const terms = [...new Set(data.map(r => r.year_term))]
+                    .filter(t => !/JLPT \d{4}年第\d回/.test(t))
+                    .sort().reverse()
+
+                const cls = [...new Set(data.map(r => r.class_name))].sort()
+
+                setYearTerms(terms)
+                setClasses(cls)
+
+                // Set default term if available
+                if (terms.length > 0) {
+                    const latest = terms[0]
+                    setSelectedTerm(latest)
+                    // Initial data fetch for the latest term
+                    await fetchTermData(latest)
+                } else {
+                    setLoading(false) // No data to load
+                }
+                setFiltersLoaded(true)
+            }
+        } catch (err) {
+            console.error('Error fetching filters:', err)
+            setLoading(false)
+        }
+    }
+
+    // 2. Fetch heavy data ONLY for the selected term
+    const fetchTermData = async (term) => {
+        if (!term) return
+
         setLoading(true)
         try {
             const { data, error } = await supabase
                 .from('grade_records')
                 .select('id, student_id_text, student_name, class_name, year_term, final_exam_total, report_card_total, final_exam_data, report_card_data, created_at')
+                .eq('year_term', term) // Server-side filter
                 .order('created_at', { ascending: false })
 
             if (error) throw error
 
             setRecords(data || [])
 
-            // Extract unique terms and classes for filters
-            // Extract unique terms and classes for filters (exclude JLPT official exams)
-            const terms = [...new Set(data.map(r => r.year_term))]
-                .filter(t => !/JLPT \d{4}年第\d回/.test(t))
-                .sort().reverse()
-            const cls = [...new Set(data.map(r => r.class_name))].sort()
-
-            setYearTerms(terms)
-            setClasses(cls)
-
-            // Set defaults
-            if (terms.length > 0) setSelectedTerm(terms[0])
-            // Default class remains empty to force selection
-            // if (cls.length > 0) setSelectedClass('ALL')
-
         } catch (err) {
-            console.error('Error fetching history:', err)
+            console.error('Error fetching term data:', err)
+            alert('データの取得に失敗しました')
         } finally {
             setLoading(false)
         }
     }
 
-
-
-    // Class Deletion State
-    const [selectedClassesForDeletion, setSelectedClassesForDeletion] = useState([])
-
-    // Clear selection when term changes
-    useEffect(() => {
-        setSelectedClassesForDeletion([])
-    }, [selectedTerm])
-
-    const deleteSelectedClasses = async () => {
-        if (!selectedTerm || selectedClassesForDeletion.length === 0) return
-
-        if (!confirm(`【警告】\n${selectedTerm} の以下のクラスの全データを削除しようとしています。\n\n対象クラス: ${selectedClassesForDeletion.join(', ')}\n\nこの操作は取り消せません。\n本当に削除してもよろしいですか？`)) return
-
-        try {
-            setLoading(true)
-
-            // Delete records for each selected class
-            // Supabase "in" operator is useful here: class_name.in.(item1,item2)
-            const { error, count } = await supabase
-                .from('grade_records')
-                .delete({ count: 'exact' })
-                .eq('year_term', selectedTerm)
-                .in('class_name', selectedClassesForDeletion)
-
-            if (error) throw error
-
-            alert(`${count}件のデータを削除しました`);
-
-            // Refresh
-            fetchRecords();
-            setSelectedClassesForDeletion([]); // Clear selection
-
-        } catch (err) {
-            console.error('Error deleting class records:', err)
-            alert('一括削除に失敗しました: ' + err.message)
-        } finally {
-            setLoading(false)
-        }
-    }
-
+    // Client-side filter (Class only now, Term is already filtered by server)
     const filteredRecords = records.filter(r => {
-        if (!selectedClass || selectedClass === 'ALL') return false // Hide if no class selected (or if strict 'ALL' check is preferred, but user wants 'Select Class')
-        const matchTerm = selectedTerm ? r.year_term === selectedTerm : true
-        // const matchClass = selectedClass && selectedClass !== 'ALL' ? r.class_name === selectedClass : true
-        const matchClass = r.class_name === selectedClass
-        return matchTerm && matchClass
+        if (!selectedClass || selectedClass === 'ALL') return true
+        return r.class_name === selectedClass
     })
 
     // Calculate Grade (A-F) helper

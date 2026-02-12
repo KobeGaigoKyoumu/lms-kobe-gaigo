@@ -39,6 +39,7 @@ export async function getStudentAssignments() {
         .select('*')
         .eq('class_name', session.className)
         .order('deadline', { ascending: true })
+        .limit(100)
 
     if (assignmentError) {
         console.error('Error fetching assignments:', assignmentError)

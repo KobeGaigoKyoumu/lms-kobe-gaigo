@@ -11,6 +11,8 @@ export default function TeacherCommunicationPage() {
 
     useEffect(() => {
         const fetchConversations = async () => {
+            if (document.visibilityState !== 'visible') return
+
             try {
                 const res = await fetch('/api/chat/conversations')
                 if (res.ok) {
@@ -25,8 +27,9 @@ export default function TeacherCommunicationPage() {
         }
 
         fetchConversations()
-        // Optional: Poll for new incoming messages from students
-        const interval = setInterval(fetchConversations, 10000)
+
+        // Poll for new incoming messages from students (every 60s, only when visible)
+        const interval = setInterval(fetchConversations, 60000)
         return () => clearInterval(interval)
     }, [])
 
