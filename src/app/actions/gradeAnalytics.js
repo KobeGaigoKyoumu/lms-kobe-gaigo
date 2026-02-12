@@ -33,7 +33,7 @@ const getCachedGradeAnalytics = unstable_cache(
         }
     },
     ['grade-analytics-v1'],
-    { revalidate: 3600, tags: ['grade-analytics'] } // 1 hour cache
+    { revalidate: 86400, tags: ['grade-analytics'] } // 24 hour cache
 )
 
 export async function fetchGradeAnalytics() {
