@@ -41,21 +41,24 @@ export async function updateSession(request) {
             }
         )
 
-        // Verify Supabase session (Admin/Teacher)
-        // SKIP for auth callback to avoid PKCE cookie issues
-        let user = null
-        const isCallback = request.nextUrl.pathname.startsWith('/auth/callback')
+        // Protected paths
+        const publicPaths = ['/login', '/auth/callback', '/_next', '/favicon.ico']
+        const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
+        const isStudentPath = request.nextUrl.pathname.startsWith('/student')
+        const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+        const isChatApi = request.nextUrl.pathname.startsWith('/api/chat')
 
-        if (!isCallback) {
+        // Verify Supabase session (Admin/Teacher)
+        // Only fetch user if it's NOT a public path, or if we need to check permissions
+        let user = null
+
+        // Skip auth check for completely public assets/paths to save CPU
+        if (!isPublicPath && !isWebhook && !isChatApi) {
             const { data: { user: authUser } } = await supabase.auth.getUser()
             user = authUser
         }
 
-        // Protected paths
-        const publicPaths = ['/login', '/auth/callback']
-        const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
-        const isStudentPath = request.nextUrl.pathname.startsWith('/student')
-        const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+
 
         const studentSession = request.cookies.get('kobe_student_session_v2') ||
             request.cookies.get('kobe_student_session_v1') ||
@@ -69,7 +72,7 @@ export async function updateSession(request) {
             return NextResponse.redirect(url)
         }
 
-        const isChatApi = request.nextUrl.pathname.startsWith('/api/chat')
+
 
         // Redirect to login if NO Supabase session exists and it's an admin/teacher path
         if (!user && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {

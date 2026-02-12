@@ -370,11 +370,12 @@ function countLength(str) {
 /**
  * 成績証明書PDFを生成
  */
-async function generateTranscriptPDF(data, issueDate, outputPath = null) {
+async function generateTranscriptPDF(data, issueDate, outputPath = null, browser = null) {
   const html = generateTranscriptHTML(data, issueDate);
   const cacheKey = `transcripts/${data.studentId}_${data.name}.pdf`;
-  return await htmlToPdf(html, outputPath, cacheKey);
+  return await htmlToPdf(html, outputPath, cacheKey, browser);
 }
+
 
 /**
  * PuppeteerでHTMLをPDFに変換 (Supabase Storage キャッシュ対応)
@@ -383,7 +384,7 @@ async function generateTranscriptPDF(data, issueDate, outputPath = null) {
  * @param {string|null} cacheKey - Storage path for caching (e.g. 'transcripts/STUDENT_ID.pdf')
  * @returns {Promise<Buffer>} PDF Buffer
  */
-async function htmlToPdf(html, outputPath = null, cacheKey = null) {
+async function htmlToPdf(html, outputPath = null, cacheKey = null, browser = null) {
   // 1. Check Cache first
   if (cacheKey) {
     try {
@@ -407,47 +408,57 @@ async function htmlToPdf(html, outputPath = null, cacheKey = null) {
   }
 
   // 2. Generate PDF using Puppeteer
-  const browser = await getBrowser();
+  const shouldCloseBrowser = !browser;
+  if (!browser) {
+    browser = await getBrowser();
+  }
+
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    try {
+      await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const options = {
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' }
-    };
+      const options = {
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '0', right: '0', bottom: '0', left: '0' }
+      };
 
-    if (outputPath) {
-      options.path = outputPath;
-    }
-
-    const buffer = await page.pdf(options);
-
-    // 3. Store in Cache asynchronously (don't block the response)
-    if (cacheKey) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        admin.storage
-          .from('reports-pdf')
-          .upload(cacheKey, buffer, {
-            contentType: 'application/pdf',
-            upsert: true
-          })
-          .then(({ error }) => {
-            if (error) console.error('PDF Cache Upload Failed:', error.message);
-            else console.log('PDF Cache Updated:', cacheKey);
-          });
+      if (outputPath) {
+        options.path = outputPath;
       }
-    }
 
-    if (outputPath) {
-      console.log('PDF生成完了:', outputPath);
-    }
+      const buffer = await page.pdf(options);
 
-    return buffer;
+      // 3. Store in Cache asynchronously (don't block the response)
+      if (cacheKey) {
+        const admin = getSupabaseAdmin();
+        if (admin) {
+          admin.storage
+            .from('reports-pdf')
+            .upload(cacheKey, buffer, {
+              contentType: 'application/pdf',
+              upsert: true
+            })
+            .then(({ error }) => {
+              if (error) console.error('PDF Cache Upload Failed:', error.message);
+              else console.log('PDF Cache Updated:', cacheKey);
+            });
+        }
+      }
+
+      if (outputPath) {
+        console.log('PDF生成完了:', outputPath);
+      }
+
+      return buffer;
+    } finally {
+      if (page) await page.close();
+    }
   } finally {
-    await browser.close();
+    if (shouldCloseBrowser) {
+      await browser.close();
+    }
   }
 }
 
@@ -767,11 +778,12 @@ function generateAttendanceHTML(data) {
 /**
  * 出席個票PDFを生成
  */
-async function generateAttendancePDF(data, outputPath = null) {
+async function generateAttendancePDF(data, outputPath = null, browser = null) {
   const html = generateAttendanceHTML(data);
   const cacheKey = `attendance/${data.student.id}_${data.student.name}.pdf`;
-  return await htmlToPdf(html, outputPath, cacheKey);
+  return await htmlToPdf(html, outputPath, cacheKey, browser);
 }
+
 
 /**
  * 成績通知表 個票HTMLを生成 (日本語版)
@@ -1554,20 +1566,22 @@ function generateFinalExamHTML(data, yearTerm) {
 /**
  * 成績通知表PDFを生成 (Japanese Edition)
  */
-async function generateGradeReportPDF(data, yearTerm, outputPath = null) {
+async function generateGradeReportPDF(data, yearTerm, outputPath = null, browser = null) {
   const html = generateGradeReportHTML(data, yearTerm);
   const cacheKey = `report-cards/${data.student_id_text}_${yearTerm}.pdf`;
-  return await htmlToPdf(html, outputPath, cacheKey);
+  return await htmlToPdf(html, outputPath, cacheKey, browser);
 }
+
 
 /**
  * 期末試験結果PDFを生成
  */
-async function generateFinalExamPDF(data, yearTerm, outputPath = null) {
+async function generateFinalExamPDF(data, yearTerm, outputPath = null, browser = null) {
   const html = generateFinalExamHTML(data, yearTerm);
   const cacheKey = `final-exams/${data.student_id_text}_${yearTerm}.pdf`;
-  return await htmlToPdf(html, outputPath, cacheKey);
+  return await htmlToPdf(html, outputPath, cacheKey, browser);
 }
+
 
 module.exports = {
   generateTranscriptHTML,
@@ -1578,5 +1592,6 @@ module.exports = {
   generateGradeReportHTML,
   generateGradeReportPDF,
   generateFinalExamHTML,
-  generateFinalExamPDF
+  generateFinalExamPDF,
+  getBrowser
 };
