@@ -38,6 +38,45 @@ export default function GradeHistoryBoard() {
         })
     }
 
+    // State for class deletion
+    const [selectedClassesForDeletion, setSelectedClassesForDeletion] = useState([])
+
+    const deleteSelectedClasses = async () => {
+        if (!confirm(`${selectedClassesForDeletion.length}クラス分のデータを削除しますか？\nこの操作は取り消せません。`)) return
+
+        setLoading(true)
+        try {
+            const { error } = await supabase
+                .from('grade_records')
+                .delete()
+                .eq('year_term', selectedTerm)
+                .in('class_name', selectedClassesForDeletion)
+
+            if (error) throw error
+
+            alert('削除しました')
+            setSelectedClassesForDeletion([])
+            // Refresh logic
+            await fetchTermData(selectedTerm)
+            // Also refresh filters to update class list if needed
+            const { data } = await supabase
+                .from('grade_records')
+                .select('class_name')
+                .eq('year_term', selectedTerm)
+
+            if (data) {
+                const cls = [...new Set(data.map(r => r.class_name))].sort()
+                setClasses(cls)
+            }
+
+        } catch (err) {
+            console.error('Delete error:', err)
+            alert('削除に失敗しました')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const toggleSelectAll = () => {
         if (selectedIds.length === filteredRecords.length) {
             setSelectedIds([])
