@@ -2,55 +2,33 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
 
-// 24時間キャッシュ（ISR）
-export const revalidate = 86400
+// 24時間キャッシュ（ISR） - Removed
+// export const revalidate = 86400
+
+import { fetchCachedClassesData } from '@/app/actions/classData'
+
 export default async function ClassesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // プロファイルとクラス一覧と学生マスターを並列取得
-    const [profileResult, classesResult, studentsResult] = await Promise.all([
+    // プロファイルとクラスデータ（キャッシュ済み）を並列取得
+    const [profileResult, classesData] = await Promise.all([
         supabase
             .from('profiles')
             .select('role')
             .eq('id', user?.id)
             .single(),
-        supabase
-            .from('classes')
-            .select(`
-                *,
-                teacher:profiles!teacher_id (
-                    id,
-                    full_name,
-                    avatar_url
-                ),
-                course:courses!course_id (
-                    id,
-                    title
-                )
-            `)
-            .order('created_at', { ascending: false }),
-        supabase
-            .from('students')
-            .select('class_name')
-            .eq('status', 'active')
+        fetchCachedClassesData()
     ])
 
     const profile = profileResult.data
-    const allClassesRaw = classesResult.data || []
-    const students = studentsResult.data || []
-    const error = classesResult.error
+    const { classes: allClassesRaw, studentCounts: studentCountByClass } = classesData
 
-    // クラスごとの学生数をカウント
-    const studentCountByClass = {}
-    students.forEach(s => {
-        if (s.class_name) {
-            studentCountByClass[s.class_name] = (studentCountByClass[s.class_name] || 0) + 1
-        }
-    })
+    // Cached action handles errors internally or returns data
+    const error = null
 
     // 学生数を各クラスに追加
-    const allClasses = allClassesRaw.map(cls => ({
+    const allClasses = (allClassesRaw || []).map(cls => ({
         ...cls,
         studentCount: studentCountByClass[cls.name] || 0
     }))

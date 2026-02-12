@@ -2,8 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
 
-// 24時間キャッシュ（ISR）
-export const revalidate = 86400
+// 24時間キャッシュ（ISR）- Removed as we use cached Server Action now
+// export const revalidate = 86400
+
+import { fetchCachedCourses } from '@/app/actions/courseData'
 
 export default async function CoursesPage() {
     const supabase = await createClient()
@@ -16,18 +18,9 @@ export default async function CoursesPage() {
         .eq('id', user?.id)
         .single()
 
-    // コース一覧取得
-    const { data: courses, error } = await supabase
-        .from('courses')
-        .select(`
-      *,
-      teacher:profiles!teacher_id (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-        .order('created_at', { ascending: false })
+    // コース一覧取得 (Cached)
+    const courses = await fetchCachedCourses()
+    const error = null // cached action throws if error, or returns data
 
     const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
 
