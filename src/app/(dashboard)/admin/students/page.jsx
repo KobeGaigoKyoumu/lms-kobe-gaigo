@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import StudentList from './StudentList'
 
+import { getCachedStudentList } from '@/app/actions/studentData'
+import { getAllStudentSubmissionStats } from '@/app/actions/homework'
+
 export const dynamic = 'force-dynamic'
 
 export default async function StudentsPage() {
@@ -21,9 +24,15 @@ export default async function StudentsPage() {
         redirect('/')
     }
 
+    // Server-side Cached Fetch
+    const [students, stats] = await Promise.all([
+        getCachedStudentList(),
+        getAllStudentSubmissionStats()
+    ])
+
     return (
         <div className={styles.page}>
-            <StudentList />
+            <StudentList initialStudents={students || []} initialStats={stats || []} />
         </div>
     )
 }

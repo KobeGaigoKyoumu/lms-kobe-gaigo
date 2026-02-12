@@ -349,45 +349,50 @@ export async function uploadSubmissionFile(formData) {
 
 // --- Stats Helpers ---
 
+import { unstable_cache } from 'next/cache'
+
 // Get submission stats for all students (Admin use)
-export async function getAllStudentSubmissionStats() {
-    const supabase = createAdminClient()
+export const getAllStudentSubmissionStats = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
 
-    // We need to fetch all submissions to aggregate.
-    // Ideally we'd use a database view or RPC, but simple aggregation in JS is fine for now.
-    const { data: submissions, error } = await supabase
-        .from('homework_submissions')
-        .select('student_id_text, score, status')
+        // We need to fetch all submissions to aggregate.
+        const { data: submissions, error } = await supabase
+            .from('homework_submissions')
+            .select('student_id_text, score, status')
 
-    if (error) {
-        console.error('Error fetching all stats:', error)
-        return []
-    }
-
-    // Aggregate by student_id_text
-    const statsMap = new Map()
-
-    submissions.forEach(sub => {
-        if (!statsMap.has(sub.student_id_text)) {
-            statsMap.set(sub.student_id_text, {
-                count: 0,
-                totalScore: 0
-            })
+        if (error) {
+            console.error('Error fetching all stats:', error)
+            return []
         }
-        const stat = statsMap.get(sub.student_id_text)
-        if (sub.status === 'submitted' || sub.status === 'graded') {
-            stat.count += 1
-            stat.totalScore += (sub.score || 0)
-        }
-    })
 
-    // Convert to array
-    return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
-        student_id_text: studentId,
-        submission_count: stat.count,
-        total_score: stat.totalScore
-    }))
-}
+        // Aggregate by student_id_text
+        const statsMap = new Map()
+
+        submissions.forEach(sub => {
+            if (!statsMap.has(sub.student_id_text)) {
+                statsMap.set(sub.student_id_text, {
+                    count: 0,
+                    totalScore: 0
+                })
+            }
+            const stat = statsMap.get(sub.student_id_text)
+            if (sub.status === 'submitted' || sub.status === 'graded') {
+                stat.count += 1
+                stat.totalScore += (sub.score || 0)
+            }
+        })
+
+        // Convert to array
+        return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
+            student_id_text: studentId,
+            submission_count: stat.count,
+            total_score: stat.totalScore
+        }))
+    },
+    ['all-student-submission-stats-v1'],
+    { revalidate: 3600, tags: ['homework-stats'] } // Cache for 1 hour
+)
 
 // Get submission stats for a specific class (Teacher use)
 export async function getClassSubmissionStats(className) {

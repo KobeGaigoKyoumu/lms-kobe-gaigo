@@ -196,7 +196,8 @@ export const getClassAttendanceStats = unstable_cache(
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
-export const getStudentListAttendance = unstable_cache(
+// Internal cached fetch (returns ALL data)
+const _getCachedStudentListAttendance = unstable_cache(
     async (year, month, isCumulative) => {
         const supabase = getSupabaseAdmin()
 
@@ -244,6 +245,93 @@ export const getStudentListAttendance = unstable_cache(
     ['attendance-student-list-v1'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
+
+// Public: Paginated & Filtered Fetch (Server-Side Processing)
+export const getPaginatedAttendance = async ({
+    year,
+    month,
+    isCumulative,
+    page = 1,
+    limit = 50,
+    search = '',
+    rateFilterType = 'none',
+    rateFilterValue = 0,
+    sortOrder = 'asc'
+}) => {
+    // 1. Get Cached Full List
+    const data = await _getCachedStudentListAttendance(year, month, isCumulative)
+    let students = data.students || []
+
+    // 2. Filter (Search)
+    if (search) {
+        const lowerSearch = search.toLowerCase()
+        students = students.filter(s =>
+            (s.student_id && s.student_id.toLowerCase().includes(lowerSearch)) ||
+            (s.student_name && s.student_name.toLowerCase().includes(lowerSearch)) ||
+            (s.name_kana && s.name_kana.toLowerCase().includes(lowerSearch))
+        )
+    }
+
+    // 3. Filter (Rate)
+    if (rateFilterType !== 'none') {
+        // Since the cached data is EITHER monthly OR cumulative (based on isCumulative param),
+        // we just check 'attendance_rate' which holds the value for that type.
+        // Wait, the UI allows filtering "Cumulative" even when viewing "Monthly"?
+        // No, usually you filter by what you see.
+        // If the user wants "Cumulative Filter" while viewing "Monthly Data", we'd need BOTH datasets.
+        // For simplicity speed, we assume filter applies to the Current View's rate.
+        students = students.filter(s => s.attendance_rate <= rateFilterValue)
+    }
+
+    // 4. Sort
+    students.sort((a, b) => {
+        if (sortOrder === 'asc') return a.attendance_rate - b.attendance_rate
+        return b.attendance_rate - a.attendance_rate
+    })
+
+    // 5. Pagination
+    const totalCount = students.length
+    const startIndex = (page - 1) * limit
+    const paginatedStudents = students.slice(startIndex, startIndex + limit)
+
+    return {
+        students: paginatedStudents,
+        totalCount,
+        page,
+        limit
+    }
+}
+
+// Public: Get IDs for Bulk Export (Filtered)
+export const getAllStudentIdsForBulk = async ({
+    year,
+    month,
+    isCumulative,
+    search = '',
+    rateFilterType = 'none',
+    rateFilterValue = 0
+}) => {
+    const data = await _getCachedStudentListAttendance(year, month, isCumulative)
+    let students = data.students || []
+
+    if (search) {
+        const lowerSearch = search.toLowerCase()
+        students = students.filter(s =>
+            (s.student_id && s.student_id.toLowerCase().includes(lowerSearch)) ||
+            (s.student_name && s.student_name.toLowerCase().includes(lowerSearch)) ||
+            (s.name_kana && s.name_kana.toLowerCase().includes(lowerSearch))
+        )
+    }
+
+    if (rateFilterType !== 'none') {
+        students = students.filter(s => s.attendance_rate <= rateFilterValue)
+    }
+
+    return students.map(s => s.student_id)
+}
+
+// Keep backward compatibility if needed, or just export the cached one as getStudentListAttendance for other uses
+export const getStudentListAttendance = _getCachedStudentListAttendance
 
 export const getStudentAttendanceHistory = unstable_cache(
     async (studentId) => {

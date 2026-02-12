@@ -3,10 +3,32 @@
 import { useState, useEffect } from 'react'
 import styles from './page.module.css'
 import { parseStudentId } from '@/lib/utils/studentId'
+import { getStudentDetail } from '@/app/actions/studentData'
 
-export default function StudentDetailModal({ student, onClose }) {
+export default function StudentDetailModal({ student: initialStudent, onClose }) {
+    const [student, setStudent] = useState(initialStudent)
+    const [loadingDetail, setLoadingDetail] = useState(true)
     const [jlptHistory, setJlptHistory] = useState([])
     const [loadingJlpt, setLoadingJlpt] = useState(true)
+
+    // Fetch Full Detail
+    useEffect(() => {
+        if (initialStudent?.student_id_text) {
+            const loadDetail = async () => {
+                try {
+                    const fullData = await getStudentDetail(initialStudent.student_id_text)
+                    if (fullData) {
+                        setStudent(prev => ({ ...prev, ...fullData }))
+                    }
+                } catch (err) {
+                    console.error('Error fetching student detail:', err)
+                } finally {
+                    setLoadingDetail(false)
+                }
+            }
+            loadDetail()
+        }
+    }, [initialStudent])
 
     useEffect(() => {
         if (student?.full_name || student?.student_id_text) {
