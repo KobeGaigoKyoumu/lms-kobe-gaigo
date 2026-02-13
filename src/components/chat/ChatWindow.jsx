@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { Paperclip, X, FileText, Image as ImageIcon, Loader2, ArrowUp, Download, Trash2, Reply, Bell } from 'lucide-react'
 import styles from './ChatWindow.module.css'
