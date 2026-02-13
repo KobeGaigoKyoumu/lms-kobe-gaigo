@@ -8,12 +8,15 @@ import { subscribeUserToPush } from '@/lib/pushNotification'
 import { createClient } from '@/lib/supabase/client'
 import { getStudentSession } from '@/app/actions/studentAuth'
 
+import { getMessages, sendMessage } from '@/app/actions/messageActions'
+
 export default function ChatWindow({
     studentId,
-    currentUserRole = 'student'
+    currentUserRole = 'student',
+    initialMessages = []
 }) {
     const supabase = createClient()
-    const [messages, setMessages] = useState([])
+    const [messages, setMessages] = useState(initialMessages)
     const [inputText, setInputText] = useState('')
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -152,6 +155,16 @@ export default function ChatWindow({
             console.log('⏳ fetchInitialMessages: resolvedStudentId is not ready yet.');
             return
         }
+
+        // If we already have initial messages from prop, we can skip initial fetch
+        // but mark as not loading anymore.
+        if (messages.length > 0) {
+            console.log('📦 fetchInitialMessages: Using cached/prop messages.');
+            setIsLoading(false);
+            setTimeout(scrollToBottom, 100);
+            return;
+        }
+
         console.log('🚀 fetchInitialMessages: starting load for', resolvedStudentId);
         setIsLoading(true)
         try {
@@ -162,12 +175,23 @@ export default function ChatWindow({
                 navigator.clearAppBadge().catch(e => console.error('Failed to clear badge', e))
             }
 
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('student_id', resolvedStudentId)
-                .order('created_at', { ascending: false })
-                .limit(30)
+            let data, error;
+            if (currentUserRole === 'student') {
+                // Securely fetch via Server Action for students (No Supabase Auth)
+                const res = await getMessages(resolvedStudentId, { limit: 30 })
+                data = res.data
+                error = res.error
+            } else {
+                // Direct Supabase fetch for Teachers/Admins (Has Supabase Auth)
+                const res = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('student_id', resolvedStudentId)
+                    .order('created_at', { ascending: false })
+                    .limit(30)
+                data = res.data
+                error = res.error
+            }
 
             if (error) throw error
 
@@ -182,7 +206,7 @@ export default function ChatWindow({
             setIsLoading(false)
             setTimeout(scrollToBottom, 100)
         }
-    }, [resolvedStudentId, supabase])
+    }, [resolvedStudentId, supabase, currentUserRole, messages.length])
 
     // Load older messages - Direct Supabase implementation
     const loadMoreMessages = async () => {
@@ -198,13 +222,25 @@ export default function ChatWindow({
         const oldestMessage = messages[0]
 
         try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('student_id', resolvedStudentId)
-                .lt('created_at', oldestMessage.created_at)
-                .order('created_at', { ascending: false })
-                .limit(30)
+            let data, error;
+            if (currentUserRole === 'student') {
+                const res = await getMessages(resolvedStudentId, {
+                    limit: 30,
+                    before: oldestMessage.created_at
+                })
+                data = res.data
+                error = res.error
+            } else {
+                const res = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('student_id', resolvedStudentId)
+                    .lt('created_at', oldestMessage.created_at)
+                    .order('created_at', { ascending: false })
+                    .limit(30)
+                data = res.data
+                error = res.error
+            }
 
             if (error) throw error
 
@@ -250,12 +286,23 @@ export default function ChatWindow({
         const latestMessage = messages[messages.length - 1]
 
         try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('student_id', resolvedStudentId)
-                .gt('created_at', latestMessage.created_at)
-                .order('created_at', { ascending: true })
+            let data, error;
+            if (currentUserRole === 'student') {
+                const res = await getMessages(resolvedStudentId, {
+                    after: latestMessage.created_at
+                })
+                data = res.data
+                error = res.error
+            } else {
+                const res = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('student_id', resolvedStudentId)
+                    .gt('created_at', latestMessage.created_at)
+                    .order('created_at', { ascending: true })
+                data = res.data
+                error = res.error
+            }
 
             if (error) throw error
 
@@ -277,7 +324,7 @@ export default function ChatWindow({
         } catch (error) {
             // Silent error
         }
-    }, [resolvedStudentId, messages, isLoading, isSending, supabase])
+    }, [resolvedStudentId, messages, isLoading, isSending, supabase, currentUserRole])
 
     // Debounced Mark Read
     const markReadTimeoutRef = useRef(null)
@@ -485,25 +532,31 @@ export default function ChatWindow({
                 const { data: { user } } = await supabase.auth.getUser()
                 payload.teacher_id = user?.id
                 payload.sender_type = 'teacher'
+
+                // Direct Insert to Supabase for Teachers
+                const { data, error } = await supabase
+                    .from('messages')
+                    .insert([payload])
+                    .select()
+                    .single()
+
+                if (error) throw error
+                setMessages(prev => [...prev, data])
             } else {
-                payload.teacher_id = null
-                payload.sender_type = 'student'
+                // Securely use Server Action for students
+                const res = await sendMessage(resolvedStudentId, inputText, {
+                    senderType: 'student',
+                    attachmentUrl: attachment?.url,
+                    attachmentName: attachment?.name,
+                    attachmentType: attachment?.type,
+                    replyToId: replyingTo?.id || null
+                })
+
+                if (res.error) throw new Error(res.error)
+                if (res.data) {
+                    setMessages(prev => [...prev, res.data])
+                }
             }
-
-            // Direct Insert to Supabase (Bypasses Vercel API CPU usage)
-            const { data, error } = await supabase
-                .from('messages')
-                .insert([payload])
-                .select()
-                .single()
-
-            if (error) throw error
-
-            // Optimistically add or let Realtime handle it (Realtime is already active)
-            setMessages(prev => {
-                if (prev.some(m => m.id === data.id)) return prev
-                return [...prev, data]
-            })
 
             setInputText('')
             setAttachment(null)

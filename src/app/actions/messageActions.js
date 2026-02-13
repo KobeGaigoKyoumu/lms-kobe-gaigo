@@ -116,24 +116,74 @@ export const getRecentConversations = unstable_cache(
     { revalidate: 60, tags: ['chat-messages'] } // 60s cache or invalidation
 )
 
-// Send Message Action (to replace API or simply invalidate)
-export async function sendMessage(studentId, content, senderType = 'teacher') {
+// Fetch Messages Action (Securely using service_role for students)
+export async function getMessages(studentId, options = {}) {
+    const {
+        limit = 30,
+        before = null,
+        after = null
+    } = options
+
     try {
-        const { error } = await adminSupabase
+        let query = adminSupabase
             .from('messages')
-            .insert({
-                student_id: studentId,
-                content,
-                sender_type: senderType,
-                read: false,
-                created_at: new Date().toISOString()
-            })
+            .select('*')
+            .eq('student_id', studentId)
+
+        if (before) {
+            query = query.lt('created_at', before)
+        }
+        if (after) {
+            query = query.gt('created_at', after)
+        }
+
+        const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(limit)
+
+        if (error) throw error
+        return { data: data || [] }
+    } catch (err) {
+        console.error('getMessages error:', err)
+        return { error: 'Failed to fetch messages', data: [] }
+    }
+}
+
+// Send Message Action (to replace API or simply invalidate)
+export async function sendMessage(studentId, content, options = {}) {
+    const {
+        senderType = 'teacher',
+        attachmentUrl = null,
+        attachmentName = null,
+        attachmentType = null,
+        replyToId = null
+    } = options
+
+    try {
+        const payload = {
+            student_id: studentId,
+            content: content || '',
+            sender_type: senderType,
+            read: false,
+            created_at: new Date().toISOString()
+        }
+
+        if (attachmentUrl) payload.attachment_url = attachmentUrl
+        if (attachmentName) payload.attachment_name = attachmentName
+        if (attachmentType) payload.attachment_type = attachmentType
+        if (replyToId) payload.reply_to_id = replyToId
+
+        const { data, error } = await adminSupabase
+            .from('messages')
+            .insert(payload)
+            .select()
+            .single()
 
         if (error) throw error
 
         // Invalidate the conversations cache so listing updates immediately
         revalidateTag('chat-messages')
-        return { success: true }
+        return { success: true, data }
     } catch (err) {
         console.error('Send message error:', err)
         return { error: 'Failed to send' }

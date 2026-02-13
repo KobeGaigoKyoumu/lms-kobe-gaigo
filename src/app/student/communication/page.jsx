@@ -1,6 +1,7 @@
 import ChatWindow from '@/components/chat/ChatWindow'
 import styles from './page.module.css'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getMessages } from '@/app/actions/messageActions'
 import { redirect } from 'next/navigation'
 
 export default async function StudentCommunicationPage() {
@@ -9,6 +10,9 @@ export default async function StudentCommunicationPage() {
     if (!session || !session.studentId) {
         redirect('/login')
     }
+
+    const { data: initialMessages } = await getMessages(session.studentId, { limit: 30 })
+    const reversedMessages = [...(initialMessages || [])].reverse()
 
     return (
         <div className={styles.container}>
@@ -21,6 +25,7 @@ export default async function StudentCommunicationPage() {
                 <ChatWindow
                     studentId={session.studentId}
                     currentUserRole="student"
+                    initialMessages={reversedMessages}
                 />
             </div>
         </div>
