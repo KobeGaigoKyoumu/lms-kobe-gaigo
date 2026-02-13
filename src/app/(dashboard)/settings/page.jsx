@@ -30,7 +30,7 @@ export default async function SettingsPage() {
             </header>
 
             <div className={styles.content}>
-                {/* Messenger連携 */}
+                {/* Telegram連携 */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>通知設定</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

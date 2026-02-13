@@ -42,10 +42,9 @@ export default function LoginForm() {
         }
 
         const ua = navigator.userAgent || navigator.vendor || window.opera
-        // Detect LINE, Instagram, Facebook, or generic WebView (Android)
+        // Detect LINE, Instagram, or generic WebView (Android)
         const isInApp = /Line\//i.test(ua) ||
             /Instagram/i.test(ua) ||
-            /FBAN|FBAV/i.test(ua) ||
             /; wv/.test(ua)
 
         setIsInAppBrowser(isInApp)
