@@ -6,7 +6,7 @@ import StudentList from './StudentList'
 import { getCachedStudentList } from '@/app/actions/studentData'
 import { getAllStudentSubmissionStats } from '@/app/actions/homework'
 
-export const dynamic = 'force-dynamic'
+
 
 export default async function StudentsPage() {
     const supabase = await createClient()

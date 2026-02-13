@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { fetchGradeFilters, fetchTermGradeRecords, deleteGradeRecords } from '@/app/actions/gradeRecords'
 import Link from 'next/link'
 import StudentGradeDetail from './StudentGradeDetail'
 import { exportGradesToExcel } from '@/lib/export/excelExport'
@@ -10,7 +10,7 @@ import { saveAs } from 'file-saver'
 // import { loadCertificateTemplate, generateClientCertificateBlob } from '@/lib/export/clientWordGenerator' // Removed unused client generator
 
 export default function GradeHistoryBoard() {
-    const supabase = createClient()
+    // const supabase = createClient() // Removed
     const [records, setRecords] = useState([])
     const [loading, setLoading] = useState(true)
     const [yearTerms, setYearTerms] = useState([])
@@ -46,34 +46,38 @@ export default function GradeHistoryBoard() {
 
         setLoading(true)
         try {
-            const { error } = await supabase
-                .from('grade_records')
-                .delete()
-                .eq('year_term', selectedTerm)
-                .in('class_name', selectedClassesForDeletion)
-
-            if (error) throw error
+            await deleteGradeRecords(selectedTerm, selectedClassesForDeletion)
 
             alert('削除しました')
             setSelectedClassesForDeletion([])
-            // Refresh logic
-            await fetchTermData(selectedTerm)
-            // Also refresh filters to update class list if needed
-            const { data } = await supabase
-                .from('grade_records')
-                .select('class_name')
-                .eq('year_term', selectedTerm)
 
-            if (data) {
-                const cls = [...new Set(data.map(r => r.class_name))].sort()
-                setClasses(cls)
-            }
+            // Refresh logic
+            // Invalidate triggers server revalidation, but we need to re-fetch client side state
+            // Re-fetching filter & term data
+            await refreshData()
 
         } catch (err) {
             console.error('Delete error:', err)
             alert('削除に失敗しました')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const refreshData = async () => {
+        // Refresh filters and current term data
+        const { yearTerms: terms, classes: cls } = await fetchGradeFilters()
+
+        // Update filters if needed (e.g. if a term was deleted entirely? Unlikely from class delete)
+        if (terms) {
+            // Need to filter out JLPT if logic requires, but action already does it?
+            // Action does: .filter(t => !/JLPT \d{4}年第\d回/.test(t))
+            setYearTerms(terms)
+            setClasses(cls)
+        }
+
+        if (selectedTerm) {
+            await fetchTermData(selectedTerm)
         }
     }
 
@@ -276,58 +280,38 @@ export default function GradeHistoryBoard() {
         }
     }, [selectedTerm, filtersLoaded])
 
-    // 1. Fetch lightweight metadata for filters
+    // 1. Fetch lightweight metadata for filters (Server Action)
     const fetchFilters = async () => {
         try {
-            // Only fetch columns needed for filters
-            const { data, error } = await supabase
-                .from('grade_records')
-                .select('year_term, class_name')
+            const { yearTerms: terms, classes: cls } = await fetchGradeFilters()
 
-            if (error) throw error
+            setYearTerms(terms)
+            setClasses(cls)
 
-            if (data) {
-                // Extract unique terms (exclude JLPT official exams)
-                const terms = [...new Set(data.map(r => r.year_term))]
-                    .filter(t => !/JLPT \d{4}年第\d回/.test(t))
-                    .sort().reverse()
-
-                const cls = [...new Set(data.map(r => r.class_name))].sort()
-
-                setYearTerms(terms)
-                setClasses(cls)
-
-                // Set default term if available
-                if (terms.length > 0) {
-                    const latest = terms[0]
-                    setSelectedTerm(latest)
-                    // Initial data fetch for the latest term
-                    await fetchTermData(latest)
-                } else {
-                    setLoading(false) // No data to load
-                }
-                setFiltersLoaded(true)
+            // Set default term if available
+            if (terms.length > 0) {
+                const latest = terms[0]
+                setSelectedTerm(latest)
+                // Initial data fetch for the latest term
+                await fetchTermData(latest)
+            } else {
+                setLoading(false) // No data to load
             }
+            setFiltersLoaded(true)
+
         } catch (err) {
             console.error('Error fetching filters:', err)
             setLoading(false)
         }
     }
 
-    // 2. Fetch heavy data ONLY for the selected term
+    // 2. Fetch heavy data ONLY for the selected term (Server Action)
     const fetchTermData = async (term) => {
         if (!term) return
 
         setLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('grade_records')
-                .select('id, student_id_text, student_name, class_name, year_term, final_exam_total, report_card_total, final_exam_data, report_card_data, created_at')
-                .eq('year_term', term) // Server-side filter
-                .order('created_at', { ascending: false })
-
-            if (error) throw error
-
+            const data = await fetchTermGradeRecords(term)
             setRecords(data || [])
 
         } catch (err) {

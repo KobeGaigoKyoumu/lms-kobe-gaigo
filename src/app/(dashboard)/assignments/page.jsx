@@ -3,7 +3,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import { Plus } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+
 
 export default async function AssignmentsPage() {
     const [assignments, classes] = await Promise.all([

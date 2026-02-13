@@ -1,17 +1,21 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
-const getSupabase = async () => {
-    return createClient()
+// Helper for admin client (Service Role)
+const createAdminClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
 // Cached Student List for Main Table
 // Includes fields used for Display AND Client-side Search
 export const getCachedStudentList = unstable_cache(
     async () => {
-        const supabase = await getSupabase()
+        const supabase = createAdminClient()
         console.log('Cache MISS: Fetching Student List...')
 
         const { data, error } = await supabase
@@ -48,7 +52,7 @@ export const getCachedStudentList = unstable_cache(
 // Fetch Full Student Detail (On Demand)
 // Not heavily cached (1 hour or less) or just standard fetch
 export const getStudentDetail = async (studentId) => {
-    const supabase = await getSupabase()
+    const supabase = await createClient()
 
     // We can use simple fetch here because it's triggered on user action (modal open)
     // But if we want to protect DB, we can cache it too for a short time

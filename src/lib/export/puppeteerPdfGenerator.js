@@ -6,6 +6,8 @@
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+// Standard 'https' module for downloading if needed
+const https = require('https');
 
 // Determine environment
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
@@ -26,6 +28,43 @@ function getSupabaseAdmin() {
   return _supabaseAdmin;
 }
 
+// Helper to download font to temp directory
+async function getFontPath() {
+  const fontUrl = 'https://github.com/googlefonts/noto-cjk/raw/main/Serif/OTF/Japanese/NotoSerifCJKjp-Regular.otf';
+  const tempPath = '/tmp/NotoSerifCJKjp-Regular.otf';
+
+  // Check if file already exists
+  if (fs.existsSync(tempPath)) {
+    // Check if file size is reasonable (not empty)
+    const stats = fs.statSync(tempPath);
+    if (stats.size > 1000) {
+      console.log('Using cached font from /tmp');
+      return tempPath;
+    }
+  }
+
+  console.log('Downloading font to /tmp...');
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(tempPath);
+    https.get(fontUrl, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to download font: ${response.statusCode}`));
+        return;
+      }
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(() => {
+          console.log('Font downloaded successfully');
+          resolve(tempPath);
+        });
+      });
+    }).on('error', (err) => {
+      fs.unlink(tempPath, () => { }); // Delete imperfect file
+      reject(err);
+    });
+  });
+}
+
 async function getBrowser() {
   if (isProduction) {
     // Vercel / Production environment
@@ -33,17 +72,15 @@ async function getBrowser() {
     const puppeteerCore = require('puppeteer-core');
 
     // Setup for Japanese fonts
-    // IPAmjMincho (45MB) is too heavy and local loading is fragile on Vercel.
-    // Switching to Noto Serif CJK JP (Regular) via direct GitHub Raw link.
-    // This provides a formal Mincho-style look for official documents.
     try {
-      await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Serif/OTF/Japanese/NotoSerifCJKjp-Regular.otf');
+      const fontPath = await getFontPath();
+      await chromium.font(fontPath);
     } catch (e) {
       console.error('Font loading failed:', e);
     }
 
     return await puppeteerCore.launch({
-      args: chromium.args,
+      args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
@@ -408,6 +445,10 @@ async function htmlToPdf(html, outputPath = null, cacheKey = null, browser = nul
   }
 
   // 2. Generate PDF using Puppeteer
+  if (browser === 'CHECK_CACHE_ONLY') {
+    return null;
+  }
+
   const shouldCloseBrowser = !browser;
   if (!browser) {
     browser = await getBrowser();

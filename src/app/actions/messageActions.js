@@ -47,3 +47,95 @@ export async function getUnreadCount() {
         return 0
     }
 }
+
+// Optimization: Cached Conversation List
+import { unstable_cache, revalidateTag } from 'next/cache'
+
+export const getRecentConversations = unstable_cache(
+    async () => {
+        try {
+            // 1. Fetch recent messages (e.g., last 2000)
+            const { data: messages, error } = await adminSupabase
+                .from('messages')
+                .select('student_id, content, created_at, read, sender_type')
+                .order('created_at', { ascending: false })
+                .limit(2000)
+
+            if (error) throw error
+
+            // 2. Aggregate by Student
+            const conversationsMap = new Map()
+
+            messages.forEach(msg => {
+                if (!conversationsMap.has(msg.student_id)) {
+                    conversationsMap.set(msg.student_id, {
+                        student_id_text: msg.student_id,
+                        last_message: msg.content,
+                        last_message_at: msg.created_at,
+                        unread_count: 0
+                    })
+                }
+
+                // Count unread 
+                if (msg.sender_type === 'student' && !msg.read) {
+                    const conv = conversationsMap.get(msg.student_id)
+                    conv.unread_count += 1
+                }
+            })
+
+            const conversationList = Array.from(conversationsMap.values())
+
+            // 3. Fetch Student Details
+            const studentIds = conversationList.map(c => c.student_id_text)
+            if (studentIds.length > 0) {
+                const { data: students } = await adminSupabase
+                    .from('students')
+                    .select('student_id_text, full_name, class_name')
+                    .in('student_id_text', studentIds)
+
+                const studentMap = new Map(students?.map(s => [s.student_id_text, s]))
+
+                conversationList.forEach(conv => {
+                    const details = studentMap.get(conv.student_id_text)
+                    if (details) {
+                        conv.name = details.full_name
+                        conv.class_name = details.class_name
+                    } else {
+                        conv.name = `Unknown (${conv.student_id_text})`
+                    }
+                })
+            }
+
+            return conversationList
+        } catch (error) {
+            console.error('Cached Conversations Error:', error)
+            return []
+        }
+    },
+    ['chat-conversations-list'],
+    { revalidate: 60, tags: ['chat-messages'] } // 60s cache or invalidation
+)
+
+// Send Message Action (to replace API or simply invalidate)
+export async function sendMessage(studentId, content, senderType = 'teacher') {
+    try {
+        const { error } = await adminSupabase
+            .from('messages')
+            .insert({
+                student_id: studentId,
+                content,
+                sender_type: senderType,
+                read: false,
+                created_at: new Date().toISOString()
+            })
+
+        if (error) throw error
+
+        // Invalidate the conversations cache so listing updates immediately
+        revalidateTag('chat-messages')
+        return { success: true }
+    } catch (err) {
+        console.error('Send message error:', err)
+        return { error: 'Failed to send' }
+    }
+}

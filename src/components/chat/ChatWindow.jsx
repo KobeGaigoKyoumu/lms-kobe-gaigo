@@ -50,7 +50,7 @@ export default function ChatWindow({
     }
 
     // Realtime Subscription & Polling Fallback
-    const POLL_INTERVAL = 300000 // 5 minutes (fallback, relying on Realtime)
+    const POLL_INTERVAL = 600000 // 10 minutes (fallback, relying on Realtime)
 
     useEffect(() => {
         if (!studentId) return

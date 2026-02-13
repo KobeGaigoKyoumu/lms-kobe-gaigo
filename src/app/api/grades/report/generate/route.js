@@ -8,16 +8,37 @@ export async function POST(request) {
         // --- BATCH MODE ---
         if (students && Array.isArray(students) && students.length > 0) {
             const zip = new AdmZip();
-            // Launch browser once for the batch
-            const browser = await getBrowser();
+            // Lazy launch browser for the batch
+            let browser = null;
 
             try {
                 for (const s of students) {
                     let buffer;
                     let fileName;
 
+                    // 1. Try to get from cache first (without launching browser)
                     if (type === 'final_exam') {
-                        buffer = await generateFinalExamPDF(s, s.yearTerm || yearTerm, null, browser);
+                        buffer = await generateFinalExamPDF(s, s.yearTerm || yearTerm, null, 'CHECK_CACHE_ONLY');
+                    } else {
+                        buffer = await generateGradeReportPDF(s, s.yearTerm || yearTerm, null, 'CHECK_CACHE_ONLY');
+                    }
+
+                    // 2. If cache miss, launch browser if needed and generate
+                    if (!buffer) {
+                        if (!browser) {
+                            console.log('Batch: Cache miss, launching browser...');
+                            browser = await getBrowser();
+                        }
+
+                        if (type === 'final_exam') {
+                            buffer = await generateFinalExamPDF(s, s.yearTerm || yearTerm, null, browser);
+                        } else {
+                            buffer = await generateGradeReportPDF(s, s.yearTerm || yearTerm, null, browser);
+                        }
+                    }
+
+                    // Determine filename
+                    if (type === 'final_exam') {
                         if ((s.yearTerm || yearTerm)?.startsWith('JLPT')) {
                             const level = s.final_exam_data?.level || '';
                             fileName = `JLPT模試${level}結果_${s.student_id_text}_${s.student_name.replace(/\s+/g, '_')}.pdf`;
@@ -25,15 +46,18 @@ export async function POST(request) {
                             fileName = `期末試験結果_${s.student_id_text}_${s.student_name.replace(/\s+/g, '_')}.pdf`;
                         }
                     } else {
-                        buffer = await generateGradeReportPDF(s, s.yearTerm || yearTerm, null, browser);
                         fileName = `成績通知表_${s.student_id_text}_${s.student_name.replace(/\s+/g, '_')}.pdf`;
                     }
 
-                    zip.addFile(fileName, buffer);
+                    if (buffer) {
+                        zip.addFile(fileName, buffer);
+                    }
                 }
             } finally {
-                // Ensure browser is closed
-                await browser.close();
+                // Ensure browser is closed if it was opened
+                if (browser) {
+                    await browser.close();
+                }
             }
 
             const zipBuffer = zip.toBuffer();

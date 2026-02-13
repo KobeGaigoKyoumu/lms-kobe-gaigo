@@ -6,6 +6,7 @@ import styles from './page.module.css'
 import RadarChart from './RadarChart'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { saveGradeRecords } from '@/app/actions/gradeRecords'
 
 export default function GradeUploader() {
     const [files, setFiles] = useState([])
@@ -436,33 +437,28 @@ export default function GradeUploader() {
             const term = selectedTerm
             const yearTerm = `${academicYear}年度 ${term}`
 
-            let successCount = 0
+            // Prepare records for bulk save
+            const recordsToSave = grades.map(student => ({
+                student_id_text: String(student.id),
+                student_name: student.name,
+                class_name: student.class,
+                year_term: yearTerm,
+                final_exam_data: student.finalExam,
+                report_card_data: student.reportDetails,
+                final_exam_total: student.finalExamSum,
+                report_card_total: student.reportCardTotal,
+                updated_at: new Date().toISOString()
+            }))
 
-            for (const student of grades) {
-                const { error } = await supabase
-                    .from('grade_records')
-                    .upsert({
-                        student_id_text: String(student.id),
-                        student_name: student.name,
-                        class_name: student.class,
-                        year_term: yearTerm,
-                        final_exam_data: student.finalExam,
-                        report_card_data: student.reportDetails, // 詳細データ保存
-                        final_exam_total: student.finalExamSum,
-                        report_card_total: student.reportCardTotal,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'student_id_text, year_term'
-                    })
+            const { success, errors } = await saveGradeRecords(recordsToSave, yearTerm)
 
-                if (error) {
-                    console.error(`Save error for ${student.id} (${yearTerm}):`, error)
-                } else {
-                    successCount++
-                }
+            if (errors && errors.length > 0) {
+                console.error('Some errors occurred:', errors)
+                setSaveMessage(`一部のデータ保存に失敗しました (${errors.length}件のエラー)`)
+            } else {
+                setSaveMessage(`${success}件のデータを保存しました (学期: ${yearTerm})`)
             }
 
-            setSaveMessage(`${successCount}件のデータを保存しました (学期: ${yearTerm})`)
         } catch (err) {
             console.error(err)
             setSaveMessage('保存中にエラーが発生しました')
@@ -478,6 +474,32 @@ export default function GradeUploader() {
     const [jlptSaving, setJlptSaving] = useState(false)
     const [jlptSaveMessage, setJlptSaveMessage] = useState('')
     const jlptFileInputRef = useRef(null)
+
+    // ... (Existing handlers)
+
+    // ... (Lines 484-765 remain unchanged) ...
+    // Note: I will replace only saveToDatabase and saveJlptToDatabase. 
+    // Wait, the previous tool call viewed up to line 800, so I can see saveJlptToDatabase starts at 766.
+    // I need to reuse handleJlptDrop etc which are in the middle.
+    // I will replace saveToDatabase only first, then separate call for saveJlptToDatabase?
+    // replace_file_content supports replacing a block.
+    // I can replacing saveToDatabase block. And then saveJlptToDatabase block.
+    // Actually, I can replace the whole chunk if contiguous. But the middle parts (handlers, parse) are huge.
+    // I will replace saveToDatabase first.
+
+    // START REPLACEMENT for saveToDatabase ONLY
+    // But I will output only saveToDatabase content here? 
+    // The instructions say "Update GradeUploader ... in saveToDatabase and saveJlptToDatabase". 
+    // I'll do saveToDatabase first. Then saveJlptToDatabase in next tool call or same if I can target ranges.
+    // replace_file_content works on a single contiguous block.
+
+    // Let's do saveToDatabase (428-472)
+    // AND then I need to do saveJlptToDatabase (766-819+)
+
+    // Let's split into two calls.
+
+
+
 
     // ... (Existing handlers)
 
@@ -769,8 +791,8 @@ export default function GradeUploader() {
         setJlptSaveMessage('')
 
         try {
-            let successCount = 0
-            for (const record of jlptData) {
+            // Prepare records for bulk save
+            const recordsToSave = jlptData.map(record => {
                 const termKey = `JLPT ${record.exam_date} ${record.exam_name}`
 
                 const jlptScores = {
@@ -789,26 +811,28 @@ export default function GradeUploader() {
                     subjectCorrectCounts: record.subjectCorrectCounts,
                 }
 
-                const { error } = await supabase
-                    .from('grade_records')
-                    .upsert({
-                        student_id_text: record.student_id,
-                        student_name: record.name,
-                        class_name: record.class_name || 'JLPT',
-                        year_term: termKey,
-                        final_exam_data: jlptScores,
-                        report_card_data: detailData,
-                        final_exam_total: record.total,
-                        report_card_total: 0,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'student_id_text, year_term'
-                    })
+                return {
+                    student_id_text: record.student_id,
+                    student_name: record.name,
+                    class_name: record.class_name || 'JLPT',
+                    year_term: termKey,
+                    final_exam_data: jlptScores,
+                    report_card_data: detailData,
+                    final_exam_total: record.total,
+                    report_card_total: 0,
+                    updated_at: new Date().toISOString()
+                }
+            })
 
-                if (error) console.error(error)
-                else successCount++
+            const { success, errors } = await saveGradeRecords(recordsToSave, `JLPT Batch`)
+
+            if (errors && errors.length > 0) {
+                console.error('JLPT Save errors:', errors)
+                setJlptSaveMessage(`一部のデータ保存に失敗しました`)
+            } else {
+                setJlptSaveMessage(`${success}件のJLPTデータを保存しました`)
             }
-            setJlptSaveMessage(`${successCount}件のJLPTデータを保存しました`)
+
         } catch (err) {
             console.error(err)
             setJlptSaveMessage('保存エラー')
