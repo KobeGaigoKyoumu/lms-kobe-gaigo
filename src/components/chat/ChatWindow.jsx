@@ -35,16 +35,30 @@ export default function ChatWindow({
 
     // Push Notification Subscription
     useEffect(() => {
+        console.log('🔍 ChatWindow Initializing:', { studentId, currentUserRole });
+
         // Resolve student ID if missing (i.e. for student view)
         if (!studentId && currentUserRole === 'student') {
             const fetchSession = async () => {
-                const session = await getStudentSession()
-                if (session && session.studentId) {
-                    setResolvedStudentId(session.studentId)
+                try {
+                    console.log('📡 Fetching student session...');
+                    const session = await getStudentSession()
+                    console.log('✅ Session fetched:', session);
+                    if (session && session.studentId) {
+                        setResolvedStudentId(session.studentId)
+                    } else {
+                        console.warn('⚠️ No studentId found in session. This might be why messages are not loading.');
+                        // If we can't find it, we should probably stop loading so at least the UI is interactive or shows error
+                        setIsLoading(false);
+                    }
+                } catch (err) {
+                    console.error('❌ Failed to fetch student session:', err);
+                    setIsLoading(false);
                 }
             }
             fetchSession()
         } else {
+            console.log('📌 Using provided studentId:', studentId);
             setResolvedStudentId(studentId)
         }
     }, [studentId, currentUserRole])
@@ -132,7 +146,11 @@ export default function ChatWindow({
 
     // Initial fetch (latest 30) - Direct Supabase implementation
     const fetchInitialMessages = useCallback(async () => {
-        if (!resolvedStudentId) return
+        if (!resolvedStudentId) {
+            console.log('⏳ fetchInitialMessages: resolvedStudentId is not ready yet.');
+            return
+        }
+        console.log('🚀 fetchInitialMessages: starting load for', resolvedStudentId);
         setIsLoading(true)
         try {
             // Clear App Badge when opening chat

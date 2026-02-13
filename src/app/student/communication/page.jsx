@@ -1,9 +1,15 @@
-'use client'
-
 import ChatWindow from '@/components/chat/ChatWindow'
 import styles from './page.module.css'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import { redirect } from 'next/navigation'
 
-export default function StudentCommunicationPage() {
+export default async function StudentCommunicationPage() {
+    const session = await getStudentSession()
+
+    if (!session || !session.studentId) {
+        redirect('/login')
+    }
+
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>先生との連絡</h1>
@@ -12,7 +18,10 @@ export default function StudentCommunicationPage() {
             </p>
 
             <div className={styles.chatWrapper}>
-                <ChatWindow currentUserRole="student" />
+                <ChatWindow
+                    studentId={session.studentId}
+                    currentUserRole="student"
+                />
             </div>
         </div>
     )
