@@ -40,30 +40,23 @@ export default function ChatWindow({
 
     // Push Notification Subscription
     useEffect(() => {
-        console.log('🔍 ChatWindow Initializing:', { studentId, currentUserRole });
-
         // Resolve student ID if missing (i.e. for student view)
         if (!studentId && currentUserRole === 'student') {
             const fetchSession = async () => {
                 try {
-                    console.log('📡 Fetching student session...');
                     const session = await getStudentSession()
-                    console.log('✅ Session fetched:', session);
                     if (session && session.studentId) {
                         setResolvedStudentId(session.studentId)
                     } else {
-                        console.warn('⚠️ No studentId found in session. This might be why messages are not loading.');
                         // If we can't find it, we should probably stop loading so at least the UI is interactive or shows error
                         setIsLoading(false);
                     }
                 } catch (err) {
-                    console.error('❌ Failed to fetch student session:', err);
                     setIsLoading(false);
                 }
             }
             fetchSession()
         } else {
-            console.log('📌 Using provided studentId:', studentId);
             setResolvedStudentId(studentId)
         }
     }, [studentId, currentUserRole])
@@ -151,21 +144,7 @@ export default function ChatWindow({
 
     // Initial fetch (latest 30) - Direct Supabase implementation
     const fetchInitialMessages = useCallback(async () => {
-        if (!resolvedStudentId) {
-            console.log('⏳ fetchInitialMessages: resolvedStudentId is not ready yet.');
-            return
-        }
-
-        // If we already have initial messages from prop, we can skip initial fetch
-        // but mark as not loading anymore.
-        if (messages.length > 0) {
-            console.log('📦 fetchInitialMessages: Using cached/prop messages.');
-            setIsLoading(false);
-            setTimeout(scrollToBottom, 100);
-            return;
-        }
-
-        console.log('🚀 fetchInitialMessages: starting load for', resolvedStudentId);
+        if (!resolvedStudentId) return
         setIsLoading(true)
         try {
             // Clear App Badge when opening chat
@@ -346,16 +325,12 @@ export default function ChatWindow({
                     // console.log よりも確実に気づけるように、開発時や特定の条件下で alert を出すこともできます
                     // ここでは console.log で状況を詳しく出力します
                     if (CLOUDFLARE_WORKER_URL) {
-                        console.log('✅ Cloudflare Worker を使用します:', CLOUDFLARE_WORKER_URL);
                         await fetch(CLOUDFLARE_WORKER_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ studentId: resolvedStudentId, senderType: currentUserRole })
                         })
                     } else {
-                        // 診断用アラートを追加 (実運用ではログのみにするべきですが、デバッグのため一時的に)
-                        alert('【デバッグ用】Cloudflare URLが設定されていません。Vercel設定を確認してください。');
-                        console.error('❌ NEXT_PUBLIC_CHAT_WORKER_URL が設定されていないため、Vercel API にフォールバックします。Vercel の環境変数を確認してください。');
                         await fetch('/api/chat/mark-read', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
