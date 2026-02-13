@@ -320,11 +320,14 @@ export default function ChatWindow({
             // Set new timeout (e.g., 2 seconds debounce)
             markReadTimeoutRef.current = setTimeout(async () => {
                 try {
-                    const CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+                    let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
 
-                    // console.log よりも確実に気づけるように、開発時や特定の条件下で alert を出すこともできます
-                    // ここでは console.log で状況を詳しく出力します
                     if (CLOUDFLARE_WORKER_URL) {
+                        // Ensure URL has protocol to avoid relative path errors (405/404)
+                        if (!CLOUDFLARE_WORKER_URL.startsWith('http')) {
+                            CLOUDFLARE_WORKER_URL = `https://${CLOUDFLARE_WORKER_URL}`;
+                        }
+
                         await fetch(CLOUDFLARE_WORKER_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },

@@ -1,22 +1,19 @@
-'use client'
-
-import { useParams, useRouter } from 'next/navigation'
 import ChatWindow from '@/components/chat/ChatWindow'
 import styles from './chatPage.module.css'
-import { ArrowLeft } from 'lucide-react'
+import BackButtonClient from './BackButtonClient'
+import { getMessages } from '@/app/actions/messageActions'
 
-export default function TeacherChatPage() {
-    const params = useParams()
-    const router = useRouter()
-    const studentId = params.studentId
+export default async function TeacherChatPage({ params }) {
+    const { studentId } = await params
+
+    // Pre-fetch initial messages
+    const { data: initialMessages } = await getMessages(studentId, { limit: 30 })
+    const reversedMessages = [...(initialMessages || [])].reverse()
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <button onClick={() => router.back()} className={styles.backButton}>
-                    <ArrowLeft size={20} />
-                    戻る
-                </button>
+                <BackButtonClient className={styles.backButton} />
                 <h1 className={styles.title}>学生 ID: {studentId} とのチャット</h1>
             </div>
 
@@ -24,6 +21,7 @@ export default function TeacherChatPage() {
                 <ChatWindow
                     studentId={studentId}
                     currentUserRole="teacher"
+                    initialMessages={reversedMessages}
                 />
             </div>
         </div>
