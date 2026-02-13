@@ -31,11 +31,35 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
     useEffect(() => {
         if (userRole === 'student') return // Handled by Context
 
-        // Legacy logic for Admin/Teacher
-        const { getAppNewStatus } = require('@/app/actions/statusActions')
         const fetchStatuses = async () => {
-            const data = await getAppNewStatus()
-            setLocalStatuses(data)
+            try {
+                let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+                if (!CLOUDFLARE_WORKER_URL) {
+                    const { getAppNewStatus } = require('@/app/actions/statusActions')
+                    const data = await getAppNewStatus()
+                    setLocalStatuses(data)
+                    return
+                }
+
+                if (!CLOUDFLARE_WORKER_URL.startsWith('http')) {
+                    CLOUDFLARE_WORKER_URL = `https://${CLOUDFLARE_WORKER_URL}`;
+                }
+
+                const res = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'get-status',
+                        role: userRole
+                    })
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setLocalStatuses(data)
+                }
+            } catch (e) {
+                console.error('Admin status fetch error:', e)
+            }
         }
         fetchStatuses()
 

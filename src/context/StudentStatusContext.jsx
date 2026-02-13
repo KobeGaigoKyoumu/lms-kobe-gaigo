@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { getAppNewStatus } from '@/app/actions/statusActions'
 import { createClient } from '@/lib/supabase/client'
 
 const StudentStatusContext = createContext({
@@ -21,7 +20,31 @@ export function StudentStatusProvider({ children, role, user }) {
 
     const fetchStatuses = async () => {
         try {
-            const data = await getAppNewStatus()
+            let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+            if (!CLOUDFLARE_WORKER_URL) {
+                const { getAppNewStatus } = await import('@/app/actions/statusActions')
+                const data = await getAppNewStatus()
+                setStatuses(data)
+                return
+            }
+
+            if (!CLOUDFLARE_WORKER_URL.startsWith('http')) {
+                CLOUDFLARE_WORKER_URL = `https://${CLOUDFLARE_WORKER_URL}`;
+            }
+
+            const res = await fetch(CLOUDFLARE_WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get-status',
+                    role: role,
+                    studentId: user?.studentId,
+                    className: user?.className,
+                    academicYear: user?.academicYear
+                })
+            })
+            if (!res.ok) throw new Error('Status fetch failed')
+            const data = await res.json()
             setStatuses(data)
         } catch (error) {
             console.error('Failed to fetch status:', error)
