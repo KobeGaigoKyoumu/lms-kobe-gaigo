@@ -4,6 +4,7 @@ import styles from './ChatWindow.module.css'
 import { subscribeUserToPush } from '@/lib/pushNotification'
 
 import { createClient } from '@/lib/supabase/client'
+import { getStudentSession } from '@/app/actions/studentAuth'
 
 export default function ChatWindow({
     studentId,
@@ -21,6 +22,7 @@ export default function ChatWindow({
     const [previewImage, setPreviewImage] = useState(null)
     const [replyingTo, setReplyingTo] = useState(null) // { id, content, sender_type }
     const [highlightedMessageId, setHighlightedMessageId] = useState(null)
+    const [resolvedStudentId, setResolvedStudentId] = useState(studentId)
     const [pushEnabled, setPushEnabled] = useState(false)
 
     const messagesEndRef = useRef(null)
@@ -32,6 +34,21 @@ export default function ChatWindow({
     const wasLoadingMoreRef = useRef(false)
 
     // Push Notification Subscription
+    useEffect(() => {
+        // Resolve student ID if missing (i.e. for student view)
+        if (!studentId && currentUserRole === 'student') {
+            const fetchSession = async () => {
+                const session = await getStudentSession()
+                if (session && session.studentId) {
+                    setResolvedStudentId(session.studentId)
+                }
+            }
+            fetchSession()
+        } else {
+            setResolvedStudentId(studentId)
+        }
+    }, [studentId, currentUserRole])
+
     useEffect(() => {
         // Try to subscribe quietly first, or check if already subscribed
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -53,16 +70,16 @@ export default function ChatWindow({
     const POLL_INTERVAL = 600000 // 10 minutes (fallback, relying on Realtime)
 
     useEffect(() => {
-        if (!studentId) return
+        if (!resolvedStudentId) return
 
         // Supabase Realtime Subscription
         const channel = supabase
-            .channel(`chat:${studentId}`)
+            .channel(`chat:${resolvedStudentId}`)
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'messages',
-                filter: `student_id=eq.${studentId}`
+                filter: `student_id=eq.${resolvedStudentId}`
             }, (payload) => {
                 const newMessage = payload.new
                 // Prevent duplicates if already added by optimistic UI or poll
@@ -98,7 +115,7 @@ export default function ChatWindow({
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [studentId, currentUserRole])
+    }, [resolvedStudentId, currentUserRole])
 
     // Scroll restoration logic
     useLayoutEffect(() => {
@@ -115,6 +132,7 @@ export default function ChatWindow({
 
     // Initial fetch (latest 30) - Direct Supabase implementation
     const fetchInitialMessages = useCallback(async () => {
+        if (!resolvedStudentId) return
         setIsLoading(true)
         try {
             // Clear App Badge when opening chat
@@ -127,7 +145,7 @@ export default function ChatWindow({
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .eq('student_id', studentId)
+                .eq('student_id', resolvedStudentId)
                 .order('created_at', { ascending: false })
                 .limit(30)
 
@@ -144,7 +162,7 @@ export default function ChatWindow({
             setIsLoading(false)
             setTimeout(scrollToBottom, 100)
         }
-    }, [studentId, supabase])
+    }, [resolvedStudentId, supabase])
 
     // Load older messages - Direct Supabase implementation
     const loadMoreMessages = async () => {
@@ -163,7 +181,7 @@ export default function ChatWindow({
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .eq('student_id', studentId)
+                .eq('student_id', resolvedStudentId)
                 .lt('created_at', oldestMessage.created_at)
                 .order('created_at', { ascending: false })
                 .limit(30)
@@ -207,7 +225,7 @@ export default function ChatWindow({
 
     // Poll for new messages (Direct Supabase version)
     const pollNewMessages = useCallback(async () => {
-        if (messages.length === 0 || isLoading || isSending) return
+        if (!resolvedStudentId || messages.length === 0 || isLoading || isSending) return
 
         const latestMessage = messages[messages.length - 1]
 
@@ -215,7 +233,7 @@ export default function ChatWindow({
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .eq('student_id', studentId)
+                .eq('student_id', resolvedStudentId)
                 .gt('created_at', latestMessage.created_at)
                 .order('created_at', { ascending: true })
 
@@ -239,7 +257,7 @@ export default function ChatWindow({
         } catch (error) {
             // Silent error
         }
-    }, [studentId, messages, isLoading, isSending, supabase])
+    }, [resolvedStudentId, messages, isLoading, isSending, supabase])
 
     // Debounced Mark Read
     const markReadTimeoutRef = useRef(null)
@@ -265,7 +283,7 @@ export default function ChatWindow({
                         await fetch(CLOUDFLARE_WORKER_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ studentId, senderType: currentUserRole })
+                            body: JSON.stringify({ studentId: resolvedStudentId, senderType: currentUserRole })
                         })
                     } else {
                         // 診断用アラートを追加 (実運用ではログのみにするべきですが、デバッグのため一時的に)
@@ -274,7 +292,7 @@ export default function ChatWindow({
                         await fetch('/api/chat/mark-read', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ studentId })
+                            body: JSON.stringify({ studentId: resolvedStudentId })
                         })
                     }
 
@@ -433,7 +451,7 @@ export default function ChatWindow({
         try {
             // Role Determination Logic from server-side moved to client
             let payload = {
-                student_id: studentId,
+                student_id: resolvedStudentId,
                 content: inputText || '',
                 attachment_url: attachment?.url,
                 attachment_name: attachment?.name,
