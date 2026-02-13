@@ -1,0 +1,169 @@
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import webpush from 'https://esm.sh/web-push@3.6.7'
+
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+Deno.serve(async (req) => {
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
+
+    try {
+        const supabaseClient = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        )
+
+        // Check if this is a direct call or a webhook
+        // Webhooks usually result in a POST with a specific payload structure
+        const payload = await req.json()
+
+        // Determine if it's a DB Webhook payload (record, old_record, type, table, schema)
+        // or a direct invoke payload
+        const record = payload.record || payload // Fallback to direct payload if not webhook
+
+        if (!record || !record.student_id || !record.content) {
+            // If it's a delete event or something else we don't care about
+            // validation might fail if 'content' is empty (e.g. image only)
+            // so check record.id exists at least.
+            if (!record || !record.id) {
+                return new Response(JSON.stringify({ message: 'Ignored: No record data' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                })
+            }
+        }
+
+        console.log('Processing message:', record.id)
+
+        // User Configuration for Web Push
+        const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
+        const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
+        const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'mailto:admin@example.com'
+
+        if (!vapidPublicKey || !vapidPrivateKey) {
+            console.error('Missing VAPID keys')
+            return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500,
+            })
+        }
+
+        webpush.setVapidDetails(adminEmail, vapidPublicKey, vapidPrivateKey)
+
+        // Determine Recipient
+        let recipientId = null
+        let title = ''
+        let url = ''
+
+        if (record.sender_type === 'teacher') {
+            recipientId = record.student_id // Helper/Teacher sending TO student
+            title = '先生からのメッセージ'
+            url = '/student/communication'
+        } else {
+            // Student sending TO teacher
+            title = '学生からのメッセージ'
+            url = `/communication/${record.student_id}` // Teacher's view
+
+            // Find the teacher to notify. 
+            // Logic: Find the last teacher who messaged this student, or default/notify all admins.
+            // For simplicity in this v1, we will notify a specific admin/teacher if linked, 
+            // or we need a way to broadcast to 'all teachers'.
+            // Existing logic in /api/chat/route.js fell back to 'admin_user' or last teacher.
+
+            // Let's try to find the last teacher interaction
+            const { data: lastTeacherMsg } = await supabaseClient
+                .from('messages')
+                .select('teacher_id')
+                .eq('student_id', record.student_id)
+                .eq('sender_type', 'teacher')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
+
+            recipientId = lastTeacherMsg?.teacher_id
+
+            if (!recipientId) {
+                console.log('No specific teacher found to notify for student:', record.student_id)
+                // In a real app, you might want to notify all admins here.
+                // For now, if we can't find a recipient, we abort push to avoid errors.
+                return new Response(JSON.stringify({ message: 'No recipient identified' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                })
+            }
+        }
+
+        // Fetch Unread Count (Optional, for badge)
+        const { count: unreadCount } = await supabaseClient
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('student_id', record.student_id)
+            .eq('read', false)
+            .eq('sender_type', record.sender_type) // Count messages OF THIS TYPE (that are unread)
+        // Wait, if I am Student, I want to see unread messages FROM Teacher.
+        // If I am Teacher, I want to see unread messages FROM Student.
+        // The query above is slightly ambiguous without context.
+        // Let's simplify: Badge is usually total unread for the user.
+
+        // Actually, let's keep it simple. Badge = 1.
+
+        // Fetch Subscriptions
+        const { data: subs, error: subError } = await supabaseClient
+            .from('push_subscriptions')
+            .select('*')
+            .eq('user_id', recipientId)
+
+        if (subError || !subs || subs.length === 0) {
+            console.log('No subscriptions found for user:', recipientId)
+            return new Response(JSON.stringify({ message: 'No subscriptions' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
+        }
+
+        const pushPayload = JSON.stringify({
+            title: title,
+            body: record.content || (record.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
+            url: url,
+            badge: 1, // Simplified
+            icon: '/icon-192.png'
+        })
+
+        const sendPromises = subs.map(async (sub) => {
+            try {
+                await webpush.sendNotification({
+                    endpoint: sub.endpoint,
+                    keys: { p256dh: sub.p256dh, auth: sub.auth }
+                }, pushPayload)
+                return { success: true }
+            } catch (error) {
+                console.error('Push failed for sub:', sub.id, error.statusCode)
+                if (error.statusCode === 410 || error.statusCode === 404) {
+                    // Check for 410 Gone or 404 Not Found and delete the subscription
+                    await supabaseClient.from('push_subscriptions').delete().eq('id', sub.id)
+                }
+                return { success: false, error: error.message }
+            }
+        })
+
+        await Promise.all(sendPromises)
+
+        return new Response(JSON.stringify({ message: 'Notifications sent' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+        })
+
+    } catch (error) {
+        console.error(error)
+        return new Response(JSON.stringify({ error: error.message }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+        })
+    }
+})

@@ -142,81 +142,15 @@ export async function POST(request) {
 
         if (error) throw error
 
-        // 4. Send Push Notification
-        try {
-            const webpush = require('web-push')
+        // 4. Send Push Notification (Supabase Edge Function will handle this via Trigger)
+        // No need to execute logic here
 
-            if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-                webpush.setVapidDetails(
-                    'mailto:admin@lms-kobe-gaigo.vercel.app',
-                    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                    process.env.VAPID_PRIVATE_KEY
-                )
+        /*
+         *  Database Trigger `on_chat_message_created` invokes `chat-push` Edge Function
+         *  This offloads the heavy lifting (Web Push API calls) from Vercel to Supabase.
+         */
 
-                let recipientId = null
-                if (payload.sender_type === 'teacher') {
-                    recipientId = payload.student_id
-                } else {
-                    // For student messages, find the last teacher who messaged them, or default to admin
-                    // Ideally, we should notify all teachers or specific assigned teachers.
-                    // For now, we'll try to find a teacher who recently interacted.
-                    const { data: lastTeacherMsg } = await adminSupabase
-                        .from('messages')
-                        .select('teacher_id')
-                        .eq('student_id', payload.student_id)
-                        .eq('sender_type', 'teacher')
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single()
-
-                    recipientId = lastTeacherMsg?.teacher_id || 'admin_user' // Fallback to a generic admin ID or handle differently
-                }
-
-                // Fetch unread count for the recipient
-                const { count: unreadCount } = await adminSupabase
-                    .from('messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('student_id', payload.student_id)
-                    .eq('read', false)
-                    .eq('sender_type', payload.sender_type === 'teacher' ? 'teacher' : 'student')
-
-                // Fetch recipient subscriptions
-                // Note: user_id in push_subscriptions might be student_id (string) or auth.uid() (uuid)
-                // We need to ensure we query correctly.
-                const { data: subs } = await adminSupabase
-                    .from('push_subscriptions')
-                    .select('*')
-                    .eq('user_id', recipientId)
-
-                if (subs && subs.length > 0) {
-                    const pushPayload = JSON.stringify({
-                        title: payload.sender_type === 'teacher' ? '先生からのメッセージ' : '学生からのメッセージ',
-                        body: payload.content || (payload.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
-                        url: payload.sender_type === 'teacher' ? `/student/communication` : `/communication/${payload.student_id}`,
-                        badge: unreadCount || 1,
-                        icon: '/icon-192.png'
-                    })
-
-                    await Promise.all(subs.map(sub =>
-                        webpush.sendNotification({
-                            endpoint: sub.endpoint,
-                            keys: { p256dh: sub.p256dh, auth: sub.auth }
-                        }, pushPayload).catch(async e => {
-                            if (e.statusCode === 410 || e.statusCode === 404) {
-                                await adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
-                            }
-                            console.error('Push send failed for one sub:', e.statusCode)
-                        })
-                    ))
-                }
-            } else {
-                console.warn('VAPID keys not configured, skipping push notification')
-            }
-        } catch (e) {
-            console.error('Push sending error:', e)
-        }
-
-        return NextResponse.json({ message: data })
+        return NextResponse.json({ message: data }) // Simply return the created message
 
     } catch (error) {
         console.error('Chat Send Error:', error)
