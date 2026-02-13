@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { X, Search, Users, Check, Filter, Send, Loader2, Paperclip, FileText, Image as ImageIcon } from 'lucide-react'
 import styles from './BroadcastModal.module.css'
+import { createClient } from '@/lib/supabase/client'
 
 export default function BroadcastModal({ isOpen, onClose, onSent }) {
     const [students, setStudents] = useState([])
@@ -18,17 +19,22 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
 
     const fileInputRef = useRef(null)
 
+    const supabase = createClient()
+
     useEffect(() => {
         if (!isOpen) return
 
         const fetchStudents = async () => {
             setIsLoading(true)
             try {
-                const res = await fetch('/api/chat/students')
-                if (res.ok) {
-                    const data = await res.json()
-                    setStudents(data.students || [])
-                }
+                // Direct Supabase call (Bypasses Vercel API)
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('student_id_text, full_name, grade, class_name')
+                    .order('student_id_text', { ascending: true })
+
+                if (error) throw error
+                setStudents(data || [])
             } catch (error) {
                 console.error('Failed to fetch students', error)
             } finally {
@@ -37,7 +43,7 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
         }
 
         fetchStudents()
-    }, [isOpen])
+    }, [isOpen, supabase])
 
     const classes = useMemo(() => {
         const set = new Set(students.map(s => s.class_name).filter(Boolean))
