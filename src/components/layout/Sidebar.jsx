@@ -45,13 +45,14 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                     CLOUDFLARE_WORKER_URL = `https://${CLOUDFLARE_WORKER_URL}`;
                 }
 
-                const res = await fetch(CLOUDFLARE_WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'get-status',
-                        role: userRole
-                    })
+                const query = new URLSearchParams({
+                    action: 'get-status',
+                    role: userRole
+                }).toString();
+
+                const res = await fetch(`${CLOUDFLARE_WORKER_URL}?${query}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
                 })
                 if (res.ok) {
                     const data = await res.json()
