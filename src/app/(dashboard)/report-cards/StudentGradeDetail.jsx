@@ -2,6 +2,8 @@
 
 import React from 'react'
 import RadarChart from './RadarChart'
+import { saveAs } from 'file-saver'
+import { generateGradePDFClient } from '@/lib/export/clientPdfGenerator'
 import styles from './page.module.css'
 // export { exportStudentGradeToPDF } removed - using server-side API
 
@@ -391,39 +393,24 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 btn.innerText = '生成中...';
                                 btn.disabled = true;
 
-                                const payload = {
+                                const blob = await generateGradePDFClient({
                                     yearTerm: student.yearTerm || '',
-                                    type: isJlpt ? 'final_exam' : (viewMode === 'exam' ? 'final_exam' : 'report_card')
-                                };
-
-                                payload.student = {
-                                    student_id_text: student.id,
-                                    student_name: student.name,
-                                    class_name: student.class,
-                                    final_exam_total: finalExamSum,
-                                    final_exam_data: finalExam,
-                                    report_card_total: reportCardTotal,
-                                    report_card_data: reportDetails
-                                };
-
-                                const response = await fetch('/api/grades/report/generate', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(payload)
+                                    type: isJlpt ? 'final_exam' : (viewMode === 'exam' ? 'final_exam' : 'report_card'),
+                                    student: {
+                                        student_id_text: student.id,
+                                        student_name: student.name,
+                                        class_name: student.class,
+                                        final_exam_total: finalExamSum,
+                                        final_exam_data: finalExam,
+                                        report_card_total: reportCardTotal,
+                                        report_card_data: reportDetails
+                                    }
                                 });
 
-                                if (!response.ok) throw new Error('PDF生成に失敗しました');
+                                if (!blob) throw new Error('PDF生成に失敗しました');
 
-                                const blob = await response.blob();
-                                const url = window.URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
                                 const filename = isJlpt ? `JLPT模試${finalExam.level || ''}結果_${student.name}.pdf` : (viewMode === 'exam' ? `期末試験結果_${student.name}_${student.id}.pdf` : `成績通知表_${student.name}_${student.id}.pdf`);
-                                a.download = filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                window.URL.revokeObjectURL(url);
-                                document.body.removeChild(a);
+                                saveAs(blob, filename);
 
                                 btn.innerText = originalText;
                                 btn.disabled = false;
@@ -432,7 +419,7 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 alert('PDFの出力中にエラーが発生しました');
                                 const btn = document.querySelector(`button[data-student-id="${student.id}"]`);
                                 if (btn) {
-                                    btn.innerText = 'PDF';
+                                    btn.innerText = 'PDF出力';
                                     btn.disabled = false;
                                 }
                             }

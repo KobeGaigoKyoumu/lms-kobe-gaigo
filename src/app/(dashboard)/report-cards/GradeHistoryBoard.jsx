@@ -6,7 +6,9 @@ import Link from 'next/link'
 import StudentGradeDetail from './StudentGradeDetail'
 import { exportGradesToExcel } from '@/lib/export/excelExport'
 import PizZip from 'pizzip'
+import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import { generateGradePDFClient, generateCertificatePDFClient } from '@/lib/export/clientPdfGenerator'
 // import { loadCertificateTemplate, generateClientCertificateBlob } from '@/lib/export/clientWordGenerator' // Removed unused client generator
 
 export default function GradeHistoryBoard() {
@@ -95,45 +97,55 @@ export default function GradeHistoryBoard() {
 
         setGenerating(true)
         try {
-            // Use Server-Side Generation for both PDF and Word
-            const response = await fetch('/api/certificates/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    studentIds: selectedIds,
-                    format: format,
-                    issueDate: new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+            if (format === 'docx') {
+                // Word is still server-side for now (complex docx templates)
+                const response = await fetch('/api/certificates/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentIds: selectedIds,
+                        format: 'docx',
+                        issueDate: new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+                    })
                 })
-            })
+                if (!response.ok) throw new Error('Word生成に失敗しました');
+                const blob = await response.blob()
+                saveAs(blob, selectedIds.length > 1 ? 'certificates.zip' : `certificate.docx`)
+            } else {
+                // PDF is now client-side
+                // 1. Fetch data only
+                const dataRes = await fetch('/api/certificates/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentIds: selectedIds, mode: 'data' })
+                })
+                if (!dataRes.ok) throw new Error('データ取得に失敗しました');
+                const { data: certificateDataList } = await dataRes.json();
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}))
-                throw new Error(errData.error || 'Generation failed')
-            }
+                const zip = new JSZip();
+                const issueDate = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Download the generated file
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
+                for (const certData of certificateDataList) {
+                    try {
+                        const blob = await generateCertificatePDFClient(certData, issueDate);
+                        if (blob) {
+                            const filename = `${certData.studentId}_${certData.name.replace(/\s+/g, '_')}_成績証明書.pdf`;
+                            if (selectedIds.length > 1) {
+                                zip.file(filename, blob);
+                            } else {
+                                saveAs(blob, filename);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Error generating certificate for ${certData.studentId}`, e);
+                    }
+                }
 
-            const disposition = response.headers.get('Content-Disposition')
-            let filename = selectedIds.length > 1 ? 'certificates.zip' : `certificate.${format === 'pdf' ? 'pdf' : 'docx'}`
-
-            if (disposition && disposition.indexOf('filename=') !== -1) {
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                if (matches != null && matches[1]) {
-                    filename = matches[1].replace(/['"]/g, '');
-                    try { filename = decodeURIComponent(filename) } catch (e) { }
+                if (selectedIds.length > 1) {
+                    const content = await zip.generateAsync({ type: 'blob' });
+                    saveAs(content, 'certificates_pdf.zip');
                 }
             }
-
-            a.download = filename
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
-
         } catch (err) {
             console.error(err)
             alert('証明書の発行に失敗しました: ' + err.message)
@@ -183,28 +195,28 @@ export default function GradeHistoryBoard() {
 
         setGenerating(true)
         try {
-            const response = await fetch('/api/grades/report/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    students: studentsPayload,
-                    type: exportType,
-                    yearTerm: selectedTerm // Fallback
-                })
-            });
+            const zip = new JSZip()
+            const folder = zip.folder(exportType === 'final_exam' ? (selectedTerm?.startsWith('JLPT') ? 'JLPT模擬試験結果' : '期末試験結果') : '成績通知表')
 
-            if (!response.ok) throw new Error('一括生成に失敗しました');
+            for (const payload of studentsPayload) {
+                try {
+                    const blob = await generateGradePDFClient({
+                        student: payload,
+                        type: exportType,
+                        yearTerm: payload.yearTerm || selectedTerm
+                    })
 
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = exportType === 'final_exam' ? (selectedTerm?.startsWith('JLPT') ? 'JLPT模擬試験結果_一括.zip' : '期末試験結果_一括.zip') : '成績通知表_一括.zip'
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+                    if (blob) {
+                        const filename = exportType === 'final_exam' ? (selectedTerm?.startsWith('JLPT') ? `JLPT模試${payload.final_exam_data?.level || ''}結果_${payload.student_name}.pdf` : `期末試験結果_${payload.student_name}.pdf`) : `成績通知表_${payload.student_name}.pdf`;
+                        folder.file(filename, blob)
+                    }
+                } catch (e) {
+                    console.error(`Error generating PDF for ${payload.student_name}`, e)
+                }
+            }
 
+            const content = await zip.generateAsync({ type: 'blob' })
+            saveAs(content, exportType === 'final_exam' ? (selectedTerm?.startsWith('JLPT') ? 'JLPT模擬試験結果_一括.zip' : '期末試験結果_一括.zip') : '成績通知表_一括.zip')
         } catch (err) {
             console.error(err)
             alert('PDFの一括出力に失敗しました: ' + err.message)
@@ -220,7 +232,7 @@ export default function GradeHistoryBoard() {
 
         setGenerating(true);
         try {
-            const payload = {
+            const blob = await generateGradePDFClient({
                 yearTerm: student.yearTerm || '',
                 type: exportType,
                 student: {
@@ -232,26 +244,12 @@ export default function GradeHistoryBoard() {
                     report_card_total: student.reportCardTotal,
                     report_card_data: student.reportDetails
                 }
-            };
-
-            const response = await fetch('/api/grades/report/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('PDF生成に失敗しました');
+            if (!blob) throw new Error('PDF生成に失敗しました');
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
             const filename = exportType === 'final_exam' ? (record.year_term?.startsWith('JLPT') ? `JLPT模試${record.final_exam_data?.level || ''}結果_${student.name}.pdf` : `期末試験結果_${student.name}.pdf`) : `成績通知表_${student.name}.pdf`;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            saveAs(blob, filename);
         } catch (err) {
             console.error(err);
             alert('PDFの出力中にエラーが発生しました');

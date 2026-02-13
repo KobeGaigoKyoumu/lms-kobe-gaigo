@@ -113,14 +113,10 @@ export default function ChatWindow({
         }
     }, [messages])
 
-    // Initial fetch (latest 30 - Reduced from 50 for optimization)
+    // Initial fetch (latest 30) - Direct Supabase implementation
     const fetchInitialMessages = useCallback(async () => {
         setIsLoading(true)
         try {
-            const params = new URLSearchParams()
-            if (studentId) params.append('studentId', studentId)
-            params.append('limit', '30')
-
             // Clear App Badge when opening chat
             if ('setAppBadge' in navigator) {
                 navigator.setAppBadge(0).catch(e => console.error('Failed to clear badge', e))
@@ -128,31 +124,35 @@ export default function ChatWindow({
                 navigator.clearAppBadge().catch(e => console.error('Failed to clear badge', e))
             }
 
-            const res = await fetch(`/api/chat?${params.toString()}`)
-            if (!res.ok) throw new Error('Failed to fetch')
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('student_id', studentId)
+                .order('created_at', { ascending: false })
+                .limit(30)
 
-            const data = await res.json()
-            setMessages(data.messages || [])
-            if ((data.messages || []).length < 30) {
+            if (error) throw error
+
+            const reversed = [...(data || [])].reverse()
+            setMessages(reversed)
+            if ((data || []).length < 30) {
                 setHasMore(false)
             }
         } catch (error) {
             console.error('Fetch error:', error)
         } finally {
             setIsLoading(false)
-            // Scroll to bottom on initial load
             setTimeout(scrollToBottom, 100)
         }
-    }, [studentId])
+    }, [studentId, supabase])
 
-    // Load older messages
+    // Load older messages - Direct Supabase implementation
     const loadMoreMessages = async () => {
         if (!hasMore || isLoadingMore || messages.length === 0) return
 
         setIsLoadingMore(true)
         wasLoadingMoreRef.current = true
 
-        // Capture scroll height before loading
         if (scrollContainerRef.current) {
             prevScrollHeight.current = scrollContainerRef.current.scrollHeight
         }
@@ -160,25 +160,23 @@ export default function ChatWindow({
         const oldestMessage = messages[0]
 
         try {
-            const params = new URLSearchParams()
-            if (studentId) params.append('studentId', studentId)
-            params.append('limit', '30')
-            params.append('before', oldestMessage.created_at)
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('student_id', studentId)
+                .lt('created_at', oldestMessage.created_at)
+                .order('created_at', { ascending: false })
+                .limit(30)
 
-            const res = await fetch(`/api/chat?${params.toString()}`)
-            if (!res.ok) throw new Error('Failed to load more')
+            if (error) throw error
 
-            const data = await res.json()
-            const newMessages = data.messages || []
-
-            if (newMessages.length < 30) {
+            if ((data || []).length < 30) {
                 setHasMore(false)
             }
 
-            if (newMessages.length > 0) {
-                setMessages(prev => [...newMessages, ...prev])
-            } else {
-                wasLoadingMoreRef.current = false
+            if (data && data.length > 0) {
+                const older = [...data].reverse()
+                setMessages(prev => [...older, ...prev])
             }
         } catch (error) {
             console.error('Load more error:', error)
@@ -207,34 +205,31 @@ export default function ChatWindow({
         return () => observer.disconnect()
     }, [hasMore, isLoadingMore, loadMoreMessages, messages.length])
 
-    // Poll for new messages
+    // Poll for new messages (Direct Supabase version)
     const pollNewMessages = useCallback(async () => {
-        if (messages.length === 0) return
+        if (messages.length === 0 || isLoading || isSending) return
 
         const latestMessage = messages[messages.length - 1]
 
         try {
-            const params = new URLSearchParams()
-            if (studentId) params.append('studentId', studentId)
-            params.append('after', latestMessage.created_at)
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('student_id', studentId)
+                .gt('created_at', latestMessage.created_at)
+                .order('created_at', { ascending: true })
 
-            const res = await fetch(`/api/chat?${params.toString()}`)
-            if (!res.ok) return // Silent fail on poll
+            if (error) throw error
 
-            const data = await res.json()
-            const newMessages = data.messages || []
-
-            if (newMessages.length > 0) {
+            if (data && data.length > 0) {
                 setMessages(prev => {
-                    const uniqueNew = newMessages.filter(nm => !prev.some(m => m.id === nm.id))
+                    const uniqueNew = data.filter(nm => !prev.some(m => m.id === nm.id))
                     if (uniqueNew.length === 0) return prev
 
-                    // Check if user is at bottom before update
                     const isAtBottom = scrollContainerRef.current &&
                         (scrollContainerRef.current.scrollTop + scrollContainerRef.current.clientHeight >= scrollContainerRef.current.scrollHeight - 50)
 
                     const updated = [...prev, ...uniqueNew]
-
                     if (isAtBottom) {
                         setTimeout(scrollToBottom, 100)
                     }
@@ -244,7 +239,7 @@ export default function ChatWindow({
         } catch (error) {
             // Silent error
         }
-    }, [studentId, messages])
+    }, [studentId, messages, isLoading, isSending, supabase])
 
     // Debounced Mark Read
     const markReadTimeoutRef = useRef(null)
@@ -258,16 +253,32 @@ export default function ChatWindow({
             if (markReadTimeoutRef.current) {
                 clearTimeout(markReadTimeoutRef.current)
             }
-
             // Set new timeout (e.g., 2 seconds debounce)
             markReadTimeoutRef.current = setTimeout(async () => {
                 try {
-                    await fetch('/api/chat/mark-read', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ studentId })
-                    })
-                    // Optimistically update local state to avoid re-triggering
+                    const CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+
+                    // console.log よりも確実に気づけるように、開発時や特定の条件下で alert を出すこともできます
+                    // ここでは console.log で状況を詳しく出力します
+                    if (CLOUDFLARE_WORKER_URL) {
+                        console.log('✅ Cloudflare Worker を使用します:', CLOUDFLARE_WORKER_URL);
+                        await fetch(CLOUDFLARE_WORKER_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ studentId, senderType: currentUserRole })
+                        })
+                    } else {
+                        // 診断用アラートを追加 (実運用ではログのみにするべきですが、デバッグのため一時的に)
+                        alert('【デバッグ用】Cloudflare URLが設定されていません。Vercel設定を確認してください。');
+                        console.error('❌ NEXT_PUBLIC_CHAT_WORKER_URL が設定されていないため、Vercel API にフォールバックします。Vercel の環境変数を確認してください。');
+                        await fetch('/api/chat/mark-read', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ studentId })
+                        })
+                    }
+
+                    // Optimistically update local state
                     setMessages(prev => prev.map(m =>
                         (!m.read && m.sender_type !== currentUserRole) ? { ...m, read: true } : m
                     ))
@@ -420,27 +431,40 @@ export default function ChatWindow({
 
         setIsSending(true)
         try {
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: inputText,
-                    studentId: studentId,
-                    attachment_url: attachment?.url,
-                    attachment_name: attachment?.name,
-                    attachment_type: attachment?.type,
-                    replyToId: replyingTo?.id
-                })
-            })
+            // Role Determination Logic from server-side moved to client
+            let payload = {
+                student_id: studentId,
+                content: inputText || '',
+                attachment_url: attachment?.url,
+                attachment_name: attachment?.name,
+                attachment_type: attachment?.type,
+                reply_to_id: replyingTo?.id || null,
+                read: false,
+                created_at: new Date().toISOString()
+            }
 
-            if (!res.ok) throw new Error('Send failed')
+            if (currentUserRole === 'teacher') {
+                const { data: { user } } = await supabase.auth.getUser()
+                payload.teacher_id = user?.id
+                payload.sender_type = 'teacher'
+            } else {
+                payload.teacher_id = null
+                payload.sender_type = 'student'
+            }
 
-            const data = await res.json()
-            // Optimistically add or just poll immediately
-            // Prevent duplicate if poll already picked it up
+            // Direct Insert to Supabase (Bypasses Vercel API CPU usage)
+            const { data, error } = await supabase
+                .from('messages')
+                .insert([payload])
+                .select()
+                .single()
+
+            if (error) throw error
+
+            // Optimistically add or let Realtime handle it (Realtime is already active)
             setMessages(prev => {
-                if (prev.some(m => m.id === data.message.id)) return prev
-                return [...prev, data.message]
+                if (prev.some(m => m.id === data.id)) return prev
+                return [...prev, data]
             })
 
             setInputText('')
@@ -448,6 +472,7 @@ export default function ChatWindow({
             setReplyingTo(null)
             setTimeout(scrollToBottom, 50)
         } catch (error) {
+            console.error('Send error:', error)
             alert('送信に失敗しました')
         } finally {
             setIsSending(false)

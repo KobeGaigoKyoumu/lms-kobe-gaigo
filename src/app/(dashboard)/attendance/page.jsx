@@ -6,6 +6,7 @@ import Link from 'next/link'
 import * as XLSX from 'xlsx'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import { generateAttendancePDFClient } from '@/lib/export/clientPdfGenerator'
 import styles from './page.module.css'
 
 import {
@@ -263,25 +264,19 @@ export default function AttendancePage() {
                 ? studentHistory.cumulativeData[studentHistory.cumulativeData.length - 1]
                 : { attendance_rate: 0 }
 
-            const response = await fetch('/api/attendance/pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    student: {
-                        id: selectedStudent,
-                        name: formatStudentName(studentInfo),
-                        className: studentInfo?.class_name
-                    },
-                    history: studentHistory,
-                    currentStats: {
-                        rate: latestCumulative.attendance_rate
-                    }
-                })
+            // Generate PDF client-side
+            const blob = await generateAttendancePDFClient({
+                student: {
+                    id: selectedStudent,
+                    name: formatStudentName(studentInfo),
+                    className: studentInfo?.class_name
+                },
+                history: studentHistory,
+                currentStats: {
+                    rate: latestCumulative.attendance_rate
+                }
             })
 
-            if (!response.ok) throw new Error('PDF generation failed')
-
-            const blob = await response.blob()
             const studentName = formatStudentName(studentInfo)
             const fileName = `${studentInfo?.class_name || ''}_${studentName}_出席率詳細.pdf`
 
@@ -355,25 +350,20 @@ export default function AttendancePage() {
                         ? studentHistoryData.cumulativeData[studentHistoryData.cumulativeData.length - 1]
                         : { attendance_rate: 0 }
 
-                    // Fetch PDF blob
-                    const pdfRes = await fetch('/api/attendance/pdf', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            student: {
-                                id: studentId,
-                                name: formatStudentName(studentInfo),
-                                className: studentInfo.class_name
-                            },
-                            history: studentHistoryData,
-                            currentStats: {
-                                rate: latestCumulative.attendance_rate
-                            }
-                        })
+                    // Generate PDF client-side
+                    const blob = await generateAttendancePDFClient({
+                        student: {
+                            id: studentId,
+                            name: formatStudentName(studentInfo),
+                            className: studentInfo.class_name
+                        },
+                        history: studentHistoryData,
+                        currentStats: {
+                            rate: latestCumulative.attendance_rate
+                        }
                     })
 
-                    if (pdfRes.ok) {
-                        const blob = await pdfRes.blob()
+                    if (blob) {
                         const monthlyData = studentHistoryData.monthlyData || []
                         let latestYear = new Date().getFullYear()
                         let latestMonth = new Date().getMonth() + 1
