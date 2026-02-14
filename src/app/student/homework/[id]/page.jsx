@@ -1,4 +1,5 @@
 import { getAssignmentDetails } from '@/app/actions/homework'
+export const runtime = 'edge'
 import SubmissionForm from '@/components/Homework/SubmissionForm'
 import { notFound } from 'next/navigation'
 import { Calendar, ChevronLeft } from 'lucide-react'

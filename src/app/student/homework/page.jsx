@@ -1,4 +1,5 @@
 import { getStudentAssignments } from '@/app/actions/homework'
+export const runtime = 'edge'
 import HomeworkListClient from './HomeworkListClient'
 import styles from './page.module.css'
 

@@ -1,4 +1,5 @@
 import { getAssignmentsByClass } from '@/app/actions/homework'
+export const runtime = 'edge'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import styles from './page.module.css'
