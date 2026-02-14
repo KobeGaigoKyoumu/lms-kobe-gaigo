@@ -163,11 +163,13 @@ export async function generateGradePDFClient(data) {
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '210mm';
-    container.style.padding = '25mm 20mm';
+    container.style.minHeight = '297mm';
+    container.style.padding = isJlpt ? '10mm' : '20mm';
     container.style.backgroundColor = 'white';
-    container.style.fontFamily = '"Noto Serif JP", serif';
+    container.style.fontFamily = isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif';
     container.style.color = '#000';
-    container.style.lineHeight = '1.5';
+    container.style.lineHeight = '1.3';
+    container.style.boxSizing = 'border-box';
 
     let contentHtml = '';
 
@@ -302,11 +304,9 @@ export async function generateGradePDFClient(data) {
             }).join('');
         }
 
-        container.style.fontFamily = '"Noto Sans JP", sans-serif';
+        // Container specific overrides for modern JLPT
         container.style.fontSize = '8.5pt';
-        container.style.lineHeight = '1.25';
         container.style.color = '#334155';
-        container.style.padding = '8mm';
 
         contentHtml = `
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 5px;">
@@ -449,14 +449,14 @@ export async function generateGradePDFClient(data) {
                 </tbody>
             </table>
 
-            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 35mm;">
+            <div style="border: 1px solid #000; padding: 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 35mm;">
                 <div style="text-align: center; width: 45%;">
                     <div style="font-size: 11pt; margin-bottom: 3mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
                     <div style="font-size: 20pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 11pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                 </div>
-                <div style="text-align: center; border: 2px solid #000; width: 45mm; height: 28mm; display: flex; flex-direction: column; justify-content: center; background: #fff;">
-                    <div style="font-size: 11pt; margin-bottom: 2mm;">${isExam ? '総合判定' : '総合評定'}</div>
-                    <div style="font-size: 32pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; display: flex; flex-direction: column; background: #fff;">
+                    <div style="font-size: 11pt; border-bottom: 1px solid #000; padding: 2mm 0; background: #fcfcfc;">${isExam ? '総合判定' : '総合評定'}</div>
+                    <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 28pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                 </div>
             </div>
             <div style="margin-top: 20mm; text-align: right;">
@@ -471,7 +471,14 @@ export async function generateGradePDFClient(data) {
     try {
         const html2canvas = (await import('html2canvas')).default;
         const jsPDF = (await import('jspdf')).default;
-        const canvas = await html2canvas(container, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1000 // Force standard width for capture
+        });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
