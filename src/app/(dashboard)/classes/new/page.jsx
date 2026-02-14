@@ -24,6 +24,13 @@ export default async function NewClassPage() {
         .select('id, title')
         .order('title')
 
+    // 教師一覧取得
+    const { data: teachers } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('role', ['teacher', 'admin'])
+        .order('full_name')
+
     async function createClass(formData) {
         'use server'
 
@@ -38,7 +45,7 @@ export default async function NewClassPage() {
                 grade_level: formData.get('grade_level') || null,
                 academic_year: parseInt(formData.get('academic_year')) || new Date().getFullYear(),
                 course_id: formData.get('course_id') || null,
-                teacher_id: user?.id
+                teacher_id: formData.get('teacher_id') || user?.id
             })
 
         if (error) {
@@ -112,6 +119,15 @@ export default async function NewClassPage() {
                         <option value="">なし</option>
                         {courses?.map(course => (
                             <option key={course.id} value={course.id}>{course.title}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label htmlFor="teacher_id">担任教師 *</label>
+                    <select id="teacher_id" name="teacher_id" required defaultValue={user?.id}>
+                        {teachers?.map(teacher => (
+                            <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>
                         ))}
                     </select>
                 </div>
