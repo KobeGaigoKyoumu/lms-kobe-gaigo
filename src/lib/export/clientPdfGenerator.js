@@ -309,7 +309,7 @@ export async function generateGradePDFClient(data) {
         container.style.padding = '8mm';
 
         contentHtml = `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px;">
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 5px;">
                 <table style="width: 100%; border: none;">
                     <tr>
                         <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>レベル:</strong> ${finalExam.level || '-'}</td>
@@ -318,6 +318,10 @@ export async function generateGradePDFClient(data) {
                         <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>合格点:</strong> ${finalExam.levelInfo?.passingScore || '-'}点</td>
                     </tr>
                 </table>
+            </div>
+
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px; font-size: 7.5pt; color: #475569;">
+                <strong>基準点:</strong> ${finalExam.levelInfo?.categoryPassingScores ? Object.entries(finalExam.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border: 1px solid #e2e8f0; border-left: 4px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; border-radius: 6px; margin-bottom: 10px; background-color: #fff;">
@@ -445,14 +449,14 @@ export async function generateGradePDFClient(data) {
                 </tbody>
             </table>
 
-            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 38mm; background-color: #fcfcfc;">
-                <div style="text-align: center; width: 45%; height: 28mm; border: 1px solid #ccc; background: #fff; display: flex; flex-direction: column; justify-content: center;">
-                    <div style="font-size: 11pt; margin-bottom: 2mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
-                    <div style="font-size: 18pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 10pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
+            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 35mm;">
+                <div style="text-align: center; width: 45%;">
+                    <div style="font-size: 11pt; margin-bottom: 3mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
+                    <div style="font-size: 20pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 11pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                 </div>
-                <div style="text-align: center; border: 2px solid #000; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; background: #fff;">
-                    <div style="font-size: 11pt; margin-bottom: 1mm;">${isExam ? '総合判定' : '総合評定'}</div>
-                    <div style="font-size: 28pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                <div style="text-align: center; border: 2px solid #000; width: 45mm; height: 28mm; display: flex; flex-direction: column; justify-content: center; background: #fff;">
+                    <div style="font-size: 11pt; margin-bottom: 2mm;">${isExam ? '総合判定' : '総合評定'}</div>
+                    <div style="font-size: 32pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                 </div>
             </div>
             <div style="margin-top: 20mm; text-align: right;">
