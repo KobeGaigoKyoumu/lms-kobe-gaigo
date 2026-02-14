@@ -123,21 +123,18 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                         </div>
                     )}
 
-                    {/* Upload Button */}
+                    {/* Upload Button - Disabled due to Google Drive Removal */}
                     <div className={styles.uploadArea}>
-                        <label className={`${styles.uploadLabel} ${uploading ? styles.disabled : ''}`}>
-                            {uploading ? <Loader2 className={styles.spinner} size={20} /> : <Upload size={20} />}
-                            <span>{uploading ? 'アップロード中...' : 'ファイルを選択'}</span>
+                        <label className={`${styles.uploadLabel} ${styles.disabled}`}>
+                            <Upload size={20} />
+                            <span>ファイル提出は現在停止中です</span>
                             <input
                                 type="file"
-                                multiple
-                                accept="image/*,.pdf,.doc,.docx"
-                                onChange={handleFileChange}
                                 className={styles.hiddenInput}
-                                disabled={uploading}
+                                disabled
                             />
                         </label>
-                        <span className={styles.hint}>※ 画像、PDFなどをアップロードできます</span>
+                        <span className={styles.hint}>※ システム更新中につき、コメントでの回答をお願いします</span>
                     </div>
                 </div>
 
