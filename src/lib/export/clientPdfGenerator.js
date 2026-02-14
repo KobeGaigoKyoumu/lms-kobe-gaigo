@@ -78,17 +78,17 @@ export async function generateAttendancePDFClient(data) {
         <div style="text-align: center; margin-bottom: 2mm;">
             <h1 style="font-size: 26pt; font-weight: bold; margin: 0; color: #333; letter-spacing: 2px;">神戸外語教育学院</h1>
         </div>
-        <div style="position: relative; height: 30mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
+        <div style="position: relative; height: 32mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
             <div style="position: absolute; bottom: 1mm; left: 0;">
                 <div style="font-weight: bold; font-size: 11pt; margin-bottom: 2px;">学籍番号：${student.id}</div>
                 <div style="font-weight: bold; font-size: 14pt; margin-bottom: 3px;">名前：${student.name}</div>
                 <div style="font-weight: bold; font-size: 11pt;">クラス：${student.className || ''}</div>
             </div>
-            <div style="position: absolute; top: 2mm; right: 0; width: 55mm; height: 22mm; border: 2px solid #333; border-radius: 8px; background: #fff; overflow: hidden;">
-                <div style="height: 7mm; background-color: #f5f5f5; border-bottom: 1px solid #333; font-size: 8pt; display: flex; align-items: center; justify-content: center; text-align: center; color: #555;">
+            <div style="position: absolute; bottom: 1mm; right: 0; width: 60mm; height: 26mm; border: 2px solid #333; border-radius: 8px; background: #fff; overflow: hidden;">
+                <div style="height: 8mm; background-color: #f5f5f5; border-bottom: 1px solid #333; font-size: 8pt; display: flex; align-items: center; justify-content: center; text-align: center; color: #555;">
                     ${latestData.year}年${latestData.month}月出席率
                 </div>
-                <div style="height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 20pt; font-weight: bold; ${rateClass}">
+                <div style="height: 18mm; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: bold; ${rateClass}">
                     ${latestRatePercent}%
                 </div>
             </div>
