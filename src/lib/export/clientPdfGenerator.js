@@ -172,75 +172,200 @@ export async function generateGradePDFClient(data) {
     let contentHtml = '';
 
     if (isJlpt) {
-        // JLPT Mock Exam Results Design
+        // Modern JLPT Mock Exam Results Design
         const finalExam = student.final_exam_data || {};
+        const reportDetails = student.report_card_data || {};
         const totalScore = student.final_exam_total || 0;
-        const result = finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格';
-        const resultColor = result === '合格' ? '#10b981' : '#ef4444';
+
+        const getEvalStr = (score, max) => {
+            if (score > (max * 2 / 3)) return 'A';
+            if (score > (max / 3)) return 'B';
+            return 'C';
+        };
+
+        const getEvalStyle = (val) => {
+            if (val === 'A') return 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
+            if (val === 'B') return 'background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a;';
+            return 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
+        };
+
+        let subjectRows = '';
+        if (finalExam.level === 'N4' || finalExam.level === 'N5') {
+            const vocab = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+            const grammar = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+            const reading = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+            const combinedScore = (finalExam.vocab || 0) + (finalExam.grammarReading || 0);
+            const combinedCorrect = vocab.correct + grammar.correct + reading.correct;
+            const combinedTotalQ = vocab.total + grammar.total + reading.total;
+            const eStr = getEvalStr(combinedScore, 120);
+
+            subjectRows = `
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">言語知識（文字・語彙・文法）・読解</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${combinedScore} / 120</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${combinedCorrect} / ${combinedTotalQ}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(eStr)}">${eStr}</span></td>
+                </tr>
+            `;
+        } else {
+            const vocabScore = (finalExam.vocab || 0) + (finalExam.grammar || 0);
+            const vocabCounts = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+            const grammarCounts = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+            const vCorrect = vocabCounts.correct + grammarCounts.correct;
+            const vTotal = vocabCounts.total + grammarCounts.total;
+            const vEval = getEvalStr(vocabScore, 60);
+
+            const rScore = finalExam.reading || 0;
+            const rCounts = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+            const rEval = getEvalStr(rScore, 60);
+
+            subjectRows = `
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">言語知識（文字・語彙・文法）</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${vocabScore} / 60</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${vCorrect} / ${vTotal}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(vEval)}">${vEval}</span></td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">読解</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${rScore} / 60</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${rCounts.correct} / ${rCounts.total}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[1] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(rEval)}">${rEval}</span></td>
+                </tr>
+            `;
+        }
+
+        const lScore = finalExam.listening || 0;
+        const lCounts = reportDetails.subjectCorrectCounts?.['聴解'] || { correct: 0, total: 0 };
+        const lEval = getEvalStr(lScore, 60);
+        const lJudgeIdx = (finalExam.level === 'N4' || finalExam.level === 'N5') ? 1 : 2;
+
+        subjectRows += `
+            <tr>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">聴解</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${lScore} / 60</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${lCounts.correct} / ${lCounts.total}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[lJudgeIdx] || '-'}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(lEval)}">${lEval}</span></td>
+            </tr>
+        `;
+
+        const totalEval = getEvalStr(totalScore, 180);
+        const counts = reportDetails.subjectCorrectCounts || {};
+        const vC = counts['文字・語彙'] || counts['文字語彙'] || counts['語彙'] || { correct: 0, total: 0 };
+        const gC = counts['文法'] || { correct: 0, total: 0 };
+        const rC = counts['読解'] || { correct: 0, total: 0 };
+        const lC = counts['聴解'] || { correct: 0, total: 0 };
+        const allCorrect = vC.correct + gC.correct + rC.correct + lC.correct;
+        const allTotal = vC.total + gC.total + rC.total + lC.total;
+
+        subjectRows += `
+            <tr style="background-color: #f8fafc; font-weight: bold;">
+                <td style="border: 1px solid #e5e7eb; padding: 6px;">合計</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right;">${totalScore} / 180</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;">${allCorrect} / ${allTotal}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(totalEval)}">${totalEval}</span></td>
+            </tr>
+        `;
+
+        let detailsHtml = '';
+        if (reportDetails.answerDetails && reportDetails.answerDetails.length > 0) {
+            const categories = ['文字・語彙', '文法', '読解', '聴解'];
+            detailsHtml = categories.map(sub => {
+                const subDetails = reportDetails.answerDetails.filter(d => {
+                    if (sub === '文字・語彙') return d.subject === '文字・語彙' || d.subject === '文字語彙' || d.subject === '語彙';
+                    return d.subject === sub;
+                });
+                if (subDetails.length === 0) return '';
+                const catCounts = sub === '文字・語彙'
+                    ? (reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'])
+                    : reportDetails.subjectCorrectCounts?.[sub];
+
+                return `
+                    <div style="margin-bottom: 8px;">
+                        <h4 style="font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b;">${sub} <span style="font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px;">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            ${subDetails.map(d => `
+                                <div style="width: 38px; padding: 3px 1px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; text-align: center; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
+                                    <div style="font-size: 6.5pt; font-weight: bold; color: #64748b; margin-bottom: 1px;">${d.questionNo}</div>
+                                    <div style="font-size: 8pt; font-weight: 700; color: #1e293b;">${d.selected || '-'}</div>
+                                    <div style="font-size: 6pt; color: #94a3b8;">(${d.correctAnswer})</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        container.style.fontFamily = '"Noto Sans JP", sans-serif';
+        container.style.fontSize = '8.5pt';
+        container.style.lineHeight = '1.25';
+        container.style.color = '#334155';
+        container.style.padding = '8mm';
 
         contentHtml = `
-            <div style="position: relative; margin-bottom: 10mm; height: 25mm; border-bottom: 2px solid #000;">
-                <div style="position: absolute; top: -10mm; right: 0; font-size: 10pt;">発行日：${today}</div>
-                <h1 style="text-align: center; font-size: 22pt; font-weight: bold; letter-spacing: 5px; margin-top: 5mm;">JLPT模擬試験 結果通知</h1>
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px;">
+                <table style="width: 100%; border: none;">
+                    <tr>
+                        <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>レベル:</strong> ${finalExam.level || '-'}</td>
+                        <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>使用教材:</strong> ${finalExam.textbook || '-'}</td>
+                        <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</td>
+                        <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>合格点:</strong> ${finalExam.levelInfo?.passingScore || '-'}点</td>
+                    </tr>
+                </table>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 8mm;">
-                <tr>
-                    <td style="background-color: #f5f5f5; text-align: center; width: 15%; padding: 5px 10px; border: 1px solid #000;">学籍番号</td>
-                    <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold;">${student.student_id_text}</td>
-                    <td style="background-color: #f5f5f5; text-align: center; width: 15%; padding: 5px 10px; border: 1px solid #000;">氏　名</td>
-                    <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold; font-size: 13pt;">${student.student_name}</td>
-                </tr>
-                <tr>
-                    <td style="background-color: #f5f5f5; text-align: center; padding: 5px 10px; border: 1px solid #000;">クラス</td>
-                    <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold;">${student.class_name}</td>
-                    <td style="background-color: #f5f5f5; text-align: center; padding: 5px 10px; border: 1px solid #000;">学　期</td>
-                    <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold;">${yearTerm || ''}</td>
-                </tr>
-            </table>
-
-            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 38mm; background-color: #fcfcfc;">
-                <div style="text-align: center; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; border: 1px solid #000; background-color: #fff;">
-                    <div style="font-size: 11pt; color: #666; margin-bottom: 2mm;">総合得点</div>
-                    <div style="font-size: 24pt; font-weight: bold;">${totalScore} <span style="font-size: 12pt; font-weight: normal;">/ 180</span></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border: 1px solid #e2e8f0; border-left: 4px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; border-radius: 6px; margin-bottom: 10px; background-color: #fff;">
+                <div>
+                    <div style="font-size: 7.5pt; color: #64748b; margin-bottom: 1px;">${student.class_name}</div>
+                    <h3 style="font-size: 13pt; font-weight: bold; color: #1e293b; margin: 0;">${student.student_name}<span style="font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px;">(${student.student_id_text})</span></h3>
+                    <div style="font-size: 8pt; color: #6b7280; margin-top: 1px;">${yearTerm}</div>
                 </div>
-                <div style="text-align: center; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; border: 2px solid ${resultColor}; background-color: ${result === '合格' ? '#f0fdf4' : '#fef2f2'};">
-                    <div style="font-size: 11pt; color: #666; margin-bottom: 2mm;">判定</div>
-                    <div style="font-size: 24pt; font-weight: bold; color: ${resultColor};">${result}</div>
+                <div style="display: flex; gap: 8px;">
+                    <div style="text-align: center; padding: 4px 12px; border-radius: 6px; min-width: 80px; border: 1px solid #000; background-color: #fff;">
+                        <div style="font-size: 6.5pt; color: #64748b; margin-bottom: 1px;">合計点</div>
+                        <div style="font-size: 11pt; font-weight: bold;">${totalScore}点 <span style="font-size: 8.5pt; color: #64748b; font-weight: normal;">/ 180</span></div>
+                    </div>
+                    <div style="text-align: center; padding: 4px 12px; border-radius: 6px; min-width: 80px; border: 1px solid ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'}; background-color: ${finalExam.result === '合' || finalExam.result === '○' ? '#f0fdf4' : '#fef2f2'};">
+                        <div style="font-size: 6.5pt; color: ${finalExam.result === '合' || finalExam.result === '○' ? '#166534' : '#991b1b'}; margin-bottom: 1px;">判定</div>
+                        <div style="font-size: 11pt; font-weight: 800; color: ${finalExam.result === '合' || finalExam.result === '○' ? '#10b981' : '#ef4444'};">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div>
+                    </div>
                 </div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 10mm;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                 <thead>
-                    <tr style="background: #f0f0f0;">
-                        <th style="border: 1px solid #000; padding: 10px; text-align: left;">得点区分</th>
-                        <th style="border: 1px solid #000; padding: 10px; text-align: center;">得点</th>
-                        <th style="border: 1px solid #000; padding: 10px; text-align: center;">判定</th>
+                    <tr style="background-color: #f9fafb;">
+                        <th style="padding: 6px; font-size: 8pt; font-weight: 600; border: 1px solid #e5e7eb; text-align: left;">科目</th>
+                        <th style="padding: 6px; font-size: 8pt; font-weight: 600; border: 1px solid #e5e7eb; text-align: right;">得点</th>
+                        <th style="padding: 6px; font-size: 8pt; font-weight: 600; border: 1px solid #e5e7eb; text-align: center;">正答数</th>
+                        <th style="padding: 6px; font-size: 8pt; font-weight: 600; border: 1px solid #e5e7eb; text-align: center;">判定</th>
+                        <th style="padding: 6px; font-size: 8pt; font-weight: 600; border: 1px solid #e5e7eb; text-align: center;">評価</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 12px;">言語知識（文字・語彙・文法）</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center; font-weight: bold;">${(finalExam.vocab || 0) + (finalExam.grammar || 0)} / 60</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center;">${finalExam.judgments?.[0] || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 12px;">読解</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center; font-weight: bold;">${finalExam.reading || 0} / 60</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center;">${finalExam.judgments?.[1] || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 12px;">聴解</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center; font-weight: bold;">${finalExam.listening || 0} / 60</td>
-                        <td style="border: 1px solid #000; padding: 12px; text-align: center;">${finalExam.judgments?.[2] || '-'}</td>
-                    </tr>
+                    ${subjectRows}
                 </tbody>
             </table>
-            <div style="margin-top: 20mm; text-align: right;">
-                <div style="font-size: 16pt; font-weight: bold;">神戸外語教育学院</div>
+
+            ${detailsHtml ? `
+                <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px;">
+                    <h3 style="font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 8px; border-bottom: 2px solid #3b82f6; padding-bottom: 2px; display: inline-block;">解答詳細</h3>
+                    ${detailsHtml}
+                </div>
+            ` : ''}
+
+            <div style="margin-top: 8px; text-align: right; font-size: 7.5pt; color: #94a3b8;">
+                神戸外語教育学院 | 発行日: ${today}
             </div>
         `;
-    } else {
+    }
+    else {
         // Standard Grade Report Design
         const isExam = type === 'final_exam';
         const subjects = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'];
