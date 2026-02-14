@@ -14,9 +14,11 @@ export async function generateAttendancePDFClient(data) {
     container.style.width = '210mm';
     container.style.padding = '8mm 15mm';
     container.style.backgroundColor = 'white';
+    container.style.margin = '0';
     container.style.fontFamily = '"Noto Sans JP", sans-serif';
     container.style.color = '#333';
     container.style.boxSizing = 'border-box';
+    container.style.lineHeight = '1.3';
 
     // Data preparation
     const monthlyData = [...(history.monthlyData || [])];
@@ -131,8 +133,9 @@ export async function generateAttendancePDFClient(data) {
         const canvas = await html2canvas(container, {
             scale: 2,
             useCORS: true,
+            logging: false,
             scrollX: 0,
-            scrollY: 0,
+            scrollY: -window.scrollY,
             windowWidth: 1000
         });
         const imgData = canvas.toDataURL('image/png');
@@ -173,6 +176,7 @@ export async function generateGradePDFClient(data) {
     container.style.minHeight = '297mm';
     container.style.padding = isJlpt ? '5mm 10mm' : '10mm 20mm';
     container.style.backgroundColor = 'white';
+    container.style.margin = '0';
     container.style.fontFamily = isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif';
     container.style.color = '#000';
     container.style.lineHeight = '1.3';
@@ -483,7 +487,7 @@ export async function generateGradePDFClient(data) {
             useCORS: true,
             logging: false,
             scrollX: 0,
-            scrollY: 0,
+            scrollY: -window.scrollY,
             windowWidth: 1000 // Force standard width for capture
         });
         const imgData = canvas.toDataURL('image/png');
@@ -614,7 +618,7 @@ export async function generateCertificatePDFClient(data, issueDate) {
             scale: 2.5,
             useCORS: true,
             scrollX: 0,
-            scrollY: 0,
+            scrollY: -window.scrollY,
             windowWidth: 1000
         });
         const imgData = canvas.toDataURL('image/png');
