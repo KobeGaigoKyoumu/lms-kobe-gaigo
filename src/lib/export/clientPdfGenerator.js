@@ -164,7 +164,7 @@ export async function generateGradePDFClient(data) {
     container.style.top = '0';
     container.style.width = '210mm';
     container.style.minHeight = '297mm';
-    container.style.padding = isJlpt ? '10mm' : '20mm';
+    container.style.padding = isJlpt ? '5mm 10mm' : '10mm 20mm';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif';
     container.style.color = '#000';
@@ -406,9 +406,9 @@ export async function generateGradePDFClient(data) {
         }
 
         contentHtml = `
-            <div style="position: relative; margin-bottom: 10mm; height: 25mm; border-bottom: 2px solid #000;">
-                <div style="position: absolute; top: -10mm; right: 0; font-size: 10pt;">発行日：${today}</div>
-                <h1 style="text-align: center; font-size: 22pt; font-weight: bold; letter-spacing: 5px; margin-top: 5mm;">${isExam ? '期末試験結果通知' : '成績通知表'}</h1>
+            <div style="position: relative; margin-bottom: 8mm; height: 22mm; border-bottom: 2px solid #000;">
+                <div style="position: absolute; top: 0; right: 0; font-size: 10pt;">発行日：${today}</div>
+                <h1 style="text-align: center; font-size: 22pt; font-weight: bold; letter-spacing: 5px; margin-top: 2mm;">${isExam ? '期末試験結果通知' : '成績通知表'}</h1>
             </div>
 
             <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 8mm;">
@@ -455,8 +455,8 @@ export async function generateGradePDFClient(data) {
                     <div style="font-size: 20pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 11pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                 </div>
                 <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; display: flex; flex-direction: column; background: #fff;">
-                    <div style="font-size: 11pt; border-bottom: 1px solid #000; padding: 2mm 0; background: #fcfcfc;">${isExam ? '総合判定' : '総合評定'}</div>
-                    <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 28pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                    <div style="font-size: 11pt; padding: 2mm 0; background: #fcfcfc;">${isExam ? '総合判定' : '総合評定'}</div>
+                    <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 28pt; font-weight: bold; line-height: 1; padding-bottom: 2mm;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                 </div>
             </div>
             <div style="margin-top: 20mm; text-align: right;">
