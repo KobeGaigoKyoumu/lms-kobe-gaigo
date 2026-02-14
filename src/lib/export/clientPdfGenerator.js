@@ -12,10 +12,11 @@ export async function generateAttendancePDFClient(data) {
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '210mm';
-    container.style.padding = '15mm 20mm';
+    container.style.padding = '8mm 15mm';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = '"Noto Sans JP", sans-serif';
     container.style.color = '#333';
+    container.style.boxSizing = 'border-box';
 
     // Data preparation
     const monthlyData = [...(history.monthlyData || [])];
@@ -127,7 +128,13 @@ export async function generateAttendancePDFClient(data) {
     try {
         const html2canvas = (await import('html2canvas')).default;
         const jsPDF = (await import('jspdf')).default;
-        const canvas = await html2canvas(container, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1000
+        });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -504,12 +511,13 @@ export async function generateCertificatePDFClient(data, issueDate) {
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '210mm';
-    container.style.padding = '18mm 20mm 18mm 20mm';
+    container.style.padding = '10mm 20mm';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = '"Noto Serif JP", "Yu Mincho", serif';
     container.style.fontSize = '10pt';
     container.style.lineHeight = '1.3';
     container.style.color = '#000';
+    container.style.boxSizing = 'border-box';
 
     const grades = data.grades || {};
     const subjects = ['文字語彙', '文法', '読解', '聴解', '作文', '会話', '総合'];
@@ -602,7 +610,13 @@ export async function generateCertificatePDFClient(data, issueDate) {
     try {
         const html2canvas = (await import('html2canvas')).default;
         const jsPDF = (await import('jspdf')).default;
-        const canvas = await html2canvas(container, { scale: 2.5, useCORS: true });
+        const canvas = await html2canvas(container, {
+            scale: 2.5,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1000
+        });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
