@@ -24,16 +24,27 @@ export default function MobileMenu({ role, user }) {
 
     const statuses = role === 'student' ? contextStatuses : localStatuses
 
+    const lastFetchRef = React.useRef(0)
+    const TTL = 60000
+    const THROTTLE = 10000
+
     React.useEffect(() => {
         if (role === 'student') return
 
-        const fetchStatuses = async () => {
+        const fetchStatuses = async (type = 'regular') => {
+            const now = Date.now()
+            const timeSinceLast = now - lastFetchRef.current
+
+            if (type === 'regular' && timeSinceLast < TTL) return
+            if (type === 'realtime' && timeSinceLast < THROTTLE) return
+
             try {
                 let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
                 if (!CLOUDFLARE_WORKER_URL) {
                     const { getAppNewStatus } = require('@/app/actions/statusActions')
                     const data = await getAppNewStatus()
                     setLocalStatuses(data)
+                    lastFetchRef.current = now
                     return
                 }
 
@@ -53,6 +64,7 @@ export default function MobileMenu({ role, user }) {
                 if (res.ok) {
                     const data = await res.json()
                     setLocalStatuses(data)
+                    lastFetchRef.current = now
                 }
             } catch (e) {
                 console.error('Mobile menu status fetch error:', e)
@@ -62,7 +74,7 @@ export default function MobileMenu({ role, user }) {
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                fetchStatuses()
+                fetchStatuses('regular')
             }
         }
         document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -70,7 +82,7 @@ export default function MobileMenu({ role, user }) {
         let channel
         channel = supabase
             .channel('mobile-unread')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => fetchStatuses('realtime'))
             .subscribe()
 
         return () => {

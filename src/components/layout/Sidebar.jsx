@@ -28,16 +28,29 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
     const menuItems = getMenuItems(userRole)
 
+    const lastFetchRef = useRef(0)
+    const TTL = 60000 // 60s for visibility/manual
+    const THROTTLE = 10000 // 10s for real-time
+
     useEffect(() => {
         if (userRole === 'student') return // Handled by Context
 
-        const fetchStatuses = async () => {
+        const fetchStatuses = async (type = 'regular') => {
+            const now = Date.now()
+            const timeSinceLast = now - lastFetchRef.current
+
+            // Visibility/Manual trigger: 60s guard
+            if (type === 'regular' && timeSinceLast < TTL) return
+            // Real-time trigger: 10s throttle
+            if (type === 'realtime' && timeSinceLast < THROTTLE) return
+
             try {
                 let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
                 if (!CLOUDFLARE_WORKER_URL) {
                     const { getAppNewStatus } = require('@/app/actions/statusActions')
                     const data = await getAppNewStatus()
                     setLocalStatuses(data)
+                    lastFetchRef.current = now
                     return
                 }
 
@@ -57,6 +70,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
                 if (res.ok) {
                     const data = await res.json()
                     setLocalStatuses(data)
+                    lastFetchRef.current = now
                 }
             } catch (e) {
                 console.error('Admin status fetch error:', e)
@@ -66,7 +80,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                fetchStatuses()
+                fetchStatuses('regular')
             }
         }
         document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -74,7 +88,7 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
         let channel
         channel = supabase
             .channel('unread-counts')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => fetchStatuses('realtime'))
             .subscribe()
 
         return () => {

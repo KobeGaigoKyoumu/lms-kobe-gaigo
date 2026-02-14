@@ -18,13 +18,27 @@ export function StudentStatusProvider({ children, role, user }) {
     })
     const supabase = createClient()
 
-    const fetchStatuses = async () => {
+    const lastFetchRef = React.useRef(0)
+    const CACHE_KEY = 'lms_student_status_cache'
+    const TTL = 60000 // 60 seconds
+    const THROTTLE = 10000 // 10 seconds for real-time
+
+    const fetchStatuses = async (type = 'regular') => {
+        const now = Date.now()
+        const timeSinceLast = now - lastFetchRef.current
+
+        // Fetch Guard
+        if (type === 'regular' && timeSinceLast < TTL) return
+        if (type === 'realtime' && timeSinceLast < THROTTLE) return
+
         try {
             let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
             if (!CLOUDFLARE_WORKER_URL) {
                 const { getAppNewStatus } = await import('@/app/actions/statusActions')
                 const data = await getAppNewStatus()
                 setStatuses(data)
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+                lastFetchRef.current = now
                 return
             }
 
@@ -47,10 +61,28 @@ export function StudentStatusProvider({ children, role, user }) {
             if (!res.ok) throw new Error('Status fetch failed')
             const data = await res.json()
             setStatuses(data)
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+            lastFetchRef.current = now
         } catch (error) {
             console.error('Failed to fetch status:', error)
         }
     }
+
+    // Hydrate from cache on mount
+    useEffect(() => {
+        const cached = sessionStorage.getItem(CACHE_KEY)
+        if (cached) {
+            try {
+                const { data, ts } = JSON.parse(cached)
+                if (Date.now() - ts < TTL * 5) { // Allow older cache for immediate display (5 mins)
+                    setStatuses(data)
+                    lastFetchRef.current = ts
+                }
+            } catch (e) {
+                console.error('Cache hydration error:', e)
+            }
+        }
+    }, [])
 
     useEffect(() => {
         if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
@@ -60,12 +92,12 @@ export function StudentStatusProvider({ children, role, user }) {
 
     useEffect(() => {
         // Initial fetch
-        fetchStatuses()
+        fetchStatuses('regular')
 
-        // Re-fetch on visibility change
+        // Re-fetch on visibility change (Guarded by TTL)
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                fetchStatuses()
+                fetchStatuses('regular')
             }
         }
         document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -79,7 +111,7 @@ export function StudentStatusProvider({ children, role, user }) {
         if (role !== 'student') {
             channel = supabase
                 .channel('status-updates')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchStatuses)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => fetchStatuses('realtime'))
                 .subscribe()
         }
 
