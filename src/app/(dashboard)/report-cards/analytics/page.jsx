@@ -493,7 +493,28 @@ export default function AnalyticsPage() {
 
     const fetchGrades = async () => {
         try {
-            // Use Cached Server Action
+            // Priority 1: Fetch from Cloudflare Snapshot (Instant)
+            const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+            if (workerUrl) {
+                let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
+                const cfRes = await fetch(`${targetUrl}?action=get-analytics&type=grades`);
+                if (cfRes.ok) {
+                    const cfData = await cfRes.json();
+                    if (cfData && cfData.data) {
+                        setGrades(cfData.data);
+                        // Process lists
+                        const uniqueTerms = [...new Set(cfData.data.map(item => item.year_term))].sort().reverse();
+                        const uniqueClasses = [...new Set(cfData.data.map(item => item.class_name))].sort();
+                        setTerms(uniqueTerms);
+                        setClasses(uniqueClasses);
+                        if (uniqueTerms.length > 0) setSelectedTerm(uniqueTerms[0]);
+                        setLoadingGrades(false);
+                        return; // Done
+                    }
+                }
+            }
+
+            // Priority 2: Fallback to Server Action
             const result = await fetchGradeAnalytics()
 
             if (result.error) throw new Error(result.error)
@@ -517,7 +538,25 @@ export default function AnalyticsPage() {
 
     const fetchJlptData = async () => {
         try {
-            // Use Server Action for reliable data fetching
+            // Priority 1: Fetch from Cloudflare Snapshot (Instant)
+            const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+            if (workerUrl) {
+                let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
+                const cfRes = await fetch(`${targetUrl}?action=get-analytics&type=jlpt`);
+                if (cfRes.ok) {
+                    const cfData = await cfRes.json();
+                    if (cfData && !cfData.error) {
+                        if (cfData.debug) setDebugInfo(cfData.debug);
+                        if (cfData.stats) setJlptData(cfData.stats);
+                        if (cfData.enhanced) setEnhancedJlptStats(cfData.enhanced);
+                        if (cfData.sectionScores) setSectionScoreStats(cfData.sectionScores);
+                        setLoadingJlpt(false);
+                        return;
+                    }
+                }
+            }
+
+            // Priority 2: Fallback to Server Action
             const result = await fetchJlptAnalyticsData()
 
             if (result.error) {

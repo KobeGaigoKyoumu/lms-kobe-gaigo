@@ -55,6 +55,16 @@ export async function fetchGradeAnalytics() {
         return { error: 'Unauthorized' }
     }
 
-    // 2. Return Cached Data
-    return await getCachedGradeAnalytics()
+    const data = await getCachedGradeAnalytics()
+
+    if (data && !data.error) {
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            await pushCloudflareSnapshot('grades', data);
+        } catch (e) {
+            console.error('Proactive grades snapshot push failed:', e);
+        }
+    }
+
+    return data
 }

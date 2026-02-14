@@ -14,27 +14,47 @@ export default async function StudentAttendancePage() {
 
     const { studentId } = session
 
-    // 2. Create Admin Client (Service Role) to bypass RLS for reading attendance
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    // 2. Try Cloudflare Worker for faster loading and Vercel offloading
+    let records = [];
+    let fetchError = null;
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('Missing Supabase Service Key')
-        return <div className={styles.page}><p className={styles.empty}>システムエラー: 設定を確認してください。</p></div>
+    try {
+        const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+        if (workerUrl) {
+            let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
+            const res = await fetch(`${targetUrl}?action=get-attendance&studentId=${studentId}`, {
+                next: { revalidate: 300 } // Cache in Vercel for 5min too
+            });
+            if (res.ok) {
+                records = await res.json();
+            } else {
+                throw new Error('Worker fetch failed');
+            }
+        } else {
+            throw new Error('Worker URL not set');
+        }
+    } catch (e) {
+        console.log('Worker attendance fetch fallback to direct DB:', e.message);
+        // 3. Fallback to Direct Supabase (Admin Client)
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!supabaseUrl || !supabaseServiceKey) {
+            return <div className={styles.page}><p className={styles.empty}>システムエラー</p></div>
+        }
+        const supabase = createClient(supabaseUrl, supabaseServiceKey)
+        const { data, error } = await supabase
+            .from('attendance_records')
+            .select('year, month, is_cumulative, attendance_rate, attendance_days, absence_days, late_slots')
+            .eq('student_id', studentId)
+            .order('year', { ascending: false })
+            .order('month', { ascending: false })
+
+        if (error) fetchError = error;
+        else records = data;
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // 3. Fetch Attendance Records
-    const { data: records, error } = await supabase
-        .from('attendance_records')
-        .select('year, month, is_cumulative, attendance_rate, attendance_days, absence_days, late_slots')
-        .eq('student_id', studentId)
-        .order('year', { ascending: false })
-        .order('month', { ascending: false })
-
-    if (error) {
-        console.error('Fetch attendance error:', error)
+    if (fetchError) {
+        console.error('Fetch attendance error:', fetchError)
         return <div className={styles.page}><p className={styles.empty}>データの取得に失敗しました。</p></div>
     }
 
