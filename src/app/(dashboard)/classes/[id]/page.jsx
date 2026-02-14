@@ -139,7 +139,7 @@ export default async function ClassDetailPage({ params }) {
                                 {classData.teacher?.avatar_url ? (
                                     <img src={classData.teacher.avatar_url} alt="" />
                                 ) : (
-                                    classData.teacher?.full_name?.[0] || '?'
+                                    (classData.homeroom_teacher_name?.[0] || classData.teacher?.full_name?.[0]) || '?'
                                 )}
                             </div>
                             <div>

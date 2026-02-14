@@ -65,7 +65,7 @@ export default async function ClassesPage() {
                         {cls.teacher?.avatar_url ? (
                             <img src={cls.teacher.avatar_url} alt="" />
                         ) : (
-                            cls.teacher?.full_name?.[0] || '?'
+                            (cls.homeroom_teacher_name?.[0] || cls.teacher?.full_name?.[0]) || '?'
                         )}
                     </div>
                     <span>{cls.homeroom_teacher_name || cls.teacher?.full_name || '担任未設定'}</span>

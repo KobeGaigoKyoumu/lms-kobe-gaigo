@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
+import { revalidateTag } from 'next/cache'
 import Link from 'next/link'
 import styles from '../../new/page.module.css'
 
