@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 
 
 
+export const runtime = 'edge'
+
 export default async function LoginPage({ searchParams }) {
     const params = await searchParams
     const nextPath = params?.next || '/student/dashboard'

@@ -372,41 +372,9 @@ export async function gradeSubmission(submissionId, score, feedback) {
     return { success: true }
 }
 
-// Upload file securely (for students)
-import { uploadFileToDrive } from '@/lib/googleDrive'
 
 export async function uploadSubmissionFile(formData) {
-    const session = await getStudentSession()
-    if (!session) return { error: 'Unauthorized' }
-
-    const file = formData.get('file')
-    const assignmentId = formData.get('assignmentId')
-
-    if (!file || !assignmentId) {
-        return { error: 'ファイルまたは課題IDが無効です' }
-    }
-
-    try {
-        const arrayBuffer = await file.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-
-        // Upload to Google Drive
-        const uploadedFile = await uploadFileToDrive(
-            buffer,
-            file.name,
-            file.type
-        )
-
-        return {
-            success: true,
-            url: uploadedFile.url,
-            name: uploadedFile.name,
-            driveId: uploadedFile.id // 将来的な削除用
-        }
-    } catch (err) {
-        console.error('Google Drive upload error:', err)
-        return { error: 'アップロードに失敗しました (Google Drive)' }
-    }
+    return { error: 'アップロード機能は現在停止されています。' }
 }
 
 
