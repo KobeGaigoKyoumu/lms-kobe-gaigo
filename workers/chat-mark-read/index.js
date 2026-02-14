@@ -135,7 +135,7 @@ export default {
                     return new Response(JSON.stringify({ success: res.ok }), { headers: corsHeaders });
                 }
 
-                // 2. Update Snapshot (New - Secure)
+                // 2. Update Snapshot (Existing)
                 if (action === 'update-snapshot') {
                     const authHeader = request.headers.get('Authorization');
                     if (authHeader !== `Bearer ${apiSecret}`) {
@@ -148,6 +148,58 @@ export default {
                     }
                     await env.LMS_KV.put(`analytics_${type}`, JSON.stringify(data));
                     return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
+                }
+
+                // 3. Telegram Webhook (New - Migrated from Vercel)
+                if (body.message && body.message.text) {
+                    const chatId = body.message.chat.id;
+                    const text = body.message.text;
+                    const botToken = env.TELEGRAM_BOT_TOKEN;
+
+                    const sendMsg = async (t) => {
+                        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: chatId, text: t, parse_mode: 'Markdown' })
+                        });
+                    };
+
+                    if (text.startsWith('/start')) {
+                        const studentId = text.split(' ')[1];
+                        if (studentId) {
+                            const sRes = await fetch(`${supabaseUrl}/rest/v1/students?student_id_text=eq.${studentId}&select=full_name`, {
+                                headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                            });
+                            const student = (await sRes.json())[0];
+                            if (student) {
+                                await fetch(`${supabaseUrl}/rest/v1/students?student_id_text=eq.${studentId}`, {
+                                    method: 'PATCH',
+                                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ telegram_chat_id: String(chatId) })
+                                });
+                                await sendMsg(`こんにちは、${student.full_name}さん！\nLMSとの連携が完了しました。✅`);
+                            } else {
+                                await sendMsg(`学生ID "${studentId}" が見つかりませんでした。`);
+                            }
+                        } else {
+                            await sendMsg(`こんにちは！LMSと連携するにはマイページからアクセスしてください。`);
+                        }
+                    } else if (text === '/grades') {
+                        await sendMsg(`📊 成績はこちら：\nhttps://lms-kobe-gaigo.vercel.app/student/grades`);
+                    } else if (text === '/attendance') {
+                        await sendMsg(`📅 出席状況はこちら：\nhttps://lms-kobe-gaigo.vercel.app/student/attendance`);
+                    } else if (text === '/unlink') {
+                        await fetch(`${supabaseUrl}/rest/v1/students?telegram_chat_id=eq.${chatId}`, {
+                            method: 'PATCH',
+                            headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ telegram_chat_id: null })
+                        });
+                        await sendMsg(`✅ 連携を解除しました。`);
+                    } else if (text === '/help') {
+                        await sendMsg(`🤖 **コマンド一覧**\n/grades - 成績\n/attendance - 出席率\n/unlink - 連携解除`);
+                    }
+
+                    return new Response("OK", { status: 200, headers: corsHeaders });
                 }
             }
 

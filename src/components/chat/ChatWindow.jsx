@@ -331,7 +331,7 @@ export default function ChatWindow({
                         await fetch(CLOUDFLARE_WORKER_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ studentId: resolvedStudentId, senderType: currentUserRole })
+                            body: JSON.stringify({ action: 'mark-read', studentId: resolvedStudentId, senderType: currentUserRole })
                         })
                     } else {
                         await fetch('/api/chat/mark-read', {

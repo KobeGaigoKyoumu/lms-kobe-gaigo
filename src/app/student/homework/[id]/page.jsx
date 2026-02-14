@@ -1,5 +1,5 @@
 import { getAssignmentDetails } from '@/app/actions/homework'
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 import SubmissionForm from '@/components/Homework/SubmissionForm'
 import { notFound } from 'next/navigation'
 import { Calendar, ChevronLeft } from 'lucide-react'

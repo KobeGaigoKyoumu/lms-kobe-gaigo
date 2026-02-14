@@ -1,5 +1,5 @@
 import { getStudentAssignments } from '@/app/actions/homework'
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 import HomeworkListClient from './HomeworkListClient'
 import styles from './page.module.css'
 

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import styles from './page.module.css'
 import AnnouncementCard from './AnnouncementCard'

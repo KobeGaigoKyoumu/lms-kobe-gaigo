@@ -1,5 +1,4 @@
 import { getAssignmentSubmissions } from '@/app/actions/homework'
-export const runtime = 'edge'
 import AssignmentGradingView from '@/components/Homework/GradingView'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'

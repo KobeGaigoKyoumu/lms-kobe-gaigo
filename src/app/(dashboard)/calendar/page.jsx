@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import CalendarView from './CalendarView'
 
-export const runtime = 'edge'
-
+export const dynamic = 'force-dynamic'
 export default async function CalendarPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

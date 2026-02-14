@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 
 
 
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 export default async function LoginPage({ searchParams }) {
     const params = await searchParams

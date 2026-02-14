@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import styles from './page.module.css'
