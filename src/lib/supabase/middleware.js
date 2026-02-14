@@ -41,18 +41,33 @@ export async function updateSession(request) {
             }
         )
 
-        // Protected paths
-        const publicPaths = ['/login', '/auth/callback', '/_next', '/favicon.ico']
-        const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
-        const isStudentPath = request.nextUrl.pathname.startsWith('/student')
-        const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
-        const isChatApi = request.nextUrl.pathname.startsWith('/api/chat')
+        // Expanded public paths to include common static files and PWA assets
+        const publicPaths = [
+            '/login',
+            '/auth/callback',
+            '/_next',
+            '/favicon.ico',
+            '/manifest.json',
+            '/sw.js',
+            '/icon-',
+            '/sitemap.xml',
+            '/robots.txt',
+            '/assets/'
+        ]
+
+        const pathname = request.nextUrl.pathname
+        const isPublicPath = publicPaths.some(path => pathname.startsWith(path)) ||
+            pathname.match(/\.(png|jpg|jpeg|gif|webp|svg|ico|css|js|json|xml|txt)$/)
+
+        const isWebhook = pathname.startsWith('/api/webhooks')
+        const isChatApi = pathname.startsWith('/api/chat')
+        const isStudentPath = pathname.startsWith('/student')
 
         // Verify Supabase session (Admin/Teacher)
-        // Only fetch user if it's NOT a public path, or if we need to check permissions
         let user = null
 
-        // Skip auth check for completely public assets/paths to save CPU
+        // CRITICAL: Only call getUser() if it's NOT a public path, NOT a webhook, AND NOT an internal API
+        // This is the most expensive part of the middleware in terms of CPU usage.
         if (!isPublicPath && !isWebhook && !isChatApi) {
             const { data: { user: authUser } } = await supabase.auth.getUser()
             user = authUser
