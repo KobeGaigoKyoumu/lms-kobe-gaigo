@@ -209,8 +209,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
 
 // --- Teacher Actions ---
 
-// Create a new assignment
-import { revalidateTag } from 'next/cache'
+
 
 export async function createAssignment(formData) {
     const supabase = await createClient()
@@ -410,9 +409,7 @@ export async function uploadSubmissionFile(formData) {
     }
 }
 
-// --- Stats Helpers ---
 
-import { unstable_cache } from 'next/cache'
 
 // Get submission stats for all students (Admin use)
 export const getAllStudentSubmissionStats = unstable_cache(

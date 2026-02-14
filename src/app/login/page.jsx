@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import LoginForm from './LoginForm'
 import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'edge'
+
 
 export default async function LoginPage({ searchParams }) {
     const params = await searchParams
