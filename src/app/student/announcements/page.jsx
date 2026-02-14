@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
-
-export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export default async function StudentAnnouncementsPage() {
     const supabase = await createClient()
@@ -23,7 +22,7 @@ export default async function StudentAnnouncementsPage() {
     let query = supabase
         .from('announcements')
         .select(`
-            *,
+            id, title, content, is_pinned, created_at, author_id, course_id, file_urls,
             author:profiles!author_id (
                 id,
                 full_name,

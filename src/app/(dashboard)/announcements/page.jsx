@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+export const runtime = 'edge'
 import Link from 'next/link'
 import styles from './page.module.css'
 import AnnouncementCard from './AnnouncementCard'
@@ -20,7 +21,7 @@ export default async function AnnouncementsPage() {
     const { data: announcements, error } = await supabase
         .from('announcements')
         .select(`
-      *,
+      id, title, content, is_pinned, created_at, author_id, course_id, file_urls,
       author:profiles!author_id (
         id,
         full_name,
