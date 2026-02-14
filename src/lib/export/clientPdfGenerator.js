@@ -199,12 +199,12 @@ export async function generateGradePDFClient(data) {
                 </tr>
             </table>
 
-            <div style="display: flex; gap: 5mm; margin-bottom: 10mm; justify-content: center;">
-                <div style="border: 1px solid #000; padding: 4mm; text-align: center; width: 45%;">
+            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 38mm; background-color: #fcfcfc;">
+                <div style="text-align: center; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; border: 1px solid #000; background-color: #fff;">
                     <div style="font-size: 11pt; color: #666; margin-bottom: 2mm;">総合得点</div>
                     <div style="font-size: 24pt; font-weight: bold;">${totalScore} <span style="font-size: 12pt; font-weight: normal;">/ 180</span></div>
                 </div>
-                <div style="border: 2px solid ${resultColor}; padding: 4mm; text-align: center; width: 45%; background-color: ${result === '合格' ? '#f0fdf4' : '#fef2f2'};">
+                <div style="text-align: center; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; border: 2px solid ${resultColor}; background-color: ${result === '合格' ? '#f0fdf4' : '#fef2f2'};">
                     <div style="font-size: 11pt; color: #666; margin-bottom: 2mm;">判定</div>
                     <div style="font-size: 24pt; font-weight: bold; color: ${resultColor};">${result}</div>
                 </div>
@@ -320,14 +320,14 @@ export async function generateGradePDFClient(data) {
                 </tbody>
             </table>
 
-            <div style="border: 1px solid #000; padding: 8mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 35mm;">
-                <div style="text-align: center;">
+            <div style="border: 1px solid #000; padding: 6mm 4mm; display: flex; justify-content: space-around; align-items: center; margin-top: 5mm; height: 38mm; background-color: #fcfcfc;">
+                <div style="text-align: center; width: 45%; height: 28mm; border: 1px solid #ccc; background: #fff; display: flex; flex-direction: column; justify-content: center;">
                     <div style="font-size: 11pt; margin-bottom: 2mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
                     <div style="font-size: 18pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 10pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                 </div>
-                <div style="text-align: center; border: 2px solid #000; padding: 2mm 15px; width: 40mm; height: 26mm; display: flex; flex-direction: column; justify-content: center; background: #fff;">
+                <div style="text-align: center; border: 2px solid #000; width: 45%; height: 28mm; display: flex; flex-direction: column; justify-content: center; background: #fff;">
                     <div style="font-size: 11pt; margin-bottom: 1mm;">${isExam ? '総合判定' : '総合評定'}</div>
-                    <div style="font-size: 26pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                    <div style="font-size: 28pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                 </div>
             </div>
             <div style="margin-top: 20mm; text-align: right;">
