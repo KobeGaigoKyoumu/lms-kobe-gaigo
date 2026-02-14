@@ -88,6 +88,7 @@ export default async function EditClassPage({ params }) {
             return
         }
 
+        revalidateTag('classes')
         redirect('/classes')
     }
 
