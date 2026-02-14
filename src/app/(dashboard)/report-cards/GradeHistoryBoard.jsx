@@ -309,6 +309,23 @@ export default function GradeHistoryBoard() {
 
         setLoading(true)
         try {
+            // Priority 0: Cloudflare Snapshot (Instant Term Switching)
+            const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+            if (workerUrl) {
+                let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
+                const safeTermKey = term.replace(/[^a-z0-9]/gi, '_');
+                const cfRes = await fetch(`${targetUrl}?action=get-analytics&type=grades_term_${safeTermKey}`);
+                if (cfRes.ok) {
+                    const cfData = await cfRes.json();
+                    if (cfData && Array.isArray(cfData)) {
+                        setRecords(cfData);
+                        setLoading(false);
+                        return; // Win
+                    }
+                }
+            }
+
+            // Priority 1: Vercel Server Action
             const data = await fetchTermGradeRecords(term)
             setRecords(data || [])
 

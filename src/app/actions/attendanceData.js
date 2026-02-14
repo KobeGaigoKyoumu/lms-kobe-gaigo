@@ -124,7 +124,7 @@ export const getSchoolAttendanceStats = unstable_cache(
             return a.grade - b.grade
         })
 
-        return {
+        const result = {
             totalStudents: students.length,
             averageRate: avgRate,
             minRate: sortedRates[0],
@@ -134,6 +134,17 @@ export const getSchoolAttendanceStats = unstable_cache(
             month,
             isCumulative
         }
+
+        // Push to Cloudflare for instant Admin Dashboard loading
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            const type = `attendance_school_${year}_${month}_${isCumulative}`;
+            await pushCloudflareSnapshot(type, result);
+        } catch (e) {
+            console.error('Proactive attendance school snapshot failed:', e);
+        }
+
+        return result;
     },
     ['attendance-school-stats-v1'],
     { revalidate: 86400, tags: ['attendance-stats'] }
@@ -190,7 +201,18 @@ export const getClassAttendanceStats = unstable_cache(
             averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
         })).sort((a, b) => (a.classCode || '').localeCompare(b.classCode || '', undefined, { numeric: true }))
 
-        return { classes, year, month, isCumulative }
+        const result = { classes, year, month, isCumulative }
+
+        // Push to Cloudflare for instant Admin Dashboard loading
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            const type = `attendance_class_${year}_${month}_${isCumulative}`;
+            await pushCloudflareSnapshot(type, result);
+        } catch (e) {
+            console.error('Proactive attendance class snapshot failed:', e);
+        }
+
+        return result;
     },
     ['attendance-class-stats-v1'],
     { revalidate: 86400, tags: ['attendance-stats'] }

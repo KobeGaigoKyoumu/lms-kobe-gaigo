@@ -42,9 +42,28 @@ export const fetchGradeFilters = unstable_cache(
 )
 
 // 2. Fetch Records for a Term - Cached 1h
-export const fetchTermGradeRecords = unstable_cache(
+export const fetchTermGradeRecords = async (term) => {
+    if (!term) return []
+
+    const data = await getCachedTermRecords(term);
+
+    // Push to Cloudflare for instant term switching
+    if (data && data.length > 0) {
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            // Using a simple alphanumeric key for term
+            const safeTermKey = term.replace(/[^a-z0-9]/gi, '_');
+            await pushCloudflareSnapshot(`grades_term_${safeTermKey}`, data);
+        } catch (e) {
+            console.error('Proactive term grades snapshot failed:', e);
+        }
+    }
+
+    return data;
+}
+
+const getCachedTermRecords = unstable_cache(
     async (term) => {
-        if (!term) return []
         const supabase = getSupabaseAdmin()
 
         const { data, error } = await supabase
@@ -77,7 +96,7 @@ export const fetchTermGradeRecords = unstable_cache(
     // BUT to be safe and explicit, usually people don't put args in the static key array unless it's a closure. 
     // Here we pass 'term' to the cached function. Next.js handles the arg hashing.
     { revalidate: 3600, tags: ['grade-records'] }
-)
+);
 
 // 3. Save Records (Bulk) - Invalidate Cache
 export async function saveGradeRecords(records, yearTerm) {

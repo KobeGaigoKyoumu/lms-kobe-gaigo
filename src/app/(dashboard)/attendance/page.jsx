@@ -125,7 +125,26 @@ export default function AttendancePage() {
         setError(null)
 
         try {
-            // Check cache
+            // Priority 0: Cloudflare Snapshots (Instant)
+            const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+            if (workerUrl && (activeTab === 'school' || activeTab === 'class')) {
+                let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
+                const snapshotType = activeTab === 'school'
+                    ? `attendance_school_${selectedYear}_${selectedMonth}_${isCumulative}`
+                    : `attendance_class_${selectedYear}_${selectedMonth}_${isCumulative}`;
+
+                const res = await fetch(`${targetUrl}?action=get-analytics&type=${snapshotType}`);
+                if (res.ok) {
+                    const cfData = await res.json();
+                    if (cfData) {
+                        applyDataToState(cfData);
+                        setLoading(false);
+                        return; // Instant Win
+                    }
+                }
+            }
+
+            // Priority 1: Check Local State Cache
             const cacheKey = `${selectedYear}-${selectedMonth}-${isCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}`
             if (dataCache.current[cacheKey]) {
                 applyDataToState(dataCache.current[cacheKey])
@@ -133,8 +152,8 @@ export default function AttendancePage() {
                 return
             }
 
+            // Priority 2: Vercel Server Actions (The "Heavy" Backup)
             let result = {}
-
             if (activeTab === 'school') {
                 result = await getSchoolAttendanceStats(selectedYear, selectedMonth, isCumulative)
             } else if (activeTab === 'class') {
