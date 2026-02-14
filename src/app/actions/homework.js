@@ -1,15 +1,15 @@
 'use server'
 
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { getStudentSession } from './studentAuth'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    const { createClient } = require('@supabase/supabase-js')
-    return createClient(supabaseUrl, supabaseServiceKey)
+    return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
 // Cache classes list for 1 hour

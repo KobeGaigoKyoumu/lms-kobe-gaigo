@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
 import styles from './page.module.css'
 
+export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export default async function StudentDashboard() {
