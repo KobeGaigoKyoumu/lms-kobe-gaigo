@@ -372,9 +372,55 @@ export async function gradeSubmission(submissionId, score, feedback) {
     return { success: true }
 }
 
+// Helper for admin client (Service Role) - defined at top of file
+// const createAdminClient = () => { ... }
 
 export async function uploadSubmissionFile(formData) {
-    return { error: 'アップロード機能は現在停止されています。' }
+    const session = await getStudentSession()
+    if (!session) return { error: 'Unauthorized' }
+
+    const file = formData.get('file')
+    const assignmentId = formData.get('assignmentId')
+
+    if (!file) {
+        return { error: 'ファイルが見つかりません' }
+    }
+
+    try {
+        const adminSupabase = createAdminClient()
+        const fileExt = file.name.split('.').pop()
+        const fileName = `submissions/${assignmentId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const bucketName = 'chat-attachments' // Using existing bucket
+
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
+        const { data, error } = await adminSupabase
+            .storage
+            .from(bucketName)
+            .upload(fileName, buffer, {
+                contentType: file.type,
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (error) throw error
+
+        const { data: { publicUrl } } = adminSupabase
+            .storage
+            .from(bucketName)
+            .getPublicUrl(fileName)
+
+        return {
+            success: true,
+            url: publicUrl,
+            name: file.name,
+            path: fileName
+        }
+    } catch (err) {
+        console.error('Supabase Submission Upload Error:', err)
+        return { error: `アップロードに失敗しました: ${err.message}` }
+    }
 }
 
 
