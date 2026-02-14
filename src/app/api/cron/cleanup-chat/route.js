@@ -17,71 +17,79 @@ export async function GET(request) {
     try {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const results = { chat: 0, homework: 0 };
 
-        // 1. Find old attachments
-        // We look for messages with attachments created more than 7 days ago
+        // 1. Cleanup Chat Attachments
         const { data: messages, error: fetchError } = await adminSupabase
             .from('messages')
             .select('id, attachment_url, attachment_name')
             .neq('attachment_url', null)
             .lt('created_at', oneWeekAgo.toISOString())
-            .limit(100); // Process in batches to avoid timeouts
+            .limit(100);
 
         if (fetchError) throw fetchError;
 
-        if (!messages || messages.length === 0) {
-            return NextResponse.json({ message: 'No files to clean', deletedCount: 0 });
-        }
-
-        const updates = [];
-        const filesToDelete = [];
-
-        for (const msg of messages) {
-            if (!msg.attachment_url) continue;
-
-            // Extract filename from URL
-            // URL format: .../storage/v1/object/public/chat-attachments/filename.jpg
-            const urlParts = msg.attachment_url.split('/');
-            const fileName = urlParts[urlParts.length - 1];
-
-            if (fileName) {
-                filesToDelete.push(fileName);
-                updates.push(msg.id);
+        if (messages && messages.length > 0) {
+            const filesToDelete = [];
+            const updates = [];
+            for (const msg of messages) {
+                const urlParts = msg.attachment_url.split('/');
+                const fileName = urlParts[urlParts.length - 1];
+                if (fileName) {
+                    filesToDelete.push(fileName);
+                    updates.push(msg.id);
+                }
             }
-        }
 
-        // 2. Delete from Storage
-        if (filesToDelete.length > 0) {
-            const { error: deleteError } = await adminSupabase
-                .storage
-                .from('chat-attachments')
-                .remove(filesToDelete);
-
-            if (deleteError) {
-                console.error('Storage Delete Error:', deleteError);
-                // We continue to update the DB records even if storage delete "fails" (e.g. file already gone)
-                // to prevent loop
-            }
-        }
-
-        // 3. Update Database records
-        if (updates.length > 0) {
-            const { error: updateError } = await adminSupabase
-                .from('messages')
-                .update({
+            if (filesToDelete.length > 0) {
+                await adminSupabase.storage.from('chat-attachments').remove(filesToDelete);
+                await adminSupabase.from('messages').update({
                     attachment_url: null,
-                    attachment_name: `(期限切れ) ${messages.find(m => m.id === updates[0])?.attachment_name || ''}`,
+                    attachment_name: `(期限切れ) ${messages[0]?.attachment_name || ''}`,
                     attachment_type: null
-                })
-                .in('id', updates);
-
-            if (updateError) throw updateError;
+                }).in('id', updates);
+                results.chat = filesToDelete.length;
+            }
         }
 
-        return NextResponse.json({
-            success: true,
-            deletedCount: filesToDelete.length
-        });
+        // 2. Cleanup Homework Submissions
+        // homework_submissions table has file_urls (jsonb array of {name, url, path})
+        const { data: submissions, error: subError } = await adminSupabase
+            .from('homework_submissions')
+            .select('id, file_urls')
+            .neq('file_urls', null)
+            .lt('submitted_at', oneWeekAgo.toISOString())
+            .limit(100);
+
+        if (subError) throw subError;
+
+        if (submissions && submissions.length > 0) {
+            const filesToDelete = [];
+            const submissionUpdates = [];
+
+            for (const sub of submissions) {
+                if (Array.isArray(sub.file_urls) && sub.file_urls.length > 0) {
+                    sub.file_urls.forEach(file => {
+                        // In new implementation we store 'path'
+                        // In old (Drive), we didn't have path in this format, but those are gone now
+                        if (file.path) filesToDelete.push(file.path);
+                    });
+                    submissionUpdates.push(sub.id);
+                }
+            }
+
+            if (filesToDelete.length > 0) {
+                await adminSupabase.storage.from('chat-attachments').remove(filesToDelete);
+                // Update to clear URLs and mark as expired
+                await adminSupabase.from('homework_submissions').update({
+                    file_urls: null,
+                    comment: `(提出ファイルは1週間の保管期限を過ぎたため削除されました) ${submissions.find(s => s.id === submissionUpdates[0])?.comment || ''}`
+                }).in('id', submissionUpdates);
+                results.homework = filesToDelete.length;
+            }
+        }
+
+        return NextResponse.json({ success: true, results });
 
     } catch (error) {
         console.error('Cleanup Cron Error:', error);
