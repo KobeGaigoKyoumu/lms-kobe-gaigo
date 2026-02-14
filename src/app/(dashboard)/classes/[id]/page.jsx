@@ -143,8 +143,8 @@ export default async function ClassDetailPage({ params }) {
                                 )}
                             </div>
                             <div>
-                                <p className={styles.teacherName}>{classData.teacher?.full_name}</p>
-                                <p className={styles.teacherEmail}>{classData.teacher?.email}</p>
+                                <p className={styles.teacherName}>{classData.homeroom_teacher_name || classData.teacher?.full_name}</p>
+                                {!classData.homeroom_teacher_name && <p className={styles.teacherEmail}>{classData.teacher?.email}</p>}
                             </div>
                         </div>
                     </div>

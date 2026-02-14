@@ -21,6 +21,7 @@ export const getCachedClasses = unstable_cache(
             .from('classes')
             .select(`
                 *,
+                homeroom_teacher_name,
                 teacher:profiles!teacher_id (
                     id,
                     full_name,

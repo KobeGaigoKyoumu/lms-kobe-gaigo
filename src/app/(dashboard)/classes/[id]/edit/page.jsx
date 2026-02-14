@@ -60,6 +60,7 @@ export default async function EditClassPage({ params }) {
                 academic_year: parseInt(formData.get('academic_year')) || new Date().getFullYear(),
                 course_id: formData.get('course_id') || null,
                 teacher_id: formData.get('teacher_id') || null,
+                homeroom_teacher_name: formData.get('homeroom_teacher_name') || null,
                 updated_at: new Date().toISOString()
             })
             .eq('id', id)
@@ -159,12 +160,24 @@ export default async function EditClassPage({ params }) {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label htmlFor="teacher_id">担任教師 *</label>
+                    <label htmlFor="teacher_id">担任教師（システム連携） *</label>
                     <select id="teacher_id" name="teacher_id" required defaultValue={classData.teacher_id}>
                         {teachers?.map(teacher => (
                             <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>
                         ))}
                     </select>
+                    <p className={styles.helpText}>システム内のアカウントと紐付けます。</p>
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label htmlFor="homeroom_teacher_name">担任教師名（自由入力）</label>
+                    <input
+                        type="text"
+                        id="homeroom_teacher_name"
+                        name="homeroom_teacher_name"
+                        defaultValue={classData.homeroom_teacher_name || ''}
+                        placeholder="例: 佐藤 太郎（こちらが入力されている場合は優先表示されます）"
+                    />
                 </div>
 
                 <div className={styles.formActions}>

@@ -68,7 +68,7 @@ export default async function ClassesPage() {
                             cls.teacher?.full_name?.[0] || '?'
                         )}
                     </div>
-                    <span>{cls.teacher?.full_name || '担任未設定'}</span>
+                    <span>{cls.homeroom_teacher_name || cls.teacher?.full_name || '担任未設定'}</span>
                 </div>
                 <span className={styles.memberCount}>
                     {cls.studentCount}名
