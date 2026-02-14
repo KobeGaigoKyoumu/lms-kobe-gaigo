@@ -161,18 +161,20 @@ const getCachedAnalytics = unstable_cache(
     { revalidate: 86400, tags: ['jlpt-analytics'] }
 );
 
-const result = await getCachedAnalytics();
+export async function fetchJlptAnalyticsData() {
+    console.log('Server Action: Fetching JLPT Analytics Data (cached)...');
+    const result = await getCachedAnalytics();
 
-// Proactively push to Cloudflare KV for the frontend to use if not error
-if (result && !result.error) {
-    try {
-        const { pushCloudflareSnapshot } = await import('./cloudflare');
-        // We push the enhanced stats specifically
-        await pushCloudflareSnapshot('jlpt', result);
-    } catch (e) {
-        console.error('Proactive snapshot push failed:', e);
+    // Proactively push to Cloudflare KV for the frontend to use if not error
+    if (result && !result.error) {
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            // We push the enhanced stats specifically
+            await pushCloudflareSnapshot('jlpt', result);
+        } catch (e) {
+            console.error('Proactive snapshot push failed:', e);
+        }
     }
-}
 
-return result;
+    return result;
 }
