@@ -41,7 +41,7 @@ const _getStudentAssignments = unstable_cache(
         // 1. Get assignments for the class
         const { data: assignments, error: assignmentError } = await supabase
             .from('homework_assignments')
-            .select('*')
+            .select('id, title, description, deadline, class_name, created_at')
             .eq('class_name', className)
             .order('deadline', { ascending: true })
             .limit(100)
@@ -96,7 +96,7 @@ const _getCachedAssignment = unstable_cache(
         const supabase = createAdminClient()
         const { data: assignment, error } = await supabase
             .from('homework_assignments')
-            .select('*')
+            .select('id, title, description, deadline, class_name, created_at, teacher_id')
             .eq('id', id)
             .single()
 
@@ -136,7 +136,7 @@ export async function getAssignmentDetails(id) {
     // 2. Get Submission (Uncached - User specific)
     const { data: submission, error: submissionError } = await supabase
         .from('homework_submissions')
-        .select('*')
+        .select('id, assignment_id, student_id_text, status, submitted_at, score, comment, file_urls, feedback, updated_at')
         .eq('assignment_id', id)
         .eq('student_id_text', session.studentId)
         .single()
@@ -314,7 +314,7 @@ export async function getAssignmentSubmissions(assignmentId) {
     // 1. Fetch Assignment
     const { data: assignment, error: assignmentError } = await supabase
         .from('homework_assignments')
-        .select('*')
+        .select('id, title, description, deadline, class_name, created_at')
         .eq('id', assignmentId)
         .single()
 
@@ -327,7 +327,7 @@ export async function getAssignmentSubmissions(assignmentId) {
     const { data: submissions, error: subError } = await supabase
         .from('homework_submissions')
         .select(`
-            *,
+            id, assignment_id, student_id_text, status, submitted_at, score, comment, file_urls, feedback, updated_at,
             student:students (
                 full_name,
                 class_name
