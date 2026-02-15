@@ -23,7 +23,7 @@ export default function GradeHistoryBoard() {
     const [selectedClass, setSelectedClass] = useState('')
 
     // View Mode for History Page (Tabs)
-    const [historyViewMode, setHistoryViewMode] = useState('list') // 'list' | 'details'
+    const [historyViewMode, setHistoryViewMode] = useState(null) // null | 'list' | 'details'
 
     // Sub View Mode for Details (Exam vs Report - passed to detail component)
     const [detailSubMode, setDetailSubMode] = useState('report') // 'exam' | 'report'
@@ -31,9 +31,22 @@ export default function GradeHistoryBoard() {
     // Transition state for switching modes
     const [isPending, startTransition] = useTransition()
 
-    // Selection State
     const [selectedIds, setSelectedIds] = useState([])
     const [generating, setGenerating] = useState(false)
+
+    // Pagination for Details View
+    const ITEMS_PER_PAGE = 20
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
+
+    // Pagination for List View
+    const LIST_ITEMS_PER_PAGE = 50
+    const [listPage, setListPage] = useState(1)
+
+    // Reset pagination when view or filters change
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE)
+        setListPage(1)
+    }, [selectedTerm, selectedClass, historyViewMode])
 
     // Selection Handlers
     const toggleSelect = (id) => {
@@ -766,164 +779,212 @@ export default function GradeHistoryBoard() {
                 ) : (
                     <>
                         {historyViewMode === 'list' ? (
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                                    <tr>
-                                        {/* Checkbox Header */}
-                                        <th style={{ padding: '12px 16px', width: '40px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.length === filteredRecords.length && filteredRecords.length > 0}
-                                                onChange={toggleSelectAll}
-                                            />
-                                        </th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>学籍番号</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>氏名</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>クラス</th>
-                                        {selectedTerm?.startsWith('JLPT') ? (
-                                            <>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>合計点(180)</th>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>合格判定</th>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>期末試験(600)</th>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>期末評価</th>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
-                                                <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
-                                            </>
-                                        )}
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
-                                        <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody style={{ divideY: '1px solid #e5e7eb' }}>
-                                    {filteredRecords.map((record) => (
-                                        <tr
-                                            key={record.id}
-                                            style={{
-                                                borderBottom: '1px solid #e5e7eb',
-                                                backgroundColor: selectedIds.includes(record.student_id_text) ? '#f0f9ff' : 'transparent'
-                                            }}
-                                        >
-                                            <td style={{ padding: '12px 16px' }}>
+                            <>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                    <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                                        <tr>
+                                            {/* Checkbox Header */}
+                                            <th style={{ padding: '12px 16px', width: '40px' }}>
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedIds.includes(record.student_id_text)}
-                                                    onChange={() => toggleSelect(record.student_id_text)}
+                                                    checked={selectedIds.length === filteredRecords.length && filteredRecords.length > 0}
+                                                    onChange={toggleSelectAll}
                                                 />
-                                            </td>
-                                            <td style={{ padding: '12px 16px', fontWeight: '500' }}>{record.student_id_text}</td>
-                                            <td style={{ padding: '12px 16px' }}>{record.student_name}</td>
-                                            <td style={{ padding: '12px 16px' }}>{record.class_name}</td>
+                                            </th>
+                                            <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>学籍番号</th>
+                                            <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>氏名</th>
+                                            <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>クラス</th>
                                             {selectedTerm?.startsWith('JLPT') ? (
                                                 <>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6', fontWeight: 'bold' }}>{record.final_exam_total}</td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#eff6ff',
-                                                            color: '#1d4ed8',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {(() => {
-                                                                const score = record.final_exam_total;
-                                                                if (score > 120) return 'A';
-                                                                if (score > 60) return 'B';
-                                                                return 'C';
-                                                            })()}
-                                                        </span>
-                                                    </td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            padding: '2px 8px',
-                                                            borderRadius: '12px',
-                                                            fontSize: '0.75rem',
-                                                            fontWeight: 'bold',
-                                                            backgroundColor: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#dcfce7' : '#fee2e2',
-                                                            color: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#166534' : '#991b1b'
-                                                        }}>
-                                                            {(record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '合格' : '不合格'}
-                                                        </span>
-                                                    </td>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>合計点(180)</th>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>合格判定</th>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#eff6ff',
-                                                            color: '#1d4ed8',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {calculateFinalExamGrade(record.final_exam_total)}
-                                                        </span>
-                                                    </td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            lineHeight: '24px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: record.report_card_total >= 60 ? '#dcfce7' : '#fee2e2',
-                                                            color: record.report_card_total >= 60 ? '#166534' : '#991b1b',
-                                                            fontSize: '0.875rem',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {calculateGrade(record.report_card_total)}
-                                                        </span>
-                                                    </td>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>期末試験(600)</th>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>期末評価</th>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'right' }}>成績評価(100)</th>
+                                                    <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>評価</th>
                                                 </>
                                             )}
-                                            <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: '0.875rem' }}>
-                                                {new Date(record.created_at).toLocaleString('ja-JP')}
-                                            </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                                <button
-                                                    onClick={() => handleSinglePdfExport(record, 'final_exam')}
-                                                    disabled={generating}
-                                                    style={{
-                                                        padding: '4px 10px',
-                                                        backgroundColor: '#ef4444',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 'bold',
-                                                        cursor: generating ? 'not-allowed' : 'pointer',
-                                                        opacity: generating ? 0.7 : 1
-                                                    }}
-                                                >
-                                                    PDF
-                                                </button>
-                                            </td>
+                                            <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280' }}>保存日時</th>
+                                            <th style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>操作</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        ) : (
+                                    </thead>
+                                    <tbody style={{ divideY: '1px solid #e5e7eb' }}>
+                                        {filteredRecords.slice((listPage - 1) * LIST_ITEMS_PER_PAGE, listPage * LIST_ITEMS_PER_PAGE).map((record) => (
+                                            <tr
+                                                key={record.id}
+                                                style={{
+                                                    borderBottom: '1px solid #e5e7eb',
+                                                    backgroundColor: selectedIds.includes(record.student_id_text) ? '#f0f9ff' : 'transparent'
+                                                }}
+                                            >
+                                                <td style={{ padding: '12px 16px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedIds.includes(record.student_id_text)}
+                                                        onChange={() => toggleSelect(record.student_id_text)}
+                                                    />
+                                                </td>
+                                                <td style={{ padding: '12px 16px', fontWeight: '500' }}>{record.student_id_text}</td>
+                                                <td style={{ padding: '12px 16px' }}>{record.student_name}</td>
+                                                <td style={{ padding: '12px 16px' }}>{record.class_name}</td>
+                                                {selectedTerm?.startsWith('JLPT') ? (
+                                                    <>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6', fontWeight: 'bold' }}>{record.final_exam_total}</td>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                            <span style={{
+                                                                display: 'inline-block',
+                                                                width: '24px',
+                                                                height: '24px',
+                                                                lineHeight: '24px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: '#eff6ff',
+                                                                color: '#1d4ed8',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                {(() => {
+                                                                    const score = record.final_exam_total;
+                                                                    if (score > 120) return 'A';
+                                                                    if (score > 60) return 'B';
+                                                                    return 'C';
+                                                                })()}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                            <span style={{
+                                                                padding: '2px 8px',
+                                                                borderRadius: '12px',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 'bold',
+                                                                backgroundColor: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#dcfce7' : '#fee2e2',
+                                                                color: (record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '#166534' : '#991b1b'
+                                                            }}>
+                                                                {(record.final_exam_data?.result === '合' || record.final_exam_data?.result === '○') ? '合格' : '不合格'}
+                                                            </span>
+                                                        </td>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'right', color: '#3b82f6' }}>{record.final_exam_total}</td>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                            <span style={{
+                                                                display: 'inline-block',
+                                                                width: '24px',
+                                                                height: '24px',
+                                                                lineHeight: '24px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: '#eff6ff',
+                                                                color: '#1d4ed8',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                {calculateFinalExamGrade(record.final_exam_total)}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 'bold' }}>{record.report_card_total}</td>
+                                                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                            <span style={{
+                                                                display: 'inline-block',
+                                                                width: '24px',
+                                                                height: '24px',
+                                                                lineHeight: '24px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: record.report_card_total >= 60 ? '#dcfce7' : '#fee2e2',
+                                                                color: record.report_card_total >= 60 ? '#166534' : '#991b1b',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                {calculateGrade(record.report_card_total)}
+                                                            </span>
+                                                        </td>
+                                                    </>
+                                                )}
+                                                <td style={{ padding: '12px 16px', color: '#6b7280', fontSize: '0.875rem' }}>
+                                                    {new Date(record.created_at).toLocaleString('ja-JP')}
+                                                </td>
+                                                <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                                    <button
+                                                        onClick={() => handleSinglePdfExport(record, 'final_exam')}
+                                                        disabled={generating}
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            backgroundColor: '#ef4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 'bold',
+                                                            cursor: generating ? 'not-allowed' : 'pointer',
+                                                            opacity: generating ? 0.7 : 1
+                                                        }}
+                                                    >
+                                                        PDF
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                {filteredRecords.length > LIST_ITEMS_PER_PAGE && (
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', padding: '20px', borderTop: '1px solid #e5e7eb' }}>
+                                        <button
+                                            disabled={listPage === 1}
+                                            onClick={() => setListPage(prev => Math.max(1, prev - 1))}
+                                            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', backgroundColor: '#fff', cursor: listPage === 1 ? 'not-allowed' : 'pointer', opacity: listPage === 1 ? 0.5 : 1 }}
+                                        >
+                                            前へ
+                                        </button>
+                                        <span style={{ fontSize: '0.9rem', color: '#4b5563' }}>
+                                            {listPage} / {Math.ceil(filteredRecords.length / LIST_ITEMS_PER_PAGE)} ページ
+                                        </span>
+                                        <button
+                                            disabled={listPage >= Math.ceil(filteredRecords.length / LIST_ITEMS_PER_PAGE)}
+                                            onClick={() => setListPage(prev => prev + 1)}
+                                            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', backgroundColor: '#fff', cursor: listPage >= Math.ceil(filteredRecords.length / LIST_ITEMS_PER_PAGE) ? 'not-allowed' : 'pointer', opacity: listPage >= Math.ceil(filteredRecords.length / LIST_ITEMS_PER_PAGE) ? 0.5 : 1 }}
+                                        >
+                                            次へ
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : historyViewMode === 'details' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                                {filteredStudents.map(student => (
+                                {filteredStudents.slice(0, visibleCount).map(student => (
                                     <StudentGradeDetail
                                         key={student.id}
                                         student={student}
                                         viewMode={detailSubMode}
                                     />
                                 ))}
+
+                                {visibleCount < filteredStudents.length && (
+                                    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                                        <button
+                                            onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
+                                            style={{
+                                                padding: '10px 40px',
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #d1d5db',
+                                                borderRadius: '8px',
+                                                color: '#374151',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                            }}
+                                        >
+                                            さらに読込 ({filteredStudents.length - visibleCount}名)
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '1rem' }}>
+                                表示モード（一覧または詳細）を選択してください
                             </div>
                         )}
                     </>

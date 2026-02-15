@@ -1,12 +1,35 @@
-'use client'
-
-import React, { memo } from 'react'
+import React, { memo, useState, useEffect, useRef } from 'react'
 import RadarChart from './RadarChart'
 import { saveAs } from 'file-saver'
 import { generateGradePDFClient } from '@/lib/export/clientPdfGenerator'
 import styles from './page.module.css'
 
 const StudentGradeDetail = memo(({ student, viewMode }) => {
+    // Lazy loading state for the chart
+    const [isChartVisible, setIsChartVisible] = useState(false)
+    const chartRef = useRef(null)
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsChartVisible(true)
+                    observer.disconnect() // Only load once
+                }
+            },
+            {
+                rootMargin: '200px', // Start loading slightly before it comes into view
+                threshold: 0.1
+            }
+        )
+
+        if (chartRef.current) {
+            observer.observe(chartRef.current)
+        }
+
+        return () => observer.disconnect()
+    }, [])
+
     const calculateGrade = (score) => {
         if (score >= 80) return 'A'
         if (score >= 70) return 'B'
@@ -445,22 +468,28 @@ const StudentGradeDetail = memo(({ student, viewMode }) => {
             <div className={styles.chartsGrid}>
                 {viewMode === 'exam' ? (
                     <>
-                        <div className={styles.chartWrapper}>
+                        <div className={styles.chartWrapper} ref={chartRef}>
                             <h4 className={styles.chartTitle}>期末試験結果 (合計: {finalExamSum}/600)</h4>
-                            <div className={styles.chartContainer}>
-                                <RadarChart
-                                    labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
-                                    data={[
-                                        finalExam?.vocab || 0,
-                                        finalExam?.listening || 0,
-                                        finalExam?.reading || 0,
-                                        finalExam?.grammar || 0,
-                                        finalExam?.writing || 0,
-                                        finalExam?.conversation || 0
-                                    ]}
-                                    title="期末試験"
-                                    color="blue"
-                                />
+                            <div className={styles.chartContainer} style={{ minHeight: '300px' }}>
+                                {isChartVisible ? (
+                                    <RadarChart
+                                        labels={['文字・語彙', '聴解', '読解', '文法', '作文', '会話']}
+                                        data={[
+                                            finalExam?.vocab || 0,
+                                            finalExam?.listening || 0,
+                                            finalExam?.reading || 0,
+                                            finalExam?.grammar || 0,
+                                            finalExam?.writing || 0,
+                                            finalExam?.conversation || 0
+                                        ]}
+                                        title="期末試験"
+                                        color="blue"
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                                        読み込み中...
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -503,24 +532,30 @@ const StudentGradeDetail = memo(({ student, viewMode }) => {
                     </>
                 ) : (
                     <>
-                        <div className={styles.chartWrapper}>
+                        <div className={styles.chartWrapper} ref={chartRef}>
                             <h4 className={styles.chartTitle}>成績通知表 (総合成績: {reportCardTotal})</h4>
-                            <div className={styles.chartContainer}>
-                                <RadarChart
-                                    labels={reportCategories.map(c => c.label)}
-                                    data={[
-                                        reportCard?.vocab || 0,
-                                        reportCard?.listening || 0,
-                                        reportCard?.reading || 0,
-                                        reportCard?.grammar || 0,
-                                        reportCard?.writing || 0,
-                                        reportCard?.conversation || 0
-                                    ]}
-                                    title="成績通知表"
-                                    color="green"
-                                    min={50}
-                                    stepSize={10}
-                                />
+                            <div className={styles.chartContainer} style={{ minHeight: '300px' }}>
+                                {isChartVisible ? (
+                                    <RadarChart
+                                        labels={reportCategories.map(c => c.label)}
+                                        data={[
+                                            reportCard?.vocab || 0,
+                                            reportCard?.listening || 0,
+                                            reportCard?.reading || 0,
+                                            reportCard?.grammar || 0,
+                                            reportCard?.writing || 0,
+                                            reportCard?.conversation || 0
+                                        ]}
+                                        title="成績通知表"
+                                        color="green"
+                                        min={50}
+                                        stepSize={10}
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                                        読み込み中...
+                                    </div>
+                                )}
                             </div>
                         </div>
 

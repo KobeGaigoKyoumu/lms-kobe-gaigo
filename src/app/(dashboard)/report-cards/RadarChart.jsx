@@ -59,6 +59,18 @@ const RadarChart = memo(function RadarChart({ labels, data, title, color = 'blue
     const options = {
         responsive: true,
         maintainAspectRatio: true,
+        animation: {
+            duration: 0 // Disable animations to reduce CPU load
+        },
+        hover: {
+            animationDuration: 0 // Disable hover animations
+        },
+        responsiveAnimationDuration: 0, // Disable resize animations
+        elements: {
+            line: {
+                tension: 0 // Straighter lines are slightly faster to draw
+            }
+        },
         plugins: {
             legend: {
                 display: false
