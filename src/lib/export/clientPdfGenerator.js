@@ -354,7 +354,9 @@ export async function generateGradePDFClient(data) {
 
                 return `
                     <div style="margin-bottom: 8px;">
-                        <h4 style="font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b;">${sub} <span style="font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px;">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></h4>
+                        <h4 style="font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b; height: 12pt; display: flex; align-items: center;">
+                            <div class="baseline-lift" style="top: -0.6mm;">${sub} <span style="font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px;">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></div>
+                        </h4>
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             ${subDetails.map(d => `
                                 <div class="rigid-box" style="width: 38px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
@@ -493,9 +495,11 @@ export async function generateGradePDFClient(data) {
 
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border: 1px solid #e2e8f0; border-left: 4px solid ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'}; border-radius: 6px; margin-bottom: 10px; background-color: #fff;">
                     <div>
-                        <div style="font-size: 7.5pt; color: #64748b; margin-bottom: 1px;">${student.class_name}</div>
-                        <h3 style="font-size: ${nameFontSize}; font-weight: bold; color: #1e293b; margin: 0;">${student.student_name}<span style="font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px;">(${student.student_id_text})</span></h3>
-                        <div style="font-size: 8pt; color: #6b7280; margin-top: 1px;">${yearTerm}</div>
+                        <div style="font-size: 7.5pt; color: #64748b; margin-bottom: 2px;"><div class="baseline-lift" style="top: -0.4mm;">${student.class_name}</div></div>
+                        <h3 style="font-size: ${nameFontSize}; font-weight: bold; color: #1e293b; margin: 0; line-height: 1.2;">
+                            <div class="baseline-lift" style="top: -0.8mm;">${student.student_name}<span style="font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px;">(${student.student_id_text})</span></div>
+                        </h3>
+                        <div style="font-size: 8pt; color: #6b7280; margin-top: 2px;"><div class="baseline-lift" style="top: -0.4mm;">${yearTerm}</div></div>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <div style="text-align: center; padding: 4px 12px; border-radius: 6px; min-width: 80px; border: 1px solid #000; background-color: #fff;">
