@@ -47,7 +47,7 @@ export async function POST(request) {
 
         if (error) throw error
 
-        /* 通知機能を一時停止中
+        // Send push notifications for broadcast
         try {
             const webpush = require('web-push')
             webpush.setVapidDetails(
@@ -67,7 +67,7 @@ export async function POST(request) {
                     title: '先生からのメッセージ',
                     body: content || (attachment_url ? 'ファイルを送信しました' : 'メッセージが届きました'),
                     url: '/student/communication',
-                    badge: 1 // Single unread for a new message
+                    badge: 1
                 })
 
                 await Promise.all(subs.map(sub =>
@@ -84,7 +84,6 @@ export async function POST(request) {
         } catch (e) {
             console.error('Broadcast push error:', e)
         }
-        */
 
         return NextResponse.json({ success: true, count: data.length })
 

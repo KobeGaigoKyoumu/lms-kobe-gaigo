@@ -6,7 +6,7 @@ create extension if not exists pg_net;
 create or replace function public.trigger_chat_push()
 returns trigger as $$
 declare
-  service_role_key text := 'YOUR_SERVICE_ROLE_KEY_HERE'; -- User needs to replace this or use vault
+  service_role_key text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
   url text := 'https://mwtlfyhkzkfagvmdwgii.supabase.co/functions/v1/chat-push';
 begin
   -- Call the Edge Function using pg_net
