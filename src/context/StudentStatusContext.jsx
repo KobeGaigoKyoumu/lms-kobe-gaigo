@@ -42,6 +42,11 @@ export function StudentStatusProvider({ children, role, userId }) {
         if (type === 'regular' && (now - lastFetchRef.current < 5000)) return
 
         try {
+            /* 
+             * Worker appears to be returning 0 for assignments (outdated logic?), 
+             * switching to internal API for correctness until Worker is updated.
+             */
+            /*
             let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
             let success = false
 
@@ -74,7 +79,9 @@ export function StudentStatusProvider({ children, role, userId }) {
                     console.warn('Worker status fetch failed, falling back...', workerErr)
                 }
             }
+            */
 
+            // Always use internal API for now
             if (!success) {
                 const resInternal = await fetch('/api/status', { cache: 'no-store' })
                 if (resInternal.ok) {
