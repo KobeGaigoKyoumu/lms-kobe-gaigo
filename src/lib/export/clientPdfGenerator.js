@@ -440,15 +440,15 @@ export async function generateGradePDFClient(data) {
             .jlpt-table { 
                 width: 100%; 
                 border-collapse: collapse; 
-                border: 1px solid #cbd5e1; 
+                border: 0.5px solid #e2e8f0; 
                 table-layout: fixed;
             }
             .jlpt-table th, .jlpt-table td { 
-                border: 1px solid #cbd5e1; 
+                border: 0.5px solid #e2e8f0; 
                 padding: 6px 10px !important;
                 vertical-align: middle !important; 
                 line-height: 1 !important;
-                font-size: 8.5pt; /* Smaller professional font */
+                font-size: 7.5pt; /* More compact font */
                 height: 38px;
                 text-align: center;
             }
@@ -489,8 +489,8 @@ export async function generateGradePDFClient(data) {
                         <tr>
                             <td colspan="3" style="padding: 4px 0 0 0; font-size: 8pt; color: #475569; border-top: 1px solid #f1f5f9;">
                                 <div style="display: flex; justify-content: space-between; width: 100%;">
-                                    <div class="baseline-lift" style="top: -0.6mm;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div>
-                                    <div class="baseline-lift" style="top: -0.6mm; text-align: right;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div>
+                                    <div class="baseline-lift" style="top: -0.6mm;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div>
+                                    <div class="baseline-lift" style="top: -0.6mm; text-align: right;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div>
                                 </div>
                             </td>
                         </tr>
