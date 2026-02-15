@@ -323,10 +323,10 @@ export async function generateGradePDFClient(data) {
                         <h4 style="font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b;">${sub} <span style="font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px;">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></h4>
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             ${subDetails.map(d => `
-                                <div style="width: 38px; padding: 3px 1px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; text-align: center; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
-                                    <div style="font-size: 6.5pt; font-weight: bold; color: #64748b; margin-bottom: 1px;">${d.questionNo}</div>
-                                    <div style="font-size: 8pt; font-weight: 700; color: #1e293b;">${d.selected || '-'}</div>
-                                    <div style="font-size: 6pt; color: #94a3b8;">(${d.correctAnswer})</div>
+                                <div class="rigid-box" style="width: 38px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
+                                    <div style="font-size: 6.5pt; font-weight: bold; color: #64748b; line-height: 1; margin-top: 1px;">${d.questionNo}</div>
+                                    <div style="font-size: 8pt; font-weight: 700; color: #1e293b; line-height: 1.1;">${d.selected || '-'}</div>
+                                    <div style="font-size: 6pt; color: #94a3b8; line-height: 1;">(${d.correctAnswer})</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -342,12 +342,12 @@ export async function generateGradePDFClient(data) {
 
         if (isExam) {
             subjectRows = subjects.map(key => `
-                <tr>
+            < tr >
                     <td style="font-weight: bold; width: 40%; font-size: 11pt; text-align: left;">${subjectNames[key]}</td>
                     <td style="width: 20%;">100</td>
                     <td style="font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</td>
                     <td style="font-weight: bold; width: 20%;">${calculateGrade(student.final_exam_data?.[key])}</td>
-                </tr>
+                </tr >
             `).join('');
         } else {
             const att = reportData.attendance;
@@ -355,15 +355,15 @@ export async function generateGradePDFClient(data) {
             subjectRows = subjects.map(key => {
                 const d = reportData[key] || {};
                 return `
-                    <tr>
+            < tr >
                         <td style="font-weight: bold; width: 25%; font-size: 10pt; text-align: left;">${subjectNames[key]}</td>
                         <td style="width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
                         <td style="width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</td>
                         <td style="width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</td>
                         <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
                         <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
-                    </tr>
-                `;
+                    </tr >
+            `;
             }).join('');
         }
     }
@@ -377,41 +377,50 @@ export async function generateGradePDFClient(data) {
     else if (nameLength > 15) nameFontSize = '10.5pt';
 
     contentHtml = `
-        <style>
-            .pdf-page {
-                width: 210mm;
-                padding: ${isJlpt ? '15mm 15mm 15mm' : '25mm 20mm 20mm'};
-                background: white;
-                font-family: ${isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif'};
-                color: ${isJlpt ? '#334155' : '#000'};
-                box-sizing: border-box;
-                line-height: 1.3;
-                -webkit-font-smoothing: antialiased;
-                transform: translateY(-0.8mm); /* Systemic shift to counteract html2canvas sinking */
-            }
-            .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
-            .pdf-table { width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; }
-            .pdf-table th, .pdf-table td { 
-                border: 1px solid #000; 
-                padding: 4px 6px 6px 6px !important; /* Bottom-heavy padding to pull text UP */
-                vertical-align: middle !important; 
-                line-height: 1.1 !important;
-                height: 42px;
-                text-align: center;
-                overflow: hidden;
-                white-space: nowrap;
-            }
-            .jlpt-table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
-            .jlpt-table th, .jlpt-table td { 
-                border: 1.5px solid #000; 
-                padding: 10px 12px 14px 12px !important; /* Systemic offset to fix sinking */
-                vertical-align: middle !important; 
-                line-height: 1.1 !important;
-                font-size: 10pt;
-                height: 46px;
-                text-align: center;
-            }
-        </style>
+            < style >
+            .pdf - page {
+            width: 210mm;
+            padding: ${isJlpt ? '15mm 15mm 15mm' : '25mm 20mm 20mm'};
+            background: white;
+            font - family: ${isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif'};
+            color: ${isJlpt ? '#334155' : '#000'};
+            box - sizing: border - box;
+            line - height: 1.3;
+            -webkit - font - smoothing: antialiased;
+            margin - top: -1.2mm; /* Negative margin is more reliable than transform in html2canvas */
+        }
+            .pdf - page * { box- sizing: border - box; margin: 0; padding: 0;
+    }
+            .pdf - table { width: 100 %; border - collapse: collapse; border: 1px solid #000; table - layout: fixed; }
+            .pdf - table th, .pdf - table td {
+        border: 1px solid #000;
+        padding: 4px 6px 7px 6px!important; /* Bottom-heavy for universal upward pull */
+        vertical - align: middle!important;
+        line - height: 1.1!important;
+        height: 42px;
+        text - align: center;
+        overflow: hidden;
+    }
+            .jlpt - table { width: 100 %; border - collapse: collapse; border: 1.5px solid #000; }
+            .jlpt - table th, .jlpt - table td {
+        border: 1.5px solid #000;
+        padding: 10px 12px 14px 12px!important;
+        vertical - align: middle!important;
+        line - height: 1.1!important;
+        font - size: 10pt;
+        height: 46px;
+        text - align: center;
+    }
+            .rigid - box {
+        display: inline - block;
+        vertical - align: top;
+        text - align: center;
+        padding - top: 2px;
+        padding - bottom: 4px; /* Internal pull-up */
+        min - height: 38px;
+        line - height: 1;
+    }
+        </style >
         <div class="pdf-page">
             ${isJlpt ? `
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 5px;">
@@ -595,98 +604,99 @@ export async function generateCertificatePDFClient(data, issueDate) {
         const selectedGrade = grades[subject] || '';
         const gradeCells = gradeLetters.map(letter => {
             const isSelected = selectedGrade === letter;
-            return `<td style="border: 1px solid #000; padding: 4px; text-align: center; width: 14%;">${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</td>`;
+            return `< td style = "border: 1px solid #000; padding: 4px; text-align: center; width: 14%;" > ${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</td > `;
         }).join('');
-        return `<tr><td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;">${subject}</td>${gradeCells}</tr>`;
+        return `< tr > <td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;">${subject}</td>${gradeCells}</tr > `;
     }).join('');
 
     container.innerHTML = `
-        <style>
-            .pdf-page {
-                width: 210mm;
-                padding: 15mm 20mm;
-                background: white;
-                font-family: "Noto Serif JP", "Yu Mincho", serif;
-                font-size: 10pt;
-                line-height: 1.3;
-                color: #000;
-                box-sizing: border-box;
-            }
-            .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
-        </style>
-        <div class="pdf-page">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h1 style="font-size: 24pt; font-weight: bold; border-bottom: 3px double #000; display: inline-block; padding: 0 10mm; margin-top: 10mm;">成 績 証 明 書</h1>
-            </div>
-            
-            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 12px; font-size: 10pt;">
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px; width: 15%; text-align: center; background: #f5f5f5;">学籍番号</td>
-                    <td style="border: 1px solid #000; padding: 6px; width: 35%; font-weight: bold;">${data.studentId || ''}</td>
-                    <td style="border: 1px solid #000; padding: 6px; width: 15%; text-align: center; background: #f5f5f5;">クラス</td>
-                    <td style="border: 1px solid #000; padding: 6px; width: 35%; font-weight: bold;">${data.className || ''}</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">国　籍</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.nationality || ''}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">氏　名</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold; font-size: ${nameFontSize};">${data.name || ''}</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">生年月日</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.birthDate || ''}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">性　別</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.gender || ''}</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">入学年月日</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="3">${data.enrollmentDate || ''}</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">卒業年月日</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="3">
-                        ${data.graduationDate || ''} （ 
-                        ${data.graduationStatus === 'graduated' ? '<span style="border: 1.5px solid #000; border-radius: 12px; padding: 0 6px;">卒業</span>' : '卒業'}・
-                        ${data.graduationStatus === 'expected' ? '<span style="border: 1.5px solid #000; border-radius: 12px; padding: 0 6px;">卒業見込み</span>' : '卒業見込み'}
-                        ）
-                    </td>
-                </tr>
-            </table>
+        < style >
+            .pdf - page {
+        width: 210mm;
+        padding: 15mm 20mm;
+        background: white;
+        font - family: "Noto Serif JP", "Yu Mincho", serif;
+        font - size: 10pt;
+        line - height: 1.3;
+        color: #000;
+        box - sizing: border - box;
+    }
+            .pdf - page * { box- sizing: border - box; margin: 0; padding: 0;
+}
+        </style >
+    <div class="pdf-page">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="font-size: 24pt; font-weight: bold; border-bottom: 3px double #000; display: inline-block; padding: 0 10mm; margin-top: 10mm;">成 績 証 明 書</h1>
+        </div>
 
-            <p style="margin: 12px 0; font-size: 11pt; text-indent: 1em;">上記の者の成績は下記の通りであることを証明致します。</p>
+        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 12px; font-size: 10pt;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px; width: 15%; text-align: center; background: #f5f5f5;">学籍番号</td>
+                <td style="border: 1px solid #000; padding: 6px; width: 35%; font-weight: bold;">${data.studentId || ''}</td>
+                <td style="border: 1px solid #000; padding: 6px; width: 15%; text-align: center; background: #f5f5f5;">クラス</td>
+                <td style="border: 1px solid #000; padding: 6px; width: 35%; font-weight: bold;">${data.className || ''}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">国　籍</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.nationality || ''}</td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">氏　名</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold; font-size: ${nameFontSize};">${data.name || ''}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">生年月日</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.birthDate || ''}</td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">性　別</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.gender || ''}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">入学年月日</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="3">${data.enrollmentDate || ''}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">卒業年月日</td>
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="3">
+                    ${data.graduationDate || ''} （
+                    ${data.graduationStatus === 'graduated' ? '<span style="border: 1.5px solid #000; border-radius: 12px; padding: 0 6px;">卒業</span>' : '卒業'}・
+                    ${data.graduationStatus === 'expected' ? '<span style="border: 1.5px solid #000; border-radius: 12px; padding: 0 6px;">卒業見込み</span>' : '卒業見込み'}
+                    ）
+                </td>
+            </tr>
+        </table>
 
-            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 8px;">
-                <thead>
-                    <tr style="background: #e0e0e0;">
-                        <th style="border: 1px solid #000; padding: 6px; font-weight: bold;">科　　目</th>
-                        <th style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="5">評　　価</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${gradeRows}
-                    <tr style="background: #f5f5f5;">
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;" colspan="6">特 記 事 項</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 12mm 10px; text-align: left; vertical-align: top; height: 35mm;" colspan="6">${data.specialNotes || ''}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <p style="margin: 12px 0; font-size: 11pt; text-indent: 1em;">上記の者の成績は下記の通りであることを証明致します。</p>
 
-            <div style="font-size: 9pt; margin-top: 5mm; border: 1px solid #000; padding: 3mm;">
-                <div style="font-weight: bold;">＊評価基準　Ａ・Ｂ・Ｃ・Ｄ・Ｆの5段階</div>
-                <div style="margin-top: 1mm;">
-                    A [100〜80] / B [79〜70] / C [69〜60] / D [59〜50] / F [49以下]
-                </div>
-            </div>
+        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 8px;">
+            <thead>
+                <tr style="background: #e0e0e0;">
+                    <th style="border: 1px solid #000; padding: 6px; font-weight: bold;">科　　目</th>
+                    <th style="border: 1px solid #000; padding: 6px; font-weight: bold;" colspan="5">評　　価</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${gradeRows}
+                <tr style="background: #f5f5f5;">
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;" colspan="6">特 記 事 項</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 12mm 10px; text-align: left; vertical-align: top; height: 35mm;" colspan="6">${data.specialNotes || ''}</td>
+                </tr>
+            </tbody>
+        </table>
 
-            <div style="text-align: right; margin-top: 20mm;">
-                <div style="font-size: 12pt; margin-bottom: 6mm;">${issueDate || today}</div>
-                <div style="font-size: 18pt; font-weight: bold; letter-spacing: 2px;">神戸外語教育学院</div>
-                <div style="font-size: 10pt; color: #333; margin-top: 2mm;">Kobe Foreign Language Education Institute</div>
+        <div style="font-size: 9pt; margin-top: 5mm; border: 1px solid #000; padding: 3mm;">
+            <div style="font-weight: bold;">＊評価基準　Ａ・Ｂ・Ｃ・Ｄ・Ｆの5段階</div>
+            <div style="margin-top: 1mm;">
+                A [100〜80] / B [79〜70] / C [69〜60] / D [59〜50] / F [49以下]
             </div>
         </div>
-    `;
+
+        <div style="text-align: right; margin-top: 20mm;">
+            <div style="font-size: 12pt; margin-bottom: 6mm;">${issueDate || today}</div>
+            <div style="font-size: 18pt; font-weight: bold; letter-spacing: 2px;">神戸外語教育学院</div>
+            <div style="font-size: 10pt; color: #333; margin-top: 2mm;">Kobe Foreign Language Education Institute</div>
+        </div>
+    </div>
+`;
 
     document.body.appendChild(container);
 
