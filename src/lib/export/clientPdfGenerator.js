@@ -246,7 +246,7 @@ export async function generateGradePDFClient(data) {
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-circle" style="${getEvalStyle(eStr)}">
-                                <div class="baseline-lift" style="top: -0.8mm;">${eStr}</div>
+                                <div class="baseline-lift">${eStr}</div>
                             </div>
                         </div>
                     </td>
@@ -273,7 +273,7 @@ export async function generateGradePDFClient(data) {
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-circle" style="${getEvalStyle(vEval)}">
-                                <div class="baseline-lift" style="top: -0.8mm;">${vEval}</div>
+                                <div class="baseline-lift">${vEval}</div>
                             </div>
                         </div>
                     </td>
@@ -286,7 +286,7 @@ export async function generateGradePDFClient(data) {
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-circle" style="${getEvalStyle(rEval)}">
-                                <div class="baseline-lift" style="top: -0.8mm;">${rEval}</div>
+                                <div class="baseline-lift">${rEval}</div>
                             </div>
                         </div>
                     </td>
@@ -308,7 +308,7 @@ export async function generateGradePDFClient(data) {
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <div class="evaluation-circle" style="${getEvalStyle(lEval)}">
-                            <div class="baseline-lift" style="top: -0.8mm;">${lEval}</div>
+                            <div class="baseline-lift">${lEval}</div>
                         </div>
                     </div>
                 </td>
@@ -333,7 +333,7 @@ export async function generateGradePDFClient(data) {
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <div class="evaluation-circle" style="${getEvalStyle(totalEval)}">
-                            <div class="baseline-lift" style="top: -0.8mm;">${totalEval}</div>
+                            <div class="baseline-lift">${totalEval}</div>
                         </div>
                     </div>
                 </td>
@@ -434,9 +434,15 @@ export async function generateGradePDFClient(data) {
                 text-align: center;
                 overflow: hidden;
             }
+            .jlpt-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                border: 1.5px solid #000; 
+                table-layout: fixed;
+            }
             .jlpt-table th, .jlpt-table td { 
                 border: 1.5px solid #000; 
-                padding: 10px 12px 14px 12px !important; 
+                padding: 10px 12px !important; /* Balanced padding, use lift for shift */
                 vertical-align: middle !important; 
                 line-height: 1 !important;
                 font-size: 10pt;
@@ -445,7 +451,7 @@ export async function generateGradePDFClient(data) {
             }
             .baseline-lift {
                 position: relative;
-                top: -1.2mm; /* Physical lift to counteract html2canvas baseline drift */
+                top: -1.8mm !important; /* Aggressive lift for JLPT/Grade reports */
             }
             .rigid-box {
                 display: inline-block;
@@ -461,13 +467,11 @@ export async function generateGradePDFClient(data) {
                 width: 24px;
                 height: 24px;
                 border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
                 font-size: 9pt;
                 font-weight: 800;
                 margin: 0 auto;
-                line-height: 1;
+                line-height: 24px; /* Explicit line-height for centering */
+                text-align: center;
             }
         </style>
         <div class="pdf-page">
@@ -508,11 +512,11 @@ export async function generateGradePDFClient(data) {
                 <table class="jlpt-table" style="margin-bottom: 10px;">
                     <thead>
                         <tr style="background-color: #f9fafb;">
-                            <th style="font-size: 8.5pt; font-weight: 600; text-align: left;">科目</th>
-                            <th style="font-size: 8.5pt; font-weight: 600; text-align: right;">得点</th>
-                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">正答数</th>
-                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">判定</th>
-                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">評価</th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: left;"><div class="baseline-lift">科目</div></th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: right;"><div class="baseline-lift">得点</div></th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;"><div class="baseline-lift">正答数</div></th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;"><div class="baseline-lift">判定</div></th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;"><div class="baseline-lift">評価</div></th>
                         </tr>
                     </thead>
                     <tbody>
