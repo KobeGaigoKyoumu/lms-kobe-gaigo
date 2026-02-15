@@ -23,7 +23,8 @@ export default function GradeHistoryBoard() {
     const [selectedClass, setSelectedClass] = useState('')
 
     // View Mode for History Page (Tabs)
-    const [historyViewMode, setHistoryViewMode] = useState(null) // null | 'list' | 'details'
+    // View Mode for History Page (Tabs)
+    const [historyViewMode, setHistoryViewMode] = useState('list') // null | 'list' | 'details'
 
     // Sub View Mode for Details (Exam vs Report - passed to detail component)
     const [detailSubMode, setDetailSubMode] = useState('report') // 'exam' | 'report'
@@ -396,7 +397,8 @@ export default function GradeHistoryBoard() {
     // Client-side filter (Class only now, Term is already filtered by server) - Memoized
     const filteredRecords = useMemo(() => {
         return records.filter(r => {
-            if (!selectedClass || selectedClass === 'ALL') return true
+            if (!selectedClass) return false // Hide all if no class selected
+            if (selectedClass === 'ALL') return true
             return r.class_name === selectedClass
         })
     }, [records, selectedClass])
@@ -433,6 +435,7 @@ export default function GradeHistoryBoard() {
                             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minWidth: '150px' }}
                         >
                             <option value="">クラスを選択してください</option>
+                            <option value="ALL">全クラス</option>
                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
@@ -588,6 +591,30 @@ export default function GradeHistoryBoard() {
 
                         return (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
+                                <div
+                                    key="ALL_CLASS_CARD"
+                                    onClick={() => setSelectedClass('ALL')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '10px',
+                                        backgroundColor: selectedClass === 'ALL' ? '#eff6ff' : '#fff',
+                                        border: selectedClass === 'ALL' ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                                        borderRadius: '6px',
+                                        transition: 'all 0.2s',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                        cursor: 'pointer'
+                                    }}
+                                    title="全クラスの成績を表示"
+                                >
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 'bold', color: selectedClass === 'ALL' ? '#1d4ed8' : '#1f2937' }}>全クラス表示</div>
+                                        <div style={{ fontSize: '0.8rem', color: selectedClass === 'ALL' ? '#60a5fa' : '#6b7280' }}>
+                                            {records.length}名のデータ
+                                            {selectedClass === 'ALL' && <span style={{ marginLeft: '5px', fontWeight: 'bold' }}>● 表示中</span>}
+                                        </div>
+                                    </div>
+                                </div>
                                 {classesInTerm.map(cls => {
                                     const count = records.filter(r => r.year_term === selectedTerm && r.class_name === cls).length;
                                     const isSelected = selectedClassesForDeletion.includes(cls);
@@ -774,6 +801,10 @@ export default function GradeHistoryBoard() {
             <div style={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden', padding: historyViewMode === 'details' ? '20px' : '0' }}>
                 {loading ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>読み込み中...</div>
+                ) : !selectedClass ? (
+                    <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '1rem' }}>
+                        クラスを選択してください
+                    </div>
                 ) : filteredRecords.length === 0 ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>データが見つかりません</div>
                 ) : (
@@ -952,7 +983,7 @@ export default function GradeHistoryBoard() {
                                     </div>
                                 )}
                             </>
-                        ) : historyViewMode === 'details' ? (
+                        ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                                 {filteredStudents.slice(0, visibleCount).map(student => (
                                     <StudentGradeDetail
@@ -981,10 +1012,6 @@ export default function GradeHistoryBoard() {
                                         </button>
                                     </div>
                                 )}
-                            </div>
-                        ) : (
-                            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '1rem' }}>
-                                表示モード（一覧または詳細）を選択してください
                             </div>
                         )}
                     </>
