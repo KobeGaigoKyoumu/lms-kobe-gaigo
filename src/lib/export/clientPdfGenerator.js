@@ -66,7 +66,7 @@ export async function generateAttendancePDFClient(data) {
             if (rate <= 0.85) return 'color: #e65100; font-weight: bold;';
             if (rate <= 0.90) return 'color: #f9a825; font-weight: bold;';
             if (rate <= 0.95) return 'color: #0277bd; font-weight: bold;';
-            return 'color: #2e7d32; font-weight: bold;';
+            return 'color: #000; font-weight: bold;';
         };
 
         return `
@@ -117,8 +117,8 @@ export async function generateAttendancePDFClient(data) {
         <div style="text-align: center; margin-bottom: 2mm;">
             <h1 style="font-size: 26pt; font-weight: bold; margin: 0; color: #333; letter-spacing: 2px;">神戸外語教育学院</h1>
         </div>
-        <div style="position: relative; height: 32mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
-            <div style="position: absolute; bottom: 1mm; left: 0; height: 26mm; display: flex; flex-direction: column; justify-content: center;">
+        <div style="position: relative; height: 37mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
+            <div style="position: absolute; top: 6mm; left: 0; display: flex; flex-direction: column; justify-content: center;">
                 <div style="font-weight: bold; font-size: 11pt; margin-bottom: 2px;">学籍番号：${student.id}</div>
                 <div style="font-weight: bold; font-size: ${nameFontSize}; margin-bottom: 3px;">名前：${student.name}</div>
                 <div style="font-weight: bold; font-size: 11pt;">クラス：${student.className || ''}</div>
@@ -149,9 +149,9 @@ export async function generateAttendancePDFClient(data) {
             </tbody>
         </table>
         <div style="display: flex; justify-content: flex-end; font-size: 8pt; gap: 10px; margin-top: 3mm;">
-            <div><span style="color: #0277bd;">■</span> 95%以上</div>
-            <div><span style="color: #f9a825;">■</span> 90%以上</div>
-            <div><span style="color: #e65100;">■</span> 85%以上</div>
+            <div><span style="color: #000;">■</span> 95%以下</div>
+            <div><span style="color: #f9a825;">■</span> 90%以下</div>
+            <div><span style="color: #e65100;">■</span> 85%以下</div>
             <div><span style="color: #c62828;">■</span> 80%以下</div>
         </div>
         <div style="margin-top: 4mm; font-size: 7.5pt; color: #333; line-height: 1.3;">
