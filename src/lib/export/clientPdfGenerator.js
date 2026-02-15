@@ -440,11 +440,11 @@ export async function generateGradePDFClient(data) {
             .jlpt-table { 
                 width: 100%; 
                 border-collapse: collapse; 
-                border: 1px solid #e2e8f0; 
+                border: 1px solid #cbd5e1; 
                 table-layout: fixed;
             }
             .jlpt-table th, .jlpt-table td { 
-                border: 1px solid #e2e8f0; 
+                border: 1px solid #cbd5e1; 
                 padding: 6px 10px !important;
                 vertical-align: middle !important; 
                 line-height: 1 !important;
@@ -482,13 +482,17 @@ export async function generateGradePDFClient(data) {
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 15px; margin-bottom: 12px;">
                     <table style="width: 100%; border: none; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 20%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>レベル:</strong> ${student.final_exam_data?.level || '-'}</div></td>
-                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 35%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>使用教材:</strong> ${student.final_exam_data?.textbook || '-'}</div></td>
-                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 30%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</div></td>
-                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 15%; text-align: right;"><div class="baseline-lift" style="top: -0.6mm;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 25%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>レベル:</strong> ${student.final_exam_data?.level || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 40%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>使用教材:</strong> ${student.final_exam_data?.textbook || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 35%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</div></td>
                         </tr>
                         <tr>
-                            <td colspan="4" style="padding: 4px 0 0 0; font-size: 8pt; color: #475569; border-top: 1px solid #f1f5f9;"><div class="baseline-lift" style="top: -0.6mm;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div></td>
+                            <td colspan="3" style="padding: 4px 0 0 0; font-size: 8pt; color: #475569; border-top: 1px solid #f1f5f9;">
+                                <div style="display: flex; justify-content: space-between; width: 100%;">
+                                    <div class="baseline-lift" style="top: -0.6mm;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div>
+                                    <div class="baseline-lift" style="top: -0.6mm; text-align: right;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div>
+                                </div>
+                            </td>
                         </tr>
                     </table>
                 </div>
