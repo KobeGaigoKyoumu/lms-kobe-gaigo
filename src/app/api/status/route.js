@@ -78,7 +78,12 @@ export async function GET() {
         return NextResponse.json({
             hasNewAnnouncement,
             unsubmittedAssignmentCount,
-            unreadMessageCount
+            unreadMessageCount,
+            debug: {
+                studentId: studentSession?.studentId,
+                className: studentSession?.className,
+                academicYear: studentSession?.academicYear
+            }
         })
 
     } catch (error) {
