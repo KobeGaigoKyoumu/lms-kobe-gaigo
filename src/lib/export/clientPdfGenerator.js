@@ -15,11 +15,11 @@ export async function generateAttendancePDFClient(data) {
 
     const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.opacity = '0.01'; // Help html2canvas compute baselines more accurately
     container.style.left = '0';
     container.style.top = '0';
     container.style.width = '210mm';
     container.style.zIndex = '-9999';
+    container.style.pointerEvents = 'none';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = '"Noto Sans JP", sans-serif';
     container.style.color = '#333';
@@ -191,11 +191,11 @@ export async function generateGradePDFClient(data) {
 
     const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.opacity = '0.01';
     container.style.left = '0';
     container.style.top = '0';
     container.style.width = '210mm';
     container.style.zIndex = '-9999';
+    container.style.pointerEvents = 'none';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif';
     container.style.color = '#000';
@@ -387,6 +387,7 @@ export async function generateGradePDFClient(data) {
                 box-sizing: border-box;
                 line-height: 1.3;
                 -webkit-font-smoothing: antialiased;
+                transform: translateY(-0.8mm); /* Systemic shift to counteract html2canvas sinking */
             }
             .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
             .pdf-table { width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; }
@@ -577,12 +578,11 @@ export async function generateCertificatePDFClient(data, issueDate) {
 
     const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.opacity = '0.01';
     container.style.left = '0';
     container.style.top = '0';
     container.style.width = '210mm';
     container.style.zIndex = '-9999';
-    container.style.visibility = 'hidden';
+    container.style.pointerEvents = 'none';
     container.style.backgroundColor = 'white';
     container.style.color = '#000';
     container.style.boxSizing = 'border-box';
