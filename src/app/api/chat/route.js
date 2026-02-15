@@ -185,11 +185,35 @@ export async function POST(request) {
                     .eq('user_id', recipientId)
 
                 if (subs && subs.length > 0) {
+                    // Fetch actual unread count for the recipient for more accurate badging
+                    let unreadCount = 1
+                    try {
+                        const { count } = await adminSupabase
+                            .from('messages')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('student_id', data.student_id)
+                            .eq('read', false)
+                            .eq('sender_type', data.sender_type === 'teacher' ? 'teacher' : 'student') // Count messages FROM the sender type
+
+                        // Inverse logic: if I am teacher sending to student, count unread from teachers for that student
+                        const recipientUnreadQuery = adminSupabase
+                            .from('messages')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('student_id', data.student_id)
+                            .eq('read', false)
+                            .eq('sender_type', data.sender_type) // Count messages of THIS sender type for the recipient
+
+                        const { count: realCount } = await recipientUnreadQuery
+                        unreadCount = realCount || 1
+                    } catch (e) {
+                        console.error('Failed to get real unread count for push', e)
+                    }
+
                     const pushPayload = JSON.stringify({
                         title: title,
                         body: data.content || (data.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
                         url: url,
-                        badge: 1
+                        badge: unreadCount
                     })
 
                     await Promise.all(subs.map(sub =>

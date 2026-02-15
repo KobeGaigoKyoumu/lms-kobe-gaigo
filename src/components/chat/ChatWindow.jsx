@@ -494,55 +494,37 @@ export default function ChatWindow({
 
         setIsSending(true)
         try {
-            // Role Determination Logic from server-side moved to client
-            let payload = {
-                student_id: resolvedStudentId,
+            const body = {
+                studentId: resolvedStudentId,
                 content: inputText || '',
                 attachment_url: attachment?.url,
                 attachment_name: attachment?.name,
                 attachment_type: attachment?.type,
-                reply_to_id: replyingTo?.id || null,
-                read: false,
-                created_at: new Date().toISOString()
+                replyToId: replyingTo?.id || null
             }
 
-            if (currentUserRole === 'teacher') {
-                const { data: { user } } = await supabase.auth.getUser()
-                payload.teacher_id = user?.id
-                payload.sender_type = 'teacher'
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
 
-                // Direct Insert to Supabase for Teachers
-                const { data, error } = await supabase
-                    .from('messages')
-                    .insert([payload])
-                    .select()
-                    .single()
-
-                if (error) throw error
-                setMessages(prev => [...prev, data])
-            } else {
-                // Securely use Server Action for students
-                const res = await sendMessage(resolvedStudentId, inputText, {
-                    senderType: 'student',
-                    attachmentUrl: attachment?.url,
-                    attachmentName: attachment?.name,
-                    attachmentType: attachment?.type,
-                    replyToId: replyingTo?.id || null
-                })
-
-                if (res.error) throw new Error(res.error)
-                if (res.data) {
-                    setMessages(prev => [...prev, res.data])
-                }
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData.error || '送信に失敗しました')
             }
 
+            const data = await res.json()
+            const newMessage = data.message // API returns { message: data }
+
+            setMessages(prev => [...prev, newMessage])
             setInputText('')
             setAttachment(null)
             setReplyingTo(null)
             setTimeout(scrollToBottom, 50)
         } catch (error) {
             console.error('Send error:', error)
-            alert('送信に失敗しました')
+            alert(error.message || '送信に失敗しました')
         } finally {
             setIsSending(false)
         }

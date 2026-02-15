@@ -31,11 +31,10 @@ self.addEventListener('push', (event) => {
             self.registration.showNotification(data.title, options),
             // 2. アプリアイコンのバッジを更新 (PWA)
             (async () => {
-                if ('setAppBadge' in navigator) {
+                if ('setAppBadge' in self.navigator) {
                     try {
                         const count = parseInt(data.badge) || 1;
-                        await navigator.setAppBadge(count);
-                        console.log('Badge set success:', count);
+                        await self.navigator.setAppBadge(count);
                     } catch (e) {
                         console.error('Badge error', e);
                     }
