@@ -484,7 +484,7 @@ export async function generateGradePDFClient(data) {
                         <tr>
                             <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 15%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>レベル:</strong> ${student.final_exam_data?.level || '-'}</div></td>
                             <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 25%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>使用教材:</strong> ${student.final_exam_data?.textbook || '-'}</div></td>
-                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 60%;"><div class="baseline-lift" style="top: -0.6mm;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569; width: 60%;"><div class="baseline-lift" style="top: -0.6mm; padding-left: 2em;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</div></td>
                         </tr>
                         <tr>
                             <td colspan="3" style="padding: 4px 0 0 0; font-size: 8pt; color: #475569;">
