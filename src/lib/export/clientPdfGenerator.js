@@ -337,10 +337,10 @@ export async function generateGradePDFClient(data) {
         if (isExam) {
             subjectRows = subjects.map(key => `
                 <tr>
-                    <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 35%;">${subjectNames[key]}</td>
-                    <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; width: 20%;">100</td>
-                    <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</td>
-                    <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 25%;">${calculateGrade(student.final_exam_data?.[key])}</td>
+                    <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 35%;">${subjectNames[key]}</td>
+                    <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 20%;">100</td>
+                    <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</td>
+                    <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 25%;">${calculateGrade(student.final_exam_data?.[key])}</td>
                 </tr>
             `).join('');
         } else {
@@ -350,12 +350,12 @@ export async function generateGradePDFClient(data) {
                 const d = reportData[key] || {};
                 return `
                     <tr>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 25%;">${subjectNames[key]}</td>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</td>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</td>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 15%;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
-                        <td align="center" style="border: 1px solid #000; padding: 10px; text-align: center !important; font-weight: bold; width: 15%;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 25%;">${subjectNames[key]}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 15%;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
+                        <td align="center" style="border: 1px solid #000; padding: 12px 8px; text-align: center !important; vertical-align: middle !important; line-height: 1; font-weight: bold; width: 15%;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
                     </tr>
                 `;
             }).join('');
@@ -446,16 +446,16 @@ export async function generateGradePDFClient(data) {
 
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15mm; table-layout: fixed;">
                     <tr>
-                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; width: 15%; border: 1px solid #000; padding: 8px;">学籍番号</td>
-                        <td align="center" style="width: 35%; border: 1px solid #000; font-weight: bold; text-align: center !important; padding: 8px;">${student.student_id_text}</td>
-                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; width: 15%; border: 1px solid #000; padding: 8px;">氏　名</td>
-                        <td align="center" style="width: 35%; border: 1px solid #000; font-weight: bold; font-size: 13pt; text-align: center !important; padding: 8px;">${student.student_name}</td>
+                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; border: 1px solid #000; padding: 8px;">学籍番号</td>
+                        <td align="center" style="width: 35%; border: 1px solid #000; font-weight: bold; text-align: center !important; vertical-align: middle !important; line-height: 1; padding: 8px;">${student.student_id_text}</td>
+                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; border: 1px solid #000; padding: 8px;">氏　名</td>
+                        <td align="center" style="width: 35%; border: 1px solid #000; font-weight: bold; font-size: 13pt; text-align: center !important; vertical-align: middle !important; line-height: 1; padding: 8px;">${student.student_name}</td>
                     </tr>
                     <tr>
-                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; border: 1px solid #000; padding: 8px;">クラス</td>
-                        <td align="center" style="border: 1px solid #000; font-weight: bold; text-align: center !important; padding: 8px;">${student.class_name}</td>
-                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; border: 1px solid #000; padding: 8px;">学　期</td>
-                        <td align="center" style="border: 1px solid #000; font-weight: bold; text-align: center !important; padding: 8px;">${yearTerm || ''}</td>
+                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; vertical-align: middle !important; line-height: 1; border: 1px solid #000; padding: 8px;">クラス</td>
+                        <td align="center" style="border: 1px solid #000; font-weight: bold; text-align: center !important; vertical-align: middle !important; line-height: 1; padding: 8px;">${student.class_name}</td>
+                        <td align="center" style="background-color: #f5f5f5; text-align: center !important; vertical-align: middle !important; line-height: 1; border: 1px solid #000; padding: 8px;">学　期</td>
+                        <td align="center" style="border: 1px solid #000; font-weight: bold; text-align: center !important; vertical-align: middle !important; line-height: 1; padding: 8px;">${yearTerm || ''}</td>
                     </tr>
                 </table>
 
@@ -463,17 +463,17 @@ export async function generateGradePDFClient(data) {
                     <thead>
                         <tr style="background: #f0f0f0;">
                             ${isExam ? `
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 35%; padding: 10px;">科目</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 20%; padding: 10px;">満点</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 20%; padding: 10px;">得点</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 25%; padding: 10px;">評価</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 35%; padding: 12px 8px;">科目</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 20%; padding: 12px 8px;">満点</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 20%; padding: 12px 8px;">得点</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 25%; padding: 12px 8px;">評価</th>
                             ` : `
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 25%; padding: 12px;">科目</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 15%; padding: 12px;">基礎点</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 15%; padding: 12px;">出席点</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 15%; padding: 12px;">平常点</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 15%; padding: 12px;">合計</th>
-                                <th align="center" style="border: 1px solid #000; text-align: center !important; width: 15%; padding: 12px;">評定</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 25%; padding: 14px 10px;">科目</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; padding: 14px 10px;">基礎点</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; padding: 14px 10px;">出席点</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; padding: 14px 10px;">平常点</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; padding: 14px 10px;">合計</th>
+                                <th align="center" style="border: 1px solid #000; text-align: center !important; vertical-align: middle !important; line-height: 1; width: 15%; padding: 14px 10px;">評定</th>
                             `}
                         </tr>
                     </thead>
