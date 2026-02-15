@@ -337,10 +337,10 @@ export async function generateGradePDFClient(data) {
         if (isExam) {
             subjectRows = subjects.map(key => `
                 <tr>
-                    <td align="center"><div class="cell-center" style="font-weight: bold; width: 35%;">${subjectNames[key]}</div></td>
+                    <td align="center"><div class="cell-center" style="font-weight: bold; width: 40%; font-size: 11pt;">${subjectNames[key]}</div></td>
                     <td align="center"><div class="cell-center" style="width: 20%;">100</div></td>
                     <td align="center"><div class="cell-center" style="font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</div></td>
-                    <td align="center"><div class="cell-center" style="font-weight: bold; width: 25%;">${calculateGrade(student.final_exam_data?.[key])}</div></td>
+                    <td align="center"><div class="cell-center" style="font-weight: bold; width: 20%;">${calculateGrade(student.final_exam_data?.[key])}</div></td>
                 </tr>
             `).join('');
         } else {
@@ -350,7 +350,7 @@ export async function generateGradePDFClient(data) {
                 const d = reportData[key] || {};
                 return `
                     <tr>
-                        <td align="center"><div class="cell-center" style="font-weight: bold; width: 25%;">${subjectNames[key]}</div></td>
+                        <td align="center"><div class="cell-center" style="font-weight: bold; width: 25%; font-size: 10pt;">${subjectNames[key]}</div></td>
                         <td align="center"><div class="cell-center" style="width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</div></td>
                         <td align="center"><div class="cell-center" style="width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</div></td>
                         <td align="center"><div class="cell-center" style="width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</div></td>
@@ -394,6 +394,7 @@ export async function generateGradePDFClient(data) {
                 line-height: 1.2;
                 padding: 6px 4px;
                 box-sizing: border-box;
+                white-space: nowrap !important;
             }
         </style>
         <div class="pdf-page">
