@@ -337,10 +337,10 @@ export async function generateGradePDFClient(data) {
         if (isExam) {
             subjectRows = subjects.map(key => `
                 <tr>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${subjectNames[key]}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">100</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${student.final_exam_data?.[key] || '-'}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${calculateGrade(student.final_exam_data?.[key])}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${subjectNames[key]}</div></td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">100</div></td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${student.final_exam_data?.[key] || '-'}</div></td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${calculateGrade(student.final_exam_data?.[key])}</div></td>
                 </tr>
             `).join('');
         } else {
@@ -350,12 +350,12 @@ export async function generateGradePDFClient(data) {
                 const d = reportData[key] || {};
                 return `
                     <tr>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${subjectNames[key]}</td>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${att !== undefined ? att.toFixed(1) : '-'}</td>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${part !== undefined ? part.toFixed(1) : '-'}</td>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
-                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${subjectNames[key]}</div></td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</div></td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">${att !== undefined ? att.toFixed(1) : '-'}</div></td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">${part !== undefined ? part.toFixed(1) : '-'}</div></td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</div></td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"><div style="width: 100%; text-align: center;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</div></td>
                     </tr>
                 `;
             }).join('');
@@ -368,7 +368,7 @@ export async function generateGradePDFClient(data) {
         <style>
             .pdf-page {
                 width: 210mm;
-                padding: ${isJlpt ? '10mm 15mm 10mm' : '15mm 20mm 15mm'};
+                padding: ${isJlpt ? '15mm 15mm 15mm' : '20mm 20mm 20mm'};
                 background: white;
                 font-family: ${isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif'};
                 color: ${isJlpt ? '#334155' : '#000'};
@@ -439,23 +439,23 @@ export async function generateGradePDFClient(data) {
                     神戸外語教育学院 | 発行日: ${today}
                 </div>
             ` : `
-                <div style="position: relative; margin-bottom: 8mm; height: 15mm; border-bottom: 2px solid #000;">
-                    <div style="position: absolute; top: 0; right: 0; font-size: 10pt;">発行日：${today}</div>
-                    <h1 style="text-align: center; font-size: 22pt; font-weight: bold; letter-spacing: 5px; margin-top: 1mm;">${isExam ? '期末試験結果通知' : '成績通知表'}</h1>
+                <div style="position: relative; margin-bottom: 8mm; height: 20mm; border-bottom: 2px solid #000;">
+                    <div style="position: absolute; top: 2mm; right: 0; font-size: 10pt;">発行日：${today}</div>
+                    <h1 style="text-align: center; font-size: 22pt; font-weight: bold; letter-spacing: 5px; padding-top: 5mm;">${isExam ? '期末試験結果通知' : '成績通知表'}</h1>
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 8mm;">
                     <tr>
                         <td style="background-color: #f5f5f5; text-align: center; width: 15%; padding: 5px 10px; border: 1px solid #000;">学籍番号</td>
-                        <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;">${student.student_id_text}</td>
+                        <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;"><div style="width: 100%; text-align: center;">${student.student_id_text}</div></td>
                         <td style="background-color: #f5f5f5; text-align: center; width: 15%; padding: 5px 10px; border: 1px solid #000;">氏　名</td>
-                        <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold; font-size: 13pt; text-align: center;">${student.student_name}</td>
+                        <td style="width: 35%; padding: 5px 10px; border: 1px solid #000; font-weight: bold; font-size: 13pt; text-align: center;"><div style="width: 100%; text-align: center;">${student.student_name}</div></td>
                     </tr>
                     <tr>
                         <td style="background-color: #f5f5f5; text-align: center; padding: 5px 10px; border: 1px solid #000;">クラス</td>
-                        <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;">${student.class_name}</td>
+                        <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;"><div style="width: 100%; text-align: center;">${student.class_name}</div></td>
                         <td style="background-color: #f5f5f5; text-align: center; padding: 5px 10px; border: 1px solid #000;">学　期</td>
-                        <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;">${yearTerm || ''}</td>
+                        <td style="padding: 5px 10px; border: 1px solid #000; font-weight: bold; text-align: center;"><div style="width: 100%; text-align: center;">${yearTerm || ''}</div></td>
                     </tr>
                 </table>
 
@@ -463,17 +463,17 @@ export async function generateGradePDFClient(data) {
                     <thead>
                         <tr style="background: #f0f0f0;">
                             ${isExam ? `
-                                <th style="border: 1px solid #000; padding: 8px; text-align: center;">科目</th>
-                                <th style="border: 1px solid #000; padding: 8px; text-align: center;">満点</th>
-                                <th style="border: 1px solid #000; padding: 8px; text-align: center;">得点</th>
-                                <th style="border: 1px solid #000; padding: 8px; text-align: center;">評価</th>
+                                <th style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">科目</div></th>
+                                <th style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">満点</div></th>
+                                <th style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">得点</div></th>
+                                <th style="border: 1px solid #000; padding: 8px; text-align: center;"><div style="width: 100%; text-align: center;">評価</div></th>
                             ` : `
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">科目</th>
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">基礎点</th>
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">出席点</th>
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">平常点</th>
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">合計</th>
-                                <th style="border: 1px solid #000; padding: 10px; text-align: center;">評定</th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">科目</div></th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">基礎点</div></th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">出席点</div></th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">平常点</div></th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">合計</div></th>
+                                <th style="border: 1px solid #000; padding: 10px; text-align: center;"><div style="width: 100%; text-align: center;">評定</div></th>
                             `}
                         </tr>
                     </thead>
