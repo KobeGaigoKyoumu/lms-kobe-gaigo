@@ -242,13 +242,8 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">言語知識（文字・語彙・文法）・読解</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${combinedScore} / 120</div></td>
-                    <td style="text-align: center; font-weight: 600;">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[0] || finalExam.judgments?.[1])}">
-                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div>
-                            </div>
-                        </div>
-                    </td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${combinedCorrect} / ${combinedTotalQ}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div></td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-badge" style="${getEvalStyle(eStr)}">
@@ -274,13 +269,8 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">言語知識（文字・語彙・文法）</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${vocabScore} / 60</div></td>
-                    <td style="text-align: center; font-weight: 600;">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[0])}">
-                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[0] || '-'}</div>
-                            </div>
-                        </div>
-                    </td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${vCorrect} / ${vTotal}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || '-'}</div></td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-badge" style="${getEvalStyle(vEval)}">
@@ -292,13 +282,8 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">読解</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${rScore} / 60</div></td>
-                    <td style="text-align: center; font-weight: 600;">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[1])}">
-                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[1] || '-'}</div>
-                            </div>
-                        </div>
-                    </td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${rCounts.correct} / ${rCounts.total}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[1] || '-'}</div></td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                             <div class="evaluation-badge" style="${getEvalStyle(rEval)}">
@@ -320,13 +305,8 @@ export async function generateGradePDFClient(data) {
             <tr>
                 <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">聴解</div></td>
                 <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${lScore} / 60</div></td>
-                <td style="text-align: center; font-weight: 600;">
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                        <div class="evaluation-badge" style="${getEvalStyle(lJudgeStr)}">
-                            <div class="baseline-lift" style="top: -0.4mm;">${lJudgeStr}</div>
-                        </div>
-                    </div>
-                </td>
+                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${lCounts.correct} / ${lCounts.total}</div></td>
+                <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${lJudgeStr}</div></td>
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <div class="evaluation-badge" style="${getEvalStyle(lEval)}">
@@ -350,13 +330,8 @@ export async function generateGradePDFClient(data) {
             <tr style="background-color: #f8fafc; font-weight: bold;">
                 <td style="text-align: left; padding-left: 15px;"><div class="baseline-lift">合計</div></td>
                 <td style="text-align: right; padding-right: 15px;"><div class="baseline-lift">${totalScore} / 180</div></td>
-                <td style="text-align: center;">
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                        <div class="evaluation-badge" style="${getEvalStyle(student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '合格' : '不合格')}">
-                            <div class="baseline-lift" style="top: -0.4mm;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div>
-                        </div>
-                    </div>
-                </td>
+                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${allCorrect} / ${allTotal}</div></td>
+                <td style="text-align: center;"><div class="baseline-lift">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div></td>
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <div class="evaluation-badge" style="${getEvalStyle(totalEval)}">
@@ -517,7 +492,7 @@ export async function generateGradePDFClient(data) {
                             <td colspan="3" style="padding: 4px 0 0 0; font-size: 8pt; color: #475569;">
                                 <table style="width: 100%; border: none; border-collapse: collapse;">
                                     <tr>
-                                        <td style="width: 120px; white-space: nowrap;"><div class="baseline-lift" style="top: -0.6mm; font-size: 8pt; color: #475569;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div></td>
+                                        <td style="width: 112px; white-space: nowrap;"><div class="baseline-lift" style="top: -0.6mm; font-size: 8pt; color: #475569;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div></td>
                                         <td><div class="baseline-lift" style="top: -0.6mm; font-size: 8pt; color: #475569;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div></td>
                                     </tr>
                                 </table>
