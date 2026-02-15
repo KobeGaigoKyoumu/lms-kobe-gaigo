@@ -235,11 +235,11 @@ export async function generateGradePDFClient(data) {
 
             subjectRows = `
                 <tr>
-                    <td align="center"><div class="cell-center" style="font-weight: 500; text-align: left !important; align-items: flex-start;">言語知識（文字・語彙・文法）・読解</div></td>
-                    <td align="center"><div class="cell-center" style="text-align: right !important; font-weight: 600; align-items: flex-end;">${combinedScore} / 120</div></td>
-                    <td align="center"><div class="cell-center" style="color: #475569;">${combinedCorrect} / ${combinedTotalQ}</div></td>
-                    <td align="center"><div class="cell-center" style="font-weight: 600;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div></td>
-                    <td align="center"><div class="cell-center"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(eStr)}">${eStr}</span></div></td>
+                    <td style="font-weight: 500; text-align: left;">言語知識（文字・語彙・文法）・読解</td>
+                    <td style="text-align: right; font-weight: 600;">${combinedScore} / 120</td>
+                    <td style="text-align: center; color: #475569;">${combinedCorrect} / ${combinedTotalQ}</td>
+                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
+                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(eStr)}">${eStr}</span></td>
                 </tr>
             `;
         } else {
@@ -256,18 +256,18 @@ export async function generateGradePDFClient(data) {
 
             subjectRows = `
                 <tr>
-                    <td align="center"><div class="cell-center" style="font-weight: 500; text-align: left !important; align-items: flex-start;">言語知識（文字・語彙・文法）</div></td>
-                    <td align="center"><div class="cell-center" style="text-align: right !important; font-weight: 600; align-items: flex-end;">${vocabScore} / 60</div></td>
-                    <td align="center"><div class="cell-center" style="color: #475569;">${vCorrect} / ${vTotal}</div></td>
-                    <td align="center"><div class="cell-center" style="font-weight: 600;">${finalExam.judgments?.[0] || '-'}</div></td>
-                    <td align="center"><div class="cell-center"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(vEval)}">${vEval}</span></div></td>
+                    <td style="font-weight: 500; text-align: left;">言語知識（文字・語彙・文法）</td>
+                    <td style="text-align: right; font-weight: 600;">${vocabScore} / 60</td>
+                    <td style="text-align: center; color: #475569;">${vCorrect} / ${vTotal}</td>
+                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || '-'}</td>
+                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(vEval)}">${vEval}</span></td>
                 </tr>
                 <tr>
-                    <td align="center"><div class="cell-center" style="font-weight: 500; text-align: left !important; align-items: flex-start;">読解</div></td>
-                    <td align="center"><div class="cell-center" style="text-align: right !important; font-weight: 600; align-items: flex-end;">${rScore} / 60</div></td>
-                    <td align="center"><div class="cell-center" style="color: #475569;">${rCounts.correct} / ${rCounts.total}</div></td>
-                    <td align="center"><div class="cell-center" style="font-weight: 600;">${finalExam.judgments?.[1] || '-'}</div></td>
-                    <td align="center"><div class="cell-center"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(rEval)}">${rEval}</span></div></td>
+                    <td style="font-weight: 500; text-align: left;">読解</td>
+                    <td style="text-align: right; font-weight: 600;">${rScore} / 60</td>
+                    <td style="text-align: center; color: #475569;">${rCounts.correct} / ${rCounts.total}</td>
+                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[1] || '-'}</td>
+                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(rEval)}">${rEval}</span></td>
                 </tr>
             `;
         }
@@ -279,11 +279,11 @@ export async function generateGradePDFClient(data) {
 
         subjectRows += `
             <tr>
-                <td align="center"><div class="cell-center" style="font-weight: 500; text-align: left !important; align-items: flex-start;">聴解</div></td>
-                <td align="center"><div class="cell-center" style="text-align: right !important; font-weight: 600; align-items: flex-end;">${lScore} / 60</div></td>
-                <td align="center"><div class="cell-center" style="color: #475569;">${lCounts.correct} / ${lCounts.total}</div></td>
-                <td align="center"><div class="cell-center" style="font-weight: 600;">${finalExam.judgments?.[lJudgeIdx] || '-'}</div></td>
-                <td align="center"><div class="cell-center"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(lEval)}">${lEval}</span></div></td>
+                <td style="font-weight: 500; text-align: left;">聴解</td>
+                <td style="text-align: right; font-weight: 600;">${lScore} / 60</td>
+                <td style="text-align: center; color: #475569;">${lCounts.correct} / ${lCounts.total}</td>
+                <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[lJudgeIdx] || '-'}</td>
+                <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(lEval)}">${lEval}</span></td>
             </tr>
         `;
 
@@ -298,11 +298,11 @@ export async function generateGradePDFClient(data) {
 
         subjectRows += `
             <tr style="background-color: #f8fafc; font-weight: bold;">
-                <td align="center"><div class="cell-center" style="text-align: left !important; align-items: flex-start;">合計</div></td>
-                <td align="center"><div class="cell-center" style="text-align: right !important; align-items: flex-end;">${totalScore} / 180</div></td>
-                <td align="center"><div class="cell-center" style="color: #475569;">${allCorrect} / ${allTotal}</div></td>
-                <td align="center"><div class="cell-center">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div></td>
-                <td align="center"><div class="cell-center"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(totalEval)}">${totalEval}</span></div></td>
+                <td style="text-align: left;">合計</td>
+                <td style="text-align: right;">${totalScore} / 180</td>
+                <td style="text-align: center; color: #475569;">${allCorrect} / ${allTotal}</td>
+                <td style="text-align: center;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
+                <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(totalEval)}">${totalEval}</span></td>
             </tr>
         `;
 
@@ -395,6 +395,14 @@ export async function generateGradePDFClient(data) {
                 padding: 0 !important; 
                 vertical-align: middle !important; 
             }
+            .jlpt-table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
+            .jlpt-table th, .jlpt-table td { 
+                border: 1.5px solid #000; 
+                padding: 10px 12px !important; 
+                vertical-align: middle !important; 
+                font-size: 10pt;
+                height: 44px;
+            }
             .cell-center {
                 display: flex;
                 flex-direction: column;
@@ -444,14 +452,14 @@ export async function generateGradePDFClient(data) {
                     </div>
                 </div>
 
-                <table class="pdf-table" style="margin-bottom: 10px;">
+                <table class="jlpt-table" style="margin-bottom: 10px;">
                     <thead>
                         <tr style="background-color: #f9fafb;">
-                            <th align="center" style="font-size: 8pt; font-weight: 600;"><div class="cell-center" style="text-align: left !important; align-items: flex-start;">科目</div></th>
-                            <th align="center" style="font-size: 8pt; font-weight: 600;"><div class="cell-center" style="text-align: right !important; align-items: flex-end;">得点</div></th>
-                            <th align="center" style="font-size: 8pt; font-weight: 600;"><div class="cell-center">正答数</div></th>
-                            <th align="center" style="font-size: 8pt; font-weight: 600;"><div class="cell-center">判定</div></th>
-                            <th align="center" style="font-size: 8pt; font-weight: 600;"><div class="cell-center">評価</div></th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: left;">科目</th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: right;">得点</th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">正答数</th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">判定</th>
+                            <th style="font-size: 8.5pt; font-weight: 600; text-align: center;">評価</th>
                         </tr>
                     </thead>
                     <tbody>
