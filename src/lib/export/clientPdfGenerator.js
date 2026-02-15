@@ -223,9 +223,10 @@ export async function generateGradePDFClient(data) {
         };
 
         const getEvalStyle = (val) => {
-            if (val === 'A') return 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
-            if (val === 'B') return 'background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a;';
-            return 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
+            if (val === 'A' || val === '合格' || val === '○' || val === '合') return 'background-color: #dcfce7; color: #166534; border: 0.05px solid #bbf7d0;';
+            if (val === 'B') return 'background-color: #fef9c3; color: #854d0e; border: 0.05px solid #fef08a;';
+            if (val === 'C' || val === '不合格' || val === '×' || val === '否') return 'background-color: #fee2e2; color: #991b1b; border: 0.05px solid #fecaca;';
+            return 'background-color: #f1f5f9; color: #475569; border: 0.05px solid #e2e8f0;';
         };
 
         if (finalExam.level === 'N4' || finalExam.level === 'N5') {
@@ -241,12 +242,17 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">言語知識（文字・語彙・文法）・読解</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${combinedScore} / 120</div></td>
-                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${combinedCorrect} / ${combinedTotalQ}</div></td>
-                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div></td>
+                    <td style="text-align: center; font-weight: 600;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[0] || finalExam.judgments?.[1])}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div>
+                            </div>
+                        </div>
+                    </td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-circle" style="${getEvalStyle(eStr)}">
-                                <div class="baseline-lift">${eStr}</div>
+                            <div class="evaluation-badge" style="${getEvalStyle(eStr)}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${eStr}</div>
                             </div>
                         </div>
                     </td>
@@ -268,12 +274,17 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">言語知識（文字・語彙・文法）</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${vocabScore} / 60</div></td>
-                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${vCorrect} / ${vTotal}</div></td>
-                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || '-'}</div></td>
+                    <td style="text-align: center; font-weight: 600;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[0])}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[0] || '-'}</div>
+                            </div>
+                        </div>
+                    </td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-circle" style="${getEvalStyle(vEval)}">
-                                <div class="baseline-lift">${vEval}</div>
+                            <div class="evaluation-badge" style="${getEvalStyle(vEval)}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${vEval}</div>
                             </div>
                         </div>
                     </td>
@@ -281,12 +292,17 @@ export async function generateGradePDFClient(data) {
                 <tr>
                     <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">読解</div></td>
                     <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${rScore} / 60</div></td>
-                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${rCounts.correct} / ${rCounts.total}</div></td>
-                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[1] || '-'}</div></td>
+                    <td style="text-align: center; font-weight: 600;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-badge" style="${getEvalStyle(finalExam.judgments?.[1])}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${finalExam.judgments?.[1] || '-'}</div>
+                            </div>
+                        </div>
+                    </td>
                     <td style="text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="evaluation-circle" style="${getEvalStyle(rEval)}">
-                                <div class="baseline-lift">${rEval}</div>
+                            <div class="evaluation-badge" style="${getEvalStyle(rEval)}">
+                                <div class="baseline-lift" style="top: -0.4mm;">${rEval}</div>
                             </div>
                         </div>
                     </td>
@@ -304,12 +320,17 @@ export async function generateGradePDFClient(data) {
             <tr>
                 <td style="font-weight: 500; text-align: left; padding-left: 15px;"><div class="baseline-lift">聴解</div></td>
                 <td style="text-align: right; padding-right: 15px; font-weight: 600;"><div class="baseline-lift">${lScore} / 60</div></td>
-                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${lCounts.correct} / ${lCounts.total}</div></td>
-                <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${lJudgeStr}</div></td>
+                <td style="text-align: center; font-weight: 600;">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div class="evaluation-badge" style="${getEvalStyle(lJudgeStr)}">
+                            <div class="baseline-lift" style="top: -0.4mm;">${lJudgeStr}</div>
+                        </div>
+                    </div>
+                </td>
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                        <div class="evaluation-circle" style="${getEvalStyle(lEval)}">
-                            <div class="baseline-lift">${lEval}</div>
+                        <div class="evaluation-badge" style="${getEvalStyle(lEval)}">
+                            <div class="baseline-lift" style="top: -0.4mm;">${lEval}</div>
                         </div>
                     </div>
                 </td>
@@ -329,12 +350,17 @@ export async function generateGradePDFClient(data) {
             <tr style="background-color: #f8fafc; font-weight: bold;">
                 <td style="text-align: left; padding-left: 15px;"><div class="baseline-lift">合計</div></td>
                 <td style="text-align: right; padding-right: 15px;"><div class="baseline-lift">${totalScore} / 180</div></td>
-                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${allCorrect} / ${allTotal}</div></td>
-                <td style="text-align: center;"><div class="baseline-lift">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div></td>
                 <td style="text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                        <div class="evaluation-circle" style="${getEvalStyle(totalEval)}">
-                            <div class="baseline-lift">${totalEval}</div>
+                        <div class="evaluation-badge" style="${getEvalStyle(student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '合格' : '不合格')}">
+                            <div class="baseline-lift" style="top: -0.4mm;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div class="evaluation-badge" style="${getEvalStyle(totalEval)}">
+                            <div class="baseline-lift" style="top: -0.4mm;">${totalEval}</div>
                         </div>
                     </div>
                 </td>
@@ -466,15 +492,16 @@ export async function generateGradePDFClient(data) {
                 line-height: 1.1;
                 box-sizing: border-box;
             }
-            .evaluation-circle {
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-                font-size: 9pt;
+            .evaluation-badge {
+                display: inline-block;
+                padding: 1px 16px; /* Horizontally wide pill */
+                border-radius: 10px; /* Capsule shape */
+                font-size: 8.5pt;
                 font-weight: 800;
-                margin: 0 auto;
-                line-height: 24px; /* Explicit line-height for centering */
+                min-width: 44px;
+                line-height: 1.4;
                 text-align: center;
+                vertical-align: middle;
             }
         </style>
         <div class="pdf-page">
