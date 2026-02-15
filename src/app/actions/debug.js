@@ -50,3 +50,22 @@ export async function getSessionDebug() {
         return { error: e.message }
     }
 }
+
+export async function createTestAssignment(className) {
+    if (!className) return { error: 'Class name required' }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('homework_assignments')
+        .insert({
+            title: '[DEBUG] テスト課題 ' + new Date().toLocaleTimeString(),
+            description: 'デバッグ用に自動生成された課題です。',
+            class_name: className,
+            deadline: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+            mandatory: false
+        })
+        .select()
+
+    if (error) return { error: error.message }
+    return { success: true, data }
+}
