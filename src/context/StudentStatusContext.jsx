@@ -76,7 +76,7 @@ export function StudentStatusProvider({ children, role, userId }) {
             }
 
             if (!success) {
-                const resInternal = await fetch('/api/status')
+                const resInternal = await fetch('/api/status', { cache: 'no-store' })
                 if (resInternal.ok) {
                     const data = await resInternal.json()
                     const normalized = normalizeStatuses(data);
@@ -152,7 +152,7 @@ export function StudentStatusProvider({ children, role, userId }) {
     const contextValue = React.useMemo(() => ({
         ...statuses,
         refreshStatus: fetchStatuses
-    }), [statuses])
+    }), [statuses, role, userId]) // Include deps that affect fetchStatuses closure
 
     if (!mounted) {
         return (
