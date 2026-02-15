@@ -209,6 +209,7 @@ html {
   scroll-behavior: smooth;
   color-scheme: light dark;
   overscroll-behavior-y: none;
+  height: 100%;
 }
 
 body {
@@ -220,6 +221,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior-y: none;
+  height: 100%;
 }
 
 a {

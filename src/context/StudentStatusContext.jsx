@@ -103,6 +103,7 @@ export function StudentStatusProvider({ children, role, userId }) {
                 const resInternal = await fetch('/api/status', { cache: 'no-store' })
                 if (resInternal.ok) {
                     const data = await resInternal.json()
+                    console.log('📱 Status API (Internal) Data:', data); // DEBUG
                     const normalized = normalizeStatuses(data);
                     setStatuses(prev => ({ ...prev, ...normalized }))
                     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
@@ -111,6 +112,16 @@ export function StudentStatusProvider({ children, role, userId }) {
             }
         } catch (error) {
             console.error('Failed to fetch status:', error)
+            // Retry internal
+            const resInternal = await fetch('/api/status', { cache: 'no-store' })
+            if (resInternal.ok) {
+                const data = await resInternal.json()
+                console.log('📱 Status API (Retry) Data:', data); // DEBUG
+                const normalized = normalizeStatuses(data);
+                setStatuses(prev => ({ ...prev, ...normalized }))
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                lastFetchRef.current = now
+            }
         }
     }
 
