@@ -71,13 +71,13 @@ export async function generateAttendancePDFClient(data) {
 
         return `
             <tr>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;">${row.year}年${row.month}月</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;">${row.class_days}</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;">${row.attendance_days}</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;">${row.absence_days}</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;">${row.late_slots !== undefined ? row.late_slots : '-'}</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(cRate)}">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(mRate)}">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.year}年${row.month}月</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.class_days}</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.attendance_days}</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.absence_days}</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.late_slots !== undefined ? row.late_slots : '-'}</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(cRate)}"><div class="baseline-lift" style="top: -0.6mm;">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</div></td>
+                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(mRate)}"><div class="baseline-lift" style="top: -0.6mm;">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</div></td>
             </tr>
         `;
     }).join('');
@@ -94,6 +94,10 @@ export async function generateAttendancePDFClient(data) {
                 line-height: 1.3;
             }
             .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
+            .baseline-lift {
+                position: relative;
+                top: -1.0mm;
+            }
         </style>
         <div class="pdf-page">
             <div style="text-align: right; font-size: 10pt; margin-bottom: 2mm;">発行日：${today}</div>
@@ -108,10 +112,10 @@ export async function generateAttendancePDFClient(data) {
             </div>
             <div style="position: absolute; bottom: 1mm; right: 0; width: 60mm; height: 26mm; border: 2px solid #333; border-radius: 8px; background: #fff; overflow: hidden;">
                 <div style="height: 8mm; background-color: #f5f5f5; border-bottom: 1px solid #333; font-size: 8pt; display: flex; align-items: center; justify-content: center; text-align: center; color: #555;">
-                    ${latestData.year}年${latestData.month}月出席率
+                    <div class="baseline-lift" style="top: -0.5mm;">${latestData.year}年${latestData.month}月出席率</div>
                 </div>
                 <div style="height: 18mm; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: bold; ${rateClass}">
-                    ${latestRatePercent}%
+                    <div class="baseline-lift" style="top: -1mm;">${latestRatePercent}%</div>
                 </div>
             </div>
         </div>
@@ -235,11 +239,17 @@ export async function generateGradePDFClient(data) {
 
             subjectRows = `
                 <tr>
-                    <td style="font-weight: 500; text-align: left;">言語知識（文字・語彙・文法）・読解</td>
-                    <td style="text-align: right; font-weight: 600;">${combinedScore} / 120</td>
-                    <td style="text-align: center; color: #475569;">${combinedCorrect} / ${combinedTotalQ}</td>
-                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
-                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(eStr)}">${eStr}</span></td>
+                    <td style="font-weight: 500; text-align: left;"><div class="baseline-lift">言語知識（文字・語彙・文法）・読解</div></td>
+                    <td style="text-align: right; font-weight: 600;"><div class="baseline-lift">${combinedScore} / 120</div></td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${combinedCorrect} / ${combinedTotalQ}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</div></td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-circle" style="${getEvalStyle(eStr)}">
+                                <div class="baseline-lift" style="top: -0.8mm;">${eStr}</div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             `;
         } else {
@@ -256,18 +266,30 @@ export async function generateGradePDFClient(data) {
 
             subjectRows = `
                 <tr>
-                    <td style="font-weight: 500; text-align: left;">言語知識（文字・語彙・文法）</td>
-                    <td style="text-align: right; font-weight: 600;">${vocabScore} / 60</td>
-                    <td style="text-align: center; color: #475569;">${vCorrect} / ${vTotal}</td>
-                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || '-'}</td>
-                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(vEval)}">${vEval}</span></td>
+                    <td style="font-weight: 500; text-align: left;"><div class="baseline-lift">言語知識（文字・語彙・文法）</div></td>
+                    <td style="text-align: right; font-weight: 600;"><div class="baseline-lift">${vocabScore} / 60</div></td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${vCorrect} / ${vTotal}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[0] || '-'}</div></td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-circle" style="${getEvalStyle(vEval)}">
+                                <div class="baseline-lift" style="top: -0.8mm;">${vEval}</div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 500; text-align: left;">読解</td>
-                    <td style="text-align: right; font-weight: 600;">${rScore} / 60</td>
-                    <td style="text-align: center; color: #475569;">${rCounts.correct} / ${rCounts.total}</td>
-                    <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[1] || '-'}</td>
-                    <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(rEval)}">${rEval}</span></td>
+                    <td style="font-weight: 500; text-align: left;"><div class="baseline-lift">読解</div></td>
+                    <td style="text-align: right; font-weight: 600;"><div class="baseline-lift">${rScore} / 60</div></td>
+                    <td style="text-align: center; color: #475569;"><div class="baseline-lift">${rCounts.correct} / ${rCounts.total}</div></td>
+                    <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[1] || '-'}</div></td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <div class="evaluation-circle" style="${getEvalStyle(rEval)}">
+                                <div class="baseline-lift" style="top: -0.8mm;">${rEval}</div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             `;
         }
@@ -279,11 +301,17 @@ export async function generateGradePDFClient(data) {
 
         subjectRows += `
             <tr>
-                <td style="font-weight: 500; text-align: left;">聴解</td>
-                <td style="text-align: right; font-weight: 600;">${lScore} / 60</td>
-                <td style="text-align: center; color: #475569;">${lCounts.correct} / ${lCounts.total}</td>
-                <td style="text-align: center; font-weight: 600;">${finalExam.judgments?.[lJudgeIdx] || '-'}</td>
-                <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(lEval)}">${lEval}</span></td>
+                <td style="font-weight: 500; text-align: left;"><div class="baseline-lift">聴解</div></td>
+                <td style="text-align: right; font-weight: 600;"><div class="baseline-lift">${lScore} / 60</div></td>
+                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${lCounts.correct} / ${lCounts.total}</div></td>
+                <td style="text-align: center; font-weight: 600;"><div class="baseline-lift">${finalExam.judgments?.[lJudgeIdx] || '-'}</div></td>
+                <td style="text-align: center;">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div class="evaluation-circle" style="${getEvalStyle(lEval)}">
+                            <div class="baseline-lift" style="top: -0.8mm;">${lEval}</div>
+                        </div>
+                    </div>
+                </td>
             </tr>
         `;
 
@@ -298,11 +326,17 @@ export async function generateGradePDFClient(data) {
 
         subjectRows += `
             <tr style="background-color: #f8fafc; font-weight: bold;">
-                <td style="text-align: left;">合計</td>
-                <td style="text-align: right;">${totalScore} / 180</td>
-                <td style="text-align: center; color: #475569;">${allCorrect} / ${allTotal}</td>
-                <td style="text-align: center;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
-                <td style="text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 8pt; font-weight: 700; ${getEvalStyle(totalEval)}">${totalEval}</span></td>
+                <td style="text-align: left;"><div class="baseline-lift">合計</div></td>
+                <td style="text-align: right;"><div class="baseline-lift">${totalScore} / 180</div></td>
+                <td style="text-align: center; color: #475569;"><div class="baseline-lift">${allCorrect} / ${allTotal}</div></td>
+                <td style="text-align: center;"><div class="baseline-lift">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</div></td>
+                <td style="text-align: center;">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div class="evaluation-circle" style="${getEvalStyle(totalEval)}">
+                            <div class="baseline-lift" style="top: -0.8mm;">${totalEval}</div>
+                        </div>
+                    </div>
+                </td>
             </tr>
         `;
 
@@ -324,9 +358,9 @@ export async function generateGradePDFClient(data) {
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             ${subDetails.map(d => `
                                 <div class="rigid-box" style="width: 38px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
-                                    <div style="font-size: 6.5pt; font-weight: bold; color: #64748b; line-height: 1; margin-top: 1px;">${d.questionNo}</div>
-                                    <div style="font-size: 8pt; font-weight: 700; color: #1e293b; line-height: 1.1;">${d.selected || '-'}</div>
-                                    <div style="font-size: 6pt; color: #94a3b8; line-height: 1;">(${d.correctAnswer})</div>
+                                    <div class="baseline-lift" style="font-size: 6.5pt; font-weight: bold; color: #64748b; top: -0.3mm;">${d.questionNo}</div>
+                                    <div class="baseline-lift" style="font-size: 8pt; font-weight: 700; color: #1e293b; top: -0.5mm;">${d.selected || '-'}</div>
+                                    <div class="baseline-lift" style="font-size: 6pt; color: #94a3b8; top: -0.3mm;">(${d.correctAnswer})</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -343,10 +377,10 @@ export async function generateGradePDFClient(data) {
         if (isExam) {
             subjectRows = subjects.map(key => `
             <tr>
-                    <td style="font-weight: bold; width: 40%; font-size: 11pt; text-align: left;">${subjectNames[key]}</td>
-                    <td style="width: 20%;">100</td>
-                    <td style="font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</td>
-                    <td style="font-weight: bold; width: 20%;">${calculateGrade(student.final_exam_data?.[key])}</td>
+                    <td style="font-weight: bold; width: 40%; font-size: 11pt; text-align: left;"><div class="baseline-lift">${subjectNames[key]}</div></td>
+                    <td style="width: 20%;"><div class="baseline-lift">100</div></td>
+                    <td style="font-weight: bold; width: 20%;"><div class="baseline-lift">${student.final_exam_data?.[key] || '-'}</div></td>
+                    <td style="font-weight: bold; width: 20%;"><div class="baseline-lift">${calculateGrade(student.final_exam_data?.[key])}</div></td>
                 </tr>
             `).join('');
         } else {
@@ -356,12 +390,12 @@ export async function generateGradePDFClient(data) {
                 const d = reportData[key] || {};
                 return `
                     <tr>
-                        <td style="font-weight: bold; width: 25%; font-size: 10pt; text-align: left;">${subjectNames[key]}</td>
-                        <td style="width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
-                        <td style="width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</td>
-                        <td style="width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</td>
-                        <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
-                        <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
+                        <td style="font-weight: bold; width: 25%; font-size: 10pt; text-align: left;"><div class="baseline-lift">${subjectNames[key]}</div></td>
+                        <td style="width: 15%;"><div class="baseline-lift">${d.base !== undefined ? d.base.toFixed(1) : '-'}</div></td>
+                        <td style="width: 15%;"><div class="baseline-lift">${att !== undefined ? att.toFixed(1) : '-'}</div></td>
+                        <td style="width: 15%;"><div class="baseline-lift">${part !== undefined ? part.toFixed(1) : '-'}</div></td>
+                        <td style="font-weight: bold; width: 15%;"><div class="baseline-lift">${d.total !== undefined ? d.total.toFixed(1) : '-'}</div></td>
+                        <td style="font-weight: bold; width: 15%;"><div class="baseline-lift">${d.total !== undefined ? calculateGrade(d.total) : '-'}</div></td>
                     </tr>
             `;
             }).join('');
@@ -400,23 +434,39 @@ export async function generateGradePDFClient(data) {
                 text-align: center;
                 overflow: hidden;
             }
-            .jlpt-table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
             .jlpt-table th, .jlpt-table td { 
                 border: 1.5px solid #000; 
                 padding: 10px 12px 14px 12px !important; 
                 vertical-align: middle !important; 
-                line-height: 1.1 !important;
+                line-height: 1 !important;
                 font-size: 10pt;
                 height: 46px;
                 text-align: center;
+            }
+            .baseline-lift {
+                position: relative;
+                top: -1.2mm; /* Physical lift to counteract html2canvas baseline drift */
             }
             .rigid-box {
                 display: inline-block;
                 vertical-align: top;
                 text-align: center;
-                padding-top: 2px;
-                padding-bottom: 4px;
+                padding-top: 3px;
+                padding-bottom: 0;
                 min-height: 38px;
+                line-height: 1.1;
+                box-sizing: border-box;
+            }
+            .evaluation-circle {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 9pt;
+                font-weight: 800;
+                margin: 0 auto;
                 line-height: 1;
             }
         </style>
@@ -445,12 +495,12 @@ export async function generateGradePDFClient(data) {
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <div style="text-align: center; padding: 4px 12px; border-radius: 6px; min-width: 80px; border: 1px solid #000; background-color: #fff;">
-                            <div style="font-size: 6.5pt; color: #64748b; margin-bottom: 1px;">合計点</div>
-                            <div style="font-size: 11pt; font-weight: bold;">${student.final_exam_total || 0}点 <span style="font-size: 8.5pt; color: #64748b; font-weight: normal;">/ 180</span></div>
+                            <div class="baseline-lift" style="font-size: 6.5pt; color: #64748b; top: -0.5mm;">合計点</div>
+                            <div class="baseline-lift" style="font-size: 11pt; font-weight: bold; top: -1.0mm;">${student.final_exam_total || 0}点 <span style="font-size: 8.5pt; color: #64748b; font-weight: normal;">/ 180</span></div>
                         </div>
                         <div style="text-align: center; padding: 4px 12px; border-radius: 6px; min-width: 80px; border: 1px solid ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'}; background-color: ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#f0fdf4' : '#fef2f2'};">
-                            <div style="font-size: 6.5pt; color: ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#166534' : '#991b1b'}; margin-bottom: 1px;">判定</div>
-                            <div style="font-size: 11pt; font-weight: 800; color: ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'};">${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '合格' : '不合格'}</div>
+                            <div class="baseline-lift" style="font-size: 6.5pt; color: ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#166534' : '#991b1b'}; top: -0.5mm;">判定</div>
+                            <div class="baseline-lift" style="font-size: 11pt; font-weight: 800; color: ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'}; top: -1.0mm;">${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '合格' : '不合格'}</div>
                         </div>
                     </div>
                 </div>
@@ -529,9 +579,9 @@ export async function generateGradePDFClient(data) {
                         <div style="font-size: 11pt; margin-bottom: 3mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
                         <div style="font-size: 20pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 11pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                     </div>
-                    <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; background: #fff; box-sizing: border-box; padding-top: 5mm;">
-                        <div style="font-size: 10pt; margin-bottom: 2mm;">${isExam ? '総合判定' : '総合評定'}</div>
-                        <div style="font-size: 32pt; font-weight: bold; line-height: 1;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                    <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div class="baseline-lift" style="font-size: 10pt; top: -1mm;">${isExam ? '総合判定' : '総合評定'}</div>
+                        <div class="baseline-lift" style="font-size: 32pt; font-weight: bold; line-height: 1; top: -3mm;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                     </div>
                 </div>
 
@@ -603,9 +653,9 @@ export async function generateCertificatePDFClient(data, issueDate) {
         const selectedGrade = grades[subject] || '';
         const gradeCells = gradeLetters.map(letter => {
             const isSelected = selectedGrade === letter;
-            return `<td style="border: 1px solid #000; padding: 4px; text-align: center; width: 14%;">${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</td>`;
+            return `<td style="border: 1px solid #000; padding: 4px; text-align: center; width: 14%;"><div class="baseline-lift" style="top: -0.5mm;">${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</div></td>`;
         }).join('');
-        return `<tr><td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;">${subject}</td>${gradeCells}</tr>`;
+        return `<tr><td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;"><div class="baseline-lift" style="top: -0.5mm;">${subject}</div></td>${gradeCells}</tr>`;
     }).join('');
 
     container.innerHTML = `
@@ -621,6 +671,10 @@ export async function generateCertificatePDFClient(data, issueDate) {
                 box-sizing: border-box;
             }
             .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
+            .baseline-lift {
+                position: relative;
+                top: -1.2mm;
+            }
         </style>
     <div class="pdf-page">
         <div style="text-align: center; margin-bottom: 20px;">
