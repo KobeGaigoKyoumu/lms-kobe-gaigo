@@ -196,6 +196,172 @@ export async function generateGradePDFClient(data) {
     container.style.lineHeight = '1.3';
     container.style.boxSizing = 'border-box';
 
+    const isExam = type === 'final_exam';
+    let subjectRows = '';
+    let detailsHtml = '';
+
+    if (isJlpt) {
+        // Modern JLPT Mock Exam Results Design
+        const finalExam = student.final_exam_data || {};
+        const reportDetails = student.report_card_data || {};
+        const totalScore = student.final_exam_total || 0;
+
+        const getEvalStr = (score, max) => {
+            if (score > (max * 2 / 3)) return 'A';
+            if (score > (max / 3)) return 'B';
+            return 'C';
+        };
+
+        const getEvalStyle = (val) => {
+            if (val === 'A') return 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
+            if (val === 'B') return 'background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a;';
+            return 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
+        };
+
+        if (finalExam.level === 'N4' || finalExam.level === 'N5') {
+            const vocab = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+            const grammar = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+            const reading = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+            const combinedScore = (finalExam.vocab || 0) + (finalExam.grammarReading || 0);
+            const combinedCorrect = vocab.correct + grammar.correct + reading.correct;
+            const combinedTotalQ = vocab.total + grammar.total + reading.total;
+            const eStr = getEvalStr(combinedScore, 120);
+
+            subjectRows = `
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">言語知識（文字・語彙・文法）・読解</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${combinedScore} / 120</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${combinedCorrect} / ${combinedTotalQ}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || finalExam.judgments?.[1] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(eStr)}">${eStr}</span></td>
+                </tr>
+            `;
+        } else {
+            const vocabScore = (finalExam.vocab || 0) + (finalExam.grammar || 0);
+            const vocabCounts = reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'] || { correct: 0, total: 0 };
+            const grammarCounts = reportDetails.subjectCorrectCounts?.['文法'] || { correct: 0, total: 0 };
+            const vCorrect = vocabCounts.correct + grammarCounts.correct;
+            const vTotal = vocabCounts.total + grammarCounts.total;
+            const vEval = getEvalStr(vocabScore, 60);
+
+            const rScore = finalExam.reading || 0;
+            const rCounts = reportDetails.subjectCorrectCounts?.['読解'] || { correct: 0, total: 0 };
+            const rEval = getEvalStr(rScore, 60);
+
+            subjectRows = `
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">言語知識（文字・語彙・文法）</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${vocabScore} / 60</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${vCorrect} / ${vTotal}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[0] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(vEval)}">${vEval}</span></td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">読解</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${rScore} / 60</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${rCounts.correct} / ${rCounts.total}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[1] || '-'}</td>
+                    <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(rEval)}">${rEval}</span></td>
+                </tr>
+            `;
+        }
+
+        const lScore = finalExam.listening || 0;
+        const lCounts = reportDetails.subjectCorrectCounts?.['聴解'] || { correct: 0, total: 0 };
+        const lEval = getEvalStr(lScore, 60);
+        const lJudgeIdx = (finalExam.level === 'N4' || finalExam.level === 'N5') ? 1 : 2;
+
+        subjectRows += `
+            <tr>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; font-weight: 500;">聴解</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right; font-weight: 600;">${lScore} / 60</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; color: #475569;">${lCounts.correct} / ${lCounts.total}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center; font-weight: 600;">${finalExam.judgments?.[lJudgeIdx] || '-'}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(lEval)}">${lEval}</span></td>
+            </tr>
+        `;
+
+        const totalEval = getEvalStr(totalScore, 180);
+        const counts = reportDetails.subjectCorrectCounts || {};
+        const vC = counts['文字・語彙'] || counts['文字語彙'] || counts['語彙'] || { correct: 0, total: 0 };
+        const gC = counts['文法'] || { correct: 0, total: 0 };
+        const rC = counts['読解'] || { correct: 0, total: 0 };
+        const lC = counts['聴解'] || { correct: 0, total: 0 };
+        const allCorrect = vC.correct + gC.correct + rC.correct + lC.correct;
+        const allTotal = vC.total + gC.total + rC.total + lC.total;
+
+        subjectRows += `
+            <tr style="background-color: #f8fafc; font-weight: bold;">
+                <td style="border: 1px solid #e5e7eb; padding: 6px;">合計</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: right;">${totalScore} / 180</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;">${allCorrect} / ${allTotal}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;">${finalExam.result === '合' || finalExam.result === '○' ? '合格' : '不合格'}</td>
+                <td style="border: 1px solid #e5e7eb; padding: 6px; text-align: center;"><span style="padding: 1px 8px; border-radius: 9999px; font-size: 7pt; font-weight: 700; ${getEvalStyle(totalEval)}">${totalEval}</span></td>
+            </tr>
+        `;
+
+        if (reportDetails.answerDetails && reportDetails.answerDetails.length > 0) {
+            const categories = ['文字・語彙', '文法', '読解', '聴解'];
+            detailsHtml = categories.map(sub => {
+                const subDetails = reportDetails.answerDetails.filter(d => {
+                    if (sub === '文字・語彙') return d.subject === '文字・語彙' || d.subject === '文字語彙' || d.subject === '語彙';
+                    return d.subject === sub;
+                });
+                if (subDetails.length === 0) return '';
+                const catCounts = sub === '文字・語彙'
+                    ? (reportDetails.subjectCorrectCounts?.['文字・語彙'] || reportDetails.subjectCorrectCounts?.['文字語彙'] || reportDetails.subjectCorrectCounts?.['語彙'])
+                    : reportDetails.subjectCorrectCounts?.[sub];
+
+                return `
+                    <div style="margin-bottom: 8px;">
+                        <h4 style="font-size: 8pt; font-weight: bold; color: #334155; margin-bottom: 4px; padding-left: 6px; border-left: 3px solid #64748b;">${sub} <span style="font-size: 7.5pt; color: #64748b; font-weight: normal; margin-left: 4px;">(${catCounts?.correct || 0} / ${catCounts?.total || 0})</span></h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            ${subDetails.map(d => `
+                                <div style="width: 38px; padding: 3px 1px; border: 1px solid ${d.isCorrect ? '#bbf7d0' : '#fecaca'}; border-radius: 3px; text-align: center; background-color: ${d.isCorrect ? '#f0fdf4' : '#fef2f2'};">
+                                    <div style="font-size: 6.5pt; font-weight: bold; color: #64748b; margin-bottom: 1px;">${d.questionNo}</div>
+                                    <div style="font-size: 8pt; font-weight: 700; color: #1e293b;">${d.selected || '-'}</div>
+                                    <div style="font-size: 6pt; color: #94a3b8;">(${d.correctAnswer})</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } else {
+        // Standard Grade Report Design
+        const subjects = ['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'];
+        const subjectNames = { 'vocab': '文字・語彙', 'grammar': '文法', 'reading': '読解', 'listening': '聴解', 'writing': '作文', 'conversation': '会話' };
+        let reportData = student.report_card_data || {};
+
+        if (isExam) {
+            subjectRows = subjects.map(key => `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${subjectNames[key]}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">100</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${student.final_exam_data?.[key] || '-'}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${calculateGrade(student.final_exam_data?.[key])}</td>
+                </tr>
+            `).join('');
+        } else {
+            const att = reportData.attendance;
+            const part = reportData.participation;
+            subjectRows = subjects.map(key => {
+                const d = reportData[key] || {};
+                return `
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${subjectNames[key]}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${att !== undefined ? att.toFixed(1) : '-'}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center;">${part !== undefined ? part.toFixed(1) : '-'}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
+                        <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
     let contentHtml = '';
 
     contentHtml = `
