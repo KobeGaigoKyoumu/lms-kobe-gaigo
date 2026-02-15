@@ -24,6 +24,15 @@ export function StudentStatusProvider({ children, role, userId }) {
     const TTL = 300000 // 5 minutes cache
     const THROTTLE = 30000 // 30 seconds for real-time trigger
 
+    const normalizeStatuses = (data) => {
+        if (!data) return statuses;
+        return {
+            hasNewAnnouncement: !!(data.hasNewAnnouncement ?? data.has_new_announcement),
+            unsubmittedAssignmentCount: Number(data.unsubmittedAssignmentCount ?? data.unsubmitted_assignment_count ?? 0),
+            unreadMessageCount: Number(data.unreadMessageCount ?? data.unread_message_count ?? 0)
+        };
+    };
+
     const fetchStatuses = async (type = 'regular') => {
         if (!userId || !role) return
 
@@ -54,8 +63,9 @@ export function StudentStatusProvider({ children, role, userId }) {
                         const data = await res.json()
                         // Ensure required fields exist
                         if (data && typeof data === 'object') {
-                            setStatuses(prev => ({ ...prev, ...data }))
-                            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+                            const normalized = normalizeStatuses(data);
+                            setStatuses(prev => ({ ...prev, ...normalized }))
+                            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
                             lastFetchRef.current = now
                             success = true
                         }
@@ -69,8 +79,9 @@ export function StudentStatusProvider({ children, role, userId }) {
                 const resInternal = await fetch('/api/status')
                 if (resInternal.ok) {
                     const data = await resInternal.json()
-                    setStatuses(prev => ({ ...prev, ...data }))
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+                    const normalized = normalizeStatuses(data);
+                    setStatuses(prev => ({ ...prev, ...normalized }))
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
                     lastFetchRef.current = now
                 }
             }
@@ -87,7 +98,7 @@ export function StudentStatusProvider({ children, role, userId }) {
             try {
                 const { data, ts } = JSON.parse(cached)
                 if (Date.now() - ts < TTL) {
-                    setStatuses(data)
+                    setStatuses(normalizeStatuses(data))
                     lastFetchRef.current = ts
                 }
             } catch (e) { }

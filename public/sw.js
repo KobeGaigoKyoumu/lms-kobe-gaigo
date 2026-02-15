@@ -35,9 +35,12 @@ self.addEventListener('push', (event) => {
                     try {
                         const count = parseInt(data.badge) || 1;
                         await self.navigator.setAppBadge(count);
+                        console.log('SW: Badge set successfully to', count);
                     } catch (e) {
-                        console.error('Badge error', e);
+                        console.error('SW: Badge error', e);
                     }
+                } else {
+                    console.log('SW: setAppBadge not supported');
                 }
             })()
         ])
