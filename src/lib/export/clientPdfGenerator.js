@@ -125,8 +125,8 @@ export async function generateAttendancePDFClient(data) {
                 <div style="height: 8mm; background-color: #f5f5f5; border-bottom: 1px solid #333; font-size: 8pt; display: flex; align-items: center; justify-content: center; text-align: center; color: #555;">
                     <div class="baseline-lift" style="top: -0.5mm;">${latestData.year}年${latestData.month}月出席率</div>
                 </div>
-                <div style="height: 18mm; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: bold; text-align: center; ${rateClass}">
-                    ${latestRatePercent}%
+                <div style="height: 18mm; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: bold; ${rateClass}">
+                    <div class="baseline-lift" style="top: -1mm;">${latestRatePercent}%</div>
                 </div>
             </div>
         </div>

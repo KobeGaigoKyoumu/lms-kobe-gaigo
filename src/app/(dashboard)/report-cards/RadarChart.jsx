@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import {
     Chart as ChartJS,
     RadialLinearScale,
@@ -22,7 +22,7 @@ ChartJS.register(
     Legend
 )
 
-export default function RadarChart({ labels, data, title, color = 'blue', ...props }) {
+const RadarChart = memo(function RadarChart({ labels, data, title, color = 'blue', ...props }) {
     const colors = {
         blue: {
             bg: 'rgba(59, 130, 246, 0.2)',
@@ -104,4 +104,6 @@ export default function RadarChart({ labels, data, title, color = 'blue', ...pro
     return (
         <Radar data={chartData} options={options} />
     )
-}
+});
+
+export default RadarChart;

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useTransition, useCallback } from 'react'
 import { fetchGradeFilters, fetchTermGradeRecords, deleteGradeRecords } from '@/app/actions/gradeRecords'
 import Link from 'next/link'
 import StudentGradeDetail from './StudentGradeDetail'
@@ -27,6 +27,9 @@ export default function GradeHistoryBoard() {
 
     // Sub View Mode for Details (Exam vs Report - passed to detail component)
     const [detailSubMode, setDetailSubMode] = useState('report') // 'exam' | 'report'
+
+    // Transition state for switching modes
+    const [isPending, startTransition] = useTransition()
 
     // Selection State
     const [selectedIds, setSelectedIds] = useState([])
@@ -337,12 +340,6 @@ export default function GradeHistoryBoard() {
         }
     }
 
-    // Client-side filter (Class only now, Term is already filtered by server)
-    const filteredRecords = records.filter(r => {
-        if (!selectedClass || selectedClass === 'ALL') return true
-        return r.class_name === selectedClass
-    })
-
     // Calculate Grade (A-F) helper
     const calculateGrade = (score) => {
         if (score >= 80) return 'A'
@@ -358,8 +355,8 @@ export default function GradeHistoryBoard() {
         return calculateGrade(normalized)
     }
 
-    // Convert record to student object format expected by StudentGradeDetail
-    const recordToStudent = (r) => {
+    // Memoized record converter
+    const recordToStudent = useCallback((r) => {
         const isJlpt = r.final_exam_data?.type === 'JLPT';
 
         return {
@@ -381,7 +378,20 @@ export default function GradeHistoryBoard() {
             reportCardTotal: r.report_card_total,
             isJlpt: isJlpt
         }
-    }
+    }, [])
+
+    // Client-side filter (Class only now, Term is already filtered by server) - Memoized
+    const filteredRecords = useMemo(() => {
+        return records.filter(r => {
+            if (!selectedClass || selectedClass === 'ALL') return true
+            return r.class_name === selectedClass
+        })
+    }, [records, selectedClass])
+
+    // Pre-calculated student data for Detail view - Memoized
+    const filteredStudents = useMemo(() => {
+        return filteredRecords.map(recordToStudent)
+    }, [filteredRecords, recordToStudent])
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -633,28 +643,31 @@ export default function GradeHistoryBoard() {
                 </div>
             )}
 
+
             {/* PRIMARY TABS: List vs Details */}
             <div style={{ marginBottom: '20px', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '20px' }}>
                 <button
-                    onClick={() => setHistoryViewMode('list')}
+                    onClick={() => startTransition(() => setHistoryViewMode('list'))}
                     style={{
                         padding: '10px 20px',
                         borderBottom: historyViewMode === 'list' ? '2px solid #3b82f6' : 'none',
                         color: historyViewMode === 'list' ? '#3b82f6' : '#6b7280',
                         fontWeight: historyViewMode === 'list' ? 'bold' : 'normal',
-                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem'
+                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem',
+                        opacity: isPending && historyViewMode !== 'list' ? 0.6 : 1
                     }}
                 >
                     一覧表示 (リスト)
                 </button>
                 <button
-                    onClick={() => setHistoryViewMode('details')}
+                    onClick={() => startTransition(() => setHistoryViewMode('details'))}
                     style={{
                         padding: '10px 20px',
                         borderBottom: historyViewMode === 'details' ? '2px solid #3b82f6' : 'none',
                         color: historyViewMode === 'details' ? '#3b82f6' : '#6b7280',
                         fontWeight: historyViewMode === 'details' ? 'bold' : 'normal',
-                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem'
+                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem',
+                        opacity: isPending && historyViewMode !== 'details' ? 0.6 : 1
                     }}
                 >
                     詳細表示 (カード)
@@ -668,14 +681,15 @@ export default function GradeHistoryBoard() {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             {selectedTerm?.startsWith('JLPT') ? (
                                 <button
-                                    onClick={() => setDetailSubMode('exam')}
+                                    onClick={() => startTransition(() => setDetailSubMode('exam'))}
                                     style={{
                                         padding: '6px 14px',
                                         backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
                                         color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
                                         borderRadius: '20px', border: '1px solid',
                                         borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
-                                        cursor: 'pointer', fontSize: '0.85rem'
+                                        cursor: 'pointer', fontSize: '0.85rem',
+                                        opacity: isPending && detailSubMode !== 'exam' ? 0.6 : 1
                                     }}
                                 >
                                     JLPT模擬試験結果詳細を表示
@@ -683,27 +697,29 @@ export default function GradeHistoryBoard() {
                             ) : (
                                 <>
                                     <button
-                                        onClick={() => setDetailSubMode('exam')}
+                                        onClick={() => startTransition(() => setDetailSubMode('exam'))}
                                         style={{
                                             padding: '6px 14px',
                                             backgroundColor: detailSubMode === 'exam' ? '#eff6ff' : '#f3f4f6',
                                             color: detailSubMode === 'exam' ? '#1d4ed8' : '#4b5563',
                                             borderRadius: '20px', border: '1px solid',
                                             borderColor: detailSubMode === 'exam' ? '#bfdbfe' : '#e5e7eb',
-                                            cursor: 'pointer', fontSize: '0.85rem'
+                                            cursor: 'pointer', fontSize: '0.85rem',
+                                            opacity: isPending && detailSubMode !== 'exam' ? 0.6 : 1
                                         }}
                                     >
                                         期末試験結果を表示
                                     </button>
                                     <button
-                                        onClick={() => setDetailSubMode('report')}
+                                        onClick={() => startTransition(() => setDetailSubMode('report'))}
                                         style={{
                                             padding: '6px 14px',
                                             backgroundColor: detailSubMode === 'report' ? '#ecfdf5' : '#f3f4f6',
                                             color: detailSubMode === 'report' ? '#047857' : '#4b5563',
                                             borderRadius: '20px', border: '1px solid',
                                             borderColor: detailSubMode === 'report' ? '#a7f3d0' : '#e5e7eb',
-                                            cursor: 'pointer', fontSize: '0.85rem'
+                                            cursor: 'pointer', fontSize: '0.85rem',
+                                            opacity: isPending && detailSubMode !== 'report' ? 0.6 : 1
                                         }}
                                     >
                                         成績通知表を表示
@@ -901,10 +917,10 @@ export default function GradeHistoryBoard() {
                             </table>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                                {filteredRecords.map(r => (
+                                {filteredStudents.map(student => (
                                     <StudentGradeDetail
-                                        key={r.id}
-                                        student={recordToStudent(r)}
+                                        key={student.id}
+                                        student={student}
                                         viewMode={detailSubMode}
                                     />
                                 ))}

@@ -1,13 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import RadarChart from './RadarChart'
 import { saveAs } from 'file-saver'
 import { generateGradePDFClient } from '@/lib/export/clientPdfGenerator'
 import styles from './page.module.css'
-// export { exportStudentGradeToPDF } removed - using server-side API
 
-const StudentGradeDetail = ({ student, viewMode }) => {
+const StudentGradeDetail = memo(({ student, viewMode }) => {
     const calculateGrade = (score) => {
         if (score >= 80) return 'A'
         if (score >= 70) return 'B'
@@ -16,7 +15,6 @@ const StudentGradeDetail = ({ student, viewMode }) => {
         return 'F'
     }
 
-    // Calculate Final Exam Letter Grade
     const calculateFinalExamGrade = (score, isJlpt = false) => {
         if (isJlpt) {
             if (score > 120) return 'A'
@@ -33,14 +31,11 @@ const StudentGradeDetail = ({ student, viewMode }) => {
     const { reportDetails, finalExam, reportCard, finalExamSum, reportCardTotal } = student
     const isJlpt = student.isJlpt || finalExam?.type === 'JLPT'
 
-    // Handle case where important data might be missing
     if (!finalExam) return null;
 
-    // --- JLPT SPECIFIC VIEW (JLPT処理結果 Layout) ---
     if (isJlpt) {
         return (
             <div style={{ padding: '0px', border: 'none', borderRadius: '12px', marginBottom: '30px', backgroundColor: 'transparent' }}>
-                {/* Common Info Bar */}
                 <div style={{
                     padding: '12px 16px',
                     backgroundColor: '#f8fafc',
@@ -80,7 +75,6 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                             <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#6b7280' }}>{student.yearTerm}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            {/* Score Tile */}
                             <div style={{
                                 textAlign: 'center',
                                 padding: '8px 16px',
@@ -99,7 +93,6 @@ const StudentGradeDetail = ({ student, viewMode }) => {
                                 </div>
                             </div>
 
-                            {/* Result Tile */}
                             <div style={{
                                 textAlign: 'center',
                                 padding: '8px 16px',
@@ -577,6 +570,6 @@ const StudentGradeDetail = ({ student, viewMode }) => {
             </div>
         </div>
     )
-}
+})
 
 export default StudentGradeDetail
