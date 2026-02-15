@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import webpush from 'web-push'
 
 // Initialize Admin Client for bypassing RLS when needed (especially for student access)
 // We reuse the service key strategy found in other API routes for consistency with existing codebase patterns
@@ -142,15 +143,72 @@ export async function POST(request) {
 
         if (error) throw error
 
-        // 4. Send Push Notification (Supabase Edge Function will handle this via Trigger)
-        // No need to execute logic here
+        // 4. Send Push Notification
+        try {
+            webpush.setVapidDetails(
+                'mailto:admin@lms-kobe-gaigo.vercel.app',
+                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                process.env.VAPID_PRIVATE_KEY
+            )
 
-        /*
-         *  Database Trigger `on_chat_message_created` invokes `chat-push` Edge Function
-         *  This offloads the heavy lifting (Web Push API calls) from Vercel to Supabase.
-         */
+            // Determine Recipient
+            let recipientId = null
+            let title = ''
+            let url = ''
 
-        return NextResponse.json({ message: data }) // Simply return the created message
+            if (data.sender_type === 'teacher') {
+                recipientId = data.student_id
+                title = `${data.sender_name || '先生'}からのメッセージ`
+                url = '/student/communication'
+            } else {
+                title = '学生からのメッセージ'
+                url = `/communication/${data.student_id}`
+
+                // Find the teacher to notify (last one who interacted or specific one)
+                const { data: lastTeacherMsg } = await adminSupabase
+                    .from('messages')
+                    .select('teacher_id')
+                    .eq('student_id', data.student_id)
+                    .eq('sender_type', 'teacher')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single()
+
+                recipientId = lastTeacherMsg?.teacher_id || data.teacher_id
+            }
+
+            if (recipientId) {
+                // Fetch registered subscriptions
+                const { data: subs } = await adminSupabase
+                    .from('push_subscriptions')
+                    .select('*')
+                    .eq('user_id', recipientId)
+
+                if (subs && subs.length > 0) {
+                    const pushPayload = JSON.stringify({
+                        title: title,
+                        body: data.content || (data.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
+                        url: url,
+                        badge: 1
+                    })
+
+                    await Promise.all(subs.map(sub =>
+                        webpush.sendNotification({
+                            endpoint: sub.endpoint,
+                            keys: { p256dh: sub.p256dh, auth: sub.auth }
+                        }, pushPayload).catch(e => {
+                            if (e.statusCode === 410 || e.statusCode === 404) {
+                                return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                            }
+                        })
+                    ))
+                }
+            }
+        } catch (e) {
+            console.error('Chat push error:', e)
+        }
+
+        return NextResponse.json({ message: data })
 
     } catch (error) {
         console.error('Chat Send Error:', error)

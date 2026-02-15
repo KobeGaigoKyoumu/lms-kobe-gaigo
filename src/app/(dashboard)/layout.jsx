@@ -1,8 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import styles from './layout.module.css'
 import Sidebar from '@/components/layout/Sidebar'
 import MobileMenu from '@/components/layout/MobileMenu'
-import styles from './layout.module.css'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { StudentStatusProvider } from '@/context/StudentStatusContext'
+
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({ children }) {
     const supabase = await createClient()
@@ -22,18 +25,28 @@ export default async function DashboardLayout({ children }) {
 
     const userRole = profile?.role
 
-    // Safety: If a student somehow ends up in the teacher layout, send them to the student portal
-    if (userRole === 'student') {
-        redirect('/student/dashboard')
-    }
-
     return (
-        <div className={styles.wrapper}>
-            <Sidebar user={user} role={userRole} hideOnMobile={true} />
-            <main className={styles.main}>
-                <MobileMenu role={userRole} user={user} />
-                {children}
-            </main>
-        </div>
+        <StudentStatusProvider role={userRole} userId={user.id}>
+            <div className={styles.wrapper}>
+                <Sidebar
+                    role={userRole}
+                    hideOnMobile={true}
+                    userId={user.id}
+                    userEmail={user.email}
+                    userName={user.user_metadata?.full_name}
+                    userAvatar={user.user_metadata?.avatar_url}
+                />
+                <main className={styles.main}>
+                    <MobileMenu
+                        role={userRole}
+                        userId={user.id}
+                        userEmail={user.email}
+                        userName={user.user_metadata?.full_name}
+                        userAvatar={user.user_metadata?.avatar_url}
+                    />
+                    {children}
+                </main>
+            </div>
+        </StudentStatusProvider>
     )
 }

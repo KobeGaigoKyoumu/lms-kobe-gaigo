@@ -30,7 +30,17 @@ self.addEventListener('push', (event) => {
         Promise.all([
             self.registration.showNotification(data.title, options),
             // 2. アプリアイコンのバッジを更新 (PWA)
-            'setAppBadge' in navigator ? navigator.setAppBadge(parseInt(data.badge) || 1).catch(e => console.error('Badge error', e)) : Promise.resolve()
+            (async () => {
+                if ('setAppBadge' in navigator) {
+                    try {
+                        const count = parseInt(data.badge) || 1;
+                        await navigator.setAppBadge(count);
+                        console.log('Badge set success:', count);
+                    } catch (e) {
+                        console.error('Badge error', e);
+                    }
+                }
+            })()
         ])
     );
 });

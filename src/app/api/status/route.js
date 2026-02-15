@@ -1,0 +1,92 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import { getUnreadCount } from '@/app/actions/messageActions'
+
+export async function GET() {
+    try {
+        const supabase = await createClient()
+
+        // 1. Identify User
+        const { data: { user } } = await supabase.auth.getUser()
+        const studentSession = await getStudentSession()
+
+        if (!user && !studentSession) {
+            return NextResponse.json({
+                hasNewAnnouncement: false,
+                unsubmittedAssignmentCount: 0,
+                unreadMessageCount: 0
+            })
+        }
+
+        // 2. Unread Messages
+        const unreadMessageCount = await getUnreadCount()
+
+        // 3. Assignments (Student logic only)
+        let unsubmittedAssignmentCount = 0
+        if (studentSession) {
+            const { data: assignments } = await supabase
+                .from('homework_assignments')
+                .select('id')
+                .eq('class_name', studentSession.className)
+
+            const assignmentIds = assignments?.map(a => a.id) || []
+            if (assignmentIds.length > 0) {
+                const { data: submissions } = await supabase
+                    .from('homework_submissions')
+                    .select('assignment_id')
+                    .eq('student_id_text', studentSession.studentId)
+                    .in('assignment_id', assignmentIds)
+
+                const submittedIds = new Set(submissions?.map(s => s.assignment_id) || [])
+                unsubmittedAssignmentCount = assignmentIds.filter(id => !submittedIds.has(id)).length
+            }
+        }
+
+        // 4. Announcements
+        const threeDaysAgo = new Date()
+        threeDaysAgo.setDate(threeDaysAgo.setDate() - 3)
+
+        const { data: announcements } = await supabase
+            .from('announcements')
+            .select('target_type, target_grade, target_class, target_student_ids')
+            .gte('created_at', threeDaysAgo.toISOString())
+
+        let hasNewAnnouncement = false
+        if (announcements && announcements.length > 0) {
+            const studentId = studentSession?.studentId
+            const className = studentSession?.className
+            const academicYear = studentSession?.academicYear
+
+            hasNewAnnouncement = announcements.some(ann => {
+                if (!ann.target_type || ann.target_type === 'all') return true
+                if (!studentSession) return false // Non-students only see 'all'
+
+                if (ann.target_type === 'grade') {
+                    const currentYear = new Date().getFullYear()
+                    const isBeforeApril = new Date().getMonth() < 3
+                    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+                    const studentGrade = academicYearBase - academicYear + 1
+                    return String(studentGrade) === ann.target_grade
+                }
+                if (ann.target_type === 'class') return ann.target_class === className
+                if (ann.target_type === 'individual') return ann.target_student_ids?.includes(studentId)
+                return false
+            })
+        }
+
+        return NextResponse.json({
+            hasNewAnnouncement,
+            unsubmittedAssignmentCount,
+            unreadMessageCount
+        })
+
+    } catch (error) {
+        console.error('Status API Error:', error)
+        return NextResponse.json({
+            hasNewAnnouncement: false,
+            unsubmittedAssignmentCount: 0,
+            unreadMessageCount: 0
+        }, { status: 500 })
+    }
+}

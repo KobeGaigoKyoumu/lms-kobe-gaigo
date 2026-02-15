@@ -6,6 +6,8 @@ import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StudentLayout({ children }) {
     const session = await getStudentSession()
 
@@ -14,9 +16,17 @@ export default async function StudentLayout({ children }) {
     }
 
     return (
-        <StudentStatusProvider role="student" user={session}>
+        <StudentStatusProvider role="student" userId={session.studentId}>
             <div className={styles.wrapper}>
-                <Sidebar user={session} role="student" dashboardHref="/student/dashboard" hideOnMobile={true} />
+                <Sidebar
+                    role="student"
+                    dashboardHref="/student/dashboard"
+                    hideOnMobile={true}
+                    userId={session.studentId}
+                    userName={session.name}
+                    userEmail={session.className}
+                    className={session.className}
+                />
 
                 <div className={styles.contentWrapper}>
                     {/* Header */}
@@ -41,7 +51,12 @@ export default async function StudentLayout({ children }) {
 
                     {/* Main Content */}
                     <main className={styles.main}>
-                        <MobileMenu role="student" user={session} />
+                        <MobileMenu
+                            role="student"
+                            userId={session.studentId}
+                            userName={session.name}
+                            userEmail={session.className}
+                        />
                         {children}
                     </main>
                 </div>

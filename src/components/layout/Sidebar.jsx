@@ -10,103 +10,17 @@ import models from './Sidebar.module.css'
 import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './Sidebar.module.css'
 
-export default function Sidebar({ user, role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false }) {
+export default function Sidebar({ role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false, userName, userEmail, userAvatar, className: studentClassName }) {
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
 
-    // Use Context for status data
-    const contextStatuses = useStudentStatus()
-    // Fallback for non-student roles (who don't have the provider)
-    const [localStatuses, setLocalStatuses] = useState({
-        hasNewAnnouncement: false,
-        unsubmittedAssignmentCount: 0,
-        unreadMessageCount: 0
-    })
-
-    const statuses = userRole === 'student' ? contextStatuses : localStatuses
-
+    const statuses = useStudentStatus()
     const menuItems = getMenuItems(userRole)
-
-    const lastFetchRef = useRef(0)
-    const TTL = 60000 // 60s for visibility/manual
-    const THROTTLE = 10000 // 10s for real-time
-
-    useEffect(() => {
-        if (userRole === 'student') return // Handled by Context
-
-        const fetchStatuses = async (type = 'regular') => {
-            const now = Date.now()
-            const timeSinceLast = now - lastFetchRef.current
-
-            // Visibility/Manual trigger: 60s guard
-            if (type === 'regular' && timeSinceLast < TTL) return
-            // Real-time trigger: 10s throttle
-            if (type === 'realtime' && timeSinceLast < THROTTLE) return
-
-            try {
-                let CLOUDFLARE_WORKER_URL = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
-                if (!CLOUDFLARE_WORKER_URL) {
-                    const { getAppNewStatus } = require('@/app/actions/statusActions')
-                    const data = await getAppNewStatus()
-                    setLocalStatuses(data)
-                    lastFetchRef.current = now
-                    return
-                }
-
-                if (!CLOUDFLARE_WORKER_URL.startsWith('http')) {
-                    CLOUDFLARE_WORKER_URL = `https://${CLOUDFLARE_WORKER_URL}`;
-                }
-
-                const query = new URLSearchParams({
-                    action: 'get-status',
-                    role: userRole
-                }).toString();
-
-                const res = await fetch(`${CLOUDFLARE_WORKER_URL}?${query}`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    setLocalStatuses(data)
-                    lastFetchRef.current = now
-                }
-            } catch (e) {
-                console.error('Admin status fetch error:', e)
-            }
-        }
-        fetchStatuses()
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                fetchStatuses('regular')
-            }
-        }
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-
-        let channel
-        channel = supabase
-            .channel('unread-counts')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => fetchStatuses('realtime'))
-            .subscribe()
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange)
-            if (channel) supabase.removeChannel(channel)
-        }
-    }, [user, userRole, supabase])
 
     useEffect(() => {
         document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')
     }, [isCollapsed])
-
-    useEffect(() => {
-        if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
-            console.log('Setting App Badge:', statuses.unreadMessageCount);
-            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error('Badge update error:', e))
-        }
-    }, [statuses.unreadMessageCount])
 
     const handleLogout = async () => {
         if (userRole === 'student') {
@@ -122,9 +36,9 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     }
 
-    const displayName = user?.user_metadata?.full_name || user?.name || 'ユーザー'
-    const displayDetail = user?.email || (user?.className ? `${user.className}` : '')
-    const avatarUrl = user?.user_metadata?.avatar_url
+    const displayName = userName || 'ユーザー'
+    const displayDetail = userEmail || (studentClassName ? `${studentClassName}` : '')
+    const avatarUrl = userAvatar
 
     return (
         <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${hideOnMobile ? styles.mobileHidden : ''}`}>
