@@ -103,7 +103,8 @@ export default function Sidebar({ user, role: userRole, dashboardHref: propDashb
 
     useEffect(() => {
         if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
-            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error(e))
+            console.log('Setting App Badge:', statuses.unreadMessageCount);
+            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error('Badge update error:', e))
         }
     }, [statuses.unreadMessageCount])
 
