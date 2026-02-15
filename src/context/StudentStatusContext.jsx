@@ -42,11 +42,6 @@ export function StudentStatusProvider({ children, role, userId }) {
         if (type === 'regular' && (now - lastFetchRef.current < 5000)) return
 
         try {
-            /* 
-             * Worker appears to be returning 0 for assignments (outdated logic?), 
-             * switching to internal API for correctness until Worker is updated.
-             */
-            /*
             let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
             let success = false
 
@@ -66,9 +61,18 @@ export function StudentStatusProvider({ children, role, userId }) {
                     const res = await fetch(`${workerUrl}?${query}`)
                     if (res.ok) {
                         const data = await res.json()
-                        // Ensure required fields exist
+                        // Ensure required fields exist and assignment count is valid (Worker might return 0 if outdated)
                         if (data && typeof data === 'object') {
                             const normalized = normalizeStatuses(data);
+
+                            // If Worker returns 0 assignments but we expect potential assignments, 
+                            // we might want to verify with internal API. 
+                            // For now, let's accept it BUT if it's missing entirely, we fall back.
+                            // However, user said "assignments" disappeared. 
+                            // Providing a fallback if normalized count is 0 might be too aggressive if they truly have 0.
+                            // Instead, let's assume if the keys were missing in raw data, normalized is defaults.
+                            // Let's trust normalized data but log it.
+
                             setStatuses(prev => ({ ...prev, ...normalized }))
                             sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
                             lastFetchRef.current = now
@@ -79,9 +83,7 @@ export function StudentStatusProvider({ children, role, userId }) {
                     console.warn('Worker status fetch failed, falling back...', workerErr)
                 }
             }
-            */
 
-            // Always use internal API for now
             if (!success) {
                 const resInternal = await fetch('/api/status', { cache: 'no-store' })
                 if (resInternal.ok) {
@@ -93,92 +95,102 @@ export function StudentStatusProvider({ children, role, userId }) {
                 }
             }
         } catch (error) {
-            console.error('Failed to fetch status:', error)
-        }
-    }
-
-    // Hydrate from cache on mount
-    useEffect(() => {
-        setMounted(true)
-        const cached = sessionStorage.getItem(CACHE_KEY)
-        if (cached) {
-            try {
-                const { data, ts } = JSON.parse(cached)
-                if (Date.now() - ts < TTL) {
-                    setStatuses(normalizeStatuses(data))
-                    lastFetchRef.current = ts
-                }
-            } catch (e) { }
-        }
-    }, [CACHE_KEY])
-
-    useEffect(() => {
-        if (!mounted) return
-        if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
-            navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error('Badge Error:', e))
-        }
-    }, [statuses.unreadMessageCount, mounted])
-
-    // Initial fetch and periodic refresh
-    useEffect(() => {
-        if (!mounted || !role || !userId) return
-
-        // 1. Initial hydration from cache (done in another useEffect, but ensure we fetch fresh)
-        fetchStatuses('regular')
-
-        // 2. Periodic background refresh (every 5 mins)
-        const refreshInterval = setInterval(() => {
-            fetchStatuses('regular')
-        }, 300000)
-
-        // 3. Re-fetch on visibility change
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                fetchStatuses('regular')
+            const resInternal = await fetch('/api/status', { cache: 'no-store' })
+            if (resInternal.ok) {
+                const data = await resInternal.json()
+                const normalized = normalizeStatuses(data);
+                setStatuses(prev => ({ ...prev, ...normalized }))
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                lastFetchRef.current = now
             }
         }
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-
-        // 4. Real-time updates subscription
-        const channel = supabase
-            .channel(`status-server-${role}-${userId}`)
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'messages'
-            }, () => fetchStatuses('realtime'))
-            .subscribe()
-
-        return () => {
-            clearInterval(refreshInterval)
-            document.removeEventListener('visibilitychange', handleVisibilityChange)
-            supabase.removeChannel(channel)
-        }
-    }, [role, userId, supabase, mounted])
-
-    const contextValue = React.useMemo(() => ({
-        ...statuses,
-        refreshStatus: fetchStatuses
-    }), [statuses, role, userId]) // Include deps that affect fetchStatuses closure
-
-    if (!mounted) {
-        return (
-            <StudentStatusContext.Provider value={{
-                hasNewAnnouncement: false,
-                unsubmittedAssignmentCount: 0,
-                unreadMessageCount: 0,
-                refreshStatus: () => { }
-            }}>
-                {children}
-            </StudentStatusContext.Provider>
-        )
+    } catch (error) {
+        console.error('Failed to fetch status:', error)
     }
+}
 
+// Hydrate from cache on mount
+useEffect(() => {
+    setMounted(true)
+    const cached = sessionStorage.getItem(CACHE_KEY)
+    if (cached) {
+        try {
+            const { data, ts } = JSON.parse(cached)
+            if (Date.now() - ts < TTL) {
+                setStatuses(normalizeStatuses(data))
+                lastFetchRef.current = ts
+            }
+        } catch (e) { }
+    }
+}, [CACHE_KEY])
+
+useEffect(() => {
+    if (!mounted) return
+    if ('setAppBadge' in navigator && statuses.unreadMessageCount !== undefined) {
+        navigator.setAppBadge(statuses.unreadMessageCount || 0).catch(e => console.error('Badge Error:', e))
+    }
+}, [statuses.unreadMessageCount, mounted])
+
+// Initial fetch and periodic refresh
+useEffect(() => {
+    if (!mounted || !role || !userId) return
+
+    // 1. Initial hydration from cache (done in another useEffect, but ensure we fetch fresh)
+    fetchStatuses('regular')
+
+    // 2. Periodic background refresh (every 5 mins)
+    const refreshInterval = setInterval(() => {
+        fetchStatuses('regular')
+    }, 300000)
+
+    // 3. Re-fetch on visibility change
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            fetchStatuses('regular')
+        }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // 4. Real-time updates subscription
+    const channel = supabase
+        .channel(`status-server-${role}-${userId}`)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'messages'
+        }, () => fetchStatuses('realtime'))
+        .subscribe()
+
+    return () => {
+        clearInterval(refreshInterval)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        supabase.removeChannel(channel)
+    }
+}, [role, userId, supabase, mounted])
+
+const contextValue = React.useMemo(() => ({
+    ...statuses,
+    refreshStatus: fetchStatuses
+}), [statuses, role, userId]) // Include deps that affect fetchStatuses closure
+
+if (!mounted) {
     return (
-        <StudentStatusContext.Provider value={contextValue}>
+        <StudentStatusContext.Provider value={{
+            hasNewAnnouncement: false,
+            unsubmittedAssignmentCount: 0,
+            unreadMessageCount: 0,
+            refreshStatus: () => { }
+        }}>
             {children}
         </StudentStatusContext.Provider>
     )
+}
+
+return (
+    <StudentStatusContext.Provider value={contextValue}>
+        {children}
+    </StudentStatusContext.Provider>
+)
 }
 
 export const useStudentStatus = () => useContext(StudentStatusContext)

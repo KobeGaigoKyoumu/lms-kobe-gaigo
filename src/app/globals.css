@@ -208,6 +208,7 @@ html {
   font-size: 14px;
   scroll-behavior: smooth;
   color-scheme: light dark;
+  overscroll-behavior-y: none;
 }
 
 body {
