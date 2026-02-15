@@ -7,6 +7,12 @@ export async function generateAttendancePDFClient(data) {
     const { student, history } = data;
     const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
+    const nameLength = (student.name || '').length;
+    let nameFontSize = '14pt';
+    if (nameLength > 30) nameFontSize = '9pt';
+    else if (nameLength > 22) nameFontSize = '11pt';
+    else if (nameLength > 15) nameFontSize = '12.5pt';
+
     const container = document.createElement('div');
     container.style.position = 'fixed';
     container.style.left = '-9999px';
@@ -97,7 +103,7 @@ export async function generateAttendancePDFClient(data) {
         <div style="position: relative; height: 32mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
             <div style="position: absolute; bottom: 1mm; left: 0;">
                 <div style="font-weight: bold; font-size: 11pt; margin-bottom: 2px;">学籍番号：${student.id}</div>
-                <div style="font-weight: bold; font-size: 14pt; margin-bottom: 3px;">名前：${student.name}</div>
+                <div style="font-weight: bold; font-size: ${nameFontSize}; margin-bottom: 3px;">名前：${student.name}</div>
                 <div style="font-weight: bold; font-size: 11pt;">クラス：${student.className || ''}</div>
             </div>
             <div style="position: absolute; bottom: 1mm; right: 0; width: 60mm; height: 26mm; border: 2px solid #333; border-radius: 8px; background: #fff; overflow: hidden;">
@@ -364,6 +370,12 @@ export async function generateGradePDFClient(data) {
 
     let contentHtml = '';
 
+    const nameLength = (student.student_name || '').length;
+    let nameFontSize = '12pt';
+    if (nameLength > 30) nameFontSize = '8pt';
+    else if (nameLength > 22) nameFontSize = '9pt';
+    else if (nameLength > 15) nameFontSize = '10.5pt';
+
     contentHtml = `
         <style>
             .pdf-page {
@@ -417,7 +429,7 @@ export async function generateGradePDFClient(data) {
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border: 1px solid #e2e8f0; border-left: 4px solid ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'}; border-radius: 6px; margin-bottom: 10px; background-color: #fff;">
                     <div>
                         <div style="font-size: 7.5pt; color: #64748b; margin-bottom: 1px;">${student.class_name}</div>
-                        <h3 style="font-size: 13pt; font-weight: bold; color: #1e293b; margin: 0;">${student.student_name}<span style="font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px;">(${student.student_id_text})</span></h3>
+                        <h3 style="font-size: ${nameFontSize}; font-weight: bold; color: #1e293b; margin: 0;">${student.student_name}<span style="font-size: 9pt; color: #64748b; font-weight: normal; margin-left: 6px;">(${student.student_id_text})</span></h3>
                         <div style="font-size: 8pt; color: #6b7280; margin-top: 1px;">${yearTerm}</div>
                     </div>
                     <div style="display: flex; gap: 8px;">
@@ -468,7 +480,7 @@ export async function generateGradePDFClient(data) {
                         <td align="center" style="background-color: #f5f5f5; width: 15%;"><div class="cell-center">学籍番号</div></td>
                         <td align="center" style="width: 35%; font-weight: bold;"><div class="cell-center">${student.student_id_text}</div></td>
                         <td align="center" style="background-color: #f5f5f5; width: 15%;"><div class="cell-center">氏　名</div></td>
-                        <td align="center" style="width: 35%; font-weight: bold; font-size: 13pt;"><div class="cell-center">${student.student_name}</div></td>
+                        <td align="center" style="width: 35%; font-weight: bold; font-size: ${nameFontSize};"><div class="cell-center">${student.student_name}</div></td>
                     </tr>
                     <tr>
                         <td align="center" style="background-color: #f5f5f5;"><div class="cell-center">クラス</div></td>
@@ -556,6 +568,12 @@ export async function generateGradePDFClient(data) {
 export async function generateCertificatePDFClient(data, issueDate) {
     const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
+    const nameLength = (data.name || '').length;
+    let nameFontSize = '14pt';
+    if (nameLength > 30) nameFontSize = '9pt';
+    else if (nameLength > 22) nameFontSize = '11pt';
+    else if (nameLength > 15) nameFontSize = '12.5pt';
+
     const container = document.createElement('div');
     container.style.position = 'fixed';
     container.style.left = '0';
@@ -612,7 +630,7 @@ export async function generateCertificatePDFClient(data, issueDate) {
                     <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">国　籍</td>
                     <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${data.nationality || ''}</td>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">氏　名</td>
-                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold; font-size: 14pt;">${data.name || ''}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: bold; font-size: ${nameFontSize};">${data.name || ''}</td>
                 </tr>
                 <tr>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center; background: #f5f5f5;">生年月日</td>
