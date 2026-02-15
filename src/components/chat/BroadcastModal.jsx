@@ -27,14 +27,10 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
         const fetchStudents = async () => {
             setIsLoading(true)
             try {
-                // Direct Supabase call (Bypasses Vercel API)
-                const { data, error } = await supabase
-                    .from('students')
-                    .select('student_id_text, full_name, grade, class_name')
-                    .order('student_id_text', { ascending: true })
-
-                if (error) throw error
-                setStudents(data || [])
+                const res = await fetch('/api/chat/students')
+                if (!res.ok) throw new Error('Failed to fetch students')
+                const data = await res.json()
+                setStudents(data.students || [])
             } catch (error) {
                 console.error('Failed to fetch students', error)
             } finally {
