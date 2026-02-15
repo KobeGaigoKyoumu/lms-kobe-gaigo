@@ -448,7 +448,7 @@ export async function generateGradePDFClient(data) {
                 padding: 6px 10px !important;
                 vertical-align: middle !important; 
                 line-height: 1 !important;
-                font-size: 10pt;
+                font-size: 8.5pt; /* Smaller professional font */
                 height: 38px;
                 text-align: center;
             }
