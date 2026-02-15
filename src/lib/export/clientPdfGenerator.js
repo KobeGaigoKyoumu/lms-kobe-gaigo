@@ -91,7 +91,9 @@ export async function generateAttendancePDFClient(data) {
             }
             .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
             .attendance-table {
-                width: 100%;
+                width: 98%;
+                margin-left: auto;
+                margin-right: auto;
                 border-collapse: collapse;
                 border: 1px solid #999;
                 table-layout: fixed;
@@ -100,12 +102,12 @@ export async function generateAttendancePDFClient(data) {
                 border: 1px solid #999;
                 padding: 4px !important;
                 vertical-align: middle !important;
-                height: 32px;
+                height: 28px;
                 text-align: center;
             }
             .baseline-lift {
                 position: relative;
-                top: -0.8mm;
+                top: -0.6mm;
             }
         </style>
         <div class="pdf-page">
@@ -113,7 +115,7 @@ export async function generateAttendancePDFClient(data) {
         <div style="text-align: center; margin-bottom: 2mm;">
             <h1 style="font-size: 26pt; font-weight: bold; margin: 0; color: #333; letter-spacing: 2px;">神戸外語教育学院</h1>
         </div>
-        <div style="position: relative; height: 37mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
+        <div style="position: relative; height: 34.5mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
             <div style="position: absolute; top: 6mm; left: 0; display: flex; flex-direction: column; justify-content: center;">
                 <div style="font-weight: bold; font-size: 11pt; margin-bottom: 2px;">学籍番号：${student.id}</div>
                 <div style="font-weight: bold; font-size: ${nameFontSize}; margin-bottom: 3px;">名前：${student.name}</div>
