@@ -7,11 +7,7 @@ export async function generateAttendancePDFClient(data) {
     const { student, history } = data;
     const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const nameLength = (student.name || '').length;
-    let nameFontSize = '14pt';
-    if (nameLength > 30) nameFontSize = '9pt';
-    else if (nameLength > 22) nameFontSize = '11pt';
-    else if (nameLength > 15) nameFontSize = '12.5pt';
+    const nameFontSize = '11pt';
 
     const container = document.createElement('div');
     container.style.position = 'fixed';
@@ -66,7 +62,7 @@ export async function generateAttendancePDFClient(data) {
             if (rate <= 0.85) return 'color: #e65100; font-weight: bold;';
             if (rate <= 0.90) return 'color: #f9a825; font-weight: bold;';
             if (rate <= 0.95) return 'color: #0277bd; font-weight: bold;';
-            return 'color: #000; font-weight: bold;';
+            return 'color: #000; font-weight: normal;';
         };
 
         return `
@@ -149,7 +145,7 @@ export async function generateAttendancePDFClient(data) {
             </tbody>
         </table>
         <div style="display: flex; justify-content: flex-end; font-size: 8pt; gap: 10px; margin-top: 3mm;">
-            <div><span style="color: #000;">■</span> 95%以下</div>
+            <div><span style="color: #0277bd;">■</span> 95%以下</div>
             <div><span style="color: #f9a825;">■</span> 90%以下</div>
             <div><span style="color: #e65100;">■</span> 85%以下</div>
             <div><span style="color: #c62828;">■</span> 80%以下</div>
