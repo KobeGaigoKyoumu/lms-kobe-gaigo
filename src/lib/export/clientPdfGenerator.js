@@ -506,9 +506,9 @@ export async function generateGradePDFClient(data) {
                         <div style="font-size: 11pt; margin-bottom: 3mm;">${isExam ? '期末試験合計' : '成績合計点'}</div>
                         <div style="font-size: 20pt; font-weight: bold;">${isExam ? student.final_exam_total : (student.report_card_total?.toFixed(1) || '0.0')} <span style="font-size: 11pt; font-weight: normal;">/ ${isExam ? '600' : '100'}</span></div>
                     </div>
-                    <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; display: flex; flex-direction: column; background: #fff;">
-                        <div style="font-size: 11pt; padding: 2mm 0; background: #fcfcfc;">${isExam ? '総合判定' : '総合評定'}</div>
-                        <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 32pt; font-weight: bold; line-height: 1; height: 100%;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
+                    <div style="text-align: center; border: 1.5px solid #000; width: 30mm; height: 30mm; display: flex; flex-direction: column; background: #fff; align-items: center;">
+                        <div style="font-size: 11pt; padding: 2mm 0; background: #fcfcfc; width: 100%; border-bottom: 0.5px solid #000;">${isExam ? '総合判定' : '総合評定'}</div>
+                        <div style="font-size: 38pt; font-weight: bold; line-height: 1; margin-top: 4mm;">${calculateGrade(isExam ? (student.final_exam_total / 6) : student.report_card_total)}</div>
                     </div>
                 </div>
 
