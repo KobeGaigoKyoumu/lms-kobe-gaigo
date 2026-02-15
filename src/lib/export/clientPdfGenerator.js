@@ -439,12 +439,12 @@ export async function generateGradePDFClient(data) {
             .jlpt-table { 
                 width: 100%; 
                 border-collapse: collapse; 
-                border: 1.5px solid #000; 
+                border: 1px solid #e2e8f0; 
                 table-layout: fixed;
             }
             .jlpt-table th, .jlpt-table td { 
-                border: 1.5px solid #000; 
-                padding: 10px 12px !important; /* Balanced padding, use lift for shift */
+                border: 1px solid #e2e8f0; 
+                padding: 10px 12px !important; 
                 vertical-align: middle !important; 
                 line-height: 1 !important;
                 font-size: 10pt;
@@ -478,19 +478,19 @@ export async function generateGradePDFClient(data) {
         </style>
         <div class="pdf-page">
             ${isJlpt ? `
-                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 5px;">
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 15px; margin-bottom: 8px;">
                     <table style="width: 100%; border: none;">
                         <tr>
-                            <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>レベル:</strong> ${student.final_exam_data?.level || '-'}</td>
-                            <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>使用教材:</strong> ${student.final_exam_data?.textbook || '-'}</td>
-                            <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</td>
-                            <td style="padding: 1px 0; font-size: 7.5pt; color: #475569;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569;"><div class="baseline-lift" style="top: -0.6mm;"><strong>レベル:</strong> ${student.final_exam_data?.level || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569;"><div class="baseline-lift" style="top: -0.6mm;"><strong>使用教材:</strong> ${student.final_exam_data?.textbook || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569;"><div class="baseline-lift" style="top: -0.6mm;"><strong>試験名/学期:</strong> ${yearTerm || '-'}</div></td>
+                            <td style="padding: 2px 0; font-size: 8pt; color: #475569;"><div class="baseline-lift" style="top: -0.6mm;"><strong>合格点:</strong> ${student.final_exam_data?.levelInfo?.passingScore || '-'}点</div></td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px; font-size: 7.5pt; color: #475569;">
-                    <strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; font-size: 8pt; color: #475569;">
+                    <div class="baseline-lift" style="top: -0.6mm;"><strong>基準点:</strong> ${student.final_exam_data?.levelInfo?.categoryPassingScores ? Object.entries(student.final_exam_data.levelInfo.categoryPassingScores).map(([k, v]) => `${k}(${v})`).join(' / ') : '文字・語彙・文法・読解(38) / 基準なし(0) / 聴解(19)'}</div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border: 1px solid #e2e8f0; border-left: 4px solid ${student.final_exam_data?.result === '合' || student.final_exam_data?.result === '○' ? '#10b981' : '#ef4444'}; border-radius: 6px; margin-bottom: 10px; background-color: #fff;">
@@ -529,8 +529,10 @@ export async function generateGradePDFClient(data) {
                 </table>
 
                 ${detailsHtml ? `
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px;">
-                        <h3 style="font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 8px; border-bottom: 2px solid #3b82f6; padding-bottom: 2px; display: inline-block;">解答詳細</h3>
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px;">
+                        <h3 style="font-size: 10pt; font-weight: bold; color: #1e293b; margin-bottom: 12px; border-bottom: 2px solid #3b82f6; padding-bottom: 4px; display: inline-block;">
+                            <div class="baseline-lift" style="top: -1mm;">解答詳細</div>
+                        </h3>
                         ${detailsHtml}
                     </div>
                 ` : ''}
