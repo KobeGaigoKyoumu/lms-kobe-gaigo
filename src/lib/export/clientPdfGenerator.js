@@ -67,13 +67,13 @@ export async function generateAttendancePDFClient(data) {
 
         return `
             <tr>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift">${row.year}年${row.month}月</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift">${row.class_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift">${row.attendance_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift">${row.absence_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift">${row.late_slots !== undefined ? row.late_slots : '-'}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(cRate)}"><div class="baseline-lift">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(mRate)}"><div class="baseline-lift">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center;"><div class="baseline-lift">${row.year}年${row.month}月</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center;"><div class="baseline-lift">${row.class_days}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center;"><div class="baseline-lift">${row.attendance_days}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center;"><div class="baseline-lift">${row.absence_days}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center;"><div class="baseline-lift">${row.late_slots !== undefined ? row.late_slots : '-'}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center; ${getRateStyle(cRate)}"><div class="baseline-lift">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</div></td>
+                <td style="border: 1px solid #333; padding: 4px; text-align: center; ${getRateStyle(mRate)}"><div class="baseline-lift">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</div></td>
             </tr>
         `;
     }).join('');
@@ -95,11 +95,11 @@ export async function generateAttendancePDFClient(data) {
                 margin-left: auto;
                 margin-right: auto;
                 border-collapse: collapse;
-                border: 1px solid #999;
+                border: 1px solid #333;
                 table-layout: fixed;
             }
             .attendance-table th, .attendance-table td {
-                border: 1px solid #999;
+                border: 1px solid #333;
                 padding: 4px !important;
                 vertical-align: middle !important;
                 height: 28px;

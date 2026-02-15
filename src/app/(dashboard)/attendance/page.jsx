@@ -434,7 +434,7 @@ export default function AttendancePage() {
 
     const formatStudentName = (student) => {
         if (!student) return ''
-        return student.full_name || student.name || ''
+        return student.full_name || student.name || student.student_name || ''
     }
 
     return (
