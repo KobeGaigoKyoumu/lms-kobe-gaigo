@@ -28,11 +28,14 @@ export function StudentStatusProvider({ children, role, userId }) {
         if (!userId || !role) return
 
         const now = Date.now()
+        // Allow forced refresh or throttled refresh
         if (type === 'realtime' && (now - lastFetchRef.current < THROTTLE)) return
         if (type === 'regular' && (now - lastFetchRef.current < 5000)) return
 
         try {
             let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
+            let success = false
+
             if (workerUrl) {
                 if (!workerUrl.startsWith('http')) {
                     workerUrl = `https://${workerUrl}`
@@ -45,22 +48,31 @@ export function StudentStatusProvider({ children, role, userId }) {
                     academicYear: ''
                 }).toString();
 
-                const res = await fetch(`${workerUrl}?${query}`)
-                if (res.ok) {
-                    const data = await res.json()
-                    setStatuses(data)
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
-                    lastFetchRef.current = now
-                    return
+                try {
+                    const res = await fetch(`${workerUrl}?${query}`)
+                    if (res.ok) {
+                        const data = await res.json()
+                        // Ensure required fields exist
+                        if (data && typeof data === 'object') {
+                            setStatuses(prev => ({ ...prev, ...data }))
+                            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+                            lastFetchRef.current = now
+                            success = true
+                        }
+                    }
+                } catch (workerErr) {
+                    console.warn('Worker status fetch failed, falling back...', workerErr)
                 }
             }
 
-            const resInternal = await fetch('/api/status')
-            if (resInternal.ok) {
-                const data = await resInternal.json()
-                setStatuses(data)
-                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
-                lastFetchRef.current = now
+            if (!success) {
+                const resInternal = await fetch('/api/status')
+                if (resInternal.ok) {
+                    const data = await resInternal.json()
+                    setStatuses(prev => ({ ...prev, ...data }))
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now }))
+                    lastFetchRef.current = now
+                }
             }
         } catch (error) {
             console.error('Failed to fetch status:', error)
