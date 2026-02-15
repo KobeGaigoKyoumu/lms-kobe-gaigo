@@ -440,16 +440,16 @@ export async function generateGradePDFClient(data) {
             .jlpt-table { 
                 width: 100%; 
                 border-collapse: collapse; 
-                border: 0.05pt solid #f1f5f9; 
+                border: 0.05pt solid #e2e8f0; 
                 table-layout: fixed;
             }
             .jlpt-table th, .jlpt-table td { 
-                border: 0.05pt solid #f1f5f9; 
-                padding: 6px 10px !important;
+                border: 0.05pt solid #e2e8f0; 
+                padding: 4px 10px !important;
                 vertical-align: middle !important; 
                 line-height: 1 !important;
-                font-size: 7.5pt; /* More compact font */
-                height: 38px;
+                font-size: 8.0pt; /* Adjusted for better legibility */
+                height: 34px; /* More compact */
                 text-align: center;
             }
             .baseline-lift {
