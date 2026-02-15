@@ -118,7 +118,7 @@ export async function generateAttendancePDFClient(data) {
             <h1 style="font-size: 26pt; font-weight: bold; margin: 0; color: #333; letter-spacing: 2px;">神戸外語教育学院</h1>
         </div>
         <div style="position: relative; height: 32mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">
-            <div style="position: absolute; bottom: 1mm; left: 0;">
+            <div style="position: absolute; bottom: 1mm; left: 0; height: 26mm; display: flex; flex-direction: column; justify-content: center;">
                 <div style="font-weight: bold; font-size: 11pt; margin-bottom: 2px;">学籍番号：${student.id}</div>
                 <div style="font-weight: bold; font-size: ${nameFontSize}; margin-bottom: 3px;">名前：${student.name}</div>
                 <div style="font-weight: bold; font-size: 11pt;">クラス：${student.className || ''}</div>
