@@ -45,7 +45,7 @@ export async function GET() {
 
         // 4. Announcements
         const threeDaysAgo = new Date()
-        threeDaysAgo.setDate(threeDaysAgo.setDate() - 3)
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
 
         const { data: announcements } = await supabase
             .from('announcements')

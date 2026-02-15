@@ -32,8 +32,11 @@ export function StudentStatusProvider({ children, role, userId }) {
         if (type === 'regular' && (now - lastFetchRef.current < 5000)) return
 
         try {
-            const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
+            let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
             if (workerUrl) {
+                if (!workerUrl.startsWith('http')) {
+                    workerUrl = `https://${workerUrl}`
+                }
                 const query = new URLSearchParams({
                     action: 'get-status',
                     role: role,
