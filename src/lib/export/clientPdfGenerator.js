@@ -71,13 +71,13 @@ export async function generateAttendancePDFClient(data) {
 
         return `
             <tr>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.year}年${row.month}月</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.class_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.attendance_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.absence_days}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center;"><div class="baseline-lift" style="top: -0.6mm;">${row.late_slots !== undefined ? row.late_slots : '-'}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(cRate)}"><div class="baseline-lift" style="top: -0.6mm;">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</div></td>
-                <td style="border: 1px solid #999; padding: 4px; text-align: center; ${getRateStyle(mRate)}"><div class="baseline-lift" style="top: -0.6mm;">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center;"><div class="baseline-lift">${row.year}年${row.month}月</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center;"><div class="baseline-lift">${row.class_days}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center;"><div class="baseline-lift">${row.attendance_days}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center;"><div class="baseline-lift">${row.absence_days}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center;"><div class="baseline-lift">${row.late_slots !== undefined ? row.late_slots : '-'}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center; ${getRateStyle(cRate)}"><div class="baseline-lift">${cRate !== undefined ? (cRate * 100).toFixed(1) + '%' : '-'}</div></td>
+                <td style="border: 0.2px solid #e2e8f0; padding: 4px; text-align: center; ${getRateStyle(mRate)}"><div class="baseline-lift">${mRate !== undefined ? (mRate * 100).toFixed(1) + '%' : '-'}</div></td>
             </tr>
         `;
     }).join('');
@@ -91,12 +91,25 @@ export async function generateAttendancePDFClient(data) {
                 font-family: "Noto Sans JP", sans-serif;
                 color: #333;
                 box-sizing: border-box;
-                line-height: 1.3;
+                line-height: 1.1;
             }
             .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
+            .attendance-table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 0.2px solid #e2e8f0;
+                table-layout: fixed;
+            }
+            .attendance-table th, .attendance-table td {
+                border: 0.2px solid #e2e8f0;
+                padding: 4px !important;
+                vertical-align: middle !important;
+                height: 32px;
+                text-align: center;
+            }
             .baseline-lift {
                 position: relative;
-                top: -1.0mm;
+                top: -0.8mm;
             }
         </style>
         <div class="pdf-page">
@@ -119,16 +132,16 @@ export async function generateAttendancePDFClient(data) {
                 </div>
             </div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 3mm; font-size: 9pt;">
+        <table class="attendance-table" style="margin-top: 3mm; font-size: 9pt;">
             <thead>
                 <tr style="background-color: #f0f0f0;">
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">年月</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">授業日数</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">出席日数</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">欠席日数</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">遅刻・早退</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">累計出席率</th>
-                    <th style="border: 1px solid #999; padding: 6px; font-weight: normal; color: #555;">月間出席率</th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">年月</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">授業日数</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">出席日数</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">欠席日数</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">遅刻・早退</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">累計出席率</div></th>
+                    <th style="font-weight: normal; color: #555;"><div class="baseline-lift">月間出席率</div></th>
                 </tr>
             </thead>
             <tbody>
