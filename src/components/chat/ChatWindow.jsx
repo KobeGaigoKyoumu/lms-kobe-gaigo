@@ -188,7 +188,7 @@ export default function ChatWindow({
     }, [resolvedStudentId, supabase, currentUserRole, messages.length])
 
     // Load older messages - Direct Supabase implementation
-    const loadMoreMessages = async () => {
+    const loadMoreMessages = useCallback(async () => {
         if (!hasMore || isLoadingMore || messages.length === 0) return
 
         setIsLoadingMore(true)
@@ -237,7 +237,7 @@ export default function ChatWindow({
         } finally {
             setIsLoadingMore(false)
         }
-    }
+    }, [hasMore, isLoadingMore, messages, resolvedStudentId, supabase, currentUserRole])
 
     // Intersection Observer for Infinite Scroll
     useEffect(() => {

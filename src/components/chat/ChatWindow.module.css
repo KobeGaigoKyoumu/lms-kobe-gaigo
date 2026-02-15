@@ -25,6 +25,7 @@
     background-image:
         radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
     background-size: 20px 20px;
+    overflow-anchor: none;
 }
 
 .messageBubbleContainer {
