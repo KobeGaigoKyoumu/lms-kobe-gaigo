@@ -342,12 +342,12 @@ export async function generateGradePDFClient(data) {
 
         if (isExam) {
             subjectRows = subjects.map(key => `
-            < tr >
+            <tr>
                     <td style="font-weight: bold; width: 40%; font-size: 11pt; text-align: left;">${subjectNames[key]}</td>
                     <td style="width: 20%;">100</td>
                     <td style="font-weight: bold; width: 20%;">${student.final_exam_data?.[key] || '-'}</td>
                     <td style="font-weight: bold; width: 20%;">${calculateGrade(student.final_exam_data?.[key])}</td>
-                </tr >
+                </tr>
             `).join('');
         } else {
             const att = reportData.attendance;
@@ -355,14 +355,14 @@ export async function generateGradePDFClient(data) {
             subjectRows = subjects.map(key => {
                 const d = reportData[key] || {};
                 return `
-            < tr >
+                    <tr>
                         <td style="font-weight: bold; width: 25%; font-size: 10pt; text-align: left;">${subjectNames[key]}</td>
                         <td style="width: 15%;">${d.base !== undefined ? d.base.toFixed(1) : '-'}</td>
                         <td style="width: 15%;">${att !== undefined ? att.toFixed(1) : '-'}</td>
                         <td style="width: 15%;">${part !== undefined ? part.toFixed(1) : '-'}</td>
                         <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? d.total.toFixed(1) : '-'}</td>
                         <td style="font-weight: bold; width: 15%;">${d.total !== undefined ? calculateGrade(d.total) : '-'}</td>
-                    </tr >
+                    </tr>
             `;
             }).join('');
         }
@@ -377,50 +377,49 @@ export async function generateGradePDFClient(data) {
     else if (nameLength > 15) nameFontSize = '10.5pt';
 
     contentHtml = `
-            < style >
-            .pdf - page {
-            width: 210mm;
-            padding: ${isJlpt ? '15mm 15mm 15mm' : '25mm 20mm 20mm'};
-            background: white;
-            font - family: ${isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif'};
-            color: ${isJlpt ? '#334155' : '#000'};
-            box - sizing: border - box;
-            line - height: 1.3;
-            -webkit - font - smoothing: antialiased;
-            margin - top: -1.2mm; /* Negative margin is more reliable than transform in html2canvas */
-        }
-            .pdf - page * { box- sizing: border - box; margin: 0; padding: 0;
-    }
-            .pdf - table { width: 100 %; border - collapse: collapse; border: 1px solid #000; table - layout: fixed; }
-            .pdf - table th, .pdf - table td {
-        border: 1px solid #000;
-        padding: 4px 6px 7px 6px!important; /* Bottom-heavy for universal upward pull */
-        vertical - align: middle!important;
-        line - height: 1.1!important;
-        height: 42px;
-        text - align: center;
-        overflow: hidden;
-    }
-            .jlpt - table { width: 100 %; border - collapse: collapse; border: 1.5px solid #000; }
-            .jlpt - table th, .jlpt - table td {
-        border: 1.5px solid #000;
-        padding: 10px 12px 14px 12px!important;
-        vertical - align: middle!important;
-        line - height: 1.1!important;
-        font - size: 10pt;
-        height: 46px;
-        text - align: center;
-    }
-            .rigid - box {
-        display: inline - block;
-        vertical - align: top;
-        text - align: center;
-        padding - top: 2px;
-        padding - bottom: 4px; /* Internal pull-up */
-        min - height: 38px;
-        line - height: 1;
-    }
-        </style >
+        <style>
+            .pdf-page {
+                width: 210mm;
+                padding: ${isJlpt ? '15mm 15mm 15mm' : '25mm 20mm 20mm'};
+                background: white;
+                font-family: ${isJlpt ? '"Noto Sans JP", sans-serif' : '"Noto Serif JP", serif'};
+                color: ${isJlpt ? '#334155' : '#000'};
+                box-sizing: border-box;
+                line-height: 1.3;
+                -webkit-font-smoothing: antialiased;
+                margin-top: -1.2mm;
+            }
+            .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
+            .pdf-table { width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; }
+            .pdf-table th, .pdf-table td { 
+                border: 1px solid #000; 
+                padding: 4px 6px 7px 6px !important; 
+                vertical-align: middle !important; 
+                line-height: 1.1 !important;
+                height: 42px;
+                text-align: center;
+                overflow: hidden;
+            }
+            .jlpt-table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
+            .jlpt-table th, .jlpt-table td { 
+                border: 1.5px solid #000; 
+                padding: 10px 12px 14px 12px !important; 
+                vertical-align: middle !important; 
+                line-height: 1.1 !important;
+                font-size: 10pt;
+                height: 46px;
+                text-align: center;
+            }
+            .rigid-box {
+                display: inline-block;
+                vertical-align: top;
+                text-align: center;
+                padding-top: 2px;
+                padding-bottom: 4px;
+                min-height: 38px;
+                line-height: 1;
+            }
+        </style>
         <div class="pdf-page">
             ${isJlpt ? `
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 5px;">
@@ -604,26 +603,25 @@ export async function generateCertificatePDFClient(data, issueDate) {
         const selectedGrade = grades[subject] || '';
         const gradeCells = gradeLetters.map(letter => {
             const isSelected = selectedGrade === letter;
-            return `< td style = "border: 1px solid #000; padding: 4px; text-align: center; width: 14%;" > ${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</td > `;
+            return `<td style="border: 1px solid #000; padding: 4px; text-align: center; width: 14%;">${isSelected ? `<span style="border: 2px solid #000; border-radius: 50%; width: 25px; height: 25px; display: inline-block; line-height: 22px; font-weight: bold;">${letter}</span>` : letter}</td>`;
         }).join('');
-        return `< tr > <td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;">${subject}</td>${gradeCells}</tr > `;
+        return `<tr><td style="border: 1px solid #000; padding: 4px; text-align: center; width: 16%; font-weight: bold; background: #f5f5f5;">${subject}</td>${gradeCells}</tr>`;
     }).join('');
 
     container.innerHTML = `
-        < style >
-            .pdf - page {
-        width: 210mm;
-        padding: 15mm 20mm;
-        background: white;
-        font - family: "Noto Serif JP", "Yu Mincho", serif;
-        font - size: 10pt;
-        line - height: 1.3;
-        color: #000;
-        box - sizing: border - box;
-    }
-            .pdf - page * { box- sizing: border - box; margin: 0; padding: 0;
-}
-        </style >
+        <style>
+            .pdf-page {
+                width: 210mm;
+                padding: 15mm 20mm;
+                background: white;
+                font-family: "Noto Serif JP", "Yu Mincho", serif;
+                font-size: 10pt;
+                line-height: 1.3;
+                color: #000;
+                box-sizing: border-box;
+            }
+            .pdf-page * { box-sizing: border-box; margin: 0; padding: 0; }
+        </style>
     <div class="pdf-page">
         <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="font-size: 24pt; font-weight: bold; border-bottom: 3px double #000; display: inline-block; padding: 0 10mm; margin-top: 10mm;">成 績 証 明 書</h1>
