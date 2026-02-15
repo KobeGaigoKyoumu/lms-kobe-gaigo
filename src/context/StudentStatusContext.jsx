@@ -89,13 +89,19 @@ export function StudentStatusProvider({ children, role, userId }) {
         }
     }, [statuses.unreadMessageCount, mounted])
 
+    // Initial fetch and periodic refresh
     useEffect(() => {
         if (!mounted || !role || !userId) return
 
-        // Initial fetch
+        // 1. Initial hydration from cache (done in another useEffect, but ensure we fetch fresh)
         fetchStatuses('regular')
 
-        // Re-fetch on visibility change
+        // 2. Periodic background refresh (every 5 mins)
+        const refreshInterval = setInterval(() => {
+            fetchStatuses('regular')
+        }, 300000)
+
+        // 3. Re-fetch on visibility change
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 fetchStatuses('regular')
@@ -103,7 +109,7 @@ export function StudentStatusProvider({ children, role, userId }) {
         }
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
-        // Real-time updates subscription centralized here
+        // 4. Real-time updates subscription
         const channel = supabase
             .channel(`status-server-${role}-${userId}`)
             .on('postgres_changes', {
@@ -114,21 +120,32 @@ export function StudentStatusProvider({ children, role, userId }) {
             .subscribe()
 
         return () => {
+            clearInterval(refreshInterval)
             document.removeEventListener('visibilitychange', handleVisibilityChange)
             supabase.removeChannel(channel)
         }
     }, [role, userId, supabase, mounted])
 
+    const contextValue = React.useMemo(() => ({
+        ...statuses,
+        refreshStatus: fetchStatuses
+    }), [statuses])
+
     if (!mounted) {
         return (
-            <StudentStatusContext.Provider value={{ ...statuses, refreshStatus: () => { } }}>
+            <StudentStatusContext.Provider value={{
+                hasNewAnnouncement: false,
+                unsubmittedAssignmentCount: 0,
+                unreadMessageCount: 0,
+                refreshStatus: () => { }
+            }}>
                 {children}
             </StudentStatusContext.Provider>
         )
     }
 
     return (
-        <StudentStatusContext.Provider value={{ ...statuses, refreshStatus: fetchStatuses }}>
+        <StudentStatusContext.Provider value={contextValue}>
             {children}
         </StudentStatusContext.Provider>
     )
