@@ -252,6 +252,8 @@ export default function ChatWindow({
             if (data && data.length > 0) {
                 const older = [...data].reverse()
                 setMessages(prev => [...older, ...prev])
+                // Visual confirmation
+                console.log('UI Updated with', data.length, 'older messages')
             }
         } catch (error) {
             console.error('Load more error (Catch):', error)

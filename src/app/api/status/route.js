@@ -99,7 +99,12 @@ export async function GET() {
             debug: {
                 studentId: studentSession?.studentId,
                 className: studentSession?.className,
-                academicYear: studentSession?.academicYear
+                classNameTrimmed: studentSession?.className?.trim(),
+                assignmentCount: assignmentIds?.length || 0,
+                // debugDetails: debugDetails // Too large for prod response usually, but ok for now if needed?
+                // simplified details
+                assignmentsFound: assignmentIds?.length,
+                count: unsubmittedAssignmentCount
             }
         })
 
