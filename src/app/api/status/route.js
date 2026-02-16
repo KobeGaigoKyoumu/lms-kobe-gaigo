@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import { getUnreadCount } from '@/app/actions/messageActions'
 
 export async function GET() {
     try {
-        const supabase = await createClient()
+        const supabaseAuth = await createClient() // For User Auth
+        // Use Service Role to bypass RLS for data fetching
+        const supabaseAdmin = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY
+        )
 
         // 1. Identify User
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data: { user } } = await supabaseAuth.auth.getUser()
         const studentSession = await getStudentSession()
 
         if (!user && !studentSession) {
@@ -24,11 +30,11 @@ export async function GET() {
 
         // 3. Assignments (Student logic only)
         let unsubmittedAssignmentCount = 0
-        let assignmentIds = [] // Fix scope issue
+        let assignmentIds = []
 
         if (studentSession) {
-            // Fetch fresh student profile to ensure class name is up to date
-            const { data: student } = await supabase
+            // Fetch fresh student profile to ensure class name is up to date (Using Admin Client)
+            const { data: student } = await supabaseAdmin
                 .from('students')
                 .select('class_name')
                 .eq('student_id_text', studentSession.studentId)
@@ -36,7 +42,7 @@ export async function GET() {
 
             const className = student ? student.class_name?.trim() : studentSession.className?.trim()
 
-            const { data: assignments } = await supabase
+            const { data: assignments } = await supabaseAdmin
                 .from('homework_assignments')
                 .select('id')
                 .eq('class_name', className)
@@ -44,7 +50,7 @@ export async function GET() {
             assignmentIds = assignments?.map(a => a.id) || []
 
             if (assignmentIds.length > 0) {
-                const { data: submissions } = await supabase
+                const { data: submissions } = await supabaseAdmin
                     .from('homework_submissions')
                     .select('assignment_id, status')
                     .eq('student_id_text', studentSession.studentId)
@@ -72,11 +78,11 @@ export async function GET() {
             }
         }
 
-        // 4. Announcements
+        // 4. Announcements (Using Admin Client)
         const threeDaysAgo = new Date()
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
 
-        const { data: announcements } = await supabase
+        const { data: announcements } = await supabaseAdmin
             .from('announcements')
             .select('target_type, target_grade, target_class, target_student_ids')
             .gte('created_at', threeDaysAgo.toISOString())
@@ -113,8 +119,6 @@ export async function GET() {
                 className: studentSession?.className,
                 classNameTrimmed: studentSession?.className?.trim(),
                 assignmentCount: assignmentIds?.length || 0,
-                // debugDetails: debugDetails // Too large for prod response usually, but ok for now if needed?
-                // simplified details
                 assignmentsFound: assignmentIds?.length,
                 count: unsubmittedAssignmentCount
             }
@@ -125,7 +129,8 @@ export async function GET() {
         return NextResponse.json({
             hasNewAnnouncement: false,
             unsubmittedAssignmentCount: 0,
-            unreadMessageCount: 0
+            unreadMessageCount: 0,
+            error: error.message
         }, { status: 500 })
     }
 }
