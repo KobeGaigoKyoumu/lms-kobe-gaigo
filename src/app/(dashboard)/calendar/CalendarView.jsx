@@ -58,6 +58,16 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     }
 
+    const formatDateTime = (dateStr, allDay) => {
+        if (!dateStr) return ''
+        const date = new Date(dateStr)
+        const datePart = formatDate(date) // YYYY-MM-DD
+        if (allDay) return datePart
+
+        const timePart = date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+        return `${datePart} ${timePart}`
+    }
+
     const getEventsForDate = (date) => {
         const dateStr = formatDate(date)
         return events.filter(e => {
@@ -240,8 +250,8 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                             .map(event => (
                                 <div key={event.id} className={styles.eventListItem}>
                                     <div className={styles.eventListDate}>
-                                        {formatDate(new Date(event.date))}
-                                        {event.end_date && ` 〜 ${formatDate(new Date(event.end_date))}`}
+                                        {formatDateTime(event.date, event.all_day)}
+                                        {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
                                     </div>
                                     <div className={styles.eventListTitle} style={{ borderLeftColor: event.color || '#3b82f6' }}>
                                         {event.type === 'assignment' ? (
