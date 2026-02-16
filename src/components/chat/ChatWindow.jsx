@@ -204,13 +204,16 @@ export default function ChatWindow({
         try {
             let data, error;
             if (currentUserRole === 'student') {
+                console.log('Fetching older messages for student', { studentId: resolvedStudentId, before: oldestMessage.created_at })
                 const res = await getMessages(resolvedStudentId, {
                     limit: 30,
                     before: oldestMessage.created_at
                 })
+                console.log('Server Action Response:', res)
                 data = res.data
                 error = res.error
             } else {
+                console.log('Fetching older messages for teacher', { studentId: resolvedStudentId, before: oldestMessage.created_at })
                 const res = await supabase
                     .from('messages')
                     .select('*')
@@ -222,7 +225,12 @@ export default function ChatWindow({
                 error = res.error
             }
 
-            if (error) throw error
+            if (error) {
+                console.error('Load more error (API):', error)
+                throw error
+            }
+
+            console.log('Loaded older messages:', data?.length)
 
             if ((data || []).length < 30) {
                 setHasMore(false)
@@ -233,7 +241,7 @@ export default function ChatWindow({
                 setMessages(prev => [...older, ...prev])
             }
         } catch (error) {
-            console.error('Load more error:', error)
+            console.error('Load more error (Catch):', error)
             wasLoadingMoreRef.current = false
         } finally {
             setIsLoadingMore(false)

@@ -47,6 +47,14 @@ export async function GET() {
                     const status = submissionMap.get(id)
                     return !status || status === 'returned'
                 }).length
+
+                console.log('Debug Status API:', {
+                    studentId: studentSession.studentId,
+                    className: studentSession.className,
+                    foundAssignments: assignmentIds.length,
+                    foundSubmissions: submissions?.length,
+                    calcUnsubmitted: unsubmittedAssignmentCount
+                })
             }
         }
 

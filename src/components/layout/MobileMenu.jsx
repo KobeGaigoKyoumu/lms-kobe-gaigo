@@ -47,6 +47,7 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
                 } else if (isHomework) {
                     showShimmer = statuses.unsubmittedAssignmentCount > 0
                     count = statuses.unsubmittedAssignmentCount
+                    console.log('MobileMenu Homework Badge:', { count, statuses })
                 }
 
                 return (
