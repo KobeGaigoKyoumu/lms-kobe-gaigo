@@ -8,6 +8,7 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
     const [loading, setLoading] = useState(false)
     const [deleting, setDeleting] = useState(false)
     const [courses, setCourses] = useState([])
+    const [classes, setClasses] = useState([])
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -16,20 +17,34 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
         all_day: true,
         event_type: 'other',
         course_id: '',
+        target_class: '',
         color: ''
     })
 
     useEffect(() => {
-        // Load teacher's courses
-        const loadCourses = async () => {
+        // Load teacher's courses and available classes
+        const loadData = async () => {
             const supabase = createClient()
-            const { data } = await supabase
+
+            // Courses
+            const { data: courseData } = await supabase
                 .from('courses')
                 .select('id, title')
                 .order('title')
-            setCourses(data || [])
+            setCourses(courseData || [])
+
+            // Classes (distinct from students)
+            const { data: studentData } = await supabase
+                .from('students')
+                .select('class_name')
+                .not('class_name', 'is', null)
+                .order('class_name')
+
+            // Extract unique class names
+            const uniqueClasses = [...new Set(studentData?.map(s => s.class_name))].filter(Boolean)
+            setClasses(uniqueClasses)
         }
-        loadCourses()
+        loadData()
 
         // Set initial form data
         if (event) {
@@ -41,6 +56,7 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                 all_day: event.allDay !== false,
                 event_type: event.type || 'other',
                 course_id: event.course_id || '',
+                target_class: event.targetClass || '',
                 color: event.color || ''
             })
         } else if (date) {
@@ -82,6 +98,7 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
             all_day: formData.all_day,
             event_type: formData.event_type,
             course_id: formData.course_id || null,
+            target_class: formData.target_class || null,
             color: formData.color || null,
             created_by: userId
         }
@@ -239,7 +256,25 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="course_id">コース（任意）</label>
+                        <label htmlFor="target_class">対象クラス（任意）</label>
+                        <select
+                            id="target_class"
+                            name="target_class"
+                            value={formData.target_class}
+                            onChange={handleChange}
+                        >
+                            <option value="">全体（全員に表示）</option>
+                            {classes.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                        <p style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
+                            ※選択すると、そのクラスの学生にのみ予定が表示されます。
+                        </p>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="course_id">関連コース（任意）</label>
                         <select
                             id="course_id"
                             name="course_id"

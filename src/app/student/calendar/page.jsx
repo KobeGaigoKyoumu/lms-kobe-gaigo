@@ -38,7 +38,11 @@ export default async function StudentCalendarPage() {
         .gte('due_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
         .order('due_date', { ascending: true })
 
-    // カレンダーイベントを取得
+    // カレンダーイベントを取得 (フィルタリング: クラス指定なし OR 自分のクラス)
+    // Note: Since target_class can be NULL, we use "is.null" OR "eq.studentClass"
+    // However, Supabase query builder OR syntax with mixed checks can be tricky.
+    // simpler method: fetch all relevant dates and filter in memory OR usage of .or()
+
     const { data: calendarEvents } = await supabase
         .from('calendar_events')
         .select(`
@@ -50,6 +54,7 @@ export default async function StudentCalendarPage() {
       all_day,
       event_type,
       color,
+      target_class,
       course:courses (
         title
       ),
@@ -57,6 +62,12 @@ export default async function StudentCalendarPage() {
     `)
         .gte('start_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
         .order('start_date', { ascending: true })
+
+    // Memory filter for class targeting
+    const filteredCalendarEvents = (calendarEvents || []).filter(e => {
+        if (!e.target_class) return true; // Global event
+        return e.target_class === session.className; // Class specific
+    })
 
     // イベントデータに変換
     const assignmentEvents = (assignments || []).map(a => ({
@@ -68,7 +79,7 @@ export default async function StudentCalendarPage() {
         color: '#f59e0b'
     }))
 
-    const customEvents = (calendarEvents || []).map(e => ({
+    const customEvents = (filteredCalendarEvents || []).map(e => ({
         id: e.id,
         title: e.title,
         description: e.description,
@@ -77,6 +88,7 @@ export default async function StudentCalendarPage() {
         allDay: e.all_day,
         type: e.event_type,
         course: e.course?.title,
+        targetClass: e.target_class,
         color: e.color || getEventColor(e.event_type),
         createdBy: e.created_by,
         isCustomEvent: true
