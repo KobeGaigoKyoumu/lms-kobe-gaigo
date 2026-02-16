@@ -76,6 +76,42 @@ export default function DebugPage() {
                 </button>
             </div>
 
+            <div style={{ margin: '20px 0', padding: '15px', border: '2px dashed #3b82f6', borderRadius: '8px' }}>
+                <h3>🔔 Background Push Test</h3>
+                <p>Click the button, then <strong>IMMEDIATELY CLOSE this tab/window</strong>. You should receive a notification after 5 seconds.</p>
+                <button
+                    onClick={async () => {
+                        if (Notification.permission !== 'granted') {
+                            alert('Notifications are not allowed. Please enable them first.');
+                            return;
+                        }
+                        try {
+                            // Ensure subscription exists first
+                            const { subscribeUserToPush } = await import('@/lib/pushNotification');
+                            await subscribeUserToPush();
+
+                            await fetch('/api/push/test', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ delay: 5 })
+                            });
+                            alert('Timer started! Close the app NOW.');
+                        } catch (e) { alert(e.message); }
+                    }}
+                    style={{
+                        padding: '10px 20px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Test 5s Delay Notification
+                </button>
+            </div>
+
             <h2>Status API Response</h2>
             <pre style={{ background: '#eee', padding: 10 }}>
                 {JSON.stringify(statusData, null, 2)}
