@@ -35,10 +35,16 @@ const useCounter = (end, duration = 1000) => {
 }
 
 export default function DashboardStats({ unsubmittedCount, completedCount, submissionPoints, dueThisWeekCount }) {
-    const animatedUnsubmitted = useCounter(unsubmittedCount)
-    const animatedCompleted = useCounter(completedCount)
-    const animatedPoints = useCounter(submissionPoints)
-    const animatedDue = useCounter(dueThisWeekCount)
+    // const animatedUnsubmitted = useCounter(unsubmittedCount)
+    // const animatedCompleted = useCounter(completedCount)
+    // const animatedPoints = useCounter(submissionPoints)
+    // const animatedDue = useCounter(dueThisWeekCount)
+
+    // Simplified for Mobile Stability
+    const animatedUnsubmitted = unsubmittedCount
+    const animatedCompleted = completedCount
+    const animatedPoints = submissionPoints
+    const animatedDue = dueThisWeekCount
 
     return (
         <div className={styles.statsGrid}>

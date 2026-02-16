@@ -239,7 +239,8 @@ export default function ChatWindow({
         }
     }, [hasMore, isLoadingMore, messages, resolvedStudentId, supabase, currentUserRole])
 
-    // Intersection Observer for Infinite Scroll
+    /* 
+    // Intersection Observer for Infinite Scroll - Disabled for stability
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -257,6 +258,7 @@ export default function ChatWindow({
 
         return () => observer.disconnect()
     }, [hasMore, isLoadingMore, loadMoreMessages, messages.length])
+    */
 
     // Poll for new messages (Direct Supabase version)
     const pollNewMessages = useCallback(async () => {
@@ -619,9 +621,25 @@ export default function ChatWindow({
                     className={styles.messageArea}
                     ref={scrollContainerRef}
                 >
-                    {/* Top Sentinel for Infinite Scroll - Only render when we CAN load more and aren't already loading */}
+                    {/* Manual Load More Button for Mobile Stability */}
                     {!isLoadingMore && hasMore && (
-                        <div ref={observerTarget} style={{ height: '10px' }} />
+                        <div className={styles.loadMoreContainer} style={{ textAlign: 'center', padding: '10px' }}>
+                            <button
+                                onClick={loadMoreMessages}
+                                className={styles.loadMoreButton}
+                                style={{
+                                    background: 'none',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '20px',
+                                    padding: '6px 16px',
+                                    fontSize: '0.8rem',
+                                    color: '#64748b',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                過去のメッセージを読み込む
+                            </button>
+                        </div>
                     )}
 
                     {isLoadingMore && (
