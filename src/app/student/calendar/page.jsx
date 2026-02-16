@@ -38,6 +38,10 @@ export default async function StudentCalendarPage() {
         .gte('due_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
         .order('due_date', { ascending: true })
 
+    // ---------------------------------------------------------
+    // 1. Fetch Standard Events
+    // ---------------------------------------------------------
+
     // カレンダーイベントを取得 (フィルタリング: クラス指定なし OR 自分のクラス)
     // Note: Since target_class can be NULL, we use "is.null" OR "eq.studentClass"
     // However, Supabase query builder OR syntax with mixed checks can be tricky.
@@ -69,6 +73,30 @@ export default async function StudentCalendarPage() {
         return e.target_class === session.className; // Class specific
     })
 
+    // ---------------------------------------------------------
+    // 2. Fetch Template Events
+    // ---------------------------------------------------------
+
+    // Find assigned template for this class
+    const { data: assignment } = await supabase
+        .from('class_template_assignments')
+        .select('template_id')
+        .eq('class_name', session.className)
+        .single()
+
+    let templateEvents = []
+    if (assignment?.template_id) {
+        const { data: tmplEvents } = await supabase
+            .from('calendar_template_events')
+            .select('*')
+            .eq('template_id', assignment.template_id)
+            .gte('start_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
+            .order('start_date', { ascending: true })
+
+        templateEvents = tmplEvents || []
+    }
+
+
     // イベントデータに変換
     const assignmentEvents = (assignments || []).map(a => ({
         id: a.id,
@@ -94,7 +122,19 @@ export default async function StudentCalendarPage() {
         isCustomEvent: true
     }))
 
-    const events = [...assignmentEvents, ...customEvents]
+    const mappedTemplateEvents = (templateEvents || []).map(e => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        date: e.start_date,
+        endDate: e.end_date,
+        allDay: e.all_day,
+        type: e.event_type,
+        color: e.color || getEventColor(e.event_type),
+        isCustomEvent: true // Treat as custom event for view
+    }))
+
+    const events = [...assignmentEvents, ...customEvents, ...mappedTemplateEvents]
 
     return (
         <div className={styles.page}>
