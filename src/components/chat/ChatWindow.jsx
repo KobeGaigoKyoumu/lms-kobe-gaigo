@@ -189,6 +189,7 @@ export default function ChatWindow({
 
     // Load older messages - Direct Supabase implementation
     const loadMoreMessages = useCallback(async () => {
+        console.log('Load More Clicked', { hasMore, isLoadingMore, msgLen: messages.length })
         if (!hasMore || isLoadingMore || messages.length === 0) return
 
         setIsLoadingMore(true)
@@ -625,7 +626,13 @@ export default function ChatWindow({
                     {!isLoadingMore && hasMore && (
                         <div className={styles.loadMoreContainer} style={{ textAlign: 'center', padding: '10px' }}>
                             <button
-                                onClick={loadMoreMessages}
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    console.log('Load More button tapped')
+                                    loadMoreMessages()
+                                }}
                                 className={styles.loadMoreButton}
                                 style={{
                                     background: 'none',

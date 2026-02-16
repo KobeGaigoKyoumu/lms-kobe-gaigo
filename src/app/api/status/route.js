@@ -34,12 +34,19 @@ export async function GET() {
             if (assignmentIds.length > 0) {
                 const { data: submissions } = await supabase
                     .from('homework_submissions')
-                    .select('assignment_id')
+                    .select('assignment_id, status')
                     .eq('student_id_text', studentSession.studentId)
                     .in('assignment_id', assignmentIds)
 
-                const submittedIds = new Set(submissions?.map(s => s.assignment_id) || [])
-                unsubmittedAssignmentCount = assignmentIds.filter(id => !submittedIds.has(id)).length
+                // Map assignment ID to status
+                const submissionMap = new Map()
+                submissions?.forEach(s => submissionMap.set(s.assignment_id, s.status))
+
+                // Count if (not submitted) OR (status is 'returned')
+                unsubmittedAssignmentCount = assignmentIds.filter(id => {
+                    const status = submissionMap.get(id)
+                    return !status || status === 'returned'
+                }).length
             }
         }
 
