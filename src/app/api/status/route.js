@@ -24,13 +24,16 @@ export async function GET() {
 
         // 3. Assignments (Student logic only)
         let unsubmittedAssignmentCount = 0
+        let assignmentIds = [] // Fix scope issue
+
         if (studentSession) {
             const { data: assignments } = await supabase
                 .from('homework_assignments')
                 .select('id')
                 .eq('class_name', studentSession.className?.trim())
 
-            const assignmentIds = assignments?.map(a => a.id) || []
+            assignmentIds = assignments?.map(a => a.id) || []
+
             if (assignmentIds.length > 0) {
                 const { data: submissions } = await supabase
                     .from('homework_submissions')

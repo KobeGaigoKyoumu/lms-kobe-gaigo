@@ -198,7 +198,7 @@ export default function ChatWindow({
             setIsLoading(false)
             setTimeout(scrollToBottom, 100)
         }
-    }, [resolvedStudentId, supabase, currentUserRole, messages.length])
+    }, [resolvedStudentId, supabase, currentUserRole]) // Removed messages.length to prevent reset loop
 
     // Load older messages - Direct Supabase implementation
     const loadMoreMessages = useCallback(async () => {
