@@ -131,12 +131,25 @@ export default function ChatWindow({
 
     // Scroll restoration logic
     useLayoutEffect(() => {
+        console.log('useLayoutEffect triggered', {
+            wasLoading: wasLoadingMoreRef.current,
+            hasContainer: !!scrollContainerRef.current,
+            msgCount: messages.length
+        })
+
         if (wasLoadingMoreRef.current && scrollContainerRef.current) {
             const container = scrollContainerRef.current
             const newScrollHeight = container.scrollHeight
             const diff = newScrollHeight - prevScrollHeight.current
+
+            console.log('Scroll Restoration:', { diff, oldTop: container.scrollTop, newScrollHeight })
+
             if (diff > 0) {
-                container.scrollTop += diff
+                container.scrollTop = diff + 10 // Add a tiny buffer to prevent top-trigger
+                // Force it again in next tick for mobile browsers
+                requestAnimationFrame(() => {
+                    if (container) container.scrollTop = diff + 10
+                })
             }
             wasLoadingMoreRef.current = false
         }

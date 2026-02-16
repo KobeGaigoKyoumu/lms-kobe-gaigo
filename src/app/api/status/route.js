@@ -28,7 +28,7 @@ export async function GET() {
             const { data: assignments } = await supabase
                 .from('homework_assignments')
                 .select('id')
-                .eq('class_name', studentSession.className)
+                .eq('class_name', studentSession.className?.trim())
 
             const assignmentIds = assignments?.map(a => a.id) || []
             if (assignmentIds.length > 0) {
@@ -43,17 +43,19 @@ export async function GET() {
                 submissions?.forEach(s => submissionMap.set(s.assignment_id, s.status))
 
                 // Count if (not submitted) OR (status is 'returned')
+                const debugDetails = []
                 unsubmittedAssignmentCount = assignmentIds.filter(id => {
                     const status = submissionMap.get(id)
-                    return !status || status === 'returned'
+                    const isUnsubmitted = !status || status === 'returned'
+                    debugDetails.push({ id, status, isUnsubmitted })
+                    return isUnsubmitted
                 }).length
 
-                console.log('Debug Status API:', {
+                console.log('Debug Status API - Detailed:', {
                     studentId: studentSession.studentId,
                     className: studentSession.className,
-                    foundAssignments: assignmentIds.length,
-                    foundSubmissions: submissions?.length,
-                    calcUnsubmitted: unsubmittedAssignmentCount
+                    assignmentCount: assignmentIds.length,
+                    details: debugDetails.slice(0, 5) // Log first 5 for sanity
                 })
             }
         }
