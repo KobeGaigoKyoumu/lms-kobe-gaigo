@@ -184,10 +184,35 @@
     overflow: hidden;
     text-overflow: ellipsis;
     transition: all var(--transition-fast);
+    /* Default margins for single day events */
+    margin: 0 1px;
+}
+
+.multiDayEvent {
+    margin: 0;
+    border-radius: 0;
+}
+
+.eventStart {
+    border-top-left-radius: var(--radius-sm);
+    border-bottom-left-radius: var(--radius-sm);
+    margin-left: 2px;
+}
+
+.eventEnd {
+    border-top-right-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+    margin-right: 2px;
+}
+
+.eventMiddle {
+    border-radius: 0;
 }
 
 .event:hover {
     background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    z-index: 10;
+    position: relative;
 }
 
 .moreEvents {
@@ -448,5 +473,88 @@
 
     .formRow {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Event List */
+.eventList {
+    margin-top: var(--spacing-6);
+    padding: var(--spacing-4);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.eventListTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.eventListContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.eventListItem {
+    display: grid;
+    grid-template-columns: 180px 1fr 100px;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-3);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.eventListItem:hover {
+    border-color: var(--primary-500);
+    box-shadow: var(--shadow-sm);
+}
+
+.eventListDate {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.eventListTitle {
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    color: var(--text-primary);
+    padding-left: var(--spacing-3);
+    border-left: 3px solid transparent;
+}
+
+.eventListTitle a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.eventListTitle a:hover {
+    color: var(--primary-500);
+    text-decoration: underline;
+}
+
+.eventListType {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    text-align: right;
+    background: var(--bg-tertiary);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-full);
+    justify-self: end;
+}
+
+@media (max-width: 640px) {
+    .eventListItem {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-2);
+    }
+
+    .eventListType {
+        justify-self: start;
     }
 }

@@ -59,9 +59,16 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     }
 
     const getEventsForDate = (date) => {
+        const dateStr = formatDate(date)
         return events.filter(e => {
-            const eventDate = new Date(e.date)
-            return formatDate(eventDate) === formatDate(date)
+            const startDateStr = formatDate(new Date(e.date))
+            // If it has an end date, check range
+            if (e.end_date) {
+                const endDateStr = formatDate(new Date(e.end_date))
+                return dateStr >= startDateStr && dateStr <= endDateStr
+            }
+            // Single day event
+            return dateStr === startDateStr
         })
     }
 
@@ -158,6 +165,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     {days.map((day, index) => {
                         const dayEvents = getEventsForDate(day.date)
                         const dayOfWeek = day.date.getDay()
+                        const dateStr = formatDate(day.date)
 
                         return (
                             <div
@@ -169,26 +177,49 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                     {day.date.getDate()}
                                 </span>
                                 <div className={styles.dayEvents}>
-                                    {dayEvents.slice(0, 3).map(event => (
-                                        <div
-                                            key={event.id}
-                                            className={styles.event}
-                                            style={{ backgroundColor: event.color || '#3b82f6' }}
-                                            onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
-                                            title={event.title}
-                                        >
-                                            {event.type === 'assignment' ? (
-                                                <Link
-                                                    href={`/assignments/${event.id}`}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    {event.title}
-                                                </Link>
-                                            ) : (
-                                                <span>{event.title}</span>
-                                            )}
-                                        </div>
-                                    ))}
+                                    {dayEvents.slice(0, 3).map(event => {
+                                        const startDateStr = formatDate(new Date(event.date))
+                                        const endDateStr = event.end_date ? formatDate(new Date(event.end_date)) : startDateStr
+                                        const isMultiDay = startDateStr !== endDateStr
+
+                                        const isStart = dateStr === startDateStr
+                                        const isEnd = dateStr === endDateStr
+                                        const isMiddle = isMultiDay && !isStart && !isEnd
+
+                                        let className = styles.event
+                                        if (isMultiDay) {
+                                            className += ` ${styles.multiDayEvent}`
+                                            if (isStart) className += ` ${styles.eventStart}`
+                                            if (isEnd) className += ` ${styles.eventEnd}`
+                                            if (isMiddle) className += ` ${styles.eventMiddle}`
+                                        }
+
+                                        return (
+                                            <div
+                                                key={event.id}
+                                                className={className}
+                                                style={{ backgroundColor: event.color || '#3b82f6' }}
+                                                onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
+                                                title={event.title}
+                                            >
+                                                {/* Only show title on start date or if it's Sunday (start of week) to give context, or if single day */}
+                                                {(isStart || dayOfWeek === 0 || !isMultiDay) ? (
+                                                    event.type === 'assignment' ? (
+                                                        <Link
+                                                            href={`/assignments/${event.id}`}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {event.title.length > 5 ? event.title.slice(0, 5) + '...' : event.title}
+                                                        </Link>
+                                                    ) : (
+                                                        <span>{event.title.length > 5 ? event.title.slice(0, 5) + '...' : event.title}</span>
+                                                    )
+                                                ) : (
+                                                    <span>&nbsp;</span> // Spacer for styling
+                                                )}
+                                            </div>
+                                        )
+                                    })}
                                     {dayEvents.length > 3 && (
                                         <span className={styles.moreEvents}>
                                             +{dayEvents.length - 3}
@@ -198,6 +229,38 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                             </div>
                         )
                     })}
+                </div>
+
+                {/* Event List */}
+                <div className={styles.eventList}>
+                    <h3 className={styles.eventListTitle}>今後の予定</h3>
+                    <div className={styles.eventListContent}>
+                        {events
+                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                            .map(event => (
+                                <div key={event.id} className={styles.eventListItem}>
+                                    <div className={styles.eventListDate}>
+                                        {formatDate(new Date(event.date))}
+                                        {event.end_date && ` 〜 ${formatDate(new Date(event.end_date))}`}
+                                    </div>
+                                    <div className={styles.eventListTitle} style={{ borderLeftColor: event.color || '#3b82f6' }}>
+                                        {event.type === 'assignment' ? (
+                                            <Link href={`/assignments/${event.id}`}>
+                                                {event.title}
+                                            </Link>
+                                        ) : (
+                                            <span>{event.title}</span>
+                                        )}
+                                    </div>
+                                    <div className={styles.eventListType}>
+                                        {event.type === 'assignment' ? '課題' :
+                                            event.type === 'class' ? '授業' :
+                                                event.type === 'exam' ? '試験' :
+                                                    event.type === 'holiday' ? '休日' : 'その他'}
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
                 </div>
 
                 {/* Legend */}
