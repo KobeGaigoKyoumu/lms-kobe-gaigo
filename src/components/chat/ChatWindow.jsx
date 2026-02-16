@@ -619,8 +619,10 @@ export default function ChatWindow({
                     className={styles.messageArea}
                     ref={scrollContainerRef}
                 >
-                    {/* Top Sentinel for Infinite Scroll */}
-                    <div ref={observerTarget} style={{ height: '10px' }} />
+                    {/* Top Sentinel for Infinite Scroll - Only render when we CAN load more and aren't already loading */}
+                    {!isLoadingMore && hasMore && (
+                        <div ref={observerTarget} style={{ height: '10px' }} />
+                    )}
 
                     {isLoadingMore && (
                         <div className={styles.loadingMoreSpinner}>
