@@ -40,6 +40,9 @@ export async function POST(request) {
 
         const webpush = require('web-push')
 
+        const body = await request.json().catch(() => ({}))
+        const { delay = 0 } = body
+
         if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
             console.error('VAPID keys missing')
             return NextResponse.json({ error: 'Server VAPID keys missing' }, { status: 500 })
@@ -51,9 +54,13 @@ export async function POST(request) {
             process.env.VAPID_PRIVATE_KEY
         )
 
+        if (delay > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay * 1000))
+        }
+
         const pushPayload = JSON.stringify({
             title: 'テスト通知',
-            body: 'これはテスト通知です。通知機能は正常に動作しています。',
+            body: `これはテスト通知です (${delay > 0 ? delay + '秒遅延' : '即時'})。通知機能は正常に動作しています。`,
             url: '/',
             badge: 1,
             icon: '/icon-192.png'
