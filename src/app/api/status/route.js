@@ -113,15 +113,7 @@ export async function GET() {
         return NextResponse.json({
             hasNewAnnouncement,
             unsubmittedAssignmentCount,
-            unreadMessageCount,
-            debug: {
-                studentId: studentSession?.studentId,
-                className: studentSession?.className,
-                classNameTrimmed: studentSession?.className?.trim(),
-                assignmentCount: assignmentIds?.length || 0,
-                assignmentsFound: assignmentIds?.length,
-                count: unsubmittedAssignmentCount
-            }
+            unreadMessageCount
         })
 
     } catch (error) {
