@@ -27,10 +27,19 @@ export async function GET() {
         let assignmentIds = [] // Fix scope issue
 
         if (studentSession) {
+            // Fetch fresh student profile to ensure class name is up to date
+            const { data: student } = await supabase
+                .from('students')
+                .select('class_name')
+                .eq('student_id_text', studentSession.studentId)
+                .single()
+
+            const className = student ? student.class_name?.trim() : studentSession.className?.trim()
+
             const { data: assignments } = await supabase
                 .from('homework_assignments')
                 .select('id')
-                .eq('class_name', studentSession.className?.trim())
+                .eq('class_name', className)
 
             assignmentIds = assignments?.map(a => a.id) || []
 
