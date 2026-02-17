@@ -514,23 +514,15 @@
     transition: all var(--transition-fast);
 }
 
-.eventListItem:hover {
-    border-color: var(--primary-500);
-    box-shadow: var(--shadow-sm);
-}
-
-.eventListDate {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-}
-
 .eventListTitle {
     font-size: var(--font-size-base);
     font-weight: 500;
     color: var(--text-primary);
     padding-left: var(--spacing-3);
     border-left: 3px solid transparent;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .eventListTitle a {

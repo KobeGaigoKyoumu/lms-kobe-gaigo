@@ -232,24 +232,45 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                 </span>
 
                                 <div className={styles.dayEvents}>
-                                    {/* If background is coloured, do NOT show non-class events text */}
+                                    {/* If background is coloured, show truncated text ONLY on start date */}
                                     {dayEvents.slice(0, 3).map(event => {
-                                        // If bgEvents includes this event, don't show text (return null)
-                                        // Unless we need to keep structure? No, user said "hide event name"
-                                        if (event.type !== 'class') {
+                                        // Check if this is the start date of the event
+                                        const isStart = formatDate(new Date(event.date)) === formatDate(day.date)
+
+                                        // For non-class events (which have background color):
+                                        // 1. Only show on start date
+                                        if (event.type !== 'class' && !isStart) {
                                             return null
                                         }
 
-                                        // Render class events normally
+                                        // 2. Truncate title to 2 chars for non-class events
+                                        const displayTitle = event.type === 'class' ?
+                                            (event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title) :
+                                            event.title.slice(0, 2)
+
                                         return (
                                             <div
                                                 key={event.id}
                                                 className={styles.event}
-                                                style={{ backgroundColor: event.color || '#3b82f6' }}
+                                                style={
+                                                    bgEvents.length > 0
+                                                        ? { background: 'rgba(255,255,255,0.2)', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }
+                                                        : { backgroundColor: event.color || '#3b82f6' }
+                                                }
                                                 onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
                                                 title={event.title}
                                             >
-                                                <span>{event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}</span>
+                                                {event.type === 'assignment' ? (
+                                                    <Link
+                                                        href={`/assignments/${event.id}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={bgEvents.length > 0 ? { color: 'white' } : {}}
+                                                    >
+                                                        {displayTitle}
+                                                    </Link>
+                                                ) : (
+                                                    <span>{displayTitle}</span>
+                                                )}
                                             </div>
                                         )
                                     })}
