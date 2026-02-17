@@ -505,7 +505,7 @@
 .eventListItem {
     display: grid;
     grid-template-columns: 180px 1fr 100px;
-    align-items: center;
+    align-items: stretch;
     gap: var(--spacing-4);
     padding: var(--spacing-3);
     background: var(--bg-primary);
@@ -514,12 +514,22 @@
     transition: all var(--transition-fast);
 }
 
+.eventListDate {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+}
+
 .eventListTitle {
     font-size: var(--font-size-base);
     font-weight: 500;
     color: var(--text-primary);
     padding-left: var(--spacing-3);
     border-left: 3px solid transparent;
+    display: flex;
+    align-items: center;
 }
 
 .eventListTitle a {

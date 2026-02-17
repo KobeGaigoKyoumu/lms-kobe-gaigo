@@ -126,21 +126,8 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
     const getPastelColor = (color) => {
-        // Map standard colors to pastels
-        // Assignment (Orange #f59e0b) -> #fef3c7
-        // Exam (Red #ef4444) -> #fee2e2
-        // Holiday (Green #22c55e) -> #dcfce7
-        // Other (Purple #8b5cf6) -> #f3e8ff
-        // Class (Blue #3b82f6) -> #dbeafe
-
-        const colorMap = {
-            '#f59e0b': '#fef3c7',
-            '#ef4444': '#fee2e2',
-            '#22c55e': '#dcfce7',
-            '#8b5cf6': '#f3e8ff',
-            '#3b82f6': '#dbeafe'
-        }
-        return colorMap[color] || color
+        // Return pastel blue for all events as requested
+        return '#dbeafe'
     }
 
     return (
@@ -246,7 +233,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                         // 2. Truncate title to 2 chars for non-class events
                                         const displayTitle = event.type === 'class' ?
                                             (event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title) :
-                                            event.title.slice(0, 2)
+                                            (event.title.length > 2 ? event.title.slice(0, 2) + '...' : event.title)
 
                                         return (
                                             <div
