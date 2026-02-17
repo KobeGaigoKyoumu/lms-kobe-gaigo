@@ -126,8 +126,15 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
     const getPastelColor = (color) => {
-        // Return pastel blue for all events as requested
-        return '#dbeafe'
+        // Map standard colors to pastels
+        const colorMap = {
+            '#f59e0b': '#fef3c7', // Assignment
+            '#ef4444': '#fee2e2', // Exam
+            '#22c55e': '#dcfce7', // Holiday
+            '#8b5cf6': '#f3e8ff', // Other
+            '#3b82f6': '#dbeafe'  // Class
+        }
+        return colorMap[color] || color
     }
 
     return (
@@ -241,7 +248,8 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                 className={styles.event}
                                                 style={
                                                     bgEvents.length > 0
-                                                        ? { color: '#374151', padding: '0 2px' } // Dark gray text, remove background/shadow
+                                                        // Event text background: Pastel Blue (#dbeafe), Text: Dark Gray (#374151)
+                                                        ? { backgroundColor: '#dbeafe', color: '#374151', padding: '0 2px', borderRadius: '4px' }
                                                         : { backgroundColor: event.color || '#3b82f6' }
                                                 }
                                                 onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}

@@ -530,6 +530,8 @@
     border-left: 3px solid transparent;
     display: flex;
     align-items: center;
+    height: 100%;
+    /* Force height to match grid row for border stretching */
 }
 
 .eventListTitle a {
