@@ -246,12 +246,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                             <div
                                                 key={event.id}
                                                 className={styles.event}
-                                                style={
-                                                    bgEvents.length > 0
-                                                        // Event text background: Pastel Blue (#dbeafe), Text: Dark Gray (#374151)
-                                                        ? { backgroundColor: '#dbeafe', color: '#374151', padding: '0 2px', borderRadius: '4px' }
-                                                        : { backgroundColor: event.color || '#3b82f6' }
-                                                }
+                                                style={{ background: '#dbeafe', color: '#374151', padding: '0 2px', borderRadius: '4px' }}
                                                 onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
                                                 title={event.title}
                                             >
@@ -259,7 +254,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                     <Link
                                                         href={`/assignments/${event.id}`}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        style={bgEvents.length > 0 ? { color: '#374151' } : {}}
+                                                        style={{ color: '#374151' }}
                                                     >
                                                         {displayTitle}
                                                     </Link>
@@ -290,9 +285,9 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                         {formatDateTime(event.date, event.all_day)}
                                         {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
                                     </div>
-                                    <div className={styles.eventListTitle} style={{ borderLeftColor: event.color || '#3b82f6' }}>
+                                    <div className={styles.eventListTitle} style={{ backgroundColor: getPastelColor(event.color || '#3b82f6'), color: '#374151' }}>
                                         {event.type === 'assignment' ? (
-                                            <Link href={`/assignments/${event.id}`}>
+                                            <Link href={`/assignments/${event.id}`} style={{ color: '#374151' }}>
                                                 {event.title}
                                             </Link>
                                         ) : (
