@@ -246,7 +246,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                             <div
                                                 key={event.id}
                                                 className={styles.event}
-                                                style={{ background: '#dbeafe', color: '#374151', padding: '0 2px', borderRadius: '4px' }}
+                                                style={{ background: getPastelColor(event.color || '#3b82f6'), color: '#374151', padding: '0 2px', borderRadius: '4px' }}
                                                 onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
                                                 title={event.title}
                                             >

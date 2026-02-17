@@ -551,6 +551,7 @@
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--radius-full);
     justify-self: end;
+    align-self: center;
 }
 
 @media (max-width: 640px) {
@@ -587,6 +588,8 @@
         border-left: none;
         height: auto;
         align-self: center;
+        display: flex;
+        align-items: center;
     }
 
     .eventListType {
