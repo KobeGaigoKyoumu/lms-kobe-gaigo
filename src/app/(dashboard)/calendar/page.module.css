@@ -520,9 +520,6 @@
     color: var(--text-primary);
     padding-left: var(--spacing-3);
     border-left: 3px solid transparent;
-    display: flex;
-    align-items: center;
-    height: 100%;
 }
 
 .eventListTitle a {

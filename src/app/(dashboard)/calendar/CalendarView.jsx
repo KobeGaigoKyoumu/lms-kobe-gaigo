@@ -254,7 +254,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                 className={styles.event}
                                                 style={
                                                     bgEvents.length > 0
-                                                        ? { background: 'rgba(255,255,255,0.2)', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }
+                                                        ? { color: '#374151', padding: '0 2px' } // Dark gray text, remove background/shadow
                                                         : { backgroundColor: event.color || '#3b82f6' }
                                                 }
                                                 onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
@@ -264,7 +264,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                     <Link
                                                         href={`/assignments/${event.id}`}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        style={bgEvents.length > 0 ? { color: 'white' } : {}}
+                                                        style={bgEvents.length > 0 ? { color: '#374151' } : {}}
                                                     >
                                                         {displayTitle}
                                                     </Link>
