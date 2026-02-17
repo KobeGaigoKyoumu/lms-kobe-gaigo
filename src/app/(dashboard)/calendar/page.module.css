@@ -555,11 +555,44 @@
 
 @media (max-width: 640px) {
     .eventListItem {
-        grid-template-columns: 1fr;
+        display: flex;
+        /* Flexbox for single row */
+        align-items: center;
+        /* Vertically align */
         gap: var(--spacing-2);
+        padding: var(--spacing-2);
+        /* Compact padding */
+    }
+
+    .eventListDate {
+        font-size: 10px;
+        /* Smaller date */
+        white-space: nowrap;
+        /* Keep on one line */
+        width: auto;
+        /* Auto width */
+        min-width: 70px;
+        /* Min width for alignment */
+    }
+
+    .eventListTitle {
+        flex: 1;
+        /* Take remaining space */
+        font-size: var(--font-size-sm);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /* Truncate if too long */
+        padding-left: var(--spacing-2);
+        border-left-width: 2px;
+        /* Thinner border */
     }
 
     .eventListType {
-        justify-self: start;
+        font-size: 10px;
+        padding: 1px 4px;
+        /* Compact padding */
+        white-space: nowrap;
+        /* justify-self removed since flex */
     }
 }

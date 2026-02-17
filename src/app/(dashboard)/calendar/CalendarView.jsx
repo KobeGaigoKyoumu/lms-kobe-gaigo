@@ -125,6 +125,24 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const weekDays = ['日', '月', '火', '水', '木', '金', '土']
     const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
+    const getPastelColor = (color) => {
+        // Map standard colors to pastels
+        // Assignment (Orange #f59e0b) -> #fef3c7
+        // Exam (Red #ef4444) -> #fee2e2
+        // Holiday (Green #22c55e) -> #dcfce7
+        // Other (Purple #8b5cf6) -> #f3e8ff
+        // Class (Blue #3b82f6) -> #dbeafe
+
+        const colorMap = {
+            '#f59e0b': '#fef3c7',
+            '#ef4444': '#fee2e2',
+            '#22c55e': '#dcfce7',
+            '#8b5cf6': '#f3e8ff',
+            '#3b82f6': '#dbeafe'
+        }
+        return colorMap[color] || color
+    }
+
     return (
         <>
             <div className={styles.calendar}>
@@ -188,19 +206,17 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                         let cellStyle = {}
                         if (bgEvents.length > 0) {
                             if (bgEvents.length === 1) {
-                                cellStyle.background = bgEvents[0].color || '#3b82f6'
-                                cellStyle.color = 'white' // Text color contrast
+                                cellStyle.background = getPastelColor(bgEvents[0].color || '#3b82f6')
                             } else {
                                 // Create gradient for multiple events
                                 const step = 100 / bgEvents.length
                                 const stops = bgEvents.map((e, i) => {
-                                    const color = e.color || '#3b82f6'
+                                    const color = getPastelColor(e.color || '#3b82f6')
                                     const start = i * step
                                     const end = (i + 1) * step
                                     return `${color} ${start}% ${end}%`
                                 }).join(', ')
                                 cellStyle.background = `linear-gradient(to right, ${stops})`
-                                cellStyle.color = 'white' // Text contrast usually better with white on colored bg
                             }
                         }
 
@@ -211,43 +227,35 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                 style={cellStyle}
                                 onClick={() => handleDayClick(day.date)}
                             >
-                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}
-                                    style={bgEvents.length > 0 ? { color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' } : {}}
-                                >
+                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}>
                                     {day.date.getDate()}
                                 </span>
 
                                 <div className={styles.dayEvents}>
-                                    {dayEvents.slice(0, 3).map(event => (
-                                        <div
-                                            key={event.id}
-                                            className={styles.event}
-                                            style={
-                                                bgEvents.length > 0
-                                                    ? { background: 'rgba(255,255,255,0.2)', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }
-                                                    : { backgroundColor: event.color || '#3b82f6' }
-                                            }
-                                            onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
-                                            title={event.title}
-                                        >
-                                            {event.type === 'assignment' ? (
-                                                <Link
-                                                    href={`/assignments/${event.id}`}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    style={bgEvents.length > 0 ? { color: 'white' } : {}}
-                                                >
-                                                    {event.title.length > 8 ? event.title.slice(0, 8) + '...' : event.title}
-                                                </Link>
-                                            ) : (
-                                                <span>{event.title.length > 8 ? event.title.slice(0, 8) + '...' : event.title}</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                    {dayEvents.length > 3 && (
-                                        <span className={styles.moreEvents} style={bgEvents.length > 0 ? { color: 'white' } : {}}>
-                                            +{dayEvents.length - 3}
-                                        </span>
-                                    )}
+                                    {/* If background is coloured, do NOT show non-class events text */}
+                                    {dayEvents.slice(0, 3).map(event => {
+                                        // If bgEvents includes this event, don't show text (return null)
+                                        // Unless we need to keep structure? No, user said "hide event name"
+                                        if (event.type !== 'class') {
+                                            return null
+                                        }
+
+                                        // Render class events normally
+                                        return (
+                                            <div
+                                                key={event.id}
+                                                className={styles.event}
+                                                style={{ backgroundColor: event.color || '#3b82f6' }}
+                                                onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
+                                                title={event.title}
+                                            >
+                                                <span>{event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}</span>
+                                            </div>
+                                        )
+                                    })}
+                                    {/* Count remaining events - optional: could show dot or something, but typically BG handles visibility. 
+                                        Let's keep count if there are MORE events than space, but typically BG handles visibility.
+                                    */}
                                 </div>
                             </div>
                         )
@@ -293,7 +301,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                         課題締切
                     </div>
                     <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#3b82f6' }}></span>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db' }}></span>
                         授業
                     </div>
                     <div className={styles.legendItem}>
