@@ -168,6 +168,20 @@
     color: var(--primary-500);
 }
 
+.dayNumber.holiday {
+    color: var(--error-500);
+}
+
+.holidayName {
+    font-size: 10px;
+    color: var(--error-500);
+    margin-bottom: 2px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .dayEvents {
     display: flex;
     flex-direction: column;

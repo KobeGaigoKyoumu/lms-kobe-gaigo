@@ -112,7 +112,7 @@ export async function generateAttendancePDFClient(data) {
         </style>
         <div class="pdf-page">
             <div style="text-align: right; font-size: 10pt; margin-bottom: 2mm;">発行日：${today}</div>
-        <div style="text-align: center; margin-bottom: 2mm;">
+        <div style="text-align: center; margin-bottom: 12mm;">
             <h1 style="font-size: 26pt; font-weight: bold; margin: 0; color: #333; letter-spacing: 2px;">神戸外語教育学院</h1>
         </div>
         <div style="position: relative; height: 34.5mm; border-bottom: 2px solid #333; margin-bottom: 3mm;">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
@@ -20,6 +20,21 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
         target_class: '',
         color: ''
     })
+
+    const formatDateTimeLocal = useCallback((date, allDay = false) => {
+        const d = new Date(date)
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+
+        if (allDay) {
+            return `${year}-${month}-${day}`
+        }
+
+        const hours = String(d.getHours()).padStart(2, '0')
+        const minutes = String(d.getMinutes()).padStart(2, '0')
+        return `${year}-${month}-${day}T${hours}:${minutes}`
+    }, [])
 
     useEffect(() => {
         // Load teacher's courses and available classes
@@ -51,8 +66,8 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
             setFormData({
                 title: event.title || '',
                 description: event.description || '',
-                start_date: formatDateTimeLocal(new Date(event.date)),
-                end_date: event.endDate ? formatDateTimeLocal(new Date(event.endDate)) : '',
+                start_date: formatDateTimeLocal(new Date(event.date), event.all_day),
+                end_date: event.endDate ? formatDateTimeLocal(new Date(event.endDate), event.all_day) : '',
                 all_day: event.allDay !== false,
                 event_type: event.type || 'other',
                 course_id: event.course_id || '',
@@ -62,26 +77,34 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
         } else if (date) {
             setFormData(prev => ({
                 ...prev,
-                start_date: formatDateTimeLocal(date)
+                start_date: formatDateTimeLocal(date, prev.all_day),
+                end_date: ''
             }))
         }
-    }, [event, date])
-
-    const formatDateTimeLocal = (date) => {
-        const d = new Date(date)
-        const year = d.getFullYear()
-        const month = String(d.getMonth() + 1).padStart(2, '0')
-        const day = String(d.getDate()).padStart(2, '0')
-        const hours = String(d.getHours()).padStart(2, '0')
-        const minutes = String(d.getMinutes()).padStart(2, '0')
-        return `${year}-${month}-${day}T${hours}:${minutes}`
-    }
+    }, [event, date, formatDateTimeLocal])
 
     const handleChange = (e) => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value
-        }))
+        const { name, value, type, checked } = e.target
+
+        if (name === 'all_day') {
+            // When switching types, reformat the dates
+            setFormData(prev => {
+                const startDate = prev.start_date ? new Date(prev.start_date) : new Date()
+                const endDate = prev.end_date ? new Date(prev.end_date) : null
+
+                return {
+                    ...prev,
+                    all_day: checked,
+                    start_date: formatDateTimeLocal(startDate, checked),
+                    end_date: endDate ? formatDateTimeLocal(endDate, checked) : ''
+                }
+            })
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }))
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -90,11 +113,24 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
 
         const supabase = createClient()
 
+        // For all_day events, we need to ensure local time is preserved when converting to ISO
+        // Or simply append time part if it's missing (though for DB handling, ISO string is expected)
+        // If all_day is true, input is YYYY-MM-DD. We can append T00:00:00 to make it a valid ISO start
+
+        let startTime = formData.start_date
+        let endTime = formData.end_date
+
+        if (formData.all_day) {
+            // Append time component if missing
+            if (startTime && !startTime.includes('T')) startTime += 'T00:00:00'
+            if (endTime && !endTime.includes('T')) endTime += 'T23:59:59'
+        }
+
         const eventData = {
             title: formData.title,
             description: formData.description || null,
-            start_date: new Date(formData.start_date).toISOString(),
-            end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+            start_date: new Date(startTime).toISOString(),
+            end_date: endTime ? new Date(endTime).toISOString() : null,
             all_day: formData.all_day,
             event_type: formData.event_type,
             course_id: formData.course_id || null,
@@ -222,9 +258,9 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="start_date">開始日時 *</label>
+                        <label htmlFor="start_date">開始{formData.all_day ? '日' : '日時'} *</label>
                         <input
-                            type="datetime-local"
+                            type={formData.all_day ? "date" : "datetime-local"}
                             id="start_date"
                             name="start_date"
                             value={formData.start_date}
@@ -234,9 +270,9 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="end_date">終了日時</label>
+                        <label htmlFor="end_date">終了{formData.all_day ? '日' : '日時'}</label>
                         <input
-                            type="datetime-local"
+                            type={formData.all_day ? "date" : "datetime-local"}
                             id="end_date"
                             name="end_date"
                             value={formData.end_date}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import JapaneseHolidays from 'japanese-holidays'
 import styles from './page.module.css'
 import EventModal from './EventModal'
 
@@ -28,19 +28,26 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     // 前月のパディング
     for (let i = 0; i < startPadding; i++) {
         const d = new Date(year, month, -startPadding + i + 1)
-        days.push({ date: d, isCurrentMonth: false })
+        const holiday = JapaneseHolidays.isHoliday(d)
+        days.push({ date: d, isCurrentMonth: false, holiday })
     }
 
     // 今月の日付
     for (let i = 1; i <= lastDay.getDate(); i++) {
-        days.push({ date: new Date(year, month, i), isCurrentMonth: true })
+        const d = new Date(year, month, i)
+        const holiday = JapaneseHolidays.isHoliday(d)
+        days.push({ date: d, isCurrentMonth: true, holiday })
     }
 
     // 次月のパディング（6週分）
     const remaining = 42 - days.length
     for (let i = 1; i <= remaining; i++) {
-        days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false })
+        const d = new Date(year, month + 1, i)
+        const holiday = JapaneseHolidays.isHoliday(d)
+        days.push({ date: d, isCurrentMonth: false, holiday })
     }
+
+
 
     const goToPrevMonth = () => {
         setCurrentDate(new Date(year, month - 1, 1))
@@ -183,9 +190,10 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                 className={`${styles.dayCell} ${!day.isCurrentMonth ? styles.otherMonth : ''} ${isToday(day.date) ? styles.today : ''}`}
                                 onClick={() => handleDayClick(day.date)}
                             >
-                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 ? styles.sunday : ''} ${dayOfWeek === 6 ? styles.saturday : ''}`}>
+                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}>
                                     {day.date.getDate()}
                                 </span>
+                                {day.holiday && <div className={styles.holidayName}>{day.holiday}</div>}
                                 <div className={styles.dayEvents}>
                                     {dayEvents.slice(0, 3).map(event => {
                                         const startDateStr = formatDate(new Date(event.date))
@@ -219,10 +227,10 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                             href={`/assignments/${event.id}`}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            {event.title.length > 5 ? event.title.slice(0, 5) + '...' : event.title}
+                                                            {event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}
                                                         </Link>
                                                     ) : (
-                                                        <span>{event.title.length > 5 ? event.title.slice(0, 5) + '...' : event.title}</span>
+                                                        <span>{event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}</span>
                                                     )
                                                 ) : (
                                                     <span>&nbsp;</span> // Spacer for styling
