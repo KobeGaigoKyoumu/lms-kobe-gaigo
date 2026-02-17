@@ -193,7 +193,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                 <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}>
                                     {day.date.getDate()}
                                 </span>
-                                {day.holiday && <div className={styles.holidayName}>{day.holiday}</div>}
+
                                 <div className={styles.dayEvents}>
                                     {dayEvents.slice(0, 3).map(event => {
                                         const startDateStr = formatDate(new Date(event.date))

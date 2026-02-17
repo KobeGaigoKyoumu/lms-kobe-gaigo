@@ -112,13 +112,13 @@ export default async function StudentCalendarPage() {
         title: e.title,
         description: e.description,
         date: e.start_date,
-        endDate: e.end_date,
-        allDay: e.all_day,
+        end_date: e.end_date, // Changed endDate to end_date to match CalendarView expectation if needed, check CalendarView again?
+        all_day: e.all_day,   // Fixed mapping
         type: e.event_type,
         course: e.course?.title,
-        targetClass: e.target_class,
+        target_class: e.target_class, // Changed targetClass to target_class? check CalendarView
         color: e.color || getEventColor(e.event_type),
-        createdBy: e.created_by,
+        created_by: e.created_by, // Changed createdBy to created_by?
         isCustomEvent: true
     }))
 
@@ -127,11 +127,11 @@ export default async function StudentCalendarPage() {
         title: e.title,
         description: e.description,
         date: e.start_date,
-        endDate: e.end_date,
-        allDay: e.all_day,
+        end_date: e.end_date, // Changed endDate to end_date
+        all_day: e.all_day,   // Fixed mapping
         type: e.event_type,
         color: e.color || getEventColor(e.event_type),
-        isCustomEvent: true // Treat as custom event for view
+        isCustomEvent: true
     }))
 
     const events = [...assignmentEvents, ...customEvents, ...mappedTemplateEvents]

@@ -116,7 +116,8 @@
 
 .dayCell {
     min-height: 100px;
-    padding: var(--spacing-2);
+    padding: var(--spacing-2) 0;
+    /* Remove horizontal padding */
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     transition: background var(--transition-fast);
@@ -158,6 +159,10 @@
     font-weight: 500;
     color: var(--text-primary);
     margin-bottom: var(--spacing-1);
+    margin-left: var(--spacing-2);
+    /* Restore left spacing */
+    margin-right: var(--spacing-2);
+    /* Restore right spacing */
 }
 
 .dayNumber.sunday {
@@ -180,6 +185,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-left: var(--spacing-2);
+    /* Restore spacing */
+    margin-right: var(--spacing-2);
+    /* Restore spacing */
 }
 
 .dayEvents {
@@ -199,24 +208,28 @@
     text-overflow: ellipsis;
     transition: all var(--transition-fast);
     /* Default margins for single day events */
-    margin: 0 1px;
+    margin: 0 var(--spacing-1);
+    /* Inset single events */
 }
 
 .multiDayEvent {
     margin: 0;
+    /* Touch edges */
     border-radius: 0;
 }
 
 .eventStart {
     border-top-left-radius: var(--radius-sm);
     border-bottom-left-radius: var(--radius-sm);
-    margin-left: 2px;
+    margin-left: var(--spacing-1);
+    /* Inset start */
 }
 
 .eventEnd {
     border-top-right-radius: var(--radius-sm);
     border-bottom-right-radius: var(--radius-sm);
-    margin-right: 2px;
+    margin-right: var(--spacing-1);
+    /* Inset end */
 }
 
 .eventMiddle {
