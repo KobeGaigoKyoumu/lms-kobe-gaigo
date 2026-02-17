@@ -202,6 +202,7 @@
     background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
     color: white;
     font-size: var(--font-size-xs);
+    font-weight: 700;
     border-radius: var(--radius-sm);
     white-space: nowrap;
     overflow: hidden;
@@ -491,7 +492,7 @@
 
 .eventListTitle {
     font-size: var(--font-size-lg);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-4);
 }
@@ -524,7 +525,7 @@
 
 .eventListTitle {
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: 700;
     color: var(--text-primary);
     padding: var(--spacing-1) var(--spacing-3);
     border-radius: var(--radius-md);
@@ -536,6 +537,30 @@
 .eventListTitle a {
     color: var(--text-primary);
     text-decoration: none;
+    font-weight: 700;
+}
+
+/* ... existing code ... */
+
+@media (max-width: 640px) {
+    /* ... existing code ... */
+
+    .eventListTitle {
+        flex: 1;
+        font-size: var(--font-size-sm);
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: var(--spacing-1) var(--spacing-2);
+        border-left: none;
+        height: auto;
+        align-self: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
 }
 
 .eventListTitle a:hover {
@@ -545,6 +570,7 @@
 
 .eventListType {
     font-size: var(--font-size-xs);
+    font-weight: 700;
     color: var(--text-tertiary);
     text-align: right;
     background: var(--bg-tertiary);
