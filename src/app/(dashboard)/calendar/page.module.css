@@ -590,6 +590,7 @@
         align-self: center;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
 
     .eventListType {
