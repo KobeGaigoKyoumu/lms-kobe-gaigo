@@ -179,6 +179,30 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     )}
                 </div>
 
+                {/* Legend - Moved to Top */}
+                <div className={styles.legend}>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }}></span>
+                        課題締切
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db' }}></span>
+                        授業
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#ef4444' }}></span>
+                        試験
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#22c55e' }}></span>
+                        休日
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#8b5cf6' }}></span>
+                        その他
+                    </div>
+                </div>
+
                 <div className={styles.weekHeader}>
                     {weekDays.map((day, i) => (
                         <div
@@ -305,29 +329,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     </div>
                 </div>
 
-                {/* Legend */}
-                <div className={styles.legend}>
-                    <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }}></span>
-                        課題締切
-                    </div>
-                    <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db' }}></span>
-                        授業
-                    </div>
-                    <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#ef4444' }}></span>
-                        試験
-                    </div>
-                    <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#22c55e' }}></span>
-                        休日
-                    </div>
-                    <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#8b5cf6' }}></span>
-                        その他
-                    </div>
-                </div>
+
             </div>
 
             {showEventModal && (

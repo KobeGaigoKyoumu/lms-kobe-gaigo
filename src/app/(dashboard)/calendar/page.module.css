@@ -582,38 +582,42 @@
 
 @media (max-width: 640px) {
     .eventListItem {
-        display: flex;
-        /* Flexbox for single row */
-        align-items: center;
-        /* Vertically align */
+        display: grid;
+        /* Use grid for stacking */
+        grid-template-columns: 1fr;
+        /* Single column */
+        justify-items: center;
+        /* Center horizontally */
+        text-align: center;
+        /* Center text */
         gap: var(--spacing-2);
         padding: var(--spacing-2);
-        /* Compact padding */
     }
 
     .eventListDate {
         font-size: 10px;
-        /* Smaller date */
         white-space: nowrap;
-        /* Keep on one line */
         width: auto;
-        /* Auto width */
-        min-width: 70px;
-        /* Min width for alignment */
+        justify-content: center;
+        /* Center flex content if any */
     }
 
     .eventListTitle {
-        flex: 1;
-        /* Take remaining space */
+        width: fit-content;
+        /* Shrink to fit text */
+        max-width: 100%;
+        /* Prevent overflow */
         font-size: var(--font-size-sm);
+        font-weight: 700;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        /* Truncate if too long */
         padding: var(--spacing-1) var(--spacing-2);
-        border-left: none;
+        border-left: 4px solid rgba(0, 0, 0, 0.1);
+        /* Add border back as it might look nice, or keep none */
         height: auto;
-        align-self: center;
+        justify-self: center;
+        /* Center grid item */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -622,8 +626,8 @@
     .eventListType {
         font-size: 10px;
         padding: 1px 4px;
-        /* Compact padding */
         white-space: nowrap;
-        /* justify-self removed since flex */
+        justify-self: center;
+        /* Center grid item */
     }
 }
