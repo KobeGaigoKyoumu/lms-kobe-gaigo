@@ -182,64 +182,69 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     {days.map((day, index) => {
                         const dayEvents = getEventsForDate(day.date)
                         const dayOfWeek = day.date.getDay()
-                        const dateStr = formatDate(day.date)
+                        // Filter for background coloring (exclude 'class')
+                        const bgEvents = dayEvents.filter(e => e.type !== 'class')
+
+                        let cellStyle = {}
+                        if (bgEvents.length > 0) {
+                            if (bgEvents.length === 1) {
+                                cellStyle.background = bgEvents[0].color || '#3b82f6'
+                                cellStyle.color = 'white' // Text color contrast
+                            } else {
+                                // Create gradient for multiple events
+                                const step = 100 / bgEvents.length
+                                const stops = bgEvents.map((e, i) => {
+                                    const color = e.color || '#3b82f6'
+                                    const start = i * step
+                                    const end = (i + 1) * step
+                                    return `${color} ${start}% ${end}%`
+                                }).join(', ')
+                                cellStyle.background = `linear-gradient(to right, ${stops})`
+                                cellStyle.color = 'white' // Text contrast usually better with white on colored bg
+                            }
+                        }
 
                         return (
                             <div
                                 key={index}
                                 className={`${styles.dayCell} ${!day.isCurrentMonth ? styles.otherMonth : ''} ${isToday(day.date) ? styles.today : ''}`}
+                                style={cellStyle}
                                 onClick={() => handleDayClick(day.date)}
                             >
-                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}>
+                                <span className={`${styles.dayNumber} ${dayOfWeek === 0 || day.holiday ? styles.sunday : ''} ${dayOfWeek === 6 && !day.holiday ? styles.saturday : ''} ${day.holiday ? styles.holiday : ''}`}
+                                    style={bgEvents.length > 0 ? { color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' } : {}}
+                                >
                                     {day.date.getDate()}
                                 </span>
 
                                 <div className={styles.dayEvents}>
-                                    {dayEvents.slice(0, 3).map(event => {
-                                        const startDateStr = formatDate(new Date(event.date))
-                                        const endDateStr = event.end_date ? formatDate(new Date(event.end_date)) : startDateStr
-                                        const isMultiDay = startDateStr !== endDateStr
-
-                                        const isStart = dateStr === startDateStr
-                                        const isEnd = dateStr === endDateStr
-                                        const isMiddle = isMultiDay && !isStart && !isEnd
-
-                                        let className = styles.event
-                                        if (isMultiDay) {
-                                            className += ` ${styles.multiDayEvent}`
-                                            if (isStart) className += ` ${styles.eventStart}`
-                                            if (isEnd) className += ` ${styles.eventEnd}`
-                                            if (isMiddle) className += ` ${styles.eventMiddle}`
-                                        }
-
-                                        return (
-                                            <div
-                                                key={event.id}
-                                                className={className}
-                                                style={{ backgroundColor: event.color || '#3b82f6' }}
-                                                onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
-                                                title={event.title}
-                                            >
-                                                {/* Only show title on start date or if it's Sunday (start of week) to give context, or if single day */}
-                                                {(isStart || dayOfWeek === 0 || !isMultiDay) ? (
-                                                    event.type === 'assignment' ? (
-                                                        <Link
-                                                            href={`/assignments/${event.id}`}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}
-                                                        </Link>
-                                                    ) : (
-                                                        <span>{event.title.length > 3 ? event.title.slice(0, 3) + '...' : event.title}</span>
-                                                    )
-                                                ) : (
-                                                    <span>&nbsp;</span> // Spacer for styling
-                                                )}
-                                            </div>
-                                        )
-                                    })}
+                                    {dayEvents.slice(0, 3).map(event => (
+                                        <div
+                                            key={event.id}
+                                            className={styles.event}
+                                            style={
+                                                bgEvents.length > 0
+                                                    ? { background: 'rgba(255,255,255,0.2)', color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }
+                                                    : { backgroundColor: event.color || '#3b82f6' }
+                                            }
+                                            onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
+                                            title={event.title}
+                                        >
+                                            {event.type === 'assignment' ? (
+                                                <Link
+                                                    href={`/assignments/${event.id}`}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={bgEvents.length > 0 ? { color: 'white' } : {}}
+                                                >
+                                                    {event.title.length > 8 ? event.title.slice(0, 8) + '...' : event.title}
+                                                </Link>
+                                            ) : (
+                                                <span>{event.title.length > 8 ? event.title.slice(0, 8) + '...' : event.title}</span>
+                                            )}
+                                        </div>
+                                    ))}
                                     {dayEvents.length > 3 && (
-                                        <span className={styles.moreEvents}>
+                                        <span className={styles.moreEvents} style={bgEvents.length > 0 ? { color: 'white' } : {}}>
                                             +{dayEvents.length - 3}
                                         </span>
                                     )}

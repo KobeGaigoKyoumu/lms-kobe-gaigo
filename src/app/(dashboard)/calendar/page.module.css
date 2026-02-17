@@ -212,29 +212,7 @@
     /* Inset single events */
 }
 
-.multiDayEvent {
-    margin: 0;
-    /* Touch edges */
-    border-radius: 0;
-}
 
-.eventStart {
-    border-top-left-radius: var(--radius-sm);
-    border-bottom-left-radius: var(--radius-sm);
-    margin-left: var(--spacing-1);
-    /* Inset start */
-}
-
-.eventEnd {
-    border-top-right-radius: var(--radius-sm);
-    border-bottom-right-radius: var(--radius-sm);
-    margin-right: var(--spacing-1);
-    /* Inset end */
-}
-
-.eventMiddle {
-    border-radius: 0;
-}
 
 .event:hover {
     background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
