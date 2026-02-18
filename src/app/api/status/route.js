@@ -25,15 +25,9 @@ export async function GET() {
             })
         }
 
-        // 2. Unread Messages
-        const unreadMessageCount = await getUnreadCount()
-
-        // 3. Assignments (Student logic only)
-        let unsubmittedAssignmentCount = 0
-        let assignmentIds = []
-
+        // 2. Try RPC (single query) for student status
         if (studentSession) {
-            // Fetch fresh student profile to ensure class name is up to date (Using Admin Client)
+            // Fetch fresh class name
             const { data: student } = await supabaseAdmin
                 .from('students')
                 .select('class_name')
@@ -42,12 +36,37 @@ export async function GET() {
 
             const className = student ? student.class_name?.trim() : studentSession.className?.trim()
 
+            // Try RPC function (1 query instead of 4-5)
+            const { data: rpcResult, error: rpcError } = await supabaseAdmin
+                .rpc('get_student_status', {
+                    p_student_id: studentSession.studentId,
+                    p_class_name: className || ''
+                })
+
+            if (!rpcError && rpcResult) {
+                return NextResponse.json({
+                    hasNewAnnouncement: rpcResult.has_new_announcement || false,
+                    unsubmittedAssignmentCount: rpcResult.unsubmitted_assignment_count || 0,
+                    unreadMessageCount: rpcResult.unread_message_count || 0
+                })
+            }
+
+            // Fallback: RPC not available, use original multi-query approach
+            console.warn('RPC fallback: get_student_status not available, using multi-query', rpcError?.message)
+        }
+
+        // Fallback: original multi-query approach (for teachers or if RPC fails)
+        const unreadMessageCount = await getUnreadCount()
+
+        let unsubmittedAssignmentCount = 0
+        if (studentSession) {
+            const className = studentSession.className?.trim()
             const { data: assignments } = await supabaseAdmin
                 .from('homework_assignments')
                 .select('id')
                 .eq('class_name', className)
 
-            assignmentIds = assignments?.map(a => a.id) || []
+            const assignmentIds = assignments?.map(a => a.id) || []
 
             if (assignmentIds.length > 0) {
                 const { data: submissions } = await supabaseAdmin
@@ -56,29 +75,17 @@ export async function GET() {
                     .eq('student_id_text', studentSession.studentId)
                     .in('assignment_id', assignmentIds)
 
-                // Map assignment ID to status
                 const submissionMap = new Map()
                 submissions?.forEach(s => submissionMap.set(s.assignment_id, s.status))
 
-                // Count if (not submitted) OR (status is 'returned')
-                const debugDetails = []
                 unsubmittedAssignmentCount = assignmentIds.filter(id => {
                     const status = submissionMap.get(id)
-                    const isUnsubmitted = !status || status === 'returned'
-                    debugDetails.push({ id, status, isUnsubmitted })
-                    return isUnsubmitted
+                    return !status || status === 'returned'
                 }).length
-
-                console.log('Debug Status API - Detailed:', {
-                    studentId: studentSession.studentId,
-                    className: studentSession.className,
-                    assignmentCount: assignmentIds.length,
-                    details: debugDetails.slice(0, 5) // Log first 5 for sanity
-                })
             }
         }
 
-        // 4. Announcements (Using Admin Client)
+        // Announcements
         const threeDaysAgo = new Date()
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
 
@@ -89,13 +96,12 @@ export async function GET() {
 
         let hasNewAnnouncement = false
         if (announcements && announcements.length > 0) {
-            const studentId = studentSession?.studentId
             const className = studentSession?.className
             const academicYear = studentSession?.academicYear
 
             hasNewAnnouncement = announcements.some(ann => {
                 if (!ann.target_type || ann.target_type === 'all') return true
-                if (!studentSession) return false // Non-students only see 'all'
+                if (!studentSession) return false
 
                 if (ann.target_type === 'grade') {
                     const currentYear = new Date().getFullYear()
@@ -105,7 +111,7 @@ export async function GET() {
                     return String(studentGrade) === ann.target_grade
                 }
                 if (ann.target_type === 'class') return ann.target_class === className
-                if (ann.target_type === 'individual') return ann.target_student_ids?.includes(studentId)
+                if (ann.target_type === 'individual') return ann.target_student_ids?.includes(studentSession.studentId)
                 return false
             })
         }

@@ -1,0 +1,11 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.vercel
+# Ignore local environment files to enforce using Cloud Run env vars
+.env*.local
+.env

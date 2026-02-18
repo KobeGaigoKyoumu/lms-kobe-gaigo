@@ -19,7 +19,7 @@ export async function getUnreadCount() {
 
         let countQuery = adminSupabase
             .from('messages')
-            .select('*', { count: 'exact', head: true })
+            .select('id', { count: 'exact', head: true })
             .eq('read', false)
 
         if (teacherUser) {

@@ -92,13 +92,7 @@ export function StudentStatusProvider({ children, role, userId }) {
                 }
             }
 
-            // Force internal API if Worker failed OR if we want to ensure accuracy (user's issue)
-            // If I want to "Revert Worker changes" but also "Fix old data", I should probably just fetch Internal if success is false.
-            // BUT, to guarantee fix for "Assignments gone", I will temporarily FORCE failure of worker or just skip it.
-            // Let's explicitly SKIP worker for now to guarantee correctness.
-
-            success = false; // FORCE INTERNAL API
-
+            // Fallback to internal API only if Worker failed
             if (!success) {
                 const resInternal = await fetch('/api/status', { cache: 'no-store' })
                 if (resInternal.ok) {
