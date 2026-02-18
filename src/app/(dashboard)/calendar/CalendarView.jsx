@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import JapaneseHolidays from 'japanese-holidays'
@@ -13,6 +13,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const [showEventModal, setShowEventModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState(null)
     const [selectedEvent, setSelectedEvent] = useState(null)
+    const [slideDirection, setSlideDirection] = useState(null)
 
     // スワイプ用
     const touchStartX = useRef(null)
@@ -30,16 +31,24 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
         // 横方向の移動が縦より大きく、かつ50px以上の場合のみスワイプ判定
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
             if (deltaX < 0) {
-                // 左スワイプ → 翌月
+                setSlideDirection('left')
                 setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
             } else {
-                // 右スワイプ → 前月
+                setSlideDirection('right')
                 setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
             }
         }
         touchStartX.current = null
         touchStartY.current = null
     }, [])
+
+    // アニメーションクラスを自動クリア
+    useEffect(() => {
+        if (slideDirection) {
+            const timer = setTimeout(() => setSlideDirection(null), 300)
+            return () => clearTimeout(timer)
+        }
+    }, [slideDirection])
 
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
@@ -241,7 +250,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     ))}
                 </div>
 
-                <div className={styles.daysGrid} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                <div className={`${styles.daysGrid} ${slideDirection === 'left' ? styles.slideLeft : ''} ${slideDirection === 'right' ? styles.slideRight : ''}`} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {days.map((day, index) => {
                         const dayEvents = getEventsForDate(day.date)
                         const dayOfWeek = day.date.getDay()

@@ -112,6 +112,39 @@
 .daysGrid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    overflow: hidden;
+}
+
+.daysGrid.slideLeft {
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+.daysGrid.slideRight {
+    animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(30%);
+        opacity: 0.3;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-30%);
+        opacity: 0.3;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 .dayCell {
@@ -542,7 +575,7 @@
 
 .eventListName {
     flex: 1;
-    font-size: var(--font-size-sm);
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
