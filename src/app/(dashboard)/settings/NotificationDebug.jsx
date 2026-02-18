@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, RefreshCw, Smartphone, Monitor, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { subscribeUserToPush } from '@/lib/pushNotification';
+import { createClient } from '@/lib/supabase/client';
 
 export default function NotificationDebug() {
     const [permission, setPermission] = useState('loading');
@@ -73,25 +74,27 @@ export default function NotificationDebug() {
 
     const handleTestPush = async (simpleMode = false) => {
         setIsTesting(true);
-        log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request...`);
+        log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request (Edge Function)...`);
         try {
-            const res = await fetch('/api/push/test', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ delay: simpleMode ? 0 : 5, simpleMode })
+            const supabase = createClient();
+            const { data, error } = await supabase.functions.invoke('chat-push', {
+                body: {
+                    type: 'test',
+                    delay: simpleMode ? 0 : 5,
+                    simpleMode
+                }
             });
-            const data = await res.json();
 
-            if (res.ok) {
-                log(`Server Response: Success`);
+            if (!error) {
+                log(`Edge Response: Success (${data?.message})`);
                 if (!simpleMode) {
                     alert('標準テスト通知を送信しました。5秒後に届くはずです。');
                 } else {
                     alert('簡易テスト通知を送信しました。即座に届くはずです。');
                 }
             } else {
-                log(`Server Error: ${data.error}`);
-                alert(`送信エラー: ${data.error}`);
+                log(`Edge Error: ${error.message}`);
+                alert(`送信エラー: ${error.message}`);
             }
         } catch (e) {
             log(`Network Error: ${e.message}`);

@@ -27,19 +27,84 @@ Deno.serve(async (req) => {
         // or a direct invoke payload
         const record = payload.record || payload // Fallback to direct payload if not webhook
 
-        if (!record || !record.student_id || !record.content) {
-            // If it's a delete event or something else we don't care about
-            // validation might fail if 'content' is empty (e.g. image only)
-            // so check record.id exists at least.
-            if (!record || !record.id) {
-                return new Response(JSON.stringify({ message: 'Ignored: No record data' }), {
+        if (payload.type === 'test') {
+            console.log('Processing TEST push request');
+            const authHeader = req.headers.get('Authorization');
+            let userId = null;
+
+            if (authHeader) {
+                const token = authHeader.replace('Bearer ', '');
+                const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+                if (user) userId = user.id;
+            }
+
+            if (!userId) {
+                return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 401,
+                });
+            }
+
+            // Fetch Subscriptions for the user
+            const { data: subs, error: subError } = await supabaseClient
+                .from('push_subscriptions')
+                .select('*')
+                .eq('user_id', userId);
+
+            if (subError || !subs || subs.length === 0) {
+                return new Response(JSON.stringify({ message: 'No subscriptions found', count: 0 }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                     status: 200,
-                })
+                });
             }
+
+            const simpleMode = payload.simpleMode || false;
+            const delay = payload.delay || 0;
+
+            if (delay > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay * 1000));
+            }
+
+            const iconUrl = '/icon-192.png';
+            let options = {}
+
+            // Payload construction for test (Manual construction as web-push takes string)
+            const pushPayload = JSON.stringify({
+                title: simpleMode ? '簡易テスト通知' : 'テスト通知',
+                body: simpleMode
+                    ? 'これは簡易モードの通知です。アイコンやアクションボタンを含みません。'
+                    : `これはテスト通知です (${delay > 0 ? delay + '秒遅延' : '即時'})。通知機能は正常に動作しています。`,
+                url: '/',
+                badge: simpleMode ? undefined : 1,
+                icon: simpleMode ? undefined : iconUrl,
+                simpleMode: simpleMode
+            });
+
+            const sendPromises = subs.map(async (sub) => {
+                try {
+                    await webpush.sendNotification({
+                        endpoint: sub.endpoint,
+                        keys: { p256dh: sub.p256dh, auth: sub.auth }
+                    }, pushPayload);
+                    return { success: true };
+                } catch (error) {
+                    console.error('Test Push failed for sub:', sub.id, error.statusCode);
+                    if (error.statusCode === 410 || error.statusCode === 404) {
+                        await supabaseClient.from('push_subscriptions').delete().eq('id', sub.id);
+                    }
+                    return { success: false, error: error.message };
+                }
+            });
+
+            const results = await Promise.all(sendPromises);
+            const successCount = results.filter(r => r.success).length;
+
+            return new Response(JSON.stringify({ message: 'Test notifications sent', count: successCount, results }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            });
         }
 
-        console.log('Processing message:', record.id)
 
         // User Configuration for Web Push
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
