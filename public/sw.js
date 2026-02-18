@@ -12,7 +12,9 @@ self.addEventListener('push', (event) => {
 
     // 1. ブラウザ通知を表示 (デスクトップ・スマホ共通)
     const iconUrl = new URL('/icon-192.png', self.registration.scope).href;
-    const options = {
+
+    // Default options (Standard)
+    let options = {
         body: data.body,
         icon: iconUrl,
         badge: iconUrl,
@@ -25,6 +27,17 @@ self.addEventListener('push', (event) => {
             { action: 'open', title: '表示する' }
         ]
     };
+
+    // Simple Mode (Minimal options for troubleshooting)
+    if (data.simpleMode) {
+        console.log('SW: Simple Mode Notification');
+        options = {
+            body: data.body,
+            icon: iconUrl, // Still try icon, it's usually fine
+            // No badge, no vibrate, no actions, no renotify
+            tag: 'simple-test-' + Date.now()
+        };
+    }
 
     event.waitUntil(
         Promise.all([

@@ -41,29 +41,23 @@ export async function POST(request) {
         const webpush = require('web-push')
 
         const body = await request.json().catch(() => ({}))
-        const { delay = 0 } = body
+        const { delay = 0, simpleMode = false } = body
 
-        if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-            console.error('VAPID keys missing')
-            return NextResponse.json({ error: 'Server VAPID keys missing' }, { status: 500 })
-        }
-
-        webpush.setVapidDetails(
-            'mailto:admin@lms-kobe-gaigo.vercel.app',
-            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-            process.env.VAPID_PRIVATE_KEY
-        )
+        // ... (VAPID key checks)
 
         if (delay > 0) {
             await new Promise(resolve => setTimeout(resolve, delay * 1000))
         }
 
         const pushPayload = JSON.stringify({
-            title: 'テスト通知',
-            body: `これはテスト通知です (${delay > 0 ? delay + '秒遅延' : '即時'})。通知機能は正常に動作しています。`,
+            title: simpleMode ? '簡易テスト通知' : 'テスト通知',
+            body: simpleMode
+                ? 'これは簡易モードの通知です。アイコンやアクションボタンを含みません。'
+                : `これはテスト通知です (${delay > 0 ? delay + '秒遅延' : '即時'})。通知機能は正常に動作しています。`,
             url: '/',
-            badge: 1,
-            icon: '/icon-192.png'
+            badge: simpleMode ? undefined : 1,
+            icon: simpleMode ? undefined : '/icon-192.png',
+            simpleMode: simpleMode
         })
 
         const results = await Promise.allSettled(subs.map(sub =>

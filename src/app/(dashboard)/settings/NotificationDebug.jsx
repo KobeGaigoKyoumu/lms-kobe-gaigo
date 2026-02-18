@@ -71,20 +71,24 @@ export default function NotificationDebug() {
         await checkStatus();
     };
 
-    const handleTestPush = async () => {
+    const handleTestPush = async (simpleMode = false) => {
         setIsTesting(true);
-        log('Sending test push request...');
+        log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request...`);
         try {
             const res = await fetch('/api/push/test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ delay: 5 }) // 5秒後に通知
+                body: JSON.stringify({ delay: simpleMode ? 0 : 5, simpleMode })
             });
             const data = await res.json();
 
             if (res.ok) {
-                log(`Server Response: Success (${data.message})`);
-                alert('テスト通知を送信しました。5秒後に届くはずです（ブラウザを閉じても届くか確認してください）。');
+                log(`Server Response: Success`);
+                if (!simpleMode) {
+                    alert('標準テスト通知を送信しました。5秒後に届くはずです。');
+                } else {
+                    alert('簡易テスト通知を送信しました。即座に届くはずです。');
+                }
             } else {
                 log(`Server Error: ${data.error}`);
                 alert(`送信エラー: ${data.error}`);
@@ -160,18 +164,30 @@ export default function NotificationDebug() {
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                         このボタンを押すと、登録済みの全端末にテスト通知を送信します。
                     </p>
-                    <button
-                        onClick={handleTestPush}
-                        disabled={isTesting || !subscription}
-                        className="w-full rounded-lg bg-emerald-600 px-3 py-3 text-base font-bold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all active:scale-95"
-                    >
-                        {isTesting ? '送信中...' : 'テスト通知を送信 (5秒後)'}
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={() => handleTestPush(false)}
+                            disabled={isTesting || !subscription}
+                            className="rounded-lg bg-emerald-600 px-3 py-3 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all active:scale-95"
+                        >
+                            {isTesting ? '送信中...' : '通常テスト (5秒後)'}
+                        </button>
+                        <button
+                            onClick={() => handleTestPush(true)}
+                            disabled={isTesting || !subscription}
+                            className="rounded-lg bg-slate-600 px-3 py-3 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all active:scale-95"
+                        >
+                            {isTesting ? '送信中...' : '簡易テスト (即時)'}
+                        </button>
+                    </div>
                     {!subscription && (
                         <p className="text-xs text-red-500 text-center">
                             ※ 通知登録がないため送信できません
                         </p>
                     )}
+                    <div className="mt-2 text-center text-xs text-slate-500">
+                        ※通知が来ない場合は「簡易テスト」を試してください
+                    </div>
                 </div>
             </div>
 
