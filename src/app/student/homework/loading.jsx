@@ -3,7 +3,7 @@ import styles from './page.module.css'
 
 export default function Loading() {
     return (
-        <div className={styles.container}>
+        <div className={styles.loadingContainer}>
             <div className="skeleton" style={{ width: '120px', height: '24px', marginBottom: '20px', background: '#eee', borderRadius: '4px' }}></div>
 
             <div className={styles.header}>

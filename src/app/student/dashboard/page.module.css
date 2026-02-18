@@ -406,12 +406,12 @@
 }
 
 /* For Loading.jsx */
-.container {
+.loadingContainer {
     width: 100%;
 }
 
 @media (max-width: 640px) {
-    .container {
+    .loadingContainer {
         display: none !important;
     }
 }

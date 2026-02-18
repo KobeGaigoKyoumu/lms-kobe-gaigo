@@ -165,7 +165,7 @@
 }
 
 @media (max-width: 640px) {
-    .container {
+    .loadingContainer {
         display: none !important;
     }
 }
