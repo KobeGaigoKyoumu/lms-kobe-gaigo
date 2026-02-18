@@ -404,3 +404,14 @@
         margin-bottom: 2px;
     }
 }
+
+/* For Loading.jsx */
+.container {
+    width: 100%;
+}
+
+@media (max-width: 640px) {
+    .container {
+        display: none !important;
+    }
+}

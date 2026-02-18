@@ -163,3 +163,9 @@
 .statusIndicator.overdue {
     background-color: var(--error-500);
 }
+
+@media (max-width: 640px) {
+    .container {
+        display: none !important;
+    }
+}
