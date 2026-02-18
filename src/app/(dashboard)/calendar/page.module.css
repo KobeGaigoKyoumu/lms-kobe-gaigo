@@ -474,15 +474,21 @@
     }
 
     .legend {
-        justify-content: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        padding: var(--spacing-2) var(--spacing-4);
     }
 
     .formRow {
         grid-template-columns: 1fr;
     }
+
+    .title {
+        text-align: left;
+    }
 }
 
-/* Event List */
+/* Event List — Single-line compact design */
 .eventList {
     margin-top: var(--spacing-6);
     padding: var(--spacing-4);
@@ -490,144 +496,93 @@
     border-top: 1px solid var(--border-color);
 }
 
-.eventListTitle {
+.eventListHeading {
     font-size: var(--font-size-lg);
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
 }
 
 .eventListContent {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
 }
 
 .eventListItem {
-    display: grid;
-    grid-template-columns: 180px 1fr 100px;
-    align-items: stretch;
-    gap: var(--spacing-4);
-    padding: var(--spacing-3);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-2) var(--spacing-3);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
 }
 
+.eventListItem:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-300);
+}
+
+.eventDot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
 .eventListDate {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-family: var(--font-mono);
-    display: flex;
-    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.eventListTitle {
-    font-size: var(--font-size-base);
-    font-weight: 700;
+.eventListName {
+    flex: 1;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
     color: var(--text-primary);
-    padding: var(--spacing-1) var(--spacing-3);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
-.eventListTitle a {
+.eventListName a {
     color: var(--text-primary);
     text-decoration: none;
-    font-weight: 700;
 }
 
-/* ... existing code ... */
-
-@media (max-width: 640px) {
-    /* ... existing code ... */
-
-    .eventListTitle {
-        flex: 1;
-        font-size: var(--font-size-sm);
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: var(--spacing-1) var(--spacing-2);
-        border-left: none;
-        height: auto;
-        align-self: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
-}
-
-.eventListTitle a:hover {
+.eventListName a:hover {
     color: var(--primary-500);
     text-decoration: underline;
 }
 
 .eventListType {
-    font-size: var(--font-size-xs);
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 600;
     color: var(--text-tertiary);
-    text-align: right;
     background: var(--bg-tertiary);
-    padding: var(--spacing-1) var(--spacing-2);
+    padding: 2px 8px;
     border-radius: var(--radius-full);
-    justify-self: end;
-    align-self: center;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
     .eventListItem {
-        display: grid;
-        /* Use grid for stacking */
-        grid-template-columns: 1fr;
-        /* Single column */
-        justify-items: center;
-        /* Center horizontally */
-        text-align: center;
-        /* Center text */
         gap: var(--spacing-2);
         padding: var(--spacing-2);
     }
 
     .eventListDate {
         font-size: 10px;
-        white-space: nowrap;
-        width: auto;
-        justify-content: center;
-        /* Center flex content if any */
     }
 
-    .eventListTitle {
-        width: fit-content;
-        /* Shrink to fit text */
-        max-width: 100%;
-        /* Prevent overflow */
-        font-size: var(--font-size-sm);
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: var(--spacing-1) var(--spacing-2);
-        border-left: 4px solid rgba(0, 0, 0, 0.1);
-        /* Add border back as it might look nice, or keep none */
-        height: auto;
-        justify-self: center;
-        /* Center grid item */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .eventListType {
-        font-size: 10px;
-        padding: 1px 4px;
-        white-space: nowrap;
-        justify-self: center;
-        /* Center grid item */
+    .eventListName {
+        font-size: var(--font-size-xs);
     }
 }

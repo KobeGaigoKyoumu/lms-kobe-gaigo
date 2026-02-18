@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import JapaneseHolidays from 'japanese-holidays'
@@ -13,6 +13,33 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const [showEventModal, setShowEventModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState(null)
     const [selectedEvent, setSelectedEvent] = useState(null)
+
+    // スワイプ用
+    const touchStartX = useRef(null)
+    const touchStartY = useRef(null)
+
+    const handleTouchStart = useCallback((e) => {
+        touchStartX.current = e.touches[0].clientX
+        touchStartY.current = e.touches[0].clientY
+    }, [])
+
+    const handleTouchEnd = useCallback((e) => {
+        if (touchStartX.current === null) return
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current
+        const deltaY = e.changedTouches[0].clientY - touchStartY.current
+        // 横方向の移動が縦より大きく、かつ50px以上の場合のみスワイプ判定
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+            if (deltaX < 0) {
+                // 左スワイプ → 翌月
+                setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+            } else {
+                // 右スワイプ → 前月
+                setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+            }
+        }
+        touchStartX.current = null
+        touchStartY.current = null
+    }, [])
 
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
@@ -214,7 +241,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     ))}
                 </div>
 
-                <div className={styles.daysGrid}>
+                <div className={styles.daysGrid} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {days.map((day, index) => {
                         const dayEvents = getEventsForDate(day.date)
                         const dayOfWeek = day.date.getDay()
@@ -299,33 +326,35 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
 
                 {/* Event List */}
                 <div className={styles.eventList}>
-                    <h3 className={styles.eventListTitle}>今後の予定</h3>
+                    <h3 className={styles.eventListHeading}>今後の予定</h3>
                     <div className={styles.eventListContent}>
                         {events
                             .sort((a, b) => new Date(a.date) - new Date(b.date))
-                            .map(event => (
-                                <div key={event.id} className={styles.eventListItem}>
-                                    <div className={styles.eventListDate}>
-                                        {formatDateTime(event.date, event.all_day)}
-                                        {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
+                            .map(event => {
+                                const typeLabel = event.type === 'assignment' ? '課題' :
+                                    event.type === 'class' ? '授業' :
+                                        event.type === 'exam' ? '試験' :
+                                            event.type === 'holiday' ? '休日' : 'その他'
+                                return (
+                                    <div key={event.id} className={styles.eventListItem}>
+                                        <span className={styles.eventDot} style={{ backgroundColor: event.color || '#3b82f6' }} />
+                                        <span className={styles.eventListDate}>
+                                            {formatDateTime(event.date, event.all_day)}
+                                            {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
+                                        </span>
+                                        <span className={styles.eventListName}>
+                                            {event.type === 'assignment' ? (
+                                                <Link href={`/assignments/${event.id}`}>
+                                                    {event.title}
+                                                </Link>
+                                            ) : (
+                                                event.title
+                                            )}
+                                        </span>
+                                        <span className={styles.eventListType}>{typeLabel}</span>
                                     </div>
-                                    <div className={styles.eventListTitle} style={{ backgroundColor: getPastelColor(event.color || '#3b82f6'), color: '#374151' }}>
-                                        {event.type === 'assignment' ? (
-                                            <Link href={`/assignments/${event.id}`} style={{ color: '#374151' }}>
-                                                {event.title}
-                                            </Link>
-                                        ) : (
-                                            <span>{event.title}</span>
-                                        )}
-                                    </div>
-                                    <div className={styles.eventListType}>
-                                        {event.type === 'assignment' ? '課題' :
-                                            event.type === 'class' ? '授業' :
-                                                event.type === 'exam' ? '試験' :
-                                                    event.type === 'holiday' ? '休日' : 'その他'}
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                     </div>
                 </div>
 
