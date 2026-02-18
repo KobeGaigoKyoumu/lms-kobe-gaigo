@@ -281,3 +281,9 @@
         height: 60px;
     }
 }
+
+@media (max-width: 640px) {
+    .loadingContainer {
+        display: none !important;
+    }
+}
