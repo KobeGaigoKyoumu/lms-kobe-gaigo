@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
+import NotificationDebug from './NotificationDebug'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 
@@ -36,6 +37,11 @@ export default async function SettingsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
                     </div>
+                </section>
+
+                {/* 通知デバッグ（診断ツール） */}
+                <section className={styles.section}>
+                    <NotificationDebug />
                 </section>
 
                 {/* プロファイルセクション */}
