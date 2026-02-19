@@ -1,6 +1,6 @@
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import webpush from 'https://esm.sh/web-push@3.6.7'
+// Dynamic imports will be used inside the handler to prevent startup crashes.
+// import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// import webpush from 'https://esm.sh/web-push@3.6.7'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -9,20 +9,34 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-    // Handle CORS preflight requests
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders, status: 200 })
-    }
-
     try {
+        // 1. Handle CORS preflight requests (Inside try-catch for safety)
+        if (req.method === 'OPTIONS') {
+            return new Response('ok', { headers: corsHeaders, status: 200 })
+        }
+
+        console.log(`[Push Function] Request: ${req.method} ${req.url}`);
+
+        // Dynamically import dependencies
+        const { createClient } = await import('npm:@supabase/supabase-js@2');
+        const webpush = (await import('npm:web-push@3.6.7')).default;
+
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         )
 
         // Check if this is a direct call or a webhook
-        // Webhooks usually result in a POST with a specific payload structure
-        const payload = await req.json()
+        let payload = {};
+        try {
+            const text = await req.text();
+            if (text && text.length > 0) {
+                payload = JSON.parse(text);
+            }
+        } catch (e) {
+            console.log('Error parsing JSON body:', e);
+            // Non-JSON body is acceptable for some cases (e.g. simple ping)
+        }
 
         // Determine if it's a DB Webhook payload (record, old_record, type, table, schema)
         // or a direct invoke payload
@@ -49,17 +63,18 @@ Deno.serve(async (req) => {
             // User Configuration for Web Push (Moved up for Test Push)
             const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
             const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
-            const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'mailto:admin@example.com'
+            const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@example.com';
+            const subject = adminEmail.startsWith('mailto:') ? adminEmail : `mailto:${adminEmail}`;
 
             if (!vapidPublicKey || !vapidPrivateKey) {
                 console.error('Missing VAPID keys')
-                return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+                return new Response(JSON.stringify({ error: 'Server configuration error: VAPID keys missing' }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                     status: 500,
                 })
             }
 
-            webpush.setVapidDetails(adminEmail, vapidPublicKey, vapidPrivateKey)
+            webpush.setVapidDetails(subject, vapidPublicKey, vapidPrivateKey)
 
             // Fetch Subscriptions for the user
             const { data: subs, error: subError } = await supabaseClient
@@ -131,7 +146,8 @@ Deno.serve(async (req) => {
 
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
         const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
-        const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'mailto:admin@example.com'
+        const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@example.com';
+        const subject = adminEmail.startsWith('mailto:') ? adminEmail : `mailto:${adminEmail}`;
 
         if (!vapidPublicKey || !vapidPrivateKey) {
             console.error('Missing VAPID keys')
@@ -141,7 +157,7 @@ Deno.serve(async (req) => {
             })
         }
 
-        webpush.setVapidDetails(adminEmail, vapidPublicKey, vapidPrivateKey)
+        webpush.setVapidDetails(subject, vapidPublicKey, vapidPrivateKey)
 
         // Determine Recipient
         let recipientId = null
@@ -247,8 +263,13 @@ Deno.serve(async (req) => {
         })
 
     } catch (error) {
-        console.error(error)
-        return new Response(JSON.stringify({ error: error.message }), {
+        console.error('Unhandled Edge Function Error:', error)
+        return new Response(JSON.stringify({
+            error: error.message || 'Internal Server Error',
+            stack: error.stack,
+            method: req.method,
+            url: req.url
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 500,
         })

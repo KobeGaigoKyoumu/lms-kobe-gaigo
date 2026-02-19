@@ -76,16 +76,34 @@ export default function NotificationDebug() {
         setIsTesting(true);
         log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request (Edge Function)...`);
         try {
+            // Use direct fetch to debug CORS
+            const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-push`;
             const supabase = createClient();
-            const { data, error } = await supabase.functions.invoke('chat-push', {
-                body: {
-                    type: 'test',
-                    delay: simpleMode ? 0 : 5,
-                    simpleMode
-                }
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+
+            const content = {
+                type: 'test',
+                delay: simpleMode ? 0 : 5,
+                simpleMode
+            };
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(content)
             });
 
-            if (!error) {
+            if (response.ok) {
+                const data = await response.json();
                 log(`Edge Response: Success (${data?.message})`);
                 if (!simpleMode) {
                     alert('標準テスト通知を送信しました。5秒後に届くはずです。');
@@ -93,8 +111,9 @@ export default function NotificationDebug() {
                     alert('簡易テスト通知を送信しました。即座に届くはずです。');
                 }
             } else {
-                log(`Edge Error: ${error.message}`);
-                alert(`送信エラー: ${error.message}`);
+                const errorText = await response.text();
+                log(`Edge Error: ${response.status} ${response.statusText} - ${errorText}`);
+                alert(`送信エラー: ${response.status} ${response.statusText}`);
             }
         } catch (e) {
             log(`Network Error: ${e.message}`);
