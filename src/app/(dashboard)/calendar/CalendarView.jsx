@@ -168,38 +168,59 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     }
 
     // Package Handlers
-    const handlePackageApply = async (pkg, startDateStr) => {
-        if (!confirm(`${pkg.title}を${startDateStr}から適用しますか？`)) return
+    const handlePackageApply = async (pkg, year) => {
+        if (!confirm(`${pkg.title}を${year}年に適用しますか？`)) return
 
         const supabase = createClient()
         const newEvents = pkg.events.map(evt => {
-            const start = new Date(startDateStr)
-            start.setDate(start.getDate() + (evt.day_offset || 0))
+            // Construct start date: Year + Month + Day
+            // Month is 1-based in UI, but Date constructor uses 0-based for month if using (y, m, d)
+            // or ISO string. Let's use Date(y, m-1, d)
+            const start = new Date(year, evt.start_month - 1, evt.start_day)
 
             let isoStart, isoEnd
+
             if (evt.all_day) {
                 const s = new Date(start)
                 s.setHours(0, 0, 0, 0)
+                // Adjust for timezone offset if needed, but for 'all_day', simply YYYY-MM-DD
+                // To safely store as ISO, we usually convert to UTC or just store string
+                // But DB expects timestamptz. 
+                // Let's use local time midnight as start.
                 isoStart = s.toISOString()
+
+                if (evt.end_month && evt.end_day) {
+                    const end = new Date(year, evt.end_month - 1, evt.end_day)
+                    end.setHours(23, 59, 59, 999)
+                    isoEnd = end.toISOString()
+                }
             } else {
                 if (evt.start_time) {
                     const [h, m] = evt.start_time.split(':')
                     start.setHours(h, m, 0, 0)
                     isoStart = start.toISOString()
                 } else {
-                    // Default to start of day if no time but not all_day? Or maybe error?
-                    // Fallback to 00:00
                     start.setHours(0, 0, 0, 0)
                     isoStart = start.toISOString()
                 }
 
-                if (evt.end_time) {
+                if (evt.end_month && evt.end_day) {
+                    const end = new Date(year, evt.end_month - 1, evt.end_day)
+                    if (evt.end_time) {
+                        const [eh, em] = evt.end_time.split(':')
+                        end.setHours(eh, em, 0, 0)
+                    } else {
+                        // Default to end of day if NO end time? Or same as start time?
+                        // If ranges are allowed, usually end of day.
+                        end.setHours(23, 59, 59, 999)
+                    }
+                    isoEnd = end.toISOString()
+                } else if (evt.end_time) {
+                    // Same day end time
+                    const end = new Date(start)
                     const [eh, em] = evt.end_time.split(':')
-                    const e = new Date(start)
-                    e.setHours(eh, em, 0, 0)
-                    // If end time is earlier than start time (next day?), handle logic? 
-                    // Assuming same day for now or user handles offset in package logic if needed (no multi-day single event support in simple package yet).
-                    isoEnd = e.toISOString()
+                    end.setHours(eh, em, 0, 0)
+                    isoEnd = end.toISOString()
                 }
             }
 

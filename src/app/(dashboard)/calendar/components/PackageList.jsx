@@ -8,7 +8,7 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
     const [applyingPkgId, setApplyingPkgId] = useState(null)
-    const [startDate, setStartDate] = useState('')
+    const [targetYear, setTargetYear] = useState(new Date().getFullYear())
 
     useEffect(() => {
         fetchPackages()
@@ -33,18 +33,16 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
     const handleApplyClick = (pkg) => {
         if (applyingPkgId === pkg.id) {
             setApplyingPkgId(null)
-            setStartDate('')
         } else {
             setApplyingPkgId(pkg.id)
-            setStartDate(new Date().toISOString().split('T')[0])
+            setTargetYear(new Date().getFullYear())
         }
     }
 
     const handleConfirmApply = (pkg) => {
-        if (!startDate) return
-        onApplyPackage(pkg, startDate)
+        if (!targetYear) return
+        onApplyPackage(pkg, targetYear)
         setApplyingPkgId(null)
-        setStartDate('')
     }
 
     if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>読み込み中...</div>
@@ -83,20 +81,22 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
 
                             {applyingPkgId === pkg.id ? (
                                 <div style={{ background: '#f3f4f6', padding: '10px', borderRadius: '6px' }}>
-                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>開始日を選択:</label>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>適用する年（西暦）:</label>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <input
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            type="number"
+                                            value={targetYear}
+                                            onChange={(e) => setTargetYear(parseInt(e.target.value))}
+                                            min="2000"
+                                            max="2100"
                                             style={{ padding: '6px', borderRadius: '4px', border: '1px solid #d1d5db', flexGrow: 1 }}
                                         />
                                         <button
                                             onClick={() => handleConfirmApply(pkg)}
-                                            disabled={!startDate}
+                                            disabled={!targetYear}
                                             style={{
                                                 background: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', padding: '0 12px', cursor: 'pointer',
-                                                opacity: !startDate ? 0.5 : 1
+                                                opacity: !targetYear ? 0.5 : 1
                                             }}
                                         >
                                             確定

@@ -20,7 +20,10 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                 ...prev.events,
                 {
                     title: '',
-                    day_offset: 0,
+                    start_month: 4,
+                    start_day: 1,
+                    end_month: '',
+                    end_day: '',
                     event_type: 'class',
                     all_day: true,
                     start_time: '',
@@ -115,9 +118,14 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
         { value: 'other', label: 'その他' }
     ]
 
+    // Generate Month options (1-12)
+    const months = Array.from({ length: 12 }, (_, i) => i + 1)
+    // Generate Day options (1-31)
+    const days = Array.from({ length: 31 }, (_, i) => i + 1)
+
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%' }}>
+            <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', width: '95%' }}>
                 <div className={styles.modalHeader}>
                     <h2>{pkg ? 'パッケージ編集' : '新規パッケージ'}</h2>
                     <button onClick={onClose} className={styles.closeBtn}>✕</button>
@@ -133,7 +141,7 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                             value={formData.title}
                             onChange={handleChange}
                             required
-                            placeholder="例: 新入生オリエンテーション週間"
+                            placeholder="例: 年間行事予定"
                         />
                     </div>
 
@@ -160,7 +168,7 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                         <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '8px', padding: '10px' }}>
                             {formData.events.length === 0 && <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>イベントがありません。追加してください。</p>}
                             {formData.events.map((evt, index) => (
-                                <div key={index} style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', marginBottom: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', position: 'relative' }}>
+                                <div key={index} style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', marginBottom: '10px', position: 'relative' }}>
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveEvent(index)}
@@ -168,60 +176,99 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                                         title="削除"
                                     >×</button>
 
-                                    <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                        <label style={{ fontSize: '0.8em' }}>タイトル *</label>
-                                        <input
-                                            type="text"
-                                            value={evt.title}
-                                            onChange={e => handleEventChange(index, 'title', e.target.value)}
-                                            required
-                                            style={{ padding: '6px' }}
-                                        />
-                                    </div>
-                                    <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                        <label style={{ fontSize: '0.8em' }}>開始日 (0=開始日, 1=翌日...)</label>
-                                        <input
-                                            type="number"
-                                            value={evt.day_offset}
-                                            onChange={e => handleEventChange(index, 'day_offset', parseInt(e.target.value))}
-                                            min="0"
-                                            style={{ padding: '6px' }}
-                                        />
-                                    </div>
-                                    <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                        <label style={{ fontSize: '0.8em' }}>種類</label>
-                                        <select
-                                            value={evt.event_type}
-                                            onChange={e => handleEventChange(index, 'event_type', e.target.value)}
-                                            style={{ padding: '6px' }}
-                                        >
-                                            {eventTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                        <label style={{ fontSize: '0.8em' }}>終日</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                                        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '0.8em' }}>タイトル *</label>
                                             <input
-                                                type="checkbox"
-                                                checked={evt.all_day}
-                                                onChange={e => handleEventChange(index, 'all_day', e.target.checked)}
-                                                style={{ width: 'auto', marginRight: '8px' }}
+                                                type="text"
+                                                value={evt.title}
+                                                onChange={e => handleEventChange(index, 'title', e.target.value)}
+                                                required
+                                                style={{ padding: '6px' }}
                                             />
-                                            <span style={{ fontSize: '0.9em' }}>はい</span>
                                         </div>
+
+                                        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '0.8em' }}>開始日 *</label>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <select
+                                                    value={evt.start_month}
+                                                    onChange={e => handleEventChange(index, 'start_month', parseInt(e.target.value))}
+                                                    style={{ padding: '6px', width: '60px' }}
+                                                    required
+                                                >
+                                                    {months.map(m => <option key={m} value={m}>{m}月</option>)}
+                                                </select>
+                                                <select
+                                                    value={evt.start_day}
+                                                    onChange={e => handleEventChange(index, 'start_day', parseInt(e.target.value))}
+                                                    style={{ padding: '6px', width: '60px' }}
+                                                    required
+                                                >
+                                                    {days.map(d => <option key={d} value={d}>{d}日</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '0.8em' }}>終了日 (任意)</label>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <select
+                                                    value={evt.end_month || ''}
+                                                    onChange={e => handleEventChange(index, 'end_month', e.target.value ? parseInt(e.target.value) : '')}
+                                                    style={{ padding: '6px', width: '60px' }}
+                                                >
+                                                    <option value="">-</option>
+                                                    {months.map(m => <option key={m} value={m}>{m}月</option>)}
+                                                </select>
+                                                <select
+                                                    value={evt.end_day || ''}
+                                                    onChange={e => handleEventChange(index, 'end_day', e.target.value ? parseInt(e.target.value) : '')}
+                                                    style={{ padding: '6px', width: '60px' }}
+                                                >
+                                                    <option value="">-</option>
+                                                    {days.map(d => <option key={d} value={d}>{d}日</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '0.8em' }}>種類</label>
+                                            <select
+                                                value={evt.event_type}
+                                                onChange={e => handleEventChange(index, 'event_type', e.target.value)}
+                                                style={{ padding: '6px' }}
+                                            >
+                                                {eventTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '0.8em' }}>終日</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={evt.all_day}
+                                                    onChange={e => handleEventChange(index, 'all_day', e.target.checked)}
+                                                    style={{ width: 'auto', marginRight: '8px' }}
+                                                />
+                                                <span style={{ fontSize: '0.9em' }}>はい</span>
+                                            </div>
+                                        </div>
+
+                                        {!evt.all_day && (
+                                            <>
+                                                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                                    <label style={{ fontSize: '0.8em' }}>開始時間</label>
+                                                    <input type="time" value={evt.start_time} onChange={e => handleEventChange(index, 'start_time', e.target.value)} style={{ padding: '6px' }} />
+                                                </div>
+                                                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                                                    <label style={{ fontSize: '0.8em' }}>終了時間</label>
+                                                    <input type="time" value={evt.end_time} onChange={e => handleEventChange(index, 'end_time', e.target.value)} style={{ padding: '6px' }} />
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
-                                    {!evt.all_day && (
-                                        <>
-                                            <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.8em' }}>開始時間</label>
-                                                <input type="time" value={evt.start_time} onChange={e => handleEventChange(index, 'start_time', e.target.value)} style={{ padding: '6px' }} />
-                                            </div>
-                                            <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.8em' }}>終了時間</label>
-                                                <input type="time" value={evt.end_time} onChange={e => handleEventChange(index, 'end_time', e.target.value)} style={{ padding: '6px' }} />
-                                            </div>
-                                        </>
-                                    )}
                                 </div>
                             ))}
                         </div>
