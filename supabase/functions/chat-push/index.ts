@@ -45,6 +45,21 @@ Deno.serve(async (req) => {
                 });
             }
 
+            // User Configuration for Web Push (Moved up for Test Push)
+            const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
+            const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
+            const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'mailto:admin@example.com'
+
+            if (!vapidPublicKey || !vapidPrivateKey) {
+                console.error('Missing VAPID keys')
+                return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500,
+                })
+            }
+
+            webpush.setVapidDetails(adminEmail, vapidPublicKey, vapidPrivateKey)
+
             // Fetch Subscriptions for the user
             const { data: subs, error: subError } = await supabaseClient
                 .from('push_subscriptions')
@@ -107,6 +122,12 @@ Deno.serve(async (req) => {
 
 
         // User Configuration for Web Push
+        // Already initialized above for Test Push, but redundant check is fine or just reuse variables if scope allows.
+        // Since we moved it inside the 'test' block above, we need it here too for the main block if it wasn't a test.
+        // Actually, better to move it to the top level scope of the request handler? 
+        // No, let's just duplicate or restructure. 
+        // Wait, the previous block returns, so we must initialize here again if we didn't enter the test block.
+
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
         const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
         const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'mailto:admin@example.com'

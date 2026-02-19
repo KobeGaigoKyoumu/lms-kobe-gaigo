@@ -1,4 +1,4 @@
-// SW Version: 2026-02-16-v1
+// SW Version: 2026-02-19-v1-fix-windows
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -22,7 +22,6 @@ self.addEventListener('push', (event) => {
         vibrate: [200, 100, 200],
         tag: 'chat-notification',
         renotify: true,
-        requireInteraction: true,
         actions: [
             { action: 'open', title: '表示する' }
         ]
