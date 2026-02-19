@@ -43,6 +43,8 @@ export default async function CalendarPage() {
       all_day,
       event_type,
       color,
+      course_id,
+      target_class,
       course:courses (
         title
       ),
@@ -70,6 +72,8 @@ export default async function CalendarPage() {
         all_day: e.all_day,
         type: e.event_type,
         course: e.course?.title,
+        course_id: e.course_id,
+        target_class: e.target_class,
         color: e.color || getEventColor(e.event_type),
         createdBy: e.created_by,
         isCustomEvent: true

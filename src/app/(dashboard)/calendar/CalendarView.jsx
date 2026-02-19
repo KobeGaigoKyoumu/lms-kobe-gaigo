@@ -1,11 +1,12 @@
-'use client'
-
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import JapaneseHolidays from 'japanese-holidays'
+import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 import EventModal from './EventModal'
+import PackageList from './components/PackageList'
+import PackageModal from './components/PackageModal'
 
 export default function CalendarView({ events, canCreateEvent, userId }) {
     const router = useRouter()
@@ -14,6 +15,12 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const [selectedDate, setSelectedDate] = useState(null)
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [slideDirection, setSlideDirection] = useState(null)
+
+    // Package Management
+    const [showPackageList, setShowPackageList] = useState(false)
+    const [showPackageModal, setShowPackageModal] = useState(false)
+    const [selectedPackage, setSelectedPackage] = useState(null)
+    const [pkgRefreshTrigger, setPkgRefreshTrigger] = useState(0)
 
     // スワイプ用
     const touchStartX = useRef(null)
@@ -158,6 +165,70 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
         router.refresh()
     }
 
+    // Package Handlers
+    const handlePackageApply = async (pkg, startDateStr) => {
+        if (!confirm(`${pkg.title}を${startDateStr}から適用しますか？`)) return
+
+        const supabase = createClient()
+        const newEvents = pkg.events.map(evt => {
+            const start = new Date(startDateStr)
+            start.setDate(start.getDate() + (evt.day_offset || 0))
+
+            let isoStart, isoEnd
+            if (evt.all_day) {
+                const s = new Date(start)
+                s.setHours(0, 0, 0, 0)
+                isoStart = s.toISOString()
+            } else {
+                if (evt.start_time) {
+                    const [h, m] = evt.start_time.split(':')
+                    start.setHours(h, m, 0, 0)
+                    isoStart = start.toISOString()
+                } else {
+                    // Default to start of day if no time but not all_day? Or maybe error?
+                    // Fallback to 00:00
+                    start.setHours(0, 0, 0, 0)
+                    isoStart = start.toISOString()
+                }
+
+                if (evt.end_time) {
+                    const [eh, em] = evt.end_time.split(':')
+                    const e = new Date(start)
+                    e.setHours(eh, em, 0, 0)
+                    // If end time is earlier than start time (next day?), handle logic? 
+                    // Assuming same day for now or user handles offset in package logic if needed (no multi-day single event support in simple package yet).
+                    isoEnd = e.toISOString()
+                }
+            }
+
+            return {
+                title: evt.title,
+                description: pkg.description,
+                start_date: isoStart,
+                end_date: isoEnd,
+                all_day: evt.all_day,
+                event_type: evt.event_type,
+                color: evt.color,
+                created_by: userId
+            }
+        })
+
+        const { error } = await supabase.from('calendar_events').insert(newEvents)
+        if (error) {
+            console.error(error)
+            alert('適用に失敗しました')
+        } else {
+            alert('適用しました')
+            router.refresh()
+            setShowPackageList(false)
+        }
+    }
+
+    const handlePackageSave = () => {
+        setShowPackageModal(false)
+        setPkgRefreshTrigger(prev => prev + 1)
+    }
+
     const weekDays = ['日', '月', '火', '水', '木', '金', '土']
     const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
@@ -199,19 +270,28 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     </button>
 
                     {canCreateEvent && (
-                        <button
-                            onClick={() => {
-                                setSelectedDate(new Date())
-                                setSelectedEvent(null)
-                                setShowEventModal(true)
-                            }}
-                            className={styles.addEventBtn}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M8 3v10M3 8h10" />
-                            </svg>
-                            イベント追加
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                onClick={() => setShowPackageList(true)}
+                                className={styles.todayBtn} // Use same style for now or add new style
+                                style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }}
+                            >
+                                パッケージ管理
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setSelectedDate(new Date())
+                                    setSelectedEvent(null)
+                                    setShowEventModal(true)
+                                }}
+                                className={styles.addEventBtn}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M8 3v10M3 8h10" />
+                                </svg>
+                                イベント追加
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -376,6 +456,36 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     date={selectedDate}
                     onClose={handleModalClose}
                     onSave={handleEventSave}
+                    userId={userId}
+                />
+            )}
+
+            {showPackageList && (
+                <div className={styles.modalOverlay} onClick={() => setShowPackageList(false)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+                        <div className={styles.modalHeader}>
+                            <h2>パッケージ管理</h2>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button onClick={() => { setSelectedPackage(null); setShowPackageModal(true); }} className={styles.addEventBtn}>
+                                    + 新規作成
+                                </button>
+                                <button onClick={() => setShowPackageList(false)} className={styles.closeBtn}>✕</button>
+                            </div>
+                        </div>
+                        <PackageList
+                            onApplyPackage={handlePackageApply}
+                            onEditPackage={(pkg) => { setSelectedPackage(pkg); setShowPackageModal(true); }}
+                            refreshTrigger={pkgRefreshTrigger}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {showPackageModal && (
+                <PackageModal
+                    pkg={selectedPackage}
+                    onClose={() => setShowPackageModal(false)}
+                    onSave={handlePackageSave}
                     userId={userId}
                 />
             )}

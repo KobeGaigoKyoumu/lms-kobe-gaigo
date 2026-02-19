@@ -67,11 +67,11 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                 title: event.title || '',
                 description: event.description || '',
                 start_date: formatDateTimeLocal(new Date(event.date), event.all_day),
-                end_date: event.endDate ? formatDateTimeLocal(new Date(event.endDate), event.all_day) : '',
-                all_day: event.allDay !== false,
+                end_date: event.end_date ? formatDateTimeLocal(new Date(event.end_date), event.all_day) : '',
+                all_day: event.all_day !== false,
                 event_type: event.type || 'other',
                 course_id: event.course_id || '',
-                target_class: event.targetClass || '',
+                target_class: event.target_class || '',
                 color: event.color || ''
             })
         } else if (date) {
