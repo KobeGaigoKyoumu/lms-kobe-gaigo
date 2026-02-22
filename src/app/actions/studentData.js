@@ -33,7 +33,8 @@ export const getCachedStudentList = unstable_cache(
                 nationality,
                 visa_status,
                 phone,
-                destination
+                destination,
+                address
             `)
             .order('class_name', { ascending: true })
             .order('student_id_text', { ascending: true })

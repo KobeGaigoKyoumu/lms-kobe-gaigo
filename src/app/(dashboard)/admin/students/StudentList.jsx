@@ -75,7 +75,8 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
             const matchId = student.student_id_text.toLowerCase().includes(lowerSearch)
             const matchName = student.full_name.toLowerCase().includes(lowerSearch)
             const matchEmail = (student.email || '').toLowerCase().includes(lowerSearch)
-            if (!matchId && !matchName && !matchEmail) return false
+            const matchAddress = (student.address || '').toLowerCase().includes(lowerSearch)
+            if (!matchId && !matchName && !matchEmail && !matchAddress) return false
         }
 
         return true
@@ -593,7 +594,7 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                     </div>
                     <input
                         type="text"
-                        placeholder="学籍番号、名前、メールで検索..."
+                        placeholder="学籍番号、名前、メール、住所で検索..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className={styles.searchInput}
