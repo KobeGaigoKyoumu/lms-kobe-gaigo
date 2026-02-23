@@ -1,4 +1,4 @@
-// SW Version: 2026-02-19-v1-fix-windows
+// SW Version: 2026-02-24-v2-badge-fix
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -10,30 +10,34 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
     const data = event.data ? event.data.json() : { title: '新着メッセージ', body: 'メッセージが届きました' };
 
-    // 1. ブラウザ通知を表示 (デスクトップ・スマホ共通)
     const iconUrl = new URL('/icon-192.png', self.registration.scope).href;
+    const badgeUrl = new URL('/icon-192.png', self.registration.scope).href;
 
-    // Default options (Standard)
+    // studentId ベースのユニークなタグを使うことで、通知が上書きされず積み重なる
+    // → Androidがドットバッジをより確実に表示する
+    const notificationTag = data.studentId
+        ? 'chat-' + data.studentId
+        : 'chat-' + Date.now();
+
     let options = {
         body: data.body,
         icon: iconUrl,
-        badge: iconUrl,
+        badge: badgeUrl,
         data: { url: data.url },
         vibrate: [200, 100, 200],
-        tag: 'chat-notification',
+        tag: notificationTag,
         renotify: true,
         actions: [
             { action: 'open', title: '表示する' }
         ]
     };
 
-    // Simple Mode (Minimal options for troubleshooting)
     if (data.simpleMode) {
         console.log('SW: Simple Mode Notification');
         options = {
             body: data.body,
-            icon: iconUrl, // Still try icon, it's usually fine
-            // No badge, no vibrate, no actions, no renotify
+            icon: iconUrl,
+            badge: badgeUrl,
             tag: 'simple-test-' + Date.now()
         };
     }
@@ -41,13 +45,13 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
         Promise.all([
             self.registration.showNotification(data.title, options),
-            // 2. アプリアイコンのバッジを更新 (PWA)
+            // アプリアイコンのバッジを更新
             (async () => {
                 if ('setAppBadge' in self.navigator) {
                     try {
                         const count = parseInt(data.badge) || 1;
                         await self.navigator.setAppBadge(count);
-                        console.log('SW: Badge set successfully to', count);
+                        console.log('SW: Badge set to', count);
                     } catch (e) {
                         console.error('SW: Badge error', e);
                     }

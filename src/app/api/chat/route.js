@@ -213,7 +213,8 @@ export async function POST(request) {
                         title: title,
                         body: data.content || (data.attachment_url ? 'ファイルを送信しました' : '新着メッセージ'),
                         url: url,
-                        badge: unreadCount
+                        badge: unreadCount,
+                        studentId: data.student_id
                     })
 
                     await Promise.all(subs.map(sub =>
