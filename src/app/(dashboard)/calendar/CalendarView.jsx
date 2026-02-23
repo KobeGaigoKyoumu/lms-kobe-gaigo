@@ -321,7 +321,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                 {/* Legend - Moved to Top */}
                 <div className={styles.legend}>
                     <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#fef3c7', border: '1px solid #f59e0b' }}></span>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }}></span>
                         課題締切
                     </div>
                     <div className={styles.legendItem}>
@@ -329,15 +329,15 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                         授業
                     </div>
                     <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#fee2e2', border: '1px solid #ef4444' }}></span>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#ef4444' }}></span>
                         試験
                     </div>
                     <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#dcfce7', border: '1px solid #22c55e' }}></span>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#22c55e' }}></span>
                         休日
                     </div>
                     <div className={styles.legendItem}>
-                        <span className={styles.legendColor} style={{ backgroundColor: '#f3e8ff', border: '1px solid #8b5cf6' }}></span>
+                        <span className={styles.legendColor} style={{ backgroundColor: '#8b5cf6' }}></span>
                         その他
                     </div>
                 </div>
@@ -450,7 +450,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                             event.type === 'holiday' ? '休日' : 'その他'
                                 return (
                                     <div key={event.id} className={styles.eventListItem}>
-                                        <span className={styles.eventDot} style={{ backgroundColor: pastelColor }} />
+                                        <span className={styles.eventDot} style={{ backgroundColor: event.color || '#3b82f6' }} />
                                         <div className={styles.eventListBody}>
                                             <span className={styles.eventListDate}>
                                                 {formatDateTime(event.date, event.all_day)}
@@ -467,7 +467,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                             </span>
                                             <span
                                                 className={styles.eventListType}
-                                                style={{ backgroundColor: pastelColor, color: '#1f2937' }}
+                                                style={{ backgroundColor: pastelColor, color: event.color || '#3b82f6' }}
                                             >
                                                 {typeLabel}
                                             </span>
