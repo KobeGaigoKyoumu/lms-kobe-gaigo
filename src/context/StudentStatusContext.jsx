@@ -10,7 +10,7 @@ const StudentStatusContext = createContext({
     refreshStatus: () => { }
 })
 
-export function StudentStatusProvider({ children, role, userId }) {
+export function StudentStatusProvider({ children, role, userId, className: userClassName }) {
     const [mounted, setMounted] = React.useState(false)
     const [statuses, setStatuses] = useState({
         hasNewAnnouncement: false,
@@ -53,7 +53,7 @@ export function StudentStatusProvider({ children, role, userId }) {
                     action: 'get-status',
                     role: role,
                     studentId: userId || '',
-                    className: '',
+                    className: userClassName || '',
                     academicYear: ''
                 }).toString();
 

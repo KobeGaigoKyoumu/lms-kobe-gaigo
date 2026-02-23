@@ -16,7 +16,7 @@ export default async function StudentLayout({ children }) {
     }
 
     return (
-        <StudentStatusProvider role="student" userId={session.studentId}>
+        <StudentStatusProvider role="student" userId={session.studentId} className={session.className}>
             <div className={styles.wrapper}>
                 <Sidebar
                     role="student"
