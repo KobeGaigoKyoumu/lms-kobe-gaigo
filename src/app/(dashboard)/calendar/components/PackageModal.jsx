@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import styles from '../page.module.css'
 
+const currentYear = new Date().getFullYear()
+const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - 2 + i)
+
 export default function PackageModal({ pkg, onClose, onSave, userId }) {
     const [loading, setLoading] = useState(false)
     const [deleting, setDeleting] = useState(false)
@@ -20,8 +23,10 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                 ...prev.events,
                 {
                     title: '',
+                    start_year: currentYear,
                     start_month: 4,
                     start_day: 1,
+                    end_year: '',
                     end_month: '',
                     end_day: '',
                     event_type: 'class',
@@ -118,9 +123,7 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
         { value: 'other', label: 'その他' }
     ]
 
-    // Generate Month options (1-12)
     const months = Array.from({ length: 12 }, (_, i) => i + 1)
-    // Generate Day options (1-31)
     const days = Array.from({ length: 31 }, (_, i) => i + 1)
 
     return (
@@ -192,9 +195,17 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                                             <label style={{ fontSize: '0.8em' }}>開始日 *</label>
                                             <div style={{ display: 'flex', gap: '4px' }}>
                                                 <select
+                                                    value={evt.start_year || currentYear}
+                                                    onChange={e => handleEventChange(index, 'start_year', parseInt(e.target.value))}
+                                                    style={{ padding: '6px', width: '72px' }}
+                                                    required
+                                                >
+                                                    {yearOptions.map(y => <option key={y} value={y}>{y}年</option>)}
+                                                </select>
+                                                <select
                                                     value={evt.start_month}
                                                     onChange={e => handleEventChange(index, 'start_month', parseInt(e.target.value))}
-                                                    style={{ padding: '6px', width: '60px' }}
+                                                    style={{ padding: '6px', width: '58px' }}
                                                     required
                                                 >
                                                     {months.map(m => <option key={m} value={m}>{m}月</option>)}
@@ -202,7 +213,7 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                                                 <select
                                                     value={evt.start_day}
                                                     onChange={e => handleEventChange(index, 'start_day', parseInt(e.target.value))}
-                                                    style={{ padding: '6px', width: '60px' }}
+                                                    style={{ padding: '6px', width: '56px' }}
                                                     required
                                                 >
                                                     {days.map(d => <option key={d} value={d}>{d}日</option>)}
@@ -214,9 +225,17 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                                             <label style={{ fontSize: '0.8em' }}>終了日 (任意)</label>
                                             <div style={{ display: 'flex', gap: '4px' }}>
                                                 <select
+                                                    value={evt.end_year || ''}
+                                                    onChange={e => handleEventChange(index, 'end_year', e.target.value ? parseInt(e.target.value) : '')}
+                                                    style={{ padding: '6px', width: '72px' }}
+                                                >
+                                                    <option value="">-</option>
+                                                    {yearOptions.map(y => <option key={y} value={y}>{y}年</option>)}
+                                                </select>
+                                                <select
                                                     value={evt.end_month || ''}
                                                     onChange={e => handleEventChange(index, 'end_month', e.target.value ? parseInt(e.target.value) : '')}
-                                                    style={{ padding: '6px', width: '60px' }}
+                                                    style={{ padding: '6px', width: '58px' }}
                                                 >
                                                     <option value="">-</option>
                                                     {months.map(m => <option key={m} value={m}>{m}月</option>)}
@@ -224,7 +243,7 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
                                                 <select
                                                     value={evt.end_day || ''}
                                                     onChange={e => handleEventChange(index, 'end_day', e.target.value ? parseInt(e.target.value) : '')}
-                                                    style={{ padding: '6px', width: '60px' }}
+                                                    style={{ padding: '6px', width: '56px' }}
                                                 >
                                                     <option value="">-</option>
                                                     {days.map(d => <option key={d} value={d}>{d}日</option>)}

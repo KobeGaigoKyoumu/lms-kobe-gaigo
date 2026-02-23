@@ -168,73 +168,72 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     }
 
     // Package Handlers
-    const handlePackageApply = async (pkg, year) => {
-        if (!confirm(`${pkg.title}を${year}年に適用しますか？`)) return
+    const handlePackageApply = async (pkg, targetClasses) => {
+        if (!confirm(`${pkg.title}を${targetClasses.join(', ')}に適用しますか？`)) return
 
         const supabase = createClient()
-        const newEvents = pkg.events.map(evt => {
-            // Construct start date: Year + Month + Day
-            // Month is 1-based in UI, but Date constructor uses 0-based for month if using (y, m, d)
-            // or ISO string. Let's use Date(y, m-1, d)
-            const start = new Date(year, evt.start_month - 1, evt.start_day)
 
-            let isoStart, isoEnd
+        const newEvents = []
+        for (const targetClass of targetClasses) {
+            for (const evt of pkg.events) {
+                // 各イベントに保存された start_year / end_year を使用（なければ現在年）
+                const startYear = evt.start_year || new Date().getFullYear()
+                const endYear = evt.end_year || startYear
 
-            if (evt.all_day) {
-                const s = new Date(start)
-                s.setHours(0, 0, 0, 0)
-                // Adjust for timezone offset if needed, but for 'all_day', simply YYYY-MM-DD
-                // To safely store as ISO, we usually convert to UTC or just store string
-                // But DB expects timestamptz. 
-                // Let's use local time midnight as start.
-                isoStart = s.toISOString()
+                const start = new Date(startYear, evt.start_month - 1, evt.start_day)
 
-                if (evt.end_month && evt.end_day) {
-                    const end = new Date(year, evt.end_month - 1, evt.end_day)
-                    end.setHours(23, 59, 59, 999)
-                    isoEnd = end.toISOString()
-                }
-            } else {
-                if (evt.start_time) {
-                    const [h, m] = evt.start_time.split(':')
-                    start.setHours(h, m, 0, 0)
-                    isoStart = start.toISOString()
+                let isoStart, isoEnd
+
+                if (evt.all_day) {
+                    const s = new Date(start)
+                    s.setHours(0, 0, 0, 0)
+                    isoStart = s.toISOString()
+
+                    if (evt.end_month && evt.end_day) {
+                        const end = new Date(endYear, evt.end_month - 1, evt.end_day)
+                        end.setHours(23, 59, 59, 999)
+                        isoEnd = end.toISOString()
+                    }
                 } else {
-                    start.setHours(0, 0, 0, 0)
-                    isoStart = start.toISOString()
-                }
+                    if (evt.start_time) {
+                        const [h, m] = evt.start_time.split(':')
+                        start.setHours(h, m, 0, 0)
+                        isoStart = start.toISOString()
+                    } else {
+                        start.setHours(0, 0, 0, 0)
+                        isoStart = start.toISOString()
+                    }
 
-                if (evt.end_month && evt.end_day) {
-                    const end = new Date(year, evt.end_month - 1, evt.end_day)
-                    if (evt.end_time) {
+                    if (evt.end_month && evt.end_day) {
+                        const end = new Date(endYear, evt.end_month - 1, evt.end_day)
+                        if (evt.end_time) {
+                            const [eh, em] = evt.end_time.split(':')
+                            end.setHours(eh, em, 0, 0)
+                        } else {
+                            end.setHours(23, 59, 59, 999)
+                        }
+                        isoEnd = end.toISOString()
+                    } else if (evt.end_time) {
+                        const end = new Date(start)
                         const [eh, em] = evt.end_time.split(':')
                         end.setHours(eh, em, 0, 0)
-                    } else {
-                        // Default to end of day if NO end time? Or same as start time?
-                        // If ranges are allowed, usually end of day.
-                        end.setHours(23, 59, 59, 999)
+                        isoEnd = end.toISOString()
                     }
-                    isoEnd = end.toISOString()
-                } else if (evt.end_time) {
-                    // Same day end time
-                    const end = new Date(start)
-                    const [eh, em] = evt.end_time.split(':')
-                    end.setHours(eh, em, 0, 0)
-                    isoEnd = end.toISOString()
                 }
-            }
 
-            return {
-                title: evt.title,
-                description: pkg.description,
-                start_date: isoStart,
-                end_date: isoEnd,
-                all_day: evt.all_day,
-                event_type: evt.event_type,
-                color: evt.color,
-                created_by: userId
+                newEvents.push({
+                    title: evt.title,
+                    description: pkg.description,
+                    start_date: isoStart,
+                    end_date: isoEnd,
+                    all_day: evt.all_day,
+                    event_type: evt.event_type,
+                    color: evt.color,
+                    target_class: targetClass,
+                    created_by: userId
+                })
             }
-        })
+        }
 
         const { error } = await supabase.from('calendar_events').insert(newEvents)
         if (error) {

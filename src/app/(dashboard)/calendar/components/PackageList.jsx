@@ -7,11 +7,13 @@ import styles from '../page.module.css'
 export default function PackageList({ onApplyPackage, onEditPackage, refreshTrigger }) {
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
+    const [classes, setClasses] = useState([])
     const [applyingPkgId, setApplyingPkgId] = useState(null)
-    const [targetYear, setTargetYear] = useState(new Date().getFullYear())
+    const [selectedClasses, setSelectedClasses] = useState([])
 
     useEffect(() => {
         fetchPackages()
+        fetchClasses()
     }, [refreshTrigger])
 
     const fetchPackages = async () => {
@@ -30,19 +32,41 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
         setLoading(false)
     }
 
+    const fetchClasses = async () => {
+        const supabase = createClient()
+        const { data } = await supabase
+            .from('students')
+            .select('class_name')
+            .not('class_name', 'is', null)
+            .order('class_name')
+        const unique = [...new Set(data?.map(s => s.class_name))].filter(Boolean)
+        setClasses(unique)
+    }
+
     const handleApplyClick = (pkg) => {
         if (applyingPkgId === pkg.id) {
             setApplyingPkgId(null)
+            setSelectedClasses([])
         } else {
             setApplyingPkgId(pkg.id)
-            setTargetYear(new Date().getFullYear())
+            setSelectedClasses([])
         }
     }
 
+    const toggleClass = (cls) => {
+        setSelectedClasses(prev =>
+            prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]
+        )
+    }
+
     const handleConfirmApply = (pkg) => {
-        if (!targetYear) return
-        onApplyPackage(pkg, targetYear)
+        if (selectedClasses.length === 0) {
+            alert('適用するクラスを1つ以上選択してください')
+            return
+        }
+        onApplyPackage(pkg, selectedClasses)
         setApplyingPkgId(null)
+        setSelectedClasses([])
     }
 
     if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>読み込み中...</div>
@@ -80,26 +104,59 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
                             </div>
 
                             {applyingPkgId === pkg.id ? (
-                                <div style={{ background: '#f3f4f6', padding: '10px', borderRadius: '6px' }}>
-                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>適用する年（西暦）:</label>
+                                <div style={{ background: '#f3f4f6', padding: '12px', borderRadius: '6px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600' }}>
+                                        適用するクラスを選択（複数可）:
+                                    </label>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                                        {classes.map(cls => (
+                                            <button
+                                                key={cls}
+                                                type="button"
+                                                onClick={() => toggleClass(cls)}
+                                                style={{
+                                                    padding: '5px 12px',
+                                                    borderRadius: '20px',
+                                                    border: '1.5px solid',
+                                                    borderColor: selectedClasses.includes(cls) ? '#3b82f6' : '#d1d5db',
+                                                    background: selectedClasses.includes(cls) ? '#dbeafe' : 'white',
+                                                    color: selectedClasses.includes(cls) ? '#1d4ed8' : '#374151',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: selectedClasses.includes(cls) ? '600' : '400',
+                                                    transition: 'all 0.15s'
+                                                }}
+                                            >
+                                                {cls}
+                                            </button>
+                                        ))}
+                                        {classes.length === 0 && (
+                                            <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>クラスが見つかりません</span>
+                                        )}
+                                    </div>
+                                    {selectedClasses.length > 0 && (
+                                        <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '8px' }}>
+                                            選択中: {selectedClasses.join(', ')}
+                                        </p>
+                                    )}
                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                        <input
-                                            type="number"
-                                            value={targetYear}
-                                            onChange={(e) => setTargetYear(parseInt(e.target.value))}
-                                            min="2000"
-                                            max="2100"
-                                            style={{ padding: '6px', borderRadius: '4px', border: '1px solid #d1d5db', flexGrow: 1 }}
-                                        />
+                                        <button
+                                            onClick={() => { setApplyingPkgId(null); setSelectedClasses([]) }}
+                                            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontSize: '0.85rem' }}
+                                        >
+                                            キャンセル
+                                        </button>
                                         <button
                                             onClick={() => handleConfirmApply(pkg)}
-                                            disabled={!targetYear}
+                                            disabled={selectedClasses.length === 0}
                                             style={{
-                                                background: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', padding: '0 12px', cursor: 'pointer',
-                                                opacity: !targetYear ? 0.5 : 1
+                                                padding: '6px 16px', borderRadius: '4px', border: 'none',
+                                                background: selectedClasses.length > 0 ? '#3b82f6' : '#93c5fd',
+                                                color: 'white', cursor: selectedClasses.length > 0 ? 'pointer' : 'default',
+                                                fontSize: '0.85rem', fontWeight: '500'
                                             }}
                                         >
-                                            確定
+                                            確定（{selectedClasses.length}クラス）
                                         </button>
                                     </div>
                                 </div>
