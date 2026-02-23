@@ -230,7 +230,8 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                     event_type: evt.event_type,
                     color: evt.color,
                     target_class: targetClass,
-                    created_by: userId
+                    created_by: userId,
+                    package_id: pkg.id
                 })
             }
         }
@@ -243,6 +244,25 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
             alert('適用しました')
             router.refresh()
             setShowPackageList(false)
+        }
+    }
+
+    const handlePackageUnapply = async (packageId, targetClass) => {
+        if (!confirm(`${targetClass} のパッケージ適用を解除しますか？\n（このパッケージから生成されたイベントが全て削除されます）`)) return
+
+        const supabase = createClient()
+        const { error } = await supabase
+            .from('calendar_events')
+            .delete()
+            .eq('package_id', packageId)
+            .eq('target_class', targetClass)
+
+        if (error) {
+            console.error(error)
+            alert('解除に失敗しました')
+        } else {
+            alert('解除しました')
+            router.refresh()
         }
     }
 
@@ -504,6 +524,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                         </div>
                         <PackageList
                             onApplyPackage={handlePackageApply}
+                            onUnapplyPackage={handlePackageUnapply}
                             onEditPackage={(pkg) => { setSelectedPackage(pkg); setShowPackageModal(true); }}
                             refreshTrigger={pkgRefreshTrigger}
                         />

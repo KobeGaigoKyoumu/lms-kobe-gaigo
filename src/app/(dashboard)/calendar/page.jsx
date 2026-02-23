@@ -63,7 +63,18 @@ export default async function CalendarPage() {
         color: '#f59e0b'
     }))
 
-    const customEvents = (calendarEvents || []).map(e => ({
+    // 同じパッケージから複数クラスに適用されたイベントの重複排除
+    // title + start_date + event_type が同じものは1つにまとめる
+    const deduplicatedCalendarEvents = []
+    const seen = new Set()
+    for (const e of (calendarEvents || [])) {
+        const key = `${e.title}|${e.start_date}|${e.event_type}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        deduplicatedCalendarEvents.push(e)
+    }
+
+    const customEvents = deduplicatedCalendarEvents.map(e => ({
         id: e.id,
         title: e.title,
         description: e.description,

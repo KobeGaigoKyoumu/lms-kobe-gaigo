@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import styles from '../page.module.css'
 
-export default function PackageList({ onApplyPackage, onEditPackage, refreshTrigger }) {
+export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, refreshTrigger }) {
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
     const [classes, setClasses] = useState([])
     const [applyingPkgId, setApplyingPkgId] = useState(null)
     const [selectedClasses, setSelectedClasses] = useState([])
+    const [appliedClasses, setAppliedClasses] = useState({}) // { packageId: ['classA', 'classB'] }
 
     useEffect(() => {
         fetchPackages()
@@ -26,10 +27,37 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
 
         if (data) {
             setPackages(data)
+            // 各パッケージの適用済みクラスを取得
+            await fetchAppliedClasses(data.map(p => p.id))
         } else {
             console.error(error)
         }
         setLoading(false)
+    }
+
+    const fetchAppliedClasses = async (packageIds) => {
+        if (!packageIds || packageIds.length === 0) return
+        const supabase = createClient()
+        const { data } = await supabase
+            .from('calendar_events')
+            .select('package_id, target_class')
+            .in('package_id', packageIds)
+            .not('target_class', 'is', null)
+
+        if (data) {
+            const map = {}
+            data.forEach(evt => {
+                if (!evt.package_id || !evt.target_class) return
+                if (!map[evt.package_id]) map[evt.package_id] = new Set()
+                map[evt.package_id].add(evt.target_class)
+            })
+            // Convert Sets to arrays
+            const result = {}
+            Object.keys(map).forEach(pid => {
+                result[pid] = [...map[pid]].sort()
+            })
+            setAppliedClasses(result)
+        }
     }
 
     const fetchClasses = async () => {
@@ -69,6 +97,19 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
         setSelectedClasses([])
     }
 
+    const handleUnapply = async (packageId, targetClass) => {
+        await onUnapplyPackage(packageId, targetClass)
+        // 適用済みクラス一覧を更新
+        setAppliedClasses(prev => {
+            const updated = { ...prev }
+            if (updated[packageId]) {
+                updated[packageId] = updated[packageId].filter(c => c !== targetClass)
+                if (updated[packageId].length === 0) delete updated[packageId]
+            }
+            return updated
+        })
+    }
+
     if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>読み込み中...</div>
 
     return (
@@ -99,9 +140,44 @@ export default function PackageList({ onApplyPackage, onEditPackage, refreshTrig
                                 <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#6b7280' }}>{pkg.description}</p>
                             )}
 
-                            <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '12px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '8px' }}>
                                 イベント数: {pkg.events?.length || 0}件
                             </div>
+
+                            {/* 適用済みクラス表示 */}
+                            {appliedClasses[pkg.id] && appliedClasses[pkg.id].length > 0 && (
+                                <div style={{ marginBottom: '12px', padding: '8px 10px', background: '#f0fdf4', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#166534', marginBottom: '6px' }}>
+                                        適用済みクラス:
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {appliedClasses[pkg.id].map(cls => (
+                                            <div
+                                                key={cls}
+                                                style={{
+                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                    padding: '3px 10px', borderRadius: '20px',
+                                                    background: '#dcfce7', border: '1px solid #86efac',
+                                                    fontSize: '0.8rem', color: '#166534'
+                                                }}
+                                            >
+                                                <span>{cls}</span>
+                                                <button
+                                                    onClick={() => handleUnapply(pkg.id, cls)}
+                                                    style={{
+                                                        background: 'none', border: 'none', color: '#dc2626',
+                                                        cursor: 'pointer', fontSize: '0.85rem', fontWeight: '700',
+                                                        padding: '0 2px', lineHeight: '1'
+                                                    }}
+                                                    title={`${cls} の適用を解除`}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {applyingPkgId === pkg.id ? (
                                 <div style={{ background: '#f3f4f6', padding: '12px', borderRadius: '6px' }}>
