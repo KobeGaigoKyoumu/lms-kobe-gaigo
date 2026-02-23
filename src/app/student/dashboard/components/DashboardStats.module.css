@@ -135,25 +135,3 @@
         font-size: 0.65rem;
     }
 }
-
-/* Shine effect for unsubmitted assignments */
-@keyframes shine {
-    0% {
-        background-position: 200% center;
-    }
-
-    100% {
-        background-position: -200% center;
-    }
-}
-
-.shineEffect {
-    border-color: #f59e0b !important;
-    background: linear-gradient(120deg,
-            var(--bg-elevated) 30%,
-            rgba(245, 158, 11, 0.15) 50%,
-            var(--bg-elevated) 70%) !important;
-    background-size: 200% 100% !important;
-    animation: shine 3s infinite linear, fadeIn 0.5s ease-out forwards !important;
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2) !important;
-}

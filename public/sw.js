@@ -13,19 +13,13 @@ self.addEventListener('push', (event) => {
     const iconUrl = new URL('/icon-192.png', self.registration.scope).href;
     const badgeUrl = new URL('/icon-192.png', self.registration.scope).href;
 
-    // studentId ベースのユニークなタグを使うことで、通知が上書きされず積み重なる
-    // → Androidがドットバッジをより確実に表示する
-    const notificationTag = data.studentId
-        ? 'chat-' + data.studentId
-        : 'chat-' + Date.now();
-
     let options = {
         body: data.body,
         icon: iconUrl,
         badge: badgeUrl,
         data: { url: data.url },
         vibrate: [200, 100, 200],
-        tag: notificationTag,
+        tag: 'chat-notification',
         renotify: true,
         actions: [
             { action: 'open', title: '表示する' }
