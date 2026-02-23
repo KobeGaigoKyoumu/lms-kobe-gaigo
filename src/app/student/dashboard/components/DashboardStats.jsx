@@ -43,7 +43,7 @@ export default function DashboardStats({ unsubmittedCount, completedCount, submi
     return (
         <div className={styles.statsGrid}>
             {/* Unsubmitted */}
-            <div className={styles.statCard}>
+            <div className={`${styles.statCard} ${unsubmittedCount > 0 ? styles.shineEffect : ''}`}>
                 <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
