@@ -443,6 +443,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                         {events
                             .sort((a, b) => new Date(a.date) - new Date(b.date))
                             .map(event => {
+                                const pastelColor = getPastelColor(event.color || '#3b82f6')
                                 const typeLabel = event.type === 'assignment' ? '課題' :
                                     event.type === 'class' ? '授業' :
                                         event.type === 'exam' ? '試験' :
@@ -450,20 +451,27 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                 return (
                                     <div key={event.id} className={styles.eventListItem}>
                                         <span className={styles.eventDot} style={{ backgroundColor: event.color || '#3b82f6' }} />
-                                        <span className={styles.eventListDate}>
-                                            {formatDateTime(event.date, event.all_day)}
-                                            {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
-                                        </span>
-                                        <span className={styles.eventListName}>
-                                            {event.type === 'assignment' ? (
-                                                <Link href={`/assignments/${event.id}`}>
-                                                    {event.title}
-                                                </Link>
-                                            ) : (
-                                                event.title
-                                            )}
-                                        </span>
-                                        <span className={styles.eventListType}>{typeLabel}</span>
+                                        <div className={styles.eventListBody}>
+                                            <span className={styles.eventListDate}>
+                                                {formatDateTime(event.date, event.all_day)}
+                                                {event.end_date && ` 〜 ${formatDateTime(event.end_date, event.all_day)}`}
+                                            </span>
+                                            <span className={styles.eventListName}>
+                                                {event.type === 'assignment' ? (
+                                                    <Link href={`/assignments/${event.id}`}>
+                                                        {event.title}
+                                                    </Link>
+                                                ) : (
+                                                    event.title
+                                                )}
+                                            </span>
+                                            <span
+                                                className={styles.eventListType}
+                                                style={{ backgroundColor: pastelColor, color: event.color || '#3b82f6' }}
+                                            >
+                                                {typeLabel}
+                                            </span>
+                                        </div>
                                     </div>
                                 )
                             })}
