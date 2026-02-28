@@ -237,6 +237,18 @@ export const getMenuItems = (role) => {
             )
         },
         {
+            href: '/kanban',
+            label: 'カンバンボード',
+            color: '#14b8a6', // Teal
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="3" width="4" height="14" rx="1" />
+                    <rect x="8" y="3" width="4" height="10" rx="1" />
+                    <rect x="14" y="3" width="4" height="12" rx="1" />
+                </svg>
+            )
+        },
+        {
             href: '/announcements',
             label: 'お知らせ',
             color: '#ef4444', // Red
