@@ -4,8 +4,8 @@ async function check() {
     const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
     const authHeader = "Basic " + Buffer.from(privateKey + ":").toString("base64");
 
-    // Need to get last ~90 days because API requires startDate/endDate
     const end = new Date();
+    end.setDate(end.getDate() + 1); // Tomorrow to include today's usage
     const start = new Date();
     start.setDate(start.getDate() - 30);
 

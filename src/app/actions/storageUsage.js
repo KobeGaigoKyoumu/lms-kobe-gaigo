@@ -8,10 +8,21 @@ import { createClient } from "@supabase/supabase-js";
  */
 export async function getImageKitUsage() {
     try {
+        const end = new Date();
+        end.setDate(end.getDate() + 1); // API仕様の endDate は排他的なため、明日を指定して本日のデータを含める
+
+        const start = new Date();
+        start.setDate(start.getDate() - 30); // 過去30日を指定（APIの仕様上必須）
+
+        const startDateStr = start.toISOString().split("T")[0];
+        const endDateStr = end.toISOString().split("T")[0];
+
+        const url = `https://api.imagekit.io/v1/accounts/usage?startDate=${startDateStr}&endDate=${endDateStr}`;
+
         const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
         const authHeader = `Basic ${Buffer.from(privateKey + ":").toString("base64")}`;
 
-        const response = await fetch("https://api.imagekit.io/v1/usage", {
+        const response = await fetch(url, {
             headers: {
                 Authorization: authHeader,
             },
