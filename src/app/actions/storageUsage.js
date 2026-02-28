@@ -26,6 +26,7 @@ export async function getImageKitUsage() {
             headers: {
                 Authorization: authHeader,
             },
+            cache: 'no-store' // 常に最新のデータを取得
         });
 
         if (!response.ok) {
@@ -36,7 +37,7 @@ export async function getImageKitUsage() {
 
         // 無料枠は 20GB
         const limit = 20 * 1024 * 1024 * 1024;
-        const used = data.storageUsed || 0;
+        const used = data.mediaLibraryStorageBytes || 0;
 
         return {
             success: true,
