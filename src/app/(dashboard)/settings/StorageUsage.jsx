@@ -28,21 +28,30 @@ export default function StorageUsage({ imageKit, supabase }) {
                 </div>
 
                 <div className={styles.usageInfo}>
-                    <div className={styles.progressBar}>
-                        <div
-                            className={styles.progressFill}
-                            style={{
-                                width: `${imageKit.percent}%`,
-                                background: 'linear-gradient(90deg, #3b82f6, #60a5fa)'
-                            }}
-                        />
-                    </div>
-                    <div className={styles.stats}>
-                        <span className={styles.percentage}>{imageKit.percent}% 使用中</span>
-                        <span className={styles.raw}>
-                            {formatSize(imageKit.used)} / {formatSize(imageKit.limit)}
-                        </span>
-                    </div>
+                    {!imageKit?.success ? (
+                        <div className={styles.errorState}>
+                            <p style={{ color: '#ef4444', fontSize: '0.9rem', margin: 0 }}>取得不可 (API非対応)</p>
+                            <p className={styles.raw} style={{ marginTop: '0.25rem' }}>無料枠 20GB</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className={styles.progressBar}>
+                                <div
+                                    className={styles.progressFill}
+                                    style={{
+                                        width: `${imageKit.percent}%`,
+                                        background: 'linear-gradient(90deg, #3b82f6, #60a5fa)'
+                                    }}
+                                />
+                            </div>
+                            <div className={styles.stats}>
+                                <span className={styles.percentage}>{imageKit.percent}% 使用中</span>
+                                <span className={styles.raw}>
+                                    {formatSize(imageKit.used)} / {formatSize(imageKit.limit)}
+                                </span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

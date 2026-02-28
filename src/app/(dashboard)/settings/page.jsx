@@ -45,12 +45,14 @@ export default async function SettingsPage() {
                 )}
 
                 {/* Telegram連携 */}
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>通知設定</h2>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
-                    </div>
-                </section>
+                {profile?.role === 'student' && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>Telegram 通知設定</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
+                        </div>
+                    </section>
+                )}
 
                 {/* 通知デバッグ（診断ツール） */}
                 <section className={styles.section}>
