@@ -2,8 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
 import NotificationDebug from './NotificationDebug'
+import StorageUsage from './StorageUsage'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
+import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
 
 export default async function SettingsPage() {
     const supabase = await createClient()
@@ -16,12 +18,15 @@ export default async function SettingsPage() {
         .eq('id', user?.id)
         .single()
 
-        .eq('id', user?.id)
-        .single()
-
     // Telegram連携状態取得
     const telegramStatus = await getTelegramStatus()
     const botUsername = await getBotUsername()
+
+    // ストレージ使用量取得
+    const [imageKitUsage, supabaseUsage] = await Promise.all([
+        getImageKitUsage(),
+        getSupabaseStorageUsage()
+    ])
 
     return (
         <div className={styles.page}>
@@ -31,6 +36,14 @@ export default async function SettingsPage() {
             </header>
 
             <div className={styles.content}>
+                {/* ストレージ使用量セクション */}
+                {profile?.role === 'admin' && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
+                        <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
+                    </section>
+                )}
+
                 {/* Telegram連携 */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>通知設定</h2>

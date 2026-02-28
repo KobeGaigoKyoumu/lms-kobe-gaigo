@@ -375,6 +375,8 @@ export async function gradeSubmission(submissionId, score, feedback) {
 // Helper for admin client (Service Role) - defined at top of file
 // const createAdminClient = () => { ... }
 
+import { uploadToImageKit } from './imagekit'
+
 export async function uploadSubmissionFile(formData) {
     const session = await getStudentSession()
     if (!session) return { error: 'Unauthorized' }
@@ -387,38 +389,22 @@ export async function uploadSubmissionFile(formData) {
     }
 
     try {
-        const adminSupabase = createAdminClient()
-        const fileExt = file.name.split('.').pop()
-        const fileName = `submissions/${assignmentId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const bucketName = 'chat-attachments' // Using existing bucket
+        const folder = `/submissions/${assignmentId}`
+        const result = await uploadToImageKit(formData, folder)
 
-        const arrayBuffer = await file.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-
-        const { data, error } = await adminSupabase
-            .storage
-            .from(bucketName)
-            .upload(fileName, buffer, {
-                contentType: file.type,
-                cacheControl: '3600',
-                upsert: false
-            })
-
-        if (error) throw error
-
-        const { data: { publicUrl } } = adminSupabase
-            .storage
-            .from(bucketName)
-            .getPublicUrl(fileName)
+        if (!result.success) {
+            throw new Error(result.error)
+        }
 
         return {
             success: true,
-            url: publicUrl,
+            url: result.url,
             name: file.name,
-            path: fileName
+            fileId: result.fileId,
+            path: result.path
         }
     } catch (err) {
-        console.error('Supabase Submission Upload Error:', err)
+        console.error('ImageKit Submission Upload Error:', err)
         return { error: `アップロードに失敗しました: ${err.message}` }
     }
 }

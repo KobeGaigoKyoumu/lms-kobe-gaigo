@@ -1,0 +1,84 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.iconWrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.cardSubtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.usageInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.progressBar {
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.percentage {
+    font-weight: 600;
+    color: #334155;
+}
+
+.raw {
+    color: #94a3b8;
+}

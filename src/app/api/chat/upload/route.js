@@ -9,6 +9,8 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1Ni
 // Initialize Admin Client for bypassing RLS
 const adminSupabase = createClient(SUPABASE_URL, SERVICE_KEY)
 
+import imagekit from '@/lib/imagekit'
+
 export async function POST(request) {
     try {
         const formData = await request.formData()
@@ -18,7 +20,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
         }
 
-        // 1. Auth Check (still use regular client for auth verification)
+        // 1. Auth Check
         const authSupabase = await createServerClient()
         const { data: { user: teacherUser } } = await authSupabase.auth.getUser()
         const studentSession = await getStudentSession()
@@ -27,39 +29,25 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // 2. Upload to Supabase Storage using Admin Client
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const bucketName = 'chat-attachments'
-
-        const { data, error } = await adminSupabase
-            .storage
-            .from(bucketName)
-            .upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false
-            })
-
-        if (error) {
-            console.error('Supabase Upload Error:', error)
-            throw new Error(`Storage Upload Failed: ${error.message}`)
-        }
-
-        // 3. Get Public URL
-        const { data: { publicUrl } } = adminSupabase
-            .storage
-            .from(bucketName)
-            .getPublicUrl(fileName)
+        // 2. Upload to ImageKit
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const response = await imagekit.upload({
+            file: buffer,
+            fileName: file.name,
+            folder: '/chat-attachments',
+            useUniqueFileName: true,
+        })
 
         return NextResponse.json({
-            url: publicUrl,
+            url: response.url,
             name: file.name,
             type: file.type,
-            id: data.path // Use the storage path as the ID
+            id: response.fileId,
+            path: response.filePath
         })
 
     } catch (error) {
-        console.error('Upload Error:', error)
+        console.error('ImageKit Chat Upload Error:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
