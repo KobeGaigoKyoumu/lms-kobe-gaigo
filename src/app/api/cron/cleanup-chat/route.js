@@ -15,8 +15,8 @@ export async function GET(request) {
     }
 
     try {
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         const results = { chat: 0, homework: 0 };
 
         // 1. Cleanup Chat Attachments
@@ -24,7 +24,7 @@ export async function GET(request) {
             .from('messages')
             .select('id, attachment_url, attachment_name')
             .neq('attachment_url', null)
-            .lt('created_at', oneWeekAgo.toISOString())
+            .lt('created_at', sixMonthsAgo.toISOString())
             .limit(100);
 
         if (fetchError) throw fetchError;
@@ -58,7 +58,7 @@ export async function GET(request) {
             .from('homework_submissions')
             .select('id, file_urls')
             .neq('file_urls', null)
-            .lt('submitted_at', oneWeekAgo.toISOString())
+            .lt('submitted_at', sixMonthsAgo.toISOString())
             .limit(100);
 
         if (subError) throw subError;
@@ -83,7 +83,7 @@ export async function GET(request) {
                 // Update to clear URLs and mark as expired
                 await adminSupabase.from('homework_submissions').update({
                     file_urls: null,
-                    comment: `(提出ファイルは1週間の保管期限を過ぎたため削除されました) ${submissions.find(s => s.id === submissionUpdates[0])?.comment || ''}`
+                    comment: `(提出ファイルは半年間の保管期限を過ぎたため削除されました) ${submissions.find(s => s.id === submissionUpdates[0])?.comment || ''}`
                 }).in('id', submissionUpdates);
                 results.homework = filesToDelete.length;
             }
