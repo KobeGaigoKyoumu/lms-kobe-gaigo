@@ -512,3 +512,56 @@ export const getClassSubmissionStats = unstable_cache(
     ['class-submission-stats'],
     { revalidate: 3600, tags: ['homework-stats'] }
 )
+
+// Get submission matrix for a class (Teacher use - submission status table)
+export const getClassSubmissionMatrix = unstable_cache(
+    async (className) => {
+        const supabase = createAdminClient()
+        const decodedClassName = decodeURIComponent(className)
+
+        // 1. Get students in this class
+        const { data: students, error: studentsError } = await supabase
+            .from('students')
+            .select('student_id_text, full_name')
+            .eq('class_name', decodedClassName)
+            .order('full_name', { ascending: true })
+
+        if (studentsError || !students || students.length === 0) {
+            return { students: [], assignments: [], submissions: [] }
+        }
+
+        // 2. Get assignments for this class (sorted by deadline)
+        const { data: assignments, error: assignmentsError } = await supabase
+            .from('homework_assignments')
+            .select('id, title, deadline, created_at')
+            .eq('class_name', decodedClassName)
+            .order('deadline', { ascending: true })
+
+        if (assignmentsError || !assignments || assignments.length === 0) {
+            return { students, assignments: [], submissions: [] }
+        }
+
+        const studentIds = students.map(s => s.student_id_text)
+        const assignmentIds = assignments.map(a => a.id)
+
+        // 3. Get all submissions for these students and assignments
+        const { data: submissions, error: subError } = await supabase
+            .from('homework_submissions')
+            .select('student_id_text, assignment_id, score, status')
+            .in('student_id_text', studentIds)
+            .in('assignment_id', assignmentIds)
+
+        if (subError) {
+            console.error('Error fetching submission matrix:', subError)
+            return { students, assignments, submissions: [] }
+        }
+
+        return {
+            students,
+            assignments,
+            submissions: submissions || []
+        }
+    },
+    ['class-submission-matrix'],
+    { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
+)

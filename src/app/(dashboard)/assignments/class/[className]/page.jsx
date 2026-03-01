@@ -1,13 +1,17 @@
-import { getAssignmentsByClass } from '@/app/actions/homework'
+import { getAssignmentsByClass, getClassSubmissionMatrix } from '@/app/actions/homework'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import styles from './page.module.css'
+import SubmissionMatrix from './SubmissionMatrix'
 
 export default async function ClassAssignmentsPage({ params }) {
     const resolvedParams = await params
     const className = decodeURIComponent(resolvedParams.className)
-    const assignments = await getAssignmentsByClass(className)
+    const [assignments, matrixData] = await Promise.all([
+        getAssignmentsByClass(className),
+        getClassSubmissionMatrix(className)
+    ])
 
     const now = new Date()
     const upcoming = assignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
@@ -111,6 +115,14 @@ export default async function ClassAssignmentsPage({ params }) {
                     </div>
                 </section>
             )}
+
+            {/* Submission Matrix Table */}
+            <SubmissionMatrix
+                students={matrixData.students}
+                assignments={matrixData.assignments}
+                submissions={matrixData.submissions}
+            />
         </div>
     )
 }
+
