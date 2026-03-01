@@ -103,6 +103,12 @@
     color: var(--primary-700);
 }
 
+.statusReturned {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
 .studentComment {
     background: var(--bg-primary);
     padding: var(--spacing-3);
@@ -198,10 +204,15 @@
     border-color: var(--primary-500);
 }
 
-.saveButton {
+.buttonGroup {
+    display: flex;
+    gap: var(--spacing-3);
     margin-top: 24px;
-    padding: var(--spacing-2);
-    background: var(--primary-600);
+}
+
+.saveButton,
+.returnButton {
+    padding: var(--spacing-2) var(--spacing-4);
     color: white;
     border-radius: var(--radius-md);
     border: none;
@@ -209,16 +220,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background var(--transition-base);
+    gap: var(--spacing-2);
+    transition: background var(--transition-base), opacity var(--transition-base);
+    font-weight: 500;
+}
+
+.saveButton {
+    background: var(--primary-600);
 }
 
 .saveButton:hover:not(:disabled) {
     background: var(--primary-700);
 }
 
-.saveButton:disabled {
+.returnButton {
+    background: #dc2626;
+}
+
+.returnButton:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.saveButton:disabled,
+.returnButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.buttonText {
+    font-size: var(--font-size-sm);
 }
 
 @media (max-width: 640px) {
@@ -228,12 +258,17 @@
 
     .scoreInputGroup,
     .feedbackGroup,
-    .saveButton {
+    .buttonGroup {
         width: 100%;
     }
 
-    .saveButton {
-        margin-top: 0;
+    .saveButton,
+    .returnButton {
+        flex: 1;
+    }
+
+    .buttonGroup {
+        margin-top: var(--spacing-4);
     }
 }
 

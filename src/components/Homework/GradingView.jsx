@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { gradeSubmission } from '@/app/actions/homework'
+import { gradeSubmission, returnSubmission } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Image as ImageIcon, X } from 'lucide-react'
+import { Loader2, Save, Undo2, Image as ImageIcon, X } from 'lucide-react'
 import styles from './GradingView.module.css'
 
 // This component handles the grading logic for a single student row
@@ -24,6 +24,19 @@ function SubmissionRow({ submission, student, onImageClick }) {
         setSaving(false)
     }
 
+    const handleReturn = async () => {
+        if (!confirm('この課題を差し戻しますか？得点はクリアされます。')) return
+        setSaving(true)
+        const result = await returnSubmission(submission.id, feedback)
+        if (result.error) {
+            alert(result.error)
+        } else {
+            setScore('')
+            router.refresh()
+        }
+        setSaving(false)
+    }
+
     const fileUrls = submission.file_urls || []
 
     const isImage = (filename) => {
@@ -38,8 +51,8 @@ function SubmissionRow({ submission, student, onImageClick }) {
                     <span className={styles.studentClass}>({student?.class_name})</span>
                     <div className={styles.submittedAt}>提出日時: {new Date(submission.submitted_at).toLocaleString('ja-JP')}</div>
                 </div>
-                <div className={`${styles.statusBadge} ${submission.status === 'graded' ? styles.statusGraded : styles.statusSubmitted}`}>
-                    {submission.status === 'graded' ? '採点済み' : '未採点'}
+                <div className={`${styles.statusBadge} ${submission.status === 'graded' ? styles.statusGraded : submission.status === 'returned' ? styles.statusReturned : styles.statusSubmitted}`}>
+                    {submission.status === 'graded' ? '採点済み' : submission.status === 'returned' ? '差し戻し' : '未採点'}
                 </div>
             </div>
 
@@ -103,14 +116,26 @@ function SubmissionRow({ submission, student, onImageClick }) {
                         placeholder="コメントを入力..."
                     />
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className={styles.saveButton}
-                    title="保存"
-                >
-                    {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                </button>
+                <div className={styles.buttonGroup}>
+                    <button
+                        onClick={handleReturn}
+                        disabled={saving}
+                        className={styles.returnButton}
+                        title="差し戻す"
+                    >
+                        {saving ? <Loader2 className="animate-spin" size={20} /> : <Undo2 size={20} />}
+                        <span className={styles.buttonText}>差戻</span>
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className={styles.saveButton}
+                        title="保存"
+                    >
+                        {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                        <span className={styles.buttonText}>保存</span>
+                    </button>
+                </div>
             </div>
         </div>
     )

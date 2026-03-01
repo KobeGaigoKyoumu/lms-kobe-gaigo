@@ -195,6 +195,18 @@
     background: #f0fdf4;
 }
 
+.scorePending {
+    color: #0284c7;
+    background: #e0f2fe;
+    font-size: 11px;
+}
+
+.scoreReturned {
+    color: #dc2626;
+    background: #fef2f2;
+    font-size: 11px;
+}
+
 .scoreNone {
     color: var(--text-tertiary);
     background: transparent;

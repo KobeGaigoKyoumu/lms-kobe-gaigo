@@ -372,6 +372,31 @@ export async function gradeSubmission(submissionId, score, feedback) {
     return { success: true }
 }
 
+// Return a submission
+export async function returnSubmission(submissionId, feedback) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('homework_submissions')
+        .update({
+            score: null,
+            feedback,
+            status: 'returned',
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', submissionId)
+
+    if (error) {
+        console.error('Return submission error:', error)
+        return { error: '差し戻しに失敗しました' }
+    }
+
+    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments')
+    revalidatePath('/assignments/[id]', 'page')
+    return { success: true }
+}
+
 // Helper for admin client (Service Role) - defined at top of file
 // const createAdminClient = () => { ... }
 

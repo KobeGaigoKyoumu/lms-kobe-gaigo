@@ -23,7 +23,7 @@ export default function SubmissionMatrix({ students, assignments, submissions })
         let total = 0
         assignments.forEach(assignment => {
             const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
-            if (sub && (sub.status === 'submitted' || sub.status === 'graded')) {
+            if (sub && sub.status === 'graded') {
                 total += (sub.score || 0)
             }
         })
@@ -35,8 +35,10 @@ export default function SubmissionMatrix({ students, assignments, submissions })
     // Max possible total (number of assignments, each worth 1 point on submission)
     const maxTotal = assignments.length
 
-    const getScoreColor = (score) => {
+    const getScoreColor = (score, status) => {
+        if (status === 'returned') return styles.scoreReturned
         if (score === null || score === undefined) return ''
+        if (status === 'submitted') return styles.scorePending
         if (score >= 1) return styles.scoreSubmitted
         return styles.scoreNone
     }
@@ -101,15 +103,17 @@ export default function SubmissionMatrix({ students, assignments, submissions })
                                     </td>
                                     {assignments.map(assignment => {
                                         const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
-                                        const hasSubmission = sub && (sub.status === 'submitted' || sub.status === 'graded')
+                                        const hasSubmission = sub && (sub.status === 'submitted' || sub.status === 'graded' || sub.status === 'returned')
                                         return (
                                             <td
                                                 key={assignment.id}
-                                                className={`${styles.td} ${styles.scoreCell} ${hasSubmission ? getScoreColor(sub.score) : styles.scoreNone}`}
+                                                className={`${styles.td} ${styles.scoreCell} ${hasSubmission ? getScoreColor(sub?.score, sub?.status) : styles.scoreNone}`}
                                             >
                                                 {hasSubmission ? (
                                                     <span className={styles.scoreValue}>
-                                                        {sub.score ?? '-'}
+                                                        {sub.status === 'returned' ? '差戻' :
+                                                            sub.status === 'submitted' ? '未' :
+                                                                (sub.score ?? '-')}
                                                     </span>
                                                 ) : (
                                                     <span className={styles.noSubmission}>-</span>
