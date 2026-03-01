@@ -250,6 +250,31 @@ export async function createAssignment(formData) {
     return { success: true, id: newAssignment.id }
 }
 
+export async function updateAssignmentDeadline(assignmentId, newDeadline) {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+        return { error: 'Unauthorized' }
+    }
+
+    const { error } = await supabase
+        .from('homework_assignments')
+        .update({ deadline: newDeadline })
+        .eq('id', assignmentId)
+        .eq('teacher_id', user.id) // Ensure only the teacher can update
+
+    if (error) {
+        console.error('Update deadline error:', error)
+        return { error: '期限の更新に失敗しました' }
+    }
+
+    revalidateTag('homework-assignments')
+    revalidatePath(`/assignments/${assignmentId}`)
+    revalidatePath('/assignments')
+    return { success: true }
+}
+
 // Fetch all assignments for teacher list (Cached)
 export const getTeacherAssignments = unstable_cache(
     async () => {

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { gradeSubmission, returnSubmission } from '@/app/actions/homework'
+import { gradeSubmission, returnSubmission, updateAssignmentDeadline } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Undo2, Image as ImageIcon, X } from 'lucide-react'
+import { Loader2, Save, Undo2, Image as ImageIcon, X, Edit2, Check } from 'lucide-react'
 import styles from './GradingView.module.css'
 
 // This component handles the grading logic for a single student row
@@ -143,8 +143,26 @@ function SubmissionRow({ submission, student, onImageClick }) {
 
 export default function AssignmentGradingView({ assignment, submissions }) {
     const [selectedImage, setSelectedImage] = useState(null)
+    const [isEditingDeadline, setIsEditingDeadline] = useState(false)
+    const [editedDeadline, setEditedDeadline] = useState(assignment?.deadline ? assignment.deadline.slice(0, 16) : '')
+    const [savingDeadline, setSavingDeadline] = useState(false)
+    const router = useRouter()
 
     if (!assignment) return <div>課題が見つかりません</div>
+
+    const handleDeadlineSave = async () => {
+        if (!editedDeadline) return
+        setSavingDeadline(true)
+        const tzDate = new Date(editedDeadline).toISOString()
+        const result = await updateAssignmentDeadline(assignment.id, tzDate)
+        if (result.error) {
+            alert(result.error)
+        } else {
+            setIsEditingDeadline(false)
+            router.refresh()
+        }
+        setSavingDeadline(false)
+    }
 
     return (
         <div className={styles.container}>
@@ -152,7 +170,48 @@ export default function AssignmentGradingView({ assignment, submissions }) {
                 <h1 className={styles.title}>{assignment.title}</h1>
                 <div className={styles.meta}>
                     <span>クラス: {assignment.class_name}</span>
-                    <span>期限: {new Date(assignment.deadline).toLocaleString('ja-JP')}</span>
+                    <span className={styles.deadlineWrapper}>
+                        期限:
+                        {isEditingDeadline ? (
+                            <div className={styles.deadlineEditGroup}>
+                                <input
+                                    type="datetime-local"
+                                    value={editedDeadline}
+                                    onChange={(e) => setEditedDeadline(e.target.value)}
+                                    className={styles.deadlineInput}
+                                    disabled={savingDeadline}
+                                />
+                                <button
+                                    onClick={handleDeadlineSave}
+                                    disabled={savingDeadline}
+                                    className={styles.iconButtonSave}
+                                >
+                                    {savingDeadline ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
+                                </button>
+                                <button
+                                    onClick={() => setIsEditingDeadline(false)}
+                                    disabled={savingDeadline}
+                                    className={styles.iconButtonCancel}
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className={styles.deadlineDisplayGroup}>
+                                {new Date(assignment.deadline).toLocaleString('ja-JP')}
+                                <button
+                                    onClick={() => {
+                                        setEditedDeadline(assignment.deadline ? assignment.deadline.slice(0, 16) : '')
+                                        setIsEditingDeadline(true)
+                                    }}
+                                    className={styles.iconButtonEdit}
+                                    title="期限を変更"
+                                >
+                                    <Edit2 size={12} />
+                                </button>
+                            </div>
+                        )}
+                    </span>
                 </div>
                 <div className={styles.description}>
                     {assignment.description || '説明なし'}

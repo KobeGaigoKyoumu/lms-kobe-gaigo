@@ -18,9 +18,95 @@
 .meta {
     display: flex;
     gap: var(--spacing-4);
+    align-items: center;
     font-size: var(--font-size-sm);
     color: var(--text-tertiary);
     margin-bottom: var(--spacing-4);
+}
+
+.deadlineWrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.deadlineDisplayGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.deadlineEditGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.deadlineInput {
+    padding: 2px 6px;
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.iconButtonEdit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.iconButtonEdit:hover {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+}
+
+.iconButtonSave {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    background: var(--success-100);
+    border: 1px solid var(--success-200);
+    border-radius: var(--radius-sm);
+    color: var(--success-700);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.iconButtonSave:hover:not(:disabled) {
+    background: var(--success-200);
+}
+
+.iconButtonCancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-sm);
+    color: #dc2626;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.iconButtonCancel:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+.iconButtonSave:disabled,
+.iconButtonCancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .description {

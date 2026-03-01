@@ -5,26 +5,24 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
-const LABEL_COLORS = [
-    { name: '未完了', color: '#e74c3c' },
-    { name: '完了', color: '#27ae60' },
-    { name: '重要', color: '#f39c12' },
-    { name: 'Purple', color: '#9b59b6' },
-    { name: 'Blue', color: '#3498db' },
-    { name: 'Red', color: '#e74c3c' },
-    { name: 'Orange', color: '#e67e22' },
-    { name: 'Cyan', color: '#1abc9c' },
-]
+// LABEL_COLORS are now fetched from DB
+
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
     '#3498db', '#e67e22', '#1abc9c', '#2c3e50'
 ]
 
-export default function KanbanBoard({ initialColumns, initialCards, userId }) {
+export default function KanbanBoard({ initialColumns, initialCards, initialLabels, userId }) {
     const router = useRouter()
     const [columns, setColumns] = useState(initialColumns)
     const [cards, setCards] = useState(initialCards)
+    const [labels, setLabels] = useState(initialLabels || [])
+
+    // Edit label
+    const [editingLabelId, setEditingLabelId] = useState(null)
+    const [editingLabelName, setEditingLabelName] = useState('')
+
 
     // Add column
     const [addingColumn, setAddingColumn] = useState(false)
@@ -133,6 +131,21 @@ export default function KanbanBoard({ initialColumns, initialCards, userId }) {
         setCards(prev => prev.filter(c => c.id !== cardId))
         setEditingCard(null)
     }
+
+    // ===== Label CRUD =====
+    const updateLabelName = async (labelId) => {
+        if (!editingLabelName.trim()) { setEditingLabelId(null); return }
+        const newName = editingLabelName.trim()
+
+        await supabase
+            .from('kanban_labels')
+            .update({ name: newName })
+            .eq('id', labelId)
+
+        setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
+        setEditingLabelId(null)
+    }
+
 
     // ===== Drag & Drop =====
     const handleDragStart = useCallback((e, card) => {
@@ -309,13 +322,28 @@ export default function KanbanBoard({ initialColumns, initialCards, userId }) {
 
             {/* Label Color Bar */}
             <div className={styles.labelBar}>
-                {LABEL_COLORS.map((lbl, i) => (
+                {labels.map((lbl) => (
                     <div
-                        key={i}
+                        key={lbl.id}
                         className={styles.labelBarItem}
                         style={{ background: lbl.color }}
+                        onClick={() => { setEditingLabelId(lbl.id); setEditingLabelName(lbl.name) }}
                     >
-                        {lbl.name}
+                        {editingLabelId === lbl.id ? (
+                            <input
+                                autoFocus
+                                className={styles.labelEditInput}
+                                value={editingLabelName}
+                                onChange={e => setEditingLabelName(e.target.value)}
+                                onBlur={() => updateLabelName(lbl.id)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') updateLabelName(lbl.id)
+                                    if (e.key === 'Escape') setEditingLabelId(null)
+                                }}
+                            />
+                        ) : (
+                            lbl.name
+                        )}
                     </div>
                 ))}
             </div>

@@ -33,6 +33,12 @@ export default async function KanbanPage() {
         .select('*')
         .order('position', { ascending: true })
 
+    // Fetch labels
+    const { data: labels } = await supabase
+        .from('kanban_labels')
+        .select('*')
+        .order('position', { ascending: true })
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -44,6 +50,7 @@ export default async function KanbanPage() {
             <KanbanBoard
                 initialColumns={columns || []}
                 initialCards={cards || []}
+                initialLabels={labels || []}
                 userId={user.id}
             />
         </div>
