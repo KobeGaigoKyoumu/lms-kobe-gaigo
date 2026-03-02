@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
+import { logoutAdminMember } from '@/app/actions/adminAuth'
 import { getMenuItems } from '@/lib/menuItems.jsx'
 import models from './Sidebar.module.css'
 import { useStudentStatus } from '@/context/StudentStatusContext'
@@ -25,6 +26,9 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
     const handleLogout = async () => {
         if (userRole === 'student') {
             await logoutStudent()
+        } else if (userEmail?.endsWith('@member')) {
+            // Admin member logout (cookie-based)
+            await logoutAdminMember()
         } else {
             await supabase.auth.signOut()
             window.location.href = '/login'

@@ -20,6 +20,9 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
         if (role === 'student') {
             const { logoutStudent } = await import('@/app/actions/studentAuth')
             await logoutStudent()
+        } else if (userEmail?.endsWith('@member')) {
+            const { logoutAdminMember } = await import('@/app/actions/adminAuth')
+            await logoutAdminMember()
         } else {
             await supabase.auth.signOut()
             window.location.href = '/login'

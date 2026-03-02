@@ -6,32 +6,55 @@ import StorageUsage from './StorageUsage'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
-import { getAdminMembers } from '@/app/actions/adminAuth'
+import { getAdminMembers, getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function SettingsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // プロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single()
+    let profile = null
+    if (user) {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+        profile = data
+    }
 
-    // Telegram連携状態取得
-    const telegramStatus = await getTelegramStatus()
-    const botUsername = await getBotUsername()
+    // Determine display values
+    const isGoogleUser = !!user
+    const isGoogleAdmin = isGoogleUser && profile?.role === 'admin'
+    const displayRole = isGoogleUser ? (profile?.role || 'student') : (adminMember?.role || 'teacher')
+    const displayEmail = isGoogleUser ? user.email : `${adminMember?.name || ''}@member`
+    const displayName = isGoogleUser ? (user.user_metadata?.full_name || '') : (adminMember?.name || '')
+    const displayCreatedAt = isGoogleUser ? user.created_at : null
 
-    // ストレージ使用量取得
-    const [imageKitUsage, supabaseUsage] = await Promise.all([
-        getImageKitUsage(),
-        getSupabaseStorageUsage()
-    ])
+    // Telegram連携状態取得（Google認証の場合のみ）
+    let telegramStatus = null
+    let botUsername = null
+    if (isGoogleUser) {
+        telegramStatus = await getTelegramStatus()
+        botUsername = await getBotUsername()
+    }
 
-    // 管理者メンバーのパスワード一覧（admin + Google認証の場合のみ取得）
-    const isGoogleAdmin = user && profile?.role === 'admin'
+    // ストレージ使用量取得（adminのみ）
+    let imageKitUsage = null
+    let supabaseUsage = null
+    if (isGoogleAdmin) {
+        ;[imageKitUsage, supabaseUsage] = await Promise.all([
+            getImageKitUsage(),
+            getSupabaseStorageUsage()
+        ])
+    }
+
+    // 管理者メンバーのパスワード一覧（Google認証のadminのみ）
     const adminMembers = isGoogleAdmin ? await getAdminMembers() : []
+
+    const roleLabel = displayRole === 'admin' ? '管理者' : displayRole === 'teacher' ? '教師' : '学生'
+    const roleBadgeClass = displayRole === 'admin' ? 'admin' : displayRole === 'teacher' ? 'teacher' : 'student'
 
     return (
         <div className={styles.page}>
@@ -42,7 +65,7 @@ export default async function SettingsPage() {
 
             <div className={styles.content}>
                 {/* ストレージ使用量セクション */}
-                {profile?.role === 'admin' && (
+                {isGoogleAdmin && imageKitUsage && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
                         <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
@@ -75,7 +98,7 @@ export default async function SettingsPage() {
                 )}
 
                 {/* Telegram連携 */}
-                {profile?.role === 'student' && (
+                {isGoogleUser && profile?.role === 'student' && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>Telegram 通知設定</h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -89,36 +112,40 @@ export default async function SettingsPage() {
                     <NotificationDebug />
                 </section>
 
-                {/* プロファイルセクション */}
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>プロファイル</h2>
-                    <ProfileForm profile={profile} user={user} />
-                </section>
+                {/* プロファイルセクション（Google認証のみ） */}
+                {isGoogleUser && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>プロファイル</h2>
+                        <ProfileForm profile={profile} user={user} />
+                    </section>
+                )}
 
                 {/* アカウント情報 */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>アカウント情報</h2>
                     <div className={styles.infoCard}>
                         <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>メールアドレス</span>
-                            <span className={styles.infoValue}>{user?.email}</span>
+                            <span className={styles.infoLabel}>{isGoogleUser ? 'メールアドレス' : '名前'}</span>
+                            <span className={styles.infoValue}>{isGoogleUser ? displayEmail : displayName}</span>
                         </div>
                         <div className={styles.infoRow}>
                             <span className={styles.infoLabel}>ロール</span>
-                            <span className={`${styles.badge} ${styles[profile?.role || 'student']}`}>
-                                {profile?.role === 'admin' ? '管理者' :
-                                    profile?.role === 'teacher' ? '教師' : '学生'}
+                            <span className={`${styles.badge} ${styles[roleBadgeClass]}`}>
+                                {roleLabel}
                             </span>
                         </div>
-                        <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>登録日</span>
-                            <span className={styles.infoValue}>
-                                {new Date(user?.created_at).toLocaleDateString('ja-JP')}
-                            </span>
-                        </div>
+                        {displayCreatedAt && (
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>登録日</span>
+                                <span className={styles.infoValue}>
+                                    {new Date(displayCreatedAt).toLocaleDateString('ja-JP')}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </section>
             </div>
         </div>
     )
 }
+
