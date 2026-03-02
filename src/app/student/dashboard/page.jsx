@@ -1,78 +1,66 @@
-import { getStudentAssignments } from '@/app/actions/homework'
-import { getStudentSession } from '@/app/actions/studentAuth'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home, Loader2 } from 'lucide-react'
 import styles from './page.module.css'
 import DashboardStats from './components/DashboardStats'
 
-export const dynamic = 'force-dynamic'
+export default function StudentDashboard() {
+    const [data, setData] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-export default async function StudentDashboard() {
-    const supabase = await createClient()
-    const session = await getStudentSession()
+    useEffect(() => {
+        let isMounted = true
+        async function fetchDashboard() {
+            try {
+                const res = await fetch('/api/student/dashboard')
+                if (!res.ok) throw new Error('Failed to fetch dashboard data')
+                const json = await res.json()
+                if (isMounted) setData(json)
+            } catch (err) {
+                console.error(err)
+                if (isMounted) setError('データの読み込みに失敗しました')
+            } finally {
+                if (isMounted) setLoading(false)
+            }
+        }
+        fetchDashboard()
+        return () => { isMounted = false }
+    }, [])
+
+    if (error) {
+        return (
+            <div className={styles.page}>
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#ff4d4f' }}>
+                    <p>{error}</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (loading || !data) {
+        return (
+            <div className={styles.page}>
+                <header className={styles.header}>
+                    <div>
+                        <h1 className={styles.title}>読み込み中...</h1>
+                    </div>
+                </header>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
+                    <Loader2 className="animate-spin text-gray-400" size={32} />
+                </div>
+            </div>
+        )
+    }
+
+    const { session, assignments, announcements: filteredAnnouncements } = data
+    const firstName = session?.name?.split(' ')[0] || '学生'
 
     const now = new Date()
     const nextWeek = new Date(now)
     nextWeek.setDate(nextWeek.getDate() + 7)
-
-    // Parallel data fetching
-    const [assignments, announcementsResult] = await Promise.all([
-        getStudentAssignments(),
-        supabase
-            .from('announcements')
-            .select(`
-                id,
-                title,
-                content,
-                is_pinned,
-                created_at,
-                target_type,
-                target_grade,
-                target_class,
-                target_student_ids,
-                course_id,
-                author:profiles!author_id (full_name)
-            `)
-            .order('is_pinned', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(50)
-    ])
-
-    const announcements = announcementsResult.data || []
-    const firstName = session?.name?.split(' ')[0] || '学生'
-
-    // Announcement Filtering
-    // Use session data for filtering
-    const filteredAnnouncements = announcements.filter(ann => {
-        if (!ann.target_type || ann.target_type === 'all') return true
-        if (!session) return false
-
-        if (ann.target_type === 'grade') {
-            // Fallback if academicYear is missing in old sessions (though unlikely after re-login)
-            // If missing, we might need to fetch or just default to false/true?
-            // Since we updated the cookie logic, new logins will have it. 
-            // For immediate effect without forcing logout, we might want a fallback, 
-            // but strict optimization requests implies we rely on the improved session.
-            // Let's assume session has it or we accept a minor glitch until re-login.
-            // Actually, we can just fetch if missing, but that defeats the purpose.
-            // Let's rely on session.
-            if (!session.academicYear) return false
-
-            const currentYear = new Date().getFullYear()
-            const isBeforeApril = new Date().getMonth() < 3
-            const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-            const studentGrade = academicYearBase - session.academicYear + 1
-            return String(studentGrade) === ann.target_grade
-        }
-        if (ann.target_type === 'class') {
-            return ann.target_class === session.className
-        }
-        if (ann.target_type === 'individual') {
-            return ann.target_student_ids?.includes(session.studentId)
-        }
-        return false
-    }).slice(0, 3)
 
     // Assignment Stats & Sorting
     const safeAssignments = Array.isArray(assignments) ? assignments : []
@@ -99,7 +87,7 @@ export default async function StudentDashboard() {
                     <p className={styles.subtitle}>今日も頑張りましょう！</p>
                 </div>
                 <div className={styles.date}>
-                    {new Date().toLocaleDateString('ja-JP', {
+                    {now.toLocaleDateString('ja-JP', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
