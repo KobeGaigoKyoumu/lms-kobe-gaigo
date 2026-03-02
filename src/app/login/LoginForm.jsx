@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { loginStudent } from '@/app/actions/studentAuth'
+import { loginAdminMember } from '@/app/actions/adminAuth'
 import styles from './login.module.css'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LoginForm() {
+export default function LoginForm({ memberNames = [] }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const nextPath = searchParams.get('next') || '/student/dashboard'
@@ -14,7 +15,7 @@ export default function LoginForm() {
     const [error, setError] = useState(null)
     const [isInAppBrowser, setIsInAppBrowser] = useState(false)
 
-    // Login Mode: 'google' (default) or 'student'
+    // Login Mode: 'google' (default), 'member', or 'student'
     const [loginMode, setLoginMode] = useState('google')
 
     useEffect(() => {
@@ -97,6 +98,26 @@ export default function LoginForm() {
         }
     }
 
+    const handleMemberLogin = async (formData) => {
+        setLoading(true)
+        setError(null)
+
+        try {
+            const result = await loginAdminMember(formData)
+            if (result?.error) {
+                setError(result.error)
+                setLoading(false)
+            } else if (result?.success) {
+                router.refresh()
+                router.push('/kanban')
+            }
+        } catch (e) {
+            console.error(e)
+            setError('システムエラーが発生しました。')
+            setLoading(false)
+        }
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.loginBox}>
@@ -131,10 +152,27 @@ export default function LoginForm() {
                             borderBottom: loginMode === 'google' ? '2px solid #3B82F6' : 'none',
                             color: loginMode === 'google' ? '#3B82F6' : '#666',
                             fontWeight: loginMode === 'google' ? 'bold' : 'normal',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
                         }}
                     >
-                        教職員 / 管理者
+                        管理者
+                    </button>
+                    <button
+                        onClick={() => setLoginMode('member')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            border: 'none',
+                            background: 'none',
+                            borderBottom: loginMode === 'member' ? '2px solid #f59e0b' : 'none',
+                            color: loginMode === 'member' ? '#f59e0b' : '#666',
+                            fontWeight: loginMode === 'member' ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        教職員
                     </button>
                     <button
                         onClick={() => setLoginMode('student')}
@@ -143,10 +181,11 @@ export default function LoginForm() {
                             padding: '10px',
                             border: 'none',
                             background: 'none',
-                            borderBottom: loginMode === 'student' ? '2px solid #3B82F6' : 'none',
-                            color: loginMode === 'student' ? '#3B82F6' : '#666',
+                            borderBottom: loginMode === 'student' ? '2px solid #10B981' : 'none',
+                            color: loginMode === 'student' ? '#10B981' : '#666',
                             fontWeight: loginMode === 'student' ? 'bold' : 'normal',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
                         }}
                     >
                         学生
@@ -216,6 +255,72 @@ export default function LoginForm() {
                     </button>
                 )}
 
+                {/* メンバーログインフォーム */}
+                {loginMode === 'member' && (
+                    <form action={handleMemberLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div>
+                            <label htmlFor="memberName" style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
+                                名前
+                            </label>
+                            <select
+                                id="memberName"
+                                name="memberName"
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #ccc',
+                                    fontSize: '1rem',
+                                    background: '#fff'
+                                }}
+                            >
+                                <option value="">選択してください</option>
+                                {memberNames.map(name => (
+                                    <option key={name} value={name}>{name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="memberPassword" style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#555' }}>
+                                パスワード (4桁)
+                            </label>
+                            <input
+                                id="memberPassword"
+                                name="memberPassword"
+                                type="password"
+                                inputMode="numeric"
+                                maxLength={4}
+                                placeholder="4桁のパスワード"
+                                required
+                                autoComplete="off"
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #ccc',
+                                    fontSize: '1rem',
+                                    letterSpacing: '0.3em',
+                                    textAlign: 'center'
+                                }}
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className={styles.googleButton}
+                            disabled={loading}
+                            style={{
+                                justifyContent: 'center',
+                                backgroundColor: '#f59e0b',
+                                color: 'white',
+                                border: 'none'
+                            }}
+                        >
+                            {loading ? <span className={styles.spinner}></span> : '教職員ログイン'}
+                        </button>
+                    </form>
+                )}
+
                 {/* 学生ログインフォーム */}
                 {loginMode === 'student' && (
                     <form action={handleStudentLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -283,4 +388,3 @@ export default function LoginForm() {
         </div>
     )
 }
-

@@ -6,6 +6,7 @@ import StorageUsage from './StorageUsage'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
+import { getAdminMembers } from '@/app/actions/adminAuth'
 
 export default async function SettingsPage() {
     const supabase = await createClient()
@@ -28,6 +29,10 @@ export default async function SettingsPage() {
         getSupabaseStorageUsage()
     ])
 
+    // 管理者メンバーのパスワード一覧（admin + Google認証の場合のみ取得）
+    const isGoogleAdmin = user && profile?.role === 'admin'
+    const adminMembers = isGoogleAdmin ? await getAdminMembers() : []
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -41,6 +46,31 @@ export default async function SettingsPage() {
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
                         <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
+                    </section>
+                )}
+
+                {/* 管理者メンバーパスワード一覧（Google認証のadminのみ） */}
+                {isGoogleAdmin && adminMembers.length > 0 && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>教職員メンバー パスワード一覧</h2>
+                        <div className={styles.infoCard}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--font-size-sm)' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-secondary)' }}>名前</th>
+                                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-secondary)' }}>パスワード</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {adminMembers.map((m, i) => (
+                                        <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                            <td style={{ padding: '8px 12px', fontWeight: 500 }}>{m.name}</td>
+                                            <td style={{ padding: '8px 12px', fontFamily: 'monospace', letterSpacing: '0.15em', color: 'var(--primary-600)' }}>{m.password}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
                 )}
 

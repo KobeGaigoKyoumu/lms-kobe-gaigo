@@ -30,7 +30,7 @@
     display: flex;
     gap: 0;
     flex: 1;
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: hidden;
     padding-bottom: var(--spacing-2);
 }
@@ -46,9 +46,8 @@
 
 /* ===== Column ===== */
 .column {
-    min-width: 260px;
-    max-width: 300px;
-    flex-shrink: 0;
+    min-width: 180px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -60,29 +59,61 @@
     border-left: 1px solid #e0d8c0;
 }
 
+.columnDragging {
+    opacity: 0.4;
+}
+
+.columnDragOver {
+    border-left: 3px solid #d4a017;
+}
+
 .columnHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 12px;
+    padding: 8px 10px;
     background: linear-gradient(180deg, #fff9db 0%, #fff5c0 100%);
     border-top: 1px solid #e0d8c0;
     border-bottom: 1px solid #e0d8c0;
-    min-height: 44px;
+    min-height: 40px;
     flex-shrink: 0;
 }
 
-.columnTitle {
+.columnDragHandle {
+    cursor: grab;
+    color: #bbb;
     font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    user-select: none;
+    flex-shrink: 0;
+    margin-right: 4px;
+    line-height: 1;
+}
+
+.columnDragHandle:hover {
+    color: #888;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.columnDragHandle:active {
+    cursor: grabbing;
+}
+
+.columnTitle {
+    font-size: 13px;
     font-weight: 700;
     color: #333;
     cursor: pointer;
     flex: 1;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .columnTitleInput {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #333;
     border: 1px solid #d4a017;
@@ -92,13 +123,15 @@
     flex: 1;
     margin-right: 4px;
     outline: none;
+    min-width: 0;
 }
 
 .columnCount {
-    font-size: 11px;
+    font-size: 10px;
     color: #888;
-    margin-left: 6px;
+    margin-left: 4px;
     margin-right: auto;
+    flex-shrink: 0;
 }
 
 .columnAddBtn {
@@ -106,9 +139,9 @@
     border: none;
     color: #999;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1;
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-radius: 3px;
     transition: background 0.15s;
 }
@@ -121,7 +154,8 @@
 .columnActions {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
+    flex-shrink: 0;
 }
 
 .columnDeleteBtn {
@@ -129,7 +163,7 @@
     border: none;
     color: #ccc;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     padding: 2px 4px;
     border-radius: 3px;
     transition: all 0.15s;
@@ -144,7 +178,7 @@
 .cardList {
     flex: 1;
     overflow-y: auto;
-    padding: 6px 8px;
+    padding: 4px 6px;
     min-height: 80px;
 }
 
@@ -166,12 +200,12 @@
     background: #fff;
     border: 1px solid #e2dcc8;
     border-radius: 5px;
-    padding: 10px 12px;
-    margin-bottom: 6px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
     cursor: grab;
     transition: box-shadow 0.15s, transform 0.1s;
     position: relative;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.5;
     color: #333;
     user-select: none;
@@ -192,6 +226,14 @@
     opacity: 0.4;
 }
 
+.cardDropBefore {
+    border-top: 2px solid #3b82f6 !important;
+}
+
+.cardDropAfter {
+    border-bottom: 2px solid #3b82f6 !important;
+}
+
 .cardColorBar {
     position: absolute;
     left: 0;
@@ -203,13 +245,13 @@
 
 .cardTitle {
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     word-break: break-word;
-    padding-right: 20px;
+    padding-right: 18px;
 }
 
 .cardDescription {
-    font-size: 12px;
+    font-size: 11px;
     color: #777;
     line-height: 1.4;
     word-break: break-word;
@@ -233,13 +275,13 @@
 
 .cardDeleteBtn {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 4px;
+    right: 4px;
     background: none;
     border: none;
     color: #ddd;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     padding: 2px 4px;
     border-radius: 3px;
     opacity: 0;
@@ -257,7 +299,7 @@
 
 /* ===== Add Card Form ===== */
 .addCardForm {
-    padding: 6px 8px 8px;
+    padding: 4px 6px 6px;
     flex-shrink: 0;
     border-top: 1px solid #ede9d8;
 }
@@ -266,8 +308,8 @@
     width: 100%;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
     outline: none;
     background: #fff;
     transition: border-color 0.15s;
@@ -280,8 +322,8 @@
 
 .addCardActions {
     display: flex;
-    gap: 6px;
-    margin-top: 6px;
+    gap: 4px;
+    margin-top: 4px;
 }
 
 .addCardSubmit {
@@ -289,8 +331,8 @@
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 14px;
-    font-size: 12px;
+    padding: 4px 12px;
+    font-size: 11px;
     cursor: pointer;
     font-weight: 600;
     transition: background 0.15s;
@@ -304,8 +346,8 @@
     background: none;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 5px 14px;
-    font-size: 12px;
+    padding: 4px 12px;
+    font-size: 11px;
     cursor: pointer;
     color: #666;
     transition: all 0.15s;
@@ -317,8 +359,8 @@
 
 /* ===== Add Column ===== */
 .addColumn {
-    min-width: 260px;
-    max-width: 300px;
+    min-width: 160px;
+    max-width: 200px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -331,13 +373,13 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px;
+    padding: 10px;
     background: rgba(255, 252, 230, 0.6);
     border: 2px dashed #e0d8c0;
     border-radius: 6px;
     color: #aaa;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     transition: all 0.2s;
     margin: 8px;
@@ -357,8 +399,8 @@
     width: 100%;
     border: 1px solid #d4a017;
     border-radius: 4px;
-    padding: 8px 10px;
-    font-size: 14px;
+    padding: 6px 8px;
+    font-size: 13px;
     outline: none;
     background: #fff;
     box-sizing: border-box;
@@ -373,7 +415,7 @@
 /* ===== Color Label Bar ===== */
 .labelBar {
     display: flex;
-    height: 28px;
+    height: 26px;
     flex-shrink: 0;
     border-top: 1px solid #e0d8c0;
 }
@@ -589,8 +631,13 @@
         height: calc(100vh - 120px);
     }
 
+    .board {
+        overflow-x: auto;
+    }
+
     .column {
-        min-width: 240px;
+        min-width: 220px;
+        flex: 0 0 220px;
     }
 
     .title {

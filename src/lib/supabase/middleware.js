@@ -89,8 +89,11 @@ export async function updateSession(request) {
 
 
 
-        // Redirect to login if NO Supabase session exists and it's an admin/teacher path
-        if (!user && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
+        // Check for admin member session cookie
+        const adminMemberSession = request.cookies.get('kobe_admin_member')
+
+        // Redirect to login if NO Supabase session AND NO admin member session exists and it's an admin/teacher path
+        if (!user && !adminMemberSession && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
             const url = request.nextUrl.clone()
             url.pathname = '/login'
             url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)

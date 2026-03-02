@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
-// LABEL_COLORS are now fetched from DB
-
-
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
     '#3498db', '#e67e22', '#1abc9c', '#2c3e50'
@@ -22,7 +19,6 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     // Edit label
     const [editingLabelId, setEditingLabelId] = useState(null)
     const [editingLabelName, setEditingLabelName] = useState('')
-
 
     // Add column
     const [addingColumn, setAddingColumn] = useState(false)
@@ -40,9 +36,12 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const [editingCard, setEditingCard] = useState(null)
     const [editForm, setEditForm] = useState({ title: '', description: '', color: null })
 
-    // Drag state
+    // Drag state for cards
     const dragCard = useRef(null)
-    const dragOverCol = useRef(null)
+    const dragOverCardId = useRef(null)
+
+    // Drag state for columns
+    const dragColumn = useRef(null)
 
     const supabase = createClient()
 
@@ -136,20 +135,18 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const updateLabelName = async (labelId) => {
         if (!editingLabelName.trim()) { setEditingLabelId(null); return }
         const newName = editingLabelName.trim()
-
         await supabase
             .from('kanban_labels')
             .update({ name: newName })
             .eq('id', labelId)
-
         setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
         setEditingLabelId(null)
     }
 
-
-    // ===== Drag & Drop =====
+    // ===== Card Drag & Drop (cross-column + intra-column reorder) =====
     const handleDragStart = useCallback((e, card) => {
         dragCard.current = card
+        dragColumn.current = null
         e.dataTransfer.effectAllowed = 'move'
         e.target.classList.add(styles.cardDragging)
     }, [])
@@ -157,41 +154,159 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const handleDragEnd = useCallback((e) => {
         e.target.classList.remove(styles.cardDragging)
         dragCard.current = null
-        dragOverCol.current = null
+        dragOverCardId.current = null
+        // Clean up drop indicators
+        document.querySelectorAll(`.${styles.cardDropBefore}, .${styles.cardDropAfter}`).forEach(el => {
+            el.classList.remove(styles.cardDropBefore)
+            el.classList.remove(styles.cardDropAfter)
+        })
     }, [])
 
-    const handleDragOver = useCallback((e) => {
+    const handleCardDragOver = useCallback((e, card) => {
+        if (!dragCard.current || dragColumn.current) return
+        e.preventDefault()
+        e.stopPropagation()
+        e.dataTransfer.dropEffect = 'move'
+
+        // Determine if we're in the top or bottom half
+        const rect = e.currentTarget.getBoundingClientRect()
+        const midY = rect.top + rect.height / 2
+        const isAbove = e.clientY < midY
+
+        // Clean old indicators
+        document.querySelectorAll(`.${styles.cardDropBefore}, .${styles.cardDropAfter}`).forEach(el => {
+            el.classList.remove(styles.cardDropBefore)
+            el.classList.remove(styles.cardDropAfter)
+        })
+
+        if (isAbove) {
+            e.currentTarget.classList.add(styles.cardDropBefore)
+        } else {
+            e.currentTarget.classList.add(styles.cardDropAfter)
+        }
+
+        dragOverCardId.current = { id: card.id, above: isAbove }
+    }, [])
+
+    const handleColumnAreaDragOver = useCallback((e) => {
+        if (!dragCard.current || dragColumn.current) return
         e.preventDefault()
         e.dataTransfer.dropEffect = 'move'
     }, [])
 
-    const handleDragEnter = useCallback((e, columnId) => {
+    const handleCardDrop = useCallback(async (e, targetColumnId) => {
         e.preventDefault()
-        dragOverCol.current = columnId
-    }, [])
+        if (dragColumn.current) return
 
-    const handleDrop = useCallback(async (e, targetColumnId) => {
-        e.preventDefault()
         const card = dragCard.current
-        if (!card || card.column_id === targetColumnId) {
-            dragCard.current = null
-            return
+        if (!card) return
+
+        // Clean up drop indicators
+        document.querySelectorAll(`.${styles.cardDropBefore}, .${styles.cardDropAfter}`).forEach(el => {
+            el.classList.remove(styles.cardDropBefore)
+            el.classList.remove(styles.cardDropAfter)
+        })
+
+        const overInfo = dragOverCardId.current
+        const colCards = cards
+            .filter(c => c.column_id === targetColumnId && c.id !== card.id)
+            .sort((a, b) => a.position - b.position)
+
+        let newPosition
+        if (overInfo) {
+            const targetIdx = colCards.findIndex(c => c.id === overInfo.id)
+            if (targetIdx >= 0) {
+                if (overInfo.above) {
+                    // Insert before
+                    newPosition = targetIdx > 0
+                        ? (colCards[targetIdx - 1].position + colCards[targetIdx].position) / 2
+                        : colCards[targetIdx].position - 1
+                } else {
+                    // Insert after
+                    newPosition = targetIdx < colCards.length - 1
+                        ? (colCards[targetIdx].position + colCards[targetIdx + 1].position) / 2
+                        : colCards[targetIdx].position + 1
+                }
+            } else {
+                newPosition = colCards.length > 0 ? colCards[colCards.length - 1].position + 1 : 0
+            }
+        } else {
+            // Dropped on empty area
+            newPosition = colCards.length > 0 ? colCards[colCards.length - 1].position + 1 : 0
         }
 
         // Optimistic update
-        const newCards = cards.map(c =>
-            c.id === card.id ? { ...c, column_id: targetColumnId } : c
-        )
-        setCards(newCards)
+        setCards(prev => prev.map(c =>
+            c.id === card.id ? { ...c, column_id: targetColumnId, position: newPosition } : c
+        ))
 
         // Persist
         await supabase
             .from('kanban_cards')
-            .update({ column_id: targetColumnId })
+            .update({ column_id: targetColumnId, position: newPosition })
             .eq('id', card.id)
 
         dragCard.current = null
+        dragOverCardId.current = null
     }, [cards, supabase])
+
+    // ===== Column Drag & Drop =====
+    const handleColumnDragStart = useCallback((e, column) => {
+        dragColumn.current = column
+        dragCard.current = null
+        e.dataTransfer.effectAllowed = 'move'
+        const colEl = e.target.closest(`.${styles.column}`)
+        if (colEl) colEl.classList.add(styles.columnDragging)
+    }, [])
+
+    const handleColumnDragEnd = useCallback((e) => {
+        const colEl = e.target.closest(`.${styles.column}`)
+        if (colEl) colEl.classList.remove(styles.columnDragging)
+        dragColumn.current = null
+        document.querySelectorAll(`.${styles.columnDragOver}`).forEach(el => el.classList.remove(styles.columnDragOver))
+    }, [])
+
+    const handleColumnDragOver = useCallback((e) => {
+        if (!dragColumn.current) return
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+    }, [])
+
+    const handleColumnDragEnter = useCallback((e, column) => {
+        if (!dragColumn.current) return
+        e.preventDefault()
+        const colEl = e.currentTarget.closest(`.${styles.column}`)
+        if (colEl) {
+            document.querySelectorAll(`.${styles.columnDragOver}`).forEach(el => el.classList.remove(styles.columnDragOver))
+            colEl.classList.add(styles.columnDragOver)
+        }
+    }, [])
+
+    const handleColumnDrop = useCallback(async (e, targetColumn) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const sourceColumn = dragColumn.current
+        if (!sourceColumn || sourceColumn.id === targetColumn.id) {
+            dragColumn.current = null
+            return
+        }
+
+        const newColumns = columns.map(c => {
+            if (c.id === sourceColumn.id) return { ...c, position: targetColumn.position }
+            if (c.id === targetColumn.id) return { ...c, position: sourceColumn.position }
+            return c
+        }).sort((a, b) => a.position - b.position)
+
+        setColumns(newColumns)
+
+        await Promise.all([
+            supabase.from('kanban_columns').update({ position: targetColumn.position }).eq('id', sourceColumn.id),
+            supabase.from('kanban_columns').update({ position: sourceColumn.position }).eq('id', targetColumn.id)
+        ])
+
+        dragColumn.current = null
+        document.querySelectorAll(`.${styles.columnDragOver}`).forEach(el => el.classList.remove(styles.columnDragOver))
+    }, [columns, supabase])
 
     const openEditModal = (card) => {
         setEditingCard(card)
@@ -206,11 +321,32 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         <>
             <div className={styles.board}>
                 {columns.map(col => {
-                    const colCards = cards.filter(c => c.column_id === col.id)
+                    const colCards = cards
+                        .filter(c => c.column_id === col.id)
+                        .sort((a, b) => a.position - b.position)
                     return (
-                        <div key={col.id} className={styles.column}>
+                        <div
+                            key={col.id}
+                            className={styles.column}
+                            onDragOver={handleColumnDragOver}
+                            onDragEnter={(e) => handleColumnDragEnter(e, col)}
+                            onDrop={(e) => {
+                                if (dragColumn.current) {
+                                    handleColumnDrop(e, col)
+                                } else {
+                                    handleCardDrop(e, col.id)
+                                }
+                            }}
+                        >
                             {/* Column Header */}
                             <div className={styles.columnHeader}>
+                                <span
+                                    className={styles.columnDragHandle}
+                                    draggable
+                                    onDragStart={(e) => handleColumnDragStart(e, col)}
+                                    onDragEnd={handleColumnDragEnd}
+                                    title="ドラッグして並び替え"
+                                >⋮⋮</span>
                                 {editingColId === col.id ? (
                                     <input
                                         className={styles.columnTitleInput}
@@ -245,10 +381,9 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
                             {/* Card List */}
                             <div
-                                className={`${styles.cardList} ${dragOverCol.current === col.id ? styles.cardListDragOver : ''}`}
-                                onDragOver={handleDragOver}
-                                onDragEnter={(e) => handleDragEnter(e, col.id)}
-                                onDrop={(e) => handleDrop(e, col.id)}
+                                className={styles.cardList}
+                                onDragOver={handleColumnAreaDragOver}
+                                onDrop={(e) => handleCardDrop(e, col.id)}
                             >
                                 {colCards.map(card => (
                                     <div
@@ -257,6 +392,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, card)}
                                         onDragEnd={handleDragEnd}
+                                        onDragOver={(e) => handleCardDragOver(e, card)}
                                         onClick={() => openEditModal(card)}
                                     >
                                         {card.color && (
