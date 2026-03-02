@@ -222,10 +222,16 @@ export async function createAssignment(formData) {
     const title = formData.get('title')
     const description = formData.get('description')
     const className = formData.get('className')
-    const deadline = formData.get('deadline') // ISO string
+    let deadline = formData.get('deadline') // ISO string from datetime-local
 
     if (!title || !className || !deadline) {
         return { error: '必須項目を入力してください' }
+    }
+
+    // datetime-local input returns "YYYY-MM-DDTHH:mm" without timezone.
+    // Force JST (+09:00) so it's not unintentionally parsed as UTC by the server environment.
+    if (deadline && !deadline.includes('Z') && !deadline.includes('+')) {
+        deadline = `${deadline}:00+09:00`
     }
 
     const { data: newAssignment, error } = await supabase
@@ -258,9 +264,15 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
         return { error: 'Unauthorized' }
     }
 
+    // datetime-local input returns "YYYY-MM-DDTHH:mm" without timezone.
+    let parsedDeadline = newDeadline
+    if (parsedDeadline && !parsedDeadline.includes('Z') && !parsedDeadline.includes('+')) {
+        parsedDeadline = `${parsedDeadline}:00+09:00`
+    }
+
     const { error } = await supabase
         .from('homework_assignments')
-        .update({ deadline: newDeadline })
+        .update({ deadline: parsedDeadline })
         .eq('id', assignmentId)
         .eq('teacher_id', user.id) // Ensure only the teacher can update
 
