@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import GradeForm from './GradeForm'
 import styles from './page.module.css'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function GradeSubmissionPage({ params }) {
     const { id, submissionId } = await params
@@ -36,14 +37,18 @@ export default async function GradeSubmissionPage({ params }) {
     }
 
     // 権限チェック
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    const adminMember = await getAdminMemberSession()
+    let isAdmin = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
 
-    const isTeacher = submission.assignment?.course?.teacher_id === user?.id
-    const isAdmin = profile?.role === 'admin'
+    const isTeacher = user ? submission.assignment?.course?.teacher_id === user.id : false
 
     if (!isTeacher && !isAdmin) {
         redirect('/assignments')

@@ -82,11 +82,17 @@ export default function EditAnnouncementPage({ params }) {
             }
 
             // コース取得
-            const { data: coursesData } = await supabase
+            let coursesQuery = supabase
                 .from('courses')
                 .select('id, title')
-                .eq('teacher_id', user?.id)
                 .order('title')
+
+            // Admin member (no user) gets all courses
+            if (user) {
+                coursesQuery = coursesQuery.eq('teacher_id', user.id)
+            }
+
+            const { data: coursesData } = await coursesQuery
 
             setCourses(coursesData || [])
             setLoading(false)

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import ScheduleManager from './ScheduleManager'
 import StudentList from './StudentList'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function ClassDetailPage({ params }) {
     const { id } = await params
@@ -36,14 +37,18 @@ export default async function ClassDetailPage({ params }) {
     }
 
     // 現在のユーザーのプロファイル
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    const adminMember = await getAdminMemberSession()
+    let isAdmin = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
 
-    const isOwner = classData.teacher_id === user?.id
-    const isAdmin = profile?.role === 'admin'
+    const isOwner = user ? classData.teacher_id === user.id : false
     const canEdit = isOwner || isAdmin
 
     // 学生マスターから該当クラスの学生を取得

@@ -3,19 +3,25 @@ import { redirect } from 'next/navigation'
 import { revalidateTag } from 'next/cache'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function NewClassPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 権限チェック
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    let isAllowed = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAllowed = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
-    if (profile?.role !== 'teacher' && profile?.role !== 'admin') {
+    if (!isAllowed) {
         redirect('/classes')
     }
 

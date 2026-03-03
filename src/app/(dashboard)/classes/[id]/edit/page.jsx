@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { revalidateTag } from 'next/cache'
 import Link from 'next/link'
 import styles from '../../new/page.module.css'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function EditClassPage({ params }) {
     const { id } = await params
@@ -21,14 +22,18 @@ export default async function EditClassPage({ params }) {
     }
 
     // 権限チェック
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    const adminMember = await getAdminMemberSession()
+    let isAdmin = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
 
-    const isOwner = classData.teacher_id === user?.id
-    const isAdmin = profile?.role === 'admin'
+    const isOwner = user ? classData.teacher_id === user.id : false
 
     if (!isOwner && !isAdmin) {
         redirect(`/classes/${id}`)

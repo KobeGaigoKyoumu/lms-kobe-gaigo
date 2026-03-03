@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import EnrollmentManager from './EnrollmentManager'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function CourseDetailPage({ params }) {
     const { id } = await params
@@ -29,16 +30,21 @@ export default async function CourseDetailPage({ params }) {
     }
 
     // 現在のユーザーのプロファイル
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    const adminMember = await getAdminMemberSession()
+    let isAdmin = !!adminMember
+    let isStudent = false
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+        isStudent = profile?.role === 'student'
+    }
 
-    const isOwner = course.teacher_id === user?.id
-    const isAdmin = profile?.role === 'admin'
+    const isOwner = user ? course.teacher_id === user.id : false
     const canEdit = isOwner || isAdmin
-    const isStudent = profile?.role === 'student'
 
     // 課題一覧取得
     const { data: assignments } = await supabase
