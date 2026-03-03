@@ -2,20 +2,26 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import UserList from './UserList'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function UsersPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 現在のユーザーのプロファイル取得
-    const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    let isAdmin = !!adminMember
+    if (user) {
+        const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = currentProfile?.role === 'admin'
+    }
 
-    // 管理者以外はアクセス拒否
-    if (currentProfile?.role !== 'admin') {
+    // 管理者・教職員以外はアクセス拒否
+    if (!isAdmin) {
         redirect('/')
     }
 

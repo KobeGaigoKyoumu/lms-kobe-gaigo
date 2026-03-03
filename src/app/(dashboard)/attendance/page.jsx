@@ -94,6 +94,9 @@ export default function AttendancePage() {
                 .eq('id', user.id)
                 .single()
             setUserRole(data?.role)
+        } else {
+            // Admin member (cookie-based) - treat as teacher
+            setUserRole('teacher')
         }
     }
 

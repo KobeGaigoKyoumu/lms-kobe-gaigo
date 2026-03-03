@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // 24時間キャッシュ（ISR）- Removed as we use cached Server Action now
 // export const revalidate = 86400
@@ -10,19 +11,22 @@ import { fetchCachedCourses } from '@/app/actions/courseData'
 export default async function CoursesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 現在のユーザーのプロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
+    let isTeacherOrAdmin = !!adminMember // Admin members are always teachers
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
     // コース一覧取得 (Cached)
     const courses = await fetchCachedCourses()
     const error = null // cached action throws if error, or returns data
-
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
 
     return (
         <div className={styles.page}>

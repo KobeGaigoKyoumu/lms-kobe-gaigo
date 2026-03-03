@@ -1,20 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import CalendarView from './CalendarView'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export const dynamic = 'force-dynamic'
 export default async function CalendarPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 現在のユーザーのプロファイル
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
-
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    let isTeacherOrAdmin = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
     // 課題（締切のあるもの）を取得
     const { data: assignments } = await supabase

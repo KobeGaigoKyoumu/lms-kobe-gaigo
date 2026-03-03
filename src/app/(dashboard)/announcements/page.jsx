@@ -3,19 +3,25 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import styles from './page.module.css'
 import AnnouncementCard from './AnnouncementCard'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function AnnouncementsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 現在のユーザーのプロファイル
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
-
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    let isTeacherOrAdmin = !!adminMember
+    let profileRole = adminMember ? 'admin' : null
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        profileRole = profile?.role
+        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
     // お知らせ一覧取得（ピン留め優先、新しい順）
     const { data: announcements, error } = await supabase
@@ -76,7 +82,7 @@ export default async function AnnouncementsPage() {
                         <AnnouncementCard
                             key={announcement.id}
                             announcement={announcement}
-                            canEdit={isTeacherOrAdmin && (announcement.author?.id === user?.id || profile?.role === 'admin')}
+                            canEdit={isTeacherOrAdmin && (announcement.author?.id === user?.id || profileRole === 'admin')}
                         />
                     ))}
                 </div>

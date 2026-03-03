@@ -3,19 +3,23 @@ import styles from './page.module.css'
 import GradeUploader from './GradeUploader'
 import GradeHistoryBoard from './GradeHistoryBoard'
 import Link from 'next/link'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function ReportCardsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // 現在のユーザーのプロファイル取得
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single()
-
-    const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    let isTeacherOrAdmin = !!adminMember
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
     return (
         <div className={styles.page}>

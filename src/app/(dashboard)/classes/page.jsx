@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // 24時間キャッシュ（ISR） - Removed
 // export const revalidate = 86400
@@ -10,18 +11,20 @@ import { fetchCachedClassesData } from '@/app/actions/classData'
 export default async function ClassesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
     // プロファイルとクラスデータ（キャッシュ済み）を並列取得
+    let profile = null
     const [profileResult, classesData] = await Promise.all([
-        supabase
+        user ? supabase
             .from('profiles')
             .select('role')
-            .eq('id', user?.id)
-            .single(),
+            .eq('id', user.id)
+            .single() : { data: null },
         fetchCachedClassesData()
     ])
 
-    const profile = profileResult.data
+    profile = profileResult.data
     const { classes: allClassesRaw, studentCounts: studentCountByClass } = classesData
 
     // Cached action handles errors internally or returns data
@@ -33,8 +36,8 @@ export default async function ClassesPage() {
         studentCount: studentCountByClass[cls.name] || 0
     }))
 
-    const isAdmin = profile?.role === 'admin'
-    const isTeacher = profile?.role === 'teacher'
+    const isAdmin = adminMember ? true : profile?.role === 'admin'
+    const isTeacher = !adminMember && profile?.role === 'teacher'
     const isTeacherOrAdmin = isTeacher || isAdmin
 
     // 自分が担任のクラス
