@@ -11,9 +11,9 @@ export default function TeacherCommunicationPage() {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        const fetchConversations = async () => {
-            if (document.visibilityState !== 'visible') return
+        let intervalId = null
 
+        const fetchConversations = async () => {
             try {
                 const data = await getConversations()
                 setConversations(data)
@@ -24,10 +24,33 @@ export default function TeacherCommunicationPage() {
             }
         }
 
-        fetchConversations()
+        const startPolling = () => {
+            fetchConversations()
+            intervalId = setInterval(fetchConversations, 300000)
+        }
 
-        const interval = setInterval(fetchConversations, 300000)
-        return () => clearInterval(interval)
+        const stopPolling = () => {
+            if (intervalId) { clearInterval(intervalId); intervalId = null }
+        }
+
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                startPolling()
+            } else {
+                stopPolling()
+            }
+        }
+
+        // Start if page is visible
+        if (document.visibilityState === 'visible') {
+            startPolling()
+        }
+
+        document.addEventListener('visibilitychange', handleVisibility)
+        return () => {
+            stopPolling()
+            document.removeEventListener('visibilitychange', handleVisibility)
+        }
     }, [])
 
     const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false)
