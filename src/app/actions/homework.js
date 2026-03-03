@@ -3,6 +3,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { getStudentSession } from './studentAuth'
+import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
 
 // Helper for admin client (Service Role)
@@ -213,9 +214,10 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
 
 export async function createAssignment(formData) {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
-    if (authError || !user) {
+    if (!user && !adminMember) {
         return { error: 'Unauthorized' }
     }
 
@@ -234,14 +236,15 @@ export async function createAssignment(formData) {
         deadline = `${deadline}:00+09:00`
     }
 
-    const { data: newAssignment, error } = await supabase
+    const adminSupabase = createAdminClient()
+    const { data: newAssignment, error } = await adminSupabase
         .from('homework_assignments')
         .insert({
             title,
             description,
             class_name: className,
             deadline,
-            teacher_id: user.id
+            teacher_id: user?.id || null
         })
         .select('id')
         .single()
@@ -258,9 +261,10 @@ export async function createAssignment(formData) {
 
 export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
-    if (authError || !user) {
+    if (!user && !adminMember) {
         return { error: 'Unauthorized' }
     }
 
@@ -270,11 +274,18 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
         parsedDeadline = `${parsedDeadline}:00+09:00`
     }
 
-    const { error } = await supabase
+    const adminSupabase = createAdminClient()
+    let query = adminSupabase
         .from('homework_assignments')
         .update({ deadline: parsedDeadline })
         .eq('id', assignmentId)
-        .eq('teacher_id', user.id) // Ensure only the teacher can update
+
+    // Only restrict to teacher's own assignments for non-admin users
+    if (user && !adminMember) {
+        query = query.eq('teacher_id', user.id)
+    }
+
+    const { error } = await query
 
     if (error) {
         console.error('Update deadline error:', error)
@@ -377,9 +388,9 @@ export async function getAssignmentSubmissions(assignmentId) {
 
 // Grade a submission
 export async function gradeSubmission(submissionId, score, feedback) {
-    const supabase = await createClient()
+    const adminSupabase = createAdminClient()
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
         .from('homework_submissions')
         .update({
             score: score ? parseInt(score) : null,
@@ -402,9 +413,9 @@ export async function gradeSubmission(submissionId, score, feedback) {
 
 // Return a submission
 export async function returnSubmission(submissionId, feedback) {
-    const supabase = await createClient()
+    const adminSupabase = createAdminClient()
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
         .from('homework_submissions')
         .update({
             score: null,
