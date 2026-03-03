@@ -26,7 +26,7 @@ export default function TeacherCommunicationPage() {
 
         fetchConversations()
 
-        const interval = setInterval(fetchConversations, 120000)
+        const interval = setInterval(fetchConversations, 300000)
         return () => clearInterval(interval)
     }, [])
 
