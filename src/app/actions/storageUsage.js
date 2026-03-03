@@ -4,30 +4,46 @@ import imagekit from "@/lib/imagekit";
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * DBの system_stats テーブルから ImageKit の使用量を取得する（軽量化）
+ * ImageKit の API から現在の使用量を取得する
  */
 export async function getImageKitUsage() {
     try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-        const { data, error } = await supabase
-            .from("system_stats")
-            .select("value")
-            .eq("key", "storage_usage")
-            .single();
-
-        if (error) {
-            console.error("Failed to read system_stats for ImageKit:", error);
-            return { success: false, error: "Failed to read cached data" };
+        const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+        if (!privateKey) {
+            throw new Error("Missing IMAGEKIT_PRIVATE_KEY");
         }
 
-        if (data && data.value && data.value.imageKit) {
-            return data.value.imageKit;
+        const authHeader = `Basic ${Buffer.from(privateKey + ":").toString("base64")}`;
+
+        const end = new Date();
+        end.setDate(end.getDate() + 1); // Tomorrow to include today's usage
+        const start = new Date();
+        start.setDate(start.getDate() - 30);
+
+        const startDateStr = start.toISOString().split("T")[0];
+        const endDateStr = end.toISOString().split("T")[0];
+
+        const url = `https://api.imagekit.io/v1/accounts/usage?startDate=${startDateStr}&endDate=${endDateStr}`;
+
+        const response = await fetch(url, {
+            headers: { Authorization: authHeader },
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            throw new Error(`ImageKit API error: ${response.statusText}`);
         }
 
-        return { success: false, error: "Data not found" };
+        const data = await response.json();
+        const limit = 20 * 1024 * 1024 * 1024; // 20GB limit
+        const used = data.mediaLibraryStorageBytes || 0;
+
+        return {
+            success: true,
+            used,
+            limit,
+            percent: Math.min(100, Math.round((used / limit) * 100)),
+        };
     } catch (error) {
         console.error("ImageKit Usage Error:", error);
         return { success: false, error: error.message };
@@ -35,7 +51,7 @@ export async function getImageKitUsage() {
 }
 
 /**
- * DBの system_stats テーブルから Supabase Storage の使用量を取得する（軽量化）
+ * Supabase Storage API から現在の使用量を取得する
  */
 export async function getSupabaseStorageUsage() {
     try {
@@ -43,22 +59,25 @@ export async function getSupabaseStorageUsage() {
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        const { data, error } = await supabase
-            .from("system_stats")
-            .select("value")
-            .eq("key", "storage_usage")
-            .single();
+        const bucketName = "chat-attachments";
+
+        const { data: files, error } = await supabase.storage.from(bucketName).list("", {
+            limit: 1000,
+        });
 
         if (error) {
-            console.error("Failed to read system_stats for Supabase:", error);
-            return { success: false, error: "Failed to read cached data" };
+            throw error;
         }
 
-        if (data && data.value && data.value.supabase) {
-            return data.value.supabase;
-        }
+        const used = files.reduce((acc, file) => acc + (file.metadata?.size || 0), 0);
+        const limit = 1 * 1024 * 1024 * 1024; // 1GB limit
 
-        return { success: false, error: "Data not found" };
+        return {
+            success: true,
+            used,
+            limit,
+            percent: Math.min(100, Math.round((used / limit) * 100)),
+        };
     } catch (error) {
         console.error("Supabase Storage Usage Error:", error);
         return { success: false, error: error.message };

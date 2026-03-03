@@ -45,17 +45,30 @@ export default async function EditClassPage({ params }) {
         .select('id, title')
         .order('title')
 
-    // 教師一覧取得
-    const { data: teachers } = await supabase
+    // 教師一覧取得 (profiles)
+    const { data: profiles } = await supabase
         .from('profiles')
         .select('id, full_name')
         .in('role', ['teacher', 'admin'])
         .order('full_name')
 
+    // 管理者メンバー取得 (admin_members)
+    const { data: adminMembers } = await supabase
+        .from('admin_members')
+        .select('id, name')
+        .order('name')
+
+    // profiles と admin_members を統合
+    const teachers = [
+        ...(profiles?.map(p => ({ id: p.id, full_name: p.full_name })) || []),
+        ...(adminMembers?.map(a => ({ id: `admin_${a.id}`, full_name: a.name })) || [])
+    ].sort((a, b) => a.full_name.localeCompare(b.full_name))
+
     async function updateClass(formData) {
         'use server'
 
         const supabase = await createClient()
+        const teacherId = formData.get('teacher_id') || ''
 
         const { error } = await supabase
             .from('classes')
@@ -65,7 +78,7 @@ export default async function EditClassPage({ params }) {
                 grade_level: formData.get('grade_level') || null,
                 academic_year: parseInt(formData.get('academic_year')) || new Date().getFullYear(),
                 course_id: formData.get('course_id') || null,
-                teacher_id: formData.get('teacher_id') || null,
+                teacher_id: teacherId.startsWith('admin_') ? null : teacherId, // profiles の ID でない場合は null にする
                 homeroom_teacher_name: formData.get('homeroom_teacher_name') || null,
                 updated_at: new Date().toISOString()
             })
@@ -168,7 +181,8 @@ export default async function EditClassPage({ params }) {
 
                 <div className={styles.formGroup}>
                     <label htmlFor="teacher_id">担任教師（システム連携） *</label>
-                    <select id="teacher_id" name="teacher_id" required defaultValue={classData.teacher_id}>
+                    <select id="teacher_id" name="teacher_id" required defaultValue={classData.teacher_id || ''}>
+                        <option value="">（選択してください）</option>
                         {teachers?.map(teacher => (
                             <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>
                         ))}

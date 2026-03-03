@@ -31,18 +31,32 @@ export default async function NewClassPage() {
         .select('id, title')
         .order('title')
 
-    // 教師一覧取得
-    const { data: teachers } = await supabase
+    // 教師一覧取得 (profiles)
+    const { data: profiles } = await supabase
         .from('profiles')
         .select('id, full_name')
         .in('role', ['teacher', 'admin'])
         .order('full_name')
+
+    // 管理者メンバー取得 (admin_members)
+    const { data: adminMembers } = await supabase
+        .from('admin_members')
+        .select('id, name')
+        .order('name')
+
+    // profiles と admin_members を統合
+    const teachers = [
+        ...(profiles?.map(p => ({ id: p.id, full_name: p.full_name })) || []),
+        ...(adminMembers?.map(a => ({ id: `admin_${a.id}`, full_name: a.name })) || [])
+    ].sort((a, b) => a.full_name.localeCompare(b.full_name))
 
     async function createClass(formData) {
         'use server'
 
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
+
+        const teacherId = formData.get('teacher_id') || user?.id
 
         const { error } = await supabase
             .from('classes')
@@ -52,7 +66,7 @@ export default async function NewClassPage() {
                 grade_level: formData.get('grade_level') || null,
                 academic_year: parseInt(formData.get('academic_year')) || new Date().getFullYear(),
                 course_id: formData.get('course_id') || null,
-                teacher_id: formData.get('teacher_id') || user?.id,
+                teacher_id: teacherId.startsWith('admin_') ? null : teacherId, // profiles の ID でない場合は null にする
                 homeroom_teacher_name: formData.get('homeroom_teacher_name') || null
             })
 
