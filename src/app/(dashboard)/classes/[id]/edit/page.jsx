@@ -68,7 +68,18 @@ export default async function EditClassPage({ params }) {
         'use server'
 
         const supabase = await createClient()
-        const teacherId = formData.get('teacher_id') || ''
+
+        const teacherDataStr = formData.get('teacher_data') || ''
+        let teacherId = null
+        let homeroomTeacherName = null
+
+        if (teacherDataStr) {
+            const parts = teacherDataStr.split('|')
+            teacherId = parts[0]
+            if (parts.length > 1) {
+                homeroomTeacherName = parts[1]
+            }
+        }
 
         const { error } = await supabase
             .from('classes')
@@ -78,8 +89,8 @@ export default async function EditClassPage({ params }) {
                 grade_level: formData.get('grade_level') || null,
                 academic_year: parseInt(formData.get('academic_year')) || new Date().getFullYear(),
                 course_id: formData.get('course_id') || null,
-                teacher_id: teacherId.startsWith('admin_') ? null : teacherId, // profiles の ID でない場合は null にする
-                homeroom_teacher_name: formData.get('homeroom_teacher_name') || null,
+                teacher_id: teacherId && teacherId.startsWith('admin_') ? null : teacherId,
+                homeroom_teacher_name: homeroomTeacherName,
                 updated_at: new Date().toISOString()
             })
             .eq('id', id)
@@ -113,6 +124,12 @@ export default async function EditClassPage({ params }) {
 
     const currentYear = new Date().getFullYear()
     const years = [currentYear - 1, currentYear, currentYear + 1]
+
+    const currentTeacher = teachers.find(t =>
+        (classData.teacher_id && t.id === classData.teacher_id) ||
+        (!classData.teacher_id && classData.homeroom_teacher_name && t.full_name === classData.homeroom_teacher_name)
+    )
+    const defaultTeacherData = currentTeacher ? `${currentTeacher.id}|${currentTeacher.full_name}` : ''
 
     return (
         <div className={styles.page}>
@@ -181,22 +198,13 @@ export default async function EditClassPage({ params }) {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label htmlFor="teacher_id">担任教師（システム連携） *</label>
-                    <select id="teacher_id" name="teacher_id" required defaultValue={classData.teacher_id || ''}>
+                    <label htmlFor="teacher_data">担任教員 *</label>
+                    <select id="teacher_data" name="teacher_data" required defaultValue={defaultTeacherData}>
                         <option value="">（選択してください）</option>
                         {teachers?.map(teacher => (
-                            <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>
-                        ))}
-                    </select>
-                    <p className={styles.helpText}>システム内のアカウントと紐付けます。</p>
-                </div>
-
-                <div className={styles.formGroup}>
-                    <label htmlFor="homeroom_teacher_name">担任教員</label>
-                    <select id="homeroom_teacher_name" name="homeroom_teacher_name" defaultValue={classData.homeroom_teacher_name || ''}>
-                        <option value="">未設定</option>
-                        {teachers?.map(teacher => (
-                            <option key={teacher.id} value={teacher.full_name}>{teacher.full_name}</option>
+                            <option key={teacher.id} value={`${teacher.id}|${teacher.full_name}`}>
+                                {teacher.full_name}
+                            </option>
                         ))}
                     </select>
                 </div>
