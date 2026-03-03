@@ -3,6 +3,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // 30秒間キャッシュ（再訪問時の高速化）
 export const revalidate = 30
@@ -17,21 +18,27 @@ export default async function DashboardPage() {
         redirect('/student/dashboard')
     }
 
-    // From here on, it's either a logged-in Supabase user (Admin/Teacher) or a guest
-    if (!user) {
+    // Check for admin member session (cookie-based)
+    const adminMember = await getAdminMemberSession()
+
+    // From here on, it's either a logged-in Supabase user (Admin/Teacher), admin member, or a guest
+    if (!user && !adminMember) {
         redirect('/login')
     }
 
-    const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'ユーザー'
+    const firstName = user?.user_metadata?.full_name?.split(' ')[0] || adminMember?.name || 'ユーザー'
 
-    // Fetch Profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, student_id_text')
-        .eq('id', user.id)
-        .single()
+    // Fetch Profile (only for Supabase users)
+    let isTeacher = true // Admin members are always teachers
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, student_id_text')
+            .eq('id', user.id)
+            .single()
 
-    const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
+        isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
+    }
 
     // Fetch Announcements
     const { data: announcements } = await supabase
@@ -62,7 +69,7 @@ export default async function DashboardPage() {
         recentAssignments: []
     }
 
-    if (isTeacher) {
+    if (isTeacher && user) {
         const { data: teacherCourses } = await supabase
             .from('courses')
             .select('id')
