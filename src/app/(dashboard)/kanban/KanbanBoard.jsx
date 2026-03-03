@@ -2,8 +2,12 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
+import {
+    addKanbanColumn, updateKanbanColumnTitle, deleteKanbanColumn, updateKanbanColumnPosition,
+    addKanbanCard, updateKanbanCard, deleteKanbanCard, updateKanbanCardPosition,
+    updateKanbanLabelName
+} from '@/app/actions/kanban'
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
@@ -43,19 +47,15 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     // Drag state for columns
     const dragColumn = useRef(null)
 
-    const supabase = createClient()
+    // All DB operations now go through Server Actions (service role)
 
     // ===== Column CRUD =====
     const addColumn = async () => {
         if (!newColumnTitle.trim()) return
         const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0
-        const { data, error } = await supabase
-            .from('kanban_columns')
-            .insert({ title: newColumnTitle.trim(), position: maxPos, created_by: userId })
-            .select()
-            .single()
-        if (!error && data) {
-            setColumns(prev => [...prev, data])
+        const result = await addKanbanColumn(newColumnTitle.trim(), maxPos, userId)
+        if (result.data) {
+            setColumns(prev => [...prev, result.data])
         }
         setNewColumnTitle('')
         setAddingColumn(false)
@@ -63,10 +63,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     const updateColumnTitle = async (colId) => {
         if (!editingColTitle.trim()) { setEditingColId(null); return }
-        await supabase
-            .from('kanban_columns')
-            .update({ title: editingColTitle.trim() })
-            .eq('id', colId)
+        await updateKanbanColumnTitle(colId, editingColTitle.trim())
         setColumns(prev => prev.map(c => c.id === colId ? { ...c, title: editingColTitle.trim() } : c))
         setEditingColId(null)
     }
@@ -78,7 +75,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         } else {
             if (!confirm('このカラムを削除しますか？')) return
         }
-        await supabase.from('kanban_columns').delete().eq('id', colId)
+        await deleteKanbanColumn(colId)
         setColumns(prev => prev.filter(c => c.id !== colId))
         setCards(prev => prev.filter(c => c.column_id !== colId))
     }
@@ -88,18 +85,9 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         if (!newCardTitle.trim()) return
         const colCards = cards.filter(c => c.column_id === columnId)
         const maxPos = colCards.length > 0 ? Math.max(...colCards.map(c => c.position)) + 1 : 0
-        const { data, error } = await supabase
-            .from('kanban_cards')
-            .insert({
-                column_id: columnId,
-                title: newCardTitle.trim(),
-                position: maxPos,
-                created_by: userId
-            })
-            .select()
-            .single()
-        if (!error && data) {
-            setCards(prev => [...prev, data])
+        const result = await addKanbanCard(columnId, newCardTitle.trim(), maxPos, userId)
+        if (result.data) {
+            setCards(prev => [...prev, result.data])
         }
         setNewCardTitle('')
         setAddingCardCol(null)
@@ -107,15 +95,12 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     const updateCard = async () => {
         if (!editingCard || !editForm.title.trim()) return
-        const { error } = await supabase
-            .from('kanban_cards')
-            .update({
-                title: editForm.title.trim(),
-                description: editForm.description || null,
-                color: editForm.color
-            })
-            .eq('id', editingCard.id)
-        if (!error) {
+        const result = await updateKanbanCard(editingCard.id, {
+            title: editForm.title.trim(),
+            description: editForm.description || null,
+            color: editForm.color
+        })
+        if (!result.error) {
             setCards(prev => prev.map(c =>
                 c.id === editingCard.id
                     ? { ...c, title: editForm.title.trim(), description: editForm.description || null, color: editForm.color }
@@ -126,19 +111,16 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     }
 
     const deleteCard = async (cardId) => {
-        await supabase.from('kanban_cards').delete().eq('id', cardId)
+        await deleteKanbanCard(cardId)
         setCards(prev => prev.filter(c => c.id !== cardId))
         setEditingCard(null)
     }
 
     // ===== Label CRUD =====
-    const updateLabelName = async (labelId) => {
+    const updateLabelNameFn = async (labelId) => {
         if (!editingLabelName.trim()) { setEditingLabelId(null); return }
         const newName = editingLabelName.trim()
-        await supabase
-            .from('kanban_labels')
-            .update({ name: newName })
-            .eq('id', labelId)
+        await updateKanbanLabelName(labelId, newName)
         setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
         setEditingLabelId(null)
     }
@@ -241,14 +223,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         ))
 
         // Persist
-        await supabase
-            .from('kanban_cards')
-            .update({ column_id: targetColumnId, position: newPosition })
-            .eq('id', card.id)
+        await updateKanbanCardPosition(card.id, targetColumnId, newPosition)
 
         dragCard.current = null
         dragOverCardId.current = null
-    }, [cards, supabase])
+    }, [cards])
 
     // ===== Column Drag & Drop =====
     const handleColumnDragStart = useCallback((e, column) => {
@@ -300,13 +279,13 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         setColumns(newColumns)
 
         await Promise.all([
-            supabase.from('kanban_columns').update({ position: targetColumn.position }).eq('id', sourceColumn.id),
-            supabase.from('kanban_columns').update({ position: sourceColumn.position }).eq('id', targetColumn.id)
+            updateKanbanColumnPosition(sourceColumn.id, targetColumn.position),
+            updateKanbanColumnPosition(targetColumn.id, sourceColumn.position)
         ])
 
         dragColumn.current = null
         document.querySelectorAll(`.${styles.columnDragOver}`).forEach(el => el.classList.remove(styles.columnDragOver))
-    }, [columns, supabase])
+    }, [columns])
 
     const openEditModal = (card) => {
         setEditingCard(card)
@@ -471,9 +450,9 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                 className={styles.labelEditInput}
                                 value={editingLabelName}
                                 onChange={e => setEditingLabelName(e.target.value)}
-                                onBlur={() => updateLabelName(lbl.id)}
+                                onBlur={() => updateLabelNameFn(lbl.id)}
                                 onKeyDown={e => {
-                                    if (e.key === 'Enter') updateLabelName(lbl.id)
+                                    if (e.key === 'Enter') updateLabelNameFn(lbl.id)
                                     if (e.key === 'Escape') setEditingLabelId(null)
                                 }}
                             />

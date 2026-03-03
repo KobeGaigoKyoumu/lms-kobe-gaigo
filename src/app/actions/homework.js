@@ -340,13 +340,7 @@ export const getAssignmentsByClass = unstable_cache(
 
 // Fetch assignment with submissions for grading
 export async function getAssignmentSubmissions(assignmentId) {
-    // For grading, we need to join student names from 'students' table.
-    // Since 'students' table policies rely on profiles/auth role, an authenticated teacher can read it.
-    // However, the relationship assumes 'students' table is foreign keyed properly.
-    // If not, we might need a manual join. But let's try the join first if FK exists.
-    // If no FK, we fetch manually.
-
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // 1. Fetch Assignment
     const { data: assignment, error: assignmentError } = await supabase
@@ -358,9 +352,6 @@ export async function getAssignmentSubmissions(assignmentId) {
     if (assignmentError) return null
 
     // 2. Fetch Submissions
-    // We can also fetch the student info if joined.
-    // homework_submissions references students(student_id_text).
-
     const { data: submissions, error: subError } = await supabase
         .from('homework_submissions')
         .select(`
