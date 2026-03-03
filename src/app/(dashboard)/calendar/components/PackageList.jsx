@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { getEventPackages, getAppliedClassesForPackages, getClassesForPackages } from '@/app/actions/calendar'
 import styles from '../page.module.css'
 
 export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, refreshTrigger }) {
@@ -19,11 +19,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
 
     const fetchPackages = async () => {
         setLoading(true)
-        const supabase = createClient()
-        const { data, error } = await supabase
-            .from('event_packages')
-            .select('*')
-            .order('created_at', { ascending: false })
+        const { data, error } = await getEventPackages()
 
         if (data) {
             setPackages(data)
@@ -37,12 +33,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
 
     const fetchAppliedClasses = async (packageIds) => {
         if (!packageIds || packageIds.length === 0) return
-        const supabase = createClient()
-        const { data } = await supabase
-            .from('calendar_events')
-            .select('package_id, target_class')
-            .in('package_id', packageIds)
-            .not('target_class', 'is', null)
+        const { data } = await getAppliedClassesForPackages(packageIds)
 
         if (data) {
             const map = {}
@@ -61,14 +52,8 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
     }
 
     const fetchClasses = async () => {
-        const supabase = createClient()
-        const { data } = await supabase
-            .from('students')
-            .select('class_name')
-            .not('class_name', 'is', null)
-            .order('class_name')
-        const unique = [...new Set(data?.map(s => s.class_name))].filter(Boolean)
-        setClasses(unique)
+        const { data } = await getClassesForPackages()
+        if (data) setClasses(data)
     }
 
     const handleApplyClick = (pkg) => {

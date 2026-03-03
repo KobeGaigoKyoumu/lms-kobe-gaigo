@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createEventPackage, updateEventPackage, deleteEventPackage } from '@/app/actions/calendar'
 import styles from '../page.module.css'
 
 const currentYear = new Date().getFullYear()
@@ -63,7 +63,6 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
         e.preventDefault()
         setLoading(true)
 
-        const supabase = createClient()
         const packageData = {
             title: formData.title,
             description: formData.description,
@@ -71,23 +70,16 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
             created_by: userId
         }
 
-        let error
+        let result
         if (pkg) {
-            const { error: updateError } = await supabase
-                .from('event_packages')
-                .update(packageData)
-                .eq('id', pkg.id)
-            error = updateError
+            result = await updateEventPackage(pkg.id, packageData)
         } else {
-            const { error: insertError } = await supabase
-                .from('event_packages')
-                .insert(packageData)
-            error = insertError
+            result = await createEventPackage(packageData)
         }
 
-        if (error) {
+        if (result.error) {
             alert('保存に失敗しました')
-            console.error(error)
+            console.error(result.error)
             setLoading(false)
             return
         }
@@ -99,16 +91,12 @@ export default function PackageModal({ pkg, onClose, onSave, userId }) {
         if (!confirm('このパッケージを削除しますか？')) return
 
         setDeleting(true)
-        const supabase = createClient()
 
-        const { error } = await supabase
-            .from('event_packages')
-            .delete()
-            .eq('id', pkg.id)
+        const result = await deleteEventPackage(pkg.id)
 
-        if (error) {
+        if (result.error) {
             alert('削除に失敗しました')
-            console.error(error)
+            console.error(result.error)
             setDeleting(false)
             return
         }
