@@ -75,6 +75,7 @@ export default async function NewClassPage() {
             return
         }
 
+        revalidateTag('classes')
         redirect('/classes')
     }
 
