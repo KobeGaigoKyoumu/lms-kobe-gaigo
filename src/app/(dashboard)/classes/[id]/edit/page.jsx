@@ -177,14 +177,13 @@ export default async function EditClassPage({ params }) {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label htmlFor="homeroom_teacher_name">担任教師名（自由入力）</label>
-                    <input
-                        type="text"
-                        id="homeroom_teacher_name"
-                        name="homeroom_teacher_name"
-                        defaultValue={classData.homeroom_teacher_name || ''}
-                        placeholder="例: 佐藤 太郎（こちらが入力されている場合は優先表示されます）"
-                    />
+                    <label htmlFor="homeroom_teacher_name">担任教員</label>
+                    <select id="homeroom_teacher_name" name="homeroom_teacher_name" defaultValue={classData.homeroom_teacher_name || ''}>
+                        <option value="">未設定</option>
+                        {teachers?.map(teacher => (
+                            <option key={teacher.id} value={teacher.full_name}>{teacher.full_name}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className={styles.formActions}>

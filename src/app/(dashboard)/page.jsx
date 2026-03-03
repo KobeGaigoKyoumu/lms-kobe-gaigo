@@ -62,38 +62,37 @@ export default async function DashboardPage() {
 
     // Fetch Basic Stats if Teacher
     let stats = {
-        enrolledCoursesCount: 0,
+        enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
-        completedAssignmentsCount: 0,
-        upcomingEventsCount: 0,
         recentAssignments: []
     }
 
     if (isTeacher && user) {
-        const { data: teacherCourses } = await supabase
-            .from('courses')
-            .select('id')
+        // Find classes where this user is the teacher
+        const { data: teacherClasses } = await supabase
+            .from('classes')
+            .select('name')
             .eq('teacher_id', user.id)
 
-        const teacherCourseIds = teacherCourses?.map(c => c.id) || []
-        stats.enrolledCoursesCount = teacherCourseIds.length
+        const teacherClassNames = teacherClasses?.map(c => c.name) || []
+        stats.enrolledClassesCount = teacherClassNames.length
 
-        if (teacherCourseIds.length > 0) {
+        if (teacherClassNames.length > 0) {
             const [pendingResult, assignmentsResult] = await Promise.all([
                 supabase
-                    .from('submissions')
-                    .select('id, assignment:assignments!inner(course_id)', { count: 'exact', head: true })
+                    .from('homework_submissions')
+                    .select('id, assignment:homework_assignments!inner(class_name)', { count: 'exact', head: true })
                     .eq('status', 'submitted')
-                    .in('assignment.course_id', teacherCourseIds),
+                    .in('assignment.class_name', teacherClassNames),
                 supabase
-                    .from('assignments')
+                    .from('homework_assignments')
                     .select(`
                         id,
                         title,
-                        due_date,
-                        course:courses (id, title)
+                        deadline,
+                        class_name
                     `)
-                    .in('course_id', teacherCourseIds)
+                    .in('class_name', teacherClassNames)
                     .order('created_at', { ascending: false })
                     .limit(5)
             ])
@@ -125,8 +124,8 @@ export default async function DashboardPage() {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h8" /></svg>
                     </div>
                     <div className={styles.statContent}>
-                        <p className={styles.statLabel}>担当コース</p>
-                        <p className={styles.statValue}>{stats.enrolledCoursesCount}</p>
+                        <p className={styles.statLabel}>担当クラス</p>
+                        <p className={styles.statValue}>{stats.enrolledClassesCount}</p>
                     </div>
                 </div>
                 <div className={styles.statCard}>
@@ -148,7 +147,7 @@ export default async function DashboardPage() {
                             <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
                                 <div>
                                     <h4>{a.title}</h4>
-                                    <p>{a.course?.title}</p>
+                                    <p>{a.class_name}</p>
                                 </div>
                             </Link>
                         ))}
