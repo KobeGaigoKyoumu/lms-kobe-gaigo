@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { revalidateTag, unstable_cache } from 'next/cache'
 
 const createAdminClient = () => {
     return createSupabaseClient(
@@ -8,6 +9,49 @@ const createAdminClient = () => {
         process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 }
+
+// ===== Readers (Cached) =====
+export const getKanbanColumns = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('kanban_columns')
+            .select('*')
+            .order('position', { ascending: true })
+        if (error) return { error: error.message }
+        return { data }
+    },
+    ['kanban-columns'],
+    { tags: ['kanban'] }
+)
+
+export const getKanbanCards = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('kanban_cards')
+            .select('*')
+            .order('position', { ascending: true })
+        if (error) return { error: error.message }
+        return { data }
+    },
+    ['kanban-cards'],
+    { tags: ['kanban'] }
+)
+
+export const getKanbanLabels = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('kanban_labels')
+            .select('*')
+            .order('position', { ascending: true })
+        if (error) return { error: error.message }
+        return { data }
+    },
+    ['kanban-labels'],
+    { tags: ['kanban'] }
+)
 
 // ===== Column CRUD =====
 export async function addKanbanColumn(title, position, createdBy) {
@@ -18,6 +62,7 @@ export async function addKanbanColumn(title, position, createdBy) {
         .select()
         .single()
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { data }
 }
 
@@ -28,6 +73,7 @@ export async function updateKanbanColumnTitle(colId, title) {
         .update({ title })
         .eq('id', colId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -38,6 +84,7 @@ export async function deleteKanbanColumn(colId) {
         .delete()
         .eq('id', colId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -48,6 +95,7 @@ export async function updateKanbanColumnPosition(colId, position) {
         .update({ position })
         .eq('id', colId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -60,6 +108,7 @@ export async function addKanbanCard(columnId, title, position, createdBy) {
         .select()
         .single()
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { data }
 }
 
@@ -70,6 +119,7 @@ export async function updateKanbanCard(cardId, updates) {
         .update(updates)
         .eq('id', cardId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -80,6 +130,7 @@ export async function deleteKanbanCard(cardId) {
         .delete()
         .eq('id', cardId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -90,6 +141,7 @@ export async function updateKanbanCardPosition(cardId, columnId, position) {
         .update({ column_id: columnId, position })
         .eq('id', cardId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }
 
@@ -101,5 +153,6 @@ export async function updateKanbanLabelName(labelId, name) {
         .update({ name })
         .eq('id', labelId)
     if (error) return { error: error.message }
+    revalidateTag('kanban')
     return { success: true }
 }

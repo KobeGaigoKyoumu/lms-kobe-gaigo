@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getKanbanColumns, getKanbanCards, getKanbanLabels } from '@/app/actions/kanban'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
 
@@ -30,29 +31,10 @@ export default async function KanbanPage() {
         userId = user.id
     }
 
-    // Use service role client for data fetching (works for both auth types)
-    const adminSupabase = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
-
-    // Fetch columns
-    const { data: columns } = await adminSupabase
-        .from('kanban_columns')
-        .select('*')
-        .order('position', { ascending: true })
-
-    // Fetch cards
-    const { data: cards } = await adminSupabase
-        .from('kanban_cards')
-        .select('*')
-        .order('position', { ascending: true })
-
-    // Fetch labels
-    const { data: labels } = await adminSupabase
-        .from('kanban_labels')
-        .select('*')
-        .order('position', { ascending: true })
+    // Fetch data using cached Server Actions
+    const { data: columns } = await getKanbanColumns()
+    const { data: cards } = await getKanbanCards()
+    const { data: labels } = await getKanbanLabels()
 
     return (
         <div className={styles.page}>
