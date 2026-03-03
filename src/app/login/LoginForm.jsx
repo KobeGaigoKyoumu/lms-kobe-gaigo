@@ -109,7 +109,7 @@ export default function LoginForm({ memberNames = [] }) {
                 setLoading(false)
             } else if (result?.success) {
                 router.refresh()
-                router.push('/kanban')
+                router.push('/')
             }
         } catch (e) {
             console.error(e)

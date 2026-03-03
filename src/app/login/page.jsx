@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }) {
     // 2. Check for Admin Member Session
     const adminMemberSession = await getAdminMemberSession()
     if (adminMemberSession) {
-        redirect(nextPath.startsWith('/student') ? '/kanban' : (nextPath || '/kanban'))
+        redirect(nextPath.startsWith('/student') ? '/' : (nextPath || '/'))
     }
 
     // 3. Check for Supabase Session (Teacher/Admin)
