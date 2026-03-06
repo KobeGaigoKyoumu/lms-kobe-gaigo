@@ -12,16 +12,85 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
     const [uploading, setUploading] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null)
+    const fileInputRef = useRef(null)
     const router = useRouter()
+
+    // 圧縮処理
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    const MAX_WIDTH = 1280;
+                    const MAX_HEIGHT = 1280;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Canvas is empty'));
+                            return;
+                        }
+                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    }, 'image/jpeg', 0.7);
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
     const handleFileChange = async (e) => {
         if (!e.target.files?.length) return
 
         setUploading(true)
         const newFiles = []
+        const oversizedFiles = []
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
         try {
             for (const file of e.target.files) {
+                let processedFile = file;
+
+                if (file.type.startsWith('image/')) {
+                    try {
+                        processedFile = await compressImage(file);
+                    } catch (error) {
+                        console.error('Compression failed, using original', error);
+                    }
+                }
+
+                if (processedFile.size > MAX_SIZE) {
+                    oversizedFiles.push(file.name);
+                    continue;
+                }
+
                 const formData = new FormData()
                 formData.append('file', file)
                 formData.append('assignmentId', assignmentId)
@@ -35,12 +104,20 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                     url: result.url
                 })
             }
+
+            if (oversizedFiles.length > 0) {
+                alert(`以下のファイルは圧縮後もサイズが大きすぎます（最大5MB）:\n${oversizedFiles.join('\n')}`);
+            }
+
             setFiles(prev => [...prev, ...newFiles])
         } catch (error) {
             console.error('Upload failed:', error)
             alert('アップロードに失敗しました。')
         } finally {
             setUploading(false)
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
         }
     }
 
@@ -135,9 +212,10 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                                 onChange={handleFileChange}
                                 className={styles.hiddenInput}
                                 disabled={uploading}
+                                ref={fileInputRef}
                             />
                         </label>
-                        <span className={styles.hint}>※ 画像、PDFなどをアップロードできます</span>
+                        <span className={styles.hint}>※ 画像、PDFなどをアップロードできます (1ファイル最大5MB。画像は自動圧縮されます)</span>
                     </div>
                 </div>
 
