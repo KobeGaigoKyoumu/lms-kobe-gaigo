@@ -14,11 +14,99 @@ export default function SubmissionForm({ assignmentId, submission, isPastDue, ma
     const [uploadedFiles, setUploadedFiles] = useState(submission?.file_urls || [])
     const [uploadProgress, setUploadProgress] = useState(0)
 
-    const handleFileSelect = (e) => {
-        const selectedFiles = Array.from(e.target.files)
-        setFiles(prev => [...prev, ...selectedFiles])
-    }
+    // Image Compression Utility
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
 
+                    // Max dimensions
+                    const MAX_WIDTH = 1280;
+                    const MAX_HEIGHT = 1280;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Canvas is empty'));
+                            return;
+                        }
+                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    }, 'image/jpeg', 0.7); // 70% quality
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleFileSelect = async (e) => {
+        const selectedFiles = Array.from(e.target.files)
+        const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+
+        const validFiles = []
+        const oversizedFiles = []
+
+        setLoading(true)
+
+        for (const file of selectedFiles) {
+            let processedFile = file;
+
+            // Compress if image
+            if (file.type.startsWith('image/')) {
+                try {
+                    processedFile = await compressImage(file);
+                } catch (error) {
+                    console.error('Compression failed, using original', error);
+                }
+            }
+
+            if (processedFile.size > MAX_SIZE) {
+                oversizedFiles.push(file.name)
+            } else {
+                validFiles.push(processedFile)
+            }
+        }
+
+        setLoading(false)
+
+        if (oversizedFiles.length > 0) {
+            alert(`以下のファイルは圧縮後もサイズが大きすぎます（最大5MB）:\n${oversizedFiles.join('\n')}`)
+        }
+
+        setFiles(prev => [...prev, ...validFiles])
+
+        // Reset the input value so the same file selection can trigger onChange again if needed
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
     const removeFile = (index) => {
         setFiles(prev => prev.filter((_, i) => i !== index))
     }
@@ -245,7 +333,7 @@ export default function SubmissionForm({ assignmentId, submission, isPastDue, ma
                         ファイルを選択
                     </button>
                     <span className={styles.fileHint}>
-                        PDF, Word, 画像など (複数選択可)
+                        PDF, Word, 画像など (複数選択可、1ファイル最大5MB。画像は自動圧縮されます)
                     </span>
                 </div>
 
