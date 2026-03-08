@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { submitHomework, uploadSubmissionFile } from '@/app/actions/homework'
+import { submitHomework } from '@/app/actions/homework'
+import { getImageKitAuthParams } from '@/app/actions/imagekit'
 import { useRouter } from 'next/navigation'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
 import styles from './SubmissionForm.module.css'
@@ -75,6 +76,12 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
         const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
         try {
+            // 認証パラメータを取得
+            const authParams = await getImageKitAuthParams()
+            if (!authParams.success) {
+                throw new Error('アップロード用認証情報の取得に失敗しました')
+            }
+
             for (const file of e.target.files) {
                 let processedFile = file;
 
@@ -91,16 +98,31 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                     continue;
                 }
 
+                // ImageKit へ直接アップロード
                 const formData = new FormData()
-                formData.append('file', file)
-                formData.append('assignmentId', assignmentId)
+                formData.append('file', processedFile)
+                formData.append('fileName', processedFile.name)
+                formData.append('publicKey', authParams.publicKey)
+                formData.append('signature', authParams.signature)
+                formData.append('expire', authParams.expire)
+                formData.append('token', authParams.token)
+                formData.append('folder', '/lms')
 
-                const result = await uploadSubmissionFile(formData)
+                // Vercel Edge ではなく直接 ImageKit の API を叩く
+                const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+                    method: 'POST',
+                    body: formData
+                })
 
-                if (result.error) throw new Error(result.error)
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.message || 'ImageKit upload failed')
+                }
+
+                const result = await response.json()
 
                 newFiles.push({
-                    name: result.name,
+                    name: processedFile.name,
                     url: result.url
                 })
             }

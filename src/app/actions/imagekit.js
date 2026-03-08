@@ -55,7 +55,11 @@ export async function deleteFromImageKit(fileId) {
 export async function getImageKitAuthParams() {
     try {
         const params = imagekit.getAuthenticationParameters();
-        return { success: true, ...params };
+        return {
+            success: true,
+            ...params,
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "dummy_public_key"
+        };
     } catch (error) {
         console.error("ImageKit Auth Params Error:", error);
         return { success: false, error: error.message };
