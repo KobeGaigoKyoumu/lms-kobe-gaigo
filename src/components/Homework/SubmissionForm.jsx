@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { submitHomework, uploadSubmissionFile } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'

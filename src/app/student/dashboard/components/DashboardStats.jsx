@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import styles from './DashboardStats.module.css'
 
-const useCounter = (end, duration = 1000) => {
+const useCounter = (targetValue, duration = 1000) => {
+    const end = Number(targetValue) || 0
     const [count, setCount] = useState(0)
 
     useEffect(() => {

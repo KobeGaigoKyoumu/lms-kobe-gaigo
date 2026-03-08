@@ -7,9 +7,14 @@ import styles from './page.module.css'
 import DashboardStats from './components/DashboardStats'
 
 export default function StudentDashboard() {
+    const [mounted, setMounted] = useState(false)
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         let isMounted = true
@@ -87,12 +92,12 @@ export default function StudentDashboard() {
                     <p className={styles.subtitle}>今日も頑張りましょう！</p>
                 </div>
                 <div className={styles.date}>
-                    {now.toLocaleDateString('ja-JP', {
+                    {mounted ? now.toLocaleDateString('ja-JP', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                         weekday: 'long'
-                    })}
+                    }) : ''}
                 </div>
             </header>
 
@@ -137,7 +142,7 @@ export default function StudentDashboard() {
                                         <h4>{assignment.title}</h4>
                                         <p>{assignment.class_name}</p>
                                     </div>
-                                    {assignment.deadline && (
+                                    {assignment.deadline && !isNaN(new Date(assignment.deadline).getTime()) && (
                                         <span className={styles.dueDate}>
                                             {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
                                                 month: 'short',
@@ -178,10 +183,12 @@ export default function StudentDashboard() {
                                             <span className={styles.pinBadge}>📌</span>
                                         )}
                                         <span className={styles.announcementDate}>
-                                            {new Date(announcement.created_at).toLocaleDateString('ja-JP', {
-                                                month: 'short',
-                                                day: 'numeric'
-                                            })}
+                                            {announcement.created_at && !isNaN(new Date(announcement.created_at).getTime()) ? (
+                                                new Date(announcement.created_at).toLocaleDateString('ja-JP', {
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })
+                                            ) : ''}
                                         </span>
                                     </div>
                                     <h4>{announcement.title}</h4>

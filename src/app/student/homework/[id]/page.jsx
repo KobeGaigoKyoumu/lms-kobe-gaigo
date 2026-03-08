@@ -11,9 +11,14 @@ export default function HomeworkPage({ params }) {
     const resolvedParams = use(params)
     const id = resolvedParams.id
 
+    const [mounted, setMounted] = useState(false)
     const [assignment, setAssignment] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         let isMounted = true
@@ -87,13 +92,15 @@ export default function HomeworkPage({ params }) {
                     <Calendar size={16} className={styles.metaIcon} />
                     <span className={styles.metaLabel}>提出期限:</span>
                     <span>
-                        {new Date(assignment.deadline).toLocaleString('ja-JP', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}
+                        {mounted && assignment.deadline && !isNaN(new Date(assignment.deadline).getTime()) ? (
+                            new Date(assignment.deadline).toLocaleString('ja-JP', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })
+                        ) : ''}
                     </span>
                 </div>
 
