@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
             sent: 0,
             push_sent: 0,
             messages_created: 0,
-            errors: []
+            errors: [] as string[]
         }
 
         // 現在のJST時刻
@@ -62,31 +62,20 @@ Deno.serve(async (req) => {
         const currentMinute = jstNow.getUTCMinutes()
         const currentDay = jstNow.getUTCDay() // 0=日, 1=月, ..., 6=土
         const currentDateStr = jstNow.toISOString().split('T')[0]
+        const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`
 
-        // 15分ウィンドウ
-        const startTotalMin = currentHour * 60 + currentMinute - 7
-        const endTotalMin = currentHour * 60 + currentMinute + 7
+        console.log(`[Kanban Reminders] JST: ${currentHour}:${currentMinute}, Date: ${currentDateStr}, Day: ${DAY_LABELS[currentDay]}`)
 
-        const toTimeStr = (totalMin: number) => {
-            const h = Math.max(0, Math.min(23, Math.floor(totalMin / 60)))
-            const m = Math.max(0, Math.min(59, totalMin % 60))
-            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-        }
-
-        const windowStart = toTimeStr(startTotalMin)
-        const windowEnd = toTimeStr(endTotalMin)
-
-        console.log(`[Kanban Reminders] JST: ${currentHour}:${currentMinute}, Window: ${windowStart}-${windowEnd}, Day: ${DAY_LABELS[currentDay]}`)
-
-        // 有効なリマインダーを時刻ウィンドウで取得
+        // 今日の対象時刻が「現在以前」のリマインダーを全て取得（キャッチアップ方式）
+        // これにより、cronの実行が多少遅れても、以前の時間帯のリマインダーを処理できる
         const { data: reminders, error: remErr } = await supabase
             .from('kanban_reminders')
             .select('*, kanban_cards!inner(title)')
             .eq('enabled', true)
-            .gte('remind_time', windowStart)
-            .lte('remind_time', windowEnd)
+            .lte('remind_time', currentTimeStr + ':59')
 
         if (remErr) {
+            console.error(`[Kanban Reminders] Fetch error: ${remErr.message}`)
             results.errors.push(`Reminder fetch error: ${remErr.message}`)
             return new Response(JSON.stringify({ success: false, results }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -94,9 +83,10 @@ Deno.serve(async (req) => {
             })
         }
 
+        console.log(`[Kanban Reminders] Found ${reminders?.length || 0} reminders with time <= ${currentTimeStr}`)
+
         if (!reminders || reminders.length === 0) {
-            console.log('[Kanban Reminders] No reminders in this window')
-            return new Response(JSON.stringify({ success: true, results, message: 'No reminders in this window' }), {
+            return new Response(JSON.stringify({ success: true, results, message: 'No reminders due' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,
             })
@@ -108,6 +98,7 @@ Deno.serve(async (req) => {
         const todayStartISO = new Date(todayStart.getTime() - jstOffset).toISOString()
 
         const dueReminders = reminders.filter((r: any) => {
+            // 今日すでに送信済みならスキップ
             if (r.last_sent_at && r.last_sent_at >= todayStartISO) {
                 return false
             }
@@ -124,8 +115,9 @@ Deno.serve(async (req) => {
             }
         })
 
+        console.log(`[Kanban Reminders] ${dueReminders.length} due reminders after filtering`)
+
         if (dueReminders.length === 0) {
-            console.log('[Kanban Reminders] No due reminders after filtering')
             return new Response(JSON.stringify({ success: true, results, message: 'No due reminders after filtering' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,
@@ -141,6 +133,8 @@ Deno.serve(async (req) => {
         const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id))
         const staffUserIds = [...new Set(staffSubs.map((s: any) => s.user_id))]
 
+        console.log(`[Kanban Reminders] Staff subs: ${staffSubs.length}, Staff users: ${staffUserIds.length}`)
+
         // web-push 設定
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
         const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
@@ -153,6 +147,7 @@ Deno.serve(async (req) => {
             pushReady = true
         } else {
             results.errors.push('Missing VAPID keys')
+            console.error('[Kanban Reminders] Missing VAPID keys')
         }
 
         // 各リマインダーを処理
@@ -162,6 +157,8 @@ Deno.serve(async (req) => {
             const typeLabel = (reminder as any).reminder_type === 'daily' ? '毎日'
                 : (reminder as any).reminder_type === 'weekly' ? '曜日指定'
                     : '一回限り'
+
+            console.log(`[Kanban Reminders] Processing: ${cardTitle} (${typeLabel} ${timeStr})`)
 
             try {
                 // 1. プッシュ通知を全教職員に送信
@@ -188,6 +185,10 @@ Deno.serve(async (req) => {
                     )
 
                     results.push_sent += pushResults.filter((r: any) => r.status === 'fulfilled').length
+                    const failedPush = pushResults.filter((r: any) => r.status === 'rejected')
+                    if (failedPush.length > 0) {
+                        console.log(`[Kanban Reminders] Push failed for ${failedPush.length} subs`)
+                    }
                 }
 
                 // 2. コミュニケーションにチャットボットメッセージ送信
@@ -208,6 +209,7 @@ Deno.serve(async (req) => {
 
                     if (msgErr) {
                         results.errors.push(`Message insert err: ${msgErr.message}`)
+                        console.error(`[Kanban Reminders] Message insert error: ${msgErr.message}`)
                     } else {
                         results.messages_created += staffUserIds.length
                     }
@@ -227,10 +229,11 @@ Deno.serve(async (req) => {
                 console.log(`[Kanban Reminders] Sent: ${cardTitle} (${typeLabel} ${timeStr})`)
             } catch (e: any) {
                 results.errors.push(`Reminder ${(reminder as any).id}: ${e.message}`)
+                console.error(`[Kanban Reminders] Error: ${e.message}`)
             }
         }
 
-        console.log(`[Kanban Reminders] Done:`, results)
+        console.log(`[Kanban Reminders] Done:`, JSON.stringify(results))
         return new Response(JSON.stringify({ success: true, results }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
