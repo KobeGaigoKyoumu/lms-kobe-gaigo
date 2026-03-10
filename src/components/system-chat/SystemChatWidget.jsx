@@ -8,6 +8,7 @@ export default function SystemChatWidget({ userId }) {
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([])
     const [unreadCount, setUnreadCount] = useState(0)
+    const [lastNotifiedCount, setLastNotifiedCount] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const intervalRef = useRef(null)
@@ -17,7 +18,14 @@ export default function SystemChatWidget({ userId }) {
         if (!userId || userId === 'member') return
         try {
             const count = await getUnreadSystemCount(userId)
-            setUnreadCount(count)
+            setUnreadCount(prev => {
+                // 未読数が増えた場合のみ自動で開く
+                if (count > prev) {
+                    setIsOpen(true)
+                    fetchMessages()
+                }
+                return count
+            })
         } catch (e) {
             console.error('Failed to fetch unread count:', e)
         }
@@ -30,12 +38,17 @@ export default function SystemChatWidget({ userId }) {
         try {
             const data = await getSystemNotifications(userId)
             setMessages(data)
+            // 開いた場合は既読にする
+            if (unreadCount > 0) {
+                await markSystemNotificationsRead(userId)
+                setUnreadCount(0)
+            }
         } catch (e) {
             console.error('Failed to fetch system notifications:', e)
         } finally {
             setIsLoading(false)
         }
-    }, [userId])
+    }, [userId, unreadCount])
 
     // 初回ロード・ポーリング
     useEffect(() => {
@@ -46,14 +59,10 @@ export default function SystemChatWidget({ userId }) {
         }
     }, [fetchUnreadCount])
 
-    // ウィジェットを開くとき
+    // ウィジェットを開くとき (手動)
     const handleOpen = async () => {
         setIsOpen(true)
         await fetchMessages()
-        if (unreadCount > 0) {
-            await markSystemNotificationsRead(userId)
-            setUnreadCount(0)
-        }
     }
 
     // ウィジェットを閉じるとき

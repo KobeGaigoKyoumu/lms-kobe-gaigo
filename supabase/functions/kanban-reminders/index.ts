@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
                 }
 
                 // 2. コミュニケーションにチャットボットメッセージ送信
-                const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}\n\nカンバンボードで確認してください。`
+                const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}`
 
                 if (staffUserIds.length > 0) {
                     const messagePayloads = staffUserIds.map((teacherId: string) => ({
