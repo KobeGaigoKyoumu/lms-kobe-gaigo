@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         // これにより、cronの実行が多少遅れても、以前の時間帯のリマインダーを処理できる
         const { data: reminders, error: remErr } = await supabase
             .from('kanban_reminders')
-            .select('*, kanban_cards!inner(title)')
+            .select('*, kanban_cards!inner(title, description)')
             .eq('enabled', true)
             .lte('remind_time', currentTimeStr + ':59')
 
@@ -163,9 +163,12 @@ Deno.serve(async (req) => {
             try {
                 // 1. プッシュ通知を全教職員に送信
                 if (pushReady && staffSubs.length > 0) {
+                    const cardDesc = (reminder as any).kanban_cards?.description || ''
+                    const truncatedDesc = cardDesc.length > 40 ? cardDesc.substring(0, 37) + '...' : cardDesc
+
                     const pushPayload = JSON.stringify({
                         title: '🔔 タスクリマインダー',
-                        body: `${cardTitle}（${typeLabel} ${timeStr}）`,
+                        body: `${cardTitle}${truncatedDesc ? '\n' + truncatedDesc : ''}（${typeLabel} ${timeStr}）`,
                         url: '/kanban',
                         badge: 1
                     })
@@ -192,7 +195,8 @@ Deno.serve(async (req) => {
                 }
 
                 // 2. コミュニケーションにチャットボットメッセージ送信
-                const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}`
+                const cardDesc = (reminder as any).kanban_cards?.description || ''
+                const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}${cardDesc ? '\n説明: ' + cardDesc : ''}`
 
                 if (staffUserIds.length > 0) {
                     const messagePayloads = staffUserIds.map((teacherId: string) => ({
