@@ -1,0 +1,27 @@
+name: Kanban Reminder Cron
+
+on:
+  schedule:
+    # 15分ごとに実行 (UTC) = 日本時間で15分ごと
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  trigger-kanban-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Trigger kanban reminders via Supabase Edge Function
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/kanban-reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          echo "Response status: $response"
+          if [ "$response" != "200" ]; then
+            echo "Cron request failed with status $response"
+            exit 1
+          fi
+          echo "Cron triggered successfully"

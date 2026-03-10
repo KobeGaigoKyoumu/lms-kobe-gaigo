@@ -1,18 +1,21 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 import {
     addKanbanColumn, updateKanbanColumnTitle, deleteKanbanColumn, updateKanbanColumnPosition,
     addKanbanCard, updateKanbanCard, deleteKanbanCard, updateKanbanCardPosition,
-    updateKanbanLabelName
+    updateKanbanLabelName,
+    getKanbanReminders, addKanbanReminder, updateKanbanReminder, deleteKanbanReminder
 } from '@/app/actions/kanban'
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
     '#3498db', '#e67e22', '#1abc9c', '#2c3e50'
 ]
+
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
 export default function KanbanBoard({ initialColumns, initialCards, initialLabels, userId }) {
     const router = useRouter()
@@ -38,6 +41,17 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     // Edit card modal
     const [editingCard, setEditingCard] = useState(null)
+
+    // Reminders
+    const [reminders, setReminders] = useState([])
+    const [reminderCardsMap, setReminderCardsMap] = useState({}) // cardId -> has reminders
+    const [showReminderForm, setShowReminderForm] = useState(false)
+    const [reminderForm, setReminderForm] = useState({
+        type: 'daily',
+        time: '09:00',
+        days: [],
+        date: ''
+    })
     const [editForm, setEditForm] = useState({ title: '', description: '', color: null })
 
     // Drag state for cards
@@ -287,14 +301,95 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         document.querySelectorAll(`.${styles.columnDragOver}`).forEach(el => el.classList.remove(styles.columnDragOver))
     }, [columns])
 
-    const openEditModal = (card) => {
+    const openEditModal = async (card) => {
         setEditingCard(card)
         setEditForm({
             title: card.title,
             description: card.description || '',
             color: card.color || null
         })
+        setShowReminderForm(false)
+        setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
+        // Load reminders for this card
+        const result = await getKanbanReminders(card.id)
+        setReminders(result.data || [])
     }
+
+    const handleAddReminder = async () => {
+        if (!editingCard) return
+        const result = await addKanbanReminder(
+            editingCard.id,
+            reminderForm.type,
+            reminderForm.time,
+            reminderForm.type === 'weekly' ? reminderForm.days : [],
+            reminderForm.type === 'once' ? reminderForm.date : null,
+            userId
+        )
+        if (result.data) {
+            setReminders(prev => [...prev, result.data])
+            setReminderCardsMap(prev => ({ ...prev, [editingCard.id]: true }))
+        }
+        setShowReminderForm(false)
+        setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
+    }
+
+    const handleToggleReminder = async (reminderId, currentEnabled) => {
+        await updateKanbanReminder(reminderId, { enabled: !currentEnabled })
+        setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, enabled: !currentEnabled } : r))
+    }
+
+    const handleDeleteReminder = async (reminderId) => {
+        await deleteKanbanReminder(reminderId)
+        setReminders(prev => prev.filter(r => r.id !== reminderId))
+        // Update map if no more reminders
+        if (editingCard) {
+            const remaining = reminders.filter(r => r.id !== reminderId)
+            if (remaining.length === 0) {
+                setReminderCardsMap(prev => {
+                    const next = { ...prev }
+                    delete next[editingCard.id]
+                    return next
+                })
+            }
+        }
+    }
+
+    const toggleDay = (day) => {
+        setReminderForm(prev => ({
+            ...prev,
+            days: prev.days.includes(day)
+                ? prev.days.filter(d => d !== day)
+                : [...prev.days, day].sort()
+        }))
+    }
+
+    const formatReminderInfo = (r) => {
+        const time = r.remind_time?.substring(0, 5) || ''
+        switch (r.reminder_type) {
+            case 'daily': return `毎日 ${time}`
+            case 'weekly': {
+                const dayStr = (r.remind_days || []).map(d => DAY_LABELS[d]).join(', ')
+                return `毎週 ${dayStr} ${time}`
+            }
+            case 'once': return `${r.remind_date || ''} ${time}`
+            default: return time
+        }
+    }
+
+    // Load reminder badge info on mount
+    useEffect(() => {
+        const loadReminderBadges = async () => {
+            const map = {}
+            for (const card of initialCards) {
+                const result = await getKanbanReminders(card.id)
+                if (result.data && result.data.length > 0) {
+                    map[card.id] = true
+                }
+            }
+            setReminderCardsMap(map)
+        }
+        if (initialCards.length > 0) loadReminderBadges()
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
@@ -380,6 +475,9 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                         <div className={styles.cardTitle}>{card.title}</div>
                                         {card.description && (
                                             <div className={styles.cardDescription}>{card.description}</div>
+                                        )}
+                                        {reminderCardsMap[card.id] && (
+                                            <span className={styles.reminderBadge} title="リマインダー設定済み">🔔</span>
                                         )}
                                         <button
                                             className={styles.cardDeleteBtn}
@@ -501,6 +599,99 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                 </div>
                             </div>
                         </div>
+
+                        {/* Reminder Section */}
+                        <div className={styles.reminderSection}>
+                            <div className={styles.reminderHeader}>
+                                <h3>🔔 リマインダー</h3>
+                                <button
+                                    className={styles.reminderAddBtn}
+                                    onClick={() => setShowReminderForm(!showReminderForm)}
+                                >{showReminderForm ? 'キャンセル' : '+ 追加'}</button>
+                            </div>
+
+                            {showReminderForm && (
+                                <div className={styles.reminderForm}>
+                                    <div className={styles.reminderFormRow}>
+                                        <label>タイプ</label>
+                                        <select
+                                            value={reminderForm.type}
+                                            onChange={e => setReminderForm(prev => ({ ...prev, type: e.target.value }))}
+                                        >
+                                            <option value="daily">毎日</option>
+                                            <option value="weekly">曜日指定</option>
+                                            <option value="once">一回限り</option>
+                                        </select>
+                                    </div>
+                                    <div className={styles.reminderFormRow}>
+                                        <label>時間</label>
+                                        <input
+                                            type="time"
+                                            value={reminderForm.time}
+                                            onChange={e => setReminderForm(prev => ({ ...prev, time: e.target.value }))}
+                                        />
+                                    </div>
+                                    {reminderForm.type === 'weekly' && (
+                                        <div className={styles.reminderFormRow}>
+                                            <label>曜日</label>
+                                            <div className={styles.dayPicker}>
+                                                {DAY_LABELS.map((label, i) => (
+                                                    <button
+                                                        key={i}
+                                                        type="button"
+                                                        className={`${styles.dayBtn} ${reminderForm.days.includes(i) ? styles.dayBtnActive : ''}`}
+                                                        onClick={() => toggleDay(i)}
+                                                    >{label}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {reminderForm.type === 'once' && (
+                                        <div className={styles.reminderFormRow}>
+                                            <label>日付</label>
+                                            <input
+                                                type="date"
+                                                value={reminderForm.date}
+                                                onChange={e => setReminderForm(prev => ({ ...prev, date: e.target.value }))}
+                                            />
+                                        </div>
+                                    )}
+                                    <button className={styles.reminderSubmitBtn} onClick={handleAddReminder}>
+                                        リマインダーを追加
+                                    </button>
+                                </div>
+                            )}
+
+                            {reminders.length > 0 ? (
+                                <div className={styles.reminderList}>
+                                    {reminders.map(r => (
+                                        <div key={r.id} className={`${styles.reminderItem} ${!r.enabled ? styles.reminderDisabled : ''}`}>
+                                            <div className={styles.reminderInfo}>
+                                                <span className={styles.reminderTypeTag}>
+                                                    {r.reminder_type === 'daily' ? '毎日' : r.reminder_type === 'weekly' ? '週次' : '一回'}
+                                                </span>
+                                                <span className={styles.reminderTime}>{formatReminderInfo(r)}</span>
+                                            </div>
+                                            <div className={styles.reminderActions}>
+                                                <button
+                                                    className={`${styles.reminderToggle} ${r.enabled ? styles.reminderToggleOn : ''}`}
+                                                    onClick={() => handleToggleReminder(r.id, r.enabled)}
+                                                    title={r.enabled ? 'オフにする' : 'オンにする'}
+                                                >{r.enabled ? 'ON' : 'OFF'}</button>
+                                                <button
+                                                    className={styles.reminderDeleteBtn}
+                                                    onClick={() => handleDeleteReminder(r.id)}
+                                                    title="削除"
+                                                >✕</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className={styles.reminderEmpty}>リマインダーはまだ設定されていません</p>
+                            )}
+                        </div>
+
                         <div className={styles.modalActions}>
                             <button className={styles.deleteBtn} onClick={() => deleteCard(editingCard.id)}>削除</button>
                             <button className={styles.cancelBtn} onClick={() => setEditingCard(null)}>キャンセル</button>

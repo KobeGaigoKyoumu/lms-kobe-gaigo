@@ -156,3 +156,53 @@ export async function updateKanbanLabelName(labelId, name) {
     revalidateTag('kanban')
     return { success: true }
 }
+
+// ===== Reminder CRUD =====
+export async function getKanbanReminders(cardId) {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+        .from('kanban_reminders')
+        .select('*')
+        .eq('card_id', cardId)
+        .order('created_at', { ascending: true })
+    if (error) return { error: error.message }
+    return { data }
+}
+
+export async function addKanbanReminder(cardId, reminderType, remindTime, remindDays, remindDate, createdBy) {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+        .from('kanban_reminders')
+        .insert({
+            card_id: cardId,
+            reminder_type: reminderType,
+            remind_time: remindTime,
+            remind_days: remindDays || [],
+            remind_date: remindDate || null,
+            created_by: createdBy
+        })
+        .select()
+        .single()
+    if (error) return { error: error.message }
+    return { data }
+}
+
+export async function updateKanbanReminder(reminderId, updates) {
+    const supabase = createAdminClient()
+    const { error } = await supabase
+        .from('kanban_reminders')
+        .update(updates)
+        .eq('id', reminderId)
+    if (error) return { error: error.message }
+    return { success: true }
+}
+
+export async function deleteKanbanReminder(reminderId) {
+    const supabase = createAdminClient()
+    const { error } = await supabase
+        .from('kanban_reminders')
+        .delete()
+        .eq('id', reminderId)
+    if (error) return { error: error.message }
+    return { success: true }
+}
