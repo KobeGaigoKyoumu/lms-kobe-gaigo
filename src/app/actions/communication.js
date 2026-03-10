@@ -40,16 +40,14 @@ export async function getConversations() {
     })
 
     // Join with students table to get names/classes
-    const studentIds = Array.from(studentMap.keys())
+    // SYSTEM_REMINDER はミニチャットウィジェットで表示するため除外
+    const studentIds = Array.from(studentMap.keys()).filter(id => id !== 'SYSTEM_REMINDER')
     if (studentIds.length === 0) return []
-
-    // SYSTEM_REMINDER を除外して学生情報を取得
-    const realStudentIds = studentIds.filter(id => id !== 'SYSTEM_REMINDER')
 
     const { data: studentInfos, error: infoError } = await supabase
         .from('students')
         .select('student_id_text, full_name, class_name')
-        .in('student_id_text', realStudentIds)
+        .in('student_id_text', studentIds)
 
     if (infoError) {
         console.error('Fetch student info error:', infoError)
@@ -60,22 +58,7 @@ export async function getConversations() {
         ...info,
         name: info.full_name,
         ...studentMap.get(info.student_id_text)
-    }))
-
-    // SYSTEM_REMINDER がある場合は特別なエントリとして追加
-    if (studentMap.has('SYSTEM_REMINDER')) {
-        const sysEntry = studentMap.get('SYSTEM_REMINDER')
-        finalConversations.push({
-            student_id_text: 'SYSTEM_REMINDER',
-            full_name: '🔔 システム通知',
-            name: '🔔 システム通知',
-            class_name: 'システム',
-            ...sysEntry
-        })
-    }
-
-    // 日付順にソート
-    finalConversations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
     return finalConversations
 }

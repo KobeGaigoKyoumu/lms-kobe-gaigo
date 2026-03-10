@@ -1,6 +1,7 @@
 import styles from './layout.module.css'
 import Sidebar from '@/components/layout/Sidebar'
 import MobileMenu from '@/components/layout/MobileMenu'
+import SystemChatWidget from '@/components/system-chat/SystemChatWidget'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
@@ -67,6 +68,7 @@ export default async function DashboardLayout({ children }) {
                     />
                     {children}
                 </main>
+                <SystemChatWidget userId={userId} />
             </div>
         </StudentStatusProvider>
     )
