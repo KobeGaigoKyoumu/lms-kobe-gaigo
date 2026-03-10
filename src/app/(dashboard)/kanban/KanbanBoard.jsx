@@ -52,6 +52,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         days: [],
         date: ''
     })
+    const [editingReminderId, setEditingReminderId] = useState(null)
     const [editForm, setEditForm] = useState({ title: '', description: '', color: null })
 
     // Drag state for cards
@@ -310,27 +311,62 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         })
         setShowReminderForm(false)
         setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
+        setEditingReminderId(null)
         // Load reminders for this card
         const result = await getKanbanReminders(card.id)
         setReminders(result.data || [])
     }
 
-    const handleAddReminder = async () => {
+    const handleEditReminder = (reminder) => {
+        setEditingReminderId(reminder.id)
+        setReminderForm({
+            type: reminder.reminder_type,
+            time: reminder.remind_time?.substring(0, 5) || '09:00',
+            days: reminder.remind_days || [],
+            date: reminder.remind_date || ''
+        })
+        setShowReminderForm(true)
+    }
+
+    const handleAddOrUpdateReminder = async () => {
         if (!editingCard) return
-        const result = await addKanbanReminder(
-            editingCard.id,
-            reminderForm.type,
-            reminderForm.time,
-            reminderForm.type === 'weekly' ? reminderForm.days : [],
-            reminderForm.type === 'once' ? reminderForm.date : null,
-            userId
-        )
-        if (result.data) {
-            setReminders(prev => [...prev, result.data])
-            setReminderCardsMap(prev => ({ ...prev, [editingCard.id]: true }))
+
+        let finalDays = reminderForm.days
+        if (reminderForm.type === 'weekday') {
+            finalDays = [1, 2, 3, 4, 5]
+        } else if (reminderForm.type !== 'weekly') {
+            finalDays = []
+        }
+
+        const payload = {
+            reminder_type: reminderForm.type,
+            remind_time: reminderForm.time,
+            remind_days: finalDays,
+            remind_date: reminderForm.type === 'once' ? reminderForm.date : null,
+        }
+
+        if (editingReminderId) {
+            const result = await updateKanbanReminder(editingReminderId, payload)
+            if (!result.error) {
+                setReminders(prev => prev.map(r => r.id === editingReminderId ? { ...r, ...payload } : r))
+            }
+        } else {
+            const result = await addKanbanReminder(
+                editingCard.id,
+                reminderForm.type,
+                reminderForm.time,
+                finalDays,
+                reminderForm.type === 'once' ? reminderForm.date : null,
+                userId
+            )
+            if (result.data) {
+                setReminders(prev => [...prev, result.data])
+                setReminderCardsMap(prev => ({ ...prev, [editingCard.id]: true }))
+            }
         }
         setShowReminderForm(false)
         setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
+        setEditingReminderId(null)
     }
 
     const handleToggleReminder = async (reminderId, currentEnabled) => {
@@ -367,6 +403,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         const time = r.remind_time?.substring(0, 5) || ''
         switch (r.reminder_type) {
             case 'daily': return `毎日 ${time}`
+            case 'weekday': return `平日 ${time}`
             case 'weekly': {
                 const dayStr = (r.remind_days || []).map(d => DAY_LABELS[d]).join(', ')
                 return `毎週 ${dayStr} ${time}`
@@ -606,7 +643,13 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                 <h3>🔔 リマインダー</h3>
                                 <button
                                     className={styles.reminderAddBtn}
-                                    onClick={() => setShowReminderForm(!showReminderForm)}
+                                    onClick={() => {
+                                        setShowReminderForm(!showReminderForm)
+                                        if (showReminderForm) {
+                                            setEditingReminderId(null)
+                                            setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
+                                        }
+                                    }}
                                 >{showReminderForm ? 'キャンセル' : '+ 追加'}</button>
                             </div>
 
@@ -619,6 +662,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                             onChange={e => setReminderForm(prev => ({ ...prev, type: e.target.value }))}
                                         >
                                             <option value="daily">毎日</option>
+                                            <option value="weekday">平日</option>
                                             <option value="weekly">曜日指定</option>
                                             <option value="once">一回限り</option>
                                         </select>
@@ -656,8 +700,8 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                             />
                                         </div>
                                     )}
-                                    <button className={styles.reminderSubmitBtn} onClick={handleAddReminder}>
-                                        リマインダーを追加
+                                    <button className={styles.reminderSubmitBtn} onClick={handleAddOrUpdateReminder}>
+                                        {editingReminderId ? 'リマインダーを更新' : 'リマインダーを追加'}
                                     </button>
                                 </div>
                             )}
@@ -668,11 +712,16 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                         <div key={r.id} className={`${styles.reminderItem} ${!r.enabled ? styles.reminderDisabled : ''}`}>
                                             <div className={styles.reminderInfo}>
                                                 <span className={styles.reminderTypeTag}>
-                                                    {r.reminder_type === 'daily' ? '毎日' : r.reminder_type === 'weekly' ? '週次' : '一回'}
+                                                    {r.reminder_type === 'daily' ? '毎日' : r.reminder_type === 'weekday' ? '平日' : r.reminder_type === 'weekly' ? '週次' : '一回'}
                                                 </span>
                                                 <span className={styles.reminderTime}>{formatReminderInfo(r)}</span>
                                             </div>
                                             <div className={styles.reminderActions}>
+                                                <button
+                                                    className={styles.reminderEditBtn}
+                                                    onClick={() => handleEditReminder(r)}
+                                                    title="編集"
+                                                >✎</button>
                                                 <button
                                                     className={`${styles.reminderToggle} ${r.enabled ? styles.reminderToggleOn : ''}`}
                                                     onClick={() => handleToggleReminder(r.id, r.enabled)}

@@ -30,7 +30,7 @@
     display: flex;
     gap: 0;
     flex: 1;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: var(--spacing-2);
 }
@@ -46,8 +46,9 @@
 
 /* ===== Column ===== */
 .column {
-    min-width: 180px;
-    flex: 1 1 0;
+    min-width: 280px;
+    width: 280px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -803,6 +804,23 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
+}
+
+.reminderEditBtn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.15s;
+    line-height: 1;
+}
+
+.reminderEditBtn:hover {
+    color: #d4a017;
+    background: #fffde0;
 }
 
 .reminderToggle {
