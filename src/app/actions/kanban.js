@@ -53,6 +53,19 @@ export const getKanbanLabels = unstable_cache(
     { tags: ['kanban'] }
 )
 
+export const getAllKanbanReminders = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('kanban_reminders')
+            .select('id, card_id, enabled')
+        if (error) return { error: error.message }
+        return { data }
+    },
+    ['kanban-all-reminders'],
+    { tags: ['kanban'] }
+)
+
 // ===== Column CRUD =====
 export async function addKanbanColumn(title, position, createdBy) {
     const supabase = createAdminClient()

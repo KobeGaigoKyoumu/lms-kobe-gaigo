@@ -17,7 +17,7 @@ const CARD_COLORS = [
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
-export default function KanbanBoard({ initialColumns, initialCards, initialLabels, userId }) {
+export default function KanbanBoard({ initialColumns, initialCards, initialLabels, initialReminders, userId }) {
     const router = useRouter()
     const [columns, setColumns] = useState(initialColumns)
     const [cards, setCards] = useState(initialCards)
@@ -413,20 +413,16 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         }
     }
 
-    // Load reminder badge info on mount
+    // Load reminder badge info on mount from initialReminders
     useEffect(() => {
-        const loadReminderBadges = async () => {
-            const map = {}
-            for (const card of initialCards) {
-                const result = await getKanbanReminders(card.id)
-                if (result.data && result.data.length > 0) {
-                    map[card.id] = true
-                }
+        const map = {}
+        if (initialReminders) {
+            for (const r of initialReminders) {
+                map[r.card_id] = true
             }
-            setReminderCardsMap(map)
         }
-        if (initialCards.length > 0) loadReminderBadges()
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+        setReminderCardsMap(map)
+    }, [initialReminders])
 
     return (
         <>

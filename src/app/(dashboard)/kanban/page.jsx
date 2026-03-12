@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
-import { getKanbanColumns, getKanbanCards, getKanbanLabels } from '@/app/actions/kanban'
+import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
 
@@ -35,6 +35,7 @@ export default async function KanbanPage() {
     const { data: columns } = await getKanbanColumns()
     const { data: cards } = await getKanbanCards()
     const { data: labels } = await getKanbanLabels()
+    const { data: allReminders } = await getAllKanbanReminders()
 
     return (
         <div className={styles.page}>
@@ -48,6 +49,7 @@ export default async function KanbanPage() {
                 initialColumns={columns || []}
                 initialCards={cards || []}
                 initialLabels={labels || []}
+                initialReminders={allReminders || []}
                 userId={userId}
             />
         </div>

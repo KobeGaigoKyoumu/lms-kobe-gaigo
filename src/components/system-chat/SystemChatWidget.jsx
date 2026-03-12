@@ -80,12 +80,19 @@ export default function SystemChatWidget({ userId }) {
     const formatTime = (dateStr) => {
         const d = new Date(dateStr)
         const now = new Date()
-        const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24))
+
+        // Convert both to day-only dates (00:00:00 local time) for comparison
+        const dDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+        const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+        // Difference in days (calendar days)
+        const diffDays = Math.round((nowDate - dDate) / (1000 * 60 * 60 * 24))
 
         const timeStr = d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
         if (diffDays === 0) return `今日 ${timeStr}`
         if (diffDays === 1) return `昨日 ${timeStr}`
+        if (diffDays === 2) return `一昨日 ${timeStr}`
         return `${d.getMonth() + 1}/${d.getDate()} ${timeStr}`
     }
 
