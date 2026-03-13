@@ -122,15 +122,15 @@ export default function AttendancePage() {
         }
     }
 
-    const fetchData = async () => {
+    const fetchData = async (forceRefresh = false) => {
         if (!selectedYear || !selectedMonth) return
         setLoading(true)
         setError(null)
 
         try {
-            // Priority 0: Cloudflare Snapshots (Instant)
+            // Priority 0: Cloudflare Snapshots (Instant) - Skip if forceRefresh is true
             const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
-            if (workerUrl && (activeTab === 'school' || activeTab === 'class')) {
+            if (!forceRefresh && workerUrl && (activeTab === 'school' || activeTab === 'class')) {
                 let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
                 const snapshotType = activeTab === 'school'
                     ? `attendance_school_${selectedYear}_${selectedMonth}_${isCumulative}`
@@ -147,9 +147,9 @@ export default function AttendancePage() {
                 }
             }
 
-            // Priority 1: Check Local State Cache
+            // Priority 1: Check Local State Cache - Skip if forceRefresh is true
             const cacheKey = `${selectedYear}-${selectedMonth}-${isCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}`
-            if (dataCache.current[cacheKey]) {
+            if (!forceRefresh && dataCache.current[cacheKey]) {
                 applyDataToState(dataCache.current[cacheKey])
                 setLoading(false)
                 return
@@ -208,7 +208,7 @@ export default function AttendancePage() {
             formData.append('file', importFile)
             formData.append('year', importYear)
             formData.append('month', importMonth)
-            formData.append('isCumulative', importCumulative)
+            formData.append('cumulative', importCumulative)
 
             const res = await fetch('/api/attendance/import', {
                 method: 'POST',
@@ -224,7 +224,7 @@ export default function AttendancePage() {
             dataCache.current = {}
             
             await fetchAvailableFiles() // Refresh list
-            fetchData() // Refresh current view
+            fetchData(true) // Refresh current view with forceRefresh to bypass snapshots and local cache
         } catch (err) {
             console.error(err)
             alert('インポートに失敗しました')
