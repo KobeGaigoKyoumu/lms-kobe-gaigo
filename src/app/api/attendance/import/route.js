@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
@@ -134,6 +135,10 @@ export async function POST(request) {
 
             if (insertError) throw insertError
         }
+
+        // キャッシュを無効化
+        revalidateTag('attendance-files')
+        revalidateTag('attendance-stats')
 
         return NextResponse.json({
             success: true,

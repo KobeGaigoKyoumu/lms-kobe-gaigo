@@ -219,7 +219,12 @@ export default function AttendancePage() {
 
             alert('インポートが完了しました')
             setImportFile(null)
-            fetchAvailableFiles() // Refresh list
+            
+            // クライアント側キャッシュをクリア
+            dataCache.current = {}
+            
+            await fetchAvailableFiles() // Refresh list
+            fetchData() // Refresh current view
         } catch (err) {
             console.error(err)
             alert('インポートに失敗しました')
