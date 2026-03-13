@@ -121,9 +121,12 @@ export default function AttendancePage() {
             setLoading(false)
         }
     }
+    const fetchData = async (forceRefresh = false, y = null, m = null, cum = null) => {
+        const targetYear = y || selectedYear;
+        const targetMonth = m || selectedMonth;
+        const targetIsCumulative = cum !== null ? cum : isCumulative;
 
-    const fetchData = async (forceRefresh = false) => {
-        if (!selectedYear || !selectedMonth) return
+        if (!targetYear || !targetMonth) return
         setLoading(true)
         setError(null)
 
@@ -133,8 +136,8 @@ export default function AttendancePage() {
             if (!forceRefresh && workerUrl && (activeTab === 'school' || activeTab === 'class')) {
                 let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
                 const snapshotType = activeTab === 'school'
-                    ? `attendance_school_${selectedYear}_${selectedMonth}_${isCumulative}`
-                    : `attendance_class_${selectedYear}_${selectedMonth}_${isCumulative}`;
+                    ? `attendance_school_${targetYear}_${targetMonth}_${targetIsCumulative}`
+                    : `attendance_class_${targetYear}_${targetMonth}_${targetIsCumulative}`;
 
                 const res = await fetch(`${targetUrl}?action=get-analytics&type=${snapshotType}`);
                 if (res.ok) {
@@ -148,7 +151,7 @@ export default function AttendancePage() {
             }
 
             // Priority 1: Check Local State Cache - Skip if forceRefresh is true
-            const cacheKey = `${selectedYear}-${selectedMonth}-${isCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}`
+            const cacheKey = `${targetYear}-${targetMonth}-${targetIsCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}`
             if (!forceRefresh && dataCache.current[cacheKey]) {
                 applyDataToState(dataCache.current[cacheKey])
                 setLoading(false)
@@ -158,14 +161,14 @@ export default function AttendancePage() {
             // Priority 2: Vercel Server Actions (The "Heavy" Backup)
             let result = {}
             if (activeTab === 'school') {
-                result = await getSchoolAttendanceStats(selectedYear, selectedMonth, isCumulative)
+                result = await getSchoolAttendanceStats(targetYear, targetMonth, targetIsCumulative)
             } else if (activeTab === 'class') {
-                result = await getClassAttendanceStats(selectedYear, selectedMonth, isCumulative)
+                result = await getClassAttendanceStats(targetYear, targetMonth, targetIsCumulative)
             } else if (activeTab === 'individual') {
                 result = await getPaginatedAttendance({
-                    year: selectedYear,
-                    month: selectedMonth,
-                    isCumulative,
+                    year: targetYear,
+                    month: targetMonth,
+                    isCumulative: targetIsCumulative,
                     page: currentPage,
                     limit: ITEMS_PER_PAGE,
                     rateFilterType: rateFilter.type,
@@ -220,11 +223,21 @@ export default function AttendancePage() {
             alert('インポートが完了しました')
             setImportFile(null)
             
-            // クライアント側キャッシュをクリア
+            // クライアント側キャッシュを全てクリア
             dataCache.current = {}
             
+            // 現在の表示設定をインポートしたものに合わせる（useEffectによる自動フェッチを待たずに手動で呼ぶ）
+            const y = importYear;
+            const m = importMonth;
+            const cum = importCumulative;
+            
+            setSelectedYear(y)
+            setSelectedMonth(m)
+            setIsCumulative(cum)
+            
             await fetchAvailableFiles() // Refresh list
-            fetchData(true) // Refresh current view with forceRefresh to bypass snapshots and local cache
+            // インポートした年月・種別で強制フェッチ（Vercel側のキャッシュとCloudflareのスナップショットを更新させる）
+            fetchData(true, y, m, cum)
         } catch (err) {
             console.error(err)
             alert('インポートに失敗しました')
