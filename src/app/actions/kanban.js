@@ -69,9 +69,10 @@ export const getAllKanbanReminders = unstable_cache(
 // ===== Column CRUD =====
 export async function addKanbanColumn(title, position, createdBy) {
     const supabase = createAdminClient()
+    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
     const { data, error } = await supabase
         .from('kanban_columns')
-        .insert({ title, position, created_by: createdBy })
+        .insert({ title, position, created_by: validCreatedBy })
         .select()
         .single()
     if (error) return { error: error.message }
@@ -115,9 +116,10 @@ export async function updateKanbanColumnPosition(colId, position) {
 // ===== Card CRUD =====
 export async function addKanbanCard(columnId, title, position, createdBy) {
     const supabase = createAdminClient()
+    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
     const { data, error } = await supabase
         .from('kanban_cards')
-        .insert({ column_id: columnId, title, position, created_by: createdBy })
+        .insert({ column_id: columnId, title, position, created_by: validCreatedBy })
         .select()
         .single()
     if (error) return { error: error.message }
@@ -184,6 +186,7 @@ export async function getKanbanReminders(cardId) {
 
 export async function addKanbanReminder(cardId, reminderType, remindTime, remindDays, remindDate, createdBy) {
     const supabase = createAdminClient()
+    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
     const { data, error } = await supabase
         .from('kanban_reminders')
         .insert({
@@ -192,7 +195,7 @@ export async function addKanbanReminder(cardId, reminderType, remindTime, remind
             remind_time: remindTime,
             remind_days: remindDays || [],
             remind_date: remindDate || null,
-            created_by: createdBy
+            created_by: validCreatedBy
         })
         .select()
         .single()
