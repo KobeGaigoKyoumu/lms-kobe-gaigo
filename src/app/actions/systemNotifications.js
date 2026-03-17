@@ -14,13 +14,20 @@ const SYSTEM_STUDENT_ID = 'SYSTEM_REMINDER'
 export async function getSystemNotifications(teacherId) {
     const supabase = createAdminClient()
 
-    const { data: messages, error } = await supabase
+    let query = supabase
         .from('messages')
         .select('*')
         .eq('student_id', SYSTEM_STUDENT_ID)
-        .eq('teacher_id', teacherId)
         .order('created_at', { ascending: false })
         .limit(50)
+
+    if (teacherId === 'member') {
+        query = query.is('teacher_id', null)
+    } else {
+        query = query.eq('teacher_id', teacherId)
+    }
+
+    const { data: messages, error } = await query
 
     if (error) {
         console.error('Fetch system notifications error:', error)
@@ -33,12 +40,19 @@ export async function getSystemNotifications(teacherId) {
 export async function getUnreadSystemCount(teacherId) {
     const supabase = createAdminClient()
 
-    const { count, error } = await supabase
+    let query = supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('student_id', SYSTEM_STUDENT_ID)
-        .eq('teacher_id', teacherId)
         .eq('read', false)
+
+    if (teacherId === 'member') {
+        query = query.is('teacher_id', null)
+    } else {
+        query = query.eq('teacher_id', teacherId)
+    }
+
+    const { count, error } = await query
 
     if (error) {
         console.error('Fetch unread system count error:', error)
@@ -51,12 +65,19 @@ export async function getUnreadSystemCount(teacherId) {
 export async function markSystemNotificationsRead(teacherId) {
     const supabase = createAdminClient()
 
-    const { error } = await supabase
+    let query = supabase
         .from('messages')
         .update({ read: true })
         .eq('student_id', SYSTEM_STUDENT_ID)
-        .eq('teacher_id', teacherId)
         .eq('read', false)
+
+    if (teacherId === 'member') {
+        query = query.is('teacher_id', null)
+    } else {
+        query = query.eq('teacher_id', teacherId)
+    }
+
+    const { error } = await query
 
     if (error) {
         console.error('Mark system notifications read error:', error)

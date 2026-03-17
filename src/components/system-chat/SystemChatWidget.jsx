@@ -14,7 +14,7 @@ export default function SystemChatWidget({ userId }) {
 
     // 未読数取得
     const fetchUnreadCount = useCallback(async () => {
-        if (!userId || userId === 'member') return
+        if (!userId) return
         try {
             const count = await getUnreadSystemCount(userId)
             setUnreadCount(prev => {
@@ -32,7 +32,7 @@ export default function SystemChatWidget({ userId }) {
 
     // メッセージ取得
     const fetchMessages = useCallback(async () => {
-        if (!userId || userId === 'member') return
+        if (!userId) return
         setIsLoading(true)
         try {
             const data = await getSystemNotifications(userId)
@@ -97,7 +97,7 @@ export default function SystemChatWidget({ userId }) {
     }
 
     // adminMember（cookie認証の教職員）の場合はウィジェット非表示
-    if (!userId || userId === 'member') return null
+    if (!userId) return null
 
     return (
         <div className={styles.container}>

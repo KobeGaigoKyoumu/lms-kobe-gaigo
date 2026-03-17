@@ -149,6 +149,8 @@ export async function getMessages(studentId, options = {}) {
     }
 }
 
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
+
 // Send Message Action (to replace API or simply invalidate)
 export async function sendMessage(studentId, content, options = {}) {
     const {
@@ -160,6 +162,16 @@ export async function sendMessage(studentId, content, options = {}) {
     } = options
 
     try {
+        // Verify session for staff if needed
+        const adminMember = await getAdminMemberSession()
+        const studentSession = await getStudentSession()
+        const supabase = await createServerClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!adminMember && !studentSession && !user) {
+            throw new Error('Unauthorized')
+        }
+
         const payload = {
             student_id: studentId,
             content: content || '',

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import webpush from 'web-push'
 
 // Initialize Admin Client for bypassing RLS when needed (especially for student access)
@@ -98,8 +99,8 @@ export async function POST(request) {
 
         // 1. Identify User
         const supabase = await createServerClient()
-        const { data: { user: teacherUser } } = await supabase.auth.getUser()
         const studentSession = await getStudentSession()
+        const adminMemberSession = await getAdminMemberSession()
 
         // 2. Construct Payload based on Role
         let payload = null
@@ -110,6 +111,20 @@ export async function POST(request) {
             payload = {
                 student_id: studentId,
                 teacher_id: teacherUser.id,
+                sender_type: 'teacher',
+                content: content || '',
+                attachment_url,
+                attachment_name,
+                attachment_type,
+                reply_to_id: replyToId || null,
+                read: false
+            }
+        } else if (adminMemberSession) {
+            if (!studentId) return NextResponse.json({ error: 'Target student required' }, { status: 400 })
+
+            payload = {
+                student_id: studentId,
+                teacher_id: null, // Use null for staff to avoid UUID FK issues
                 sender_type: 'teacher',
                 content: content || '',
                 attachment_url,
@@ -174,7 +189,7 @@ export async function POST(request) {
                     .limit(1)
                     .single()
 
-                recipientId = lastTeacherMsg?.teacher_id || data.teacher_id
+                recipientId = lastTeacherMsg?.teacher_id || data.teacher_id || 'member'
             }
 
             if (recipientId) {

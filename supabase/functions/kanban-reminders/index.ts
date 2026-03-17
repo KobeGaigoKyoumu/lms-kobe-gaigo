@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
             .select('*')
 
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-        const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id))
+        const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id) || s.user_id === 'member')
         const staffUserIds = [...new Set(staffSubs.map((s: any) => s.user_id))]
 
         console.log(`[Kanban Reminders] Staff subs: ${staffSubs.length}, Staff users: ${staffUserIds.length}`)
@@ -199,9 +199,9 @@ Deno.serve(async (req) => {
                 const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}${cardDesc ? '\n説明: ' + cardDesc : ''}`
 
                 if (staffUserIds.length > 0) {
-                    const messagePayloads = staffUserIds.map((teacherId: string) => ({
+                    const messagePayloads = staffUserIds.map((userId: string) => ({
                         student_id: SYSTEM_STUDENT_ID,
-                        teacher_id: teacherId,
+                        teacher_id: userId === 'member' ? null : userId,
                         sender_type: 'student',
                         content: messageContent,
                         read: false

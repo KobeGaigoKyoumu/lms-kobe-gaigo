@@ -192,13 +192,8 @@ Deno.serve(async (req) => {
             recipientId = lastTeacherMsg?.teacher_id
 
             if (!recipientId) {
-                console.log('No specific teacher found to notify for student:', record.student_id)
-                // In a real app, you might want to notify all admins here.
-                // For now, if we can't find a recipient, we abort push to avoid errors.
-                return new Response(JSON.stringify({ message: 'No recipient identified' }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 200,
-                })
+                console.log('No specific teacher found to notify for student:', record.student_id, '. Falling back to "member" (staff).')
+                recipientId = 'member'
             }
         }
 

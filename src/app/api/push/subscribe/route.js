@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
 // Hardcoded fallback for service key if env var is missing
@@ -19,6 +20,7 @@ export async function POST(request) {
 
         // 1. Identify User
         const studentSession = await getStudentSession()
+        const adminMemberSession = await getAdminMemberSession()
         const supabase = await createServerClient()
         const { data: { user: authUser } } = await supabase.auth.getUser()
 
@@ -29,6 +31,9 @@ export async function POST(request) {
         } else if (authUser) {
             // Priority 2: Teacher/Admin (use Supabase UUID)
             userId = authUser.id
+        } else if (adminMemberSession) {
+            // Priority 3: Staff/Member (use 'member' or memberId)
+            userId = 'member'
         } else {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

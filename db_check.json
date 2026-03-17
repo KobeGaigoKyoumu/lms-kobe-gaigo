@@ -1,0 +1,37 @@
+[
+  {
+    "year": 2026,
+    "month": 2,
+    "is_cumulative": false,
+    "created_at": "2026-03-13T04:17:10.841147+00:00",
+    "attendance_rate": 1
+  },
+  {
+    "year": 2026,
+    "month": 2,
+    "is_cumulative": false,
+    "created_at": "2026-03-13T04:17:10.841147+00:00",
+    "attendance_rate": 0.9971
+  },
+  {
+    "year": 2026,
+    "month": 2,
+    "is_cumulative": false,
+    "created_at": "2026-03-13T04:17:10.841147+00:00",
+    "attendance_rate": 1
+  },
+  {
+    "year": 2026,
+    "month": 2,
+    "is_cumulative": false,
+    "created_at": "2026-03-13T04:17:10.841147+00:00",
+    "attendance_rate": 1
+  },
+  {
+    "year": 2026,
+    "month": 2,
+    "is_cumulative": false,
+    "created_at": "2026-03-13T04:17:10.841147+00:00",
+    "attendance_rate": 0.9971
+  }
+]
