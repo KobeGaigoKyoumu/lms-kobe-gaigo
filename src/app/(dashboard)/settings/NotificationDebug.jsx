@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, RefreshCw, Smartphone, Monitor, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { subscribeUserToPush } from '@/lib/pushNotification';
-import { createClient } from '@/lib/supabase/client';
 
 export default function NotificationDebug() {
     const [permission, setPermission] = useState('loading');
@@ -74,46 +73,26 @@ export default function NotificationDebug() {
 
     const handleTestPush = async (simpleMode = false) => {
         setIsTesting(true);
-        log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request (Edge Function)...`);
+        log(`Sending ${simpleMode ? 'SHORT/SIMPLE' : 'STANDARD'} push request via API...`);
         try {
-            // Use direct fetch to debug CORS
-            const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-push`;
-            const supabase = createClient();
-            const { data: { session } } = await supabase.auth.getSession();
-            const token = session?.access_token;
-
-            const content = {
-                type: 'test',
-                delay: simpleMode ? 0 : 5,
-                simpleMode
-            };
-
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const response = await fetch(functionUrl, {
+            const response = await fetch('/api/push/test', {
                 method: 'POST',
-                headers: headers,
-                body: JSON.stringify(content)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delay: simpleMode ? 0 : 5, simpleMode })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                log(`Edge Response: Success (${data?.message})`);
+                log(`Response: Success (${data?.message})`);
                 if (!simpleMode) {
                     alert('標準テスト通知を送信しました。5秒後に届くはずです。');
                 } else {
                     alert('簡易テスト通知を送信しました。即座に届くはずです。');
                 }
             } else {
-                const errorText = await response.text();
-                log(`Edge Error: ${response.status} ${response.statusText} - ${errorText}`);
-                alert(`送信エラー: ${response.status} ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({}));
+                log(`Error: ${response.status} ${response.statusText} - ${errorData.error || ''}`);
+                alert(`送信エラー: ${response.status} ${errorData.error || response.statusText}`);
             }
         } catch (e) {
             log(`Network Error: ${e.message}`);

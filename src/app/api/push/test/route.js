@@ -1,7 +1,7 @@
-
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
@@ -11,6 +11,7 @@ const adminSupabase = createClient(SUPABASE_URL, SERVICE_KEY)
 export async function POST(request) {
     try {
         const studentSession = await getStudentSession()
+        const adminMemberSession = await getAdminMemberSession()
         const supabase = await createServerClient()
         const { data: { user: authUser } } = await supabase.auth.getUser()
 
@@ -19,6 +20,8 @@ export async function POST(request) {
             userId = studentSession.studentId
         } else if (authUser) {
             userId = authUser.id
+        } else if (adminMemberSession) {
+            userId = 'member'
         } else {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -43,7 +46,12 @@ export async function POST(request) {
         const body = await request.json().catch(() => ({}))
         const { delay = 0, simpleMode = false } = body
 
-        // ... (VAPID key checks)
+        // Set VAPID details
+        webpush.setVapidDetails(
+            'mailto:admin@lms-kobe-gaigo.vercel.app',
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+        )
 
         if (delay > 0) {
             await new Promise(resolve => setTimeout(resolve, delay * 1000))
