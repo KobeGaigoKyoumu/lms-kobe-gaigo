@@ -10,6 +10,8 @@ const createAdminClient = () => {
 }
 
 const SYSTEM_STUDENT_ID = 'SYSTEM_REMINDER'
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const isUUID = (id) => typeof id === 'string' && UUID_REGEX.test(id)
 
 export async function getSystemNotifications(teacherId) {
     const supabase = createAdminClient()
@@ -21,7 +23,7 @@ export async function getSystemNotifications(teacherId) {
         .order('created_at', { ascending: false })
         .limit(50)
 
-    if (teacherId === 'member') {
+    if (!isUUID(teacherId)) {
         query = query.is('teacher_id', null)
     } else {
         query = query.eq('teacher_id', teacherId)
@@ -46,7 +48,7 @@ export async function getUnreadSystemCount(teacherId) {
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (teacherId === 'member') {
+    if (!isUUID(teacherId)) {
         query = query.is('teacher_id', null)
     } else {
         query = query.eq('teacher_id', teacherId)
@@ -71,7 +73,7 @@ export async function markSystemNotificationsRead(teacherId) {
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (teacherId === 'member') {
+    if (!isUUID(teacherId)) {
         query = query.is('teacher_id', null)
     } else {
         query = query.eq('teacher_id', teacherId)
