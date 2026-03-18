@@ -31,25 +31,21 @@ export const getEventPackages = unstable_cache(
 )
 
 // 適用済みクラス取得
-export const getAppliedClassesForPackages = unstable_cache(
-    async (packageIds) => {
-        if (!packageIds || packageIds.length === 0) return { data: [] }
-        const supabase = createAdminClient()
-        const { data, error } = await supabase
-            .from('calendar_events')
-            .select('package_id, target_class')
-            .in('package_id', packageIds)
-            .not('target_class', 'is', null)
+export const getAppliedClassesForPackages = async (packageIds) => {
+    if (!packageIds || packageIds.length === 0) return { data: [] }
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+        .from('calendar_events')
+        .select('package_id, target_class')
+        .in('package_id', packageIds)
+        .not('target_class', 'is', null)
 
-        if (error) {
-            console.error('getAppliedClasses error:', error)
-            return { error: 'Failed to fetch applied classes' }
-        }
-        return { data }
-    },
-    ['event-packages-applied-classes'],
-    { tags: ['calendar-events', 'event-packages'] } // どちらの更新でもリセットされるべき
-)
+    if (error) {
+        console.error('getAppliedClasses error:', error)
+        return { error: 'Failed to fetch applied classes' }
+    }
+    return { data }
+}
 
 // クラス一覧取得
 export const getClassesForPackages = unstable_cache(
