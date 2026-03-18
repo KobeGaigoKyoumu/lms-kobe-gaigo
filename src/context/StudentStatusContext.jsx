@@ -20,7 +20,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
     const supabase = createClient()
 
     const lastFetchRef = React.useRef(0)
-    const CACHE_KEY = `lms_status_cache_v2_${role}_${userId || 'anon'}`
+    const CACHE_KEY = `lms_status_cache_v3_${role}_${userId || 'anon'}`
     const TTL = 300000 // 5 minutes cache
     const THROTTLE = 30000 // 30 seconds for real-time trigger
 
@@ -45,7 +45,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
             let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
             let success = false
 
-            if (workerUrl) {
+            if (workerUrl && role === 'student') {
                 if (!workerUrl.startsWith('http')) {
                     workerUrl = `https://${workerUrl}`
                 }

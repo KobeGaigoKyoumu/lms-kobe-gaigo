@@ -32,7 +32,7 @@ export default {
                     // Unread Messages
                     let unreadQuery = (role === 'student' && studentId)
                         ? `messages?student_id=eq.${studentId}&sender_type=eq.teacher&read=eq.false&select=count`
-                        : (role !== 'student' ? `messages?sender_type=eq.student&read=eq.false&select=count` : null);
+                        : (role !== 'student' ? `messages?sender_type=eq.student&read=eq.false&student_id=neq.SYSTEM_REMINDER&select=count` : null);
 
                     if (unreadQuery) {
                         const res = await fetch(`${supabaseUrl}/rest/v1/${unreadQuery}`, {
