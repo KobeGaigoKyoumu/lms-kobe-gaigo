@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getEventPackages, getAppliedClassesForPackages, getClassesForPackages, getTermsForPackages } from '@/app/actions/calendar'
+import { getEventPackages, getAppliedClassesForPackages, getTermsForPackages } from '@/app/actions/calendar'
 import styles from '../page.module.css'
 
 export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, refreshTrigger }) {
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
-    const [classes, setClasses] = useState([])
     const [terms, setTerms] = useState([])
     const [applyingPkgId, setApplyingPkgId] = useState(null)
     const [selectedClasses, setSelectedClasses] = useState([])
@@ -53,12 +52,8 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
     }
 
     const fetchClasses = async () => {
-        const [clsRes, termRes] = await Promise.all([
-            getClassesForPackages(),
-            getTermsForPackages()
-        ])
-        if (clsRes.data) setClasses(clsRes.data)
-        if (termRes.data) setTerms(termRes.data)
+        const { data } = await getTermsForPackages()
+        if (data) setTerms(data)
     }
 
     const handleApplyClick = (pkg) => {
@@ -79,7 +74,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
 
     const handleConfirmApply = (pkg) => {
         if (selectedClasses.length === 0) {
-            alert('適用するクラスを1つ以上選択してください')
+            alert('適用する入学期を1つ以上選択してください')
             return
         }
         onApplyPackage(pkg, selectedClasses)
@@ -138,7 +133,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                             {appliedClasses[pkg.id] && appliedClasses[pkg.id].length > 0 && (
                                 <div style={{ marginBottom: '12px', padding: '8px 10px', background: '#f0fdf4', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
                                     <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#166534', marginBottom: '6px' }}>
-                                        適用済みクラス:
+                                        適用済み入学期:
                                     </div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                         {appliedClasses[pkg.id].map(cls => (
@@ -171,36 +166,6 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
 
                             {applyingPkgId === pkg.id ? (
                                 <div style={{ background: '#f3f4f6', padding: '12px', borderRadius: '6px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600' }}>
-                                        適用するクラスを選択（複数可）:
-                                    </label>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                                        {classes.map(cls => (
-                                            <button
-                                                key={cls}
-                                                type="button"
-                                                onClick={() => toggleClass(cls)}
-                                                style={{
-                                                    padding: '5px 12px',
-                                                    borderRadius: '20px',
-                                                    border: '1.5px solid',
-                                                    borderColor: selectedClasses.includes(cls) ? '#3b82f6' : '#d1d5db',
-                                                    background: selectedClasses.includes(cls) ? '#dbeafe' : 'white',
-                                                    color: selectedClasses.includes(cls) ? '#1d4ed8' : '#374151',
-                                                    cursor: 'pointer',
-                                                    fontSize: '0.85rem',
-                                                    fontWeight: selectedClasses.includes(cls) ? '600' : '400',
-                                                    transition: 'all 0.15s'
-                                                }}
-                                            >
-                                                {cls}
-                                            </button>
-                                        ))}
-                                        {classes.length === 0 && (
-                                            <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>クラスが見つかりません</span>
-                                        )}
-                                    </div>
-                                    
                                     {terms.length > 0 && (
                                         <>
                                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600', marginTop: '12px' }}>
@@ -257,7 +222,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                                 fontSize: '0.85rem', fontWeight: '500'
                                             }}
                                         >
-                                            確定（{selectedClasses.length}クラス）
+                                            確定（{selectedClasses.length}期）
                                         </button>
                                     </div>
                                 </div>
