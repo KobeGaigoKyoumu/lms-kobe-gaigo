@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // Reuse the service key approach from api/chat/route.js for admin access
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
@@ -16,14 +17,16 @@ export async function getUnreadCount() {
         const supabase = await createServerClient()
         const { data: { user: teacherUser } } = await supabase.auth.getUser()
         const studentSession = await getStudentSession()
+        const adminMember = await getAdminMemberSession()
 
         let countQuery = adminSupabase
             .from('messages')
             .select('id', { count: 'exact', head: true })
             .eq('read', false)
+            .neq('student_id', 'SYSTEM_REMINDER')
 
-        if (teacherUser) {
-            // Teacher/Admin: Count all unread messages from students
+        if (teacherUser || adminMember) {
+            // Teacher/Admin/Staff: Count all unread messages from students
             countQuery = countQuery.eq('sender_type', 'student')
         } else if (studentSession) {
             // Student: Count unread messages from teachers
@@ -149,7 +152,6 @@ export async function getMessages(studentId, options = {}) {
     }
 }
 
-import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // Send Message Action (to replace API or simply invalidate)
 export async function sendMessage(studentId, content, options = {}) {
