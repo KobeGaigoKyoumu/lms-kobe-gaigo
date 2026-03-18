@@ -70,7 +70,9 @@ export default async function StudentCalendarPage() {
     // Memory filter for class targeting
     const filteredCalendarEvents = (calendarEvents || []).filter(e => {
         if (!e.target_class) return true; // Global event
-        return e.target_class === session.className; // Class specific
+        if (e.target_class === session.className) return true; // Class specific
+        if (session.academicYear && e.target_class === `term:${session.academicYear}`) return true; // Term specific
+        return false;
     })
 
     // ---------------------------------------------------------

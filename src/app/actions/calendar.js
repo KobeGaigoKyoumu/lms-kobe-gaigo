@@ -73,6 +73,28 @@ export const getClassesForPackages = unstable_cache(
     { tags: ['students'] } // classes や students テーブルの更新時にタグ指定すればリロード可能（今回は念のため）
 )
 
+// 入学期（年度）一覧取得
+export const getTermsForPackages = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('students')
+            .select('academic_year')
+            .not('academic_year', 'is', null)
+            .order('academic_year', { ascending: false })
+
+        if (error) {
+            console.error('getTerms error:', error)
+            return { error: 'Failed to fetch terms' }
+        }
+
+        const unique = [...new Set(data?.map(s => s.academic_year))].filter(Boolean)
+        return { data: unique }
+    },
+    ['event-packages-terms'],
+    { tags: ['students'] }
+)
+
 // パッケージ作成
 export async function createEventPackage(packageData) {
     const supabase = createAdminClient()

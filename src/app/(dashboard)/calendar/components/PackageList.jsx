@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getEventPackages, getAppliedClassesForPackages, getClassesForPackages } from '@/app/actions/calendar'
+import { getEventPackages, getAppliedClassesForPackages, getClassesForPackages, getTermsForPackages } from '@/app/actions/calendar'
 import styles from '../page.module.css'
 
 export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, refreshTrigger }) {
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
     const [classes, setClasses] = useState([])
+    const [terms, setTerms] = useState([])
     const [applyingPkgId, setApplyingPkgId] = useState(null)
     const [selectedClasses, setSelectedClasses] = useState([])
     const [appliedClasses, setAppliedClasses] = useState({}) // { packageId: ['classA', 'classB'] }
@@ -52,8 +53,12 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
     }
 
     const fetchClasses = async () => {
-        const { data } = await getClassesForPackages()
-        if (data) setClasses(data)
+        const [clsRes, termRes] = await Promise.all([
+            getClassesForPackages(),
+            getTermsForPackages()
+        ])
+        if (clsRes.data) setClasses(clsRes.data)
+        if (termRes.data) setTerms(termRes.data)
     }
 
     const handleApplyClick = (pkg) => {
@@ -146,7 +151,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                                     fontSize: '0.8rem', color: '#166534'
                                                 }}
                                             >
-                                                <span>{cls}</span>
+                                                <span>{cls.startsWith('term:') ? `${cls.split(':')[1]}年入学期` : cls}</span>
                                                 <button
                                                     onClick={() => handleUnapply(pkg.id, cls)}
                                                     style={{
@@ -195,9 +200,44 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                             <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>クラスが見つかりません</span>
                                         )}
                                     </div>
+                                    
+                                    {terms.length > 0 && (
+                                        <>
+                                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600', marginTop: '12px' }}>
+                                                適用する入学期を選択（複数可）:
+                                            </label>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                                                {terms.map(year => {
+                                                    const termVal = `term:${year}`
+                                                    return (
+                                                        <button
+                                                            key={termVal}
+                                                            type="button"
+                                                            onClick={() => toggleClass(termVal)}
+                                                            style={{
+                                                                padding: '5px 12px',
+                                                                borderRadius: '20px',
+                                                                border: '1.5px solid',
+                                                                borderColor: selectedClasses.includes(termVal) ? '#10b981' : '#d1d5db',
+                                                                background: selectedClasses.includes(termVal) ? '#d1fae5' : 'white',
+                                                                color: selectedClasses.includes(termVal) ? '#047857' : '#374151',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: selectedClasses.includes(termVal) ? '600' : '400',
+                                                                transition: 'all 0.15s'
+                                                            }}
+                                                        >
+                                                            {year}年入学期
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+
                                     {selectedClasses.length > 0 && (
                                         <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '8px' }}>
-                                            選択中: {selectedClasses.join(', ')}
+                                            選択中: {selectedClasses.map(c => c.startsWith('term:') ? `${c.split(':')[1]}年入学期` : c).join(', ')}
                                         </p>
                                     )}
                                     <div style={{ display: 'flex', gap: '8px' }}>
