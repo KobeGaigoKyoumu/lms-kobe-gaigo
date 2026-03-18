@@ -142,9 +142,9 @@ Deno.serve(async (req) => {
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id) || s.user_id === 'member')
 
-        // memberユーザーがいる場合、staffUserIdsにも含める（メッセージ作成用）
-        const hasMemberSub = staffSubs.some((s: any) => s.user_id === 'member')
-        if (hasMemberSub && !staffUserIds.includes('member')) {
+        // memberアカウント（cookie認証の教職員）は常にメッセージ対象に含める
+        // profilesテーブルには存在しないため、明示的に追加
+        if (!staffUserIds.includes('member')) {
             staffUserIds.push('member')
         }
 
