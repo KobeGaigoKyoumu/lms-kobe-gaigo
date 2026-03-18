@@ -16,6 +16,12 @@ const isUUID = (id) => typeof id === 'string' && UUID_REGEX.test(id)
 export async function getSystemNotifications(teacherId) {
     const supabase = createAdminClient()
 
+    let isProfileUser = false;
+    if (isUUID(teacherId)) {
+        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isProfileUser = true;
+    }
+
     let query = supabase
         .from('messages')
         .select('*')
@@ -23,10 +29,10 @@ export async function getSystemNotifications(teacherId) {
         .order('created_at', { ascending: false })
         .limit(50)
 
-    if (!isUUID(teacherId)) {
-        query = query.is('teacher_id', null)
-    } else {
+    if (isProfileUser) {
         query = query.eq('teacher_id', teacherId)
+    } else {
+        query = query.is('teacher_id', null)
     }
 
     const { data: messages, error } = await query
@@ -42,16 +48,22 @@ export async function getSystemNotifications(teacherId) {
 export async function getUnreadSystemCount(teacherId) {
     const supabase = createAdminClient()
 
+    let isProfileUser = false;
+    if (isUUID(teacherId)) {
+        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isProfileUser = true;
+    }
+
     let query = supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (!isUUID(teacherId)) {
-        query = query.is('teacher_id', null)
-    } else {
+    if (isProfileUser) {
         query = query.eq('teacher_id', teacherId)
+    } else {
+        query = query.is('teacher_id', null)
     }
 
     const { count, error } = await query
@@ -67,16 +79,22 @@ export async function getUnreadSystemCount(teacherId) {
 export async function markSystemNotificationsRead(teacherId) {
     const supabase = createAdminClient()
 
+    let isProfileUser = false;
+    if (isUUID(teacherId)) {
+        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isProfileUser = true;
+    }
+
     let query = supabase
         .from('messages')
         .update({ read: true })
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (!isUUID(teacherId)) {
-        query = query.is('teacher_id', null)
-    } else {
+    if (isProfileUser) {
         query = query.eq('teacher_id', teacherId)
+    } else {
+        query = query.is('teacher_id', null)
     }
 
     const { error } = await query
