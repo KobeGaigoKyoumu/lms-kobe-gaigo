@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getTermsForPackages, createSingleEvent, updateSingleEvent, deleteSingleEvent } from '@/app/actions/calendar'
 import styles from './page.module.css'
 
 export default function EventModal({ event, date, onClose, onSave, userId }) {
@@ -48,16 +49,9 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                 .order('title')
             setCourses(courseData || [])
 
-            // Classes (distinct from students)
-            const { data: studentData } = await supabase
-                .from('students')
-                .select('class_name')
-                .not('class_name', 'is', null)
-                .order('class_name')
-
-            // Extract unique class names
-            const uniqueClasses = [...new Set(studentData?.map(s => s.class_name))].filter(Boolean)
-            setClasses(uniqueClasses)
+            // Terms (instead of classes)
+            const { data: termData } = await getTermsForPackages()
+            setClasses(termData || [])
         }
         loadData()
 
@@ -142,17 +136,12 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
         let error
         if (event) {
             // Update
-            const { error: updateError } = await supabase
-                .from('calendar_events')
-                .update(eventData)
-                .eq('id', event.id)
-            error = updateError
+            const res = await updateSingleEvent(event.id, eventData)
+            error = res.error
         } else {
             // Insert
-            const { error: insertError } = await supabase
-                .from('calendar_events')
-                .insert(eventData)
-            error = insertError
+            const res = await createSingleEvent(eventData)
+            error = res.error
         }
 
         if (error) {
@@ -169,12 +158,8 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
         if (!confirm('このイベントを削除しますか？')) return
 
         setDeleting(true)
-        const supabase = createClient()
 
-        const { error } = await supabase
-            .from('calendar_events')
-            .delete()
-            .eq('id', event.id)
+        const { error } = await deleteSingleEvent(event.id)
 
         if (error) {
             alert('削除に失敗しました')
@@ -292,7 +277,7 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="target_class">対象クラス（任意）</label>
+                        <label htmlFor="target_class">対象の入学期（任意）</label>
                         <select
                             id="target_class"
                             name="target_class"
@@ -300,12 +285,12 @@ export default function EventModal({ event, date, onClose, onSave, userId }) {
                             onChange={handleChange}
                         >
                             <option value="">全体（全員に表示）</option>
-                            {classes.map(c => (
-                                <option key={c} value={c}>{c}</option>
+                            {classes.map(term => (
+                                <option key={`term:${term}`} value={`term:${term}`}>{term}</option>
                             ))}
                         </select>
                         <p style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
-                            ※選択すると、そのクラスの学生にのみ予定が表示されます。
+                            ※選択すると、その入学期の学生にのみ予定が表示されます。
                         </p>
                     </div>
 

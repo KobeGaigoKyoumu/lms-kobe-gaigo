@@ -203,3 +203,37 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
     revalidateTag('calendar-events')
     return { success: true }
 }
+
+// === 単独イベントの管理アクション ===
+export async function createSingleEvent(eventData) {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.from('calendar_events').insert(eventData).select()
+    if (error) {
+        console.error('createSingleEvent error:', error)
+        return { error: 'Failed to create event' }
+    }
+    revalidateTag('calendar-events')
+    return { success: true, data: data[0] }
+}
+
+export async function updateSingleEvent(id, eventData) {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.from('calendar_events').update(eventData).eq('id', id).select()
+    if (error) {
+        console.error('updateSingleEvent error:', error)
+        return { error: 'Failed to update event' }
+    }
+    revalidateTag('calendar-events')
+    return { success: true, data: data[0] }
+}
+
+export async function deleteSingleEvent(id) {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('calendar_events').delete().eq('id', id)
+    if (error) {
+        console.error('deleteSingleEvent error:', error)
+        return { error: 'Failed to delete event' }
+    }
+    revalidateTag('calendar-events')
+    return { success: true }
+}
