@@ -71,7 +71,7 @@ export default async function StudentCalendarPage() {
     const filteredCalendarEvents = (calendarEvents || []).filter(e => {
         if (!e.target_class) return true; // Global event
         if (e.target_class === session.className) return true; // Class specific
-        if (session.academicYear && e.target_class === `term:${session.academicYear}`) return true; // Term specific
+        if (session.enrollmentPeriod && e.target_class === `term:${session.enrollmentPeriod}`) return true; // Term specific
         return false;
     })
 

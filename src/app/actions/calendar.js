@@ -73,22 +73,22 @@ export const getClassesForPackages = unstable_cache(
     { tags: ['students'] } // classes や students テーブルの更新時にタグ指定すればリロード可能（今回は念のため）
 )
 
-// 入学期（年度）一覧取得
+// 入学期一覧取得
 export const getTermsForPackages = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('students')
-            .select('academic_year')
-            .not('academic_year', 'is', null)
-            .order('academic_year', { ascending: false })
+            .select('enrollment_period')
+            .not('enrollment_period', 'is', null)
+            .order('enrollment_period', { ascending: false })
 
         if (error) {
             console.error('getTerms error:', error)
             return { error: 'Failed to fetch terms' }
         }
 
-        const unique = [...new Set(data?.map(s => s.academic_year))].filter(Boolean)
+        const unique = [...new Set(data?.map(s => s.enrollment_period))].filter(Boolean)
         return { data: unique }
     },
     ['event-packages-terms'],

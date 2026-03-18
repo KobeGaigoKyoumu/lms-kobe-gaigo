@@ -30,7 +30,7 @@ export async function loginStudent(formData) {
         const supabase = createAdminClient()
         const { data: student, error } = await supabase
             .from('students')
-            .select('student_id_text, full_name, class_name, academic_year')
+            .select('student_id_text, full_name, class_name, academic_year, enrollment_period')
             .eq('student_id_text', studentId.trim())
             .eq('class_name', className.trim())
             .single()
@@ -43,7 +43,8 @@ export async function loginStudent(formData) {
             studentId: student.student_id_text,
             name: student.full_name,
             className: student.class_name,
-            academicYear: student.academic_year, // Added for optimization
+            academicYear: student.academic_year, 
+            enrollmentPeriod: student.enrollment_period,
             at: Date.now()
         }
 
@@ -96,18 +97,27 @@ export const getStudentSession = cache(async () => {
                 // If it's the Base64 version
                 const json = Buffer.from(encoded, 'base64').toString('utf8')
                 const data = JSON.parse(json)
+                
+                // Fallback fetch if missing enrollmentPeriod but has studentId
+                if (data.studentId && !data.enrollmentPeriod) {
+                    const supabase = createAdminClient()
+                    const { data: stData } = await supabase.from('students').select('enrollment_period').eq('student_id_text', data.studentId).single()
+                    if (stData) data.enrollmentPeriod = stData.enrollment_period
+                }
+                
                 return {
                     studentId: data.studentId,
                     name: data.name,
                     className: data.className,
-                    academicYear: data.academicYear // Restore from session
+                    academicYear: data.academicYear,
+                    enrollmentPeriod: data.enrollmentPeriod
                 }
             } catch {
                 // Fallback for ID-only legacy cookies
                 const supabase = createAdminClient()
                 const { data: student } = await supabase
                     .from('students')
-                    .select('student_id_text, full_name, class_name, academic_year')
+                    .select('student_id_text, full_name, class_name, academic_year, enrollment_period')
                     .eq('student_id_text', encoded)
                     .single()
 
@@ -116,7 +126,8 @@ export const getStudentSession = cache(async () => {
                         studentId: student.student_id_text,
                         name: student.full_name,
                         className: student.class_name,
-                        academicYear: student.academic_year
+                        academicYear: student.academic_year,
+                        enrollmentPeriod: student.enrollment_period
                     }
                 }
             }
@@ -137,7 +148,7 @@ export const getStudentSession = cache(async () => {
                 // Fetch class info from students master if missing in profile
                 const { data: studentMaster } = await supabase
                     .from('students')
-                    .select('class_name, academic_year')
+                    .select('class_name, academic_year, enrollment_period')
                     .eq('student_id_text', profile.student_id_text)
                     .single()
 
@@ -145,7 +156,8 @@ export const getStudentSession = cache(async () => {
                     studentId: profile.student_id_text,
                     name: profile.full_name,
                     className: studentMaster?.class_name || '未設定',
-                    academicYear: studentMaster?.academic_year
+                    academicYear: studentMaster?.academic_year,
+                    enrollmentPeriod: studentMaster?.enrollment_period
                 }
             }
         }

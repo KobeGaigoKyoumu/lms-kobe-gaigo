@@ -151,7 +151,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                                     fontSize: '0.8rem', color: '#166534'
                                                 }}
                                             >
-                                                <span>{cls.startsWith('term:') ? `${cls.split(':')[1]}年入学期` : cls}</span>
+                                                <span>{cls.startsWith('term:') ? cls.replace('term:', '') : cls}</span>
                                                 <button
                                                     onClick={() => handleUnapply(pkg.id, cls)}
                                                     style={{
@@ -207,8 +207,8 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                                 適用する入学期を選択（複数可）:
                                             </label>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                                                {terms.map(year => {
-                                                    const termVal = `term:${year}`
+                                                {terms.map(term => {
+                                                    const termVal = `term:${term}`
                                                     return (
                                                         <button
                                                             key={termVal}
@@ -227,7 +227,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                                                                 transition: 'all 0.15s'
                                                             }}
                                                         >
-                                                            {year}年入学期
+                                                            {term}
                                                         </button>
                                                     )
                                                 })}
@@ -237,7 +237,7 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
 
                                     {selectedClasses.length > 0 && (
                                         <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '8px' }}>
-                                            選択中: {selectedClasses.map(c => c.startsWith('term:') ? `${c.split(':')[1]}年入学期` : c).join(', ')}
+                                            選択中: {selectedClasses.map(c => c.startsWith('term:') ? c.replace('term:', '') : c).join(', ')}
                                         </p>
                                     )}
                                     <div style={{ display: 'flex', gap: '8px' }}>
