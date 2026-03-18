@@ -6,6 +6,7 @@ import { Bell, X } from 'lucide-react';
 export default function PWARegistry() {
     const [status, setStatus] = useState('loading'); // loading, default, granted, denied
     const [showBanner, setShowBanner] = useState(false);
+    const [isRequesting, setIsRequesting] = useState(false);
 
     const checkPermission = () => {
         if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
@@ -113,9 +114,11 @@ export default function PWARegistry() {
     };
 
     const handleEnableNotifications = async () => {
+        setIsRequesting(true);
         try {
             console.log('Requesting permission...');
             const permission = await Notification.requestPermission();
+            console.log('Permission result:', permission);
             setStatus(permission);
             if (permission === 'granted') {
                 console.log('Permission granted by user');
@@ -129,6 +132,8 @@ export default function PWARegistry() {
             }
         } catch (err) {
             console.error('Permission request failed:', err);
+        } finally {
+            setIsRequesting(false);
         }
     };
 
@@ -157,9 +162,14 @@ export default function PWARegistry() {
                         </p>
                         <button
                             onClick={handleEnableNotifications}
-                            className="mt-4 w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg active:scale-95"
+                            disabled={isRequesting}
+                            className={`mt-4 w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all active:scale-95 ${
+                                isRequesting
+                                    ? 'bg-amber-500 cursor-default animate-pulse'
+                                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
+                            }`}
                         >
-                            通知を有効にする
+                            {isRequesting ? '↑ ブラウザの許可ダイアログを確認してください' : '通知を有効にする'}
                         </button>
                     </div>
                 </div>
