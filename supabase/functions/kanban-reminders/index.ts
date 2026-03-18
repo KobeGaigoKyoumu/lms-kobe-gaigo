@@ -126,16 +126,29 @@ Deno.serve(async (req) => {
             })
         }
 
-        // 教職員のプッシュ購読を取得（UUID形式のuser_id = 教職員）
+        // 教職員のIDをprofilesテーブルから取得（push_subscriptionsに依存しない）
+        const { data: staffProfiles } = await supabase
+            .from('profiles')
+            .select('id')
+            .in('role', ['teacher', 'admin'])
+
+        const staffUserIds: string[] = (staffProfiles || []).map((p: any) => p.id)
+
+        // 教職員のプッシュ購読を取得（プッシュ通知送信用）
         const { data: allSubs } = await supabase
             .from('push_subscriptions')
             .select('*')
 
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id) || s.user_id === 'member')
-        const staffUserIds = [...new Set(staffSubs.map((s: any) => s.user_id))]
 
-        console.log(`[Kanban Reminders] Staff subs: ${staffSubs.length}, Staff users: ${staffUserIds.length}`)
+        // memberユーザーがいる場合、staffUserIdsにも含める（メッセージ作成用）
+        const hasMemberSub = staffSubs.some((s: any) => s.user_id === 'member')
+        if (hasMemberSub && !staffUserIds.includes('member')) {
+            staffUserIds.push('member')
+        }
+
+        console.log(`[Kanban Reminders] Staff users (profiles): ${staffUserIds.length}, Staff push subs: ${staffSubs.length}`)
 
         // web-push 設定
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
