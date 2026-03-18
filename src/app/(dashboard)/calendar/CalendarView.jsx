@@ -9,7 +9,7 @@ import styles from './page.module.css'
 import EventModal from './EventModal'
 import PackageList from './components/PackageList'
 import PackageModal from './components/PackageModal'
-import { applyPackageToTarget, unapplyPackageFromTarget } from '@/app/actions/calendar'
+import { applyPackageToTarget, unapplyPackageFromTarget, copyEventPackage } from '@/app/actions/calendar'
 
 export default function CalendarView({ events, canCreateEvent, userId }) {
     const router = useRouter()
@@ -267,6 +267,19 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
         setPkgRefreshTrigger(prev => prev + 1)
     }
 
+    const handlePackageCopy = async (pkg) => {
+        if (!confirm(`「${pkg.title}」を複製しますか？`)) return
+
+        const { error } = await copyEventPackage(pkg.id)
+        if (error) {
+            console.error(error)
+            alert('複製に失敗しました')
+        } else {
+            alert('複製しました')
+            setPkgRefreshTrigger(prev => prev + 1)
+        }
+    }
+
     const weekDays = ['日', '月', '火', '水', '木', '金', '土']
     const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
@@ -522,6 +535,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                             onApplyPackage={handlePackageApply}
                             onUnapplyPackage={handlePackageUnapply}
                             onEditPackage={(pkg) => { setSelectedPackage(pkg); setShowPackageModal(true); }}
+                            onCopyPackage={handlePackageCopy}
                             refreshTrigger={pkgRefreshTrigger}
                         />
                     </div>

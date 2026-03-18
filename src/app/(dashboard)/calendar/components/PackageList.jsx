@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { getEventPackages, getAppliedClassesForPackages, getTermsForPackages } from '@/app/actions/calendar'
 import styles from '../page.module.css'
 
-export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, refreshTrigger }) {
+export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPackage, onCopyPackage, refreshTrigger }) {
     const [packages, setPackages] = useState([])
     const [loading, setLoading] = useState(true)
     const [terms, setTerms] = useState([])
@@ -112,6 +112,12 @@ export default function PackageList({ onApplyPackage, onUnapplyPackage, onEditPa
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                 <h4 style={{ margin: '0', fontSize: '1rem', fontWeight: '600' }}>{pkg.title}</h4>
                                 <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                        onClick={() => onCopyPackage(pkg)}
+                                        style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.9rem' }}
+                                    >
+                                        コピー
+                                    </button>
                                     <button
                                         onClick={() => onEditPackage(pkg)}
                                         style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.9rem' }}

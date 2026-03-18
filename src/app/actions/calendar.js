@@ -140,6 +140,43 @@ export async function deleteEventPackage(id) {
     return { success: true }
 }
 
+// パッケージの複製
+export async function copyEventPackage(id) {
+    const supabase = createAdminClient()
+    
+    // 1. Get the original
+    const { data: original, error: fetchErr } = await supabase
+        .from('event_packages')
+        .select('*')
+        .eq('id', id)
+        .single()
+        
+    if (fetchErr || !original) {
+        console.error('Fetch error for copy:', fetchErr)
+        return { error: 'Failed to fetch original package' }
+    }
+    
+    // 2. Prepare the clone
+    const clone = {
+        title: `${original.title} - コピー`,
+        description: original.description,
+        events: original.events
+    }
+    
+    const { data, error: insertErr } = await supabase
+        .from('event_packages')
+        .insert(clone)
+        .select()
+        
+    if (insertErr) {
+        console.error('Insert error for copy:', insertErr)
+        return { error: 'Failed to clone package' }
+    }
+    
+    revalidateTag('event-packages')
+    return { success: true, data: data[0] }
+}
+
 // パッケージの適用
 export async function applyPackageToTarget(newEvents) {
     const supabase = createAdminClient()
