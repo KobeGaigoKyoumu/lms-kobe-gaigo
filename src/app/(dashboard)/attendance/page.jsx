@@ -537,13 +537,13 @@ export default function AttendancePage() {
                     >
                         <option value="none-0">指定なし</option>
                         <option value="monthly-0.95">月別 95%以下</option>
-                        <option value="monthly-0.90">月別 90%以下</option>
+                        <option value="monthly-0.9">月別 90%以下</option>
                         <option value="monthly-0.85">月別 85%以下</option>
-                        <option value="monthly-0.80">月別 80%以下</option>
+                        <option value="monthly-0.8">月別 80%以下</option>
                         <option value="cumulative-0.95">累計 95%以下</option>
-                        <option value="cumulative-0.90">累計 90%以下</option>
+                        <option value="cumulative-0.9">累計 90%以下</option>
                         <option value="cumulative-0.85">累計 85%以下</option>
-                        <option value="cumulative-0.80">累計 80%以下</option>
+                        <option value="cumulative-0.8">累計 80%以下</option>
                     </select>
                 </div>
 
