@@ -12,23 +12,19 @@ const createAdminClient = () => {
 }
 
 // パッケージ一覧取得（全アカウント共有）
-export const getEventPackages = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        const { data, error } = await supabase
-            .from('event_packages')
-            .select('*')
-            .order('created_at', { ascending: false })
+export const getEventPackages = async () => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+        .from('event_packages')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-        if (error) {
-            console.error('getEventPackages error:', error)
-            return { error: 'Failed to fetch packages' }
-        }
-        return { data }
-    },
-    ['event-packages-list'],
-    { tags: ['event-packages'] }
-)
+    if (error) {
+        console.error('getEventPackages error:', error)
+        return { error: 'Failed to fetch packages' }
+    }
+    return { data }
+}
 
 // 適用済みクラス取得
 export const getAppliedClassesForPackages = async (packageIds) => {
