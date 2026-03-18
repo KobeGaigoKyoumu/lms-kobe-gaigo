@@ -106,6 +106,8 @@ Deno.serve(async (req) => {
             switch (r.reminder_type) {
                 case 'daily':
                     return true
+                case 'weekday':
+                    return currentDay >= 1 && currentDay <= 5
                 case 'weekly':
                     return r.remind_days && r.remind_days.includes(currentDay)
                 case 'once':
