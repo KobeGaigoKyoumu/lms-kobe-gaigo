@@ -143,3 +143,34 @@ export async function deleteEventPackage(id) {
     revalidateTag('event-packages')
     return { success: true }
 }
+
+// パッケージの適用
+export async function applyPackageToTarget(newEvents) {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('calendar_events').insert(newEvents)
+    if (error) {
+        console.error('applyPackageToTarget error:', error)
+        return { error: 'Failed to apply package' }
+    }
+    revalidateTag('calendar-events')
+    return { success: true }
+}
+
+// パッケージの適用解除
+export async function unapplyPackageFromTarget(packageId, targetClass) {
+    const supabase = createAdminClient()
+    const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('package_id', packageId)
+        .eq('target_class', targetClass)
+
+    if (error) {
+        console.error('unapplyPackageFromTarget error:', error)
+        return { error: 'Failed to unapply package' }
+    }
+    
+    // イベント削除されたためカレンダー関連のキャッシュを無効化
+    revalidateTag('calendar-events')
+    return { success: true }
+}

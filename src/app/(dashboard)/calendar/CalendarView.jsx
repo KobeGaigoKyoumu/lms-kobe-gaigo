@@ -9,6 +9,7 @@ import styles from './page.module.css'
 import EventModal from './EventModal'
 import PackageList from './components/PackageList'
 import PackageModal from './components/PackageModal'
+import { applyPackageToTarget, unapplyPackageFromTarget } from '@/app/actions/calendar'
 
 export default function CalendarView({ events, canCreateEvent, userId }) {
     const router = useRouter()
@@ -236,7 +237,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
             }
         }
 
-        const { error } = await supabase.from('calendar_events').insert(newEvents)
+        const { error } = await applyPackageToTarget(newEvents)
         if (error) {
             console.error(error)
             alert('適用に失敗しました')
@@ -250,12 +251,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
     const handlePackageUnapply = async (packageId, targetClass) => {
         if (!confirm(`${targetClass} のパッケージ適用を解除しますか？\n（このパッケージから生成されたイベントが全て削除されます）`)) return
 
-        const supabase = createClient()
-        const { error } = await supabase
-            .from('calendar_events')
-            .delete()
-            .eq('package_id', packageId)
-            .eq('target_class', targetClass)
+        const { error } = await unapplyPackageFromTarget(packageId, targetClass)
 
         if (error) {
             console.error(error)
