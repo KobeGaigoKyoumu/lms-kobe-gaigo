@@ -85,7 +85,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
 )
 
 export const getSchoolAttendanceStats = unstable_cache(
-    async (year, month, isCumulative) => {
+    async (year, month, isCumulative, enrollmentFilter = 'all') => {
         const supabase = getSupabaseAdmin()
         const { data: students, error } = await supabase
             .from('attendance_records')
@@ -96,14 +96,22 @@ export const getSchoolAttendanceStats = unstable_cache(
             .range(0, 49999)
 
         if (error) throw error
-        if (!students || students.length === 0) return null
+        
+        let filteredStudents = students
+        if (enrollmentFilter === 'enrolled') {
+            filteredStudents = students?.filter(s => calculateGrade(s.student_id, year, month) > 0)
+        } else if (enrollmentFilter === 'non-enrolled') {
+            filteredStudents = students?.filter(s => calculateGrade(s.student_id, year, month) === 0)
+        }
 
-        const rates = students.map(s => parseFloat(s.attendance_rate))
+        if (!filteredStudents || filteredStudents.length === 0) return null
+
+        const rates = filteredStudents.map(s => parseFloat(s.attendance_rate))
         const avgRate = rates.reduce((sum, r) => sum + r, 0) / rates.length
         const sortedRates = rates.sort((a, b) => a - b)
 
         const gradeGroups = {}
-        students.forEach(s => {
+        filteredStudents.forEach(s => {
             const grade = calculateGrade(s.student_id, year, month)
             if (!gradeGroups[grade]) gradeGroups[grade] = []
             gradeGroups[grade].push(parseFloat(s.attendance_rate))
@@ -137,9 +145,11 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         // Push to Cloudflare for instant Admin Dashboard loading
         try {
-            const { pushCloudflareSnapshot } = await import('./cloudflare');
-            const type = `attendance_school_${year}_${month}_${isCumulative}`;
-            await pushCloudflareSnapshot(type, result);
+            if (enrollmentFilter === 'all') {
+                const { pushCloudflareSnapshot } = await import('./cloudflare');
+                const type = `attendance_school_${year}_${month}_${isCumulative}`;
+                await pushCloudflareSnapshot(type, result);
+            }
         } catch (e) {
             console.error('Proactive attendance school snapshot failed:', e);
         }
@@ -151,7 +161,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 )
 
 export const getClassAttendanceStats = unstable_cache(
-    async (year, month, isCumulative) => {
+    async (year, month, isCumulative, enrollmentFilter = 'all') => {
         const supabase = getSupabaseAdmin()
 
         // Fetch Master Data
@@ -177,8 +187,15 @@ export const getClassAttendanceStats = unstable_cache(
 
         if (error) throw error
 
+        let filteredStudents = students
+        if (enrollmentFilter === 'enrolled') {
+            filteredStudents = students?.filter(s => calculateGrade(s.student_id, year, month) > 0)
+        } else if (enrollmentFilter === 'non-enrolled') {
+            filteredStudents = students?.filter(s => calculateGrade(s.student_id, year, month) === 0)
+        }
+
         const classGroups = {}
-        students?.forEach(s => {
+        filteredStudents?.forEach(s => {
             const info = studentInfoMap.get(s.student_id)
             const className = info?.className || '未設定'
             const grade = calculateGrade(s.student_id, year, month)
@@ -205,9 +222,11 @@ export const getClassAttendanceStats = unstable_cache(
 
         // Push to Cloudflare for instant Admin Dashboard loading
         try {
-            const { pushCloudflareSnapshot } = await import('./cloudflare');
-            const type = `attendance_class_${year}_${month}_${isCumulative}`;
-            await pushCloudflareSnapshot(type, result);
+            if (enrollmentFilter === 'all') {
+                const { pushCloudflareSnapshot } = await import('./cloudflare');
+                const type = `attendance_class_${year}_${month}_${isCumulative}`;
+                await pushCloudflareSnapshot(type, result);
+            }
         } catch (e) {
             console.error('Proactive attendance class snapshot failed:', e);
         }
@@ -278,11 +297,19 @@ export const getPaginatedAttendance = async ({
     search = '',
     rateFilterType = 'none',
     rateFilterValue = 0,
-    sortOrder = 'asc'
+    sortOrder = 'asc',
+    enrollmentFilter = 'all'
 }) => {
     // 1. Get Cached Full List
     const data = await _getCachedStudentListAttendance(year, month, isCumulative)
     let students = data.students || []
+
+    // 1.5 Filter (Enrollment)
+    if (enrollmentFilter === 'enrolled') {
+        students = students.filter(s => s.grade > 0)
+    } else if (enrollmentFilter === 'non-enrolled') {
+        students = students.filter(s => s.grade === 0)
+    }
 
     // 2. Filter (Search)
     if (search) {
@@ -331,10 +358,17 @@ export const getAllStudentIdsForBulk = async ({
     isCumulative,
     search = '',
     rateFilterType = 'none',
-    rateFilterValue = 0
+    rateFilterValue = 0,
+    enrollmentFilter = 'all'
 }) => {
     const data = await _getCachedStudentListAttendance(year, month, isCumulative)
     let students = data.students || []
+
+    if (enrollmentFilter === 'enrolled') {
+        students = students.filter(s => s.grade > 0)
+    } else if (enrollmentFilter === 'non-enrolled') {
+        students = students.filter(s => s.grade === 0)
+    }
 
     if (search) {
         const lowerSearch = search.toLowerCase()

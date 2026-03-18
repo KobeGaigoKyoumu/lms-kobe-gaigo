@@ -44,6 +44,7 @@ export default function AttendancePage() {
     const [selectedStudents, setSelectedStudents] = useState(new Set()) // For Bulk Export
     const [exporting, setExporting] = useState(false)
     const [rateFilter, setRateFilter] = useState({ type: 'none', value: 0 }) // { type: 'monthly'|'cumulative'|'none', value: 0.95 }
+    const [enrollmentFilter, setEnrollmentFilter] = useState('all') // 'all', 'enrolled', 'non-enrolled'
     const [studentHistory, setStudentHistory] = useState(null)
     const [historyLoading, setHistoryLoading] = useState(false)
     const [sortOrder, setSortOrder] = useState('asc')
@@ -76,12 +77,12 @@ export default function AttendancePage() {
         if (selectedYear && selectedMonth) {
             fetchData()
         }
-    }, [selectedYear, selectedMonth, isCumulative, activeTab, currentPage, rateFilter, sortOrder])
+    }, [selectedYear, selectedMonth, isCumulative, activeTab, currentPage, rateFilter, sortOrder, enrollmentFilter])
 
     // Reset pagination when filters change (manual search trigger handles its own reset effectively if we set page to 1 there, but let's do it here for other filters)
     useEffect(() => {
         setCurrentPage(1)
-    }, [activeTab, rateFilter, sortOrder])
+    }, [activeTab, rateFilter, sortOrder, enrollmentFilter])
     // Note: studentSearch is not here because we trigger search manually or on enter. 
     // When hitting search, we should probably manually reset page to 1.
 
@@ -133,7 +134,7 @@ export default function AttendancePage() {
         try {
             // Priority 0: Cloudflare Snapshots (Instant) - Skip if forceRefresh is true
             const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
-            if (!forceRefresh && workerUrl && (activeTab === 'school' || activeTab === 'class')) {
+            if (!forceRefresh && workerUrl && (activeTab === 'school' || activeTab === 'class') && enrollmentFilter === 'all') {
                 let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
                 const snapshotType = activeTab === 'school'
                     ? `attendance_school_${targetYear}_${targetMonth}_${targetIsCumulative}`
@@ -151,7 +152,7 @@ export default function AttendancePage() {
             }
 
             // Priority 1: Check Local State Cache - Skip if forceRefresh is true
-            const cacheKey = `${targetYear}-${targetMonth}-${targetIsCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}`
+            const cacheKey = `${targetYear}-${targetMonth}-${targetIsCumulative}-${activeTab}-${currentPage}-${rateFilter.type}-${rateFilter.value}-${sortOrder}-${enrollmentFilter}`
             if (!forceRefresh && dataCache.current[cacheKey]) {
                 applyDataToState(dataCache.current[cacheKey])
                 setLoading(false)
@@ -161,9 +162,9 @@ export default function AttendancePage() {
             // Priority 2: Vercel Server Actions (The "Heavy" Backup)
             let result = {}
             if (activeTab === 'school') {
-                result = await getSchoolAttendanceStats(targetYear, targetMonth, targetIsCumulative)
+                result = await getSchoolAttendanceStats(targetYear, targetMonth, targetIsCumulative, enrollmentFilter)
             } else if (activeTab === 'class') {
-                result = await getClassAttendanceStats(targetYear, targetMonth, targetIsCumulative)
+                result = await getClassAttendanceStats(targetYear, targetMonth, targetIsCumulative, enrollmentFilter)
             } else if (activeTab === 'individual') {
                 result = await getPaginatedAttendance({
                     year: targetYear,
@@ -173,7 +174,8 @@ export default function AttendancePage() {
                     limit: ITEMS_PER_PAGE,
                     rateFilterType: rateFilter.type,
                     rateFilterValue: rateFilter.value,
-                    sortOrder
+                    sortOrder,
+                    enrollmentFilter
                     // search is handled via separate state trigger or included? 
                     // Wait, studentSearch is state. Let's include it if present.
                     // But useEffect dependency doesn't include studentSearch properly yet.
@@ -343,7 +345,8 @@ export default function AttendancePage() {
                     isCumulative,
                     search: studentSearch,
                     rateFilterType: rateFilter.type,
-                    rateFilterValue: rateFilter.value
+                    rateFilterValue: rateFilter.value,
+                    enrollmentFilter
                 })
                 setSelectedStudents(new Set(allIds))
             } catch (err) {
@@ -541,6 +544,19 @@ export default function AttendancePage() {
                         <option value="cumulative-0.90">累計 90%以下</option>
                         <option value="cumulative-0.85">累計 85%以下</option>
                         <option value="cumulative-0.80">累計 80%以下</option>
+                    </select>
+                </div>
+
+                <div className={styles.filterGroup}>
+                    <label>在籍状況:</label>
+                    <select
+                        className={styles.select}
+                        value={enrollmentFilter}
+                        onChange={(e) => setEnrollmentFilter(e.target.value)}
+                    >
+                        <option value="all">すべて</option>
+                        <option value="enrolled">在籍者のみ</option>
+                        <option value="non-enrolled">非在籍者のみ</option>
                     </select>
                 </div>
 
