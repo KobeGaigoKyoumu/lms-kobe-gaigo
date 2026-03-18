@@ -920,7 +920,7 @@ export default function AttendancePage() {
 
             {/* 管理者用インポート機能 */}
             {
-                userRole === 'admin' && (
+                (userRole === 'admin' || userRole === 'teacher') && (
                     <div className={styles.importSection}>
                         <h3>データインポート</h3>
                         <div className={styles.importForm}>

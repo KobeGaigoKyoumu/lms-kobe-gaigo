@@ -3,6 +3,7 @@ import { revalidateTag } from 'next/cache'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // Service Role Client to bypass RLS (same as main route.js)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
@@ -16,18 +17,29 @@ export async function POST(request) {
 
         // 認証チェック
         const { data: { user } } = await authClient.auth.getUser()
-        if (!user) {
-            return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+        const adminMember = await getAdminMemberSession()
+
+        let isAuthorized = false
+
+        if (user) {
+            // 管理者チェック (Supabase Auth)
+            const { data: profile } = await authClient
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+            
+            if (profile?.role === 'admin') {
+                isAuthorized = true
+            }
         }
 
-        // 管理者チェック
-        const { data: profile } = await authClient
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
+        // adminMemberセッションがあれば許可
+        if (!isAuthorized && adminMember) {
+            isAuthorized = true
+        }
 
-        if (profile?.role !== 'admin') {
+        if (!isAuthorized) {
             return NextResponse.json({ error: '管理者権限が必要です' }, { status: 403 })
         }
 
