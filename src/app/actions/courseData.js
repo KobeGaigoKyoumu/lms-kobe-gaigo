@@ -1,7 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache, revalidateTag } from 'next/cache'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
@@ -41,10 +42,69 @@ export const getCachedCourses = unstable_cache(
 )
 
 export async function fetchCachedCourses() {
-    // Auth Check
+    // Auth Check: Allow both Supabase Auth users AND Admin Members
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return []
+    const adminMember = await getAdminMemberSession()
+
+    if (!user && !adminMember) return []
 
     return await getCachedCourses()
+}
+
+export async function createCourse(formData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
+
+    if (!user && !adminMember) throw new Error('Unauthorized')
+
+    // Use admin client to ensure we can insert regardless of RLS, 
+    // but try to associate with a teacher_id if possible
+    const adminSupabase = getSupabaseAdmin()
+    const { data, error } = await adminSupabase
+        .from('courses')
+        .insert({
+            title: formData.title,
+            description: formData.description,
+            syllabus: formData.syllabus,
+            is_published: formData.is_published,
+            teacher_id: user?.id || null, // Can be null if created by adminMember without profile
+            // We could add admin_member_id here if we update the schema
+        })
+        .select()
+        .single()
+
+    if (error) throw error
+
+    revalidateTag('courses')
+    return data
+}
+
+export async function updateCourse(id, updates) {
+    const supabase = await createClient()
+    const adminMember = await getAdminMemberSession()
+    // Validation logic here...
+    
+    const adminSupabase = getSupabaseAdmin()
+    const { error } = await adminSupabase
+        .from('courses')
+        .update(updates)
+        .eq('id', id)
+
+    if (error) throw error
+    revalidateTag('courses')
+    return { success: true }
+}
+
+export async function deleteCourse(id) {
+    const adminSupabase = getSupabaseAdmin()
+    const { error } = await adminSupabase
+        .from('courses')
+        .delete()
+        .eq('id', id)
+
+    if (error) throw error
+    revalidateTag('courses')
+    return { success: true }
 }

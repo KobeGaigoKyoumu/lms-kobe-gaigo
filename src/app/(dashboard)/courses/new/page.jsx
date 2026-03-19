@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createCourse } from '@/app/actions/courseData'
 import styles from './page.module.css'
 
 export default function NewCoursePage() {
@@ -29,26 +29,14 @@ export default function NewCoursePage() {
         setLoading(true)
         setError(null)
 
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        const { data, error: insertError } = await supabase
-            .from('courses')
-            .insert({
-                ...formData,
-                teacher_id: user?.id
-            })
-            .select()
-            .single()
-
-        if (insertError) {
+        try {
+            const data = await createCourse(formData)
+            router.push(`/courses/${data.id}`)
+        } catch (err) {
             setError('コースの作成に失敗しました')
-            console.error(insertError)
+            console.error(err)
             setLoading(false)
-            return
         }
-
-        router.push(`/courses/${data.id}`)
     }
 
     return (

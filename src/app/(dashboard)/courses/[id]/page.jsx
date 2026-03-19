@@ -32,7 +32,9 @@ export default async function CourseDetailPage({ params }) {
     // 現在のユーザーのプロファイル
     const adminMember = await getAdminMemberSession()
     let isAdmin = !!adminMember
+    let isTeacher = false
     let isStudent = false
+    
     if (user) {
         const { data: profile } = await supabase
             .from('profiles')
@@ -40,11 +42,15 @@ export default async function CourseDetailPage({ params }) {
             .eq('id', user.id)
             .single()
         isAdmin = profile?.role === 'admin'
+        isTeacher = profile?.role === 'teacher'
         isStudent = profile?.role === 'student'
+    } else if (adminMember) {
+        isAdmin = adminMember.role === 'admin'
+        isTeacher = adminMember.role === 'teacher'
     }
 
-    const isOwner = user ? course.teacher_id === user.id : false
-    const canEdit = isOwner || isAdmin
+    // 「共有」の要件に基づき、管理者または教職員であれば誰でも編集可能にする
+    const canEdit = isAdmin || isTeacher
 
     // 課題一覧取得
     const { data: assignments } = await supabase
