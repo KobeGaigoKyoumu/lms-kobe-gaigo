@@ -500,7 +500,7 @@
     border-color: var(--border-hover);
 }
 
-.paginationBtn.disabled {
+.disabled {
     opacity: 0.5;
     pointer-events: none;
     color: var(--text-tertiary);

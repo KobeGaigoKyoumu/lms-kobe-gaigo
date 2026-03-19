@@ -13,6 +13,11 @@ export default async function CourseDetailPage({ params, searchParams }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    let enrollments = []
+    let totalEnrollments = 0
+    let totalPages = 0
+    let paginatedEnrollments = []
+
     // コース詳細取得
     const { data: course, error } = await supabase
         .from('courses')
@@ -77,7 +82,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
         .order('created_at', { ascending: false })
 
     // 登録者一覧取得（教師・管理者のみ表示）
-    let enrollments = []
     if (canEdit) {
         // 1. 手動登録者を取得
         const { data: manualEnrollments } = await supabase
