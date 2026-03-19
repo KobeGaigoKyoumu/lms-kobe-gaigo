@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import EnrollmentManager from './EnrollmentManager'
+import CourseScheduleManager from './CourseScheduleManager'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function CourseDetailPage({ params, searchParams }) {
@@ -13,6 +14,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    let schedules = []
     let enrollments = []
     let totalEnrollments = 0
     let totalPages = 0
@@ -81,8 +83,21 @@ export default async function CourseDetailPage({ params, searchParams }) {
         .eq('course_id', id)
         .order('created_at', { ascending: false })
 
-    // 登録者一覧取得（教師・管理者のみ表示）
+    // 登録者数と時間割の取得（教師・管理者のみ）
     if (canEdit) {
+        // 時間割取得
+        const { data: scheduleData } = await supabase
+            .from('schedules')
+            .select(`
+                *,
+                class:classes(id, name)
+            `)
+            .eq('course_id', id)
+            .order('day_of_week', { ascending: true })
+            .order('start_time', { ascending: true })
+        schedules = scheduleData || []
+
+        // 登録者数集計のためのデータ取得
         // 1. 手動登録者を取得
         const { data: manualEnrollments } = await supabase
             .from('course_enrollments')
@@ -144,17 +159,8 @@ export default async function CourseDetailPage({ params, searchParams }) {
             }
         })
 
-        enrollments = Array.from(unifiedMap.values()).sort((a, b) => 
-            (b.enrolled_at || '').localeCompare(a.enrolled_at || '')
-        )
-
         totalEnrollments = enrollments.length
-        totalPages = Math.ceil(totalEnrollments / pageSize)
-        paginatedEnrollments = enrollments.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
-
-    // 必要に応じて currentPage が範囲外の場合の調整
-    const displayEnrollments = paginatedEnrollments
 
     // 学生の場合：登録状況を確認
     let isEnrolled = false
@@ -267,6 +273,15 @@ export default async function CourseDetailPage({ params, searchParams }) {
                         </div>
                     </section>
 
+                    {/* 時間割作成（教師・管理者のみ） */}
+                    {canEdit && (
+                        <CourseScheduleManager
+                            courseId={id}
+                            classes={classes}
+                            initialSchedules={schedules}
+                        />
+                    )}
+
                     {/* 登録クラス一覧 */}
                     <section className={styles.section}>
                         <div className={styles.sectionHeader}>
@@ -339,75 +354,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
                             </div>
                         )}
                     </section>
-
-                    {/* 登録者一覧（教師・管理者のみ） */}
-                    {canEdit && (
-                        <section className={styles.section}>
-                            <h2>登録者一覧 ({totalEnrollments}名)</h2>
-
-                            {displayEnrollments.length === 0 ? (
-                                <p className={styles.empty}>登録者がいません</p>
-                            ) : (
-                                <>
-                                    <div className={styles.enrollmentList}>
-                                        {displayEnrollments.map(enrollment => (
-                                            <div key={enrollment.id} className={styles.enrollmentCard}>
-                                                <div className={styles.enrollmentUser}>
-                                                    <div className={styles.userAvatar}>
-                                                        {enrollment.avatar_url ? (
-                                                            <img src={enrollment.avatar_url} alt="" />
-                                                        ) : (
-                                                            enrollment.full_name?.[0] || '?'
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className={styles.userName}>
-                                                            {enrollment.full_name}
-                                                            <span className={`${styles.typeBadge} ${styles[enrollment.type]}`}>
-                                                                {enrollment.type === 'class' ? 'クラス' : '個別'}
-                                                            </span>
-                                                        </p>
-                                                        <p className={styles.userMeta}>
-                                                            {enrollment.student_id && (
-                                                                <span>学籍番号: {enrollment.student_id}</span>
-                                                            )}
-                                                            {enrollment.email && (
-                                                                <span>{enrollment.email}</span>
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <span className={styles.enrolledAt}>
-                                                    {enrollment.enrolled_at ? new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP') : '---'}登録
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* ページネーション */}
-                                    {totalPages > 1 && (
-                                        <div className={styles.pagination}>
-                                            <Link
-                                                href={`/courses/${id}?page=${currentPage - 1}`}
-                                                className={`${styles.paginationBtn} ${currentPage <= 1 ? styles.disabled : ''}`}
-                                            >
-                                                前へ
-                                            </Link>
-                                            <span className={styles.pageInfo}>
-                                                {currentPage} / {totalPages} ページ
-                                            </span>
-                                            <Link
-                                                href={`/courses/${id}?page=${currentPage + 1}`}
-                                                className={`${styles.paginationBtn} ${currentPage >= totalPages ? styles.disabled : ''}`}
-                                            >
-                                                次へ
-                                            </Link>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </section>
-                    )}
                 </main>
             </div>
         </div>

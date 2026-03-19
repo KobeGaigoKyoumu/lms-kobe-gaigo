@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
-import ScheduleManager from './ScheduleManager'
 import StudentList from './StudentList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
@@ -193,37 +192,23 @@ export default async function ClassDetailPage({ params }) {
 
                     {/* 時間割 */}
                     <section className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <h2>時間割</h2>
-                        </div>
-
+                        <h2>時間割</h2>
                         {schedules?.length === 0 ? (
-                            <p className={styles.empty}>時間割が登録されていません</p>
+                            <p className={styles.empty}>設定されていません</p>
                         ) : (
                             <div className={styles.scheduleList}>
-                                {schedules?.map(schedule => (
+                                {schedules.map(schedule => (
                                     <div key={schedule.id} className={styles.scheduleCard}>
-                                        <div className={styles.scheduleDay}>
-                                            {dayNames[schedule.day_of_week]}曜日
-                                        </div>
+                                        <div className={styles.scheduleDay}>{['日', '月', '火', '水', '木', '金', '土'][schedule.day_of_week]}曜日</div>
                                         <div className={styles.scheduleTime}>
                                             {schedule.start_time?.slice(0, 5)} - {schedule.end_time?.slice(0, 5)}
                                         </div>
                                         {schedule.room && (
-                                            <div className={styles.scheduleRoom}>
-                                                教室: {schedule.room}
-                                            </div>
+                                            <div className={styles.scheduleRoom}>{schedule.room}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
-                        )}
-
-                        {canEdit && (
-                            <ScheduleManager
-                                classId={id}
-                                schedules={schedules || []}
-                            />
                         )}
                     </section>
 
