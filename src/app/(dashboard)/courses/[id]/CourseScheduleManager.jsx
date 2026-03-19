@@ -126,6 +126,7 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
             await saveScheduleTemplateAction(courseId, templateName, editingTemplate, newItems)
 
             setEditingTemplate(null)
+            router.refresh()
         } catch (error) {
             console.error('Save template error:', error)
             alert('テンプレートの保存に失敗しました')
@@ -137,12 +138,14 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
     const handleDeleteTemplate = async (templateId) => {
         if (!confirm('このテンプレートを削除しますか？')) return
         await deleteScheduleTemplateAction(courseId, templateId)
+        router.refresh()
     }
 
     const handleCopyTemplate = async (template) => {
         setLoading(true)
         try {
             await copyScheduleTemplateAction(courseId, template)
+            router.refresh()
         } catch (error) {
             console.error(error)
             alert('コピーに失敗しました')
@@ -168,6 +171,7 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
         try {
             await applyScheduleTemplateAction(courseId, selectedClassId, template, applyConfig.shift)
             setShowApplyModal(false)
+            router.refresh()
         } catch (error) {
             console.error('Apply template error:', error)
             alert('テンプレートの適用に失敗しました')
@@ -179,6 +183,7 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
     const handleDeleteClassSchedule = async (scheduleId) => {
         if (!confirm('このコマを削除しますか？')) return
         await deleteClassScheduleAction(courseId, scheduleId)
+        router.refresh()
     }
 
     // --- Renderers ---
