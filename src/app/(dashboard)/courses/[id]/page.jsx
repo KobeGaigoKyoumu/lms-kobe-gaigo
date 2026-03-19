@@ -5,6 +5,7 @@ import styles from './page.module.css'
 import EnrollmentManager from './EnrollmentManager'
 import CourseScheduleManager from './CourseScheduleManager'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export default async function CourseDetailPage({ params, searchParams }) {
     const { id } = await params
@@ -12,6 +13,10 @@ export default async function CourseDetailPage({ params, searchParams }) {
     const currentPage = parseInt(resolvedSearchParams.page) || 1
     const pageSize = 10
     const supabase = await createClient()
+    const adminSupabase = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
     const { data: { user } } = await supabase.auth.getUser()
 
     let schedules = []
@@ -98,8 +103,8 @@ export default async function CourseDetailPage({ params, searchParams }) {
             .order('start_time', { ascending: true })
         schedules = scheduleData || []
 
-        // 時間割テンプレート取得
-        const { data: templateData } = await supabase
+        // 時間割テンプレート取得 (管理者権限で取得)
+        const { data: templateData } = await adminSupabase
             .from('schedule_templates')
             .select(`
                 *,
