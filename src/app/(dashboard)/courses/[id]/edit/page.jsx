@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { updateCourse, deleteCourse } from '@/app/actions/courseData'
 import styles from './page.module.css'
 
 export default function EditCoursePage({ params }) {
@@ -63,42 +64,31 @@ export default function EditCoursePage({ params }) {
         setSaving(true)
         setError(null)
 
-        const supabase = createClient()
-        const { error: updateError } = await supabase
-            .from('courses')
-            .update({
+        try {
+            await updateCourse(courseId, {
                 ...formData,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', courseId)
-
-        if (updateError) {
+            router.push(`/courses/${courseId}`)
+            router.refresh() // Ensure server components re-fetch
+        } catch (updateError) {
             setError('コースの更新に失敗しました')
             console.error(updateError)
             setSaving(false)
-            return
         }
-
-        router.push(`/courses/${courseId}`)
     }
 
     const handleDelete = async () => {
         setDeleting(true)
-        const supabase = createClient()
-
-        const { error: deleteError } = await supabase
-            .from('courses')
-            .delete()
-            .eq('id', courseId)
-
-        if (deleteError) {
+        try {
+            await deleteCourse(courseId)
+            router.push('/courses')
+            router.refresh()
+        } catch (deleteError) {
             setError('コースの削除に失敗しました')
             console.error(deleteError)
             setDeleting(false)
-            return
         }
-
-        router.push('/courses')
     }
 
     if (loading) {
