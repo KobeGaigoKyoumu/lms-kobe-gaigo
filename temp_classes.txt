@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS public.classes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  grade_level TEXT,     -- 初級、中級、上級など
+  academic_year INTEGER DEFAULT EXTRACT(YEAR FROM NOW()),
+  teacher_id UUID REFERENCES public.profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);

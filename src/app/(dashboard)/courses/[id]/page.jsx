@@ -15,6 +15,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
     const { data: { user } } = await supabase.auth.getUser()
 
     let schedules = []
+    let templates = []
     let enrollments = []
     let totalEnrollments = 0
     let totalPages = 0
@@ -96,6 +97,17 @@ export default async function CourseDetailPage({ params, searchParams }) {
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true })
         schedules = scheduleData || []
+
+        // 時間割テンプレート取得
+        const { data: templateData } = await supabase
+            .from('schedule_templates')
+            .select(`
+                *,
+                items:schedule_template_items(*)
+            `)
+            .eq('course_id', id)
+            .order('created_at', { ascending: false })
+        templates = templateData || []
 
         // 登録者数集計のためのデータ取得
         // 1. 手動登録者を取得
@@ -279,6 +291,7 @@ export default async function CourseDetailPage({ params, searchParams }) {
                             courseId={id}
                             classes={classes}
                             initialSchedules={schedules}
+                            initialTemplates={templates}
                         />
                     )}
 
