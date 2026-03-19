@@ -207,6 +207,8 @@
     color: white;
     font-size: var(--font-size-sm);
     border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
     transition: all var(--transition-fast);
 }
 
