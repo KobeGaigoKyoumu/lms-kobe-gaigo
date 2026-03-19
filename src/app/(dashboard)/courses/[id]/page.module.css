@@ -781,7 +781,7 @@
 
 .gridHeaderRow {
     display: grid;
-    grid-template-columns: 80px repeat(4, 1fr);
+    grid-template-columns: 80px repeat(5, 1fr);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     font-weight: 600;
@@ -801,7 +801,7 @@
 
 .gridRow {
     display: grid;
-    grid-template-columns: 80px repeat(4, 1fr);
+    grid-template-columns: 80px repeat(5, 1fr);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -809,7 +809,7 @@
     border-bottom: none;
 }
 
-.gridDayCell {
+.gridSideCell {
     display: flex;
     align-items: center;
     justify-content: center;

@@ -190,23 +190,23 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
     const renderGrid = (gridData, isEditing = false, onCellChange = null, onDeleteCell = null) => {
         return (
             <div className={styles.scheduleGrid}>
-                {/* Header: Periods */}
+                {/* Header: Days */}
                 <div className={styles.gridHeaderRow}>
-                    <div className={styles.gridCorner}>曜日 \ 時間</div>
-                    {[1, 2, 3, 4].map(period => (
-                        <div key={period} className={styles.gridHeaderCell}>{period}限</div>
+                    <div className={styles.gridCorner}>時間 \ 曜日</div>
+                    {DAY_NAMES.map((dayName) => (
+                        <div key={dayName} className={styles.gridHeaderCell}>{dayName}</div>
                     ))}
                 </div>
-                {/* Body: Days */}
-                {DAY_NAMES.map((dayName, dayIndex) => {
-                    const dayNum = dayIndex + 1
+                {/* Body: Periods */}
+                {[1, 2, 3, 4].map(period => {
                     return (
-                        <div key={dayNum} className={styles.gridRow}>
-                            <div className={styles.gridDayCell}>{dayName}</div>
-                            {[1, 2, 3, 4].map(period => {
+                        <div key={period} className={styles.gridRow}>
+                            <div className={styles.gridSideCell}>{period}限</div>
+                            {DAY_NAMES.map((_, dayIndex) => {
+                                const dayNum = dayIndex + 1
                                 const subject = isEditing ? gridData[dayNum]?.[period] : gridData.find(s => s.day_of_week === dayNum && s.period === period)
                                 return (
-                                    <div key={period} className={styles.gridDataCell}>
+                                    <div key={dayNum} className={styles.gridDataCell}>
                                         {isEditing ? (
                                             <input
                                                 type="text"
