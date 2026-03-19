@@ -91,29 +91,45 @@ export const getStudentSession = cache(async () => {
             cookieStore.get('kobe_student_session_v1')?.value ||
             cookieStore.get('student_id_session')?.value
 
-        // 1. Check Passcode Cookie
+        // 1. Check Passcode Cookie (Fastest - No DB hit if Base64 is valid)
         if (encoded) {
             try {
                 // If it's the Base64 version
                 const json = Buffer.from(encoded, 'base64').toString('utf8')
                 const data = JSON.parse(json)
                 
-                // Fallback fetch if missing enrollmentPeriod but has studentId
-                if (data.studentId && !data.enrollmentPeriod) {
-                    const supabase = createAdminClient()
-                    const { data: stData } = await supabase.from('students').select('enrollment_period').eq('student_id_text', data.studentId).single()
-                    if (stData) data.enrollmentPeriod = stData.enrollment_period
+                // Return immediately if all essential data is present
+                if (data.studentId && data.enrollmentPeriod && data.className) {
+                    return {
+                        studentId: data.studentId,
+                        name: data.name,
+                        className: data.className,
+                        academicYear: data.academicYear,
+                        enrollmentPeriod: data.enrollmentPeriod
+                    }
                 }
-                
-                return {
-                    studentId: data.studentId,
-                    name: data.name,
-                    className: data.className,
-                    academicYear: data.academicYear,
-                    enrollmentPeriod: data.enrollmentPeriod
+
+                // Fallback fetch only if missing essential data (one-time migration)
+                if (data.studentId) {
+                    const supabase = createAdminClient()
+                    const { data: stData } = await supabase
+                        .from('students')
+                        .select('class_name, academic_year, enrollment_period')
+                        .eq('student_id_text', data.studentId)
+                        .single()
+                    
+                    if (stData) {
+                        return {
+                            studentId: data.studentId,
+                            name: data.name,
+                            className: stData.class_name,
+                            academicYear: stData.academic_year,
+                            enrollmentPeriod: stData.enrollment_period
+                        }
+                    }
                 }
             } catch {
-                // Fallback for ID-only legacy cookies
+                // Legacy ID-only fallback (one-time DB hit)
                 const supabase = createAdminClient()
                 const { data: student } = await supabase
                     .from('students')
@@ -134,8 +150,10 @@ export const getStudentSession = cache(async () => {
         }
 
         // 2. Check Supabase User (Google Login)
+        // Skip if a cookie-based session was already found to save CPU
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data: { session } } = await supabase.auth.getSession() // getSession is faster than getUser for simple presence check
+        const user = session?.user
 
         if (user) {
             const { data: profile } = await supabase
@@ -144,8 +162,9 @@ export const getStudentSession = cache(async () => {
                 .eq('id', user.id)
                 .single()
 
-            if (profile?.role === 'student') {
-                // Fetch class info from students master if missing in profile
+            if (profile?.role === 'student' && profile.student_id_text) {
+                // Use a short cache for the master data fetch if needed, 
+                // but usually we can assume the profile is correct or fetch once.
                 const { data: studentMaster } = await supabase
                     .from('students')
                     .select('class_name, academic_year, enrollment_period')

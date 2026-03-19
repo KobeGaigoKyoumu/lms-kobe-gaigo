@@ -45,6 +45,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
             let workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL
             let success = false
 
+            // Try Worker first (0 CPU on Vercel)
             if (workerUrl && role === 'student') {
                 if (!workerUrl.startsWith('http')) {
                     workerUrl = `https://${workerUrl}`
@@ -58,29 +59,11 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                 }).toString();
 
                 try {
-                    const res = await fetch(`${workerUrl}?${query}`)
+                    const res = await fetch(`${workerUrl}?${query}`, { signal: AbortSignal.timeout(5000) })
                     if (res.ok) {
                         const data = await res.json()
-                        // Ensure required fields exist
                         if (data && typeof data === 'object') {
                             const normalized = normalizeStatuses(data);
-                            // If Worker returns 0 assignments, we might suspect it's outdated. 
-                            // But for now, we accept it. If user insists on verification, we can add a secondary check.
-                            // Given the user report "Mobile reading old data", let's prioritize Internal API if Worker result is suspicious (e.g. 0 assignments for a student).
-                            // A simple heuristic: if assignments > 0 in cache but 0 in worker, that's sus.
-                            // For now, let's just stick to the plan: try worker, but if it fails/returns garbage, use internal.
-                            // Actually, let's just use the internal API as a fallback if the worker didn't provide specific keys.
-                            // But since we normalize, keys are always there.
-
-                            // CRITICAL: The user said "Assignments disappeared". Worker likely returns 0. 
-                            // So let's double check with internal if counts are 0? No, that's double fetching.
-                            // Let's just USE INTERNAL API PREFERENTIALLY for now as requested/implied by "Worker is stopped" logic attempt.
-                            // But I will keep the optimistic Worker code commented out to "revert" correctly but effectively DISABLE it for now.
-
-                            // Wait, the user said "Worse, chat animation and counter gone". That was due to Syntax Error.
-                            // So fixing syntax is priority #1. 
-                            // To fix "Old data", I will bump cache key.
-
                             setStatuses(prev => ({ ...prev, ...normalized }))
                             sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
                             lastFetchRef.current = now
@@ -92,30 +75,27 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                 }
             }
 
-            // Fallback to internal API only if Worker failed
+            // Fallback to internal API (Only if Worker failed and not on short cooldown)
+            // Use a specific ref to avoid hammering Vercel if it's already struggling
             if (!success) {
-                const resInternal = await fetch('/api/status', { cache: 'no-store' })
+                const lastFallback = parseInt(sessionStorage.getItem('last_status_fallback') || '0')
+                if (now - lastFallback < 60000) { // 1 minute cooldown for Vercel fallback
+                    console.log('Vercel status fallback on cooldown to save CPU')
+                    return
+                }
+
+                const resInternal = await fetch('/api/status', { cache: 'no-store', signal: AbortSignal.timeout(8000) })
                 if (resInternal.ok) {
                     const data = await resInternal.json()
-                    console.log('📱 Status API (Internal) Data:', data); // DEBUG
                     const normalized = normalizeStatuses(data);
                     setStatuses(prev => ({ ...prev, ...normalized }))
                     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                    sessionStorage.setItem('last_status_fallback', now.toString())
                     lastFetchRef.current = now
                 }
             }
         } catch (error) {
             console.error('Failed to fetch status:', error)
-            // Retry internal
-            const resInternal = await fetch('/api/status', { cache: 'no-store' })
-            if (resInternal.ok) {
-                const data = await resInternal.json()
-                console.log('📱 Status API (Retry) Data:', data); // DEBUG
-                const normalized = normalizeStatuses(data);
-                setStatuses(prev => ({ ...prev, ...normalized }))
-                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
-                lastFetchRef.current = now
-            }
         }
     }
 
