@@ -123,11 +123,11 @@ export default async function CourseDetailPage({ params }) {
 
         // クラス学生を追加
         classStudents?.forEach(s => {
-            const key = s.email || s.id
+            const key = s.email || s.student_id_text
             if (!unifiedMap.has(key)) {
                 unifiedMap.set(key, {
-                    id: `student-${s.id}`,
-                    full_name: s.name,
+                    id: `student-${s.student_id_text}`,
+                    full_name: s.full_name,
                     email: s.email,
                     student_id: s.student_id_text,
                     avatar_url: null,
