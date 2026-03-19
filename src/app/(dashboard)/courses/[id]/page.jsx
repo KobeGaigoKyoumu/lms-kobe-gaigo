@@ -52,12 +52,26 @@ export default async function CourseDetailPage({ params }) {
     // 「共有」の要件に基づき、管理者または教職員であれば誰でも編集可能にする
     const canEdit = isAdmin || isTeacher
 
-    // 課題一覧取得
     const { data: assignments } = await supabase
         .from('assignments')
         .select('*')
         .eq('course_id', id)
         .order('due_date', { ascending: true })
+
+    // このコースに紐付くクラス一覧取得
+    const { data: classes } = await supabase
+        .from('classes')
+        .select(`
+            id,
+            name,
+            grade_level,
+            academic_year,
+            teacher:profiles!teacher_id (
+                full_name
+            )
+        `)
+        .eq('course_id', id)
+        .order('created_at', { ascending: false })
 
     // 登録者一覧取得（教師・管理者のみ表示）
     let enrollments = []
@@ -140,20 +154,6 @@ export default async function CourseDetailPage({ params }) {
         isEnrolled = !!enrollment
     }
 
-    // このコースに紐付くクラス一覧取得
-    const { data: classes } = await supabase
-        .from('classes')
-        .select(`
-            id,
-            name,
-            grade_level,
-            academic_year,
-            teacher:profiles!teacher_id (
-                full_name
-            )
-        `)
-        .eq('course_id', id)
-        .order('created_at', { ascending: false })
 
     return (
         <div className={styles.page}>
