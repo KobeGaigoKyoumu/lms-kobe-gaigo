@@ -384,6 +384,27 @@
     font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.typeBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.typeBadge.class {
+    background: var(--primary-50);
+    color: var(--primary-600);
+}
+
+.typeBadge.manual {
+    background: var(--secondary-50);
+    color: var(--secondary-600);
 }
 
 .userMeta {

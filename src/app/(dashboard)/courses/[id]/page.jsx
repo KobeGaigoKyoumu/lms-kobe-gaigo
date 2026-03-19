@@ -62,7 +62,8 @@ export default async function CourseDetailPage({ params }) {
     // 登録者一覧取得（教師・管理者のみ表示）
     let enrollments = []
     if (canEdit) {
-        const { data } = await supabase
+        // 1. 手動登録者を取得
+        const { data: manualEnrollments } = await supabase
             .from('course_enrollments')
             .select(`
                 id,
@@ -76,8 +77,55 @@ export default async function CourseDetailPage({ params }) {
                 )
             `)
             .eq('course_id', id)
-            .order('enrolled_at', { ascending: false })
-        enrollments = data || []
+
+        // 2. 紐付いているクラスの学生を取得
+        const classNames = classes?.map(c => c.name) || []
+        let classStudents = []
+        if (classNames.length > 0) {
+            const { data } = await supabase
+                .from('students')
+                .select('*')
+                .in('class_name', classNames)
+                .eq('status', 'active')
+            classStudents = data || []
+        }
+
+        // 3. 統合と重複排除（student_id または email で名寄せ）
+        const unifiedMap = new Map()
+
+        // 手動登録者を優先
+        manualEnrollments?.forEach(e => {
+            const key = e.user?.email || e.id
+            unifiedMap.set(key, {
+                id: e.id,
+                full_name: e.user?.full_name,
+                email: e.user?.email,
+                student_id: e.user?.student_id,
+                avatar_url: e.user?.avatar_url,
+                enrolled_at: e.enrolled_at,
+                type: 'manual'
+            })
+        })
+
+        // クラス学生を追加
+        classStudents?.forEach(s => {
+            const key = s.email || s.id
+            if (!unifiedMap.has(key)) {
+                unifiedMap.set(key, {
+                    id: `student-${s.id}`,
+                    full_name: s.name,
+                    email: s.email,
+                    student_id: s.student_id_text,
+                    avatar_url: null,
+                    enrolled_at: s.created_at, // またはクラス紐付け日
+                    type: 'class'
+                })
+            }
+        })
+
+        enrollments = Array.from(unifiedMap.values()).sort((a, b) => 
+            (b.enrolled_at || '').localeCompare(a.enrolled_at || '')
+        )
     }
 
     // 学生の場合：登録状況を確認
@@ -291,26 +339,31 @@ export default async function CourseDetailPage({ params }) {
                                         <div key={enrollment.id} className={styles.enrollmentCard}>
                                             <div className={styles.enrollmentUser}>
                                                 <div className={styles.userAvatar}>
-                                                    {enrollment.user?.avatar_url ? (
-                                                        <img src={enrollment.user.avatar_url} alt="" />
+                                                    {enrollment.avatar_url ? (
+                                                        <img src={enrollment.avatar_url} alt="" />
                                                     ) : (
-                                                        enrollment.user?.full_name?.[0] || '?'
+                                                        enrollment.full_name?.[0] || '?'
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className={styles.userName}>{enrollment.user?.full_name}</p>
+                                                    <p className={styles.userName}>
+                                                        {enrollment.full_name}
+                                                        <span className={`${styles.typeBadge} ${styles[enrollment.type]}`}>
+                                                            {enrollment.type === 'class' ? 'クラス' : '個別'}
+                                                        </span>
+                                                    </p>
                                                     <p className={styles.userMeta}>
-                                                        {enrollment.user?.student_id && (
-                                                            <span>学籍番号: {enrollment.user.student_id}</span>
+                                                        {enrollment.student_id && (
+                                                            <span>学籍番号: {enrollment.student_id}</span>
                                                         )}
-                                                        {enrollment.user?.email && (
-                                                            <span>{enrollment.user.email}</span>
+                                                        {enrollment.email && (
+                                                            <span>{enrollment.email}</span>
                                                         )}
                                                     </p>
                                                 </div>
                                             </div>
                                             <span className={styles.enrolledAt}>
-                                                {new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP')}登録
+                                                {enrollment.enrolled_at ? new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP') : '---'}登録
                                             </span>
                                         </div>
                                     ))}
