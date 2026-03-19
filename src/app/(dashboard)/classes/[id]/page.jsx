@@ -2,8 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
+import courseStyles from '@/app/(dashboard)/courses/[id]/page.module.css'
 import StudentList from './StudentList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+
+const DAY_NAMES = ['月', '火', '水', '木', '金']
 
 export default async function ClassDetailPage({ params }) {
     const { id } = await params
@@ -193,23 +196,56 @@ export default async function ClassDetailPage({ params }) {
                     {/* 時間割 */}
                     <section className={styles.section}>
                         <h2>時間割</h2>
-                        {schedules?.length === 0 ? (
-                            <p className={styles.empty}>設定されていません</p>
-                        ) : (
-                            <div className={styles.scheduleList}>
-                                {schedules.map(schedule => (
-                                    <div key={schedule.id} className={styles.scheduleCard}>
-                                        <div className={styles.scheduleDay}>{['日', '月', '火', '水', '木', '金', '土'][schedule.day_of_week]}曜日</div>
-                                        <div className={styles.scheduleTime}>
-                                            {schedule.start_time?.slice(0, 5)} - {schedule.end_time?.slice(0, 5)}
-                                        </div>
-                                        {schedule.room && (
-                                            <div className={styles.scheduleRoom}>{schedule.room}</div>
-                                        )}
+                        {(() => {
+                            const processedSchedules = schedules.map(s => {
+                                if (!s.period && s.start_time) {
+                                    if (s.start_time.startsWith('09:00') || s.start_time.startsWith('13:10')) s.period = 1;
+                                    else if (s.start_time.startsWith('09:50') || s.start_time.startsWith('14:00')) s.period = 2;
+                                    else if (s.start_time.startsWith('10:50') || s.start_time.startsWith('15:00')) s.period = 3;
+                                    else if (s.start_time.startsWith('11:40') || s.start_time.startsWith('15:50')) s.period = 4;
+                                }
+                                return s;
+                            });
+
+                            return processedSchedules?.length === 0 ? (
+                                <p className={styles.empty}>設定されていません</p>
+                            ) : (
+                                <div className={courseStyles.scheduleGrid}>
+                                    <div className={courseStyles.gridHeaderRow}>
+                                        <div className={courseStyles.gridCorner}>時間 \ 曜日</div>
+                                        {DAY_NAMES.map(dayName => (
+                                            <div key={dayName} className={courseStyles.gridHeaderCell}>{dayName}</div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    {[1, 2, 3, 4].map(period => (
+                                        <div key={period} className={courseStyles.gridRow}>
+                                            <div className={courseStyles.gridSideCell}>{period}限</div>
+                                            {DAY_NAMES.map((_, dayIndex) => {
+                                                const dayNum = dayIndex + 1;
+                                                const subject = processedSchedules.find(s => s.day_of_week === dayNum && s.period === period);
+                                                return (
+                                                    <div key={dayNum} className={courseStyles.gridDataCell}>
+                                                        {subject ? (
+                                                            <div className={courseStyles.slotContent}>
+                                                                <span className={courseStyles.slotSubject}>{subject.subject}</span>
+                                                                {subject.start_time && (
+                                                                    <span className={courseStyles.slotTime}>{subject.start_time.slice(0, 5)}~{subject.end_time.slice(0, 5)}</span>
+                                                                )}
+                                                                {subject.room && (
+                                                                    <span className={courseStyles.slotRoom}>{subject.room}</span>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className={courseStyles.emptySlot}>-</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </section>
 
                     {/* 課題 */}
