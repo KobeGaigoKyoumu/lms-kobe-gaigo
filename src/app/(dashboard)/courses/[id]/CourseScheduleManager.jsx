@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'react-router-dom' // Wait, this is Next.js. Should be next/navigation
-import { useRouter as useNextRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
 export default function CourseScheduleManager({ courseId, classes, initialSchedules }) {
-    const router = useNextRouter()
+    const router = useRouter()
     const [showAdd, setShowAdd] = useState(false)
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
