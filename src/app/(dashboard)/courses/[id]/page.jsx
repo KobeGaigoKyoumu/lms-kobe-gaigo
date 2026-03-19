@@ -5,8 +5,11 @@ import styles from './page.module.css'
 import EnrollmentManager from './EnrollmentManager'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
-export default async function CourseDetailPage({ params }) {
+export default async function CourseDetailPage({ params, searchParams }) {
     const { id } = await params
+    const resolvedSearchParams = await searchParams
+    const currentPage = parseInt(resolvedSearchParams.page) || 1
+    const pageSize = 10
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -140,7 +143,14 @@ export default async function CourseDetailPage({ params }) {
         enrollments = Array.from(unifiedMap.values()).sort((a, b) => 
             (b.enrolled_at || '').localeCompare(a.enrolled_at || '')
         )
+
+        totalEnrollments = enrollments.length
+        totalPages = Math.ceil(totalEnrollments / pageSize)
+        paginatedEnrollments = enrollments.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
+
+    // 必要に応じて currentPage が範囲外の場合の調整
+    const displayEnrollments = paginatedEnrollments
 
     // 学生の場合：登録状況を確認
     let isEnrolled = false
@@ -329,45 +339,68 @@ export default async function CourseDetailPage({ params }) {
                     {/* 登録者一覧（教師・管理者のみ） */}
                     {canEdit && (
                         <section className={styles.section}>
-                            <h2>登録者一覧 ({enrollments?.length || 0}名)</h2>
+                            <h2>登録者一覧 ({totalEnrollments}名)</h2>
 
-                            {enrollments?.length === 0 ? (
+                            {displayEnrollments.length === 0 ? (
                                 <p className={styles.empty}>登録者がいません</p>
                             ) : (
-                                <div className={styles.enrollmentList}>
-                                    {enrollments?.map(enrollment => (
-                                        <div key={enrollment.id} className={styles.enrollmentCard}>
-                                            <div className={styles.enrollmentUser}>
-                                                <div className={styles.userAvatar}>
-                                                    {enrollment.avatar_url ? (
-                                                        <img src={enrollment.avatar_url} alt="" />
-                                                    ) : (
-                                                        enrollment.full_name?.[0] || '?'
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <p className={styles.userName}>
-                                                        {enrollment.full_name}
-                                                        <span className={`${styles.typeBadge} ${styles[enrollment.type]}`}>
-                                                            {enrollment.type === 'class' ? 'クラス' : '個別'}
-                                                        </span>
-                                                    </p>
-                                                    <p className={styles.userMeta}>
-                                                        {enrollment.student_id && (
-                                                            <span>学籍番号: {enrollment.student_id}</span>
+                                <>
+                                    <div className={styles.enrollmentList}>
+                                        {displayEnrollments.map(enrollment => (
+                                            <div key={enrollment.id} className={styles.enrollmentCard}>
+                                                <div className={styles.enrollmentUser}>
+                                                    <div className={styles.userAvatar}>
+                                                        {enrollment.avatar_url ? (
+                                                            <img src={enrollment.avatar_url} alt="" />
+                                                        ) : (
+                                                            enrollment.full_name?.[0] || '?'
                                                         )}
-                                                        {enrollment.email && (
-                                                            <span>{enrollment.email}</span>
-                                                        )}
-                                                    </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className={styles.userName}>
+                                                            {enrollment.full_name}
+                                                            <span className={`${styles.typeBadge} ${styles[enrollment.type]}`}>
+                                                                {enrollment.type === 'class' ? 'クラス' : '個別'}
+                                                            </span>
+                                                        </p>
+                                                        <p className={styles.userMeta}>
+                                                            {enrollment.student_id && (
+                                                                <span>学籍番号: {enrollment.student_id}</span>
+                                                            )}
+                                                            {enrollment.email && (
+                                                                <span>{enrollment.email}</span>
+                                                            )}
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                                <span className={styles.enrolledAt}>
+                                                    {enrollment.enrolled_at ? new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP') : '---'}登録
+                                                </span>
                                             </div>
-                                            <span className={styles.enrolledAt}>
-                                                {enrollment.enrolled_at ? new Date(enrollment.enrolled_at).toLocaleDateString('ja-JP') : '---'}登録
+                                        ))}
+                                    </div>
+
+                                    {/* ページネーション */}
+                                    {totalPages > 1 && (
+                                        <div className={styles.pagination}>
+                                            <Link
+                                                href={`/courses/${id}?page=${currentPage - 1}`}
+                                                className={`${styles.paginationBtn} ${currentPage <= 1 ? styles.disabled : ''}`}
+                                            >
+                                                前へ
+                                            </Link>
+                                            <span className={styles.pageInfo}>
+                                                {currentPage} / {totalPages} ページ
                                             </span>
+                                            <Link
+                                                href={`/courses/${id}?page=${currentPage + 1}`}
+                                                className={`${styles.paginationBtn} ${currentPage >= totalPages ? styles.disabled : ''}`}
+                                            >
+                                                次へ
+                                            </Link>
                                         </div>
-                                    ))}
-                                </div>
+                                    )}
+                                </>
                             )}
                         </section>
                     )}
