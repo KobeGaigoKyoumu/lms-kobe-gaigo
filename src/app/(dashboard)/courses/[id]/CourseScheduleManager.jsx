@@ -3,6 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import {
+    saveScheduleTemplateAction,
+    deleteScheduleTemplateAction,
+    copyScheduleTemplateAction,
+    applyScheduleTemplateAction,
+    deleteClassScheduleAction
+} from '@/app/actions/scheduleTemplateActions'
 import styles from './page.module.css'
 
 const SHIFT_TIMES = {
@@ -100,36 +107,14 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
         }
 
         setLoading(true)
-        const supabase = createClient()
-        let templateId = editingTemplate
 
         try {
-            if (editingTemplate === 'new') {
-                const { data, error } = await supabase
-                    .from('schedule_templates')
-                    .insert({ course_id: courseId, name: templateName })
-                    .select()
-                    .single()
-                if (error) throw error
-                templateId = data.id
-            } else {
-                const { error } = await supabase
-                    .from('schedule_templates')
-                    .update({ name: templateName })
-                    .eq('id', templateId)
-                if (error) throw error
-            }
-
-            // Update items
-            await supabase.from('schedule_template_items').delete().eq('template_id', templateId)
-
             const newItems = []
             for (let day = 1; day <= 5; day++) {
                 for (let period = 1; period <= 4; period++) {
                     const subject = templateGrid[day]?.[period]
                     if (subject?.trim()) {
                         newItems.push({
-                            template_id: templateId,
                             day_of_week: day,
                             period: period,
                             subject: subject.trim()
@@ -138,15 +123,9 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
                 }
             }
 
-            if (newItems.length > 0) {
-                const { error: itemsError } = await supabase
-                    .from('schedule_template_items')
-                    .insert(newItems)
-                if (itemsError) throw itemsError
-            }
+            await saveScheduleTemplateAction(courseId, templateName, editingTemplate, newItems)
 
             setEditingTemplate(null)
-            router.refresh()
         } catch (error) {
             console.error('Save template error:', error)
             alert('テンプレートの保存に失敗しました')
@@ -157,32 +136,13 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
 
     const handleDeleteTemplate = async (templateId) => {
         if (!confirm('このテンプレートを削除しますか？')) return
-        const supabase = createClient()
-        await supabase.from('schedule_templates').delete().eq('id', templateId)
-        router.refresh()
+        await deleteScheduleTemplateAction(courseId, templateId)
     }
 
     const handleCopyTemplate = async (template) => {
         setLoading(true)
         try {
-            const supabase = createClient()
-            const { data: newTemplate, error } = await supabase
-                .from('schedule_templates')
-                .insert({ course_id: courseId, name: `${template.name} - コピー` })
-                .select()
-                .single()
-            if (error) throw error
-
-            if (template.items && template.items.length > 0) {
-                const copyItems = template.items.map(i => ({
-                    template_id: newTemplate.id,
-                    day_of_week: i.day_of_week,
-                    period: i.period,
-                    subject: i.subject
-                }))
-                await supabase.from('schedule_template_items').insert(copyItems)
-            }
-            router.refresh()
+            await copyScheduleTemplateAction(courseId, template)
         } catch (error) {
             console.error(error)
             alert('コピーに失敗しました')
@@ -204,32 +164,10 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
         if (!confirm(`「${template.name}」をクラス適用しますか？現在の時間割は上書きされます。`)) return
 
         setLoading(true)
-        const supabase = createClient()
 
         try {
-            // Delete current schedules for this class
-            await supabase.from('schedules').delete().eq('class_id', selectedClassId)
-
-            // Insert new ones
-            const shiftTimes = SHIFT_TIMES[applyConfig.shift]
-            const newSchedules = template.items.map(item => ({
-                course_id: courseId,
-                class_id: selectedClassId,
-                day_of_week: item.day_of_week,
-                period: item.period,
-                subject: item.subject,
-                start_time: shiftTimes[item.period].start,
-                end_time: shiftTimes[item.period].end,
-                room: null // 教室は別途手動で設定
-            }))
-
-            if (newSchedules.length > 0) {
-                const { error } = await supabase.from('schedules').insert(newSchedules)
-                if (error) throw error
-            }
-
+            await applyScheduleTemplateAction(courseId, selectedClassId, template, applyConfig.shift)
             setShowApplyModal(false)
-            router.refresh()
         } catch (error) {
             console.error('Apply template error:', error)
             alert('テンプレートの適用に失敗しました')
@@ -240,9 +178,7 @@ export default function CourseScheduleManager({ courseId, classes, initialSchedu
 
     const handleDeleteClassSchedule = async (scheduleId) => {
         if (!confirm('このコマを削除しますか？')) return
-        const supabase = createClient()
-        await supabase.from('schedules').delete().eq('id', scheduleId)
-        router.refresh()
+        await deleteClassScheduleAction(courseId, scheduleId)
     }
 
     // --- Renderers ---
