@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import Link from 'next/link'
@@ -49,8 +50,14 @@ export default async function StudentCoursePage() {
         )
     }
 
+    // 管理者クライアントを作成してRLSをバイパスし、他の学生情報（在籍者数）を取得する
+    const adminSupabase = createSupabaseAdmin(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+
     // 学生マスターから該当クラスの学生を取得（在籍者数用）
-    const { data: students } = await supabase
+    const { data: students } = await adminSupabase
         .from('students')
         .select('id')
         .eq('class_name', classData.name)
@@ -139,8 +146,9 @@ export default async function StudentCoursePage() {
                             return processedSchedules?.length === 0 ? (
                                 <p className={styles.empty}>設定されていません</p>
                             ) : (
-                                <div className={courseStyles.scheduleGrid}>
-                                    <div className={courseStyles.gridHeaderRow}>
+                                <div className={styles.tableWrapper}>
+                                    <div className={courseStyles.scheduleGrid} style={{ minWidth: '600px' }}>
+                                        <div className={courseStyles.gridHeaderRow}>
                                         <div className={courseStyles.gridCorner}>時間 \ 曜日</div>
                                         {DAY_NAMES.map(dayName => (
                                             <div key={dayName} className={courseStyles.gridHeaderCell}>{dayName}</div>
@@ -172,6 +180,7 @@ export default async function StudentCoursePage() {
                                             })}
                                         </div>
                                     ))}
+                                    </div>
                                 </div>
                             );
                         })()}

@@ -155,6 +155,12 @@
     padding-right: var(--spacing-4);
 }
 
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: var(--spacing-4);
+}
+
 .section {
     padding: var(--spacing-4);
     background: var(--bg-elevated);
