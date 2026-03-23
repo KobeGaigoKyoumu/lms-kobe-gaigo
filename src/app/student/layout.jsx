@@ -40,11 +40,6 @@ export default async function StudentLayout({ children }) {
                                     <span className={styles.userName}>{session.name}</span> さん
                                     <span className={styles.className}>({session.className})</span>
                                 </div>
-                                <form action={logoutStudent}>
-                                    <button className={styles.logoutButton}>
-                                        ログアウト
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     </header>

@@ -50,21 +50,22 @@ export default async function StudentCoursePage() {
         )
     }
 
-    // RLSをバイパスするため、環境変数またはフォールバックのサービスキーを使用
-    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
-    
-    // 管理者クライアントを作成して他の学生情報（在籍者数）を取得する
-    const adminSupabase = createSupabaseAdmin(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        SERVICE_KEY
-    )
+    // 管理者権限での取得を試みる（環境変数が無い場合はanonキーで試行し結果を確認）
+    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const adminSupabase = SERVICE_KEY 
+        ? createSupabaseAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL, SERVICE_KEY)
+        : supabase;
 
     // 学生マスターから該当クラスの学生を取得（在籍者数用）
-    const { data: students } = await adminSupabase
+    const { data: students, error: studentsError } = await adminSupabase
         .from('students')
-        .select('id')
+        .select('id', { count: 'exact' })
         .eq('class_name', classData.name)
         .eq('status', 'active')
+    
+    if (studentsError) {
+        console.error("DEBUG: studentsError", studentsError);
+    }
 
     // 時間割取得
     const { data: schedules } = await supabase
@@ -124,7 +125,11 @@ export default async function StudentCoursePage() {
                         <dl className={styles.infoList}>
                             <div>
                                 <dt>在籍者数</dt>
-                                <dd>{students?.length || 0}名</dd>
+                                <dd>
+                                    {students?.length || 0}名
+                                    {studentsError && <span style={{fontSize: '10px', color: 'red', display: 'block'}}>{studentsError.message}</span>}
+                                    {!SERVICE_KEY && <span style={{fontSize: '10px', color: 'orange', display: 'block'}}>No Admin Key</span>}
+                                </dd>
                             </div>
                         </dl>
                     </div>
@@ -150,7 +155,7 @@ export default async function StudentCoursePage() {
                                 <p className={styles.empty}>設定されていません</p>
                             ) : (
                                 <div className={styles.tableWrapper}>
-                                    <div className={courseStyles.scheduleGrid}>
+                                    <div className={`${courseStyles.scheduleGrid} ${styles.studentGrid}`}>
                                         <div className={courseStyles.gridHeaderRow}>
                                         <div className={courseStyles.gridCorner}>時間 \ 曜日</div>
                                         {DAY_NAMES.map(dayName => (
