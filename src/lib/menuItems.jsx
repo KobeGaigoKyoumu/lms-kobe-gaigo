@@ -113,6 +113,16 @@ export const getMenuItems = (role) => {
                         <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41" />
                     </svg>
                 )
+            },
+            {
+                href: '/student/course',
+                label: 'コース情報',
+                color: '#6366f1', // Indigo
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M4 5h12M4 10h12M4 15h8" />
+                    </svg>
+                )
             }
         ]
     }

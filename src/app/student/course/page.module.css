@@ -1,0 +1,171 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-6);
+}
+
+.headerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+}
+
+.headerMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.badge {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.year {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--spacing-6);
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.sidebarCard {
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.sidebarCard h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-3);
+}
+
+.teacher {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.teacherAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.teacherAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.teacherName {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.courseInfo {
+    padding: var(--spacing-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.courseInfo h4 {
+    font-weight: 500;
+    color: var(--primary-600);
+    margin-bottom: var(--spacing-1);
+}
+
+.courseInfo p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.infoList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.infoList div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.infoList dt {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.infoList dd {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.section {
+    padding: var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.section h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.empty {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+}
