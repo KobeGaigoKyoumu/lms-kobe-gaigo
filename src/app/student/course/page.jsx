@@ -40,7 +40,7 @@ export default async function StudentCoursePage() {
         return (
             <div className={styles.page}>
                 <header className={styles.header}>
-                    <h1 className={styles.title}>コース情報</h1>
+                    <h1 className={styles.title}>クラス情報</h1>
                 </header>
                 <div className={styles.content}>
                     <p className={styles.empty}>現在、所属クラスの情報が見つかりません。</p>
@@ -75,7 +75,7 @@ export default async function StudentCoursePage() {
                             <span className={styles.badge}>{classData.grade_level || '未設定'}</span>
                             <span className={styles.year}>{classData.academic_year}年度</span>
                         </div>
-                        <h1 className={styles.title}>{classData.name} - コース情報</h1>
+                        <h1 className={styles.title}>{classData.name} - クラス情報</h1>
                     </div>
                 </div>
             </header>
@@ -115,10 +115,6 @@ export default async function StudentCoursePage() {
                             <div>
                                 <dt>在籍者数</dt>
                                 <dd>{students?.length || 0}名</dd>
-                            </div>
-                            <div>
-                                <dt>作成日</dt>
-                                <dd>{new Date(classData.created_at).toLocaleDateString('ja-JP')}</dd>
                             </div>
                         </dl>
                     </div>

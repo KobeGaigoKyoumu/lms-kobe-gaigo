@@ -116,7 +116,7 @@ export const getMenuItems = (role) => {
             },
             {
                 href: '/student/course',
-                label: 'コース情報',
+                label: 'クラス情報',
                 color: '#6366f1', // Indigo
                 icon: (
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
