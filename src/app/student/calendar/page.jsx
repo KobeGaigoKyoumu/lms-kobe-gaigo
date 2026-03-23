@@ -136,7 +136,19 @@ export default async function StudentCalendarPage() {
         isCustomEvent: true
     }))
 
-    const events = [...assignmentEvents, ...customEvents, ...mappedTemplateEvents]
+    const allEvents = [...assignmentEvents, ...customEvents, ...mappedTemplateEvents]
+
+    // 同じ日付・タイトル・タイプのイベントの重複を排除
+    const events = []
+    const seenEventKeys = new Set()
+    for (const e of allEvents) {
+        const dateStr = e.date ? e.date.substring(0, 10) : ''
+        const key = `${e.title}|${dateStr}|${e.type}`
+        if (!seenEventKeys.has(key)) {
+            seenEventKeys.add(key)
+            events.push(e)
+        }
+    }
 
     return (
         <div className={styles.page}>
