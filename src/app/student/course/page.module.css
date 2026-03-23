@@ -185,35 +185,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-.studentGrid {
-    width: 100% !important;
-    min-width: 0 !important;
-}
-
-.studentGrid div[class*="gridHeaderRow"],
-.studentGrid div[class*="gridRow"] {
-    grid-template-columns: 60px repeat(5, 1fr) !important;
-}
-
-.studentGrid div[class*="gridHeaderCell"],
-.studentGrid div[class*="gridSideCell"] {
-    font-size: var(--font-size-xs) !important;
-    padding: var(--spacing-1) !important;
-}
-
-.studentGrid div[class*="slotContent"] {
-    padding: var(--spacing-1) !important;
-    min-height: 50px !important;
-}
-
-.studentGrid span[class*="slotSubject"] {
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-}
-
-.studentGrid span[class*="slotTime"],
-.studentGrid span[class*="slotRoom"] {
-    font-size: 9px !important;
-    white-space: nowrap !important;
-}

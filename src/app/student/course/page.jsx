@@ -50,22 +50,18 @@ export default async function StudentCoursePage() {
         )
     }
 
-    // 管理者権限での取得を試みる（環境変数が無い場合はanonキーで試行し結果を確認）
+    // 管理者権限での取得を試みる
     const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const adminSupabase = SERVICE_KEY 
         ? createSupabaseAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL, SERVICE_KEY)
         : supabase;
 
     // 学生マスターから該当クラスの学生を取得（在籍者数用）
-    const { data: students, error: studentsError } = await adminSupabase
+    const { data: students } = await adminSupabase
         .from('students')
-        .select('id', { count: 'exact' })
+        .select('student_id_text')
         .eq('class_name', classData.name)
         .eq('status', 'active')
-    
-    if (studentsError) {
-        console.error("DEBUG: studentsError", studentsError);
-    }
 
     // 時間割取得
     const { data: schedules } = await supabase
@@ -125,11 +121,7 @@ export default async function StudentCoursePage() {
                         <dl className={styles.infoList}>
                             <div>
                                 <dt>在籍者数</dt>
-                                <dd>
-                                    {students?.length || 0}名
-                                    {studentsError && <span style={{fontSize: '10px', color: 'red', display: 'block'}}>{studentsError.message}</span>}
-                                    {!SERVICE_KEY && <span style={{fontSize: '10px', color: 'orange', display: 'block'}}>No Admin Key</span>}
-                                </dd>
+                                <dd>{students?.length || 0}名</dd>
                             </div>
                         </dl>
                     </div>
@@ -155,7 +147,7 @@ export default async function StudentCoursePage() {
                                 <p className={styles.empty}>設定されていません</p>
                             ) : (
                                 <div className={styles.tableWrapper}>
-                                    <div className={`${courseStyles.scheduleGrid} ${styles.studentGrid}`}>
+                                    <div className={courseStyles.scheduleGrid} style={{ minWidth: '800px' }}>
                                         <div className={courseStyles.gridHeaderRow}>
                                         <div className={courseStyles.gridCorner}>時間 \ 曜日</div>
                                         {DAY_NAMES.map(dayName => (
