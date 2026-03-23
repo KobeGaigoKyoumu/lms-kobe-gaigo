@@ -50,10 +50,13 @@ export default async function StudentCoursePage() {
         )
     }
 
-    // 管理者クライアントを作成してRLSをバイパスし、他の学生情報（在籍者数）を取得する
+    // RLSをバイパスするため、環境変数またはフォールバックのサービスキーを使用
+    const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
+    
+    // 管理者クライアントを作成して他の学生情報（在籍者数）を取得する
     const adminSupabase = createSupabaseAdmin(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
+        SERVICE_KEY
     )
 
     // 学生マスターから該当クラスの学生を取得（在籍者数用）
@@ -147,7 +150,7 @@ export default async function StudentCoursePage() {
                                 <p className={styles.empty}>設定されていません</p>
                             ) : (
                                 <div className={styles.tableWrapper}>
-                                    <div className={courseStyles.scheduleGrid} style={{ minWidth: '600px' }}>
+                                    <div className={courseStyles.scheduleGrid}>
                                         <div className={courseStyles.gridHeaderRow}>
                                         <div className={courseStyles.gridCorner}>時間 \ 曜日</div>
                                         {DAY_NAMES.map(dayName => (
