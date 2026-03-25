@@ -24,12 +24,14 @@ CREATE INDEX IF NOT EXISTS idx_students_status ON students(status);
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 
 -- RLSポリシー: 認証済みユーザーは閲覧可能
+DROP POLICY IF EXISTS "Students are viewable by authenticated users" ON students;
 CREATE POLICY "Students are viewable by authenticated users"
 ON students FOR SELECT
 TO authenticated
 USING (true);
 
 -- RLSポリシー: 管理者・教師は編集可能
+DROP POLICY IF EXISTS "Students are editable by admin and teachers" ON students;
 CREATE POLICY "Students are editable by admin and teachers"
 ON students FOR ALL
 TO authenticated

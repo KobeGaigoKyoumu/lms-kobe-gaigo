@@ -73,25 +73,23 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
                 )
             })}
 
-            {role !== 'student' && (
-                <button
-                    onClick={handleLogout}
-                    className={styles.menuItem}
-                    type="button"
+            <button
+                onClick={handleLogout}
+                className={styles.menuItem}
+                type="button"
+            >
+                <div
+                    className={styles.iconWrapper}
+                    style={{ color: '#475569' }}
                 >
-                    <div
-                        className={styles.iconWrapper}
-                        style={{ color: '#475569' }}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                    </div>
-                    <span className={styles.label}>ログアウト</span>
-                </button>
-            )}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </div>
+                <span className={styles.label}>ログアウト</span>
+            </button>
         </nav>
     )
 }

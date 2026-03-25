@@ -133,15 +133,13 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
                         <p className={styles.userEmail}>{displayDetail}</p>
                     </div>
                 </div>
-                {userRole !== 'student' && (
-                    <button onClick={handleLogout} className={styles.logoutBtn} title="ログアウト">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M6 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" />
-                            <path d="M12 12l3-3-3-3" />
-                            <path d="M15 9H7" />
-                        </svg>
-                    </button>
-                )}
+                <button onClick={handleLogout} className={styles.logoutBtn} title="ログアウト">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M6 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" />
+                        <path d="M12 12l3-3-3-3" />
+                        <path d="M15 9H7" />
+                    </svg>
+                </button>
             </div>
         </aside>
     )
