@@ -3,12 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
-import {
-    addKanbanColumn, updateKanbanColumnTitle, deleteKanbanColumn, updateKanbanColumnPosition,
-    addKanbanCard, updateKanbanCard, deleteKanbanCard, updateKanbanCardPosition,
-    updateKanbanLabelName,
-    getKanbanReminders, addKanbanReminder, updateKanbanReminder, deleteKanbanReminder
-} from '@/app/actions/kanban'
+import { createClient } from '@/lib/supabase/client'
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
@@ -19,8 +14,10 @@ const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
 export default function KanbanBoard({ initialColumns, initialCards, initialLabels, initialReminders, userId }) {
     const router = useRouter()
-    const [columns, setColumns] = useState(initialColumns)
-    const [cards, setCards] = useState(initialCards)
+    const supabase = createClient()
+    const [isLoading, setIsLoading] = useState(!initialColumns)
+    const [columns, setColumns] = useState(initialColumns || [])
+    const [cards, setCards] = useState(initialCards || [])
     const [labels, setLabels] = useState(initialLabels || [])
     const [expandedCards, setExpandedCards] = useState(new Set())
 
@@ -63,15 +60,51 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     // Drag state for columns
     const dragColumn = useRef(null)
 
-    // All DB operations now go through Server Actions (service role)
+    useEffect(() => {
+        const fetchBoardData = async () => {
+            if (initialColumns) return // already provided by server (if any)
+            
+            const [
+                { data: colData },
+                { data: cardData },
+                { data: labelData },
+                { data: reminderData }
+            ] = await Promise.all([
+                supabase.from('kanban_columns').select('*').order('position', { ascending: true }),
+                supabase.from('kanban_cards').select('*').order('position', { ascending: true }),
+                supabase.from('kanban_labels').select('*').order('position', { ascending: true }),
+                supabase.from('kanban_reminders').select('id, card_id, enabled')
+            ])
+
+            if (colData) setColumns(colData)
+            if (cardData) setCards(cardData)
+            if (labelData) setLabels(labelData)
+            
+            if (reminderData) {
+                const map = {}
+                for (const r of reminderData) {
+                    map[r.card_id] = true
+                }
+                setReminderCardsMap(map)
+            }
+            setIsLoading(false)
+        }
+        fetchBoardData()
+    }, [initialColumns, supabase])
+
+    // Direct DB operations via Supabase client
 
     // ===== Column CRUD =====
     const addColumn = async () => {
         if (!newColumnTitle.trim()) return
         const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0
-        const result = await addKanbanColumn(newColumnTitle.trim(), maxPos, userId)
-        if (result.data) {
-            setColumns(prev => [...prev, result.data])
+        const validCreatedBy = (!userId || userId === 'member') ? null : userId;
+        const { data } = await supabase
+            .from('kanban_columns')
+            .insert({ title: newColumnTitle.trim(), position: maxPos, created_by: validCreatedBy })
+            .select().single()
+        if (data) {
+            setColumns(prev => [...prev, data])
         }
         setNewColumnTitle('')
         setAddingColumn(false)
@@ -79,8 +112,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     const updateColumnTitle = async (colId) => {
         if (!editingColTitle.trim()) { setEditingColId(null); return }
-        await updateKanbanColumnTitle(colId, editingColTitle.trim())
-        setColumns(prev => prev.map(c => c.id === colId ? { ...c, title: editingColTitle.trim() } : c))
+        const newTitle = editingColTitle.trim()
+        const { error } = await supabase.from('kanban_columns').update({ title: newTitle }).eq('id', colId)
+        if (!error) {
+            setColumns(prev => prev.map(c => c.id === colId ? { ...c, title: newTitle } : c))
+        }
         setEditingColId(null)
     }
 
@@ -91,9 +127,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         } else {
             if (!confirm('このカラムを削除しますか？')) return
         }
-        await deleteKanbanColumn(colId)
-        setColumns(prev => prev.filter(c => c.id !== colId))
-        setCards(prev => prev.filter(c => c.column_id !== colId))
+        const { error } = await supabase.from('kanban_columns').delete().eq('id', colId)
+        if (!error) {
+            setColumns(prev => prev.filter(c => c.id !== colId))
+            setCards(prev => prev.filter(c => c.column_id !== colId))
+        }
     }
 
     // ===== Card CRUD =====
@@ -101,9 +139,13 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         if (!newCardTitle.trim()) return
         const colCards = cards.filter(c => c.column_id === columnId)
         const maxPos = colCards.length > 0 ? Math.max(...colCards.map(c => c.position)) + 1 : 0
-        const result = await addKanbanCard(columnId, newCardTitle.trim(), maxPos, userId)
-        if (result.data) {
-            setCards(prev => [...prev, result.data])
+        const validCreatedBy = (!userId || userId === 'member') ? null : userId;
+        const { data } = await supabase
+            .from('kanban_cards')
+            .insert({ column_id: columnId, title: newCardTitle.trim(), position: maxPos, created_by: validCreatedBy })
+            .select().single()
+        if (data) {
+            setCards(prev => [...prev, data])
         }
         setNewCardTitle('')
         setAddingCardCol(null)
@@ -111,24 +153,25 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     const updateCard = async () => {
         if (!editingCard || !editForm.title.trim()) return
-        const result = await updateKanbanCard(editingCard.id, {
+        const updates = {
             title: editForm.title.trim(),
             description: editForm.description || null,
             color: editForm.color
-        })
-        if (!result.error) {
+        }
+        const { error } = await supabase.from('kanban_cards').update(updates).eq('id', editingCard.id)
+        if (!error) {
             setCards(prev => prev.map(c =>
-                c.id === editingCard.id
-                    ? { ...c, title: editForm.title.trim(), description: editForm.description || null, color: editForm.color }
-                    : c
+                c.id === editingCard.id ? { ...c, ...updates } : c
             ))
         }
         setEditingCard(null)
     }
 
     const deleteCard = async (cardId) => {
-        await deleteKanbanCard(cardId)
-        setCards(prev => prev.filter(c => c.id !== cardId))
+        const { error } = await supabase.from('kanban_cards').delete().eq('id', cardId)
+        if (!error) {
+            setCards(prev => prev.filter(c => c.id !== cardId))
+        }
         setEditingCard(null)
     }
 
@@ -136,8 +179,10 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const updateLabelNameFn = async (labelId) => {
         if (!editingLabelName.trim()) { setEditingLabelId(null); return }
         const newName = editingLabelName.trim()
-        await updateKanbanLabelName(labelId, newName)
-        setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
+        const { error } = await supabase.from('kanban_labels').update({ name: newName }).eq('id', labelId)
+        if (!error) {
+            setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
+        }
         setEditingLabelId(null)
     }
 
@@ -252,7 +297,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         ))
 
         // Persist
-        await updateKanbanCardPosition(card.id, targetColumnId, newPosition)
+        await supabase.from('kanban_cards').update({ column_id: targetColumnId, position: newPosition }).eq('id', card.id)
 
         dragCard.current = null
         dragOverCardId.current = null
@@ -308,8 +353,8 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         setColumns(newColumns)
 
         await Promise.all([
-            updateKanbanColumnPosition(sourceColumn.id, targetColumn.position),
-            updateKanbanColumnPosition(targetColumn.id, sourceColumn.position)
+            supabase.from('kanban_columns').update({ position: targetColumn.position }).eq('id', sourceColumn.id),
+            supabase.from('kanban_columns').update({ position: sourceColumn.position }).eq('id', targetColumn.id)
         ])
 
         dragColumn.current = null
@@ -327,8 +372,8 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
         setEditingReminderId(null)
         // Load reminders for this card
-        const result = await getKanbanReminders(card.id)
-        setReminders(result.data || [])
+        const { data } = await supabase.from('kanban_reminders').select('*').eq('card_id', card.id).order('created_at', { ascending: true })
+        setReminders(data || [])
     }
 
     const handleEditReminder = (reminder) => {
@@ -360,21 +405,22 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         }
 
         if (editingReminderId) {
-            const result = await updateKanbanReminder(editingReminderId, payload)
-            if (!result.error) {
+            const { error } = await supabase.from('kanban_reminders').update(payload).eq('id', editingReminderId)
+            if (!error) {
                 setReminders(prev => prev.map(r => r.id === editingReminderId ? { ...r, ...payload } : r))
             }
         } else {
-            const result = await addKanbanReminder(
-                editingCard.id,
-                reminderForm.type,
-                reminderForm.time,
-                finalDays,
-                reminderForm.type === 'once' ? reminderForm.date : null,
-                userId
-            )
-            if (result.data) {
-                setReminders(prev => [...prev, result.data])
+            const validCreatedBy = (!userId || userId === 'member') ? null : userId;
+            const { data, error } = await supabase
+                .from('kanban_reminders')
+                .insert({
+                    card_id: editingCard.id,
+                    ...payload,
+                    created_by: validCreatedBy
+                })
+                .select().single()
+            if (data) {
+                setReminders(prev => [...prev, data])
                 setReminderCardsMap(prev => ({ ...prev, [editingCard.id]: true }))
             }
         }
@@ -384,12 +430,12 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     }
 
     const handleToggleReminder = async (reminderId, currentEnabled) => {
-        await updateKanbanReminder(reminderId, { enabled: !currentEnabled })
+        await supabase.from('kanban_reminders').update({ enabled: !currentEnabled }).eq('id', reminderId)
         setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, enabled: !currentEnabled } : r))
     }
 
     const handleDeleteReminder = async (reminderId) => {
-        await deleteKanbanReminder(reminderId)
+        await supabase.from('kanban_reminders').delete().eq('id', reminderId)
         setReminders(prev => prev.filter(r => r.id !== reminderId))
         // Update map if no more reminders
         if (editingCard) {
@@ -427,16 +473,19 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         }
     }
 
-    // Load reminder badge info on mount from initialReminders
     useEffect(() => {
         const map = {}
         if (initialReminders) {
             for (const r of initialReminders) {
                 map[r.card_id] = true
             }
+            setReminderCardsMap(map)
         }
-        setReminderCardsMap(map)
     }, [initialReminders])
+
+    if (isLoading) {
+        return <div style={{ padding: '20px', color: '#888' }}>読み込み中...</div>
+    }
 
     return (
         <>

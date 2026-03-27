@@ -2,12 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
-import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
 
-export const dynamic = 'force-dynamic'
-
+// Removed force-dynamic to allow potential static optimization
 export default async function KanbanPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -31,11 +29,7 @@ export default async function KanbanPage() {
         userId = user.id
     }
 
-    // Fetch data using cached Server Actions
-    const { data: columns } = await getKanbanColumns()
-    const { data: cards } = await getKanbanCards()
-    const { data: labels } = await getKanbanLabels()
-    const { data: allReminders } = await getAllKanbanReminders()
+    // Data fetching moved to client-side (KanbanBoard.jsx) to save Vercel CPU
 
     return (
         <div className={styles.page}>
@@ -45,14 +39,7 @@ export default async function KanbanPage() {
                     <p className={styles.subtitle}>タスクとスケジュールの管理</p>
                 </div>
             </header>
-            <KanbanBoard
-                initialColumns={columns || []}
-                initialCards={cards || []}
-                initialLabels={labels || []}
-                initialReminders={allReminders || []}
-                userId={userId}
-            />
+            <KanbanBoard userId={userId} />
         </div>
     )
 }
-

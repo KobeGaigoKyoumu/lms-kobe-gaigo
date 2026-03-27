@@ -78,20 +78,54 @@ export function StudentStatusProvider({ children, role, userId, className: userC
             // Fallback to internal API (Only if Worker failed and not on short cooldown)
             // Use a specific ref to avoid hammering Vercel if it's already struggling
             if (!success) {
-                const lastFallback = parseInt(sessionStorage.getItem('last_status_fallback') || '0')
-                if (now - lastFallback < 60000) { // 1 minute cooldown for Vercel fallback
-                    console.log('Vercel status fallback on cooldown to save CPU')
-                    return
+                // If student, try direct RPC to save Vercel CPU
+                if (role === 'student') {
+                    const lastFallback = parseInt(sessionStorage.getItem('last_status_fallback') || '0')
+                    if (now - lastFallback < 15000) { // 15 seconds cooldown for direct RPC
+                        console.log('Direct status fallback on cooldown')
+                        return
+                    }
+
+                    const { data: rpcResult, error: rpcError } = await supabase
+                        .rpc('get_student_status', {
+                            p_student_id: userId,
+                            p_class_name: userClassName || ''
+                        })
+
+                    if (!rpcError && rpcResult) {
+                        const data = {
+                            hasNewAnnouncement: rpcResult.has_new_announcement || false,
+                            unsubmittedAssignmentCount: rpcResult.unsubmitted_assignment_count || 0,
+                            unreadMessageCount: rpcResult.unread_message_count || 0
+                        }
+                        const normalized = normalizeStatuses(data);
+                        setStatuses(prev => ({ ...prev, ...normalized }))
+                        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                        sessionStorage.setItem('last_status_fallback', now.toString())
+                        lastFetchRef.current = now
+                        success = true
+                    } else if (rpcError) {
+                        console.warn('Direct RPC status fetch failed', rpcError)
+                    }
                 }
 
-                const resInternal = await fetch('/api/status', { cache: 'no-store', signal: AbortSignal.timeout(8000) })
-                if (resInternal.ok) {
-                    const data = await resInternal.json()
-                    const normalized = normalizeStatuses(data);
-                    setStatuses(prev => ({ ...prev, ...normalized }))
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
-                    sessionStorage.setItem('last_status_fallback', now.toString())
-                    lastFetchRef.current = now
+                // If still not success (teacher, or RPC failed), fallback to Vercel API
+                if (!success) {
+                    const lastFallback = parseInt(sessionStorage.getItem('last_status_vercel_fallback') || '0')
+                    if (now - lastFallback < 60000) { // 1 minute cooldown for Vercel fallback
+                        console.log('Vercel status fallback on cooldown to save CPU')
+                        return
+                    }
+
+                    const resInternal = await fetch('/api/status', { cache: 'no-store', signal: AbortSignal.timeout(8000) })
+                    if (resInternal.ok) {
+                        const data = await resInternal.json()
+                        const normalized = normalizeStatuses(data);
+                        setStatuses(prev => ({ ...prev, ...normalized }))
+                        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                        sessionStorage.setItem('last_status_vercel_fallback', now.toString())
+                        lastFetchRef.current = now
+                    }
                 }
             }
         } catch (error) {
