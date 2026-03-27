@@ -258,6 +258,51 @@
     word-break: break-word;
 }
 
+.cardDescWrapper {
+    position: relative;
+    margin-top: 4px;
+}
+
+.cardDescriptionCollapsed {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+.cardDescriptionExpanded {
+    display: block;
+    margin-bottom: 24px;
+}
+
+.expandRibbon {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #e0d8c0;
+    border-radius: 10px;
+    padding: 1px 12px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #d4a017;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    z-index: 5;
+    transition: all 0.2s;
+}
+
+.expandRibbon:hover {
+    background: #fffde0;
+    border-color: #d4a017;
+    transform: translateX(-50%) translateY(-1px);
+}
+
 .cardLabels {
     display: flex;
     flex-wrap: wrap;

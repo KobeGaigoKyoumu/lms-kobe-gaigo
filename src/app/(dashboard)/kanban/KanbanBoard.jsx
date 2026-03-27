@@ -22,6 +22,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const [columns, setColumns] = useState(initialColumns)
     const [cards, setCards] = useState(initialCards)
     const [labels, setLabels] = useState(initialLabels || [])
+    const [expandedCards, setExpandedCards] = useState(new Set())
 
     // Edit label
     const [editingLabelId, setEditingLabelId] = useState(null)
@@ -138,6 +139,19 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         await updateKanbanLabelName(labelId, newName)
         setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
         setEditingLabelId(null)
+    }
+
+    const toggleExpand = (e, cardId) => {
+        e.stopPropagation()
+        setExpandedCards(prev => {
+            const next = new Set(prev)
+            if (next.has(cardId)) {
+                next.delete(cardId)
+            } else {
+                next.add(cardId)
+            }
+            return next
+        })
     }
 
     // ===== Card Drag & Drop (cross-column + intra-column reorder) =====
@@ -507,7 +521,19 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                         )}
                                         <div className={styles.cardTitle}>{card.title}</div>
                                         {card.description && (
-                                            <div className={styles.cardDescription}>{card.description}</div>
+                                            <div className={styles.cardDescWrapper}>
+                                                <div className={`${styles.cardDescription} ${expandedCards.has(card.id) ? styles.cardDescriptionExpanded : styles.cardDescriptionCollapsed}`}>
+                                                    {card.description}
+                                                </div>
+                                                {card.description.length > 50 && (
+                                                    <button
+                                                        className={styles.expandRibbon}
+                                                        onClick={(e) => toggleExpand(e, card.id)}
+                                                    >
+                                                        {expandedCards.has(card.id) ? '▲ 閉じる' : '▼ もっと見る'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         )}
                                         {reminderCardsMap[card.id] && (
                                             <span className={styles.reminderBadge} title="リマインダー設定済み">🔔</span>
