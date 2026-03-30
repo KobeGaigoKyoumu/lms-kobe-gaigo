@@ -12,13 +12,15 @@ import {
     updateStudentGrade,
     deleteStudent,
     bulkDeleteStudents,
-    resetAllGrades
+    resetAllGrades,
+    performGradeReset
 } from '@/app/actions/studentManagement'
 import { revalidateStudents } from '@/app/actions/studentData'
 
 export default function StudentList({ initialStudents = [], initialStats = [] }) {
     const router = useRouter()
     const fileInputRef = useRef(null)
+    const gradeResetFileRef = useRef(null)
     const [students, setStudents] = useState(initialStudents)
     const [classes, setClasses] = useState([])
     const [loading, setLoading] = useState(false)
@@ -165,17 +167,150 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
         }
     }
 
-    const handleResetGrades = async () => {
-        if (!confirm('全ての学生の学年データを自動計算（学籍番号ベース）に戻しますか？\n※手動で設定した学年もリセットされます。')) return
+    const handleGradeResetUpload = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploading(true)
+        setUploadResult(null)
 
         try {
-            await resetAllGrades()
-            setStudents(prev => prev.map(s => ({ ...s, academic_year: null })))
+            const data = await file.arrayBuffer()
+            const workbook = XLSX.read(data, { type: 'array' })
+            const sheet = workbook.Sheets[workbook.SheetNames[0]]
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+            // カラム位置（在籍者.xlsx形式）
+            const headers = rows[0] || []
+            let colStudentId = headers.findIndex(h => h && String(h).includes('学籍番号'))
+            let colName = headers.findIndex(h => h && String(h).includes('氏名'))
+            let colClass = headers.findIndex(h => h && (String(h).includes('クラス') || String(h).replace(/\r?\n/g, '').includes('現')))
+            let colEmail = headers.findIndex(h => h && String(h).includes('メール'))
+
+            if (colStudentId === -1) colStudentId = 2
+            if (colName === -1) colName = 3
+            if (colClass === -1) colClass = 17
+
+            // Excel日付シリアル値をISO日付文字列に変換
+            const excelDateToIso = (serial) => {
+                if (!serial || typeof serial !== 'number') return null
+                const date = new Date((serial - 25569) * 86400 * 1000)
+                return date.toISOString().split('T')[0]
+            }
+
+            // ヘッダー行とデータ行を分離（繰り返しヘッダーを除外）
+            const dataRows = rows.slice(1).filter(row =>
+                row[colStudentId] && !String(row[colStudentId]).includes('学籍番号')
+            )
+
+            // 学生データを作成
+            const studentsToInsert = dataRows.map(row => {
+                const studentData = {
+                    student_id_text: String(row[colStudentId]).trim(),
+                    full_name: String(row[colName] || '').trim(),
+                    email: colEmail >= 0 && row[colEmail] ? String(row[colEmail]).trim() : null,
+                    class_name: String(row[colClass] || '').trim() || null,
+                    status: 'active'
+                }
+
+                // 拡張カラム（在籍者.xlsx形式）
+                if (row[4]) studentData.name_kana = String(row[4]).trim()
+                if (row[5]) studentData.name_romaji = String(row[5]).trim()
+                if (row[6]) studentData.nationality = String(row[6]).trim()
+                if (row[7]) studentData.gender = String(row[7]).trim()
+                if (row[8]) studentData.birth_date = excelDateToIso(row[8])
+                if (row[9]) studentData.visa_status = String(row[9]).trim()
+                if (row[10]) studentData.entry_date = excelDateToIso(row[10])
+                if (row[11]) studentData.visa_expiry = excelDateToIso(row[11])
+                if (row[12]) studentData.passport_number = String(row[12]).trim()
+                if (row[13]) studentData.residence_card_number = String(row[13]).trim()
+                if (row[14]) studentData.address = String(row[14]).trim()
+                if (row[15]) studentData.phone = String(row[15]).trim()
+                if (row[16]) studentData.enrollment_period = String(row[16]).trim()
+                if (row[18]) studentData.enrollment_date = excelDateToIso(row[18])
+                if (row[19]) studentData.graduation_date = excelDateToIso(row[19])
+                if (row[20]) studentData.course = String(row[20]).trim()
+
+                return studentData
+            }).filter(s => s.student_id_text)
+
+            // 重複学籍番号を除去
+            const uniqueStudents = []
+            const seenIds = new Set()
+            for (let i = studentsToInsert.length - 1; i >= 0; i--) {
+                const student = studentsToInsert[i]
+                if (!seenIds.has(student.student_id_text)) {
+                    seenIds.add(student.student_id_text)
+                    uniqueStudents.unshift(student)
+                }
+            }
+
+            if (uniqueStudents.length === 0) {
+                setUploadResult({ success: false, message: 'データが見つかりません' })
+                setUploading(false)
+                return
+            }
+
+            // 年度で分類して件数を確認
+            const today = new Date()
+            const currentYear = today.getFullYear()
+            const isBeforeApril = today.getMonth() < 3
+            const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+            const yearSuffix2nd = String(academicYearBase - 1).substring(2)
+            const yearSuffix1st = String(academicYearBase).substring(2)
+
+            const new2ndYears = uniqueStudents.filter(s =>
+                String(s.student_id_text).substring(0, 2) === yearSuffix2nd
+            )
+            const new1stYears = uniqueStudents.filter(s =>
+                String(s.student_id_text).substring(0, 2) === yearSuffix1st
+            )
+
+            // 現2年生の数を取得（ステータスがactiveの2年生）
+            const old2ndCount = students.filter(s => {
+                if (s.status !== 'active') return false
+                const info = parseStudentId(s.student_id_text, new Date(), s.academic_year)
+                return info.grade === 2
+            }).length
+
+            const confirmMsg = [
+                `学年リセットを実行しますか？\n`,
+                `■ 旧2年生 → 非在籍者化: ${old2ndCount}名`,
+                `■ 新2年生データ更新: ${new2ndYears.length}名`,
+                `■ 新1年生データ登録: ${new1stYears.length}名`,
+                `\n※この操作は元に戻せません`
+            ].join('\n')
+
+            if (!confirm(confirmMsg)) {
+                setUploading(false)
+                return
+            }
+
+            const result = await performGradeReset(uniqueStudents)
+
+            let message = '学年リセット完了！\n'
+            message += `・旧2年生 ${result.graduatedCount}名を非在籍者化\n`
+            message += `・新2年生 ${result.updatedCount}名のデータを更新\n`
+            message += `・新1年生 ${result.createdCount}名のデータを登録`
+            if (result.classesCreated > 0) {
+                message += `\n・${result.classesCreated}個のクラスを新規作成`
+            }
+            if (result.membersRegistered > 0) {
+                message += `\n・${result.membersRegistered}名をクラスに登録`
+            }
+
+            setUploadResult({ success: true, message })
+            await revalidateStudents()
             router.refresh()
-            alert('学年データをリセットしました')
         } catch (error) {
-            console.error('Reset error:', error)
-            alert('リセットに失敗しました')
+            console.error('Grade reset error:', error)
+            setUploadResult({
+                success: false,
+                message: `学年リセットエラー: ${error.message}`
+            })
+        } finally {
+            setUploading(false)
+            if (gradeResetFileRef.current) gradeResetFileRef.current.value = ''
         }
     }
 
@@ -524,9 +659,21 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                                 hidden
                             />
                         </label>
-                        <button onClick={handleResetGrades} className={styles.templateBtn} style={{ marginLeft: '10px', color: '#666' }}>
-                            学年リセット
-                        </button>
+                        <label className={styles.templateBtn} style={{ marginLeft: '10px', color: '#666', cursor: 'pointer' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                <path d="M21 3v5h-5" />
+                            </svg>
+                            {uploading ? '処理中...' : '学年リセット'}
+                            <input
+                                ref={gradeResetFileRef}
+                                type="file"
+                                accept=".xlsx,.xls"
+                                onChange={handleGradeResetUpload}
+                                disabled={uploading}
+                                hidden
+                            />
+                        </label>
 
                     </div>
                     {uploadResult && (
