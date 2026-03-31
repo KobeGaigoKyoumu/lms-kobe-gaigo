@@ -97,9 +97,31 @@ export const getStudentSession = cache(async () => {
                 // If it's the Base64 version
                 const json = Buffer.from(encoded, 'base64').toString('utf8')
                 const data = JSON.parse(json)
-                
-                // Return immediately if all essential data is present
-                if (data.studentId && data.enrollmentPeriod && data.className) {
+                // クッキーから基本情報は取得するが、クラス名や学年などは学年リセット等で変更される可能性があるため
+                // 毎回DBから最新の情報を取得するよう方針変更（cacheされているためリクエスト毎に1回のみ）
+                if (data.studentId && data.name) {
+                    try {
+                        const supabase = createAdminClient()
+                        const { data: latestData } = await supabase
+                            .from('students')
+                            .select('class_name, academic_year, enrollment_period, status')
+                            .eq('student_id_text', data.studentId)
+                            .single()
+                        
+                        if (latestData) {
+                            return {
+                                studentId: data.studentId,
+                                name: data.name,
+                                className: latestData.class_name || data.className || '未設定',
+                                academicYear: latestData.academic_year || data.academicYear,
+                                enrollmentPeriod: latestData.enrollment_period || data.enrollmentPeriod,
+                                status: latestData.status
+                            }
+                        }
+                    } catch (e) {
+                        // DB fetch failed, fallback to purely cookie data
+                    }
+
                     return {
                         studentId: data.studentId,
                         name: data.name,
