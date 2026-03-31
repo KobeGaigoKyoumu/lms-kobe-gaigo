@@ -5,10 +5,13 @@ export async function GET(request, { params }) {
     try {
         const resolvedParams = await params
         const className = decodeURIComponent(resolvedParams.className)
+        
+        // Extract archived query param
+        const isArchived = request.nextUrl.searchParams.get('archived') === 'true'
 
         const [assignments, matrixData] = await Promise.all([
-            getAssignmentsByClass(className),
-            getClassSubmissionMatrix(className)
+            getAssignmentsByClass(className, isArchived),
+            getClassSubmissionMatrix(className, isArchived)
         ])
 
         return NextResponse.json({ assignments, matrixData })

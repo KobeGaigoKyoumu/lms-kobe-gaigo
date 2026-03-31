@@ -7,7 +7,7 @@ export default async function StudentHomeworkPage() {
     const assignments = await getStudentAssignments()
 
     // Handle error case appropriately
-    const safeAssignments = Array.isArray(assignments) ? assignments : []
+    const safeData = (assignments && !assignments.error) ? assignments : { active: [], archived: [] }
 
     return (
         <div className={styles.container}>
@@ -16,7 +16,7 @@ export default async function StudentHomeworkPage() {
                 <p className={styles.subtitle}>提出期限を確認して、計画的に進めましょう</p>
             </div>
 
-            <HomeworkListClient assignments={safeAssignments} />
+            <HomeworkListClient assignmentsData={safeData} />
         </div>
     )
 }

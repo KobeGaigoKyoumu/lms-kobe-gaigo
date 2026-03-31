@@ -13,12 +13,14 @@ export default function ClassAssignmentsPage({ params }) {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [isArchived, setIsArchived] = useState(false)
 
     useEffect(() => {
         let isMounted = true
+        setLoading(true)
         async function fetchData() {
             try {
-                const res = await fetch(`/api/teacher/class-assignments/${encodeURIComponent(className)}`)
+                const res = await fetch(`/api/teacher/class-assignments/${encodeURIComponent(className)}?archived=${isArchived}`)
                 if (!res.ok) {
                     throw new Error('Failed to fetch data')
                 }
@@ -33,7 +35,7 @@ export default function ClassAssignmentsPage({ params }) {
         }
         fetchData()
         return () => { isMounted = false }
-    }, [className])
+    }, [className, isArchived])
 
     if (error) {
         return (
@@ -72,6 +74,22 @@ export default function ClassAssignmentsPage({ params }) {
                         <p className={styles.subtitle}>課題一覧</p>
                     </div>
                 </header>
+
+                <div className={styles.tabsContainer} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #eee', marginBottom: '2rem', paddingBottom: '0.5rem' }}>
+                    <button
+                        onClick={() => setIsArchived(false)}
+                        style={{ padding: '0.5rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: isArchived ? 'normal' : 'bold', color: isArchived ? '#666' : '#2563eb', borderBottom: isArchived ? 'none' : '2px solid #2563eb' }}
+                    >
+                        今年の課題
+                    </button>
+                    <button
+                        onClick={() => setIsArchived(true)}
+                        style={{ padding: '0.5rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: isArchived ? 'bold' : 'normal', color: isArchived ? '#2563eb' : '#666', borderBottom: isArchived ? '2px solid #2563eb' : 'none' }}
+                    >
+                        過去の課題 (アーカイブ)
+                    </button>
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
                     <Loader2 className="animate-spin text-gray-400" size={32} />
                 </div>
@@ -106,6 +124,21 @@ export default function ClassAssignmentsPage({ params }) {
                     <p className={styles.subtitle}>課題一覧</p>
                 </div>
             </header>
+
+            <div className={styles.tabsContainer} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #eee', marginBottom: '2rem', paddingBottom: '0.5rem' }}>
+                <button
+                    onClick={() => setIsArchived(false)}
+                    style={{ padding: '0.5rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: isArchived ? 'normal' : 'bold', color: isArchived ? '#666' : '#2563eb', borderBottom: isArchived ? 'none' : '2px solid #2563eb' }}
+                >
+                    今年の課題
+                </button>
+                <button
+                    onClick={() => setIsArchived(true)}
+                    style={{ padding: '0.5rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: isArchived ? 'bold' : 'normal', color: isArchived ? '#2563eb' : '#666', borderBottom: isArchived ? '2px solid #2563eb' : 'none' }}
+                >
+                    過去の課題 (アーカイブ)
+                </button>
+            </div>
 
             {/* Upcoming Assignments */}
             <section className={styles.section}>

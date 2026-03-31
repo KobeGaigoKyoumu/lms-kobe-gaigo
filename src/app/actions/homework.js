@@ -39,20 +39,21 @@ const _getStudentAssignments = unstable_cache(
     async (studentId, className) => {
         const supabase = createAdminClient()
 
-        // 1. Get assignments for the class
-        const { data: assignments, error: assignmentError } = await supabase
+        // 1. Get assignments for the class currently
+        const { data: activeAssignments, error: activeError } = await supabase
             .from('homework_assignments')
             .select('id, title, description, deadline, class_name, created_at')
             .eq('class_name', className)
+            .eq('is_archived', false)
             .order('deadline', { ascending: true })
             .limit(100)
 
-        if (assignmentError) {
-            console.error('Error fetching assignments:', assignmentError)
-            return []
+        if (activeError) {
+            console.error('Error fetching active assignments:', activeError)
+            return { active: [], archived: [] }
         }
 
-        // 2. Get student's submissions for these assignments
+        // 2. Get student's all submissions (past and present)
         const { data: submissions, error: submissionError } = await supabase
             .from('homework_submissions')
             .select('id, assignment_id, status, submitted_at, score')
@@ -60,17 +61,44 @@ const _getStudentAssignments = unstable_cache(
 
         if (submissionError) {
             console.error('Error fetching submissions:', submissionError)
-            return assignments.map(a => ({ ...a, submission: null }))
+            return {
+                active: activeAssignments.map(a => ({ ...a, submission: null })),
+                archived: []
+            }
         }
 
-        // 3. Merge
         const submissionMap = new Map()
-        submissions.forEach(s => submissionMap.set(s.assignment_id, s))
+        ;(submissions || []).forEach(s => submissionMap.set(s.assignment_id, s))
 
-        return assignments.map(a => ({
+        // 3. To get the details of archived assignments or assignments from previous classes
+        const activeAssignmentIds = new Set((activeAssignments || []).map(a => a.id))
+        const submittedAssignmentIds = (submissions || []).map(s => s.assignment_id)
+        
+        // Find past assignment IDs that the student has submitted to, but are not in the current active list
+        const pastIdsToFetch = submittedAssignmentIds.filter(id => !activeAssignmentIds.has(id))
+
+        let archivedAssignments = []
+        if (pastIdsToFetch.length > 0) {
+            const { data: pastAssignmentsData } = await supabase
+                .from('homework_assignments')
+                .select('id, title, description, deadline, class_name, created_at')
+                .in('id', pastIdsToFetch)
+                .order('created_at', { ascending: false })
+            
+            archivedAssignments = pastAssignmentsData || []
+        }
+
+        const active = (activeAssignments || []).map(a => ({
             ...a,
             submission: submissionMap.get(a.id) || null
         }))
+
+        const archived = archivedAssignments.map(a => ({
+            ...a,
+            submission: submissionMap.get(a.id) || null
+        }))
+
+        return { active, archived }
     },
     ['student-assignments-v1'],
     { revalidate: 3600, tags: ['homework-assignments'] } // Base tag, dynamic tags are not supported in options object directly this way usually?
@@ -326,7 +354,7 @@ export const getTeacherAssignments = unstable_cache(
 // Fetch assignments for a specific class (Teacher view helper)
 // Fetch assignments for a specific class (Cached)
 export const getAssignmentsByClass = unstable_cache(
-    async (className) => {
+    async (className, isArchived = false) => {
         const supabase = createAdminClient()
 
         // Decode URL component just in case
@@ -336,6 +364,7 @@ export const getAssignmentsByClass = unstable_cache(
             .from('homework_assignments')
             .select('*')
             .eq('class_name', decodedClassName)
+            .eq('is_archived', isArchived)
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -579,7 +608,7 @@ export const getClassSubmissionStats = unstable_cache(
 
 // Get submission matrix for a class (Teacher use - submission status table)
 export const getClassSubmissionMatrix = unstable_cache(
-    async (className) => {
+    async (className, isArchived = false) => {
         const supabase = createAdminClient()
         const decodedClassName = decodeURIComponent(className)
 
@@ -599,6 +628,7 @@ export const getClassSubmissionMatrix = unstable_cache(
             .from('homework_assignments')
             .select('id, title, deadline, created_at')
             .eq('class_name', decodedClassName)
+            .eq('is_archived', isArchived)
             .order('deadline', { ascending: true })
 
         if (assignmentsError || !assignments || assignments.length === 0) {

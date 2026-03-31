@@ -240,7 +240,20 @@ export const performGradeReset = async (studentsData) => {
         }
     }
 
+    // ===== 課題データのアーカイブ化 =====
+    // 学年リセットに伴い、現在アクティブな全課題を一括でアーカイブ（過去分）に移動する
+    const { error: archiveError } = await supabase
+        .from('homework_assignments')
+        .update({ is_archived: true })
+        .eq('is_archived', false)
+
+    if (archiveError) {
+        console.error('Failed to archive assignments:', archiveError)
+        // 致命的なエラーにはしないがログに残す
+    }
+
     revalidateTag('students')
+    revalidateTag('homework-assignments')
     return {
         success: true,
         graduatedCount,

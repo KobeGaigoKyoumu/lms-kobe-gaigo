@@ -5,10 +5,13 @@ import Link from 'next/link'
 import { ChevronRight, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 import styles from './page.module.css'
 
-export default function HomeworkListClient({ assignments }) {
+export default function HomeworkListClient({ assignmentsData = { active: [], archived: [] } }) {
+    const [viewMode, setViewMode] = useState('active') // 'active' or 'archived'
     const [filter, setFilter] = useState('all') // 'all', 'unsubmitted', 'submitted'
 
-    const filteredAssignments = assignments.filter(a => {
+    const currentAssignments = viewMode === 'active' ? assignmentsData.active : assignmentsData.archived
+
+    const filteredAssignments = currentAssignments.filter(a => {
         const isSubmitted = a.submission && a.submission.status !== 'returned'
         if (filter === 'unsubmitted') return !isSubmitted
         if (filter === 'submitted') return isSubmitted
@@ -41,7 +44,35 @@ export default function HomeworkListClient({ assignments }) {
 
     return (
         <div>
-            {/* Tabs */}
+            {/* View Mode Switcher */}
+            <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
+                <button
+                    onClick={() => setViewMode('active')}
+                    style={{
+                        padding: '0.5rem 0', background: 'none', border: 'none', fontSize: '15px', cursor: 'pointer',
+                        fontWeight: viewMode === 'active' ? '600' : '400',
+                        color: viewMode === 'active' ? '#4f46e5' : '#6b7280',
+                        borderBottom: viewMode === 'active' ? '2px solid #4f46e5' : '2px solid transparent',
+                        marginBottom: '-9px'
+                    }}
+                >
+                    これからの課題
+                </button>
+                <button
+                    onClick={() => setViewMode('archived')}
+                    style={{
+                        padding: '0.5rem 0', background: 'none', border: 'none', fontSize: '15px', cursor: 'pointer',
+                        fontWeight: viewMode === 'archived' ? '600' : '400',
+                        color: viewMode === 'archived' ? '#4f46e5' : '#6b7280',
+                        borderBottom: viewMode === 'archived' ? '2px solid #4f46e5' : '2px solid transparent',
+                        marginBottom: '-9px'
+                    }}
+                >
+                    過去の課題・提出履歴
+                </button>
+            </div>
+
+            {/* Filter Tabs */}
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${filter === 'all' ? styles.active : ''}`}
@@ -75,9 +106,17 @@ export default function HomeworkListClient({ assignments }) {
                             key={assignment.id}
                             href={`/student/homework/${assignment.id}`}
                             className={styles.card}
+                            style={viewMode === 'archived' ? { opacity: 0.8, background: '#fafafa' } : {}}
                         >
                             <div className={styles.cardHeader}>
-                                <div className={styles.cardTitle}>{assignment.title}</div>
+                                <div className={styles.cardTitle}>
+                                    {assignment.title}
+                                    {viewMode === 'archived' && (
+                                        <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: '8px', fontWeight: 'normal' }}>
+                                            ({assignment.class_name})
+                                        </span>
+                                    )}
+                                </div>
                                 <ChevronRight size={20} className={styles.arrow} />
                             </div>
 
