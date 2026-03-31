@@ -58,13 +58,26 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
     }, [initialStudents, initialStats])
 
     // Filter Students
+    // 新年度への「学年リセット」が完了している場合（今年入学予定の学生データが存在する場合）、
+    // 1〜3月であっても表示上の「基準日」を新年度(4月1日)にして、進級後の学年を表示する
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const isBeforeApril = today.getMonth() < 3
+    const hasNextYearStudents = students.some(s => {
+        const enrollYear = 2000 + parseInt(String(s.student_id_text).substring(0, 2), 10)
+        return enrollYear === currentYear
+    })
+    const displayBaseDate = (isBeforeApril && hasNextYearStudents)
+        ? new Date(currentYear, 3, 1) // 今年の4月1日を基準日として扱う
+        : today
+
     const filteredStudents = students.filter(student => {
         // Status Filter
         if (filter !== 'all' && student.status !== filter) return false
 
         // Grade Filter
         if (gradeFilter) {
-            const info = parseStudentId(student.student_id_text, new Date(), student.academic_year)
+            const info = parseStudentId(student.student_id_text, displayBaseDate, student.academic_year)
             if (String(info.grade) !== gradeFilter) return false
         }
 
@@ -251,13 +264,12 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                 return
             }
 
-            // 年度で分類して件数を確認
+            // 学年リセットは次年度への移行であるので、1〜3月に実行しても基準年は「今年の年(currentYear)」になる
             const today = new Date()
             const currentYear = today.getFullYear()
-            const isBeforeApril = today.getMonth() < 3
-            const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-            const yearSuffix2nd = String(academicYearBase - 1).substring(2)
-            const yearSuffix1st = String(academicYearBase).substring(2)
+            const targetAcademicYear = currentYear
+            const yearSuffix2nd = String(targetAcademicYear - 1).substring(2)
+            const yearSuffix1st = String(targetAcademicYear).substring(2)
 
             const new2ndYears = uniqueStudents.filter(s =>
                 String(s.student_id_text).substring(0, 2) === yearSuffix2nd
@@ -269,7 +281,9 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
             // 現2年生の数を取得（ステータスがactiveの2年生）
             const old2ndCount = students.filter(s => {
                 if (s.status !== 'active') return false
-                const info = parseStudentId(s.student_id_text, new Date(), s.academic_year)
+                // ここでの計算は「今の現実の学年」ではなく、「現在登録されているデータでの学年」を見たい。
+                // したがって、ダイアログ表示時と同じく `displayBaseDate` を基準にする。
+                const info = parseStudentId(s.student_id_text, displayBaseDate, s.academic_year)
                 return info.grade === 2
             }).length
 
@@ -772,7 +786,7 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                         </thead>
                         <tbody>
                             {paginatedStudents.map(student => {
-                                const studentInfo = parseStudentId(student.student_id_text, new Date(), student.academic_year)
+                                const studentInfo = parseStudentId(student.student_id_text, displayBaseDate, student.academic_year)
                                 const isSelected = selectedIds.has(student.student_id_text)
                                 const stat = stats.get(student.student_id_text) || { submission_count: 0, total_score: 0 }
 

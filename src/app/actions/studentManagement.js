@@ -87,15 +87,13 @@ export const resetAllGrades = async () => {
 export const performGradeReset = async (studentsData) => {
     const supabase = await getSupabase()
 
-    // 現在の年度を計算（4月始まり）
-    const today = new Date()
-    const currentYear = today.getFullYear()
-    const isBeforeApril = today.getMonth() < 3
-    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+    // 学年リセットは「新年度」への移行処理であるため、
+    // 今が1〜3月であっても対象となるベース年度は「今年(currentYear)」と同じになる
+    const targetAcademicYear = currentYear
 
     // ===== Step 1: 旧2年生の非在籍者化 =====
-    // 現2年生 = academic_year が academicYearBase - 1 の学生
-    const oldSecondYearAY = academicYearBase - 1
+    // 新年度(targetAcademicYear)から見て、2年前に入学した学生（旧2年生）
+    const oldSecondYearAY = targetAcademicYear - 2
     const { data: graduatedStudents, error: gradError } = await supabase
         .from('students')
         .update({ status: 'graduated' })
@@ -112,10 +110,13 @@ export const performGradeReset = async (studentsData) => {
         const idPrefix = String(s.student_id_text).substring(0, 2)
         const enrollYear = 2000 + parseInt(idPrefix, 10)
 
+        // Excelに旧2年生以下のデータが混ざっていた場合、強制的に 'graduated' にする
+        const studentStatus = (enrollYear <= oldSecondYearAY) ? 'graduated' : (s.status || 'active')
+
         return {
             ...s,
             academic_year: enrollYear,
-            status: s.status || 'active'
+            status: studentStatus
         }
     })
 
@@ -130,10 +131,10 @@ export const performGradeReset = async (studentsData) => {
 
     // 新2年生と新1年生の件数を集計
     const newSecondYears = processedStudents.filter(s =>
-        String(s.student_id_text).substring(0, 2) === String(academicYearBase - 1).substring(2)
+        String(s.student_id_text).substring(0, 2) === String(targetAcademicYear - 1).substring(2)
     )
     const newFirstYears = processedStudents.filter(s =>
-        String(s.student_id_text).substring(0, 2) === String(academicYearBase).substring(2)
+        String(s.student_id_text).substring(0, 2) === String(targetAcademicYear).substring(2)
     )
 
     // ===== クラス関連処理 =====
