@@ -7,6 +7,7 @@ import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
 import { getAdminMembers, getAdminMemberSession } from '@/app/actions/adminAuth'
+import QRCodeDisplay from './QRCodeDisplay'
 
 export default async function SettingsPage() {
     const supabase = await createClient()
@@ -143,6 +144,12 @@ export default async function SettingsPage() {
                             </div>
                         )}
                     </div>
+                </section>
+
+                {/* WebアプリインストールQR (Admin & Teacher向け) */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>システム (Webアプリ) のインストール</h2>
+                    <QRCodeDisplay />
                 </section>
             </div>
         </div>
