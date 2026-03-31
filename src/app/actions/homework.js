@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
+import { uploadToImageKit } from './imagekit'
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
@@ -31,8 +32,6 @@ export const getClassesList = unstable_cache(
     ['classes-list'],
     { revalidate: 3600, tags: ['classes'] }
 )
-
-// ...
 
 // Internal cached function for student assignments
 const _getStudentAssignments = unstable_cache(
@@ -101,14 +100,7 @@ const _getStudentAssignments = unstable_cache(
         return { active, archived }
     },
     ['student-assignments-v1'],
-    { revalidate: 3600, tags: ['homework-assignments'] } // Base tag, dynamic tags are not supported in options object directly this way usually?
-    // Wait, dynamic tags in options? No, tags must be static array?
-    // Actually, we can just use a broad tag 'homework-assignments' for now, or include student ID in key.
-    // Revalidation by tag 'homework-assignments' will clear ALL students cache? That's okay for now.
-    // Better: use `tags: ['homework-assignments', `student-${studentId}`]`?
-    // unstable_cache options object takes tags array. It can be dynamic if I pass a function?
-    // No, the third arg is options.
-    // Let's stick to simple key-based caching for now, and revalidatePath.
+    { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
 // Fetch active assignments for the student's class
@@ -135,7 +127,7 @@ const _getCachedAssignment = unstable_cache(
         }
         return assignment
     },
-    ['assignment-details-v1'], // We'll append ID? unstable_cache handles args automatically if passed
+    ['assignment-details-v1'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
@@ -152,10 +144,7 @@ export async function getAssignmentDetails(id) {
     if (!assignment) return null
 
     // Security check: Ensure student belongs to class
-    // Decode if one is encoded and other is not? usually straight comparison
     if (assignment.class_name !== session.className && decodeURIComponent(assignment.class_name) !== session.className) {
-        // Allow if it's encoded differently?
-        // Just strictly check.
         if (assignment.class_name !== session.className) {
             console.warn('Unauthorized assignment access attempt:', session.studentId, id)
             return null
@@ -169,8 +158,6 @@ export async function getAssignmentDetails(id) {
         .eq('assignment_id', id)
         .eq('student_id_text', session.studentId)
         .single()
-
-    // It's okay if submission doesn't exist (not submitted yet)
 
     return {
         ...assignment,
@@ -203,8 +190,8 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 comment,
                 file_urls: fileUrls,
                 submitted_at: new Date().toISOString(),
-                status: 'submitted', // Reset status if re-submitted
-                score: 1 // Automatic 1 point for submission
+                status: 'submitted',
+                score: 1 
             })
             .eq('id', existing.id)
         error = updateError
@@ -218,7 +205,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 comment,
                 file_urls: fileUrls,
                 status: 'submitted',
-                score: 1 // Automatic 1 point for submission
+                score: 1
             })
         error = insertError
     }
@@ -229,7 +216,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
     }
 
     revalidateTag('homework-stats')
-    revalidateTag('homework-assignments') // Clear cache so student dashboard updates status
+    revalidateTag('homework-assignments')
     revalidatePath(`/student/homework/${assignmentId}`)
     revalidatePath('/student/dashboard')
 
@@ -237,8 +224,6 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
 }
 
 // --- Teacher Actions ---
-
-
 
 export async function createAssignment(formData) {
     const supabase = await createClient()
@@ -252,14 +237,12 @@ export async function createAssignment(formData) {
     const title = formData.get('title')
     const description = formData.get('description')
     const className = formData.get('className')
-    let deadline = formData.get('deadline') // ISO string from datetime-local
+    let deadline = formData.get('deadline')
 
     if (!title || !className || !deadline) {
         return { error: '必須項目を入力してください' }
     }
 
-    // datetime-local input returns "YYYY-MM-DDTHH:mm" without timezone.
-    // Force JST (+09:00) so it's not unintentionally parsed as UTC by the server environment.
     if (deadline && !deadline.includes('Z') && !deadline.includes('+')) {
         deadline = `${deadline}:00+09:00`
     }
@@ -296,7 +279,6 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
         return { error: 'Unauthorized' }
     }
 
-    // datetime-local input returns "YYYY-MM-DDTHH:mm" without timezone.
     let parsedDeadline = newDeadline
     if (parsedDeadline && !parsedDeadline.includes('Z') && !parsedDeadline.includes('+')) {
         parsedDeadline = `${parsedDeadline}:00+09:00`
@@ -308,7 +290,6 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
         .update({ deadline: parsedDeadline })
         .eq('id', assignmentId)
 
-    // Only restrict to teacher's own assignments for non-admin users
     if (user && !adminMember) {
         query = query.eq('teacher_id', user.id)
     }
@@ -326,15 +307,9 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     return { success: true }
 }
 
-// Fetch all assignments for teacher list (Cached)
 export const getTeacherAssignments = unstable_cache(
     async () => {
         const supabase = createAdminClient()
-
-        // We want to get submission counts too.
-        // This might be complex in one query with Supabase depending on foreign keys.
-        // Let's just fetch assignments first.
-
         const { data: assignments, error } = await supabase
             .from('homework_assignments')
             .select('*')
@@ -351,8 +326,6 @@ export const getTeacherAssignments = unstable_cache(
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
-// Fetch assignments for a specific class (Teacher view helper)
-// Fetch assignments for a specific class (Cached)
 export async function getAssignmentsByClass(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
     
@@ -379,11 +352,9 @@ export async function getAssignmentsByClass(className, isArchived = false) {
     return fetcher()
 }
 
-// Fetch assignment with submissions for grading
 export async function getAssignmentSubmissions(assignmentId) {
     const supabase = createAdminClient()
 
-    // 1. Fetch Assignment
     const { data: assignment, error: assignmentError } = await supabase
         .from('homework_assignments')
         .select('id, title, description, deadline, class_name, created_at')
@@ -392,7 +363,6 @@ export async function getAssignmentSubmissions(assignmentId) {
 
     if (assignmentError) return null
 
-    // 2. Fetch Submissions
     const { data: submissions, error: subError } = await supabase
         .from('homework_submissions')
         .select(`
@@ -416,7 +386,6 @@ export async function getAssignmentSubmissions(assignmentId) {
     }
 }
 
-// Grade a submission
 export async function gradeSubmission(submissionId, score, feedback) {
     const adminSupabase = createAdminClient()
 
@@ -441,7 +410,6 @@ export async function gradeSubmission(submissionId, score, feedback) {
     return { success: true }
 }
 
-// Return a submission
 export async function returnSubmission(submissionId, feedback) {
     const adminSupabase = createAdminClient()
 
@@ -465,11 +433,6 @@ export async function returnSubmission(submissionId, feedback) {
     revalidatePath('/assignments/[id]', 'page')
     return { success: true }
 }
-
-// Helper for admin client (Service Role) - defined at top of file
-// const createAdminClient = () => { ... }
-
-import { uploadToImageKit } from './imagekit'
 
 export async function uploadSubmissionFile(formData) {
     const session = await getStudentSession()
@@ -503,14 +466,9 @@ export async function uploadSubmissionFile(formData) {
     }
 }
 
-
-
-// Get submission stats for all students (Admin use)
 export const getAllStudentSubmissionStats = unstable_cache(
     async () => {
         const supabase = createAdminClient()
-
-        // We need to fetch all submissions to aggregate.
         const { data: submissions, error } = await supabase
             .from('homework_submissions')
             .select('student_id_text, score, status')
@@ -520,9 +478,7 @@ export const getAllStudentSubmissionStats = unstable_cache(
             return []
         }
 
-        // Aggregate by student_id_text
         const statsMap = new Map()
-
         submissions.forEach(sub => {
             if (!statsMap.has(sub.student_id_text)) {
                 statsMap.set(sub.student_id_text, {
@@ -537,7 +493,6 @@ export const getAllStudentSubmissionStats = unstable_cache(
             }
         })
 
-        // Convert to array
         return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
             student_id_text: studentId,
             submission_count: stat.count,
@@ -545,21 +500,12 @@ export const getAllStudentSubmissionStats = unstable_cache(
         }))
     },
     ['all-student-submission-stats-v1'],
-    { revalidate: 3600, tags: ['homework-stats'] } // Cache for 1 hour
+    { revalidate: 3600, tags: ['homework-stats'] }
 )
 
-// Get submission stats for a specific class (Teacher use)
 export const getClassSubmissionStats = unstable_cache(
     async (className) => {
         const supabase = createAdminClient()
-
-        // 1. Get assignments for this class to filter submissions (optional but safer)
-        // Actually, checking student's class membership is better, but submission table has student_id.
-        // We can fetch submissions where student belongs to class, but that requires join.
-        // Simpler: Fetch all submissions and filter by students in the class?
-        // OR: Assume we want stats for *ALL* work done by students currently in this class.
-
-        // Let's fetch students in class first
         const { data: students } = await supabase
             .from('students')
             .select('student_id_text')
@@ -569,7 +515,6 @@ export const getClassSubmissionStats = unstable_cache(
 
         const studentIds = students.map(s => s.student_id_text)
 
-        // 2. Fetch submissions for these students
         const { data: submissions, error } = await supabase
             .from('homework_submissions')
             .select('student_id_text, score, status')
@@ -580,9 +525,7 @@ export const getClassSubmissionStats = unstable_cache(
             return []
         }
 
-        // 3. Aggregate
         const statsMap = new Map()
-        // Initialize for all students in class (even if 0 submissions)
         studentIds.forEach(id => {
             statsMap.set(id, { count: 0, totalScore: 0 })
         })
@@ -607,7 +550,6 @@ export const getClassSubmissionStats = unstable_cache(
     { revalidate: 3600, tags: ['homework-stats'] }
 )
 
-// Get submission matrix for a class (Teacher use - submission status table)
 export async function getClassSubmissionMatrix(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
 
@@ -615,47 +557,97 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
         async () => {
             const supabase = createAdminClient()
 
-            // 1. Get students in this class
-            const { data: students, error: studentsError } = await supabase
-                .from('students')
-                .select('student_id_text, full_name')
-                .eq('class_name', decodedClassName)
-                .order('full_name', { ascending: true })
+            if (isArchived) {
+                // =============== アーカイブモード (過去の課題) ===============
+                // 過去のクラスのため現在の「students.class_name」で探すと誰もいない可能性がある。
+                // そのため、課題 → 提出物 → 提出した学生 という順番で取得し、過去の提出履歴から名簿を復元する。
 
-            if (studentsError || !students || students.length === 0) {
-                return { students: [], assignments: [], submissions: [] }
+                // 1. Get assignments for this class (sorted by deadline)
+                const { data: assignments, error: assignmentsError } = await supabase
+                    .from('homework_assignments')
+                    .select('id, title, deadline, created_at')
+                    .eq('class_name', decodedClassName)
+                    .eq('is_archived', true)
+                    .order('deadline', { ascending: true })
+
+                if (assignmentsError || !assignments || assignments.length === 0) {
+                    return { students: [], assignments: [], submissions: [] }
+                }
+
+                const assignmentIds = assignments.map(a => a.id)
+
+                // 2. Get all submissions for these assignments (クラス制限なしで全取得)
+                const { data: submissions, error: subError } = await supabase
+                    .from('homework_submissions')
+                    .select('student_id_text, assignment_id, status, score')
+                    .in('assignment_id', assignmentIds)
+
+                if (subError || !submissions || submissions.length === 0) {
+                    return { students: [], assignments, submissions: [] }
+                }
+
+                // 3. 提出物から過去の学生ID（student_id_text）を抽出
+                const submittedStudentIds = [...new Set(submissions.map(s => s.student_id_text))]
+
+                // 4. その学生たちの現在の名前などを取得
+                const { data: students, error: studentsError } = await supabase
+                    .from('students')
+                    .select('student_id_text, full_name')
+                    .in('student_id_text', submittedStudentIds)
+                    .order('full_name', { ascending: true })
+
+                return {
+                    students: students || [], 
+                    assignments,
+                    submissions
+                }
+
+            } else {
+                // =============== 通常モード (今年の課題) ===============
+                // 現在そのクラスに在籍している学生をベースにマトリクスを作成する（未提出の学生も一覧に並べるため）
+                
+                // 1. Get current students in this class
+                const { data: students, error: studentsError } = await supabase
+                    .from('students')
+                    .select('student_id_text, full_name')
+                    .eq('class_name', decodedClassName)
+                    .order('full_name', { ascending: true })
+
+                if (studentsError || !students || students.length === 0) {
+                    return { students: [], assignments: [], submissions: [] }
+                }
+
+                // 2. Get assignments for this class
+                const { data: assignments, error: assignmentsError } = await supabase
+                    .from('homework_assignments')
+                    .select('id, title, deadline, created_at')
+                    .eq('class_name', decodedClassName)
+                    .eq('is_archived', false)
+                    .order('deadline', { ascending: true })
+
+                if (assignmentsError || !assignments || assignments.length === 0) {
+                    return { students, assignments: [], submissions: [] }
+                }
+
+                const studentIds = students.map(s => s.student_id_text)
+                const assignmentIds = assignments.map(a => a.id)
+
+                // 3. Get all submissions for these students and assignments
+                const { data: submissions, error: subError } = await supabase
+                    .from('homework_submissions')
+                    .select('student_id_text, assignment_id, status, score')
+                    .in('student_id_text', studentIds)
+                    .in('assignment_id', assignmentIds)
+
+                if (subError) {
+                    console.error('Error fetching submissions for matrix:', subError)
+                    return { students, assignments, submissions: [] }
+                }
+
+                return { students, assignments, submissions }
             }
-
-            // 2. Get assignments for this class (sorted by deadline)
-            const { data: assignments, error: assignmentsError } = await supabase
-                .from('homework_assignments')
-                .select('id, title, deadline, created_at')
-                .eq('class_name', decodedClassName)
-                .eq('is_archived', isArchived)
-                .order('deadline', { ascending: true })
-
-            if (assignmentsError || !assignments || assignments.length === 0) {
-                return { students, assignments: [], submissions: [] }
-            }
-
-            const studentIds = students.map(s => s.student_id_text)
-            const assignmentIds = assignments.map(a => a.id)
-
-            // 3. Get all submissions for these students and assignments
-            const { data: submissions, error: subError } = await supabase
-                .from('homework_submissions')
-                .select('student_id_text, assignment_id, status, score')
-                .in('student_id_text', studentIds)
-                .in('assignment_id', assignmentIds)
-
-            if (subError) {
-                console.error('Error fetching submissions for matrix:', subError)
-                return { students, assignments, submissions: [] }
-            }
-
-            return { students, assignments, submissions }
         },
-        ['class-submission-matrix-v2', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v3', decodedClassName, String(isArchived)],
         { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()
