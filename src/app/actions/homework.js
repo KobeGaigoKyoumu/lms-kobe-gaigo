@@ -353,30 +353,31 @@ export const getTeacherAssignments = unstable_cache(
 
 // Fetch assignments for a specific class (Teacher view helper)
 // Fetch assignments for a specific class (Cached)
-export const getAssignmentsByClass = unstable_cache(
-    async (className, isArchived = false) => {
-        const supabase = createAdminClient()
+export async function getAssignmentsByClass(className, isArchived = false) {
+    const decodedClassName = decodeURIComponent(className)
+    
+    const fetcher = unstable_cache(
+        async () => {
+            const supabase = createAdminClient()
+            const { data: assignments, error } = await supabase
+                .from('homework_assignments')
+                .select('*')
+                .eq('class_name', decodedClassName)
+                .eq('is_archived', isArchived)
+                .order('created_at', { ascending: false })
 
-        // Decode URL component just in case
-        const decodedClassName = decodeURIComponent(className)
+            if (error) {
+                console.error('Fetch assignments by class error:', error)
+                return []
+            }
 
-        const { data: assignments, error } = await supabase
-            .from('homework_assignments')
-            .select('*')
-            .eq('class_name', decodedClassName)
-            .eq('is_archived', isArchived)
-            .order('created_at', { ascending: false })
-
-        if (error) {
-            console.error('Fetch assignments by class error:', error)
-            return []
-        }
-
-        return assignments
-    },
-    ['class-assignments-list'],
-    { revalidate: 3600, tags: ['homework-assignments'] }
-)
+            return assignments
+        },
+        ['class-assignments-v2', decodedClassName, String(isArchived)],
+        { revalidate: 3600, tags: ['homework-assignments'] }
+    )
+    return fetcher()
+}
 
 // Fetch assignment with submissions for grading
 export async function getAssignmentSubmissions(assignmentId) {
@@ -607,55 +608,55 @@ export const getClassSubmissionStats = unstable_cache(
 )
 
 // Get submission matrix for a class (Teacher use - submission status table)
-export const getClassSubmissionMatrix = unstable_cache(
-    async (className, isArchived = false) => {
-        const supabase = createAdminClient()
-        const decodedClassName = decodeURIComponent(className)
+export async function getClassSubmissionMatrix(className, isArchived = false) {
+    const decodedClassName = decodeURIComponent(className)
 
-        // 1. Get students in this class
-        const { data: students, error: studentsError } = await supabase
-            .from('students')
-            .select('student_id_text, full_name')
-            .eq('class_name', decodedClassName)
-            .order('full_name', { ascending: true })
+    const fetcher = unstable_cache(
+        async () => {
+            const supabase = createAdminClient()
 
-        if (studentsError || !students || students.length === 0) {
-            return { students: [], assignments: [], submissions: [] }
-        }
+            // 1. Get students in this class
+            const { data: students, error: studentsError } = await supabase
+                .from('students')
+                .select('student_id_text, full_name')
+                .eq('class_name', decodedClassName)
+                .order('full_name', { ascending: true })
 
-        // 2. Get assignments for this class (sorted by deadline)
-        const { data: assignments, error: assignmentsError } = await supabase
-            .from('homework_assignments')
-            .select('id, title, deadline, created_at')
-            .eq('class_name', decodedClassName)
-            .eq('is_archived', isArchived)
-            .order('deadline', { ascending: true })
+            if (studentsError || !students || students.length === 0) {
+                return { students: [], assignments: [], submissions: [] }
+            }
 
-        if (assignmentsError || !assignments || assignments.length === 0) {
-            return { students, assignments: [], submissions: [] }
-        }
+            // 2. Get assignments for this class (sorted by deadline)
+            const { data: assignments, error: assignmentsError } = await supabase
+                .from('homework_assignments')
+                .select('id, title, deadline, created_at')
+                .eq('class_name', decodedClassName)
+                .eq('is_archived', isArchived)
+                .order('deadline', { ascending: true })
 
-        const studentIds = students.map(s => s.student_id_text)
-        const assignmentIds = assignments.map(a => a.id)
+            if (assignmentsError || !assignments || assignments.length === 0) {
+                return { students, assignments: [], submissions: [] }
+            }
 
-        // 3. Get all submissions for these students and assignments
-        const { data: submissions, error: subError } = await supabase
-            .from('homework_submissions')
-            .select('student_id_text, assignment_id, score, status')
-            .in('student_id_text', studentIds)
-            .in('assignment_id', assignmentIds)
+            const studentIds = students.map(s => s.student_id_text)
+            const assignmentIds = assignments.map(a => a.id)
 
-        if (subError) {
-            console.error('Error fetching submission matrix:', subError)
-            return { students, assignments, submissions: [] }
-        }
+            // 3. Get all submissions for these students and assignments
+            const { data: submissions, error: subError } = await supabase
+                .from('homework_submissions')
+                .select('student_id_text, assignment_id, status, score')
+                .in('student_id_text', studentIds)
+                .in('assignment_id', assignmentIds)
 
-        return {
-            students,
-            assignments,
-            submissions: submissions || []
-        }
-    },
-    ['class-submission-matrix'],
-    { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
-)
+            if (subError) {
+                console.error('Error fetching submissions for matrix:', subError)
+                return { students, assignments, submissions: [] }
+            }
+
+            return { students, assignments, submissions }
+        },
+        ['class-submission-matrix-v2', decodedClassName, String(isArchived)],
+        { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
+    )
+    return fetcher()
+}
