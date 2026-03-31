@@ -188,6 +188,7 @@ export default function ClassAssignmentsPage({ params }) {
                 students={matrixData.students}
                 assignments={matrixData.assignments}
                 submissions={matrixData.submissions}
+                className={className}
             />
         </div>
     )
