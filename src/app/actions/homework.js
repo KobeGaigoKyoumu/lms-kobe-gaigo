@@ -236,10 +236,10 @@ export async function createAssignment(formData) {
 
     const title = formData.get('title')
     const description = formData.get('description')
-    const className = formData.get('className')
+    const classNames = formData.getAll('classNames')
     let deadline = formData.get('deadline')
 
-    if (!title || !className || !deadline) {
+    if (!title || classNames.length === 0 || !deadline) {
         return { error: '必須項目を入力してください' }
     }
 
@@ -248,17 +248,19 @@ export async function createAssignment(formData) {
     }
 
     const adminSupabase = createAdminClient()
-    const { data: newAssignment, error } = await adminSupabase
+    
+    const insertData = classNames.map(className => ({
+        title,
+        description,
+        class_name: className,
+        deadline,
+        teacher_id: user?.id || null
+    }))
+
+    const { data: newAssignments, error } = await adminSupabase
         .from('homework_assignments')
-        .insert({
-            title,
-            description,
-            class_name: className,
-            deadline,
-            teacher_id: user?.id || null
-        })
+        .insert(insertData)
         .select('id')
-        .single()
 
     if (error) {
         console.error('Create assignment error:', error)
@@ -267,7 +269,7 @@ export async function createAssignment(formData) {
 
     revalidateTag('homework-assignments')
     revalidatePath('/assignments')
-    return { success: true, id: newAssignment.id }
+    return { success: true, ids: newAssignments.map(a => a.id) }
 }
 
 export async function updateAssignmentDeadline(assignmentId, newDeadline) {

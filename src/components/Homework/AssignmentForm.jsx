@@ -10,38 +10,36 @@ import styles from '@/app/(dashboard)/assignments/new/page.module.css'
 export default function AssignmentForm({ classes = [] }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-    const [createdAssignmentId, setCreatedAssignmentId] = useState(null)
-    const [copied, setCopied] = useState(false)
+    const [createdAssignmentIds, setCreatedAssignmentIds] = useState(null)
     const [origin, setOrigin] = useState('')
 
     useEffect(() => {
         setOrigin(window.location.origin)
     }, [])
 
-    const handleCopy = () => {
-        const url = `${origin}/student/homework/${createdAssignmentId}`
-        navigator.clipboard.writeText(url)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-    }
-
     const handleSubmit = async (formData) => {
         setLoading(true)
+        
+        const classNames = formData.getAll('classNames')
+        if (!classNames || classNames.length === 0) {
+            alert('少なくとも1つのクラスを選択してください')
+            setLoading(false)
+            return
+        }
+
         const result = await createAssignment(formData)
 
         if (result.error) {
             alert(result.error)
             setLoading(false)
         } else {
-            setCreatedAssignmentId(result.id)
+            setCreatedAssignmentIds(result.ids)
             setLoading(false)
             router.refresh()
         }
     }
 
-    if (createdAssignmentId) {
-        const studentUrl = `${origin}/student/homework/${createdAssignmentId}`
-
+    if (createdAssignmentIds && createdAssignmentIds.length > 0) {
         return (
             <div className={styles.successContainer}>
                 <div className={styles.successIcon}>
@@ -49,23 +47,14 @@ export default function AssignmentForm({ classes = [] }) {
                 </div>
                 <h2 className={styles.successTitle}>課題を作成しました！</h2>
 
-                <div className={styles.linkBox}>
-                    <label className={styles.linkLabel}>学生用提出ページURL</label>
-                    <div className={styles.urlWrapper}>
-                        <div className={styles.urlInput}>{studentUrl}</div>
-                        <button
-                            onClick={handleCopy}
-                            className={`${styles.copyButton} ${copied ? styles.copied : ''}`}
-                        >
-                            {copied ? <Check size={16} /> : <Copy size={16} />}
-                            {copied ? 'コピーしました' : 'コピー'}
-                        </button>
-                    </div>
-                </div>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                    選択した{createdAssignmentIds.length}クラスへの課題割り当てが完了しました。<br/>
+                    学生は自身のダッシュボードから課題を確認・提出できます。
+                </p>
 
                 <div className={styles.successActions}>
                     <button
-                        onClick={() => setCreatedAssignmentId(null)}
+                        onClick={() => setCreatedAssignmentIds(null)}
                         className={styles.secondaryButton}
                     >
                         <Plus size={18} />
@@ -105,29 +94,45 @@ export default function AssignmentForm({ classes = [] }) {
                 />
             </div>
 
-            <div className={styles.row}>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>
-                        対象クラス <span className={styles.required}>*</span>
-                    </label>
-                    <select
-                        name="className"
-                        required
-                        className={styles.input}
-                    >
-                        <option value="">クラスを選択</option>
-                        {classes.length > 0 ? (
-                            classes.map(c => (
-                                <option key={c.id} value={c.name || c.class_name}>
+            <div className={styles.formGroup}>
+                <label className={styles.label}>
+                    対象クラス <span className={styles.required}>*</span>
+                    <span className={styles.hint}>（複数選択可）</span>
+                </label>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                    gap: '0.75rem',
+                    padding: '1rem',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-primary)',
+                    maxHeight: '240px',
+                    overflowY: 'auto'
+                }}>
+                    {classes.length > 0 ? (
+                        classes.map(c => (
+                            <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    name="classNames"
+                                    value={c.name || c.class_name}
+                                    style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                                />
+                                <span style={{ fontSize: 'var(--font-size-sm)', userSelect: 'none' }}>
                                     {c.name || c.class_name}
-                                </option>
-                            ))
-                        ) : (
-                            <option value="" disabled>クラスが見つかりません</option>
-                        )}
-                    </select>
+                                </span>
+                            </label>
+                        ))
+                    ) : (
+                        <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>
+                            クラスが見つかりません
+                        </div>
+                    )}
                 </div>
+            </div>
 
+            <div className={styles.row}>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>
                         提出期限 <span className={styles.required}>*</span>
