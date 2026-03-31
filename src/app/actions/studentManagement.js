@@ -96,15 +96,35 @@ export const performGradeReset = async (studentsData) => {
     // ===== Step 1: 旧2年生（およびそれ以前の過年度生）の非在籍者化 =====
     // 新年度(targetAcademicYear)から見て、2年以上前に入学した学生
     const oldSecondYearAY = targetAcademicYear - 2
-    const { data: graduatedStudents, error: gradError } = await supabase
-        .from('students')
-        .update({ status: 'graduated' })
-        .lte('academic_year', oldSecondYearAY)
-        .eq('status', 'active')
-        .select('student_id_text')
 
-    if (gradError) throw gradError
-    const graduatedCount = graduatedStudents?.length || 0
+    // `academic_year` カラムが null の場合（学籍番号フォールバック）も考慮するため、全 active 学生を取得して判定する
+    const { data: allActiveStudents, error: fetchError } = await supabase
+        .from('students')
+        .select('student_id_text, academic_year')
+        .eq('status', 'active')
+
+    if (fetchError) throw fetchError
+
+    const studentsToGraduate = (allActiveStudents || []).filter(student => {
+        let enrollYear = student.academic_year
+        if (!enrollYear) {
+            // academic_yearがnullの場合は学籍番号から類推 (parseStudentIdと同じロジック)
+            const idPrefix = String(student.student_id_text).substring(0, 2)
+            enrollYear = 2000 + parseInt(idPrefix, 10)
+        }
+        return enrollYear <= oldSecondYearAY
+    }).map(s => s.student_id_text)
+
+    let graduatedCount = 0
+    if (studentsToGraduate.length > 0) {
+        const { error: gradError } = await supabase
+            .from('students')
+            .update({ status: 'graduated' })
+            .in('student_id_text', studentsToGraduate)
+
+        if (gradError) throw gradError
+        graduatedCount = studentsToGraduate.length
+    }
 
     // ===== Step 2 & 3: Excelデータのupsert =====
     // 新2年生（25xx）と新1年生（26xx）を分類してacademic_yearを設定
