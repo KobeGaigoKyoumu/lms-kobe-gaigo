@@ -155,10 +155,25 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
 
         try {
             await updateStudentGrade(studentId, newAcademicYear)
+            
+            // 非在籍者 ('0') が選択された場合は、ステータスも自動的に 'graduated' に変更する
+            let updatedStatus = undefined
+            if (newGrade === '0') {
+                await updateStudentStatus(studentId, 'graduated')
+                updatedStatus = 'graduated'
+            }
+
             // Optimistic Update
-            setStudents(prev => prev.map(s =>
-                s.student_id_text === studentId ? { ...s, academic_year: newAcademicYear } : s
-            ))
+            setStudents(prev => prev.map(s => {
+                if (s.student_id_text === studentId) {
+                    return {
+                        ...s,
+                        academic_year: newAcademicYear,
+                        ...(updatedStatus ? { status: updatedStatus } : {})
+                    }
+                }
+                return s
+            }))
             router.refresh()
         } catch (error) {
             console.error('Grade update error:', error)

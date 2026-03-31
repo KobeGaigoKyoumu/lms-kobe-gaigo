@@ -91,13 +91,13 @@ export const performGradeReset = async (studentsData) => {
     // 今が1〜3月であっても対象となるベース年度は「今年(currentYear)」と同じになる
     const targetAcademicYear = currentYear
 
-    // ===== Step 1: 旧2年生の非在籍者化 =====
-    // 新年度(targetAcademicYear)から見て、2年前に入学した学生（旧2年生）
+    // ===== Step 1: 旧2年生（およびそれ以前の過年度生）の非在籍者化 =====
+    // 新年度(targetAcademicYear)から見て、2年以上前に入学した学生
     const oldSecondYearAY = targetAcademicYear - 2
     const { data: graduatedStudents, error: gradError } = await supabase
         .from('students')
         .update({ status: 'graduated' })
-        .eq('academic_year', oldSecondYearAY)
+        .lte('academic_year', oldSecondYearAY)
         .eq('status', 'active')
         .select('student_id_text')
 
