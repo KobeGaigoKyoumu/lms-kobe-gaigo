@@ -89,6 +89,8 @@ export const performGradeReset = async (studentsData) => {
 
     // 学年リセットは「新年度」への移行処理であるため、
     // 今が1〜3月であっても対象となるベース年度は「今年(currentYear)」と同じになる
+    const today = new Date()
+    const currentYear = today.getFullYear()
     const targetAcademicYear = currentYear
 
     // ===== Step 1: 旧2年生（およびそれ以前の過年度生）の非在籍者化 =====
