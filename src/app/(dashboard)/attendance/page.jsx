@@ -66,6 +66,10 @@ export default function AttendancePage() {
     const [importCumulative, setImportCumulative] = useState(false)
     const [importing, setImporting] = useState(false)
 
+    // 年度管理用
+    const [academicYears, setAcademicYears] = useState([])
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState(null)
+
     // Data Cache
     const dataCache = useRef({})
 
@@ -100,6 +104,16 @@ export default function AttendancePage() {
             const files = await getAvailableAttendanceFiles()
             setAvailableFiles(files)
 
+            // Extract Academic Years
+            const allFiles = [...files.monthlyFiles, ...files.cumulativeFiles]
+            const yearSet = new Set()
+            allFiles.forEach(f => {
+                const ay = f.month >= 4 ? f.year : f.year - 1
+                yearSet.add(ay)
+            })
+            const sortedYears = Array.from(yearSet).sort((a, b) => b - a)
+            setAcademicYears(sortedYears)
+
             // Auto-select latest
             if (!selectedYear && !selectedMonth) {
                 const targetFiles = isCumulative ? files.cumulativeFiles : files.monthlyFiles
@@ -107,7 +121,13 @@ export default function AttendancePage() {
                     const latest = targetFiles[0]
                     setSelectedYear(latest.year)
                     setSelectedMonth(latest.month)
+                    
+                    const latestAy = latest.month >= 4 ? latest.year : latest.year - 1
+                    setSelectedAcademicYear(latestAy)
                 }
+            } else if (selectedYear && selectedMonth && !selectedAcademicYear) {
+                const ay = selectedMonth >= 4 ? selectedYear : selectedYear - 1
+                setSelectedAcademicYear(ay)
             }
         } catch (err) {
             console.error(err)
@@ -464,6 +484,30 @@ export default function AttendancePage() {
                 </p>
             </header>
 
+            {/* 年度タブ */}
+            {academicYears.length > 0 && (
+                <div className={styles.academicYearTabs}>
+                    {academicYears.map(ay => (
+                        <button
+                            key={ay}
+                            className={`${styles.ayTab} ${selectedAcademicYear === ay ? styles.activeAyTab : ''}`}
+                            onClick={() => {
+                                setSelectedAcademicYear(ay)
+                                // 選択した年度内で利用可能な最新月を自動選択
+                                const targetFiles = isCumulative ? availableFiles.cumulativeFiles : availableFiles.monthlyFiles
+                                const filesInAy = targetFiles.filter(f => (f.month >= 4 ? f.year : f.year - 1) === ay)
+                                if (filesInAy.length > 0) {
+                                    setSelectedYear(filesInAy[0].year)
+                                    setSelectedMonth(filesInAy[0].month)
+                                }
+                            }}
+                        >
+                            {ay}年度
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* フィルター */}
             <div className={styles.filters}>
                 <div className={styles.filterGroup}>
@@ -477,11 +521,14 @@ export default function AttendancePage() {
                         }}
                         className={styles.select}
                     >
-                        {(isCumulative ? availableFiles.cumulativeFiles : availableFiles.monthlyFiles).map(f => (
-                            <option key={`${f.year}-${f.month}`} value={`${f.year}-${f.month}`}>
-                                {f.year}年{f.month}月
-                            </option>
-                        ))}
+                        {(isCumulative ? availableFiles.cumulativeFiles : availableFiles.monthlyFiles)
+                            .filter(f => (f.month >= 4 ? f.year : f.year - 1) === selectedAcademicYear)
+                            .map(f => (
+                                <option key={`${f.year}-${f.month}`} value={`${f.year}-${f.month}`}>
+                                    {f.year}年{f.month}月
+                                </option>
+                            ))
+                        }
                     </select>
                 </div>
 

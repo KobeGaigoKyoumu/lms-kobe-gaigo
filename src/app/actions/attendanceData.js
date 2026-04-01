@@ -80,7 +80,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
             return { monthlyFiles: [], cumulativeFiles: [] }
         }
     },
-    ['attendance-files-v3'],
+    ['attendance-files-v4'],
     { revalidate: 86400, tags: ['attendance-files'] }
 )
 
@@ -106,8 +106,8 @@ export const getSchoolAttendanceStats = unstable_cache(
         const studentStatusMap = new Map()
         masterData?.forEach(s => studentStatusMap.set(s.student_id_text, s.status))
 
-        // First, filter out graduated students completely
-        let filteredStudents = students?.filter(s => studentStatusMap.get(s.student_id) !== 'graduated') || []
+        // First, filter out graduated students completely -- REMOVED AS REQUESTED TO SHOW HISTORICAL ACCURACY
+        let filteredStudents = students //?.filter(s => studentStatusMap.get(s.student_id) !== 'graduated') || []
 
         if (enrollmentFilter === 'enrolled') {
             filteredStudents = filteredStudents?.filter(s => calculateGrade(s.student_id, year, month) > 0)
@@ -167,7 +167,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-school-stats-v3'],
+    ['attendance-school-stats-v4'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -210,9 +210,6 @@ export const getClassAttendanceStats = unstable_cache(
 
         const classGroups = {}
         filteredStudents?.forEach(s => {
-            const info = studentInfoMap.get(s.student_id)
-            if (info?.status === 'graduated') return // Skip graduated students
-
             // Use the RECORD's grade and class_code, not the current master's className
             const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
             const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
@@ -251,7 +248,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v3'],
+    ['attendance-class-stats-v4'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -304,11 +301,11 @@ const _getCachedStudentListAttendance = unstable_cache(
                 nationality: info.nationality,
                 status: info.status
             }
-        })?.filter(s => s.status !== 'graduated') || []
+        }) || [] // REMOVED GRADUATED FILTER
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v3'],
+    ['attendance-student-list-v4'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -446,6 +443,6 @@ export const getStudentAttendanceHistory = unstable_cache(
             studentInfo
         }
     },
-    ['attendance-student-history-v3'],
+    ['attendance-student-history-v4'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
