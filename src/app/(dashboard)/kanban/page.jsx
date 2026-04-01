@@ -14,7 +14,8 @@ export default async function KanbanPage() {
         redirect('/login')
     }
 
-    const userId = adminMember.memberId || 'member'
+    // Use 'admin' as userId to signify an admin session (avoids UUID-format FKey constraint errors)
+    const userId = 'admin'
 
     // Restore server-side fetching for Service Role access (Fixes Staff visibility)
     const [columns, cards, labels, reminders] = await Promise.all([

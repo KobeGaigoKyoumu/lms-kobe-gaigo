@@ -30,7 +30,7 @@ export const getClassesList = unstable_cache(
         }
         return classes
     },
-    ['classes-list-v2'],
+    ['classes-list-v3'],
     { revalidate: 3600, tags: ['classes'] }
 )
 
