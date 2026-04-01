@@ -63,33 +63,30 @@ export async function updateSession(request) {
         const isChatApi = pathname.startsWith('/api/chat')
         const isStudentPath = pathname.startsWith('/student')
 
-        // Cookie-based auth only (no more supabase.auth.getUser() for CPU savings)
-        const studentSession = request.cookies.get('kobe_student_session_v2') ||
-            request.cookies.get('kobe_student_session_v1') ||
-            request.cookies.get('student_id_session')
+        // 1. Check for sessions safely
+        const hasStudentSession = !!(request.cookies.get('kobe_student_session_v2') || 
+                                   request.cookies.get('kobe_student_session_v1') || 
+                                   request.cookies.get('student_id_session'))
+        
+        const hasAdminSession = !!request.cookies.get('kobe_admin_member')
 
-        const adminMemberSession = request.cookies.get('kobe_admin_member')
-
-        // Redirect to login if NO student session for a student path
-        if (isStudentPath && !studentSession) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/login'
-            url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
-            return NextResponse.redirect(url)
+        // 2. Redirect logic
+        if (isStudentPath && !hasStudentSession) {
+            const redirectUrl = new URL('/login', request.url)
+            redirectUrl.searchParams.set('next', pathname)
+            return NextResponse.redirect(redirectUrl)
         }
 
-        // Redirect to login if NO admin member session for admin/teacher paths
-        if (!adminMemberSession && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/login'
-            url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
-            return NextResponse.redirect(url)
+        if (!hasAdminSession && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
+            const redirectUrl = new URL('/login', request.url)
+            redirectUrl.searchParams.set('next', pathname)
+            return NextResponse.redirect(redirectUrl)
         }
 
         return supabaseResponse
 
     } catch (e) {
-        console.error('CRITICAL: Middleware failed', e);
-        return NextResponse.next({ request });
+        console.error('Middleware Error:', e)
+        return NextResponse.next()
     }
 }

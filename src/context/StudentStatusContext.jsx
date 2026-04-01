@@ -112,8 +112,8 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                 }
 
                 // If still not success (teacher, or RPC failed), fallback to Vercel API
-                if (!success) {
-                    const lastFallback = parseInt(sessionStorage.getItem('last_status_vercel_fallback') || '0')
+                if (!success && typeof window !== 'undefined') {
+                    const lastFallback = parseInt(window.sessionStorage.getItem('last_status_vercel_fallback') || '0')
                     if (now - lastFallback < 300000) { // 5 minutes cooldown for Vercel fallback
                         console.log('Vercel status fallback on cooldown to save CPU')
                         return
@@ -124,8 +124,8 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                         const data = await resInternal.json()
                         const normalized = normalizeStatuses(data);
                         setStatuses(prev => ({ ...prev, ...normalized }))
-                        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
-                        sessionStorage.setItem('last_status_vercel_fallback', now.toString())
+                        window.sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
+                        window.sessionStorage.setItem('last_status_vercel_fallback', now.toString())
                         lastFetchRef.current = now
                     }
                 }
@@ -138,7 +138,10 @@ export function StudentStatusProvider({ children, role, userId, className: userC
     // Hydrate from cache on mount
     useEffect(() => {
         setMounted(true)
-        const cached = sessionStorage.getItem(CACHE_KEY)
+        
+        if (typeof window === 'undefined') return
+
+        const cached = window.sessionStorage.getItem(CACHE_KEY)
         if (cached) {
             try {
                 const { data, ts } = JSON.parse(cached)

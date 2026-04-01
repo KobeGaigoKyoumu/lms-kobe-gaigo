@@ -7,6 +7,7 @@ export default function PWARegistry() {
     const [status, setStatus] = useState('loading'); // loading, default, granted, denied
     const [showBanner, setShowBanner] = useState(false);
     const [isRequesting, setIsRequesting] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     const checkPermission = () => {
         if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
@@ -14,6 +15,7 @@ export default function PWARegistry() {
     };
 
     useEffect(() => {
+        setMounted(true);
         const currentPermission = checkPermission();
         console.log('Current notification permission:', currentPermission);
         setStatus(currentPermission);
@@ -44,6 +46,8 @@ export default function PWARegistry() {
             }
         }
     }, []);
+
+    if (!mounted) return null;
 
     const subscribeUser = async (registration) => {
         try {
