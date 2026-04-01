@@ -297,8 +297,13 @@ export async function createAssignment(formData) {
         return { error: '作成に失敗しました' }
     }
 
+    // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
+    revalidateTag('schedules')
     revalidatePath('/assignments')
+    revalidatePath('/assignments/new')
+    
     return { success: true, ids: newAssignments.map(a => a.id) }
 }
 
@@ -322,8 +327,12 @@ export async function deleteAssignment(id) {
         return { error: '削除に失敗しました' }
     }
 
+    // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
     revalidatePath('/assignments')
+    revalidatePath('/assignments/new')
+    
     return { success: true }
 }
 
@@ -358,9 +367,12 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
         return { error: '期限の更新に失敗しました' }
     }
 
+    // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
     revalidatePath(`/assignments/${assignmentId}`)
     revalidatePath('/assignments')
+    
     return { success: true }
 }
 
@@ -464,9 +476,11 @@ export async function gradeSubmission(submissionId, score, feedback) {
         return { error: '保存に失敗しました' }
     }
 
+    // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-stats')
     revalidateTag('homework-assignments')
-    revalidatePath('/assignments/[id]', 'page')
+    revalidatePath('/assignments', 'layout') // Revalidate entire tree
+    
     return { success: true }
 }
 
@@ -488,9 +502,11 @@ export async function returnSubmission(submissionId, feedback) {
         return { error: '差し戻しに失敗しました' }
     }
 
+    // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-stats')
     revalidateTag('homework-assignments')
-    revalidatePath('/assignments/[id]', 'page')
+    revalidatePath('/assignments', 'layout') // Revalidate entire tree
+    
     return { success: true }
 }
 
