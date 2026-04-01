@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { gradeSubmission, returnSubmission, updateAssignmentDeadline } from '@/app/actions/homework'
+import { gradeSubmission, returnSubmission, updateAssignmentDeadline, deleteAssignment } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Undo2, Image as ImageIcon, X, Edit2, Check } from 'lucide-react'
+import { Loader2, Save, Undo2, Image as ImageIcon, X, Edit2, Check, Trash2 } from 'lucide-react'
 import styles from './GradingView.module.css'
 
 // This component handles the grading logic for a single student row
@@ -146,6 +146,7 @@ export default function AssignmentGradingView({ assignment, submissions }) {
     const [isEditingDeadline, setIsEditingDeadline] = useState(false)
     const [editedDeadline, setEditedDeadline] = useState(assignment?.deadline ? assignment.deadline.slice(0, 16) : '')
     const [savingDeadline, setSavingDeadline] = useState(false)
+    const [deleting, setDeleting] = useState(false)
     const router = useRouter()
 
     if (!assignment) return <div>課題が見つかりません</div>
@@ -164,10 +165,34 @@ export default function AssignmentGradingView({ assignment, submissions }) {
         setSavingDeadline(false)
     }
 
+    const handleDelete = async () => {
+        if (!confirm('この課題を完全に削除してもよろしいですか？\n提出されたすべてのデータも削除されます。')) return
+        
+        setDeleting(true)
+        const result = await deleteAssignment(assignment.id)
+        if (result.error) {
+            alert(result.error)
+            setDeleting(false)
+        } else {
+            router.push(`/assignments/class/${encodeURIComponent(assignment.class_name)}`)
+            router.refresh()
+        }
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1 className={styles.title}>{assignment.title}</h1>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', width: '100%' }}>
+                    <h1 className={styles.title}>{assignment.title}</h1>
+                    <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className={styles.deleteAssignmentButton}
+                    >
+                        {deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                        <span>課題を削除</span>
+                    </button>
+                </div>
                 <div className={styles.meta}>
                     <span>クラス: {assignment.class_name}</span>
                     <span className={styles.deadlineWrapper}>

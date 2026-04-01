@@ -301,6 +301,31 @@ export async function createAssignment(formData) {
     return { success: true, ids: newAssignments.map(a => a.id) }
 }
 
+export async function deleteAssignment(id) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
+
+    if (!user && !adminMember) {
+        return { error: 'Unauthorized' }
+    }
+
+    const adminSupabase = createAdminClient()
+    const { error } = await adminSupabase
+        .from('homework_assignments')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Delete assignment error:', error)
+        return { error: '削除に失敗しました' }
+    }
+
+    revalidateTag('homework-assignments')
+    revalidatePath('/assignments')
+    return { success: true }
+}
+
 export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
