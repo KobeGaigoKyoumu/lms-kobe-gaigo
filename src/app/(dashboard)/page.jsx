@@ -58,7 +58,7 @@ export default async function DashboardPage() {
         const { data: teacherClasses } = await supabase
             .from('classes')
             .select('name')
-            .eq('teacher_id', user.id)
+            .eq('teacher_id', userId)
 
         const teacherClassNames = teacherClasses?.map(c => c.name) || []
         stats.enrolledClassesCount = teacherClassNames.length
