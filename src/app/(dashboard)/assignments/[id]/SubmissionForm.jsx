@@ -3,10 +3,12 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './page.module.css'
 
 export default function SubmissionForm({ assignmentId, submission, isPastDue, maxScore }) {
     const router = useRouter()
+    const { userId: contextUserId } = useStudentStatus()
     const fileInputRef = useRef(null)
     const [loading, setLoading] = useState(false)
     const [content, setContent] = useState(submission?.content || '')
@@ -153,17 +155,16 @@ export default function SubmissionForm({ assignmentId, submission, isPastDue, ma
         setLoading(true)
         setUploadProgress(0)
         const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
 
         // Upload files if any
         let fileUrls = uploadedFiles
         if (files.length > 0) {
-            fileUrls = await uploadFiles(supabase, user?.id)
+            fileUrls = await uploadFiles(supabase, contextUserId)
         }
 
         const submissionData = {
             assignment_id: assignmentId,
-            student_id: user?.id,
+            student_id: contextUserId,
             content,
             file_urls: fileUrls,
             status: isDraft ? 'draft' : 'submitted',

@@ -9,8 +9,7 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 export const revalidate = 30
 
 export default async function DashboardPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
     const studentSession = await getStudentSessionLight()
 
     // Redirect students to their portal if they hit the root dashboard
@@ -18,27 +17,14 @@ export default async function DashboardPage() {
         redirect('/student/dashboard')
     }
 
-    // Check for admin member session (cookie-based)
-    const adminMember = await getAdminMemberSession()
-
-    // From here on, it's either a logged-in Supabase user (Admin/Teacher), admin member, or a guest
-    if (!user && !adminMember) {
+    if (!adminMember) {
         redirect('/login')
     }
 
-    const firstName = user?.user_metadata?.full_name?.split(' ')[0] || adminMember?.name || 'ユーザー'
-
-    // Fetch Profile (only for Supabase users)
-    let isTeacher = true // Admin members are always teachers
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role, student_id_text')
-            .eq('id', user.id)
-            .single()
-
-        isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
-    }
+    const firstName = adminMember.name || 'ユーザー'
+    const isTeacher = true // Admin members are always teachers/admins
+    const userId = adminMember.memberId
+    const supabase = await createClient()
 
     // Fetch Announcements
     const { data: announcements } = await supabase
@@ -67,7 +53,7 @@ export default async function DashboardPage() {
         recentAssignments: []
     }
 
-    if (isTeacher && user) {
+    if (isTeacher) {
         // Find classes where this user is the teacher
         const { data: teacherClasses } = await supabase
             .from('classes')

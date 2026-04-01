@@ -5,25 +5,16 @@ import UserList from './UserList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function UsersPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 現在のユーザーのプロファイル取得
-    let isAdmin = !!adminMember
-    if (user) {
-        const { data: currentProfile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAdmin = currentProfile?.role === 'admin'
-    }
-
-    // 管理者・教職員以外はアクセス拒否
+    // 管理者以外はアクセス拒否 (cookie-based role check)
+    const isAdmin = adminMember?.role === 'admin'
+    
     if (!isAdmin) {
         redirect('/')
     }
+
+    const supabase = await createClient()
 
     // 全ユーザー取得
     const { data: users, error } = await supabase
@@ -68,7 +59,7 @@ export default async function UsersPage() {
                 </div>
             )}
 
-            <UserList users={users || []} currentUserId={user?.id} />
+            <UserList users={users || []} currentUserId={adminMember?.memberId} />
         </div>
     )
 }

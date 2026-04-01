@@ -9,7 +9,7 @@ import { saveAs } from 'file-saver'
 import { generateAttendancePDFClient } from '@/lib/export/clientPdfGenerator'
 import styles from './page.module.css'
 
-import {
+import { 
     getAvailableAttendanceFiles,
     getSchoolAttendanceStats,
     getClassAttendanceStats,
@@ -17,9 +17,11 @@ import {
     getAllStudentIdsForBulk,
     getStudentAttendanceHistory
 } from '@/app/actions/attendanceData'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 
 export default function AttendancePage() {
     const supabase = createClient()
+    const { role: contextRole } = useStudentStatus()
     const [activeTab, setActiveTab] = useState('school')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -68,7 +70,12 @@ export default function AttendancePage() {
     const dataCache = useRef({})
 
     useEffect(() => {
-        fetchUserRole()
+        if (contextRole) {
+            setUserRole(contextRole)
+        }
+    }, [contextRole])
+
+    useEffect(() => {
         fetchAvailableFiles()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -86,20 +93,7 @@ export default function AttendancePage() {
     // Note: studentSearch is not here because we trigger search manually or on enter. 
     // When hitting search, we should probably manually reset page to 1.
 
-    const fetchUserRole = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-            const { data } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single()
-            setUserRole(data?.role)
-        } else {
-            // Admin member (cookie-based) - treat as teacher
-            setUserRole('teacher')
-        }
-    }
+    // Role check now handled by StudentStatusContext to save Vercel CPU
 
     const fetchAvailableFiles = async () => {
         try {

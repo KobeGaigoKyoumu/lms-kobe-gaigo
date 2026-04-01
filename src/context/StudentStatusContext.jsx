@@ -7,6 +7,8 @@ const StudentStatusContext = createContext({
     hasNewAnnouncement: false,
     unsubmittedAssignmentCount: 0,
     unreadMessageCount: 0,
+    userId: null,
+    role: null,
     refreshStatus: () => { }
 })
 
@@ -194,6 +196,8 @@ export function StudentStatusProvider({ children, role, userId, className: userC
 
     const contextValue = React.useMemo(() => ({
         ...statuses,
+        role,
+        userId,
         refreshStatus: fetchStatuses
     }), [statuses, role, userId]) // Include deps that affect fetchStatuses closure
 

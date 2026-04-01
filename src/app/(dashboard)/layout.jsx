@@ -2,7 +2,6 @@ import styles from './layout.module.css'
 import Sidebar from '@/components/layout/Sidebar'
 import MobileMenu from '@/components/layout/MobileMenu'
 import SystemChatWidget from '@/components/system-chat/SystemChatWidget'
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -10,42 +9,19 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 export const revalidate = 30
 
 export default async function DashboardLayout({ children }) {
-    const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // Check for admin member session (cookie-based)
+    // Check for admin/teacher session (cookie-based only for better CPU performance)
     const adminMember = await getAdminMemberSession()
 
-    if (!user && !adminMember) {
+    if (!adminMember) {
         redirect('/login')
     }
 
-    // Fetch user role server-side for performance
-    let userRole = 'teacher'
-    let userId = 'member'
-    let userEmail = ''
-    let userName = ''
-    let userAvatar = ''
-
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        userRole = profile?.role
-        userId = user.id
-        userEmail = user.email
-        userName = user.user_metadata?.full_name
-        userAvatar = user.user_metadata?.avatar_url
-    } else if (adminMember) {
-        userRole = adminMember.role || 'teacher'
-        userId = adminMember.memberId || 'member'
-        userName = adminMember.name
-        userEmail = `${adminMember.name}@member`
-    }
+    // Role, name, and ID are derived directly from the cookie session
+    const userRole = adminMember.role || 'teacher'
+    const userId = adminMember.memberId || 'member'
+    const userName = adminMember.name
+    const userEmail = `${adminMember.name}@member`
+    const userAvatar = '' // No more Google avatar, can be added to admin_members table later if needed
 
     return (
         <StudentStatusProvider role={userRole} userId={userId}>
@@ -73,4 +49,5 @@ export default async function DashboardLayout({ children }) {
         </StudentStatusProvider>
     )
 }
+
 

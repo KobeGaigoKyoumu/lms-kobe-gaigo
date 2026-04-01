@@ -6,24 +6,16 @@ import styles from './page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function NewClassPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 権限チェック
-    let isAllowed = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAllowed = profile?.role === 'teacher' || profile?.role === 'admin'
+    if (!adminMember) {
+        redirect('/login')
     }
 
-    if (!isAllowed) {
-        redirect('/classes')
-    }
+    const supabase = await createClient()
+
+    // 権限判定 (Admin member session based)
+    const isAllowed = true // Only admin/teacher members can reach here due to adminMember check
 
     // コース一覧取得（紐付け用）
     const { data: courses } = await supabase
@@ -54,7 +46,6 @@ export default async function NewClassPage() {
         'use server'
 
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
 
         const teacherDataStr = formData.get('teacher_data') || ''
         let teacherId = null

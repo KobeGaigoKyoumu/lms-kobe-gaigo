@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { sendTelegramBroadcast } from '@/actions/telegram'
 import { uploadAnnouncementFile } from '@/app/actions/announcements'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './page.module.css'
 
 export default function NewAnnouncementPage() {
     const router = useRouter()
+    const { userId: contextUserId } = useStudentStatus()
     const [loading, setLoading] = useState(false)
     const [courses, setCourses] = useState([])
     const [allStudents, setAllStudents] = useState([])
@@ -35,8 +37,8 @@ export default function NewAnnouncementPage() {
 
     useEffect(() => {
         const loadInitialData = async () => {
+            if (!contextUserId) return
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
 
             // Fetch Courses
             let coursesQuery = supabase
@@ -45,8 +47,9 @@ export default function NewAnnouncementPage() {
                 .order('title')
 
             // Admin member (no user) gets all courses
-            if (user) {
-                coursesQuery = coursesQuery.eq('teacher_id', user.id)
+            // Apply teacher filter (non-admin members)
+            if (contextUserId && contextUserId !== 'member') {
+                coursesQuery = coursesQuery.eq('teacher_id', contextUserId)
             }
 
             const { data: coursesData } = await coursesQuery
@@ -65,7 +68,7 @@ export default function NewAnnouncementPage() {
             setAllClasses(uniqueClasses)
         }
         loadInitialData()
-    }, [])
+    }, [contextUserId])
 
     const handleChange = (e) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -184,7 +187,6 @@ export default function NewAnnouncementPage() {
 
         try {
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
 
             // ファイルアップロード
             let uploadedFileUrls = []
@@ -210,7 +212,7 @@ export default function NewAnnouncementPage() {
                         target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
                         course_id: formData.target_type === 'course' ? formData.course_id : null,
                         is_pinned: formData.is_pinned,
-                        author_id: user?.id,
+                        author_id: contextUserId,
                         file_urls: uploadedFileUrls,
                         sender_name: formData.sender_name || null
                     })

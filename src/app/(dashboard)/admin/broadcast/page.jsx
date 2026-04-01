@@ -1,7 +1,16 @@
+export const dynamic = 'force-dynamic'
 import { getClassesList } from '@/app/actions/homework'
 import BroadcastForm from './BroadcastForm'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { redirect } from 'next/navigation'
 
 export default async function BroadcastPage() {
+    const adminMember = await getAdminMemberSession()
+
+    if (!adminMember || adminMember.role !== 'admin') {
+        redirect('/')
+    }
+
     const classes = await getClassesList()
 
     return (

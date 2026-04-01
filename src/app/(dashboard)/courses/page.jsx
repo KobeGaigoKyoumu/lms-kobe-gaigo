@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -9,24 +10,15 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { fetchCachedCourses } from '@/app/actions/courseData'
 
 export default async function CoursesPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 現在のユーザーのプロファイル取得
-    let isTeacherOrAdmin = !!adminMember // Admin members are always teachers
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
-    }
+    // 現在のユーザーの権限確認 (Admin memberは常に権限あり)
+    const isTeacherOrAdmin = !!adminMember
 
     // コース一覧取得 (Cached)
     const courses = await fetchCachedCourses()
     const error = null // cached action throws if error, or returns data
+    const supabase = await createClient() // Still need for other potential direct queries if any, but we'll use it minimally
 
     return (
         <div className={styles.page}>

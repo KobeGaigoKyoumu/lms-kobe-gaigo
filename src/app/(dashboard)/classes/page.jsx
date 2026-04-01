@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -9,25 +10,21 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { fetchCachedClassesData } from '@/app/actions/classData'
 
 export default async function ClassesPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // プロファイルとクラスデータ（キャッシュ済み）を並列取得
-    let profile = null
-    const [profileResult, classesData] = await Promise.all([
-        user ? supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single() : { data: null },
-        fetchCachedClassesData()
-    ])
+    if (!adminMember) {
+        redirect('/login')
+    }
 
-    profile = profileResult.data
+    const isAdmin = adminMember.role === 'admin'
+    const isTeacher = adminMember.role === 'teacher'
+    const isTeacherOrAdmin = true // Admin member is always either teacher or admin
+
+    // クラスデータ（キャッシュ済み）を並列取得
+    const classesData = await fetchCachedClassesData()
     const { classes: allClassesRaw, studentCounts: studentCountByClass } = classesData
 
-    // Cached action handles errors internally or returns data
+    // 取得エラー時のハンドリング
     const error = null
 
     // 学生数を各クラスに追加
@@ -36,14 +33,20 @@ export default async function ClassesPage() {
         studentCount: studentCountByClass[cls.name] || 0
     }))
 
-    const isAdmin = adminMember ? true : profile?.role === 'admin'
-    const isTeacher = !adminMember && profile?.role === 'teacher'
-    const isTeacherOrAdmin = isTeacher || isAdmin
-
-    // 自分が担任のクラス
-    const myClasses = allClasses?.filter(cls => cls.teacher_id === user?.id) || []
+    // 自分が担任のクラス (現在は名前一致、または管理者の場合は全表示を選択可能)
+    // セッションにIDが含まれている場合はIDで比較、そうでなければ名前で部分一致
+    const myClasses = isAdmin ? [] : allClasses?.filter(cls => 
+        cls.teacher_id === adminMember.memberId || 
+        cls.homeroom_teacher_name === adminMember.name
+    ) || []
+    
     // その他のクラス
-    const otherClasses = allClasses?.filter(cls => cls.teacher_id !== user?.id) || []
+    const otherClasses = isAdmin ? allClasses : (allClasses?.filter(cls => 
+        cls.teacher_id !== adminMember.memberId && 
+        cls.homeroom_teacher_name !== adminMember.name
+    ) || [])
+
+    const supabase = await createClient() // Still need for internal logic or sub-queries
 
     const ClassCard = ({ cls, isMyClass = false, showAdminBadge = false }) => (
         <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''} ${showAdminBadge ? styles.adminCard : ''}`}>

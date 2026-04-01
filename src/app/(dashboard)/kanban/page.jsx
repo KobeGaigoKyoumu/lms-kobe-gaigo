@@ -1,35 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
 
 // Removed force-dynamic to allow potential static optimization
 export default async function KanbanPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // Check for admin member session (cookie-based)
+    // Check for admin/teacher session (cookie-based only for better CPU performance)
     const adminMember = await getAdminMemberSession()
 
-    if (!user && !adminMember) redirect('/login')
-
-    // If Google user, verify role
-    let userId = 'member'
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        const isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
-        if (!isTeacherOrAdmin) redirect('/')
-        userId = user.id
+    if (!adminMember) {
+        redirect('/login')
     }
 
-    // Data fetching moved to client-side (KanbanBoard.jsx) to save Vercel CPU
+    const userId = adminMember.memberId || 'member'
+
+    // Restore server-side fetching for Service Role access (Fixes Staff visibility)
+    const [columns, cards, labels, reminders] = await Promise.all([
+        getKanbanColumns(),
+        getKanbanCards(),
+        getKanbanLabels(),
+        getAllKanbanReminders()
+    ])
 
     return (
         <div className={styles.page}>
@@ -39,7 +32,14 @@ export default async function KanbanPage() {
                     <p className={styles.subtitle}>タスクとスケジュールの管理</p>
                 </div>
             </header>
-            <KanbanBoard userId={userId} />
+            <KanbanBoard 
+                userId={userId} 
+                initialColumns={columns.data || []}
+                initialCards={cards.data || []}
+                initialLabels={labels.data || []}
+                initialReminders={reminders.data || []}
+            />
         </div>
     )
 }
+

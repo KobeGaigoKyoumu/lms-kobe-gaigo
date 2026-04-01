@@ -7,10 +7,15 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function GradeSubmissionPage({ params }) {
     const { id, submissionId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
-    // 提出物取得
+    if (!adminMember) {
+        redirect('/login')
+    }
+
+    const supabase = await createClient()
+
+    // 提出物取得 (Same query as before)
     const { data: submission, error } = await supabase
         .from('submissions')
         .select(`
@@ -36,19 +41,10 @@ export default async function GradeSubmissionPage({ params }) {
         notFound()
     }
 
-    // 権限チェック
-    const adminMember = await getAdminMemberSession()
-    let isAdmin = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAdmin = profile?.role === 'admin'
-    }
-
-    const isTeacher = user ? submission.assignment?.course?.teacher_id === user.id : false
+    // 権限チェック (Admin member session based)
+    const isAdmin = adminMember.role === 'admin'
+    // 管理者または教職員であれば採点可能
+    const isTeacher = adminMember.role === 'teacher' || isAdmin
 
     if (!isTeacher && !isAdmin) {
         redirect('/assignments')

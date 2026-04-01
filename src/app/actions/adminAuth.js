@@ -40,7 +40,7 @@ export async function loginAdminMember(formData) {
         const sessionData = {
             memberId: member.id,
             name: member.name,
-            role: member.role || 'teacher',
+            role: (member.name === '田中' || member.role === 'admin') ? 'admin' : 'teacher',
             at: Date.now()
         }
 

@@ -4,6 +4,21 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/client'
+import { 
+    addKanbanColumn, 
+    updateKanbanColumnTitle, 
+    deleteKanbanColumn,
+    addKanbanCard,
+    updateKanbanCard,
+    deleteKanbanCard,
+    updateKanbanCardPosition,
+    updateKanbanColumnPosition,
+    updateKanbanLabelName,
+    addKanbanReminder,
+    updateKanbanReminder,
+    deleteKanbanReminder,
+    getKanbanReminders
+} from '@/app/actions/kanban'
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
@@ -62,8 +77,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
 
     useEffect(() => {
         const fetchBoardData = async () => {
-            if (initialColumns) return // already provided by server (if any)
-            
+            setIsLoading(true)
             const [
                 { data: colData },
                 { data: cardData },
@@ -89,8 +103,16 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             }
             setIsLoading(false)
         }
-        fetchBoardData()
-    }, [initialColumns, supabase])
+        
+        if (initialColumns) {
+            setColumns(initialColumns)
+            setCards(initialCards || [])
+            setLabels(initialLabels || [])
+            setIsLoading(false)
+        } else {
+            fetchBoardData()
+        }
+    }, [initialColumns, initialCards, initialLabels, supabase])
 
     // Direct DB operations via Supabase client
 
@@ -98,13 +120,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const addColumn = async () => {
         if (!newColumnTitle.trim()) return
         const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0
-        const validCreatedBy = (!userId || userId === 'member') ? null : userId;
-        const { data } = await supabase
-            .from('kanban_columns')
-            .insert({ title: newColumnTitle.trim(), position: maxPos, created_by: validCreatedBy })
-            .select().single()
+        const { data, error } = await addKanbanColumn(newColumnTitle.trim(), maxPos, userId)
         if (data) {
             setColumns(prev => [...prev, data])
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setNewColumnTitle('')
         setAddingColumn(false)
@@ -113,9 +133,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const updateColumnTitle = async (colId) => {
         if (!editingColTitle.trim()) { setEditingColId(null); return }
         const newTitle = editingColTitle.trim()
-        const { error } = await supabase.from('kanban_columns').update({ title: newTitle }).eq('id', colId)
-        if (!error) {
+        const { success, error } = await updateKanbanColumnTitle(colId, newTitle)
+        if (success) {
             setColumns(prev => prev.map(c => c.id === colId ? { ...c, title: newTitle } : c))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setEditingColId(null)
     }
@@ -127,10 +149,12 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         } else {
             if (!confirm('このカラムを削除しますか？')) return
         }
-        const { error } = await supabase.from('kanban_columns').delete().eq('id', colId)
-        if (!error) {
+        const { success, error } = await deleteKanbanColumn(colId)
+        if (success) {
             setColumns(prev => prev.filter(c => c.id !== colId))
             setCards(prev => prev.filter(c => c.column_id !== colId))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
     }
 
@@ -139,13 +163,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         if (!newCardTitle.trim()) return
         const colCards = cards.filter(c => c.column_id === columnId)
         const maxPos = colCards.length > 0 ? Math.max(...colCards.map(c => c.position)) + 1 : 0
-        const validCreatedBy = (!userId || userId === 'member') ? null : userId;
-        const { data } = await supabase
-            .from('kanban_cards')
-            .insert({ column_id: columnId, title: newCardTitle.trim(), position: maxPos, created_by: validCreatedBy })
-            .select().single()
+        const { data, error } = await addKanbanCard(columnId, newCardTitle.trim(), maxPos, userId)
         if (data) {
             setCards(prev => [...prev, data])
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setNewCardTitle('')
         setAddingCardCol(null)
@@ -158,19 +180,23 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             description: editForm.description || null,
             color: editForm.color
         }
-        const { error } = await supabase.from('kanban_cards').update(updates).eq('id', editingCard.id)
-        if (!error) {
+        const { success, error } = await updateKanbanCard(editingCard.id, updates)
+        if (success) {
             setCards(prev => prev.map(c =>
                 c.id === editingCard.id ? { ...c, ...updates } : c
             ))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setEditingCard(null)
     }
 
     const deleteCard = async (cardId) => {
-        const { error } = await supabase.from('kanban_cards').delete().eq('id', cardId)
-        if (!error) {
+        const { success, error } = await deleteKanbanCard(cardId)
+        if (success) {
             setCards(prev => prev.filter(c => c.id !== cardId))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setEditingCard(null)
     }
@@ -179,9 +205,11 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const updateLabelNameFn = async (labelId) => {
         if (!editingLabelName.trim()) { setEditingLabelId(null); return }
         const newName = editingLabelName.trim()
-        const { error } = await supabase.from('kanban_labels').update({ name: newName }).eq('id', labelId)
-        if (!error) {
+        const { success, error } = await updateKanbanLabelName(labelId, newName)
+        if (success) {
             setLabels(prev => prev.map(l => l.id === labelId ? { ...l, name: newName } : l))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
         }
         setEditingLabelId(null)
     }
@@ -297,7 +325,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         ))
 
         // Persist
-        await supabase.from('kanban_cards').update({ column_id: targetColumnId, position: newPosition }).eq('id', card.id)
+        await updateKanbanCardPosition(card.id, targetColumnId, newPosition)
 
         dragCard.current = null
         dragOverCardId.current = null
@@ -353,8 +381,8 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         setColumns(newColumns)
 
         await Promise.all([
-            supabase.from('kanban_columns').update({ position: targetColumn.position }).eq('id', sourceColumn.id),
-            supabase.from('kanban_columns').update({ position: sourceColumn.position }).eq('id', targetColumn.id)
+            updateKanbanColumnPosition(sourceColumn.id, targetColumn.position),
+            updateKanbanColumnPosition(targetColumn.id, sourceColumn.position)
         ])
 
         dragColumn.current = null
@@ -368,11 +396,10 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             description: card.description || '',
             color: card.color || null
         })
-        setShowReminderForm(false)
-        setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
         setEditingReminderId(null)
+        setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
         // Load reminders for this card
-        const { data } = await supabase.from('kanban_reminders').select('*').eq('card_id', card.id).order('created_at', { ascending: true })
+        const { data } = await getKanbanReminders(card.id)
         setReminders(data || [])
     }
 
@@ -405,23 +432,26 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         }
 
         if (editingReminderId) {
-            const { error } = await supabase.from('kanban_reminders').update(payload).eq('id', editingReminderId)
-            if (!error) {
+            const { success, error } = await updateKanbanReminder(editingReminderId, payload)
+            if (success) {
                 setReminders(prev => prev.map(r => r.id === editingReminderId ? { ...r, ...payload } : r))
+            } else if (error) {
+                alert('エラーが発生しました: ' + error)
             }
         } else {
-            const validCreatedBy = (!userId || userId === 'member') ? null : userId;
-            const { data, error } = await supabase
-                .from('kanban_reminders')
-                .insert({
-                    card_id: editingCard.id,
-                    ...payload,
-                    created_by: validCreatedBy
-                })
-                .select().single()
+            const { data, error } = await addKanbanReminder(
+                editingCard.id,
+                payload.reminder_type,
+                payload.remind_time,
+                payload.remind_days,
+                payload.remind_date,
+                userId
+            )
             if (data) {
                 setReminders(prev => [...prev, data])
                 setReminderCardsMap(prev => ({ ...prev, [editingCard.id]: true }))
+            } else if (error) {
+                alert('エラーが発生しました: ' + error)
             }
         }
         setShowReminderForm(false)
@@ -430,13 +460,21 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     }
 
     const handleToggleReminder = async (reminderId, currentEnabled) => {
-        await supabase.from('kanban_reminders').update({ enabled: !currentEnabled }).eq('id', reminderId)
-        setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, enabled: !currentEnabled } : r))
+        const { success, error } = await updateKanbanReminder(reminderId, { enabled: !currentEnabled })
+        if (success) {
+            setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, enabled: !currentEnabled } : r))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
+        }
     }
 
     const handleDeleteReminder = async (reminderId) => {
-        await supabase.from('kanban_reminders').delete().eq('id', reminderId)
-        setReminders(prev => prev.filter(r => r.id !== reminderId))
+        const { success, error } = await deleteKanbanReminder(reminderId)
+        if (success) {
+            setReminders(prev => prev.filter(r => r.id !== reminderId))
+        } else if (error) {
+            alert('エラーが発生しました: ' + error)
+        }
         // Update map if no more reminders
         if (editingCard) {
             const remaining = reminders.filter(r => r.id !== reminderId)

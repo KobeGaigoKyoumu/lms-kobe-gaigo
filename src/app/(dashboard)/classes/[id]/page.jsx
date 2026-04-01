@@ -10,10 +10,15 @@ const DAY_NAMES = ['月', '火', '水', '木', '金']
 
 export default async function ClassDetailPage({ params }) {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
 
-    // クラス詳細取得
+    if (!adminMember) {
+        redirect('/login')
+    }
+
+    const supabase = await createClient()
+
+    // クラス詳細取得 (Same query as before)
     const { data: classData, error } = await supabase
         .from('classes')
         .select(`
@@ -38,19 +43,9 @@ export default async function ClassDetailPage({ params }) {
         notFound()
     }
 
-    // 現在のユーザーのプロファイル
-    const adminMember = await getAdminMemberSession()
-    let isAdmin = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAdmin = profile?.role === 'admin'
-    }
-
-    const isOwner = user ? classData.teacher_id === user.id : false
+    // 現在のユーザーの権限判定
+    const isAdmin = adminMember.role === 'admin'
+    const isOwner = classData.teacher_id === adminMember.memberId || classData.homeroom_teacher_name === adminMember.name
     const canEdit = isOwner || isAdmin
 
     // 学生マスターから該当クラスの学生を取得

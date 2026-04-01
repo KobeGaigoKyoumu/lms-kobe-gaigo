@@ -10,9 +10,11 @@ import { getAdminMembers, getAdminMemberSession } from '@/app/actions/adminAuth'
 import QRCodeDisplay from './QRCodeDisplay'
 
 export default async function SettingsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
+    const supabase = await createClient()
+
+    // Get Google Auth user only if not an admin member or if needed for profile
+    const { data: { user } } = await supabase.auth.getUser()
 
     // プロファイル取得
     let profile = null
@@ -25,34 +27,36 @@ export default async function SettingsPage() {
         profile = data
     }
 
-    // Determine display values
+    // Determine roles and flags
     const isGoogleUser = !!user
-    const isGoogleAdmin = isGoogleUser && profile?.role === 'admin'
-    const displayRole = isGoogleUser ? (profile?.role || 'student') : (adminMember?.role || 'teacher')
-    const displayEmail = isGoogleUser ? user.email : `${adminMember?.name || ''}@member`
-    const displayName = isGoogleUser ? (user.user_metadata?.full_name || '') : (adminMember?.name || '')
+    const isAdmin = (adminMember?.role === 'admin') || (isGoogleUser && profile?.role === 'admin')
+    const isTeacher = (adminMember?.role === 'teacher') || (isGoogleUser && profile?.role === 'teacher')
+    
+    const displayRole = adminMember ? adminMember.role : (profile?.role || 'student')
+    const displayEmail = isGoogleUser ? user.email : (adminMember ? `${adminMember.name}@member` : '')
+    const displayName = adminMember ? adminMember.name : (user?.user_metadata?.full_name || '')
     const displayCreatedAt = isGoogleUser ? user.created_at : null
 
-    // Telegram連携状態取得（Google認証の場合のみ）
+    // Telegram連携状態取得（学生の場合のみ）
     let telegramStatus = null
     let botUsername = null
-    if (isGoogleUser) {
+    if (isGoogleUser && profile?.role === 'student') {
         telegramStatus = await getTelegramStatus()
         botUsername = await getBotUsername()
     }
 
-    // ストレージ使用量取得（adminのみ）
+    // ストレージ使用量取得（管理者のみ）
     let imageKitUsage = null
     let supabaseUsage = null
-    if (isGoogleAdmin) {
+    if (isAdmin) {
         ;[imageKitUsage, supabaseUsage] = await Promise.all([
             getImageKitUsage(),
             getSupabaseStorageUsage()
         ])
     }
 
-    // 管理者メンバーのパスワード一覧（Google認証のadminのみ）
-    const adminMembers = isGoogleAdmin ? await getAdminMembers() : []
+    // 管理者メンバーのパスワード一覧（管理者の場合。Service Roleを使用するため、admin_memberであれば閲覧可能にする）
+    const adminMembers = isAdmin ? await getAdminMembers() : []
 
     const roleLabel = displayRole === 'admin' ? '管理者' : displayRole === 'teacher' ? '教師' : '学生'
     const roleBadgeClass = displayRole === 'admin' ? 'admin' : displayRole === 'teacher' ? 'teacher' : 'student'
@@ -66,7 +70,7 @@ export default async function SettingsPage() {
 
             <div className={styles.content}>
                 {/* ストレージ使用量セクション */}
-                {isGoogleAdmin && imageKitUsage && (
+                {isAdmin && imageKitUsage && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
                         <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
@@ -74,7 +78,7 @@ export default async function SettingsPage() {
                 )}
 
                 {/* 管理者メンバーパスワード一覧（Google認証のadminのみ） */}
-                {isGoogleAdmin && adminMembers.length > 0 && (
+                {isAdmin && adminMembers.length > 0 && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>教職員メンバー パスワード一覧</h2>
                         <div className={styles.infoCard}>

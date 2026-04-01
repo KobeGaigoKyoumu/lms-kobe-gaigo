@@ -5,19 +5,28 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export const dynamic = 'force-dynamic'
 export default async function CalendarPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
+    const supabase = await createClient()
+    
+    let isTeacherOrAdmin = false
+    let userId = null
+    let authUser = null
 
-    // 現在のユーザーのプロファイル
-    let isTeacherOrAdmin = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    if (adminMember) {
+        isTeacherOrAdmin = true
+        userId = adminMember.memberId
+    } else {
+        const { data: { user } } = await supabase.auth.getUser()
+        authUser = user
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+            isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+            userId = user.id
+        }
     }
 
     // 課題（締切のあるもの）を取得
@@ -108,7 +117,7 @@ export default async function CalendarPage() {
             <CalendarView
                 events={events}
                 canCreateEvent={isTeacherOrAdmin}
-                userId={user?.id}
+                userId={userId}
             />
         </div>
     )

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import GradeUploader from './GradeUploader'
 import GradeHistoryBoard from './GradeHistoryBoard'
@@ -6,20 +7,16 @@ import Link from 'next/link'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function ReportCardsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 現在のユーザーのプロファイル取得
-    let isTeacherOrAdmin = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    // 現在のユーザーのプロファイル取得 (管理者・教職員のみ)
+    const isTeacherOrAdmin = !!adminMember
+
+    if (!isTeacherOrAdmin) {
+        redirect('/login')
     }
+
+    const supabase = await createClient()
 
     return (
         <div className={styles.page}>

@@ -7,8 +7,13 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function EditClassPage({ params }) {
     const { id } = await params
+    const adminMember = await getAdminMemberSession()
+
+    if (!adminMember) {
+        redirect('/login')
+    }
+
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
     // クラス取得
     const { data: classData, error } = await supabase
@@ -21,19 +26,9 @@ export default async function EditClassPage({ params }) {
         notFound()
     }
 
-    // 権限チェック
-    const adminMember = await getAdminMemberSession()
-    let isAdmin = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAdmin = profile?.role === 'admin'
-    }
-
-    const isOwner = user ? classData.teacher_id === user.id : false
+    // 権限チェック (Admin member session based)
+    const isAdmin = adminMember.role === 'admin'
+    const isOwner = classData.teacher_id === adminMember.memberId || classData.homeroom_teacher_name === adminMember.name
 
     if (!isOwner && !isAdmin) {
         redirect(`/classes/${id}`)

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import styles from './page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -7,87 +8,44 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 export const revalidate = 86400
 
 export default async function GradesPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // プロファイル取得
-    let isStudent = false
-    let isTeacher = !!adminMember
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isStudent = profile?.role === 'student'
-        isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
+    if (!adminMember) {
+        redirect('/login')
     }
 
-    // 学生の場合: 自分の成績を取得
-    let grades = []
-    if (isStudent && user) {
-        const { data } = await supabase
-            .from('submissions')
-            .select(`
-        *,
-        assignment:assignments (
-          id,
-          title,
-          max_score,
-          course:courses (
-            id,
-            title
-          )
-        )
-      `)
-            .eq('student_id', user.id)
-            .eq('status', 'graded')
-            .order('graded_at', { ascending: false })
-        grades = data || []
-    }
+    // 教職員・管理者としてのセッションを前提とする
+    const isStudent = false
+    const isTeacher = true
+    const isAdmin = adminMember.role === 'admin'
+    const supabase = await createClient()
 
-    // 教師の場合: 担当コースの課題を取得
+    // 教師の場合: 担当コースの課題を取得 (Service Role Client を使用)
     let teacherCourses = []
     if (isTeacher) {
-        const query = user
-            ? supabase
-                .from('courses')
-                .select(`
-            id,
-            title,
-            assignments (
-              id,
-              title,
-              max_score,
-              submissions (
+        const adminSupabase = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY
+        )
+        
+        const { data } = await adminSupabase
+            .from('courses')
+            .select(`
                 id,
-                score,
-                status
-              )
-            )
-          `)
-                .eq('teacher_id', user.id)
-            : createSupabaseClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL,
-                process.env.SUPABASE_SERVICE_ROLE_KEY
-            )
-                .from('courses')
-                .select(`
-            id,
-            title,
-            assignments (
-              id,
-              title,
-              max_score,
-              submissions (
-                id,
-                score,
-                status
-              )
-            )
-          `)
-        const { data } = await query
+                title,
+                assignments (
+                    id,
+                    title,
+                    max_score,
+                    submissions (
+                        id,
+                        score,
+                        status
+                    )
+                )
+            `)
+            .eq('teacher_id', adminMember.memberId)
+        
         teacherCourses = data || []
     }
 

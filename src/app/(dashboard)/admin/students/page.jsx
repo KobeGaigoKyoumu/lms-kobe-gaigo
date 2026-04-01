@@ -11,25 +11,14 @@ import { getAllStudentSubmissionStats } from '@/app/actions/homework'
 
 
 export default async function StudentsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 現在のユーザーのプロファイル取得
-    let isAllowed = !!adminMember
-    if (user) {
-        const { data: currentProfile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAllowed = ['admin', 'teacher'].includes(currentProfile?.role)
+    // 管理者・教職員以外はアクセス拒否 (cookie-based only)
+    if (!adminMember) {
+        redirect('/login')
     }
 
-    // 管理者・教師・教職員以外はアクセス拒否
-    if (!isAllowed) {
-        redirect('/')
-    }
+    const supabase = await createClient()
 
     // Server-side Cached Fetch
     const [students, stats] = await Promise.all([

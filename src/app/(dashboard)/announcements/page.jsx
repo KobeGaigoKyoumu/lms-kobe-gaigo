@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import styles from './page.module.css'
@@ -6,22 +7,15 @@ import AnnouncementCard from './AnnouncementCard'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export default async function AnnouncementsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    // 現在のユーザーのプロファイル
-    let isTeacherOrAdmin = !!adminMember
-    let profileRole = adminMember ? 'admin' : null
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        profileRole = profile?.role
-        isTeacherOrAdmin = profile?.role === 'teacher' || profile?.role === 'admin'
+    if (!adminMember) {
+        redirect('/login')
     }
+
+    const isTeacherOrAdmin = true // Admin member is always teacher or admin
+    const profileRole = adminMember.role
+    const supabase = await createClient()
 
     // お知らせ一覧取得（ピン留め優先、新しい順）
     const { data: announcements, error } = await supabase
@@ -82,7 +76,7 @@ export default async function AnnouncementsPage() {
                         <AnnouncementCard
                             key={announcement.id}
                             announcement={announcement}
-                            canEdit={isTeacherOrAdmin && (announcement.author?.id === user?.id || profileRole === 'admin')}
+                            canEdit={isTeacherOrAdmin && (announcement.author_id === adminMember.memberId || profileRole === 'admin')}
                         />
                     ))}
                 </div>

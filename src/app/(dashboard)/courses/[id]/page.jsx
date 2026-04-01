@@ -17,14 +17,39 @@ export default async function CourseDetailPage({ params, searchParams }) {
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.SUPABASE_SERVICE_ROLE_KEY
     )
-    const { data: { user } } = await supabase.auth.getUser()
+    // 現在のユーザーの権限判定
+    const adminMember = await getAdminMemberSession()
+    let isAdmin = false
+    let isTeacher = false
+    let isStudent = false
+    let user = null
+
+    if (adminMember) {
+        isAdmin = adminMember.role === 'admin'
+        isTeacher = adminMember.role === 'teacher'
+    } else {
+        // Googleログインユーザーの確認 (学生または旧方式の管理者)
+        const { data: authData } = await supabase.auth.getUser()
+        user = authData?.user
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+            isAdmin = profile?.role === 'admin'
+            isTeacher = profile?.role === 'teacher'
+            isStudent = profile?.role === 'student'
+        }
+    }
+
+    // 管理者または教職員であれば誰でも編集可能
+    const canEdit = isAdmin || isTeacher
 
     let schedules = []
     let templates = []
     let enrollments = []
     let totalEnrollments = 0
-    let totalPages = 0
-    let paginatedEnrollments = []
 
     // コース詳細取得
     const { data: course, error } = await supabase
@@ -44,29 +69,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
     if (error || !course) {
         notFound()
     }
-
-    // 現在のユーザーのプロファイル
-    const adminMember = await getAdminMemberSession()
-    let isAdmin = !!adminMember
-    let isTeacher = false
-    let isStudent = false
-    
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        isAdmin = profile?.role === 'admin'
-        isTeacher = profile?.role === 'teacher'
-        isStudent = profile?.role === 'student'
-    } else if (adminMember) {
-        isAdmin = adminMember.role === 'admin'
-        isTeacher = adminMember.role === 'teacher'
-    }
-
-    // 「共有」の要件に基づき、管理者または教職員であれば誰でも編集可能にする
-    const canEdit = isAdmin || isTeacher
 
     const { data: assignments } = await supabase
         .from('assignments')

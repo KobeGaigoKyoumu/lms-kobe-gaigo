@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { uploadAnnouncementFile } from '@/app/actions/announcements'
+import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './page.module.css'
 
 export default function EditAnnouncementPage({ params }) {
     const router = useRouter()
+    const { userId: contextUserId } = useStudentStatus()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [courses, setCourses] = useState([])
@@ -36,7 +38,6 @@ export default function EditAnnouncementPage({ params }) {
             setAnnouncementId(resolvedParams.id)
 
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
 
             // お知らせ取得
             const { data: announcement, error } = await supabase
@@ -88,8 +89,8 @@ export default function EditAnnouncementPage({ params }) {
                 .order('title')
 
             // Admin member (no user) gets all courses
-            if (user) {
-                coursesQuery = coursesQuery.eq('teacher_id', user.id)
+            if (contextUserId && contextUserId !== 'member') {
+                coursesQuery = coursesQuery.eq('teacher_id', contextUserId)
             }
 
             const { data: coursesData } = await coursesQuery
@@ -99,7 +100,7 @@ export default function EditAnnouncementPage({ params }) {
         }
 
         loadData()
-    }, [params, router])
+    }, [params, router, contextUserId])
 
     const handleChange = (e) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
