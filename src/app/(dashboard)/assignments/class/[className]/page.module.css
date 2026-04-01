@@ -150,3 +150,40 @@
         gap: var(--spacing-3);
     }
 }
+
+.subjectTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-6);
+}
+
+.subjectTab {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.subjectTab:hover {
+    background: var(--bg-primary);
+    border-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+
+.activeSubjectTab {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--primary-600);
+    border: 1px solid var(--primary-600);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: white;
+    cursor: default;
+    box-shadow: var(--shadow-sm);
+}

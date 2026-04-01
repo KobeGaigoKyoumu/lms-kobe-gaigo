@@ -237,6 +237,7 @@ export async function createAssignment(formData) {
     const title = formData.get('title')
     const description = formData.get('description')
     const classNames = formData.getAll('classNames')
+    const courseId = formData.get('courseId')
     let deadline = formData.get('deadline')
 
     if (!title || classNames.length === 0 || !deadline) {
@@ -253,6 +254,7 @@ export async function createAssignment(formData) {
         title,
         description,
         class_name: className,
+        course_id: courseId || null,
         deadline,
         teacher_id: user?.id || null
     }))
@@ -336,7 +338,10 @@ export async function getAssignmentsByClass(className, isArchived = false) {
             const supabase = createAdminClient()
             const { data: assignments, error } = await supabase
                 .from('homework_assignments')
-                .select('*')
+                .select(`
+                    *,
+                    course:courses!course_id(id, title)
+                `)
                 .eq('class_name', decodedClassName)
                 .eq('is_archived', isArchived)
                 .order('created_at', { ascending: false })
@@ -568,7 +573,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 1. Get assignments for this class (sorted by deadline)
                 const { data: assignments, error: assignmentsError } = await supabase
                     .from('homework_assignments')
-                    .select('id, title, deadline, created_at')
+                    .select('id, title, deadline, created_at, course_id')
                     .eq('class_name', decodedClassName)
                     .eq('is_archived', true)
                     .order('deadline', { ascending: true })
@@ -624,7 +629,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 2. Get assignments for this class
                 const { data: assignments, error: assignmentsError } = await supabase
                     .from('homework_assignments')
-                    .select('id, title, deadline, created_at')
+                    .select('id, title, deadline, created_at, course_id')
                     .eq('class_name', decodedClassName)
                     .eq('is_archived', false)
                     .order('deadline', { ascending: true })

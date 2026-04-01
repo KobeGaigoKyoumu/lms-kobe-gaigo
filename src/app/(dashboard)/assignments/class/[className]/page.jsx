@@ -14,6 +14,7 @@ export default function ClassAssignmentsPage({ params }) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [isArchived, setIsArchived] = useState(false)
+    const [selectedCourseId, setSelectedCourseId] = useState('all')
 
     useEffect(() => {
         let isMounted = true
@@ -99,8 +100,34 @@ export default function ClassAssignmentsPage({ params }) {
 
     const { assignments, matrixData } = data
     const now = new Date()
-    const upcoming = assignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
-    const past = assignments.filter(a => a.deadline && new Date(a.deadline) < now)
+    
+    // Group assignments by course for tabs
+    const coursesMap = new Map()
+    assignments.forEach(a => {
+        if (a.course) {
+            coursesMap.set(a.course.id, a.course.title)
+        } else if (a.course_id && !a.course) {
+            // Fallback if course object is missing but ID is present
+            coursesMap.set(a.course_id, '不明な科目')
+        }
+    })
+    const uniqueCourses = Array.from(coursesMap.entries()).map(([id, title]) => ({ id, title }))
+
+    const filteredAssignments = selectedCourseId === 'all' 
+        ? assignments 
+        : assignments.filter(a => a.course_id === selectedCourseId)
+
+    const upcoming = filteredAssignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
+    const past = filteredAssignments.filter(a => a.deadline && new Date(a.deadline) < now)
+
+    // Filter matrix data for SubmissionMatrix
+    const filteredMatrixAssignments = selectedCourseId === 'all' 
+        ? matrixData.assignments 
+        : matrixData.assignments.filter(a => a.course_id === selectedCourseId)
+    
+    const filteredAssignmentIds = new Set(filteredMatrixAssignments.map(a => a.id))
+    const filteredSubmissions = matrixData.submissions.filter(s => filteredAssignmentIds.has(s.assignment_id))
+
 
     return (
         <div className={styles.container}>
@@ -139,6 +166,34 @@ export default function ClassAssignmentsPage({ params }) {
                     過去の課題 (アーカイブ)
                 </button>
             </div>
+
+            {uniqueCourses.length > 0 && (
+                <div className={styles.subjectTabs} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
+                    <button
+                        onClick={() => setSelectedCourseId('all')}
+                        className={selectedCourseId === 'all' ? styles.activeSubjectTab : styles.subjectTab}
+                    >
+                        すべて
+                    </button>
+                    {uniqueCourses.map(course => (
+                        <button
+                            key={course.id}
+                            onClick={() => setSelectedCourseId(course.id)}
+                            className={selectedCourseId === course.id ? styles.activeSubjectTab : styles.subjectTab}
+                        >
+                            {course.title}
+                        </button>
+                    ))}
+                    {assignments.some(a => !a.course_id) && (
+                        <button
+                            onClick={() => setSelectedCourseId(null)}
+                            className={selectedCourseId === null ? styles.activeSubjectTab : styles.subjectTab}
+                        >
+                            未分類
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Upcoming Assignments */}
             <section className={styles.section}>
@@ -219,8 +274,8 @@ export default function ClassAssignmentsPage({ params }) {
             {/* Submission Matrix Table */}
             <SubmissionMatrix
                 students={matrixData.students}
-                assignments={matrixData.assignments}
-                submissions={matrixData.submissions}
+                assignments={filteredMatrixAssignments}
+                submissions={filteredSubmissions}
                 className={className}
             />
         </div>
