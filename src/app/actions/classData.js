@@ -41,7 +41,7 @@ export const getCachedClasses = unstable_cache(
 
         return data
     },
-    ['classes-list-v1'],
+    ['classes-list-v2'],
     { revalidate: 86400, tags: ['classes'] }
 )
 
@@ -69,7 +69,7 @@ export const getCachedStudentClassCounts = unstable_cache(
 
         return counts
     },
-    ['student-class-counts-v1'],
+    ['student-class-counts-v2'],
     { revalidate: 86400, tags: ['students', 'classes'] }
 )
 

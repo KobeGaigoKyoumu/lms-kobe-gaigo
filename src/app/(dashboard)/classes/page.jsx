@@ -123,7 +123,7 @@ export default async function ClassesPage() {
                             <ClassCard
                                 key={cls.id}
                                 cls={cls}
-                                isMyClass={cls.teacher_id === user?.id}
+                                isMyClass={cls.teacher_id === adminMember.memberId}
                                 showAdminBadge={true}
                             />
                         ))}
