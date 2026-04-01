@@ -14,7 +14,7 @@ export default function ClassAssignmentsPage({ params }) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [isArchived, setIsArchived] = useState(false)
-    const [selectedCourseId, setSelectedCourseId] = useState('all')
+    const [selectedSubject, setSelectedSubject] = useState('all')
 
     useEffect(() => {
         let isMounted = true
@@ -101,29 +101,24 @@ export default function ClassAssignmentsPage({ params }) {
     const { assignments, matrixData } = data
     const now = new Date()
     
-    // Group assignments by course for tabs
-    const coursesMap = new Map()
-    assignments.forEach(a => {
-        if (a.course) {
-            coursesMap.set(a.course.id, a.course.title)
-        } else if (a.course_id && !a.course) {
-            // Fallback if course object is missing but ID is present
-            coursesMap.set(a.course_id, '不明な科目')
-        }
-    })
-    const uniqueCourses = Array.from(coursesMap.entries()).map(([id, title]) => ({ id, title }))
+    // Group assignments by subject name (text) for tabs
+    const uniqueSubjects = [...new Set(
+        assignments
+            .map(a => a.subject?.trim())
+            .filter(Boolean)
+    )].sort()
 
-    const filteredAssignments = selectedCourseId === 'all' 
+    const filteredAssignments = selectedSubject === 'all' 
         ? assignments 
-        : assignments.filter(a => a.course_id === selectedCourseId)
+        : assignments.filter(a => a.subject === selectedSubject)
 
     const upcoming = filteredAssignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
     const past = filteredAssignments.filter(a => a.deadline && new Date(a.deadline) < now)
 
     // Filter matrix data for SubmissionMatrix
-    const filteredMatrixAssignments = selectedCourseId === 'all' 
+    const filteredMatrixAssignments = selectedSubject === 'all' 
         ? matrixData.assignments 
-        : matrixData.assignments.filter(a => a.course_id === selectedCourseId)
+        : matrixData.assignments.filter(a => a.subject === selectedSubject)
     
     const filteredAssignmentIds = new Set(filteredMatrixAssignments.map(a => a.id))
     const filteredSubmissions = matrixData.submissions.filter(s => filteredAssignmentIds.has(s.assignment_id))
@@ -167,27 +162,27 @@ export default function ClassAssignmentsPage({ params }) {
                 </button>
             </div>
 
-            {uniqueCourses.length > 0 && (
+            {uniqueSubjects.length > 0 && (
                 <div className={styles.subjectTabs} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
                     <button
-                        onClick={() => setSelectedCourseId('all')}
-                        className={selectedCourseId === 'all' ? styles.activeSubjectTab : styles.subjectTab}
+                        onClick={() => setSelectedSubject('all')}
+                        className={selectedSubject === 'all' ? styles.activeSubjectTab : styles.subjectTab}
                     >
                         すべて
                     </button>
-                    {uniqueCourses.map(course => (
+                    {uniqueSubjects.map(subjectName => (
                         <button
-                            key={course.id}
-                            onClick={() => setSelectedCourseId(course.id)}
-                            className={selectedCourseId === course.id ? styles.activeSubjectTab : styles.subjectTab}
+                            key={subjectName}
+                            onClick={() => setSelectedSubject(subjectName)}
+                            className={selectedSubject === subjectName ? styles.activeSubjectTab : styles.subjectTab}
                         >
-                            {course.title}
+                            {subjectName}
                         </button>
                     ))}
-                    {assignments.some(a => !a.course_id) && (
+                    {assignments.some(a => !a.subject) && (
                         <button
-                            onClick={() => setSelectedCourseId(null)}
-                            className={selectedCourseId === null ? styles.activeSubjectTab : styles.subjectTab}
+                            onClick={() => setSelectedSubject(null)}
+                            className={selectedSubject === null ? styles.activeSubjectTab : styles.subjectTab}
                         >
                             未分類
                         </button>

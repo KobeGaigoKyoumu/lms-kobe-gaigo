@@ -7,7 +7,7 @@ import { Loader2, Check, Copy, ExternalLink, Plus } from 'lucide-react'
 import Link from 'next/link'
 import styles from '@/app/(dashboard)/assignments/new/page.module.css'
 
-export default function AssignmentForm({ classes = [], courses = [] }) {
+export default function AssignmentForm({ classes = [], subjects = [] }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [createdAssignmentIds, setCreatedAssignmentIds] = useState(null)
@@ -89,19 +89,19 @@ export default function AssignmentForm({ classes = [], courses = [] }) {
                     科目 <span className={styles.required}>*</span>
                 </label>
                 <select
-                    name="courseId"
+                    name="subject"
                     required
                     className={styles.input}
                 >
                     <option value="">科目を選択</option>
-                    {courses.length > 0 ? (
-                        courses.map(course => (
-                            <option key={course.id} value={course.id}>
-                                {course.title}
+                    {subjects.length > 0 ? (
+                        subjects.map(subject => (
+                            <option key={subject} value={subject}>
+                                {subject}
                             </option>
                         ))
                     ) : (
-                        <option value="" disabled>科目が登録されていません</option>
+                        <option value="" disabled>時間割に科目が登録されていません</option>
                     )}
                 </select>
             </div>

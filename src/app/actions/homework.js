@@ -33,6 +33,33 @@ export const getClassesList = unstable_cache(
     { revalidate: 3600, tags: ['classes'] }
 )
 
+// Fetch all unique subject names from the timetable (schedules)
+export const getTimetableSubjects = unstable_cache(
+    async () => {
+        const supabase = createAdminClient()
+        const { data: schedules, error } = await supabase
+            .from('schedules')
+            .select('subject')
+            .not('subject', 'is', null)
+        
+        if (error) {
+            console.error('Fetch timetable subjects error:', error)
+            return []
+        }
+
+        // Extract unique subject names and filter out empty strings
+        const subjects = [...new Set(
+            schedules
+                .map(s => s.subject.trim())
+                .filter(s => s.length > 0)
+        )].sort()
+
+        return subjects
+    },
+    ['timetable-subjects-list'],
+    { revalidate: 3600, tags: ['schedules'] }
+)
+
 // Internal cached function for student assignments
 const _getStudentAssignments = unstable_cache(
     async (studentId, className) => {
@@ -237,7 +264,7 @@ export async function createAssignment(formData) {
     const title = formData.get('title')
     const description = formData.get('description')
     const classNames = formData.getAll('classNames')
-    const courseId = formData.get('courseId')
+    const subject = formData.get('subject')
     let deadline = formData.get('deadline')
 
     if (!title || classNames.length === 0 || !deadline) {
@@ -254,7 +281,7 @@ export async function createAssignment(formData) {
         title,
         description,
         class_name: className,
-        course_id: courseId || null,
+        subject: subject || null,
         deadline,
         teacher_id: user?.id || null
     }))
@@ -573,7 +600,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 1. Get assignments for this class (sorted by deadline)
                 const { data: assignments, error: assignmentsError } = await supabase
                     .from('homework_assignments')
-                    .select('id, title, deadline, created_at, course_id')
+                    .select('id, title, deadline, created_at, course_id, subject')
                     .eq('class_name', decodedClassName)
                     .eq('is_archived', true)
                     .order('deadline', { ascending: true })
@@ -629,7 +656,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 2. Get assignments for this class
                 const { data: assignments, error: assignmentsError } = await supabase
                     .from('homework_assignments')
-                    .select('id, title, deadline, created_at, course_id')
+                    .select('id, title, deadline, created_at, course_id, subject')
                     .eq('class_name', decodedClassName)
                     .eq('is_archived', false)
                     .order('deadline', { ascending: true })
