@@ -72,7 +72,7 @@ export async function logoutAdminMember() {
     redirect('/login')
 }
 
-export const getAdminMemberSession = cache(async () => {
+export async function getAdminMemberSession() {
     try {
         const cookieStore = await cookies()
         const encoded = cookieStore.get(COOKIE_NAME)?.value
@@ -88,7 +88,7 @@ export const getAdminMemberSession = cache(async () => {
     } catch {
         return null
     }
-})
+}
 
 // Fetch all admin members (for settings page display)
 export async function getAdminMembers() {

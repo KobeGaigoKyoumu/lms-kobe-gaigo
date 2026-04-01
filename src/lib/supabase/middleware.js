@@ -63,37 +63,23 @@ export async function updateSession(request) {
         const isChatApi = pathname.startsWith('/api/chat')
         const isStudentPath = pathname.startsWith('/student')
 
-        // Verify Supabase session (Admin/Teacher)
-        let user = null
-
-        // CRITICAL: Only call getUser() if it's NOT a public path, NOT a webhook, AND NOT an internal API
-        // This is the most expensive part of the middleware in terms of CPU usage.
-        if (!isPublicPath && !isWebhook && !isChatApi) {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
-            user = authUser
-        }
-
-
-
+        // Cookie-based auth only (no more supabase.auth.getUser() for CPU savings)
         const studentSession = request.cookies.get('kobe_student_session_v2') ||
             request.cookies.get('kobe_student_session_v1') ||
             request.cookies.get('student_id_session')
 
-        // Redirect to login if NO student session AND NO Supabase user exists for a student path
-        if (isStudentPath && !studentSession && !user) {
+        const adminMemberSession = request.cookies.get('kobe_admin_member')
+
+        // Redirect to login if NO student session for a student path
+        if (isStudentPath && !studentSession) {
             const url = request.nextUrl.clone()
             url.pathname = '/login'
             url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
             return NextResponse.redirect(url)
         }
 
-
-
-        // Check for admin member session cookie
-        const adminMemberSession = request.cookies.get('kobe_admin_member')
-
-        // Redirect to login if NO Supabase session AND NO admin member session exists and it's an admin/teacher path
-        if (!user && !adminMemberSession && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
+        // Redirect to login if NO admin member session for admin/teacher paths
+        if (!adminMemberSession && !isPublicPath && !isStudentPath && !isWebhook && !isChatApi) {
             const url = request.nextUrl.clone()
             url.pathname = '/login'
             url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)

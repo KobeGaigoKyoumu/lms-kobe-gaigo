@@ -85,7 +85,7 @@ export async function logoutStudent() {
  * Use this for auth guards (login redirects, layout checks) where
  * you only need to know IF a student is logged in, not fresh DB data.
  */
-export const getStudentSessionLight = cache(async () => {
+export async function getStudentSessionLight() {
     try {
         const cookieStore = await cookies()
         const encoded = cookieStore.get(COOKIE_NAME)?.value ||
@@ -119,7 +119,7 @@ export const getStudentSessionLight = cache(async () => {
     } catch {
         return null
     }
-})
+}
 
 /**
  * Get the current student session.
