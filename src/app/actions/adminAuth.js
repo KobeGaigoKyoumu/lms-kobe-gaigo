@@ -110,26 +110,30 @@ export async function getAdminMembers() {
 }
 
 // Fetch member names only (for login dropdown)
-export const getAdminMemberNames = unstable_cache(
-    async () => {
-        try {
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-            const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-            if (!supabaseUrl || !supabaseServiceKey) return []
+export async function getAdminMemberNames() {
+    const getCached = unstable_cache(
+        async () => {
+            try {
+                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+                const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+                if (!supabaseUrl || !supabaseServiceKey) return []
 
-            const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
-            const { data, error } = await supabase
-                .from('admin_members')
-                .select('name')
-                .order('name', { ascending: true })
+                const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
+                const { data, error } = await supabase
+                    .from('admin_members')
+                    .select('name')
+                    .order('name', { ascending: true })
 
-            if (error) return []
-            return (data || []).map(m => m.name)
-        } catch (e) {
-            console.error('getAdminMemberNames Error:', e)
-            return []
-        }
-    },
-    ['admin-member-names'],
-    { revalidate: 3600, tags: ['admin_members'] }
-)
+                if (error) return []
+                return (data || []).map(m => m.name)
+            } catch (e) {
+                console.error('getAdminMemberNames Error:', e)
+                return []
+            }
+        },
+        ['admin-member-names'],
+        { revalidate: 3600, tags: ['admin_members'] }
+    )
+    return getCached()
+}
+

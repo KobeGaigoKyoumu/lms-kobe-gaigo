@@ -1,7 +1,6 @@
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminMemberSession, getAdminMemberNames } from '@/app/actions/adminAuth'
 import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
 import LoginForm from './LoginForm'
 
 export const dynamic = 'force-dynamic'
