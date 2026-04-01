@@ -41,24 +41,42 @@ export async function getConversations() {
 
     // Join with students table to get names/classes
     // SYSTEM_REMINDER はミニチャットウィジェットで表示するため除外
-    const studentIds = Array.from(studentMap.keys()).filter(id => id !== 'SYSTEM_REMINDER')
-    if (studentIds.length === 0) return []
+    const allIds = Array.from(studentMap.keys()).filter(id => id !== 'SYSTEM_REMINDER')
+    if (allIds.length === 0) return []
 
+    // 1. Fetch from students
     const { data: studentInfos, error: infoError } = await supabase
         .from('students')
         .select('student_id_text, full_name, class_name')
-        .in('student_id_text', studentIds)
+        .in('student_id_text', allIds)
 
-    if (infoError) {
-        console.error('Fetch student info error:', infoError)
-        return []
+    // 2. Fetch from admin_members
+    const { data: staffInfos, error: staffError } = await supabase
+        .from('admin_members')
+        .select('id, name')
+        .in('id', allIds)
+
+    const infoMap = new Map()
+    if (studentInfos) {
+        studentInfos.forEach(s => infoMap.set(s.student_id_text, {
+            name: s.full_name,
+            class_name: s.class_name
+        }))
+    }
+    if (staffInfos) {
+        staffInfos.forEach(s => infoMap.set(s.id, {
+            name: `${s.name} (スタッフ)`,
+            class_name: '教職員'
+        }))
     }
 
-    const finalConversations = studentInfos.map(info => ({
-        ...info,
-        name: info.full_name,
-        ...studentMap.get(info.student_id_text)
-    })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    const finalConversations = Array.from(studentMap.keys())
+        .filter(id => id !== 'SYSTEM_REMINDER' && infoMap.has(id))
+        .map(id => ({
+            ...infoMap.get(id),
+            student_id_text: id,
+            ...studentMap.get(id)
+        })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
     return finalConversations
 }

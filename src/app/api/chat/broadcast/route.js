@@ -52,50 +52,63 @@ export async function POST(request) {
             .insert(payloads)
             .select()
 
-        if (error) throw error
+        if (error) {
+            console.error('Database Insert Error:', error)
+            throw new Error(`DB Insert Failed: ${JSON.stringify(error)}`)
+        }
+
+        if (!data || data.length === 0) {
+            throw new Error('No data returned from insert')
+        }
 
         // Send push notifications for broadcast
         try {
+            // Check if web-push is available
             const webpush = require('web-push')
-            webpush.setVapidDetails(
-                'mailto:admin@lms-kobe-gaigo.vercel.app',
-                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                process.env.VAPID_PRIVATE_KEY
-            )
+            if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+                webpush.setVapidDetails(
+                    'mailto:admin@lms-kobe-gaigo.vercel.app',
+                    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                    process.env.VAPID_PRIVATE_KEY
+                )
 
-            // Fetch subscriptions for all targeted students
-            const { data: subs } = await adminSupabase
-                .from('push_subscriptions')
-                .select('*')
-                .in('user_id', studentIds)
+                // Fetch subscriptions for all targeted students
+                const { data: subs } = await adminSupabase
+                    .from('push_subscriptions')
+                    .select('*')
+                    .in('user_id', studentIds)
 
-            if (subs && subs.length > 0) {
-                const pushPayload = JSON.stringify({
-                    title: '先生からのメッセージ',
-                    body: content || (attachment_url ? 'ファイルを送信しました' : 'メッセージが届きました'),
-                    url: '/student/communication',
-                    badge: 1
-                })
-
-                await Promise.all(subs.map(sub =>
-                    webpush.sendNotification({
-                        endpoint: sub.endpoint,
-                        keys: { p256dh: sub.p256dh, auth: sub.auth }
-                    }, pushPayload).catch(e => {
-                        if (e.statusCode === 410 || e.statusCode === 404) {
-                            return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
-                        }
+                if (subs && subs.length > 0) {
+                    const pushPayload = JSON.stringify({
+                        title: '先生からのメッセージ',
+                        body: content || (attachment_url ? 'ファイルを送信しました' : 'メッセージが届きました'),
+                        url: '/student/communication',
+                        badge: 1
                     })
-                ))
+
+                    await Promise.all(subs.map(sub =>
+                        webpush.sendNotification({
+                            endpoint: sub.endpoint,
+                            keys: { p256dh: sub.p256dh, auth: sub.auth }
+                        }, pushPayload).catch(e => {
+                            if (e.statusCode === 410 || e.statusCode === 404) {
+                                return adminSupabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+                            }
+                        })
+                    ))
+                }
             }
         } catch (e) {
-            console.error('Broadcast push error:', e)
+            console.error('Broadcast push error (non-fatal):', e)
         }
 
         return NextResponse.json({ success: true, count: data.length })
 
     } catch (error) {
-        console.error('Broadcast API Error:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Broadcast API Critical Error:', error)
+        return NextResponse.json({ 
+            error: error.message,
+            details: error.stack 
+        }, { status: 500 })
     }
 }

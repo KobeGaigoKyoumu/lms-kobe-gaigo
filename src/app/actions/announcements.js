@@ -60,6 +60,40 @@ export async function uploadAnnouncementFile(formData) {
 }
 
 /**
+ * お知らせを新規作成する（サーバーサイドで実行）
+ * 
+ * @param {object} announcementData - お知らせのデータ
+ * @returns {Promise<{success: boolean, data: object, error: string}>}
+ */
+export async function createAnnouncement(announcementData) {
+    if (!SUPABASE_SERVICE_KEY) {
+        return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY is missing' }
+    }
+
+    try {
+        // Sanitize author_id (allow null for staff accounts)
+        const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+        const sanitizedData = {
+            ...announcementData,
+            author_id: isUUID(announcementData.author_id) ? announcementData.author_id : null
+        }
+
+        const { data, error } = await adminSupabase
+            .from('announcements')
+            .insert(sanitizedData)
+            .select()
+            .single()
+
+        if (error) throw error
+
+        return { success: true, data }
+    } catch (err) {
+        console.error('Create Announcement Error:', err)
+        return { success: false, error: err.message }
+    }
+}
+
+/**
  * お知らせを削除する（サーバーサイドで実行）
  * 
  * @param {string} id - 削除するお知らせのID

@@ -5,10 +5,12 @@ import { unstable_cache } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 
 const createAdminClient = () => {
-    return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+        console.error('Calendar Action: Missing Supabase Environment Variables');
+    }
+    return createSupabaseClient(url, key)
 }
 
 const isUUID = (str) => {
@@ -191,8 +193,8 @@ export async function applyPackageToTarget(newEvents) {
 
     const { error } = await supabase.from('calendar_events').insert(sanitizedEvents)
     if (error) {
-        console.error('applyPackageToTarget error:', error)
-        return { error: 'Failed to apply package' }
+        console.error('applyPackageToTarget Database error:', error)
+        return { error: `Failed to apply package: ${error.message}` }
     }
     revalidateTag('calendar-events')
     return { success: true }

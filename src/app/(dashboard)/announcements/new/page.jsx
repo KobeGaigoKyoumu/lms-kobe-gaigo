@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { sendTelegramBroadcast } from '@/actions/telegram'
-import { uploadAnnouncementFile } from '@/app/actions/announcements'
+import { uploadAnnouncementFile, createAnnouncement } from '@/app/actions/announcements'
 import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './page.module.css'
 
@@ -201,26 +201,23 @@ export default function NewAnnouncementPage() {
 
             let insertError = null
             if (isAnnouncement) {
-                // Sanitize author_id to avoid foreign key errors for admin/staff
-                const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
-                const sanitizedAuthorId = isUUID(contextUserId) ? contextUserId : null
+                const result = await createAnnouncement({
+                    title: formData.title,
+                    content: formData.content,
+                    target_type: formData.target_type,
+                    target_grade: formData.target_type === 'grade' ? formData.target_grade : null,
+                    target_class: formData.target_type === 'class' ? formData.target_class : null,
+                    target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
+                    course_id: formData.target_type === 'course' ? formData.course_id : null,
+                    is_pinned: formData.is_pinned,
+                    author_id: contextUserId,
+                    file_urls: uploadedFileUrls,
+                    sender_name: formData.sender_name || null
+                })
 
-                const { error } = await supabase
-                    .from('announcements')
-                    .insert({
-                        title: formData.title,
-                        content: formData.content,
-                        target_type: formData.target_type,
-                        target_grade: formData.target_type === 'grade' ? formData.target_grade : null,
-                        target_class: formData.target_type === 'class' ? formData.target_class : null,
-                        target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
-                        course_id: formData.target_type === 'course' ? formData.course_id : null,
-                        is_pinned: formData.is_pinned,
-                        author_id: sanitizedAuthorId,
-                        file_urls: uploadedFileUrls,
-                        sender_name: formData.sender_name || null
-                    })
-                insertError = error
+                if (!result.success) {
+                    insertError = result.error
+                }
             }
 
             if (insertError) {
