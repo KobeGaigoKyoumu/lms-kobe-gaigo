@@ -80,7 +80,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
             return { monthlyFiles: [], cumulativeFiles: [] }
         }
     },
-    ['attendance-files-v7'],
+    ['attendance-files-v8'],
     { revalidate: 86400, tags: ['attendance-files'] }
 )
 
@@ -167,7 +167,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-school-stats-v7'],
+    ['attendance-school-stats-v8'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -183,9 +183,9 @@ export const getClassAttendanceStats = unstable_cache(
 
         const studentInfoMap = new Map()
         masterData?.forEach(s => {
-            const normalizedId = String(s.student_id_text || '').trim()
-            if (normalizedId) {
-                studentInfoMap.set(normalizedId, {
+            const numericId = String(s.student_id_text || '').replace(/\D/g, '')
+            if (numericId) {
+                studentInfoMap.set(numericId, {
                     className: s.class_name,
                     status: s.status
                 })
@@ -214,8 +214,8 @@ export const getClassAttendanceStats = unstable_cache(
             // Use the RECORD's grade, fallback to current calculated if missing
             const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
             
-            // IMPROVED ID MATCHING:
-            const normalizedId = String(s.student_id || '').trim()
+            // IMPROVED ID MATCHING (Numeric Only):
+            const normalizedId = String(s.student_id || '').replace(/\D/g, '')
             const info = studentInfoMap.get(normalizedId)
 
             // IMPROVED CLASS CLASSIFICATION:
@@ -227,17 +227,14 @@ export const getClassAttendanceStats = unstable_cache(
                 // If we found a suffix in the master table (e.g. they are in 2-7, they were 1-7)
                 className = `${recordGrade}-${classSuffix}`
             } else {
-                // Fallback 1: Use recorded class_code (BUT ONLY IF IT'S NOT A KNOWN DUMMY LIKE "テスト")
+                // Fallback: Use cleansed record class_code from database
                 const recordClassCodeRaw = s.class_code || ''
-                const recordClassCode = parseInt(recordClassCodeRaw)
-                if (!isNaN(recordClassCode) && recordClassCode > 0) {
-                    className = `${recordGrade}-${recordClassCode}`
-                } else if (normalizedId && normalizedId.length >= 6) {
-                    // Fallback 2: Data-driven fallback (digits 5-6 which we found to be distributed)
-                    const parsedCode = parseInt(normalizedId.substring(4, 6))
-                    if (!isNaN(parsedCode) && parsedCode > 0) {
-                        className = `${recordGrade}-${parsedCode}`
-                    }
+                // Correct suffixes are numbers like "7", "8", but could be "2-7" if from previous import
+                const suffixMatch = recordClassCodeRaw.match(/-([^-]+)$/) || [null, recordClassCodeRaw]
+                const finalSuffix = suffixMatch[1]
+
+                if (finalSuffix && finalSuffix !== 'テスト' && !isNaN(parseInt(finalSuffix))) {
+                    className = `${recordGrade}-${finalSuffix}`
                 }
             }
 
@@ -289,7 +286,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v7'],
+    ['attendance-class-stats-v8'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -317,9 +314,9 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         const studentInfoMap = new Map()
         masterData?.forEach(s => {
-            const normalizedId = String(s.student_id_text || '').trim()
-            if (normalizedId) {
-                studentInfoMap.set(normalizedId, {
+            const numericId = String(s.student_id_text || '').replace(/\D/g, '')
+            if (numericId) {
+                studentInfoMap.set(numericId, {
                     className: s.class_name,
                     nameKana: s.name_kana,
                     nationality: s.nationality,
@@ -329,8 +326,8 @@ const _getCachedStudentListAttendance = unstable_cache(
         })
 
         const processedStudents = students?.map(s => {
-            // IMPROVED ID MATCHING:
-            const normalizedId = String(s.student_id || '').trim()
+            // IMPROVED ID MATCHING (Numeric Only):
+            const normalizedId = String(s.student_id || '').replace(/\D/g, '')
             const info = studentInfoMap.get(normalizedId) || {}
             
             // Use the RECORD's grade, fallback to current calculated if missing
@@ -345,14 +342,11 @@ const _getCachedStudentListAttendance = unstable_cache(
                 recordClassName = `${recordGrade}-${classSuffix}`
             } else {
                 const recordClassCodeRaw = s.class_code || ''
-                const recordClassCode = parseInt(recordClassCodeRaw)
-                if (!isNaN(recordClassCode) && recordClassCode > 0) {
-                    recordClassName = `${recordGrade}-${recordClassCode}`
-                } else if (normalizedId && normalizedId.length >= 6) {
-                    const parsedCode = parseInt(normalizedId.substring(4, 6))
-                    if (!isNaN(parsedCode) && parsedCode > 0) {
-                        recordClassName = `${recordGrade}-${parsedCode}`
-                    }
+                const suffixMatch = recordClassCodeRaw.match(/-([^-]+)$/) || [null, recordClassCodeRaw]
+                const finalSuffix = suffixMatch[1]
+
+                if (finalSuffix && finalSuffix !== 'テスト' && !isNaN(parseInt(finalSuffix))) {
+                    recordClassName = `${recordGrade}-${finalSuffix}`
                 }
             }
 
@@ -368,7 +362,7 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v7'],
+    ['attendance-student-list-v8'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -506,6 +500,6 @@ export const getStudentAttendanceHistory = unstable_cache(
             studentInfo
         }
     },
-    ['attendance-student-history-v7'],
+    ['attendance-student-history-v8'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
