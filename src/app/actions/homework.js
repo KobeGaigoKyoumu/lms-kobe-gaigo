@@ -406,7 +406,7 @@ export async function getAssignmentsByClass(className, isArchived = false) {
 
             return assignments
         },
-        ['class-assignments-v2', decodedClassName, String(isArchived)],
+        ['class-assignments-v3', decodedClassName, String(isArchived)],
         { revalidate: 3600, tags: ['homework-assignments'] }
     )
     return fetcher()
@@ -709,7 +709,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 return { students, assignments, submissions }
             }
         },
-        ['class-submission-matrix-v3', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v4', decodedClassName, String(isArchived)],
         { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()
