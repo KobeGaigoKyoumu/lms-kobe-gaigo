@@ -187,6 +187,7 @@ export const getMenuItems = (role) => {
                 </svg>
             )
         },
+        /*
         {
             href: '/grades',
             label: '課題評価',
@@ -198,6 +199,7 @@ export const getMenuItems = (role) => {
                 </svg>
             )
         },
+        */
         {
             href: '/report-cards',
             label: '成績管理',
