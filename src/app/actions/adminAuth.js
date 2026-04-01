@@ -110,23 +110,26 @@ export async function getAdminMembers() {
 }
 
 // Fetch member names only (for login dropdown)
-export const getAdminMemberNames = cache(async () => {
-    return await unstable_cache(
-        async () => {
-            try {
-                const supabase = createAdminClient()
-                const { data, error } = await supabase
-                    .from('admin_members')
-                    .select('name')
-                    .order('name', { ascending: true })
+export const getAdminMemberNames = unstable_cache(
+    async () => {
+        try {
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+            const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+            if (!supabaseUrl || !supabaseServiceKey) return []
 
-                if (error) return []
-                return (data || []).map(m => m.name)
-            } catch {
-                return []
-            }
-        },
-        ['admin-member-names'],
-        { revalidate: 3600, tags: ['admin_members'] }
-    )()
-})
+            const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
+            const { data, error } = await supabase
+                .from('admin_members')
+                .select('name')
+                .order('name', { ascending: true })
+
+            if (error) return []
+            return (data || []).map(m => m.name)
+        } catch (e) {
+            console.error('getAdminMemberNames Error:', e)
+            return []
+        }
+    },
+    ['admin-member-names'],
+    { revalidate: 3600, tags: ['admin_members'] }
+)
