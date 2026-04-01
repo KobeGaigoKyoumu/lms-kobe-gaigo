@@ -22,7 +22,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
     const lastFetchRef = React.useRef(0)
     const CACHE_KEY = `lms_status_cache_v3_${role}_${userId || 'anon'}`
     const TTL = 300000 // 5 minutes cache
-    const THROTTLE = 30000 // 30 seconds for real-time trigger
+    const THROTTLE = 60000 // 60 seconds for real-time trigger
 
     const normalizeStatuses = (data) => {
         if (!data) return statuses;
@@ -112,7 +112,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                 // If still not success (teacher, or RPC failed), fallback to Vercel API
                 if (!success) {
                     const lastFallback = parseInt(sessionStorage.getItem('last_status_vercel_fallback') || '0')
-                    if (now - lastFallback < 60000) { // 1 minute cooldown for Vercel fallback
+                    if (now - lastFallback < 300000) { // 5 minutes cooldown for Vercel fallback
                         console.log('Vercel status fallback on cooldown to save CPU')
                         return
                     }
@@ -162,10 +162,10 @@ export function StudentStatusProvider({ children, role, userId, className: userC
         // 1. Initial hydration from cache (done in another useEffect, but ensure we fetch fresh)
         fetchStatuses('regular')
 
-        // 2. Periodic background refresh (every 5 mins)
+        // 2. Periodic background refresh (every 10 mins)
         const refreshInterval = setInterval(() => {
             fetchStatuses('regular')
-        }, 300000)
+        }, 600000)
 
         // 3. Re-fetch on visibility change
         const handleVisibilityChange = () => {

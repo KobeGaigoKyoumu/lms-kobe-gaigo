@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 30
 
 export default async function DashboardLayout({ children }) {
     const supabase = await createClient()

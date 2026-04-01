@@ -81,6 +81,47 @@ export async function logoutStudent() {
 }
 
 /**
+ * Lightweight session check - cookie only, NO DB access.
+ * Use this for auth guards (login redirects, layout checks) where
+ * you only need to know IF a student is logged in, not fresh DB data.
+ */
+export const getStudentSessionLight = cache(async () => {
+    try {
+        const cookieStore = await cookies()
+        const encoded = cookieStore.get(COOKIE_NAME)?.value ||
+            cookieStore.get('kobe_student_session_v1')?.value ||
+            cookieStore.get('student_id_session')?.value
+
+        if (!encoded) return null
+
+        try {
+            const json = Buffer.from(encoded, 'base64').toString('utf8')
+            const data = JSON.parse(json)
+            if (data.studentId && data.name) {
+                return {
+                    studentId: data.studentId,
+                    name: data.name,
+                    className: data.className || '未設定',
+                    academicYear: data.academicYear,
+                    enrollmentPeriod: data.enrollmentPeriod
+                }
+            }
+            if (data.studentId) {
+                return { studentId: data.studentId, name: '学生', className: '未設定' }
+            }
+        } catch {
+            // Legacy plain studentId cookie
+            if (encoded && encoded.length > 0) {
+                return { studentId: encoded, name: '学生', className: '未設定' }
+            }
+        }
+        return null
+    } catch {
+        return null
+    }
+})
+
+/**
  * Get the current student session.
  * Now retrieves data directly from the cookie (Base64) for maximum speed and stability.
  */

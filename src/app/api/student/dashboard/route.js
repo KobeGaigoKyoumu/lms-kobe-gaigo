@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getStudentAssignments } from '@/app/actions/homework'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
     try {
         const supabase = await createClient()
-        const session = await getStudentSession()
+        const session = await getStudentSessionLight()
 
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

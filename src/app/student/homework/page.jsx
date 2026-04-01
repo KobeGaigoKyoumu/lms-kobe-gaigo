@@ -1,5 +1,5 @@
 import { getStudentAssignments } from '@/app/actions/homework'
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 import HomeworkListClient from './HomeworkListClient'
 import styles from './page.module.css'
 

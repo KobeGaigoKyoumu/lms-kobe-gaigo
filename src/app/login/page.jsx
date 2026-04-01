@@ -1,4 +1,4 @@
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminMemberSession, getAdminMemberNames } from '@/app/actions/adminAuth'
 import { redirect } from 'next/navigation'
 import LoginForm from './LoginForm'
@@ -12,20 +12,22 @@ export default async function LoginPage({ searchParams }) {
     const params = await searchParams
     const nextPath = params?.next || '/student/dashboard'
 
-    // 1. Check for Student Session (Unified: Passcode or Google Student)
-    const studentSession = await getStudentSession()
+    // 1. Cookie-based checks first (NO DB access, very fast)
+    const [studentSession, adminMemberSession] = await Promise.all([
+        getStudentSessionLight(),
+        getAdminMemberSession()
+    ])
+
     if (studentSession) {
         const isStudentTarget = nextPath.startsWith('/student') || nextPath.startsWith('/auth')
         redirect(isStudentTarget ? nextPath : '/student/dashboard')
     }
 
-    // 2. Check for Admin Member Session
-    const adminMemberSession = await getAdminMemberSession()
     if (adminMemberSession) {
         redirect(nextPath.startsWith('/student') ? '/' : (nextPath || '/'))
     }
 
-    // 3. Check for Supabase Session (Teacher/Admin)
+    // 2. Only check Supabase Auth if no cookie session found (slower - API call)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {

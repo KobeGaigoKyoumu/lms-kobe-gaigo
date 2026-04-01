@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getUnreadCount } from '@/app/actions/messageActions'
 
 export async function GET() {
@@ -15,7 +15,7 @@ export async function GET() {
 
         // 1. Identify User
         const { data: { user } } = await supabaseAuth.auth.getUser()
-        const studentSession = await getStudentSession()
+        const studentSession = await getStudentSessionLight()
 
         if (!user && !studentSession) {
             return NextResponse.json({

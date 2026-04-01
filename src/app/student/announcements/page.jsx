@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function StudentAnnouncementsPage() {
     const supabase = await createClient()
-    const session = await getStudentSession()
+    const session = await getStudentSessionLight()
 
     if (!session) return null
 

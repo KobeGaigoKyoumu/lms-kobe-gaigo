@@ -1,4 +1,4 @@
-import { logoutStudent, getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/layout/Sidebar'
@@ -6,10 +6,10 @@ import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 30
 
 export default async function StudentLayout({ children }) {
-    const session = await getStudentSession()
+    const session = await getStudentSessionLight()
 
     if (!session) {
         redirect('/login')

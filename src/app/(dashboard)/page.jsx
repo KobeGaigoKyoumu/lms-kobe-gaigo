@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { redirect } from 'next/navigation'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 // 30秒間キャッシュ（再訪問時の高速化）
@@ -11,7 +11,7 @@ export const revalidate = 30
 export default async function DashboardPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const studentSession = await getStudentSession()
+    const studentSession = await getStudentSessionLight()
 
     // Redirect students to their portal if they hit the root dashboard
     if (studentSession) {

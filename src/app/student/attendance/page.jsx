@@ -1,13 +1,13 @@
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function StudentAttendancePage() {
     // 1. Check Student Session
-    const session = await getStudentSession()
+    const session = await getStudentSessionLight()
     if (!session) {
         redirect('/login')
     }

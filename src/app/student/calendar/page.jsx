@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 import { redirect } from 'next/navigation'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import styles from './page.module.css'
 import CalendarView from '@/app/(dashboard)/calendar/CalendarView'
 
@@ -14,7 +14,7 @@ const createAdminClient = () => {
 }
 
 export default async function StudentCalendarPage() {
-    const session = await getStudentSession()
+    const session = await getStudentSessionLight()
 
     if (!session) {
         redirect('/login')
