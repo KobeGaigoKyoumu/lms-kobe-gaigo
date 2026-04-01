@@ -28,10 +28,14 @@ export default async function ClassesPage() {
     const error = null
 
     // 学生数を各クラスに追加
-    const allClasses = (allClassesRaw || []).map(cls => ({
+    const allClassesFull = (allClassesRaw || []).map(cls => ({
         ...cls,
         studentCount: studentCountByClass[cls.name] || 0
     }))
+
+    // 現在の年度（2026年度）のみを表示
+    const currentAcademicYear = 2026
+    const allClasses = allClassesFull.filter(cls => cls.academic_year === currentAcademicYear)
 
     // 自分が担任のクラス (現在は名前一致、または管理者の場合は全表示を選択可能)
     // セッションにIDが含まれている場合はIDで比較、そうでなければ名前で部分一致

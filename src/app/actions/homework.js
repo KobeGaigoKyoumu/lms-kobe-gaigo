@@ -21,6 +21,7 @@ export const getClassesList = unstable_cache(
         const { data: classes, error } = await supabase
             .from('classes')
             .select('*')
+            .eq('academic_year', 2026) // Filter for current year
             .order('name', { ascending: true })
 
         if (error) {
@@ -29,7 +30,7 @@ export const getClassesList = unstable_cache(
         }
         return classes
     },
-    ['classes-list'],
+    ['classes-list-v2'],
     { revalidate: 3600, tags: ['classes'] }
 )
 
