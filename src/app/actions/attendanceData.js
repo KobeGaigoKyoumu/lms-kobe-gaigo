@@ -80,7 +80,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
             return { monthlyFiles: [], cumulativeFiles: [] }
         }
     },
-    ['attendance-files-v2'],
+    ['attendance-files-v3'],
     { revalidate: 86400, tags: ['attendance-files'] }
 )
 
@@ -89,7 +89,7 @@ export const getSchoolAttendanceStats = unstable_cache(
         const supabase = getSupabaseAdmin()
         const { data: students, error } = await supabase
             .from('attendance_records')
-            .select('student_id, attendance_rate')
+            .select('student_id, attendance_rate, grade')
             .eq('year', year)
             .eq('month', month)
             .eq('is_cumulative', isCumulative)
@@ -123,7 +123,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         const gradeGroups = {}
         filteredStudents.forEach(s => {
-            const grade = calculateGrade(s.student_id, year, month)
+            const grade = s.grade || calculateGrade(s.student_id, year, month)
             if (!gradeGroups[grade]) gradeGroups[grade] = []
             gradeGroups[grade].push(parseFloat(s.attendance_rate))
         })
@@ -167,7 +167,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-school-stats-v2'],
+    ['attendance-school-stats-v3'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -193,7 +193,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         const { data: students, error } = await supabase
             .from('attendance_records')
-            .select('student_id, attendance_rate')
+            .select('student_id, attendance_rate, grade, class_code')
             .eq('year', year)
             .eq('month', month)
             .eq('is_cumulative', isCumulative)
@@ -213,12 +213,14 @@ export const getClassAttendanceStats = unstable_cache(
             const info = studentInfoMap.get(s.student_id)
             if (info?.status === 'graduated') return // Skip graduated students
 
-            const className = info?.className || '未設定'
-            const grade = calculateGrade(s.student_id, year, month)
+            // Use the RECORD's grade and class_code, not the current master's className
+            const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
+            const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
+            const className = recordClassCode > 0 ? `${recordGrade}-${recordClassCode}` : '未設定'
 
             if (!classGroups[className]) {
                 classGroups[className] = {
-                    grade,
+                    grade: recordGrade,
                     classCode: className,
                     rates: []
                 }
@@ -249,7 +251,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v2'],
+    ['attendance-class-stats-v3'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -260,7 +262,7 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         const { data: students, error } = await supabase
             .from('attendance_records')
-            .select('student_id, student_name, attendance_rate')
+            .select('student_id, student_name, attendance_rate, grade, class_code')
             .eq('year', year)
             .eq('month', month)
             .eq('is_cumulative', isCumulative)
@@ -289,10 +291,15 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         const processedStudents = students?.map(s => {
             const info = studentInfoMap.get(s.student_id) || {}
+            // Use the RECORD's grade and class_code, fallback to current calculated if missing
+            const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
+            const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
+            const recordClassName = recordClassCode > 0 ? `${recordGrade}-${recordClassCode}` : (info.className || '未設定')
+
             return {
                 ...s,
-                grade: calculateGrade(s.student_id, year, month),
-                class_name: info.className,
+                grade: recordGrade,
+                class_name: recordClassName,
                 name_kana: info.nameKana,
                 nationality: info.nationality,
                 status: info.status
@@ -301,7 +308,7 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v2'],
+    ['attendance-student-list-v3'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -439,6 +446,6 @@ export const getStudentAttendanceHistory = unstable_cache(
             studentInfo
         }
     },
-    ['attendance-student-history-v2'],
+    ['attendance-student-history-v3'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
