@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import { loginStudent } from '@/app/actions/studentAuth'
 import { loginAdminMember } from '@/app/actions/adminAuth'
 import styles from './login.module.css'
-import { useRouter, useSearchParams } from 'next/navigation'
-
-export default function LoginForm({ memberNames = [] }) {
+export default function LoginForm({ 
+    memberNames = [], 
+    nextPath = '/student/dashboard',
+    errorType = null,
+    errorMsg = null,
+    errorDesc = null
+}) {
     const router = useRouter()
-    const searchParams = useSearchParams()
-    const nextPath = searchParams.get('next') || '/student/dashboard'
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [isInAppBrowser, setIsInAppBrowser] = useState(false)
@@ -19,11 +21,6 @@ export default function LoginForm({ memberNames = [] }) {
     const [loginMode, setLoginMode] = useState('student')
 
     useEffect(() => {
-        // Handle error from URL parameters (e.g., from auth callback)
-        const errorType = searchParams.get('error')
-        const errorMsg = searchParams.get('msg')
-        const errorDesc = searchParams.get('desc')
-
         if (errorType) {
             let fullError = ''
             if (errorType === 'auth_failed' || errorType === 'no_code') {
@@ -43,13 +40,8 @@ export default function LoginForm({ memberNames = [] }) {
         }
 
         const ua = navigator.userAgent || navigator.vendor || window.opera
-        // Detect LINE, Instagram, or generic WebView (Android)
-        const isInApp = /Line\//i.test(ua) ||
-            /Instagram/i.test(ua) ||
-            /; wv/.test(ua)
-
-        setIsInAppBrowser(isInApp)
-    }, [searchParams])
+        setIsInAppBrowser(/Line\//i.test(ua) || /Instagram/i.test(ua) || /; wv/.test(ua))
+    }, [errorType, errorMsg, errorDesc])
 
     const copyCurrentUrl = () => {
         navigator.clipboard.writeText(window.location.href)

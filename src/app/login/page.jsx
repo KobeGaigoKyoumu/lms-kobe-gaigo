@@ -9,6 +9,9 @@ export const dynamic = 'force-dynamic'
 export default async function LoginPage({ searchParams }) {
     const params = await searchParams
     const nextPath = params?.next || '/student/dashboard'
+    const errorType = params?.error || null
+    const errorMsg = params?.msg || null
+    const errorDesc = params?.desc || null
 
     // 1. Cookie-based checks first (NO DB access, very fast)
     const [studentSession, adminMemberSession] = await Promise.all([
@@ -29,9 +32,13 @@ export default async function LoginPage({ searchParams }) {
     const memberNames = await getAdminMemberNames()
 
     return (
-        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#666' }}>読み込み中...</div>}>
-            <LoginForm memberNames={memberNames} />
-        </Suspense>
+        <LoginForm 
+            memberNames={memberNames} 
+            nextPath={nextPath}
+            errorType={errorType}
+            errorMsg={errorMsg}
+            errorDesc={errorDesc}
+        />
     )
 }
 
