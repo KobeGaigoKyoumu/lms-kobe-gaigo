@@ -172,9 +172,8 @@ export async function sendMessage(studentId, content, options = {}) {
 
         const senderId = user?.id || adminMember?.memberId || 'admin'
         
-        // helper to check if string is UUID
-        const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
-        const profileId = isUUID(senderId) && user ? senderId : null
+        // Profiles table only contains Auth users (students/teachers)
+        const profileId = user ? user.id : null
 
         const payload = {
             student_id: studentId,

@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { revalidateTag } from 'next/cache'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -71,11 +73,13 @@ export async function createAnnouncement(announcementData) {
     }
 
     try {
-        // Sanitize author_id (allow null for staff accounts)
-        const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+        // Authenticate the user - only profiles exist for Auth users
+        const supabase = await createServerClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
         const sanitizedData = {
             ...announcementData,
-            author_id: isUUID(announcementData.author_id) ? announcementData.author_id : null
+            author_id: user ? user.id : null
         }
 
         const { data, error } = await adminSupabase
@@ -86,6 +90,7 @@ export async function createAnnouncement(announcementData) {
 
         if (error) throw error
 
+        revalidateTag('announcements')
         return { success: true, data }
     } catch (err) {
         console.error('Create Announcement Error:', err)

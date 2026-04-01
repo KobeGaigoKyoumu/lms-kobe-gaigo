@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 
@@ -183,15 +184,17 @@ export async function copyEventPackage(id) {
 
 // パッケージの適用
 export async function applyPackageToTarget(newEvents) {
-    const supabase = createAdminClient()
+    const supabaseAdmin = createAdminClient()
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
     
-    // Sanitize created_by for all events since staff accounts are not in profiles table
+    // Authユーザーでない（管理者など）場合は created_by を null にして制約エラーを回避
     const sanitizedEvents = (newEvents || []).map(e => ({
         ...e,
-        created_by: isUUID(e.created_by) ? e.created_by : null
+        created_by: user ? e.created_by : null
     }))
 
-    const { error } = await supabase.from('calendar_events').insert(sanitizedEvents)
+    const { error } = await supabaseAdmin.from('calendar_events').insert(sanitizedEvents)
     if (error) {
         console.error('applyPackageToTarget Database error:', error)
         return { error: `Failed to apply package: ${error.message}` }
@@ -221,15 +224,17 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
 
 // === 単独イベントの管理アクション ===
 export async function createSingleEvent(eventData) {
-    const supabase = createAdminClient()
+    const supabaseAdmin = createAdminClient()
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
     
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: isUUID(eventData.created_by) ? eventData.created_by : null
+        created_by: user ? eventData.created_by : null
     }
 
-    const { data, error } = await supabase.from('calendar_events').insert(sanitizedData).select()
+    const { data, error } = await supabaseAdmin.from('calendar_events').insert(sanitizedData).select()
     if (error) {
         console.error('createSingleEvent error:', error)
         return { error: 'Failed to create event' }
@@ -239,15 +244,17 @@ export async function createSingleEvent(eventData) {
 }
 
 export async function updateSingleEvent(id, eventData) {
-    const supabase = createAdminClient()
+    const supabaseAdmin = createAdminClient()
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
     
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: isUUID(eventData.created_by) ? eventData.created_by : null
+        created_by: user ? eventData.created_by : null
     }
 
-    const { data, error } = await supabase.from('calendar_events').update(sanitizedData).eq('id', id).select()
+    const { data, error } = await supabaseAdmin.from('calendar_events').update(sanitizedData).eq('id', id).select()
     if (error) {
         console.error('updateSingleEvent error:', error)
         return { error: 'Failed to update event' }
