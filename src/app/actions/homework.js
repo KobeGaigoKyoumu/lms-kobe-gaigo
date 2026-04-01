@@ -512,6 +512,7 @@ export const getClassSubmissionStats = unstable_cache(
             .from('students')
             .select('student_id_text')
             .eq('class_name', className)
+            .eq('status', 'active')
 
         if (!students || students.length === 0) return []
 
@@ -613,6 +614,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                     .from('students')
                     .select('student_id_text, full_name')
                     .eq('class_name', decodedClassName)
+                    .eq('status', 'active')
                     .order('full_name', { ascending: true })
 
                 if (studentsError || !students || students.length === 0) {
