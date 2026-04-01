@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { loginStudent } from '@/app/actions/studentAuth'
 import { loginAdminMember } from '@/app/actions/adminAuth'
 import styles from './login.module.css'
+import { useRouter } from 'next/navigation'
+
 export default function LoginForm({ 
     memberNames = [], 
     nextPath = '/student/dashboard',
