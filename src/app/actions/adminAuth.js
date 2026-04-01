@@ -75,17 +75,28 @@ export async function logoutAdminMember() {
 export async function getAdminMemberSession() {
     try {
         const cookieStore = await cookies()
-        const encoded = cookieStore.get(COOKIE_NAME)?.value
-        if (!encoded) return null
+        const cookie = cookieStore.get(COOKIE_NAME)
+        if (!cookie || !cookie.value) return null
 
-        const json = Buffer.from(encoded, 'base64').toString('utf8')
-        const data = JSON.parse(json)
-        return {
-            memberId: data.memberId,
-            name: data.name,
-            role: data.role
+        try {
+            // Use a more robust decoding method
+            const json = Buffer.from(cookie.value, 'base64').toString('utf8')
+            if (!json) return null
+            
+            const data = JSON.parse(json)
+            if (!data || typeof data !== 'object') return null
+
+            return {
+                memberId: data.memberId || null,
+                name: data.name || '不明',
+                role: data.role || 'teacher'
+            }
+        } catch (innerError) {
+            console.error('Admin Member Session Decode Error:', innerError)
+            return null
         }
-    } catch {
+    } catch (e) {
+        console.error('getAdminMemberSession Critical Error:', e)
         return null
     }
 }
@@ -110,30 +121,45 @@ export async function getAdminMembers() {
 }
 
 // Fetch member names only (for login dropdown)
-export async function getAdminMemberNames() {
-    const getCached = unstable_cache(
-        async () => {
-            try {
-                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-                const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-                if (!supabaseUrl || !supabaseServiceKey) return []
-
-                const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
-                const { data, error } = await supabase
-                    .from('admin_members')
-                    .select('name')
-                    .order('name', { ascending: true })
-
-                if (error) return []
-                return (data || []).map(m => m.name)
-            } catch (e) {
-                console.error('getAdminMemberNames Error:', e)
+// Cache the member names list for 1 hour
+const getCachedMemberNames = unstable_cache(
+    async () => {
+        try {
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+            const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'MISSING'
+            
+            if (!supabaseUrl || supabaseServiceKey === 'MISSING') {
+                console.warn('getAdminMemberNames: Missing Supabase environment variables');
                 return []
             }
-        },
-        ['admin-member-names'],
-        { revalidate: 3600, tags: ['admin_members'] }
-    )
-    return getCached()
+
+            const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
+            const { data, error } = await supabase
+                .from('admin_members')
+                .select('name')
+                .order('name', { ascending: true })
+
+            if (error) {
+                console.error('getAdminMemberNames DB Error:', error);
+                return []
+            }
+            return (data || []).map(m => m.name)
+        } catch (e) {
+            console.error('getAdminMemberNames (Cache) Error:', e)
+            return []
+        }
+    },
+    ['admin-member-names-v2'],
+    { revalidate: 3600, tags: ['admin_members'] }
+)
+
+// Fetch member names only (for login dropdown)
+export async function getAdminMemberNames() {
+    try {
+        return await getCachedMemberNames()
+    } catch (e) {
+        console.error('getAdminMemberNames Wrapper Error:', e)
+        return []
+    }
 }
 

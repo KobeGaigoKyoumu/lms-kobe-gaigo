@@ -6,29 +6,62 @@ import LoginForm from './LoginForm'
 export const dynamic = 'force-dynamic'
 
 export default async function LoginPage({ searchParams }) {
-    const params = await searchParams
-    const nextPath = params?.next || '/student/dashboard'
-    const errorType = params?.error || null
-    const errorMsg = params?.msg || null
-    const errorDesc = params?.desc || null
+    // Standard defaults for failure cases
+    let nextPath = '/student/dashboard'
+    let errorType = null
+    let errorMsg = null
+    let errorDesc = null
+    let memberNames = []
 
-    // 1. Cookie-based checks first (NO DB access, very fast)
-    const [studentSession, adminMemberSession] = await Promise.all([
-        getStudentSessionLight(),
-        getAdminMemberSession()
-    ])
+    try {
+        // Safe searchParams extraction (Promise in Next.js 15)
+        const params = await searchParams
+        if (params) {
+            nextPath = params.next || '/student/dashboard'
+            errorType = params.error || null
+            errorMsg = params.msg || null
+            errorDesc = params.desc || null
+        }
 
-    if (studentSession) {
-        const isStudentTarget = nextPath.startsWith('/student') || nextPath.startsWith('/auth')
-        redirect(isStudentTarget ? nextPath : '/student/dashboard')
+        // 1. Session checks (wrapped individually to prevent cascading failure)
+        let studentSession = null
+        let adminMemberSession = null
+
+        try {
+            const sessions = await Promise.allSettled([
+                getStudentSessionLight(),
+                getAdminMemberSession()
+            ])
+            studentSession = sessions[0].status === 'fulfilled' ? sessions[0].value : null
+            adminMemberSession = sessions[1].status === 'fulfilled' ? sessions[1].value : null
+        } catch (sessionErr) {
+            console.error('LoginPage: Session fetch failed', sessionErr)
+        }
+
+        // 2. Redirect logic (Next.js redirect is special as it throws an error that must NOT be caught by a generic try-catch)
+        if (studentSession) {
+            const isStudentTarget = nextPath.startsWith('/student') || nextPath.startsWith('/auth')
+            redirect(isStudentTarget ? nextPath : '/student/dashboard')
+        }
+
+        if (adminMemberSession) {
+            redirect(nextPath.startsWith('/student') ? '/' : (nextPath || '/'))
+        }
+
+        // 3. Fetch member names for the dropdown
+        try {
+            memberNames = await getAdminMemberNames() || []
+        } catch (namesErr) {
+            console.error('LoginPage: Failed to fetch member names', namesErr)
+        }
+
+    } catch (e) {
+        // If it's a redirect error, re-throw it so Next.js can handle it
+        if (e.digest?.includes('NEXT_REDIRECT')) throw e
+        
+        console.error('LoginPage: Critical Render Error Blocked', e)
+        // Ensure some names are available even on failure (fallback handled by LoginForm)
     }
-
-    if (adminMemberSession) {
-        redirect(nextPath.startsWith('/student') ? '/' : (nextPath || '/'))
-    }
-
-    // Fetch member names (admins and teachers) for the login dropdown
-    const memberNames = await getAdminMemberNames()
 
     return (
         <LoginForm 

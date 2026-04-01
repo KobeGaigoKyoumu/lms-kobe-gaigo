@@ -88,15 +88,24 @@ export async function logoutStudent() {
 export async function getStudentSessionLight() {
     try {
         const cookieStore = await cookies()
-        const encoded = cookieStore.get(COOKIE_NAME)?.value ||
-            cookieStore.get('kobe_student_session_v1')?.value ||
-            cookieStore.get('student_id_session')?.value
+        const cookie = cookieStore.get(COOKIE_NAME) ||
+            cookieStore.get('kobe_student_session_v1') ||
+            cookieStore.get('student_id_session')
 
-        if (!encoded) return null
+        if (!cookie || !cookie.value) return null
 
         try {
-            const json = Buffer.from(encoded, 'base64').toString('utf8')
-            const data = JSON.parse(json)
+            const decoded = Buffer.from(cookie.value, 'base64').toString('utf8')
+            if (!decoded) return null
+            
+            const data = JSON.parse(decoded)
+            if (!data || typeof data !== 'object') {
+                if (cookie.value && cookie.value.length > 0) {
+                     return { studentId: cookie.value, name: '学生', className: '未設定' }
+                }
+                return null
+            }
+
             if (data.studentId && data.name) {
                 return {
                     studentId: data.studentId,
@@ -110,13 +119,14 @@ export async function getStudentSessionLight() {
                 return { studentId: data.studentId, name: '学生', className: '未設定' }
             }
         } catch {
-            // Legacy plain studentId cookie
-            if (encoded && encoded.length > 0) {
-                return { studentId: encoded, name: '学生', className: '未設定' }
+            // Legacy plain studentId cookie or corruption
+            if (cookie.value && cookie.value.length > 0) {
+                return { studentId: cookie.value, name: '学生', className: '未設定' }
             }
         }
         return null
-    } catch {
+    } catch (e) {
+        console.error('getStudentSessionLight Critical Error:', e)
         return null
     }
 }
