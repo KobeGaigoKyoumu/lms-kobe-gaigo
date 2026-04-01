@@ -30,7 +30,7 @@ export const getClassesList = unstable_cache(
         }
         return classes
     },
-    ['classes-list-v3'],
+    ['classes-list-v4'],
     { revalidate: 3600, tags: ['classes'] }
 )
 
@@ -57,7 +57,7 @@ export const getTimetableSubjects = unstable_cache(
 
         return subjects
     },
-    ['timetable-subjects-list'],
+    ['timetable-subjects-list-v2'],
     { revalidate: 3600, tags: ['schedules'] }
 )
 
