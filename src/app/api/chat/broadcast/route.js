@@ -19,18 +19,25 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Missing content or attachment' }, { status: 400 })
         }
 
-        // 1. Auth Check (Teacher only)
+        // 1. Auth Check (Teacher or Admin)
         const supabase = await createServerClient()
         const { data: { user: teacherUser } } = await supabase.auth.getUser()
+        const adminMember = await getAdminMemberSession()
 
-        if (!teacherUser) {
+        if (!teacherUser && !adminMember) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const senderId = teacherUser?.id || adminMember?.memberId || 'admin'
+        
+        // helper to check if string is UUID
+        const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+        const profileId = isUUID(senderId) && teacherUser ? senderId : null
 
         // 2. Prepare Payloads
         const payloads = studentIds.map(sid => ({
             student_id: sid,
-            teacher_id: teacherUser.id,
+            teacher_id: profileId, // This points to profiles.id (nullable)
             sender_type: 'teacher',
             content: content || '',
             attachment_url,

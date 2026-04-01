@@ -30,7 +30,7 @@ export default function BroadcastModal({ isOpen, onClose, onSent }) {
                 const res = await fetch('/api/chat/students')
                 if (!res.ok) throw new Error('Failed to fetch students')
                 const data = await res.json()
-                setStudents(data.students || [])
+                setStudents(data.all || data.students || [])
             } catch (error) {
                 console.error('Failed to fetch students', error)
             } finally {

@@ -170,12 +170,15 @@ export async function sendMessage(studentId, content, options = {}) {
         const supabase = await createServerClient()
         const { data: { user } } = await supabase.auth.getUser()
 
-        if (!adminMember && !studentSession && !user) {
-            throw new Error('Unauthorized')
-        }
+        const senderId = user?.id || adminMember?.memberId || 'admin'
+        
+        // helper to check if string is UUID
+        const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+        const profileId = isUUID(senderId) && user ? senderId : null
 
         const payload = {
             student_id: studentId,
+            teacher_id: profileId, // points to profiles.id (nullable)
             content: content || '',
             sender_type: senderType,
             read: false,

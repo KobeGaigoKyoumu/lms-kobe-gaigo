@@ -14,7 +14,7 @@ export default async function CalendarPage() {
 
     if (adminMember) {
         isTeacherOrAdmin = true
-        userId = adminMember.memberId
+        userId = 'admin'
     } else {
         const { data: { user } } = await supabase.auth.getUser()
         authUser = user

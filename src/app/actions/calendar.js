@@ -11,6 +11,12 @@ const createAdminClient = () => {
     )
 }
 
+const isUUID = (str) => {
+    if (!str) return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+}
+
 // パッケージ一覧取得（全アカウント共有）
 export const getEventPackages = async () => {
     const supabase = createAdminClient()
@@ -176,7 +182,14 @@ export async function copyEventPackage(id) {
 // パッケージの適用
 export async function applyPackageToTarget(newEvents) {
     const supabase = createAdminClient()
-    const { error } = await supabase.from('calendar_events').insert(newEvents)
+    
+    // Sanitize created_by for all events since staff accounts are not in profiles table
+    const sanitizedEvents = (newEvents || []).map(e => ({
+        ...e,
+        created_by: isUUID(e.created_by) ? e.created_by : null
+    }))
+
+    const { error } = await supabase.from('calendar_events').insert(sanitizedEvents)
     if (error) {
         console.error('applyPackageToTarget error:', error)
         return { error: 'Failed to apply package' }
@@ -207,7 +220,14 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
 // === 単独イベントの管理アクション ===
 export async function createSingleEvent(eventData) {
     const supabase = createAdminClient()
-    const { data, error } = await supabase.from('calendar_events').insert(eventData).select()
+    
+    // Sanitize created_by for staff accounts
+    const sanitizedData = {
+        ...eventData,
+        created_by: isUUID(eventData.created_by) ? eventData.created_by : null
+    }
+
+    const { data, error } = await supabase.from('calendar_events').insert(sanitizedData).select()
     if (error) {
         console.error('createSingleEvent error:', error)
         return { error: 'Failed to create event' }
@@ -218,7 +238,14 @@ export async function createSingleEvent(eventData) {
 
 export async function updateSingleEvent(id, eventData) {
     const supabase = createAdminClient()
-    const { data, error } = await supabase.from('calendar_events').update(eventData).eq('id', id).select()
+    
+    // Sanitize created_by for staff accounts
+    const sanitizedData = {
+        ...eventData,
+        created_by: isUUID(eventData.created_by) ? eventData.created_by : null
+    }
+
+    const { data, error } = await supabase.from('calendar_events').update(sanitizedData).eq('id', id).select()
     if (error) {
         console.error('updateSingleEvent error:', error)
         return { error: 'Failed to update event' }
