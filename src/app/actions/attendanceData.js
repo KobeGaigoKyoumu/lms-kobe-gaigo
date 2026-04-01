@@ -80,7 +80,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
             return { monthlyFiles: [], cumulativeFiles: [] }
         }
     },
-    ['attendance-files-v4'],
+    ['attendance-files-v5'],
     { revalidate: 86400, tags: ['attendance-files'] }
 )
 
@@ -167,7 +167,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-school-stats-v4'],
+    ['attendance-school-stats-v5'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -210,10 +210,32 @@ export const getClassAttendanceStats = unstable_cache(
 
         const classGroups = {}
         filteredStudents?.forEach(s => {
-            // Use the RECORD's grade and class_code, not the current master's className
+            // Use the RECORD's grade, fallback to current calculated if missing
             const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
-            const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
-            const className = recordClassCode > 0 ? `${recordGrade}-${recordClassCode}` : '未設定'
+            
+            // IMPROVED CLASS CLASSIFICATION:
+            // 1. Try to get the class suffix (the "X" in "Grade-X") from current student master
+            const info = studentInfoMap.get(s.student_id)
+            const masterClassName = info?.className || ''
+            const classSuffix = masterClassName.includes('-') ? masterClassName.split('-')[1] : null
+
+            let className = '未設定'
+            if (classSuffix) {
+                // If we found a suffix in the master table (e.g. they are in 2-1, they were 1-1)
+                className = `${recordGrade}-${classSuffix}`
+            } else {
+                // Fallback 1: Use recorded class_code
+                const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
+                if (recordClassCode > 0) {
+                    className = `${recordGrade}-${recordClassCode}`
+                } else if (s.student_id && s.student_id.length >= 4) {
+                    // Fallback 2: Try parsing student_id (substring 2-4)
+                    const parsedCode = parseInt(s.student_id.substring(2, 4))
+                    if (!isNaN(parsedCode) && parsedCode > 0) {
+                        className = `${recordGrade}-${parsedCode}`
+                    }
+                }
+            }
 
             if (!classGroups[className]) {
                 classGroups[className] = {
@@ -248,7 +270,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v4'],
+    ['attendance-class-stats-v5'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -288,10 +310,27 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         const processedStudents = students?.map(s => {
             const info = studentInfoMap.get(s.student_id) || {}
-            // Use the RECORD's grade and class_code, fallback to current calculated if missing
+            // Use the RECORD's grade, fallback to current calculated if missing
             const recordGrade = s.grade || calculateGrade(s.student_id, year, month)
-            const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
-            const recordClassName = recordClassCode > 0 ? `${recordGrade}-${recordClassCode}` : (info.className || '未設定')
+            
+            // IMPROVED CLASS CLASSIFICATION:
+            const masterClassName = info.className || ''
+            const classSuffix = masterClassName.includes('-') ? masterClassName.split('-')[1] : null
+
+            let recordClassName = '未設定'
+            if (classSuffix) {
+                recordClassName = `${recordGrade}-${classSuffix}`
+            } else {
+                const recordClassCode = s.class_code ? parseInt(s.class_code) : 0
+                if (recordClassCode > 0) {
+                    recordClassName = `${recordGrade}-${recordClassCode}`
+                } else if (s.student_id && s.student_id.length >= 4) {
+                    const parsedCode = parseInt(s.student_id.substring(2, 4))
+                    if (!isNaN(parsedCode) && parsedCode > 0) {
+                        recordClassName = `${recordGrade}-${parsedCode}`
+                    }
+                }
+            }
 
             return {
                 ...s,
@@ -305,7 +344,7 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v4'],
+    ['attendance-student-list-v5'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -443,6 +482,6 @@ export const getStudentAttendanceHistory = unstable_cache(
             studentInfo
         }
     },
-    ['attendance-student-history-v4'],
+    ['attendance-student-history-v5'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
