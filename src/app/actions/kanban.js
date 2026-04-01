@@ -10,6 +10,12 @@ const createAdminClient = () => {
     )
 }
 
+// Helper to check if a string is a valid UUID
+const isUUID = (str) => {
+    if (!str) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+};
+
 // ===== Readers (Cached) =====
 export const getKanbanColumns = unstable_cache(
     async () => {
@@ -69,7 +75,7 @@ export const getAllKanbanReminders = unstable_cache(
 // ===== Column CRUD =====
 export async function addKanbanColumn(title, position, createdBy) {
     const supabase = createAdminClient()
-    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
+    const validCreatedBy = isUUID(createdBy) ? createdBy : null;
     const { data, error } = await supabase
         .from('kanban_columns')
         .insert({ title, position, created_by: validCreatedBy })
@@ -116,7 +122,7 @@ export async function updateKanbanColumnPosition(colId, position) {
 // ===== Card CRUD =====
 export async function addKanbanCard(columnId, title, position, createdBy) {
     const supabase = createAdminClient()
-    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
+    const validCreatedBy = isUUID(createdBy) ? createdBy : null;
     const { data, error } = await supabase
         .from('kanban_cards')
         .insert({ column_id: columnId, title, position, created_by: validCreatedBy })
@@ -186,7 +192,7 @@ export async function getKanbanReminders(cardId) {
 
 export async function addKanbanReminder(cardId, reminderType, remindTime, remindDays, remindDate, createdBy) {
     const supabase = createAdminClient()
-    const validCreatedBy = (!createdBy || createdBy === 'member') ? null : createdBy;
+    const validCreatedBy = isUUID(createdBy) ? createdBy : null;
     const { data, error } = await supabase
         .from('kanban_reminders')
         .insert({
