@@ -80,7 +80,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
             return { monthlyFiles: [], cumulativeFiles: [] }
         }
     },
-    ['attendance-files-v6'],
+    ['attendance-files-v7'],
     { revalidate: 86400, tags: ['attendance-files'] }
 )
 
@@ -167,7 +167,7 @@ export const getSchoolAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-school-stats-v6'],
+    ['attendance-school-stats-v7'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -251,13 +251,28 @@ export const getClassAttendanceStats = unstable_cache(
             classGroups[className].rates.push(parseFloat(s.attendance_rate))
         })
 
-        const classes = Object.values(classGroups).map(cls => ({
-            grade: cls.grade,
-            classCode: cls.classCode,
-            className: cls.classCode,
-            studentCount: cls.rates.length,
-            averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
-        })).sort((a, b) => (a.classCode || '').localeCompare(b.classCode || '', undefined, { numeric: true }))
+        // Fetch Class Definitions for the target Academic Year
+        const targetAcademicYear = month >= 4 ? year : year - 1
+        const { data: yearClasses } = await supabase
+            .from('classes')
+            .select('id, name, homeroom_teacher_name')
+            .eq('academic_year', targetAcademicYear)
+
+        const classDefMap = new Map()
+        yearClasses?.forEach(c => classDefMap.set(c.name, c))
+
+        const classes = Object.values(classGroups).map(cls => {
+            const classDef = classDefMap.get(cls.classCode)
+            return {
+                id: classDef?.id || cls.classCode,
+                grade: cls.grade,
+                classCode: cls.classCode,
+                className: cls.classCode,
+                homeroomTeacherName: classDef?.homeroom_teacher_name || '',
+                studentCount: cls.rates.length,
+                averageRate: cls.rates.reduce((sum, r) => sum + r, 0) / cls.rates.length
+            }
+        }).sort((a, b) => (a.classCode || '').localeCompare(b.classCode || '', undefined, { numeric: true }))
 
         const result = { classes, year, month, isCumulative }
 
@@ -274,7 +289,7 @@ export const getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v6'],
+    ['attendance-class-stats-v7'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -353,7 +368,7 @@ const _getCachedStudentListAttendance = unstable_cache(
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v6'],
+    ['attendance-student-list-v7'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
 
@@ -491,6 +506,6 @@ export const getStudentAttendanceHistory = unstable_cache(
             studentInfo
         }
     },
-    ['attendance-student-history-v6'],
+    ['attendance-student-history-v7'],
     { revalidate: 86400, tags: ['attendance-stats'] }
 )
