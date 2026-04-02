@@ -19,7 +19,7 @@ const COOKIE_NAME = 'kobe_student_session_v2'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
 // Normalize helper (must match the one in homework.js for consistency)
-const normalizeClassName = (name) => {
+export const normalizeClassName = (name) => {
     if (!name) return ''
     return typeof name === 'string' 
         ? name.trim()

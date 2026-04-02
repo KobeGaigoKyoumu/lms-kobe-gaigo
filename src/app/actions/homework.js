@@ -1,22 +1,12 @@
 'use server'
 
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { normalizeClassName } from './studentAuth'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
 import { uploadToImageKit } from './imagekit'
-
-// Normalize class names (convert full-width numbers/hyphens to half-width)
-const normalizeClassName = (name) => {
-    if (!name) return ''
-    return typeof name === 'string' 
-        ? name.trim()
-            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-            .replace(/[－ー—―]/g, '-')
-            .replace(/\s+/g, '') // Remove internal spaces for robust matching
-        : name
-}
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
