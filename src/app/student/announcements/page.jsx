@@ -22,7 +22,7 @@ export default async function StudentAnnouncementsPage() {
     let query = supabase
         .from('announcements')
         .select(`
-            id, title, content, is_pinned, created_at, author_id, course_id, file_urls,
+            id, title, content, is_pinned, created_at, author_id, course_id, file_urls, sender_name,
             author:profiles!author_id (
                 id,
                 full_name,
@@ -40,9 +40,30 @@ export default async function StudentAnnouncementsPage() {
         query = query.is('course_id', null)
     }
 
-    const { data: announcements, error } = await query
+    const { data: rawAnnouncements, error } = await query
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
+
+    // 3. Complement author names from admin_members
+    let announcements = rawAnnouncements || []
+    const authorIdsWithNoProfiles = announcements
+        .filter(ann => !ann.author?.full_name && ann.author_id)
+        .map(ann => ann.author_id)
+    
+    if (authorIdsWithNoProfiles.length > 0) {
+        const { data: admins } = await supabase
+            .from('admin_members')
+            .select('id, name')
+            .in('id', authorIdsWithNoProfiles)
+        
+        if (admins) {
+            const adminMap = new Map(admins.map(a => [a.id, a.name]))
+            announcements = announcements.map(ann => ({
+                ...ann,
+                admin_author_name: adminMap.get(ann.author_id) || null
+            }))
+        }
+    }
 
     return (
         <div className={styles.page}>

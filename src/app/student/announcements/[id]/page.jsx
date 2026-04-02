@@ -27,6 +27,19 @@ export default async function StudentAnnouncementDetailPage({ params }) {
         notFound()
     }
 
+    // Complement author name from admin_members if profile join is null
+    let adminAuthorName = null
+    if (!announcement.sender_name && !announcement.author?.full_name && announcement.author_id) {
+        const { data: admin } = await supabase
+            .from('admin_members')
+            .select('name')
+            .eq('id', announcement.author_id)
+            .single()
+        if (admin) {
+            adminAuthorName = admin.name
+        }
+    }
+
     // Permission check (same as dashboard)
     const canSee = () => {
         if (!announcement.target_type || announcement.target_type === 'all') return true
@@ -75,7 +88,7 @@ export default async function StudentAnnouncementDetailPage({ params }) {
                             </span>
                             <span className={styles.metaItem}>
                                 <User size={14} />
-                                {announcement.sender_name || announcement.author?.full_name || '教務'}
+                                {announcement.sender_name || adminAuthorName || announcement.author?.full_name || '教務'}
                             </span>
                         </div>
                     </div>

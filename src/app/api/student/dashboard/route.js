@@ -59,6 +59,27 @@ export async function GET() {
             return false
         }).slice(0, 3)
 
+        // 3. Complement author names from admin_members for those missing profiles
+        const authorIdsWithNoProfiles = filteredAnnouncements
+            .filter(ann => !ann.author?.full_name && ann.author_id)
+            .map(ann => ann.author_id)
+        
+        if (authorIdsWithNoProfiles.length > 0) {
+            const { data: admins } = await supabase
+                .from('admin_members')
+                .select('id, name')
+                .in('id', authorIdsWithNoProfiles)
+            
+            if (admins) {
+                const adminMap = new Map(admins.map(a => [a.id, a.name]))
+                filteredAnnouncements.forEach(ann => {
+                    if (adminMap.has(ann.author_id)) {
+                        ann.admin_author_name = adminMap.get(ann.author_id)
+                    }
+                })
+            }
+        }
+
         console.log(`[DEBUG] API Response for student: ${session.studentId}, class: ${session.className}`)
         console.log(`[DEBUG] Assignments: Active=${assignments?.active?.length || 0}, Archived=${assignments?.archived?.length || 0}`)
 

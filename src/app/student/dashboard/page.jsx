@@ -192,7 +192,7 @@ export default function StudentDashboard() {
                                             ) : ''}
                                         </span>
                                         <span className={styles.announcementAuthor}>
-                                            {announcement.sender_name || announcement.author?.full_name || '配信元'}
+                                            {announcement.sender_name || announcement.admin_author_name || announcement.author?.full_name || '配信元'}
                                         </span>
                                     </div>
                                     <h4>{announcement.title}</h4>
