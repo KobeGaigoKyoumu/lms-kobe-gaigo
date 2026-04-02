@@ -14,41 +14,6 @@ export default function PWARegistry() {
         return Notification.permission;
     };
 
-    useEffect(() => {
-        setMounted(true);
-        const currentPermission = checkPermission();
-        console.log('Current notification permission:', currentPermission);
-        setStatus(currentPermission);
-
-        if (currentPermission === 'default') {
-            setShowBanner(true);
-        }
-
-        if ('serviceWorker' in navigator) {
-            const setupPush = async () => {
-                try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('SW registered:', registration.scope);
-
-                    if (Notification.permission === 'granted') {
-                        console.log('Permission already granted, ensuring subscription...');
-                        await subscribeUser(registration);
-                    }
-                } catch (err) {
-                    console.error('SW registration failed:', err);
-                }
-            };
-
-            if (document.readyState === 'complete') {
-                setupPush();
-            } else {
-                window.addEventListener('load', setupPush);
-            }
-        }
-    }, []);
-
-    if (!mounted) return null;
-
     const subscribeUser = async (registration) => {
         try {
             let subscription = await registration.pushManager.getSubscription();
@@ -116,6 +81,39 @@ export default function PWARegistry() {
             console.error('Push subscription process failed:', err);
         }
     };
+
+    useEffect(() => {
+        setMounted(true);
+        const currentPermission = checkPermission();
+        console.log('Current notification permission:', currentPermission);
+        setStatus(currentPermission);
+
+        if (currentPermission === 'default') {
+            setShowBanner(true);
+        }
+
+        if ('serviceWorker' in navigator) {
+            const setupPush = async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('SW registered:', registration.scope);
+
+                    if (Notification.permission === 'granted') {
+                        console.log('Permission already granted, ensuring subscription...');
+                        await subscribeUser(registration);
+                    }
+                } catch (err) {
+                    console.error('SW registration failed:', err);
+                }
+            };
+
+            if (document.readyState === 'complete') {
+                setupPush();
+            } else {
+                window.addEventListener('load', setupPush);
+            }
+        }
+    }, []);
 
     const handleEnableNotifications = async () => {
         setIsRequesting(true);

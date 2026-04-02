@@ -1,7 +1,7 @@
 'use server'
 
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeClassName } from './studentAuth'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
@@ -72,18 +72,18 @@ export const getTimetableSubjects = unstable_cache(
     { revalidate: 3600, tags: ['schedules'] }
 )
 
-// Internal function for student assignments (Cache removed for deep debug)
+// Internal function for student assignments (Standard server client)
 async function _getStudentAssignments(studentId, className) {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
     const normalizedClassName = normalizeClassName(className)
     
     console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName}`)
 
-    // 1. Get ALL assignments for the class (Super simple query for debug)
+    // 1. Get ALL assignments for the class
     const { data: allAssignments, error: activeError } = await supabase
         .from('homework_assignments')
         .select('id, title, description, deadline, class_name, created_at, released_at, is_archived')
-        .eq('class_name', normalizedClassName)
+        .ilike('class_name', normalizedClassName)
         .order('deadline', { ascending: true })
 
     if (activeError) {
