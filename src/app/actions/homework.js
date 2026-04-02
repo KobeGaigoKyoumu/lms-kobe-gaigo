@@ -62,15 +62,37 @@ export const getTimetableSubjects = unstable_cache(
     { revalidate: 3600, tags: ['schedules'] }
 )
 
-// Internal function for student assignments (Ultra-safe query using select('*'))
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+// Helper for admin operations (RLS bypass)
+function createSupabaseAdmin() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+        console.error('[DEBUG] Admin credentials missing!')
+        return null
+    }
+    return createSupabaseClient(url, key)
+}
+
+// Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 async function _getStudentAssignments(studentId, className) {
-    const supabase = await createClient()
+    const supabase = createSupabaseAdmin()
+    if (!supabase) {
+        console.error('[DEBUG] Falling back to Public Client (RLS might block)')
+        const fallbackSubabase = await createClient()
+        return await _getStudentAssignmentsWithClient(fallbackSubabase, studentId, className)
+    }
+    return await _getStudentAssignmentsWithClient(supabase, studentId, className)
+}
+
+async function _getStudentAssignmentsWithClient(supabase, studentId, className) {
     const normalizedClassName = normalizeClassName(className)
     const now = new Date()
     
-    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName}`)
+    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName} (Admin Mode)`)
 
-    // 1. Get ALL assignments for the class (Ultra-safe: select('*') avoids 42703)
+    // 1. Get ALL assignments for the class (Ultra-safe: select('*'))
     const { data: allAssignments, error: activeError } = await supabase
         .from('homework_assignments')
         .select('*')
