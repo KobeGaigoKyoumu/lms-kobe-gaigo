@@ -4,6 +4,16 @@ import styles from './page.module.css'
 import { redirect } from 'next/navigation'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { 
+    LayoutDashboard, 
+    BookOpen, 
+    ClipboardCheck, 
+    Bell, 
+    Calendar as CalendarIcon,
+    ChevronRight,
+    Search,
+    TrendingUp
+} from 'lucide-react'
 
 // 30秒間キャッシュ（再訪問時の高速化）
 export const revalidate = 30
@@ -41,6 +51,7 @@ export default async function DashboardPage() {
             target_student_ids,
             course_id,
             author_id,
+            sender_name,
             author:profiles!author_id (full_name)
         `)
         .order('is_pinned', { ascending: false })
@@ -65,21 +76,25 @@ export default async function DashboardPage() {
         stats.enrolledClassesCount = teacherClassNames.length
 
         if (teacherClassNames.length > 0) {
+            const now = new Date().toISOString()
             const [pendingResult, assignmentsResult] = await Promise.all([
                 supabase
                     .from('homework_submissions')
-                    .select('id, assignment:homework_assignments!inner(class_name)', { count: 'exact', head: true })
+                    .select('id, assignment:homework_assignments!inner(class_name, released_at)', { count: 'exact', head: true })
                     .eq('status', 'submitted')
-                    .in('assignment.class_name', teacherClassNames),
+                    .in('assignment.class_name', teacherClassNames)
+                    .or(`assignment.released_at.is.null,assignment.released_at.lte."${now}"`),
                 supabase
                     .from('homework_assignments')
                     .select(`
                         id,
                         title,
                         deadline,
-                        class_name
+                        class_name,
+                        released_at
                     `)
                     .in('class_name', teacherClassNames)
+                    .or(`released_at.is.null,released_at.lte."${now}"`)
                     .order('created_at', { ascending: false })
                     .limit(5)
             ])
@@ -107,51 +122,96 @@ export default async function DashboardPage() {
 
             <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
-                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h8" /></svg>
+                    <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+                        <BookOpen size={24} color="white" />
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
                         <p className={styles.statValue}>{stats.enrolledClassesCount}</p>
                     </div>
+                    <div className={styles.statTrend}>
+                        <TrendingUp size={14} className={styles.trendIcon} />
+                        <span>Active</span>
+                    </div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /></svg>
+                        <ClipboardCheck size={24} color="white" />
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>未採点課題</p>
                         <p className={styles.statValue}>{stats.pendingAssignmentsCount}</p>
                     </div>
+                    {stats.pendingAssignmentsCount > 0 && (
+                        <div className={`${styles.statStatus} ${styles.urgent}`}>
+                            要対応
+                        </div>
+                    )}
                 </div>
             </div>
 
             <div className={styles.mainGrid}>
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>最近作成した課題</h2>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <BookOpen size={20} />
+                            最近作成した課題
+                        </h2>
+                        <Link href="/assignments" className={styles.viewMore}>すべて見る</Link>
+                    </div>
                     <div className={styles.assignmentList}>
-                        {stats.recentAssignments.map(a => (
-                            <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
-                                <div>
-                                    <h4>{a.title}</h4>
-                                    <p>{a.class_name}</p>
+                        {stats.recentAssignments.length > 0 ? (
+                            stats.recentAssignments.map(a => (
+                                <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
+                                    <div className={styles.assignmentInfo}>
+                                        <h4>{a.title}</h4>
+                                        <p>{a.class_name}</p>
+                                    </div>
+                                    <ChevronRight size={16} className={styles.itemArrow} />
+                                </Link>
+                            ))
+                        ) : (
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyIcon}>
+                                    <LayoutDashboard size={40} />
                                 </div>
-                            </Link>
-                        ))}
+                                <p>最近作成した課題はありません</p>
+                            </div>
+                        )}
                     </div>
                 </section>
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>お知らせ</h2>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <Bell size={20} />
+                            お知らせ
+                        </h2>
+                        <Link href="/admin/broadcast" className={styles.viewMore}>すべて見る</Link>
+                    </div>
                     <div className={styles.announcementList}>
-                        {announcements?.map(ann => (
-                            <div key={ann.id} className={styles.announcementItem}>
-                                <span className={styles.announcementDate}>{new Date(ann.created_at).toLocaleDateString()}</span>
-                                <div className={styles.announcementMeta}>
-                                    <span className={styles.announcementAuthor}>{ann.author?.full_name || '配信元'}</span>
+                        {announcements && announcements.length > 0 ? (
+                            announcements.map(ann => (
+                                <div key={ann.id} className={styles.announcementItem}>
+                                    <div className={styles.announcementHeader}>
+                                        <span className={styles.announcementDate}>
+                                            <CalendarIcon size={12} />
+                                            {new Date(ann.created_at).toLocaleDateString('ja-JP')}
+                                        </span>
+                                        <span className={styles.announcementAuthor}>
+                                            {ann.author?.full_name || ann.sender_name || '配信元'}
+                                        </span>
+                                    </div>
+                                    <h4 className={styles.announcementTitle}>{ann.title}</h4>
                                 </div>
-                                <h4>{ann.title}</h4>
+                            ))
+                        ) : (
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyIcon}>
+                                    <Bell size={40} />
+                                </div>
+                                <p>現在、新しいお知らせはありません</p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </section>
             </div>

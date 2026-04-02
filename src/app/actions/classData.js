@@ -32,6 +32,7 @@ export const getCachedClasses = unstable_cache(
                     title
                 )
             `)
+            .eq('academic_year', 2026)
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -141,6 +142,28 @@ export async function cleanupDuplicateClasses() {
         .in('id', idsToDelete)
     
     if (delError) return { error: delError.message }
-
+    
+    revalidateTag('classes')
     return { success: true, deletedCount: idsToDelete.length }
+}
+
+/**
+ * Hard delete all classes from a specific academic year. (Use with CAUTION)
+ */
+export async function deleteOldAcademicYearData(year) {
+    const supabase = getSupabaseAdmin()
+    
+    const { data: deletedClasses, error: delError } = await supabase
+        .from('classes')
+        .delete()
+        .eq('academic_year', year)
+        .select('id')
+    
+    if (delError) {
+        console.error(`Delete ${year} Data Error:`, delError)
+        return { error: delError.message }
+    }
+
+    revalidateTag('classes')
+    return { success: true, count: deletedClasses.length }
 }

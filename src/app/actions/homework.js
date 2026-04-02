@@ -30,7 +30,7 @@ export const getClassesList = unstable_cache(
         }
         return classes
     },
-    ['classes-list-v4'],
+    ['classes-list-v5'],
     { revalidate: 3600, tags: ['classes'] }
 )
 
@@ -73,7 +73,7 @@ const _getStudentAssignments = unstable_cache(
             .select('id, title, description, deadline, class_name, created_at, released_at')
             .eq('class_name', className)
             .eq('is_archived', false)
-            .lte('released_at', now) // Only assignments released before or at now
+            .or(`released_at.is.null,released_at.lte."${now}"`)
             .order('deadline', { ascending: true })
             .limit(100)
 
@@ -129,7 +129,7 @@ const _getStudentAssignments = unstable_cache(
 
         return { active, archived }
     },
-    ['student-assignments-v1'],
+    ['student-assignments-v2'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
@@ -175,7 +175,9 @@ export async function getAssignmentDetails(id) {
 
     // Check if released
     const now = new Date()
-    const releasedAt = new Date(assignment.released_at || assignment.created_at)
+    const releasedAtRaw = assignment.released_at || assignment.created_at
+    const releasedAt = new Date(releasedAtRaw)
+    
     if (releasedAt > now) {
         console.warn('Unauthorized assignment access attempt (not released yet):', session.studentId, id)
         return null

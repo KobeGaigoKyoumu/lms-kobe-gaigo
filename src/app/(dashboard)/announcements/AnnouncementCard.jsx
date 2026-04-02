@@ -86,14 +86,11 @@ export default function AnnouncementCard({ announcement, canEdit }) {
                         {announcement.author?.avatar_url ? (
                             <img src={announcement.author.avatar_url} alt="" />
                         ) : (
-                            announcement.author?.full_name?.[0] || '?'
+                            (announcement.author?.full_name || announcement.sender_name)?.[0] || '?'
                         )}
                     </div>
                     <span>
-                        {announcement.author?.full_name || '不明'}
-                        {announcement.sender_name && (
-                            <span className={styles.senderName}>（配信者：{announcement.sender_name}）</span>
-                        )}
+                        {announcement.author?.full_name || announcement.sender_name || '配信元'}
                     </span>
                 </div>
 

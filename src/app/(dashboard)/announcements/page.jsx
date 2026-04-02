@@ -21,7 +21,7 @@ export default async function AnnouncementsPage() {
     const { data: announcements, error } = await supabase
         .from('announcements')
         .select(`
-      id, title, content, is_pinned, created_at, author_id, course_id, file_urls,
+      id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
       author:profiles!author_id (
         id,
         full_name,
