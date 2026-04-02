@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                     .select('id, assignment:homework_assignments!inner(class_name, released_at)', { count: 'exact', head: true })
                     .eq('status', 'submitted')
                     .in('assignment.class_name', teacherClassNames)
-                    .or(`assignment.released_at.is.null,assignment.released_at.lte.${now}`),
+                    .or(`assignment.released_at.is.null,assignment.released_at.lte."${now}"`),
                 supabase
                     .from('homework_assignments')
                     .select(`
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                         released_at
                     `)
                     .in('class_name', teacherClassNames)
-                    .or(`released_at.is.null,released_at.lte.${now}`)
+                    .or(`released_at.is.null,released_at.lte."${now}"`)
                     .order('created_at', { ascending: false })
                     .limit(5)
             ])
