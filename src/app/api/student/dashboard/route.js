@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getStudentAssignments } from '@/app/actions/homework'
-import { getStudentSessionLight } from '@/app/actions/studentAuth'
+import { getStudentSession } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { normalizeClassName } from '@/lib/utils'
@@ -21,11 +21,14 @@ export async function GET() {
     try {
         const supabase = await createClient()
         const adminSupabase = createAdminClient() || supabase
-        const session = await getStudentSessionLight()
+        const session = await getStudentSession()
 
         if (!session) {
+            console.warn('[DEBUG] Dashboard API: No session found')
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        console.log(`[DEBUG] Dashboard API: Fetching for Student=${session.studentId}, Class=${session.className}, Grade=${session.academicYear}`)
 
         const [assignments, announcementsResult] = await Promise.all([
             getStudentAssignments(),
@@ -54,26 +57,28 @@ export async function GET() {
 
         // Announcement Filtering
         const filteredAnnouncements = announcements.filter(ann => {
-            if (!ann.target_type || ann.target_type === 'all') return true
+            let match = false
+            if (!ann.target_type || ann.target_type === 'all') {
+                match = true
+            } else if (ann.target_type === 'grade') {
+                if (session.academicYear) {
+                    const currentYear = new Date().getFullYear()
+                    const isBeforeApril = new Date().getMonth() < 3
+                    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+                    const studentGrade = academicYearBase - session.academicYear + 1
+                    match = String(studentGrade) === ann.target_grade
+                }
+            } else if (ann.target_type === 'class') {
+                match = normalizeClassName(ann.target_class) === normalizeClassName(session.className)
+            } else if (ann.target_type === 'individual') {
+                match = ann.target_student_ids?.includes(session.studentId)
+            }
 
-            if (ann.target_type === 'grade') {
-                if (!session.academicYear) return false
-                const currentYear = new Date().getFullYear()
-                const isBeforeApril = new Date().getMonth() < 3
-                const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
-                const studentGrade = academicYearBase - session.academicYear + 1
-                return String(studentGrade) === ann.target_grade
-            }
-            if (ann.target_type === 'class') {
-                return normalizeClassName(ann.target_class) === normalizeClassName(session.className)
-            }
-            if (ann.target_type === 'individual') {
-                return ann.target_student_ids?.includes(session.studentId)
-            }
-            return false
+            console.log(`  [FILTER] "${ann.title}" (Type: ${ann.target_type}, Target: ${ann.target_class || ann.target_grade || '-'}) -> Match: ${match}`)
+            return match
         }).slice(0, 3)
 
-        // 3. Complement author names from admin_members for those missing profiles
+        console.log(`[DEBUG] Dashboard API: ${filteredAnnouncements.length} announcements matched.`)
         const authorIdsWithNoProfiles = filteredAnnouncements
             .filter(ann => !ann.author?.full_name && ann.author_id)
             .map(ann => ann.author_id)
