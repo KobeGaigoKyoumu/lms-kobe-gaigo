@@ -75,7 +75,7 @@ export default async function StudentAnnouncementDetailPage({ params }) {
                             </span>
                             <span className={styles.metaItem}>
                                 <User size={14} />
-                                {announcement.author?.full_name || '管理者'}
+                                {announcement.sender_name || announcement.author?.full_name || '教務'}
                             </span>
                         </div>
                     </div>

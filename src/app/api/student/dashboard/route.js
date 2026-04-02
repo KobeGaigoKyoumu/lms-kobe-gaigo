@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getStudentAssignments } from '@/app/actions/homework'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeClassName } from '@/lib/utils'
 
 export async function GET() {
     try {
@@ -27,6 +28,7 @@ export async function GET() {
                     target_class,
                     target_student_ids,
                     course_id,
+                    sender_name,
                     author:profiles!author_id (full_name)
                 `)
                 .order('is_pinned', { ascending: false })
@@ -49,7 +51,7 @@ export async function GET() {
                 return String(studentGrade) === ann.target_grade
             }
             if (ann.target_type === 'class') {
-                return ann.target_class === session.className
+                return normalizeClassName(ann.target_class) === normalizeClassName(session.className)
             }
             if (ann.target_type === 'individual') {
                 return ann.target_student_ids?.includes(session.studentId)
