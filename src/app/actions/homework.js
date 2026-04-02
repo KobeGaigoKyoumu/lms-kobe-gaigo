@@ -67,11 +67,13 @@ const _getStudentAssignments = unstable_cache(
         const supabase = createAdminClient()
 
         // 1. Get assignments for the class currently
+        const now = new Date().toISOString()
         const { data: activeAssignments, error: activeError } = await supabase
             .from('homework_assignments')
-            .select('id, title, description, deadline, class_name, created_at')
+            .select('id, title, description, deadline, class_name, created_at, released_at')
             .eq('class_name', className)
             .eq('is_archived', false)
+            .lte('released_at', now) // Only assignments released before or at now
             .order('deadline', { ascending: true })
             .limit(100)
 
@@ -108,7 +110,7 @@ const _getStudentAssignments = unstable_cache(
         if (pastIdsToFetch.length > 0) {
             const { data: pastAssignmentsData } = await supabase
                 .from('homework_assignments')
-                .select('id, title, description, deadline, class_name, created_at')
+                .select('id, title, description, deadline, class_name, created_at, released_at')
                 .in('id', pastIdsToFetch)
                 .order('created_at', { ascending: false })
             
@@ -145,7 +147,7 @@ const _getCachedAssignment = unstable_cache(
         const supabase = createAdminClient()
         const { data: assignment, error } = await supabase
             .from('homework_assignments')
-            .select('id, title, description, deadline, class_name, created_at, teacher_id')
+            .select('id, title, description, deadline, class_name, created_at, teacher_id, released_at')
             .eq('id', id)
             .single()
 
@@ -170,6 +172,14 @@ export async function getAssignmentDetails(id) {
     const assignment = await _getCachedAssignment(id)
 
     if (!assignment) return null
+
+    // Check if released
+    const now = new Date()
+    const releasedAt = new Date(assignment.released_at || assignment.created_at)
+    if (releasedAt > now) {
+        console.warn('Unauthorized assignment access attempt (not released yet):', session.studentId, id)
+        return null
+    }
 
     // Security check: Ensure student belongs to class
     if (assignment.class_name !== session.className && decodeURIComponent(assignment.class_name) !== session.className) {
@@ -267,6 +277,7 @@ export async function createAssignment(formData) {
     const classNames = formData.getAll('classNames')
     const subject = formData.get('subject')
     let deadline = formData.get('deadline')
+    let releasedAt = formData.get('released_at')
 
     if (!title || classNames.length === 0 || !deadline) {
         return { error: '必須項目を入力してください' }
@@ -274,6 +285,14 @@ export async function createAssignment(formData) {
 
     if (deadline && !deadline.includes('Z') && !deadline.includes('+')) {
         deadline = `${deadline}:00+09:00`
+    }
+
+    if (releasedAt) {
+        if (!releasedAt.includes('Z') && !releasedAt.includes('+')) {
+            releasedAt = `${releasedAt}:00+09:00`
+        }
+    } else {
+        releasedAt = new Date().toISOString() // Fallback to immediate
     }
 
     const adminSupabase = createAdminClient()
@@ -284,6 +303,7 @@ export async function createAssignment(formData) {
         class_name: className,
         subject: subject || null,
         deadline,
+        released_at: releasedAt,
         teacher_id: user?.id || null
     }))
 

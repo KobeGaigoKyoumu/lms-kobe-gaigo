@@ -157,6 +157,16 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
             <div className={styles.row}>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>
+                        公開開始日時 <span className={styles.hint}>（空欄で即時公開）</span>
+                    </label>
+                    <input
+                        name="released_at"
+                        type="datetime-local"
+                        className={styles.input}
+                    />
+                </div>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>
                         提出期限 <span className={styles.required}>*</span>
                     </label>
                     <input

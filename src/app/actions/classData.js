@@ -81,3 +81,66 @@ export async function fetchCachedClassesData() {
 
     return { classes, studentCounts }
 }
+
+/**
+ * Cleanup duplicate classes that have no teacher and no schedules.
+ * This is a one-time cleanup utility.
+ */
+export async function cleanupDuplicateClasses() {
+    const supabase = getSupabaseAdmin()
+    
+    // 1. Get all classes
+    const { data: allClasses, error: clsError } = await supabase
+        .from('classes')
+        .select('id, name, teacher_id, homeroom_teacher_name')
+    
+    if (clsError) return { error: clsError.message }
+
+    // 2. Count occurrences of each name
+    const nameCounts = {}
+    allClasses.forEach(c => {
+        nameCounts[c.name] = (nameCounts[c.name] || 0) + 1
+    })
+
+    // 3. Find potentially duplicate names
+    const duplicateNames = Object.keys(nameCounts).filter(name => nameCounts[name] > 1)
+
+    if (duplicateNames.length === 0) {
+        return { success: true, count: 0, message: 'No duplicate names found.' }
+    }
+
+    // 4. Get all schedules to check for empty classes
+    const { data: allSchedules, error: schError } = await supabase
+        .from('schedules')
+        .select('class_id')
+    
+    if (schError) return { error: schError.message }
+
+    const scheduleMap = {}
+    allSchedules.forEach(s => {
+        scheduleMap[s.class_id] = (scheduleMap[s.class_id] || 0) + 1
+    })
+
+    // 5. Identify IDs to delete
+    const idsToDelete = allClasses.filter(c => {
+        const isDuplicate = nameCounts[c.name] > 1
+        const hasNoTeacher = !c.teacher_id && !c.homeroom_teacher_name
+        const hasNoSchedules = !scheduleMap[c.id]
+        
+        return isDuplicate && hasNoTeacher && hasNoSchedules
+    }).map(c => c.id)
+
+    if (idsToDelete.length === 0) {
+        return { success: true, count: 0, message: 'No "empty" duplicates found matching criteria.' }
+    }
+
+    // 6. Delete
+    const { error: delError } = await supabase
+        .from('classes')
+        .delete()
+        .in('id', idsToDelete)
+    
+    if (delError) return { error: delError.message }
+
+    return { success: true, deletedCount: idsToDelete.length }
+}

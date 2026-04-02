@@ -72,6 +72,29 @@
     min-width: 0;
 }
 
+.announcementDate {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-1);
+    display: block;
+}
+
+.announcementMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.announcementAuthor {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
 .statLabel {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);

@@ -40,6 +40,7 @@ export default async function DashboardPage() {
             target_class,
             target_student_ids,
             course_id,
+            author_id,
             author:profiles!author_id (full_name)
         `)
         .order('is_pinned', { ascending: false })
@@ -54,11 +55,11 @@ export default async function DashboardPage() {
     }
 
     if (isTeacher) {
-        // Find classes where this user is the teacher
+        // Find classes where this user is the teacher or homeroom teacher
         const { data: teacherClasses } = await supabase
             .from('classes')
-            .select('name')
-            .eq('teacher_id', userId)
+            .select('name, teacher_id, homeroom_teacher_name')
+            .or(`teacher_id.eq.${userId},homeroom_teacher_name.eq."${adminMember.name}"`)
 
         const teacherClassNames = teacherClasses?.map(c => c.name) || []
         stats.enrolledClassesCount = teacherClassNames.length
@@ -145,6 +146,9 @@ export default async function DashboardPage() {
                         {announcements?.map(ann => (
                             <div key={ann.id} className={styles.announcementItem}>
                                 <span className={styles.announcementDate}>{new Date(ann.created_at).toLocaleDateString()}</span>
+                                <div className={styles.announcementMeta}>
+                                    <span className={styles.announcementAuthor}>{ann.author?.full_name || '配信元'}</span>
+                                </div>
                                 <h4>{ann.title}</h4>
                             </div>
                         ))}
