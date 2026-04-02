@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
-import { getStudentSessionLight } from '@/app/actions/studentAuth'
+import { getStudentSession } from '@/app/actions/studentAuth'
+import { normalizeClassName } from '@/lib/utils'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
-export const revalidate = 60
+
+export const dynamic = 'force-dynamic'
 
 export default async function StudentAnnouncementsPage() {
     const supabase = await createClient()
-    const session = await getStudentSessionLight()
+    const session = await getStudentSession()
 
     if (!session) return null
 
@@ -14,15 +16,16 @@ export default async function StudentAnnouncementsPage() {
     const { data: enrollments } = await supabase
         .from('enrollments')
         .select('course_id')
-        .eq('student_id', session.id)
+        .eq('student_id', session.studentId)
 
     const courseIds = enrollments?.map(e => e.course_id) || []
 
-    // 2. お知らせ一覧取得
+    // 2. お知らせ一覧取得 (コースIDが null または 自分のコースに含まれるものをザックリ取得)
     let query = supabase
         .from('announcements')
         .select(`
             id, title, content, is_pinned, created_at, author_id, course_id, file_urls, sender_name,
+            target_type, target_grade, target_class, target_student_ids,
             author:profiles!author_id (
                 id,
                 full_name,
@@ -44,8 +47,29 @@ export default async function StudentAnnouncementsPage() {
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
 
-    // 3. Complement author names from admin_members
-    let announcements = rawAnnouncements || []
+    // 3. 厳格なクラス判定フィルター (他クラス向けを除外)
+    let filteredAnnouncements = (rawAnnouncements || []).filter(ann => {
+        if (!ann.target_type || ann.target_type === 'all') return true
+
+        if (ann.target_type === 'grade') {
+            if (!session.academicYear) return false
+            const currentYear = new Date().getFullYear()
+            const isBeforeApril = new Date().getMonth() < 3
+            const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+            const studentGrade = academicYearBase - session.academicYear + 1
+            return String(studentGrade) === ann.target_grade
+        }
+        if (ann.target_type === 'class') {
+            return normalizeClassName(ann.target_class) === normalizeClassName(session.className)
+        }
+        if (ann.target_type === 'individual') {
+            return ann.target_student_ids?.includes(session.studentId)
+        }
+        return false
+    })
+
+    // 4. Complement author names from admin_members
+    let announcements = filteredAnnouncements
     const authorIdsWithNoProfiles = announcements
         .filter(ann => !ann.author?.full_name && ann.author_id)
         .map(ann => ann.author_id)
