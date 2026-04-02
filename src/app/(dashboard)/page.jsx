@@ -92,9 +92,10 @@ export default async function DashboardPage() {
             const [pendingResult, assignmentsResult] = await Promise.all([
                 supabase
                     .from('homework_submissions')
-                    .select('id, assignment:homework_assignments!inner(class_name, released_at)', { count: 'exact', head: true })
+                    .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
                     .eq('status', 'submitted')
                     .in('assignment.class_name', teacherClassNames)
+                    .or('assignment.is_archived.is.null,assignment.is_archived.is.false')
                     .or(`assignment.released_at.is.null,assignment.released_at.lte."${now}"`),
                 supabase
                     .from('homework_assignments')
@@ -103,9 +104,11 @@ export default async function DashboardPage() {
                         title,
                         deadline,
                         class_name,
-                        released_at
+                        released_at,
+                        is_archived
                     `)
                     .in('class_name', teacherClassNames)
+                    .or('is_archived.is.null,is_archived.is.false')
                     .or(`released_at.is.null,released_at.lte."${now}"`)
                     .order('created_at', { ascending: false })
                     .limit(5)

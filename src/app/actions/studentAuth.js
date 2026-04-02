@@ -187,7 +187,7 @@ export const getStudentSession = cache(async () => {
                     return {
                         studentId: data.studentId,
                         name: data.name,
-                        className: data.className,
+                        className: normalizeClassName(data.className),
                         academicYear: data.academicYear,
                         enrollmentPeriod: data.enrollmentPeriod
                     }
@@ -206,7 +206,7 @@ export const getStudentSession = cache(async () => {
                         return {
                             studentId: data.studentId,
                             name: data.name,
-                            className: stData.class_name,
+                            className: normalizeClassName(stData.class_name),
                             academicYear: stData.academic_year,
                             enrollmentPeriod: stData.enrollment_period
                         }
@@ -225,7 +225,7 @@ export const getStudentSession = cache(async () => {
                     return {
                         studentId: student.student_id_text,
                         name: student.full_name,
-                        className: student.class_name,
+                        className: normalizeClassName(student.class_name),
                         academicYear: student.academic_year,
                         enrollmentPeriod: student.enrollment_period
                     }

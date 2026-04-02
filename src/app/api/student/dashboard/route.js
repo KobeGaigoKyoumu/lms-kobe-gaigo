@@ -59,7 +59,7 @@ export async function GET() {
 
         return NextResponse.json({
             session,
-            assignments: Array.isArray(assignments) ? assignments : [],
+            assignments: assignments || { active: [], archived: [] },
             announcements: filteredAnnouncements
         })
     } catch (error) {

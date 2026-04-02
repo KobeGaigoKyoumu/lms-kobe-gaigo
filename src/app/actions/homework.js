@@ -84,7 +84,7 @@ const _getStudentAssignments = unstable_cache(
             .from('homework_assignments')
             .select('id, title, description, deadline, class_name, created_at, released_at')
             .eq('class_name', normalizedClassName)
-            .eq('is_archived', false)
+            .or(`is_archived.is.null,is_archived.is.false`)
             .or(`released_at.is.null,released_at.lte."${now}"`)
             .order('deadline', { ascending: true })
             .limit(100)
@@ -158,7 +158,7 @@ const _getStudentAssignments = unstable_cache(
 
         return { active, archived }
     },
-    ['student-assignments-v5'],
+    ['student-assignments-v7'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
@@ -331,11 +331,12 @@ export async function createAssignment(formData) {
     const insertData = classNames.map(className => ({
         title,
         description,
-        class_name: className,
+        class_name: normalizeClassName(className),
         subject: subject || null,
         deadline,
         released_at: releasedAt,
-        teacher_id: user?.id || null
+        teacher_id: user?.id || null,
+        is_archived: false // Explicitly set to false to avoid NULL issues
     }))
 
     const { data: newAssignments, error } = await adminSupabase
@@ -452,15 +453,22 @@ export async function getAssignmentsByClass(className, isArchived = false) {
     const fetcher = unstable_cache(
         async () => {
             const supabase = createAdminClient()
-            const { data: assignments, error } = await supabase
+            let query = supabase
                 .from('homework_assignments')
                 .select(`
                     *,
                     course:courses!course_id(id, title)
                 `)
                 .eq('class_name', decodedClassName)
-                .eq('is_archived', isArchived)
                 .order('created_at', { ascending: false })
+            
+            if (isArchived) {
+                query = query.eq('is_archived', true)
+            } else {
+                query = query.or('is_archived.is.null,is_archived.is.false')
+            }
+            
+            const { data: assignments, error } = await query
 
             if (error) {
                 console.error('Fetch assignments by class error:', error)
