@@ -67,8 +67,8 @@ export default function StudentDashboard() {
     const nextWeek = new Date(now)
     nextWeek.setDate(nextWeek.getDate() + 7)
 
-    // Assignment Stats & Sorting
-    const safeAssignments = Array.isArray(assignments) ? assignments : []
+    // Assignment Stats & Sorting: assignments is { active: [...], archived: [...] }
+    const safeAssignments = assignments?.active || []
     const unsubmitted = safeAssignments.filter(a => !a.submission)
     const completed = safeAssignments.filter(a => !!a.submission)
     const dueThisWeek = safeAssignments.filter(a => {

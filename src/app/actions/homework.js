@@ -111,7 +111,7 @@ const _getStudentAssignments = unstable_cache(
             .from('homework_assignments')
             .select('id, title, description, deadline, class_name, created_at, released_at, is_archived')
             .eq('class_name', normalizedClassName)
-            .or(`is_archived.eq.true,deadline.lt."${now}"`) // Get past/archived
+            .or(`is_archived.is.true,deadline.lt."${now}"`) // Get past/archived
             .order('created_at', { ascending: false })
             .limit(100)
 
@@ -158,7 +158,7 @@ const _getStudentAssignments = unstable_cache(
 
         return { active, archived }
     },
-    ['student-assignments-v7'],
+    ['student-assignments-v8'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 
