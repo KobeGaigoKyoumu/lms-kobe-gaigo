@@ -45,8 +45,8 @@ export async function GET() {
                     sender_name,
                     author:profiles!author_id (full_name)
                 `)
-                .order('is_pinned', { ascending: false })
                 .order('created_at', { ascending: false })
+                .order('is_pinned', { ascending: false })
                 .limit(50)
         ])
 
