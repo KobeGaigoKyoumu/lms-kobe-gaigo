@@ -20,20 +20,85 @@ export default function StudentDashboard() {
         let isMounted = true
         async function fetchDashboard() {
             try {
-                const res = await fetch('/api/student/dashboard')
-                if (!res.ok) throw new Error('Failed to fetch dashboard data')
-                const json = await res.json()
-                if (isMounted) setData(json)
+                // Get student session from cookies (fast)
+                const resSession = await fetch('/api/auth/session') // Special light endpoint or just use logic
+                const sessionJson = await resSession.json()
+                const session = sessionJson.session
+
+                if (!session) throw new Error('Unauthorized')
+
+                // Fetch assignments and announcements in parallel directly from Supabase
+                const [activeAssignments, submissionsRes, announcementsRes] = await Promise.all([
+                    supabase
+                        .from('homework_assignments')
+                        .select('id, title, description, deadline, class_name, created_at')
+                        .eq('class_name', session.className)
+                        .eq('is_archived', false)
+                        .order('deadline', { ascending: true })
+                        .limit(10),
+                    supabase
+                        .from('homework_submissions')
+                        .select('assignment_id, status, score')
+                        .eq('student_id_text', session.studentId),
+                    supabase
+                        .from('announcements')
+                        .select(`
+                            id, title, content, is_pinned, created_at, 
+                            target_type, target_grade, target_class, target_student_ids,
+                            author:profiles!author_id (full_name)
+                        `)
+                        .order('is_pinned', { ascending: false })
+                        .order('created_at', { ascending: false })
+                        .limit(50)
+                ])
+
+                if (activeAssignments.error) throw activeAssignments.error
+                if (submissionsRes.error) throw submissionsRes.error
+                if (announcementsRes.error) throw announcementsRes.error
+
+                const submissionMap = new Map()
+                submissionsRes.data.forEach(s => submissionMap.set(s.assignment_id, s))
+
+                const assignmentsWithSubmissions = activeAssignments.data.map(a => ({
+                    ...a,
+                    submission: submissionMap.get(a.id) || null
+                }))
+
+                // Announcement Filtering (Client Side)
+                const filteredAnnouncements = (announcementsRes.data || []).filter(ann => {
+                    if (!ann.target_type || ann.target_type === 'all') return true
+
+                    if (ann.target_type === 'grade') {
+                        if (!session.academicYear) return false
+                        const currentYear = new Date().getFullYear()
+                        const isBeforeApril = new Date().getMonth() < 3
+                        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear
+                        const studentGrade = academicYearBase - session.academicYear + 1
+                        return String(studentGrade) === ann.target_grade
+                    }
+                    if (ann.target_type === 'class') return ann.target_class === session.className
+                    if (ann.target_type === 'individual') return ann.target_student_ids?.includes(session.studentId)
+                    return false
+                }).slice(0, 3)
+
+                if (isMounted) {
+                    setData({
+                        session,
+                        assignments: assignmentsWithSubmissions,
+                        announcements: filteredAnnouncements
+                    })
+                }
             } catch (err) {
-                console.error(err)
+                console.error('Dashboard fetch error:', err)
                 if (isMounted) setError('データの読み込みに失敗しました')
             } finally {
                 if (isMounted) setLoading(false)
             }
         }
+        
         fetchDashboard()
         return () => { isMounted = false }
-    }, [])
+    }, [supabase])
 
     if (error) {
         return (

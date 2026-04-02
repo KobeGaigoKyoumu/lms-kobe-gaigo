@@ -1,22 +1,14 @@
-import { getStudentAssignments } from '@/app/actions/homework'
-export const revalidate = 60
-import HomeworkListClient from './HomeworkListClient'
-import styles from './page.module.css'
+import { getStudentSessionLight } from '@/app/actions/studentAuth'
+import { redirect } from 'next/navigation'
+import HomeworkClientWrapper from './HomeworkClientWrapper'
 
 export default async function StudentHomeworkPage() {
-    const assignments = await getStudentAssignments()
+    const session = await getStudentSessionLight()
 
-    // Handle error case appropriately
-    const safeData = (assignments && !assignments.error) ? assignments : { active: [], archived: [] }
+    if (!session) {
+        redirect('/login')
+    }
 
-    return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>課題一覧</h1>
-                <p className={styles.subtitle}>提出期限を確認して、計画的に進めましょう</p>
-            </div>
-
-            <HomeworkListClient assignmentsData={safeData} />
-        </div>
-    )
+    // Pass session data to client side for direct Supabase fetching (Saving Vercel CPU)
+    return <HomeworkClientWrapper studentId={session.studentId} className={session.className} />
 }

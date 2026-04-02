@@ -13,9 +13,15 @@ export async function GET() {
             process.env.SUPABASE_SERVICE_ROLE_KEY
         )
 
-        // 1. Identify User
-        const { data: { user } } = await supabaseAuth.auth.getUser()
+        // 1. Identify User (Optimized: Check cookies first to avoid unnecessary Auth API calls)
         const studentSession = await getStudentSessionLight()
+        
+        let user = null
+        if (!studentSession) {
+            // Only call getUser if not a student to identify teacher/admin
+            const { data } = await supabaseAuth.auth.getUser()
+            user = data?.user
+        }
 
         if (!user && !studentSession) {
             return NextResponse.json({
