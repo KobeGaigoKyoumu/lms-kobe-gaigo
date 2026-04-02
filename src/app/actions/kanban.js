@@ -28,7 +28,7 @@ export const getKanbanColumns = unstable_cache(
         return { data }
     },
     ['kanban-columns'],
-    { tags: ['kanban'] }
+    { revalidate: 86400, tags: ['kanban'] }
 )
 
 export const getKanbanCards = unstable_cache(
@@ -42,7 +42,7 @@ export const getKanbanCards = unstable_cache(
         return { data }
     },
     ['kanban-cards'],
-    { tags: ['kanban'] }
+    { revalidate: 86400, tags: ['kanban'] }
 )
 
 export const getKanbanLabels = unstable_cache(
@@ -56,7 +56,7 @@ export const getKanbanLabels = unstable_cache(
         return { data }
     },
     ['kanban-labels'],
-    { tags: ['kanban'] }
+    { revalidate: 86400, tags: ['kanban'] }
 )
 
 export const getAllKanbanReminders = unstable_cache(
@@ -69,7 +69,7 @@ export const getAllKanbanReminders = unstable_cache(
         return { data }
     },
     ['kanban-all-reminders'],
-    { tags: ['kanban'] }
+    { revalidate: 86400, tags: ['kanban'] }
 )
 
 // ===== Column CRUD =====
