@@ -1,4 +1,5 @@
-import { getStudentSession, getStudentAssignments } from '@/app/actions/homework'
+import { getStudentAssignments } from '@/app/actions/homework'
+import { getStudentSession } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
 import HomeworkListClient from './HomeworkListClient'
 import styles from './page.module.css'
