@@ -72,8 +72,19 @@ export default async function DashboardPage() {
             .select('name, teacher_id, homeroom_teacher_name')
             .or(`teacher_id.eq.${userId},homeroom_teacher_name.eq."${adminMember.name}"`)
 
+        // Normalize class names (convert full-width numbers/hyphens to half-width)
+        const normalizeClassName = (name) => {
+            if (!name) return ''
+            return typeof name === 'string' 
+                ? name.trim()
+                    .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                    .replace(/[－ー—―]/g, '-')
+                    .replace(/\s+/g, '') 
+                : name
+        }
+
         const teacherClassNamesRaw = teacherClasses?.map(c => c.name) || []
-        const teacherClassNames = teacherClassNamesRaw.map(n => n.trim())
+        const teacherClassNames = teacherClassNamesRaw.map(n => normalizeClassName(n))
         stats.enrolledClassesCount = teacherClassNames.length
 
         if (teacherClassNames.length > 0) {
@@ -84,7 +95,7 @@ export default async function DashboardPage() {
                     .select('id, assignment:homework_assignments!inner(class_name, released_at)', { count: 'exact', head: true })
                     .eq('status', 'submitted')
                     .in('assignment.class_name', teacherClassNames)
-                    .or(`assignment.released_at.is.null,assignment.released_at.lte."${now}"`),
+                    .or(`assignment.released_at.is.null,assignment.released_at.lte.${now}`),
                 supabase
                     .from('homework_assignments')
                     .select(`
@@ -95,7 +106,7 @@ export default async function DashboardPage() {
                         released_at
                     `)
                     .in('class_name', teacherClassNames)
-                    .or(`released_at.is.null,released_at.lte."${now}"`)
+                    .or(`released_at.is.null,released_at.lte.${now}`)
                     .order('created_at', { ascending: false })
                     .limit(5)
             ])

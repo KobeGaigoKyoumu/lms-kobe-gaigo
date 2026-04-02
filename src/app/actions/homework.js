@@ -7,6 +7,17 @@ import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
 import { uploadToImageKit } from './imagekit'
 
+// Normalize class names (convert full-width numbers/hyphens to half-width)
+const normalizeClassName = (name) => {
+    if (!name) return ''
+    return typeof name === 'string' 
+        ? name.trim()
+            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+            .replace(/[－ー—―]/g, '-')
+            .replace(/\s+/g, '') // Remove internal spaces for robust matching
+        : name
+}
+
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -65,8 +76,8 @@ export const getTimetableSubjects = unstable_cache(
 const _getStudentAssignments = unstable_cache(
     async (studentId, className) => {
         const supabase = createAdminClient()
+        const normalizedClassName = normalizeClassName(className)
         const now = new Date().toISOString()
-        const normalizedClassName = className?.trim() || ''
 
         // 1. Get assignments for the class currently (Active)
         const { data: activeAssignments, error: activeError } = await supabase
@@ -74,7 +85,7 @@ const _getStudentAssignments = unstable_cache(
             .select('id, title, description, deadline, class_name, created_at, released_at')
             .eq('class_name', normalizedClassName)
             .eq('is_archived', false)
-            .or(`released_at.is.null,released_at.lte."${now}"`)
+            .or(`released_at.is.null,released_at.lte.${now}`)
             .order('deadline', { ascending: true })
             .limit(100)
 
@@ -147,7 +158,7 @@ const _getStudentAssignments = unstable_cache(
 
         return { active, archived }
     },
-    ['student-assignments-v3'],
+    ['student-assignments-v4'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 

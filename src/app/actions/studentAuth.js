@@ -18,6 +18,17 @@ const createAdminClient = () => {
 const COOKIE_NAME = 'kobe_student_session_v2'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
+// Normalize helper (must match the one in homework.js for consistency)
+const normalizeClassName = (name) => {
+    if (!name) return ''
+    return typeof name === 'string' 
+        ? name.trim()
+            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+            .replace(/[－ー—―]/g, '-')
+            .replace(/\s+/g, '')
+        : name
+}
+
 export async function loginStudent(formData) {
     const className = formData.get('className')
     const studentId = formData.get('studentId')
@@ -42,7 +53,7 @@ export async function loginStudent(formData) {
         const sessionData = {
             studentId: student.student_id_text,
             name: student.full_name,
-            className: student.class_name?.trim(),
+            className: normalizeClassName(student.class_name),
             academicYear: student.academic_year, 
             enrollmentPeriod: student.enrollment_period,
             at: Date.now()
@@ -163,7 +174,7 @@ export const getStudentSession = cache(async () => {
                             return {
                                 studentId: data.studentId,
                                 name: data.name,
-                                className: (latestData.class_name || data.className)?.trim() || '未設定',
+                                className: normalizeClassName(latestData.class_name || data.className) || '未設定',
                                 academicYear: latestData.academic_year || data.academicYear,
                                 enrollmentPeriod: latestData.enrollment_period || data.enrollmentPeriod,
                                 status: latestData.status
