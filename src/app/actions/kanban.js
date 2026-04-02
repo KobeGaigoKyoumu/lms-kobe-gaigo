@@ -183,7 +183,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
 
     // 4. Update all cards in this column with sequential positions
     const updates = sortedCards.map((c, idx) => ({
-        id: c.id,
+        ...c, // Spread all existing fields (title, created_at, etc.)
         column_id: columnId,
         position: idx
     }))
