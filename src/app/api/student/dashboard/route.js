@@ -30,7 +30,7 @@ export async function GET() {
 
         console.log(`[DEBUG] Dashboard API: Fetching for Student=${session.studentId}, Class=${session.className}, Grade=${session.academicYear}`)
 
-        const [assignments, announcementsResult] = await Promise.all([
+        const [assignments, announcementsResult, enrollmentsResult] = await Promise.all([
             getStudentAssignments(),
             adminSupabase
                 .from('announcements')
@@ -50,10 +50,16 @@ export async function GET() {
                 `)
                 .order('created_at', { ascending: false })
                 .order('is_pinned', { ascending: false })
-                .limit(50)
+                .limit(50),
+            adminSupabase
+                .from('enrollments')
+                .select('course_id')
+                .eq('student_id', session.studentId)
         ])
 
         const announcements = announcementsResult.data || []
+        const studentCourseIds = enrollmentsResult.data?.map(e => e.course_id) || []
+        console.log(`[DEBUG] Dashboard API: Student is enrolled in ${studentCourseIds.length} courses.`)
 
         // Announcement Filtering
         const filteredAnnouncements = announcements.filter(ann => {
@@ -74,7 +80,13 @@ export async function GET() {
                 match = ann.target_student_ids?.includes(session.studentId)
             }
 
-            console.log(`  [FILTER] "${ann.title}" (Type: ${ann.target_type}, Target: ${ann.target_class || ann.target_grade || '-'}) -> Match: ${match}`)
+            // Also check Course ID (consistent with announcements list page)
+            if (!match && ann.course_id && studentCourseIds.includes(ann.course_id)) {
+                match = true
+                console.log(`    [MATCH] "${ann.title}" matched by Course ID: ${ann.course_id}`)
+            }
+
+            console.log(`  [FILTER] "${ann.title}" (Type: ${ann.target_type}, Target: ${ann.target_class || ann.target_grade || ann.course_id || '-'}) -> Match: ${match}`)
             return match
         }).slice(0, 3)
 
