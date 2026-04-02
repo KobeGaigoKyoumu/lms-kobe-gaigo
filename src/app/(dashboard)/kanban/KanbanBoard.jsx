@@ -296,36 +296,36 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             .filter(c => c.column_id === targetColumnId && c.id !== card.id)
             .sort((a, b) => a.position - b.position)
 
-        let newPosition
+        let newIndex
         if (overInfo) {
             const targetIdx = colCards.findIndex(c => c.id === overInfo.id)
-            if (targetIdx >= 0) {
-                if (overInfo.above) {
-                    // Insert before
-                    newPosition = targetIdx > 0
-                        ? (colCards[targetIdx - 1].position + colCards[targetIdx].position) / 2
-                        : colCards[targetIdx].position - 1
-                } else {
-                    // Insert after
-                    newPosition = targetIdx < colCards.length - 1
-                        ? (colCards[targetIdx].position + colCards[targetIdx + 1].position) / 2
-                        : colCards[targetIdx].position + 1
-                }
-            } else {
-                newPosition = colCards.length > 0 ? colCards[colCards.length - 1].position + 1 : 0
-            }
+            newIndex = overInfo.above ? targetIdx : targetIdx + 1
         } else {
             // Dropped on empty area
-            newPosition = colCards.length > 0 ? colCards[colCards.length - 1].position + 1 : 0
+            newIndex = colCards.length
         }
 
+        // Store original cards for rollback
+        const originalCards = [...cards]
+
         // Optimistic update
-        setCards(prev => prev.map(c =>
-            c.id === card.id ? { ...c, column_id: targetColumnId, position: newPosition } : c
-        ))
+        setCards(prev => {
+            const filtered = prev.filter(c => c.id !== card.id)
+            const updatedCard = { ...card, column_id: targetColumnId, position: newIndex }
+            return [...filtered, updatedCard].sort((a, b) => {
+                if (a.column_id !== b.column_id) return 0
+                return a.position - b.position
+            })
+        })
 
         // Persist
-        await updateKanbanCardPosition(card.id, targetColumnId, newPosition)
+        const { success, error } = await updateKanbanCardPosition(card.id, targetColumnId, newIndex)
+        
+        if (!success) {
+            console.error('Failed to save card position:', error)
+            alert('保存に失敗しました。元の位置に戻します。')
+            setCards(originalCards)
+        }
 
         dragCard.current = null
         dragOverCardId.current = null

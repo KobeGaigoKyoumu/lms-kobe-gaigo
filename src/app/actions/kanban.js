@@ -155,13 +155,46 @@ export async function deleteKanbanCard(cardId) {
     return { success: true }
 }
 
-export async function updateKanbanCardPosition(cardId, columnId, position) {
+export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     const supabase = createAdminClient()
-    const { error } = await supabase
+
+    // 1. Get all cards in the target column except the moving card
+    const { data: otherCards, error: fetchError } = await supabase
         .from('kanban_cards')
-        .update({ column_id: columnId, position })
+        .select('*')
+        .eq('column_id', columnId)
+        .neq('id', cardId)
+        .order('position', { ascending: true })
+
+    if (fetchError) return { error: fetchError.message }
+
+    // 2. Get the moving card's data if it needs to change column
+    const { data: movingCard, error: cardError } = await supabase
+        .from('kanban_cards')
+        .select('*')
         .eq('id', cardId)
-    if (error) return { error: error.message }
+        .single()
+    
+    if (cardError) return { error: cardError.message }
+
+    // 3. Construct the new order list
+    const sortedCards = [...otherCards]
+    sortedCards.splice(newIndex, 0, { ...movingCard, column_id: columnId })
+
+    // 4. Update all cards in this column with sequential positions
+    const updates = sortedCards.map((c, idx) => ({
+        id: c.id,
+        column_id: columnId,
+        position: idx
+    }))
+
+    // Use upsert to update multiple rows (using id as the unique key)
+    const { error: upsertError } = await supabase
+        .from('kanban_cards')
+        .upsert(updates)
+
+    if (upsertError) return { error: upsertError.message }
+
     revalidateTag('kanban')
     return { success: true }
 }
