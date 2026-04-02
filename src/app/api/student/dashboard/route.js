@@ -2,11 +2,25 @@ import { NextResponse } from 'next/server'
 import { getStudentAssignments } from '@/app/actions/homework'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { normalizeClassName } from '@/lib/utils'
+
+export const dynamic = 'force-dynamic'
+
+const createAdminClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+        console.error('Missing env for admin client in dashboard API')
+        return null
+    }
+    return createSupabaseAdmin(supabaseUrl, supabaseServiceKey)
+}
 
 export async function GET() {
     try {
         const supabase = await createClient()
+        const adminSupabase = createAdminClient() || supabase
         const session = await getStudentSessionLight()
 
         if (!session) {
@@ -15,7 +29,7 @@ export async function GET() {
 
         const [assignments, announcementsResult] = await Promise.all([
             getStudentAssignments(),
-            supabase
+            adminSupabase
                 .from('announcements')
                 .select(`
                     id,

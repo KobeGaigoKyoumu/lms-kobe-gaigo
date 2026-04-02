@@ -8,31 +8,18 @@ envContent.split('\n').filter(l => l.includes('=')).forEach(l => {
     env[parts[0].trim()] = parts.slice(1).join('=').trim().replace(/^"|"$/g, '')
 })
 
-const supabase = createClient(env['NEXT_PUBLIC_SUPABASE_URL'], env['SUPABASE_SERVICE_ROLE_KEY'])
+const supabaseAnon = createClient(env['NEXT_PUBLIC_SUPABASE_URL'], env['NEXT_PUBLIC_SUPABASE_ANON_KEY'])
+const supabaseAdmin = createClient(env['NEXT_PUBLIC_SUPABASE_URL'], env['SUPABASE_SERVICE_ROLE_KEY'])
 
 async function run() {
-    console.log("Checking RLS status for 'homework_assignments'...")
-    const { data: policies, error } = await supabase
-        .rpc('get_policies', { table_name_v2: 'homework_assignments' }) // Try common RPC name
-        .catch(e => ({ error: e }));
-
-    // Fallback: Query system tables directly if RPC fails
-    const { data: pgPolicies, error: pgError } = await supabase
-        .from('pg_policies')
-        .select('*')
-        .eq('tablename', 'homework_assignments')
-
-    if (pgError) {
-        console.log("Could not fetch policies via pg_policies (likely RLS blocked or no permission).")
-    } else {
-        console.log("Policies found:", pgPolicies)
-    }
-
-    const { data: tableInfo, error: tableError } = await supabase
-        .rpc('get_table_info', { p_table_name: 'homework_assignments' })
+    console.log("RLS Check for Announcements...")
     
-    if (tableInfo) {
-        console.log("Table info:", tableInfo)
-    }
+    const { data: anonData } = await supabaseAnon.from('announcements').select('id, title, target_type').limit(10)
+    console.log(`Anon Key can see ${anonData?.length || 0} announcements.`)
+    anonData?.forEach(a => console.log(`- [Anon] ${a.title} (${a.target_type})`))
+
+    const { data: adminData } = await supabaseAdmin.from('announcements').select('id, title, target_type').limit(10)
+    console.log(`Admin Key can see ${adminData?.length || 0} announcements.`)
+    adminData?.forEach(a => console.log(`- [Admin] ${a.title} (${a.target_type})`))
 }
 run()

@@ -8,7 +8,7 @@ export const normalizeClassName = (name) => {
     return typeof name === 'string' 
         ? name.trim()
             .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-            .replace(/[－ー—―]/g, '-')
+            .replace(/[－ー—―‐−–—]/g, '-')
             .replace(/\s+/g, '') // Remove internal spaces for robust matching
         : name
 }
