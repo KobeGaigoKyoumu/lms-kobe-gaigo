@@ -62,26 +62,28 @@ export const getTimetableSubjects = unstable_cache(
     { revalidate: 3600, tags: ['schedules'] }
 )
 
-// Internal function for student assignments (Standard server client)
+// Internal function for student assignments (Corrected column: release_date)
 async function _getStudentAssignments(studentId, className) {
     const supabase = await createClient()
     const normalizedClassName = normalizeClassName(className)
+    const now = new Date().toISOString()
     
-    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName}`)
+    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName} at ${now}`)
 
-    // 1. Get ALL assignments for the class
+    // 1. Get ALL potentially visible assignments (Corrected column name: release_date)
     const { data: allAssignments, error: activeError } = await supabase
         .from('homework_assignments')
-        .select('id, title, description, deadline, class_name, created_at, released_at, is_archived')
+        .select('id, title, description, deadline, class_name, created_at, release_date, is_archived, subject')
         .ilike('class_name', normalizedClassName)
+        .or(`release_date.is.null,release_date.lte."${now}"`) // Filter by corrected release date
         .order('deadline', { ascending: true })
 
     if (activeError) {
-        console.error('[DEBUG] Fetch assignments error:', activeError)
+        console.error('[DEBUG] Fetch assignments error (42703?):', activeError)
         return { active: [], archived: [] }
     }
 
-    console.log(`[DEBUG] Found ${allAssignments?.length || 0} assignments in DB for ${normalizedClassName}`)
+    console.log(`[DEBUG] Found ${allAssignments?.length || 0} assignments for ${normalizedClassName}`)
 
     // 2. Get student's submissions
     const { data: submissions, error: submissionError } = await supabase
@@ -94,10 +96,10 @@ async function _getStudentAssignments(studentId, className) {
         submissions.forEach(s => submissionMap.set(s.assignment_id, s))
     }
 
-    const now = new Date()
+    const today = new Date()
 
-    // 3. Simple logic: If deadline is in future, it's active. If past, it's archived.
-    // (Ignoring is_archived/released_at flags temporarily to force visibility)
+    // 3. Logic: If deadline is in future, it's active. If past, it's archived.
+    // Also consider is_archived flag.
     const active = []
     const archived = []
 
@@ -107,26 +109,33 @@ async function _getStudentAssignments(studentId, className) {
                 ...a,
                 submission: submissionMap.get(a.id) || null
             }
+            
             const deadline = a.deadline ? new Date(a.deadline) : null
-            if (!deadline || deadline >= now) {
-                active.push(item)
-            } else {
+            const isArchived = a.is_archived === true
+            
+            if (isArchived || (deadline && deadline < today)) {
                 archived.push(item)
+            } else {
+                active.push(item)
             }
         })
     }
 
-    console.log(`[DEBUG] Returning active: ${active.length}, archived: ${archived.length}`)
+    console.log(`[DEBUG] Final counts - Active: ${active.length}, Archived: ${archived.length}`)
     return { active, archived }
 }
 
-// Fetch active assignments for the student's class
-export async function getStudentAssignments() {
-    const session = await getStudentSession()
-    if (!session) return { error: 'Unauthorized' }
-
-    return await _getStudentAssignments(session.studentId, session.className)
-}
+// Fetch active assignments for the student's class (Cache V9 with 30s revalidate)
+export const getStudentAssignments = unstable_cache(
+    async () => {
+        const session = await getStudentSession()
+        if (!session) return { active: [], archived: [] }
+    
+        return await _getStudentAssignments(session.studentId, session.className)
+    },
+    ['student-assignments-v9'],
+    { revalidate: 30, tags: ['homework-assignments'] }
+)
 
 // Internal cached assignment fetcher
 const _getCachedAssignment = unstable_cache(
