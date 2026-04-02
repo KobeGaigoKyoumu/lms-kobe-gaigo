@@ -2,7 +2,7 @@
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
-import { normalizeClassName } from './studentAuth'
+import { normalizeClassName } from '@/lib/utils'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'

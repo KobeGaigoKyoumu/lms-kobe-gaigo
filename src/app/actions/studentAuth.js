@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeClassName } from '@/lib/utils'
 
 // Helper to create admin client
 const createAdminClient = () => {
@@ -17,17 +18,6 @@ const createAdminClient = () => {
 // Version 2 cookie with Base64 encoding for stability
 const COOKIE_NAME = 'kobe_student_session_v2'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
-
-// Normalize helper (must match the one in homework.js for consistency)
-export const normalizeClassName = (name) => {
-    if (!name) return ''
-    return typeof name === 'string' 
-        ? name.trim()
-            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-            .replace(/[－ー—―]/g, '-')
-            .replace(/\s+/g, '')
-        : name
-}
 
 export async function loginStudent(formData) {
     const className = formData.get('className')
