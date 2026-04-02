@@ -65,13 +65,14 @@ export const getTimetableSubjects = unstable_cache(
 const _getStudentAssignments = unstable_cache(
     async (studentId, className) => {
         const supabase = createAdminClient()
-
-        // 1. Get assignments for the class currently
         const now = new Date().toISOString()
+        const normalizedClassName = className?.trim() || ''
+
+        // 1. Get assignments for the class currently (Active)
         const { data: activeAssignments, error: activeError } = await supabase
             .from('homework_assignments')
             .select('id, title, description, deadline, class_name, created_at, released_at')
-            .eq('class_name', className)
+            .eq('class_name', normalizedClassName)
             .eq('is_archived', false)
             .or(`released_at.is.null,released_at.lte."${now}"`)
             .order('deadline', { ascending: true })
@@ -82,54 +83,71 @@ const _getStudentAssignments = unstable_cache(
             return { active: [], archived: [] }
         }
 
-        // 2. Get student's all submissions (past and present)
+        // 2. Get student's submissions for merging
         const { data: submissions, error: submissionError } = await supabase
             .from('homework_submissions')
             .select('id, assignment_id, status, submitted_at, score')
             .eq('student_id_text', studentId)
 
-        if (submissionError) {
-            console.error('Error fetching submissions:', submissionError)
-            return {
-                active: activeAssignments.map(a => ({ ...a, submission: null })),
-                archived: []
-            }
+        const submissionMap = new Map()
+        if (!submissionError && submissions) {
+            submissions.forEach(s => submissionMap.set(s.assignment_id, s))
         }
 
-        const submissionMap = new Map()
-        ;(submissions || []).forEach(s => submissionMap.set(s.assignment_id, s))
+        // 3. Get ALL potential assignments for this class (including archived/past)
+        // This ensures the student sees PAST unsubmitted tasks too.
+        const { data: allClassAssignments, error: allErr } = await supabase
+            .from('homework_assignments')
+            .select('id, title, description, deadline, class_name, created_at, released_at, is_archived')
+            .eq('class_name', normalizedClassName)
+            .or(`is_archived.eq.true,deadline.lt."${now}"`) // Get past/archived
+            .order('created_at', { ascending: false })
+            .limit(100)
 
-        // 3. To get the details of archived assignments or assignments from previous classes
-        const activeAssignmentIds = new Set((activeAssignments || []).map(a => a.id))
-        const submittedAssignmentIds = (submissions || []).map(s => s.assignment_id)
+        // 4. Also fetch assignments the student HAS submitted to, even if they were from other classes (e.g. transfer students)
+        const activeIds = new Set((activeAssignments || []).map(a => a.id))
+        const submittedIds = (submissions || []).map(s => s.assignment_id)
+        const otherSubmittedIds = submittedIds.filter(id => !activeIds.has(id))
         
-        // Find past assignment IDs that the student has submitted to, but are not in the current active list
-        const pastIdsToFetch = submittedAssignmentIds.filter(id => !activeAssignmentIds.has(id))
-
-        let archivedAssignments = []
-        if (pastIdsToFetch.length > 0) {
-            const { data: pastAssignmentsData } = await supabase
+        let otherSubmittedAssignments = []
+        if (otherSubmittedIds.length > 0) {
+            const { data: otherData } = await supabase
                 .from('homework_assignments')
                 .select('id, title, description, deadline, class_name, created_at, released_at')
-                .in('id', pastIdsToFetch)
-                .order('created_at', { ascending: false })
-            
-            archivedAssignments = pastAssignmentsData || []
+                .in('id', otherSubmittedIds)
+            otherSubmittedAssignments = otherData || []
         }
+
+        // Merge and uniquely identify archived assignments
+        const archivedMap = new Map()
+        
+        // Add all assignments from current class that are past/archived
+        if (!allErr && allClassAssignments) {
+            allClassAssignments.forEach(a => {
+                if (!activeIds.has(a.id)) {
+                    archivedMap.set(a.id, a)
+                }
+            })
+        }
+        
+        // Add assignments from other classes that have been submitted
+        otherSubmittedAssignments.forEach(a => {
+            archivedMap.set(a.id, a)
+        })
 
         const active = (activeAssignments || []).map(a => ({
             ...a,
             submission: submissionMap.get(a.id) || null
         }))
 
-        const archived = archivedAssignments.map(a => ({
+        const archived = Array.from(archivedMap.values()).map(a => ({
             ...a,
             submission: submissionMap.get(a.id) || null
         }))
 
         return { active, archived }
     },
-    ['student-assignments-v2'],
+    ['student-assignments-v3'],
     { revalidate: 3600, tags: ['homework-assignments'] }
 )
 

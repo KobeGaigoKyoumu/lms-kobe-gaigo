@@ -72,7 +72,8 @@ export default async function DashboardPage() {
             .select('name, teacher_id, homeroom_teacher_name')
             .or(`teacher_id.eq.${userId},homeroom_teacher_name.eq."${adminMember.name}"`)
 
-        const teacherClassNames = teacherClasses?.map(c => c.name) || []
+        const teacherClassNamesRaw = teacherClasses?.map(c => c.name) || []
+        const teacherClassNames = teacherClassNamesRaw.map(n => n.trim())
         stats.enrolledClassesCount = teacherClassNames.length
 
         if (teacherClassNames.length > 0) {

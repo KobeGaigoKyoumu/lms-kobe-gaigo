@@ -42,7 +42,7 @@ export async function loginStudent(formData) {
         const sessionData = {
             studentId: student.student_id_text,
             name: student.full_name,
-            className: student.class_name,
+            className: student.class_name?.trim(),
             academicYear: student.academic_year, 
             enrollmentPeriod: student.enrollment_period,
             at: Date.now()
@@ -163,7 +163,7 @@ export const getStudentSession = cache(async () => {
                             return {
                                 studentId: data.studentId,
                                 name: data.name,
-                                className: latestData.class_name || data.className || '未設定',
+                                className: (latestData.class_name || data.className)?.trim() || '未設定',
                                 academicYear: latestData.academic_year || data.academicYear,
                                 enrollmentPeriod: latestData.enrollment_period || data.enrollmentPeriod,
                                 status: latestData.status
