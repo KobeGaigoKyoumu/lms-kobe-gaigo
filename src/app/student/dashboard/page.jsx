@@ -23,6 +23,7 @@ export default function StudentDashboard() {
                 const res = await fetch('/api/student/dashboard')
                 if (!res.ok) throw new Error('Failed to fetch dashboard data')
                 const json = await res.json()
+                console.log('[DEBUG] Fetched Dashboard Data:', json)
                 if (isMounted) setData(json)
             } catch (err) {
                 console.error(err)

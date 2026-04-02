@@ -57,6 +57,9 @@ export async function GET() {
             return false
         }).slice(0, 3)
 
+        console.log(`[DEBUG] API Response for student: ${session.studentId}, class: ${session.className}`)
+        console.log(`[DEBUG] Assignments: Active=${assignments?.active?.length || 0}, Archived=${assignments?.archived?.length || 0}`)
+
         return NextResponse.json({
             session,
             assignments: assignments || { active: [], archived: [] },
