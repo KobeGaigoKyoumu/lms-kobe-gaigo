@@ -62,6 +62,7 @@ export const getTimetableSubjects = unstable_cache(
     { revalidate: 3600, tags: ['schedules'] }
 )
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
+// Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 async function _getStudentAssignments(studentId, className) {
     const supabase = createAdminClient()
     return await _getStudentAssignmentsWithClient(supabase, studentId, className)
@@ -71,36 +72,47 @@ async function _getStudentAssignmentsWithClient(supabase, studentId, className) 
     const normalizedClassName = normalizeClassName(className)
     const now = new Date()
     
-    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName} (Admin Mode)`)
+    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName} (Full History Mode)`)
 
-    // 1. Get ALL assignments for the class (Ultra-safe: select('*'))
-    const { data: allAssignments, error: activeError } = await supabase
-        .from('homework_assignments')
+    // 1. Get student's submissions first
+    const { data: submissions, error: submissionError } = await supabase
+        .from('homework_submissions')
         .select('*')
-        .ilike('class_name', normalizedClassName)
-        .order('deadline', { ascending: true })
+        .eq('student_id_text', studentId)
+
+    if (submissionError) {
+        console.error('[DEBUG] Fetch submissions error:', submissionError)
+    }
+
+    const submissionMap = new Map()
+    const submittedIds = []
+    if (submissions) {
+        submissions.forEach(s => {
+            submissionMap.set(s.assignment_id, s)
+            submittedIds.push(s.assignment_id)
+        })
+    }
+
+    // 2. Get assignments matching current class OR previously submitted IDs
+    // (Ultra-safe: select('*'))
+    let query = supabase.from('homework_assignments').select('*')
+    
+    if (submittedIds.length > 0) {
+        query = query.or(`class_name.ilike."${normalizedClassName}",id.in.(${submittedIds.map(id => `"${id}"`).join(',')})`)
+    } else {
+        query = query.ilike('class_name', normalizedClassName)
+    }
+
+    const { data: allAssignments, error: activeError } = await query.order('deadline', { ascending: true })
 
     if (activeError) {
-        console.error('[DEBUG] FATAL Query Error:', activeError)
+        console.error('[DEBUG] FATAL Query Error during history fetch:', activeError)
         return { active: [], archived: [] }
     }
 
-    if (allAssignments && allAssignments.length > 0) {
-        console.log(`[DEBUG] Physical DB columns detected:`, Object.keys(allAssignments[0]))
-    }
+    console.log(`[DEBUG] Found ${allAssignments?.length || 0} total visible assignments.`)
 
-    // 2. Get student's submissions
-    const { data: submissions, error: submissionError } = await supabase
-        .from('homework_submissions')
-        .select('id, assignment_id, status, submitted_at, score')
-        .eq('student_id_text', studentId)
-
-    const submissionMap = new Map()
-    if (!submissionError && submissions) {
-        submissions.forEach(s => submissionMap.set(s.assignment_id, s))
-    }
-
-    // 3. Logic: Filter in JavaScript memory to handle column name ambiguity
+    // 3. Logic: Filter in JavaScript memory
     const active = []
     const archived = []
 
@@ -112,8 +124,9 @@ async function _getStudentAssignmentsWithClient(supabase, studentId, className) 
             const deadline = a.deadline ? new Date(a.deadline) : null
             const isArchived = a.is_archived === true
 
-            // Release filter in JS
-            const isReleased = !releaseDate || releaseDate <= now
+            // If submitted, it should always be visible (even if not released yet - should not happen but safe)
+            const isSubmitted = submissionMap.has(a.id)
+            const isReleased = !releaseDate || releaseDate <= now || isSubmitted
 
             if (isReleased) {
                 const item = {
@@ -122,6 +135,8 @@ async function _getStudentAssignmentsWithClient(supabase, studentId, className) 
                 }
                 
                 // Active/Archived split
+                // If it is ALREADY passed deadline, it is archived.
+                // If it is manually archived, it is archived.
                 if (isArchived || (deadline && deadline < now)) {
                     archived.push(item)
                 } else {
