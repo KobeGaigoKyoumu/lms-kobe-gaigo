@@ -62,28 +62,29 @@ export const getTimetableSubjects = unstable_cache(
     { revalidate: 3600, tags: ['schedules'] }
 )
 
-// Internal function for student assignments (Corrected column: release_date)
+// Internal function for student assignments (Ultra-safe query using select('*'))
 async function _getStudentAssignments(studentId, className) {
     const supabase = await createClient()
     const normalizedClassName = normalizeClassName(className)
-    const now = new Date().toISOString()
+    const now = new Date()
     
-    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName} at ${now}`)
+    console.log(`[DEBUG] Fetching assignments for student: ${studentId}, class: ${normalizedClassName}`)
 
-    // 1. Get ALL potentially visible assignments (Corrected column name: release_date)
+    // 1. Get ALL assignments for the class (Ultra-safe: select('*') avoids 42703)
     const { data: allAssignments, error: activeError } = await supabase
         .from('homework_assignments')
-        .select('id, title, description, deadline, class_name, created_at, release_date, is_archived, subject')
+        .select('*')
         .ilike('class_name', normalizedClassName)
-        .or(`release_date.is.null,release_date.lte."${now}"`) // Filter by corrected release date
         .order('deadline', { ascending: true })
 
     if (activeError) {
-        console.error('[DEBUG] Fetch assignments error (42703?):', activeError)
+        console.error('[DEBUG] FATAL Query Error:', activeError)
         return { active: [], archived: [] }
     }
 
-    console.log(`[DEBUG] Found ${allAssignments?.length || 0} assignments for ${normalizedClassName}`)
+    if (allAssignments && allAssignments.length > 0) {
+        console.log(`[DEBUG] Physical DB columns detected:`, Object.keys(allAssignments[0]))
+    }
 
     // 2. Get student's submissions
     const { data: submissions, error: submissionError } = await supabase
@@ -96,32 +97,38 @@ async function _getStudentAssignments(studentId, className) {
         submissions.forEach(s => submissionMap.set(s.assignment_id, s))
     }
 
-    const today = new Date()
-
-    // 3. Logic: If deadline is in future, it's active. If past, it's archived.
-    // Also consider is_archived flag.
+    // 3. Logic: Filter in JavaScript memory to handle column name ambiguity
     const active = []
     const archived = []
 
     if (allAssignments) {
         allAssignments.forEach(a => {
-            const item = {
-                ...a,
-                submission: submissionMap.get(a.id) || null
-            }
-            
+            // Find the release date from any possible property name
+            const releaseValue = a.release_date || a.released_at || a.release_at || null
+            const releaseDate = releaseValue ? new Date(releaseValue) : null
             const deadline = a.deadline ? new Date(a.deadline) : null
             const isArchived = a.is_archived === true
-            
-            if (isArchived || (deadline && deadline < today)) {
-                archived.push(item)
-            } else {
-                active.push(item)
+
+            // Release filter in JS
+            const isReleased = !releaseDate || releaseDate <= now
+
+            if (isReleased) {
+                const item = {
+                    ...a,
+                    submission: submissionMap.get(a.id) || null
+                }
+                
+                // Active/Archived split
+                if (isArchived || (deadline && deadline < now)) {
+                    archived.push(item)
+                } else {
+                    active.push(item)
+                }
             }
         })
     }
 
-    console.log(`[DEBUG] Final counts - Active: ${active.length}, Archived: ${archived.length}`)
+    console.log(`[DEBUG] Final Counts - Active: ${active.length}, Archived: ${archived.length}`)
     return { active, archived }
 }
 
