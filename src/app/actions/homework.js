@@ -125,17 +125,18 @@ async function _getStudentAssignments(studentId, className) {
     return { active, archived }
 }
 
-// Fetch active assignments for the student's class (Cache V9 with 30s revalidate)
-export const getStudentAssignments = unstable_cache(
-    async () => {
+// Fetch active assignments for the student (Fresh fetch to avoid white screen crashes)
+export async function getStudentAssignments() {
+    try {
         const session = await getStudentSession()
         if (!session) return { active: [], archived: [] }
     
         return await _getStudentAssignments(session.studentId, session.className)
-    },
-    ['student-assignments-v9'],
-    { revalidate: 30, tags: ['homework-assignments'] }
-)
+    } catch (e) {
+        console.error('[DEBUG] getStudentAssignments fatal error:', e)
+        return { active: [], archived: [] }
+    }
+}
 
 // Internal cached assignment fetcher
 const _getCachedAssignment = unstable_cache(
