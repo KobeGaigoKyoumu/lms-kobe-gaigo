@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home, Loader2 } from 'lucide-react'
 import styles from './page.module.css'
 import DashboardStats from './components/DashboardStats'
@@ -20,11 +21,37 @@ export default function StudentDashboard() {
         let isMounted = true
         async function fetchDashboard() {
             try {
-                const res = await fetch('/api/student/dashboard')
-                if (!res.ok) throw new Error('Failed to fetch dashboard data')
-                const json = await res.json()
-                console.log('[DEBUG] Fetched Dashboard Data:', json)
-                if (isMounted) setData(json)
+                const supabase = createClient()
+                
+                // Get session from cookie-based client (lightweight)
+                const { data: { user } } = await supabase.auth.getUser()
+                
+                // We need the student session details (className, academicYear)
+                // These are stored in cookies or can be fetched from the profile
+                // For simplicity and matching the old API, we use the student session action
+                // but call it from the client (it uses cookies).
+                const resSession = await fetch('/api/auth/student-session')
+                const session = await resSession.json()
+
+                if (!session || session.error) throw new Error('Unauthorized')
+
+                // Call the new optimized RPC
+                const { data: dashboardData, error: rpcError } = await supabase
+                    .rpc('get_student_dashboard_data', {
+                        p_student_id: session.studentId,
+                        p_class_name: session.className,
+                        p_academic_year: session.academicYear
+                    })
+
+                if (rpcError) throw rpcError
+                
+                console.log('[DEBUG] Fetched Dashboard Data via RPC:', dashboardData)
+                if (isMounted) setData({
+                    session,
+                    stats: dashboardData.stats,
+                    assignments: { active: dashboardData.recentAssignments || [], archived: [] },
+                    announcements: dashboardData.announcements || []
+                })
             } catch (err) {
                 console.error(err)
                 if (isMounted) setError('データの読み込みに失敗しました')

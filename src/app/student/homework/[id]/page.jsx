@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { Calendar, ChevronLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { createClient } from '@/lib/supabase/client'
 
 export default function HomeworkPage({ params }) {
     const resolvedParams = use(params)
@@ -24,17 +25,41 @@ export default function HomeworkPage({ params }) {
         let isMounted = true
         async function fetchAssignment() {
             try {
-                const res = await fetch(`/api/student/homework/${id}`)
-                if (!res.ok) {
-                    if (res.status === 404) {
-                        if (isMounted) setError('Not Found')
-                    } else {
-                        throw new Error('Failed to fetch')
-                    }
+                const supabase = createClient()
+                
+                // Get session
+                const resSession = await fetch('/api/auth/student-session')
+                const session = await resSession.json()
+                if (!session || session.error) throw new Error('Unauthorized')
+
+                // Fetch assignment and submission in one go
+                // Note: We use the admin client logic via RPC or simple select if RLS allows
+                const { data: assignmentData, error: fetchError } = await supabase
+                    .from('homework_assignments')
+                    .select(`
+                        *,
+                        submission:homework_submissions(*)
+                    `)
+                    .eq('id', id)
+                    .eq('submission.student_id_text', session.studentId)
+                    .single()
+
+                if (fetchError || !assignmentData) {
+                    if (isMounted) setError('Not Found')
                     return
                 }
-                const data = await res.json()
-                if (isMounted) setAssignment(data)
+
+                if (isMounted) {
+                    // Normalize submission from array to object if needed (depending on how select joins)
+                    const submission = Array.isArray(assignmentData.submission) 
+                        ? assignmentData.submission[0] 
+                        : assignmentData.submission
+                    
+                    setAssignment({
+                        ...assignmentData,
+                        submission: submission || null
+                    })
+                }
             } catch (err) {
                 console.error(err)
                 if (isMounted) setError('エラーが発生しました')
