@@ -308,23 +308,27 @@ export async function createAssignment(formData) {
     const description = formData.get('description')
     const classNames = formData.getAll('classNames')
     const subject = formData.get('subject')
-    let deadline = formData.get('deadline')
-    let releasedAt = formData.get('released_at')
+    // Support both snake_case and camelCase for robustness
+    let deadline = formData.get('deadline') || formData.get('dueDate')
+    let releasedAt = formData.get('released_at') || formData.get('releasedAt')
 
-    if (!title || classNames.length === 0 || !deadline) {
-        return { error: '必須項目を入力してください' }
+    if (!title || !classNames || classNames.length === 0 || !deadline) {
+        console.error('[createAssignment] Missing required fields:', { title, classNamesCount: classNames?.length, deadline })
+        return { error: '必須項目（タイトル、クラス、締切）を入力してください' }
     }
 
-    if (deadline && !deadline.includes('Z') && !deadline.includes('+')) {
+    // Format deadline to ISO with timezone if needed
+    if (deadline && typeof deadline === 'string' && !deadline.includes('Z') && !deadline.includes('+')) {
         deadline = `${deadline}:00+09:00`
     }
 
-    if (releasedAt) {
+    // Format releasedAt or fallback to now
+    if (releasedAt && typeof releasedAt === 'string') {
         if (!releasedAt.includes('Z') && !releasedAt.includes('+')) {
             releasedAt = `${releasedAt}:00+09:00`
         }
     } else {
-        releasedAt = new Date().toISOString() // Fallback to immediate
+        releasedAt = new Date().toISOString()
     }
 
     const adminSupabase = createAdminClient()
@@ -337,17 +341,17 @@ export async function createAssignment(formData) {
         deadline,
         released_at: releasedAt,
         teacher_id: user?.id || null,
-        is_archived: false // Explicitly set to false to avoid NULL issues
+        is_archived: false
     }))
 
     const { data: newAssignments, error } = await adminSupabase
         .from('homework_assignments')
         .insert(insertData)
-        .select('id')
+        .select()
 
     if (error) {
-        console.error('Create assignment error:', error)
-        return { error: '作成に失敗しました' }
+        console.error('[createAssignment] Supabase error:', error)
+        return { error: `作成に失敗しました: ${error.message} (${error.code})` }
     }
 
     // Comprehensive revalidation for immediate reflection

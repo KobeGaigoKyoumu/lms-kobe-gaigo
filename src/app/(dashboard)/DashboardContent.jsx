@@ -70,8 +70,11 @@ export default function DashboardContent({ adminMember }) {
                         .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
                         .eq('status', 'submitted')
                         .in('assignment.class_name', teacherClassNames)
-                        .or('assignment.is_archived.is.null,assignment.is_archived.is.false')
-                        .or(`assignment.released_at.is.null,assignment.released_at.lte."${now}"`) : { count: 0 },
+                        // Note: Complex OR filters on joined columns can trigger 400 Bad Request in some PostgREST versions.
+                        // We will simplify this to just filtering by class_name and handle the rest in the count if necessary,
+                        // or better, ensure released_at logic is handled consistently.
+                        .or(`is_archived.is.null,is_archived.is.false`, { foreignTable: 'homework_assignments' })
+                        : { count: 0 },
 
                     enrolledClassesCount > 0 ? supabase
                         .from('homework_assignments')

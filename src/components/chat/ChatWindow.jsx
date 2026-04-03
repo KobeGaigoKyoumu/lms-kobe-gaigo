@@ -94,35 +94,16 @@ export default function ChatWindow({
                 filter: `student_id=eq.${resolvedStudentId}`
             }, (payload) => {
                 const newMessage = payload.new
-                // Prevent duplicates if already added by optimistic UI or poll
                 setMessages(prev => {
                     if (prev.some(m => m.id === newMessage.id)) return prev
-
-                    // Note: If user is scrolled up, we might want to show "New Message" banner instead of auto-scrolling
-                    // For now, we just append.
-                    const isAtBottom = scrollContainerRef.current &&
-                        (scrollContainerRef.current.scrollTop + scrollContainerRef.current.clientHeight >= scrollContainerRef.current.scrollHeight - 50)
-
-                    if (isAtBottom) {
-                        setTimeout(scrollToBottom, 100)
-                    }
-
                     return [...prev, newMessage]
                 })
-
-                // If message is from the other party, mark as read logic is handled by the useEffect
-                // to batch/debounce updates.
-                /* 
-                if (newMessage.sender_type !== currentUserRole) {
-                    fetch('/api/chat/mark-read', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ studentId })
-                    }).catch(e => console.error('Realtime mark read error', e))
-                }
-                */
             })
-            .subscribe()
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('Chat Realtime Subscribed')
+                }
+            })
 
         return () => {
             supabase.removeChannel(channel)
