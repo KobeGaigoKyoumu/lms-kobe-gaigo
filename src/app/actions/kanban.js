@@ -1,7 +1,14 @@
 "use server"
 
-import { createAdminClient } from "@/lib/supabase"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
+
+// Helper for admin client (Service Role)
+const createAdminClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey)
+}
 
 // ===== Fetching Functions =====
 
