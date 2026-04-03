@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toCDNUrl } from '@/lib/utils'
 import styles from './page.module.css'
 
 export default function ProfileForm({ profile, user }) {
@@ -59,7 +59,7 @@ export default function ProfileForm({ profile, user }) {
                 <div className={styles.avatar}>
                     {profile?.avatar_url || user?.user_metadata?.avatar_url ? (
                         <img
-                            src={profile?.avatar_url || user?.user_metadata?.avatar_url}
+                            src={toCDNUrl(profile?.avatar_url || user?.user_metadata?.avatar_url)}
                             alt=""
                         />
                     ) : (

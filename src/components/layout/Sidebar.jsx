@@ -7,8 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import { logoutStudent } from '@/app/actions/studentAuth'
 import { logoutAdminMember } from '@/app/actions/adminAuth'
 import { getMenuItems } from '@/lib/menuItems.jsx'
-import models from './Sidebar.module.css'
 import { useStudentStatus } from '@/context/StudentStatusContext'
+import { toCDNUrl } from '@/lib/utils'
 import styles from './Sidebar.module.css'
 
 export default function Sidebar({ role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false, userName, userEmail, userAvatar, className: studentClassName }) {
@@ -121,7 +121,7 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
                 <div className={styles.userInfo}>
                     <div className={styles.avatar}>
                         {avatarUrl ? (
-                            <img src={avatarUrl} alt="" />
+                            <img src={toCDNUrl(avatarUrl)} alt="" />
                         ) : (
                             getInitials(displayName)
                         )}

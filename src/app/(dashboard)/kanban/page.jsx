@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
-import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
 
@@ -15,15 +14,8 @@ export default async function KanbanPage() {
     // Use 'admin' as userId to signify an admin session
     const userId = 'admin'
 
-    // Restore server-side fetching with aggressive caching (Service Role)
-    // This allows the data to be visible while keeping Vercel active CPU time minimal
-    const [columns, cards, labels, reminders] = await Promise.all([
-        getKanbanColumns(),
-        getKanbanCards(),
-        getKanbanLabels(),
-        getAllKanbanReminders()
-    ])
-
+    // Offload all data fetching to the client side.
+    // KanbanBoard component will detect missing initial props and fetch directly from Supabase.
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -34,10 +26,6 @@ export default async function KanbanPage() {
             </header>
             <KanbanBoard 
                 userId={userId} 
-                initialColumns={columns.data || []}
-                initialCards={cards.data || []}
-                initialLabels={labels.data || []}
-                initialReminders={reminders.data || []}
             />
         </div>
     )

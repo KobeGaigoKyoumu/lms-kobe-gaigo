@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toCDNUrl } from '@/lib/utils'
 import styles from './page.module.css'
 
 export default function UserList({ users: initialUsers, currentUserId }) {
@@ -112,7 +113,7 @@ export default function UserList({ users: initialUsers, currentUserId }) {
                                     <div className={styles.userCell}>
                                         <div className={styles.avatar}>
                                             {user.avatar_url ? (
-                                                <img src={user.avatar_url} alt="" />
+                                                <img src={toCDNUrl(user.avatar_url)} alt="" />
                                             ) : (
                                                 user.full_name?.[0] || '?'
                                             )}

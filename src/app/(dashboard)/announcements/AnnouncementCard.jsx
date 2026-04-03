@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { toCDNUrl } from '@/lib/utils'
 import styles from './page.module.css'
 import { deleteAnnouncement } from '@/app/actions/announcements'
 
@@ -65,7 +66,7 @@ export default function AnnouncementCard({ announcement, canEdit }) {
                     {announcement.file_urls.map((file, index) => (
                         <a
                             key={index}
-                            href={file.url}
+                            href={toCDNUrl(file.url)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.attachmentItem}
@@ -84,7 +85,7 @@ export default function AnnouncementCard({ announcement, canEdit }) {
                 <div className={styles.author}>
                     <div className={styles.authorAvatar}>
                         {announcement.author?.avatar_url ? (
-                            <img src={announcement.author.avatar_url} alt="" />
+                            <img src={toCDNUrl(announcement.author.avatar_url)} alt="" />
                         ) : (
                             (announcement.sender_name || announcement.admin_author_name || announcement.author?.full_name)?.[0] || '?'
                         )}

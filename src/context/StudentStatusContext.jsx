@@ -81,54 +81,60 @@ export function StudentStatusProvider({ children, role, userId, className: userC
             // Use a specific ref to avoid hammering Vercel if it's already struggling
             if (!success) {
                 // If student, try direct RPC to save Vercel CPU
-                if (role === 'student') {
+                if (role === 'student' || role === 'teacher' || role === 'admin') {
                     const lastFallback = parseInt(sessionStorage.getItem('last_status_fallback') || '0')
                     if (now - lastFallback < 15000) { // 15 seconds cooldown for direct RPC
                         console.log('Direct status fallback on cooldown')
                         return
                     }
 
-                    const { data: rpcResult, error: rpcError } = await supabase
-                        .rpc('get_student_status', {
-                            p_student_id: userId,
-                            p_class_name: userClassName || ''
-                        })
-
-                    if (!rpcError && rpcResult) {
-                        const data = {
-                            hasNewAnnouncement: rpcResult.has_new_announcement || false,
-                            unsubmittedAssignmentCount: rpcResult.unsubmitted_assignment_count || 0,
-                            unreadMessageCount: rpcResult.unread_message_count || 0
+                    // Use appropriate RPC or direct query for status
+                    let data = null
+                    if (role === 'student') {
+                        const { data: rpcResult, error: rpcError } = await supabase
+                            .rpc('get_student_status', {
+                                p_student_id: userId,
+                                p_class_name: userClassName || ''
+                            })
+                        if (!rpcError && rpcResult) {
+                            data = {
+                                hasNewAnnouncement: rpcResult.has_new_announcement || false,
+                                unsubmittedAssignmentCount: rpcResult.unsubmitted_assignment_count || 0,
+                                unreadMessageCount: rpcResult.unread_message_count || 0
+                            }
                         }
+                    } else {
+                        // For teacher/admin, we can use a direct query to get unread count to save Vercel CPU
+                        // And skip the complex dashboard stats here as they are shown on the dashboard page anyway
+                        const { count: unreadCount } = await supabase
+                            .from('messages')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('receiver_id', userId)
+                            .eq('read', false)
+
+                        data = {
+                            hasNewAnnouncement: false, // Will be fetched on dashboard
+                            unsubmittedAssignmentCount: 0,
+                            unreadMessageCount: unreadCount || 0
+                        }
+                    }
+
+                    if (data) {
                         const normalized = normalizeStatuses(data);
                         setStatuses(prev => ({ ...prev, ...normalized }))
                         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
                         sessionStorage.setItem('last_status_fallback', now.toString())
                         lastFetchRef.current = now
                         success = true
-                    } else if (rpcError) {
-                        console.warn('Direct RPC status fetch failed', rpcError)
                     }
                 }
 
-                // If still not success (teacher, or RPC failed), fallback to Vercel API
+                // Vercel fallback removed to save CPU as per optimization plan
+                /*
                 if (!success && typeof window !== 'undefined') {
-                    const lastFallback = parseInt(window.sessionStorage.getItem('last_status_vercel_fallback') || '0')
-                    if (now - lastFallback < 300000) { // 5 minutes cooldown for Vercel fallback
-                        console.log('Vercel status fallback on cooldown to save CPU')
-                        return
-                    }
-
-                    const resInternal = await fetch('/api/status', { cache: 'no-store', signal: AbortSignal.timeout(8000) })
-                    if (resInternal.ok) {
-                        const data = await resInternal.json()
-                        const normalized = normalizeStatuses(data);
-                        setStatuses(prev => ({ ...prev, ...normalized }))
-                        window.sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: normalized, ts: now }))
-                        window.sessionStorage.setItem('last_status_vercel_fallback', now.toString())
-                        lastFetchRef.current = now
-                    }
+                    ...
                 }
+                */
             }
         } catch (error) {
             console.error('Failed to fetch status:', error)
