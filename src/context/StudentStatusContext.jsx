@@ -189,27 +189,9 @@ export function StudentStatusProvider({ children, role, userId, className: userC
         }
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
-        // 4. Real-time updates subscription (Optimized with filters)
-        // Students: only care about messages to them (sender_type=teacher)
-        // Teachers: only care about messages from students (sender_type=student)
-        const filter = role === 'student' 
-            ? `student_id=eq.${userId}` 
-            : `sender_type=eq.student`
-
-        const channel = supabase
-            .channel(`status-server-${role}-${userId}`)
-            .on('postgres_changes', {
-                event: 'INSERT', // Focus on new messages
-                schema: 'public',
-                table: 'messages',
-                filter: filter
-            }, () => fetchStatuses('realtime'))
-            .subscribe()
-
         return () => {
             clearInterval(refreshInterval)
             document.removeEventListener('visibilitychange', handleVisibilityChange)
-            supabase.removeChannel(channel)
         }
     }, [role, userId, supabase, mounted])
 

@@ -82,7 +82,7 @@ export async function addKanbanColumn(title, position, createdBy) {
         .select()
         .single()
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { data }
 }
 
@@ -93,7 +93,7 @@ export async function updateKanbanColumnTitle(colId, title) {
         .update({ title })
         .eq('id', colId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -104,7 +104,7 @@ export async function deleteKanbanColumn(colId) {
         .delete()
         .eq('id', colId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -115,7 +115,7 @@ export async function updateKanbanColumnPosition(colId, position) {
         .update({ position })
         .eq('id', colId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -129,7 +129,7 @@ export async function addKanbanCard(columnId, title, position, createdBy) {
         .select()
         .single()
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { data }
 }
 
@@ -140,7 +140,7 @@ export async function updateKanbanCard(cardId, updates) {
         .update(updates)
         .eq('id', cardId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -151,7 +151,7 @@ export async function deleteKanbanCard(cardId) {
         .delete()
         .eq('id', cardId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -195,7 +195,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
 
     if (upsertError) return { error: upsertError.message }
 
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 
@@ -207,7 +207,7 @@ export async function updateKanbanLabelName(labelId, name) {
         .update({ name })
         .eq('id', labelId)
     if (error) return { error: error.message }
-    revalidateTag('kanban')
+    revalidateTag('kanban', 'max')
     return { success: true }
 }
 

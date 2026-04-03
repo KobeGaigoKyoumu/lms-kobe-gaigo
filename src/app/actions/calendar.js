@@ -108,7 +108,7 @@ export async function createEventPackage(packageData) {
         console.error('createEventPackage error:', error)
         return { error: 'Failed to create package' }
     }
-    revalidateTag('event-packages')
+    revalidateTag('event-packages', 'max')
     return { success: true, data }
 }
 
@@ -125,7 +125,7 @@ export async function updateEventPackage(id, packageData) {
         console.error('updateEventPackage error:', error)
         return { error: 'Failed to update package' }
     }
-    revalidateTag('event-packages')
+    revalidateTag('event-packages', 'max')
     return { success: true, data }
 }
 
@@ -141,7 +141,7 @@ export async function deleteEventPackage(id) {
         console.error('deleteEventPackage error:', error)
         return { error: 'Failed to delete package' }
     }
-    revalidateTag('event-packages')
+    revalidateTag('event-packages', 'max')
     return { success: true }
 }
 
@@ -178,7 +178,7 @@ export async function copyEventPackage(id) {
         return { error: 'Failed to clone package' }
     }
     
-    revalidateTag('event-packages')
+    revalidateTag('event-packages', 'max')
     return { success: true, data: data[0] }
 }
 
@@ -199,7 +199,7 @@ export async function applyPackageToTarget(newEvents) {
         console.error('applyPackageToTarget Database error:', error)
         return { error: `Failed to apply package: ${error.message}` }
     }
-    revalidateTag('calendar-events')
+    revalidateTag('calendar-events', 'max')
     return { success: true }
 }
 
@@ -218,7 +218,7 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
     }
     
     // イベント削除されたためカレンダー関連のキャッシュを無効化
-    revalidateTag('calendar-events')
+    revalidateTag('calendar-events', 'max')
     return { success: true }
 }
 
@@ -239,7 +239,7 @@ export async function createSingleEvent(eventData) {
         console.error('createSingleEvent error:', error)
         return { error: 'Failed to create event' }
     }
-    revalidateTag('calendar-events')
+    revalidateTag('calendar-events', 'max')
     return { success: true, data: data[0] }
 }
 
@@ -259,7 +259,7 @@ export async function updateSingleEvent(id, eventData) {
         console.error('updateSingleEvent error:', error)
         return { error: 'Failed to update event' }
     }
-    revalidateTag('calendar-events')
+    revalidateTag('calendar-events', 'max')
     return { success: true, data: data[0] }
 }
 
@@ -270,6 +270,6 @@ export async function deleteSingleEvent(id) {
         console.error('deleteSingleEvent error:', error)
         return { error: 'Failed to delete event' }
     }
-    revalidateTag('calendar-events')
+    revalidateTag('calendar-events', 'max')
     return { success: true }
 }

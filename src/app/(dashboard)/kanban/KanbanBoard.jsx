@@ -316,11 +316,17 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         let newIndex
         if (overInfo) {
             const targetIdx = colCards.findIndex(c => c.id === overInfo.id)
-            newIndex = overInfo.above ? targetIdx : targetIdx + 1
+            if (targetIdx === -1) {
+                newIndex = colCards.length
+            } else {
+                newIndex = overInfo.above ? targetIdx : targetIdx + 1
+            }
         } else {
             // Dropped on empty area
             newIndex = colCards.length
         }
+
+        console.log(`[DEBUG] Moving card ${card.id} to column ${targetColumnId} at index ${newIndex}`)
 
         // Store original cards for rollback
         const originalCards = [...cards]
@@ -329,19 +335,27 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         setCards(prev => {
             const filtered = prev.filter(c => c.id !== card.id)
             const updatedCard = { ...card, column_id: targetColumnId, position: newIndex }
-            return [...filtered, updatedCard].sort((a, b) => {
+            const result = [...filtered, updatedCard].sort((a, b) => {
                 if (a.column_id !== b.column_id) return 0
                 return a.position - b.position
             })
+            return result
         })
 
         // Persist
-        const { success, error } = await updateKanbanCardPosition(card.id, targetColumnId, newIndex)
-        
-        if (!success) {
-            console.error('Failed to save card position:', error)
-            alert('保存に失敗しました。元の位置に戻します。')
+        try {
+            const { success, error } = await updateKanbanCardPosition(card.id, targetColumnId, newIndex)
+            
+            if (!success) {
+                throw new Error(error || 'Unknown server error')
+            }
+        } catch (err) {
+            console.error('Failed to save card position:', err)
+            setError(`移動の保存に失敗しました: ${err.message}`)
             setCards(originalCards)
+            
+            // Auto-clear error after 5 seconds
+            setTimeout(() => setError(null), 5000)
         }
 
         dragCard.current = null

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache, revalidateTag } from 'next/cache'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
@@ -143,7 +143,7 @@ export async function cleanupDuplicateClasses() {
     
     if (delError) return { error: delError.message }
     
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     return { success: true, deletedCount: idsToDelete.length }
 }
 
@@ -164,6 +164,6 @@ export async function deleteOldAcademicYearData(year) {
         return { error: delError.message }
     }
 
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     return { success: true, count: deletedClasses.length }
 }
