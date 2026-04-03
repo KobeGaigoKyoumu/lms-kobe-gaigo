@@ -110,7 +110,7 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                             .from('messages')
                             .select('*', { count: 'exact', head: true })
                             .eq('receiver_id', userId)
-                            .eq('read', false)
+                            .eq('is_read', false)
 
                         data = {
                             hasNewAnnouncement: false, // Will be fetched on dashboard

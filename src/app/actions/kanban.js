@@ -3,6 +3,8 @@
 import { createAdminClient } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
 
+// ===== Fetching Functions =====
+
 export async function getKanbanColumns() {
   const supabase = createAdminClient()
   const { data, error } = await supabase
@@ -10,113 +12,171 @@ export async function getKanbanColumns() {
     .select("*")
     .order("order_index")
   
-  if (error) {
-    console.error("Error fetching kanban columns:", error)
-    return []
-  }
-  return data
+  return { data: data || [], error: error?.message }
 }
 
 export async function getKanbanCards(userId) {
   const supabase = createAdminClient()
   
-  // JOIN with profiles to get student name
-  const { data, error } = await supabase
+  let query = supabase
     .from("kanban_cards")
     .select(`
       *,
       profiles:user_id(full_name)
     `)
-    .eq("user_id", userId)
     .order("position")
   
-  if (error) {
-    console.error("Error fetching kanban cards:", error)
-    return []
+  if (userId) {
+    query = query.eq("user_id", userId)
   }
+  
+  const { data, error } = await query
+  
+  if (error) return { data: [], error: error.message }
 
-  // Flatten student name
-  return data.map(card => ({
+  const formattedData = data.map(card => ({
     ...card,
     student_name: card.profiles?.full_name || "Unknown"
   }))
+
+  return { data: formattedData, error: null }
 }
 
-export async function createKanbanCard(cardData) {
+export async function getKanbanLabels() {
   const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_labels")
+    .select("*")
+    .order("id")
   
-  // Get max position in the target column
-  const { data: existingCards } = await supabase
-    .from("kanban_cards")
-    .select("position")
-    .eq("user_id", cardData.user_id)
-    .eq("column_id", cardData.column_id)
-    .order("position", { ascending: false })
-    .limit(1)
-  
-  const nextPosition = existingCards && existingCards.length > 0 
-    ? existingCards[0].position + 1 
-    : 0
+  return { data: data || [], error: error?.message }
+}
 
+export async function getAllKanbanReminders() {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_reminders")
+    .select("*")
+  
+  return { data: data || [], error: error?.message }
+}
+
+export async function getKanbanReminders(cardId) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_reminders")
+    .select("*")
+    .eq("card_id", cardId)
+  
+  return { data: data || [], error: error?.message }
+}
+
+// ===== Column CRUD =====
+
+export async function addKanbanColumn(title, position, userId) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_columns")
+    .insert({ title, order_index: position, user_id: userId })
+    .select()
+    .single()
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { data, error: error?.message }
+}
+
+export async function updateKanbanColumnTitle(colId, title) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_columns")
+    .update({ title })
+    .eq("id", colId)
+    .select()
+    .single()
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, data, error: error?.message }
+}
+
+export async function deleteKanbanColumn(colId) {
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from("kanban_columns")
+    .delete()
+    .eq("id", colId)
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, error: error?.message }
+}
+
+export async function updateKanbanColumnPosition(colId, newPosition, userId) {
+  const supabase = createAdminClient()
+  // Simplified position update: just update the one or handle full reordering
+  const { error } = await supabase
+    .from("kanban_columns")
+    .update({ order_index: newPosition })
+    .eq("id", colId)
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, error: error?.message }
+}
+
+// ===== Card CRUD =====
+
+export async function addKanbanCard(columnId, title, position, userId) {
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("kanban_cards")
     .insert({
-      ...cardData,
-      position: nextPosition
+      column_id: columnId,
+      title,
+      position,
+      user_id: userId
     })
     .select()
     .single()
-    
-  if (error) {
-    console.error("Error creating kanban card:", error)
-    return { success: false, error: error.message }
-  }
   
-  revalidatePath("/(dashboard)/kanban", "page")
-  return { success: true, data }
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { data, error: error?.message }
+}
+
+export async function createKanbanCard(cardData) {
+  // Alias for compatibility
+  return addKanbanCard(cardData.column_id, cardData.title, cardData.position || 0, cardData.user_id)
 }
 
 export async function updateKanbanCard(cardId, updates) {
   const supabase = createAdminClient()
   
+  // Map any camelCase to snake_case if necessary
+  const dbUpdates = { ...updates }
+  
   const { data, error } = await supabase
     .from("kanban_cards")
-    .update(updates)
+    .update(dbUpdates)
     .eq("id", cardId)
     .select()
     .single()
     
-  if (error) {
-    console.error("Error updating kanban card:", error)
-    return { success: false, error: error.message }
-  }
-  
-  revalidatePath("/(dashboard)/kanban", "page")
-  return { success: true, data }
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, data, error: error?.message }
 }
 
 export async function deleteKanbanCard(cardId) {
   const supabase = createAdminClient()
-  
   const { error } = await supabase
     .from("kanban_cards")
     .delete()
     .eq("id", cardId)
     
-  if (error) {
-    console.error("Error deleting kanban card:", error)
-    return { success: false, error: error.message }
-  }
-  
-  revalidatePath("/(dashboard)/kanban", "page")
-  return { success: true }
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, error: error?.message }
 }
 
 export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
   const supabase = createAdminClient()
   
   try {
-    // 1. Get the card to find out who it belongs to
     const { data: movingCard, error: fetchError } = await supabase
       .from("kanban_cards")
       .select("user_id, column_id, position")
@@ -128,7 +188,6 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     const userId = movingCard.user_id
     const prevColumnId = movingCard.column_id
 
-    // 2. Fetch all cards for this user in the target column
     const { data: targetCards, error: targetError } = await supabase
       .from("kanban_cards")
       .select("id, position")
@@ -138,13 +197,9 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
 
     if (targetError) throw targetError
 
-    // 3. Remove the card if it's already in the target column (reordering)
     let reorderedCards = targetCards.filter(c => String(c.id) !== String(cardId))
-    
-    // 4. Insert at the new index
     reorderedCards.splice(newIndex, 0, { id: cardId })
 
-    // 5. Build the batch update operations for the target column
     const updates = reorderedCards.map((c, index) => ({
       id: c.id,
       user_id: userId,
@@ -152,14 +207,12 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
       position: index
     }))
 
-    // 6. Perform the upsert (which updates existing rows by ID)
     const { error: batchError } = await supabase
       .from("kanban_cards")
       .upsert(updates, { onConflict: 'id' })
 
     if (batchError) throw batchError
 
-    // 7. Optional: Reindex the source column if it was different
     if (String(prevColumnId) !== String(columnId)) {
       const { data: sourceCards } = await supabase
         .from("kanban_cards")
@@ -185,4 +238,64 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     console.error("Position update error:", err)
     return { success: false, error: err.message }
   }
+}
+
+// ===== Reminder CRUD =====
+
+export async function addKanbanReminder(cardId, reminderType, remindTime, remindDays, remindDate, userId) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_reminders")
+    .insert({
+      card_id: cardId,
+      reminder_type: reminderType,
+      remind_time: remindTime,
+      remind_days: remindDays,
+      remind_date: remindDate,
+      user_id: userId
+    })
+    .select()
+    .single()
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { data, error: error?.message }
+}
+
+export async function updateKanbanReminder(reminderId, updates) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_reminders")
+    .update(updates)
+    .eq("id", reminderId)
+    .select()
+    .single()
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { data, error: error?.message }
+}
+
+export async function deleteKanbanReminder(reminderId) {
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from("kanban_reminders")
+    .delete()
+    .eq("id", reminderId)
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, error: error?.message }
+}
+
+// ===== Label CRUD =====
+
+export async function updateKanbanLabelName(labelId, newName) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("kanban_labels")
+    .update({ name: newName })
+    .eq("id", labelId)
+    .select()
+    .single()
+  
+  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  return { success: !error, data, error: error?.message }
 }
