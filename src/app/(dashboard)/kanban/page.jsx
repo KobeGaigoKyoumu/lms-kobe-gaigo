@@ -11,8 +11,8 @@ export default async function KanbanPage() {
         redirect('/login')
     }
 
-    // Use 'admin' as userId to signify an admin session
-    const userId = 'admin'
+    const userId = adminMember.memberId
+    const userName = adminMember.name
 
     // Offload all data fetching to the client side.
     // KanbanBoard component will detect missing initial props and fetch directly from Supabase.
@@ -26,6 +26,7 @@ export default async function KanbanPage() {
             </header>
             <KanbanBoard 
                 userId={userId} 
+                userName={userName}
             />
         </div>
     )

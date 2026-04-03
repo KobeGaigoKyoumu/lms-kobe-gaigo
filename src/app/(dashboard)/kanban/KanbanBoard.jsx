@@ -17,7 +17,11 @@ import {
     addKanbanReminder,
     updateKanbanReminder,
     deleteKanbanReminder,
-    getKanbanReminders
+    getKanbanReminders,
+    getKanbanColumns,
+    getKanbanCards,
+    getKanbanLabels,
+    getAllKanbanReminders
 } from '@/app/actions/kanban'
 
 const CARD_COLORS = [
@@ -27,10 +31,11 @@ const CARD_COLORS = [
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
-export default function KanbanBoard({ initialColumns, initialCards, initialLabels, initialReminders, userId }) {
+export default function KanbanBoard({ initialColumns, initialCards, initialLabels, initialReminders, userId, userName }) {
     const router = useRouter()
     const supabase = createClient()
     const [isLoading, setIsLoading] = useState(!initialColumns)
+    const [error, setError] = useState(null)
     const [columns, setColumns] = useState(initialColumns || [])
     const [cards, setCards] = useState(initialCards || [])
     const [labels, setLabels] = useState(initialLabels || [])
@@ -78,30 +83,42 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     useEffect(() => {
         const fetchBoardData = async () => {
             setIsLoading(true)
-            const [
-                { data: colData },
-                { data: cardData },
-                { data: labelData },
-                { data: reminderData }
-            ] = await Promise.all([
-                supabase.from('kanban_columns').select('*').order('position', { ascending: true }),
-                supabase.from('kanban_cards').select('*').order('position', { ascending: true }),
-                supabase.from('kanban_labels').select('*').order('position', { ascending: true }),
-                supabase.from('kanban_reminders').select('id, card_id, enabled')
-            ])
+            setError(null)
+            try {
+                // Use Server Actions to fetch data as they have proper DB access (bypassing RLS issues for client-side fetching)
+                const [
+                    { data: colData, error: colError },
+                    { data: cardData, error: cardError },
+                    { data: labelData, error: labelError },
+                    { data: reminderData, error: reminderError }
+                ] = await Promise.all([
+                    getKanbanColumns(),
+                    getKanbanCards(),
+                    getKanbanLabels(),
+                    getAllKanbanReminders()
+                ])
 
-            if (colData) setColumns(colData)
-            if (cardData) setCards(cardData)
-            if (labelData) setLabels(labelData)
-            
-            if (reminderData) {
-                const map = {}
-                for (const r of reminderData) {
-                    map[r.card_id] = true
+                if (colError || cardError || labelError || reminderError) {
+                    throw new Error(colError || cardError || labelError || reminderError)
                 }
-                setReminderCardsMap(map)
+
+                if (colData) setColumns(colData)
+                if (cardData) setCards(cardData)
+                if (labelData) setLabels(labelData)
+                
+                if (reminderData) {
+                    const map = {}
+                    for (const r of reminderData) {
+                        map[r.card_id] = true
+                    }
+                    setReminderCardsMap(map)
+                }
+            } catch (err) {
+                console.error('Failed to fetch Kanban data:', err)
+                setError('データの読み込みに失敗しました。再読み込みしてください。')
+            } finally {
+                setIsLoading(false)
             }
-            setIsLoading(false)
         }
         
         if (initialColumns) {
@@ -112,7 +129,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         } else {
             fetchBoardData()
         }
-    }, [initialColumns, initialCards, initialLabels, supabase])
+    }, [initialColumns, initialCards, initialLabels])
 
     // Direct DB operations via Supabase client
 
@@ -522,7 +539,21 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     }, [initialReminders])
 
     if (isLoading) {
-        return <div style={{ padding: '20px', color: '#888' }}>読み込み中...</div>
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p>読み込み中...</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className={styles.errorContainer}>
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()} className={styles.retryBtn}>再試行</button>
+            </div>
+        )
     }
 
     return (
