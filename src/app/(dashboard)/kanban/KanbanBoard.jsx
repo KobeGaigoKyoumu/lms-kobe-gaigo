@@ -349,6 +349,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             if (!success) {
                 throw new Error(error || 'Unknown server error')
             }
+            console.log(`[DEBUG] Position saved successfully for card ${card.id}`)
         } catch (err) {
             console.error('Failed to save card position:', err)
             setError(`移動の保存に失敗しました: ${err.message}`)
