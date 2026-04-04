@@ -186,7 +186,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
   try {
     const { data: movingCard, error: fetchError } = await supabase
       .from("kanban_cards")
-      .select("user_id, column_id, position")
+      .select("*")
       .eq("id", cardId)
       .single()
       
