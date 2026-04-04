@@ -196,19 +196,11 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     const userId = movingCard.user_id === "null" ? null : movingCard.user_id
     const prevColumnId = movingCard.column_id === "null" ? null : movingCard.column_id
 
-    let targetQuery = supabase
+    const { data: targetCards, error: targetError } = await supabase
       .from("kanban_cards")
       .select("*")
       .eq("column_id", columnId)
       .order("position")
-
-    if (userId === null) {
-      targetQuery = targetQuery.is("user_id", null)
-    } else {
-      targetQuery = targetQuery.eq("user_id", userId)
-    }
-
-    const { data: targetCards, error: targetError } = await targetQuery
 
     if (targetError) throw targetError
 
@@ -217,7 +209,6 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
 
     const updates = reorderedCards.map((c, index) => ({
       ...c,
-      user_id: userId,
       column_id: columnId,
       position: index
     }))
@@ -229,24 +220,15 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     if (batchError) throw batchError
 
     if (String(prevColumnId) !== String(columnId)) {
-      let sourceQuery = supabase
+      const { data: sourceCards } = await supabase
         .from("kanban_cards")
         .select("*")
         .eq("column_id", prevColumnId)
         .order("position")
-
-      if (userId === null) {
-        sourceQuery = sourceQuery.is("user_id", null)
-      } else {
-        sourceQuery = sourceQuery.eq("user_id", userId)
-      }
-
-      const { data: sourceCards } = await sourceQuery
       
       if (sourceCards && sourceCards.length > 0) {
         const sourceUpdates = sourceCards.map((c, index) => ({
           ...c,
-          user_id: userId,
           column_id: prevColumnId,
           position: index
         }))
