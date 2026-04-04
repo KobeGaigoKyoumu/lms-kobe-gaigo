@@ -29,7 +29,7 @@ export async function getKanbanCards(userId) {
     .from("kanban_cards")
     .select(`
       *,
-      profiles:user_id(full_name)
+      admin_members:user_id(name)
     `)
     .order("position")
   
@@ -43,7 +43,7 @@ export async function getKanbanCards(userId) {
 
   const formattedData = data.map(card => ({
     ...card,
-    student_name: card.profiles?.full_name || "Unknown"
+    student_name: card.admin_members?.name || "Unknown"
   }))
 
   return { data: formattedData, error: null }
