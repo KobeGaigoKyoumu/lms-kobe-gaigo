@@ -136,7 +136,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     // ===== Column CRUD =====
     const addColumn = async () => {
         if (!newColumnTitle.trim()) return
-        const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0
+        const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.order_index || 0)) + 1 : 0
         const { data, error } = await addKanbanColumn(newColumnTitle.trim(), maxPos, userId)
         if (data) {
             setColumns(prev => [...prev, data])
@@ -326,7 +326,6 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             newIndex = colCards.length
         }
 
-        console.log(`[DEBUG] Moving card ${card.id} to column ${targetColumnId} at index ${newIndex}`)
 
         // Store original cards for rollback
         const originalCards = [...cards]
@@ -349,7 +348,6 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             if (!success) {
                 throw new Error(error || 'Unknown server error')
             }
-            console.log(`[DEBUG] Position saved successfully for card ${card.id}`)
         } catch (err) {
             console.error('Failed to save card position:', err)
             setError(`移動の保存に失敗しました: ${err.message}`)

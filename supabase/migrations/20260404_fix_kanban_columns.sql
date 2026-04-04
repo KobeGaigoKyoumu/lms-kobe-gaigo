@@ -41,6 +41,7 @@ BEGIN
     ALTER TABLE kanban_columns ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
 
     -- Update existing constraint if any
+    ALTER TABLE kanban_columns DROP CONSTRAINT IF EXISTS kanban_columns_created_by_fkey;
     ALTER TABLE kanban_columns DROP CONSTRAINT IF EXISTS kanban_columns_user_id_fkey;
     ALTER TABLE kanban_columns ADD CONSTRAINT kanban_columns_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
@@ -48,6 +49,7 @@ END $$;
 -- 2. kanban_cards fix
 DO $$ 
 BEGIN 
+    -- Rename position -> position (just dummy to match logic)
     -- Rename created_by -> user_id if it exists
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_cards' AND column_name = 'created_by') THEN
         ALTER TABLE kanban_cards RENAME COLUMN created_by TO user_id;
@@ -67,6 +69,7 @@ BEGIN
     ALTER TABLE kanban_cards ALTER COLUMN column_id TYPE UUID USING column_id::UUID;
 
     -- Update existing constraint if any
+    ALTER TABLE kanban_cards DROP CONSTRAINT IF EXISTS kanban_cards_created_by_fkey;
     ALTER TABLE kanban_cards DROP CONSTRAINT IF EXISTS kanban_cards_user_id_fkey;
     ALTER TABLE kanban_cards ADD CONSTRAINT kanban_cards_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
@@ -94,6 +97,7 @@ BEGIN
     ALTER TABLE kanban_reminders ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
 
     -- Update existing constraint if any
+    ALTER TABLE kanban_reminders DROP CONSTRAINT IF EXISTS kanban_reminders_created_by_fkey;
     ALTER TABLE kanban_reminders DROP CONSTRAINT IF EXISTS kanban_reminders_user_id_fkey;
     ALTER TABLE kanban_reminders ADD CONSTRAINT kanban_reminders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
