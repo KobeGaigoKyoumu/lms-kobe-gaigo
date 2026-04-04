@@ -197,7 +197,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
 
     const { data: targetCards, error: targetError } = await supabase
       .from("kanban_cards")
-      .select("id, position")
+      .select("*")
       .eq("user_id", userId)
       .eq("column_id", columnId)
       .order("position")
@@ -205,10 +205,10 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     if (targetError) throw targetError
 
     let reorderedCards = targetCards.filter(c => String(c.id) !== String(cardId))
-    reorderedCards.splice(newIndex, 0, { id: cardId })
+    reorderedCards.splice(newIndex, 0, movingCard) // Use movingCard instead of just {id: cardId}
 
     const updates = reorderedCards.map((c, index) => ({
-      id: c.id,
+      ...c,
       user_id: userId,
       column_id: columnId,
       position: index
@@ -223,14 +223,14 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
     if (String(prevColumnId) !== String(columnId)) {
       const { data: sourceCards } = await supabase
         .from("kanban_cards")
-        .select("id")
+        .select("*")
         .eq("user_id", userId)
         .eq("column_id", prevColumnId)
         .order("position")
       
       if (sourceCards && sourceCards.length > 0) {
         const sourceUpdates = sourceCards.map((c, index) => ({
-          id: c.id,
+          ...c,
           user_id: userId,
           column_id: prevColumnId,
           position: index
