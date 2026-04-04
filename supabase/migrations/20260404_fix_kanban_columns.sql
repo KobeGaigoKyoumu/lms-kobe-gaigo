@@ -12,7 +12,7 @@ BEGIN
         title TEXT NOT NULL,
         order_index INTEGER NOT NULL DEFAULT 0,
         color TEXT DEFAULT '#f59e0b',
-        user_id UUID REFERENCES auth.users(id),
+        user_id UUID REFERENCES public.profiles(id),
         created_at TIMESTAMPTZ DEFAULT now()
     );
 
@@ -33,8 +33,12 @@ BEGIN
 
     -- Ensure user_id exists
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_columns' AND column_name = 'user_id') THEN
-        ALTER TABLE kanban_columns ADD COLUMN user_id UUID REFERENCES auth.users(id);
+        ALTER TABLE kanban_columns ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
+    
+    -- Update existing constraint if any
+    ALTER TABLE kanban_columns DROP CONSTRAINT IF EXISTS kanban_columns_user_id_fkey;
+    ALTER TABLE kanban_columns ADD CONSTRAINT kanban_columns_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
 
 -- 2. kanban_cards fix
@@ -47,8 +51,12 @@ BEGIN
 
     -- Ensure user_id exists
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_cards' AND column_name = 'user_id') THEN
-        ALTER TABLE kanban_cards ADD COLUMN user_id UUID REFERENCES auth.users(id);
+        ALTER TABLE kanban_cards ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
+
+    -- Update existing constraint if any
+    ALTER TABLE kanban_cards DROP CONSTRAINT IF EXISTS kanban_cards_user_id_fkey;
+    ALTER TABLE kanban_cards ADD CONSTRAINT kanban_cards_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
 
 -- 3. kanban_reminders fix
@@ -58,7 +66,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_reminders' AND column_name = 'created_by') THEN
         -- If it was TEXT (as seen in some migrations), we might need to cast it
         ALTER TABLE kanban_reminders RENAME COLUMN created_by TO user_id_temp;
-        ALTER TABLE kanban_reminders ADD COLUMN user_id UUID REFERENCES auth.users(id);
+        ALTER TABLE kanban_reminders ADD COLUMN user_id UUID REFERENCES public.profiles(id);
         -- Try to migrate data if it looks like a UUID
         UPDATE kanban_reminders SET user_id = user_id_temp::uuid WHERE user_id_temp ~ '^[0-9a-fA-F-]{36}$';
         ALTER TABLE kanban_reminders DROP COLUMN user_id_temp;
@@ -66,6 +74,10 @@ BEGIN
 
     -- Ensure user_id exists
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_reminders' AND column_name = 'user_id') THEN
-        ALTER TABLE kanban_reminders ADD COLUMN user_id UUID REFERENCES auth.users(id);
+        ALTER TABLE kanban_reminders ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
+
+    -- Update existing constraint if any
+    ALTER TABLE kanban_reminders DROP CONSTRAINT IF EXISTS kanban_reminders_user_id_fkey;
+    ALTER TABLE kanban_reminders ADD CONSTRAINT kanban_reminders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
 END $$;
