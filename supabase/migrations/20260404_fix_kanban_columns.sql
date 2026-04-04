@@ -36,6 +36,10 @@ BEGIN
         ALTER TABLE kanban_columns ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
     
+    -- Clean up and set types
+    UPDATE kanban_columns SET user_id = NULL WHERE user_id::text = 'null';
+    ALTER TABLE kanban_columns ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
+
     -- Update existing constraint if any
     ALTER TABLE kanban_columns DROP CONSTRAINT IF EXISTS kanban_columns_user_id_fkey;
     ALTER TABLE kanban_columns ADD CONSTRAINT kanban_columns_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id);
@@ -53,6 +57,14 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_cards' AND column_name = 'user_id') THEN
         ALTER TABLE kanban_cards ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
+
+    -- Clean up and set types
+    UPDATE kanban_cards SET user_id = NULL WHERE user_id::text = 'null';
+    ALTER TABLE kanban_cards ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
+    
+    -- Also clean column_id just in case
+    UPDATE kanban_cards SET column_id = NULL WHERE column_id::text = 'null';
+    ALTER TABLE kanban_cards ALTER COLUMN column_id TYPE UUID USING column_id::UUID;
 
     -- Update existing constraint if any
     ALTER TABLE kanban_cards DROP CONSTRAINT IF EXISTS kanban_cards_user_id_fkey;
@@ -76,6 +88,10 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'kanban_reminders' AND column_name = 'user_id') THEN
         ALTER TABLE kanban_reminders ADD COLUMN user_id UUID REFERENCES public.profiles(id);
     END IF;
+
+    -- Clean up and set types
+    UPDATE kanban_reminders SET user_id = NULL WHERE user_id::text = 'null';
+    ALTER TABLE kanban_reminders ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
 
     -- Update existing constraint if any
     ALTER TABLE kanban_reminders DROP CONSTRAINT IF EXISTS kanban_reminders_user_id_fkey;

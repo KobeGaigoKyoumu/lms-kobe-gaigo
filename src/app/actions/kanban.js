@@ -191,9 +191,10 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
       .single()
       
     if (fetchError || !movingCard) throw new Error("Moving card not found")
-
-    const userId = movingCard.user_id
-    const prevColumnId = movingCard.column_id
+    
+    // Sanitize userId and columnId - handle string "null" which might come from bad data
+    const userId = movingCard.user_id === "null" ? null : movingCard.user_id
+    const prevColumnId = movingCard.column_id === "null" ? null : movingCard.column_id
 
     const { data: targetCards, error: targetError } = await supabase
       .from("kanban_cards")
