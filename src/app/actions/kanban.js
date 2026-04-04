@@ -88,7 +88,7 @@ export async function addKanbanColumn(title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { data, error: error?.message }
 }
 
@@ -101,7 +101,7 @@ export async function updateKanbanColumnTitle(colId, title) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, data, error: error?.message }
 }
 
@@ -112,7 +112,7 @@ export async function deleteKanbanColumn(colId) {
     .delete()
     .eq("id", colId)
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, error: error?.message }
 }
 
@@ -124,7 +124,7 @@ export async function updateKanbanColumnPosition(colId, newPosition, userId) {
     .update({ order_index: newPosition })
     .eq("id", colId)
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, error: error?.message }
 }
 
@@ -143,7 +143,7 @@ export async function addKanbanCard(columnId, title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { data, error: error?.message }
 }
 
@@ -165,7 +165,7 @@ export async function updateKanbanCard(cardId, updates) {
     .select()
     .single()
     
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, data, error: error?.message }
 }
 
@@ -176,7 +176,7 @@ export async function deleteKanbanCard(cardId) {
     .delete()
     .eq("id", cardId)
     
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, error: error?.message }
 }
 
@@ -240,7 +240,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
       }
     }
 
-    revalidatePath("/(dashboard)/kanban", "page")
+    revalidatePath("/kanban", "page")
     return { success: true }
   } catch (err) {
     console.error("Position update error:", err)
@@ -265,7 +265,7 @@ export async function addKanbanReminder(cardId, reminderType, remindTime, remind
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { data, error: error?.message }
 }
 
@@ -278,7 +278,7 @@ export async function updateKanbanReminder(reminderId, updates) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { data, error: error?.message }
 }
 
@@ -289,7 +289,7 @@ export async function deleteKanbanReminder(reminderId) {
     .delete()
     .eq("id", reminderId)
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, error: error?.message }
 }
 
@@ -304,6 +304,6 @@ export async function updateKanbanLabelName(labelId, newName) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/(dashboard)/kanban", "page")
+  if (!error) revalidatePath("/kanban", "page")
   return { success: !error, data, error: error?.message }
 }
