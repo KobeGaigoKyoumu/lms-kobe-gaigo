@@ -157,8 +157,8 @@ const getCachedAnalytics = unstable_cache(
 
         return JSON.parse(JSON.stringify(result));
     },
-    ['jlpt-analytics-v2'],
-    { revalidate: 86400, tags: ['jlpt-analytics'] }
+    ['jlpt-analytics-v3'],
+    { revalidate: 3600, tags: ['jlpt-analytics'] }
 );
 
 export async function fetchJlptAnalyticsData() {

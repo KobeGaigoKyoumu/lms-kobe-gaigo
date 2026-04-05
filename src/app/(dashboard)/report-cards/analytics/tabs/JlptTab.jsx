@@ -14,13 +14,15 @@ export default function JlptTab({
     chartFontSize = 12
 }) {
     // If initialStats is the full response object, we use it directly.
-    // If it's just the 'stats' array (legacy), we wrap it.
-    const statsObj = Array.isArray(initialStats) ? { stats: initialStats } : initialStats;
+    const statsObj = useMemo(() => {
+        if (Array.isArray(initialStats)) return { stats: initialStats }
+        return initialStats || { stats: [] }
+    }, [initialStats])
     
     const [jlptSubTab, setJlptSubTab] = useState('summary')
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
-    const [nationalStats] = useState(initialNationalStats)
-    const [sectionScoreStats] = useState(initialSectionStats)
+    const nationalStats = initialNationalStats
+    const sectionScoreStats = initialSectionStats
 
     // Standardized Color Constants
     const COLOR_PASS = '#22c55e'

@@ -38,11 +38,11 @@ async function getGradeAnalyticsData() {
 }
 
 // Cache the grade analytics data for 1 hour
-// Key: 'grade-analytics-v1'
+// Key: 'grade-analytics-v3' (Force refresh)
 const getCachedGradeAnalytics = unstable_cache(
     getGradeAnalyticsData,
-    ['grade-analytics-v1'],
-    { revalidate: 86400, tags: ['grade-analytics'] } // 24 hour cache
+    ['grade-analytics-v3'],
+    { revalidate: 3600, tags: ['grade-analytics'] } // 1 hour cache
 )
 
 export async function fetchGradeAnalytics() {

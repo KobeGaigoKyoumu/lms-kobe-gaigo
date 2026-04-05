@@ -7,7 +7,6 @@ import { MultiSelect } from '../components/MultiSelect'
 import styles from '../page.module.css'
 
 export default function GradeTab({ initialGrades = [], chartFontSize }) {
-    const [grades] = useState(initialGrades || [])
     const [selectedTerm, setSelectedTerm] = useState('')
     const [selectedClasses, setSelectedClasses] = useState([])
     const [selectedGrades, setSelectedGrades] = useState([])
@@ -23,14 +22,14 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
 
     // Derived Data with Safety Checks
     const terms = useMemo(() => {
-        const data = grades || []
+        const data = initialGrades || []
         return [...new Set(data.map(item => item.year_term))].filter(Boolean).sort().reverse()
-    }, [grades])
+    }, [initialGrades])
 
     const classes = useMemo(() => {
-        const data = grades || []
+        const data = initialGrades || []
         return [...new Set(data.map(item => item.class_name))].filter(Boolean).sort()
-    }, [grades])
+    }, [initialGrades])
 
     useEffect(() => {
         if (terms.length > 0 && !selectedTerm) {
@@ -73,7 +72,7 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
     }
 
     const filteredGrades = useMemo(() => {
-        const data = grades || []
+        const data = initialGrades || []
         return data.filter(g => {
             const targetTerm = selectedTerm || g.year_term
             const studentId = g.student_id_text || g.student_id
@@ -97,7 +96,7 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
 
             return matchTerm && matchClass && matchGrade
         })
-    }, [grades, selectedTerm, selectedClasses, selectedGrades])
+    }, [initialGrades, selectedTerm, selectedClasses, selectedGrades])
 
     const rankedGrades = useMemo(() => {
         const sortedForRank = [...filteredGrades].sort((a, b) => {
