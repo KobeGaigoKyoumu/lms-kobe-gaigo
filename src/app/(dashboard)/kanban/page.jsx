@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
+import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
 
 export default async function KanbanPage() {
     // Check for admin/teacher session (cookie-based only for better CPU performance)
@@ -14,8 +15,19 @@ export default async function KanbanPage() {
     const userId = adminMember.memberId
     const userName = adminMember.name
 
-    // Offload all data fetching to the client side.
-    // KanbanBoard component will detect missing initial props and fetch directly from Supabase.
+    // Fetch all board data in a single server-side context to maximize efficiency
+    const [
+        { data: initialColumns },
+        { data: initialCards },
+        { data: initialLabels },
+        { data: initialReminders }
+    ] = await Promise.all([
+        getKanbanColumns(),
+        getKanbanCards(),
+        getKanbanLabels(),
+        getAllKanbanReminders()
+    ])
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -27,6 +39,10 @@ export default async function KanbanPage() {
             <KanbanBoard 
                 userId={userId} 
                 userName={userName}
+                initialColumns={initialColumns || []}
+                initialCards={initialCards || []}
+                initialLabels={initialLabels || []}
+                initialReminders={initialReminders || []}
             />
         </div>
     )

@@ -31,14 +31,13 @@ const CARD_COLORS = [
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
-export default function KanbanBoard({ initialColumns, initialCards, initialLabels, initialReminders, userId, userName }) {
+export default function KanbanBoard({ initialColumns = [], initialCards = [], initialLabels = [], initialReminders = [], userId, userName }) {
     const router = useRouter()
-    const supabase = createClient()
-    const [isLoading, setIsLoading] = useState(!initialColumns)
+    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
-    const [columns, setColumns] = useState(initialColumns || [])
-    const [cards, setCards] = useState(initialCards || [])
-    const [labels, setLabels] = useState(initialLabels || [])
+    const [columns, setColumns] = useState(initialColumns)
+    const [cards, setCards] = useState(initialCards)
+    const [labels, setLabels] = useState(initialLabels)
     const [expandedCards, setExpandedCards] = useState(new Set())
 
     // Edit label
@@ -80,64 +79,28 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     // Drag state for columns
     const dragColumn = useRef(null)
 
+    // Sync local state when server props change (important for multi-user or revalidatePath)
     useEffect(() => {
-        const fetchBoardData = async () => {
-            setIsLoading(true)
-            setError(null)
-            try {
-                // Use Server Actions to fetch data as they have proper DB access (bypassing RLS issues for client-side fetching)
-                const [
-                    { data: colData, error: colError },
-                    { data: cardData, error: cardError },
-                    { data: labelData, error: labelError },
-                    { data: reminderData, error: reminderError }
-                ] = await Promise.all([
-                    getKanbanColumns(),
-                    getKanbanCards(),
-                    getKanbanLabels(),
-                    getAllKanbanReminders()
-                ])
-
-                if (colError) throw new Error("カラム取得に失敗: " + colError)
-                if (cardError) throw new Error("カード取得に失敗: " + cardError)
-                if (labelError) throw new Error("ラベル取得に失敗: " + labelError)
-                if (reminderError) throw new Error("通知取得に失敗: " + reminderError)
-
-                if (colData) setColumns(colData)
-                if (cardData) setCards(cardData)
-                if (labelData) setLabels(labelData)
-                
-                if (reminderData) {
-                    const map = {}
-                    for (const r of reminderData) {
-                        map[r.card_id] = true
-                    }
-                    setReminderCardsMap(map)
-                }
-            } catch (err) {
-                console.error('Failed to fetch Kanban data:', err)
-                setError(`データの読み込みに失敗しました (${err.message})。再読み込みしてください。`)
-            } finally {
-                setIsLoading(false)
+        setColumns(initialColumns || [])
+        setCards(initialCards || [])
+        setLabels(initialLabels || [])
+        
+        const map = {}
+        if (initialReminders) {
+            for (const r of initialReminders) {
+                map[r.card_id] = true
             }
         }
-        
-        if (initialColumns) {
-            setColumns(initialColumns)
-            setCards(initialCards || [])
-            setLabels(initialLabels || [])
-            setIsLoading(false)
-        } else {
-            fetchBoardData()
-        }
-    }, [initialColumns, initialCards, initialLabels])
+        setReminderCardsMap(map)
+    }, [initialColumns, initialCards, initialLabels, initialReminders])
 
     // Direct DB operations via Supabase client
 
     // ===== Column CRUD =====
     const addColumn = async () => {
         if (!newColumnTitle.trim()) return
-        const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.order_index || 0)) + 1 : 0
+        const DEFAULT_STEP = 1000
+        const maxPos = columns.length > 0 ? Math.max(...columns.map(c => c.order_index || 0)) + DEFAULT_STEP : DEFAULT_STEP
         const { data, error } = await addKanbanColumn(newColumnTitle.trim(), maxPos, userId)
         if (data) {
             setColumns(prev => [...prev, data])
@@ -180,7 +143,8 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
     const addCard = async (columnId) => {
         if (!newCardTitle.trim()) return
         const colCards = cards.filter(c => c.column_id === columnId)
-        const maxPos = colCards.length > 0 ? Math.max(...colCards.map(c => c.position)) + 1 : 0
+        const DEFAULT_STEP = 1000
+        const maxPos = colCards.length > 0 ? Math.max(...colCards.map(c => c.position)) + DEFAULT_STEP : DEFAULT_STEP
         const { data, error } = await addKanbanCard(columnId, newCardTitle.trim(), maxPos, userId)
         if (data) {
             setCards(prev => [...prev, data])
@@ -554,15 +518,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         }
     }
 
-    useEffect(() => {
-        const map = {}
-        if (initialReminders) {
-            for (const r of initialReminders) {
-                map[r.card_id] = true
-            }
-            setReminderCardsMap(map)
-        }
-    }, [initialReminders])
+    // (Consolidated into the top sync useEffect)
 
     if (isLoading) {
         return (
