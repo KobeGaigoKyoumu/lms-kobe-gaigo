@@ -41,20 +41,18 @@ async function getGradeAnalyticsData() {
 // Cache the grade analytics data for 1 hour
 // Key: 'grade-analytics-v3' (Force refresh)
 const getCachedGradeAnalytics = unstable_cache(
-    getGradeAnalyticsData,
+    getGradeAnalyticsDataInternal,
     ['grade-analytics-v3'],
     { tags: ['grade-records', 'grade-analytics'] }
 )
 
-export async function fetchGradeAnalytics() {
-    // 1. Verify Auth (Security Check)
-    const session = await getAdminMemberSession()
-
-    if (!session) {
-        console.error('Unauthorized access to Grade Analytics')
-        return { error: 'Unauthorized' }
-    }
-
+/**
+ * Internal logic for Grade Analytics, can be called from Server Components safely.
+ */
+export async function getGradeAnalyticsData(session) {
+    if (!session) return { error: 'Unauthorized' }
+    
+    console.log('getGradeAnalyticsData: Starting fetch...')
     const result = await getCachedGradeAnalytics()
 
     if (result && !result.error && result.data) {
@@ -67,4 +65,9 @@ export async function fetchGradeAnalytics() {
     }
 
     return result || { data: [], error: 'No data returned' }
+}
+
+export async function fetchGradeAnalytics() {
+    const session = await getAdminMemberSession()
+    return getGradeAnalyticsData(session)
 }

@@ -1,6 +1,6 @@
 import AnalyticsDashboard from './AnalyticsDashboard'
-import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
-import { fetchGradeAnalytics } from '@/app/actions/gradeAnalytics'
+import { getJlptAnalyticsData } from '@/app/actions/jlpt'
+import { getGradeAnalyticsData } from '@/app/actions/gradeAnalytics'
 import careerStatsData from '@/data/career_stats_v2.json'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { redirect } from 'next/navigation'
@@ -8,6 +8,33 @@ import { redirect } from 'next/navigation'
 export const metadata = {
     title: '成績・進路分析 | LMS',
     description: '学生の学力推移と進路実績の多角的な分析ダッシュボード',
+}
+
+/**
+ * Internal logic for JLPT Analytics, can be called from Server Components safely.
+ */
+export async function getJlptAnalyticsData(session) {
+    if (!session) return { error: 'Unauthorized' }
+
+    console.log('getJlptAnalyticsData: Fetching Data...');
+    const result = await getCachedAnalytics();
+
+    // Proactively push to Cloudflare KV for the frontend to use if not error
+    if (result && !result.error) {
+        try {
+            const { pushCloudflareSnapshot } = await import('./cloudflare');
+            await pushCloudflareSnapshot('jlpt', result);
+        } catch (e) {
+            console.error('Proactive snapshot push failed:', e);
+        }
+    }
+
+    return result;
+}
+
+export async function fetchJlptAnalyticsData() {
+    const session = await getAdminMemberSession()
+    return getJlptAnalyticsData(session)
 }
 
 export default async function AnalyticsPage() {
@@ -19,10 +46,10 @@ export default async function AnalyticsPage() {
 
     console.log('AnalyticsPage: Fetching components for admin:', adminMember.name)
 
-    // 2. Parallel fetching with individual error handling to prevent page crash
+    // 2. Direct internal calls (avoids Server Action context issues)
     const fetchResults = await Promise.allSettled([
-        fetchGradeAnalytics(),
-        fetchJlptAnalyticsData()
+        getGradeAnalyticsData(adminMember),
+        getJlptAnalyticsData(adminMember)
     ])
 
     const gradeResult = fetchResults[0].status === 'fulfilled' ? fetchResults[0].value : { error: 'Grade fetch failed' }

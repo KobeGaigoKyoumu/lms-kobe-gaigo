@@ -76,15 +76,23 @@ export async function getAdminMemberSession() {
     try {
         const cookieStore = await cookies()
         const cookie = cookieStore.get(COOKIE_NAME)
-        if (!cookie || !cookie.value) return null
+        if (!cookie || !cookie.value) {
+            console.warn('getAdminMemberSession: No session cookie found')
+            return null
+        }
 
         try {
-            // Use a more robust decoding method
             const json = Buffer.from(cookie.value, 'base64').toString('utf8')
-            if (!json) return null
+            if (!json) {
+                console.warn('getAdminMemberSession: Empty session JSON during decode')
+                return null
+            }
             
             const data = JSON.parse(json)
-            if (!data || typeof data !== 'object') return null
+            if (!data || typeof data !== 'object') {
+                console.warn('getAdminMemberSession: Invalid session data format')
+                return null
+            }
 
             return {
                 memberId: data.memberId || null,
@@ -92,7 +100,7 @@ export async function getAdminMemberSession() {
                 role: data.role || 'teacher'
             }
         } catch (innerError) {
-            console.error('Admin Member Session Decode Error:', innerError)
+            console.error('getAdminMemberSession Decode Error:', innerError)
             return null
         }
     } catch (e) {
