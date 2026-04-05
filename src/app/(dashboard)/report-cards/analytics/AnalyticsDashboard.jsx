@@ -92,7 +92,7 @@ export default function AnalyticsDashboard({
             <main className={styles.mainContent}>
                 {activeTab === 'grade' && (
                     <GradeTab 
-                        initialData={initialGradeData} 
+                        initialGrades={initialGradeData} 
                         chartFontSize={chartFontSize} 
                     />
                 )}

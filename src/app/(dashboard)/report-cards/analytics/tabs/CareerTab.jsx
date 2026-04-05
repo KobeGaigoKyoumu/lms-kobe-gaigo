@@ -39,9 +39,12 @@ export default function CareerTab({ careerStats = null }) {
                         value={selectedYear} 
                         onChange={(e) => setSelectedYear(e.target.value)}
                     >
-                        {Object.keys(careerStats).map(year => (
-                            <option key={year} value={year}>{year}年度</option>
-                        ))}
+                        {Object.keys(careerStats)
+                            .filter(key => !isNaN(parseInt(key)) && key.length === 4)
+                            .sort((a, b) => b.localeCompare(a))
+                            .map(year => (
+                                <option key={year} value={year}>{year}年度</option>
+                            ))}
                     </select>
                 </div>
             </div>

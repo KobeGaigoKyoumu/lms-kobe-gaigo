@@ -22,7 +22,7 @@ export default async function AnalyticsPage() {
     return (
         <AnalyticsDashboard 
             initialGradeData={gradeResult?.data || []}
-            initialJlptData={jlptResult?.stats || {}}
+            initialJlptData={jlptResult || {}}
             initialNationalStats={nationalStats}
             initialSectionStats={jlptResult?.sectionScores || null}
             initialCareerStats={careerStatsData}

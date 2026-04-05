@@ -13,6 +13,10 @@ export default function JlptTab({
     sectionScoreStats: initialSectionStats = null,
     chartFontSize = 12
 }) {
+    // If initialStats is the full response object, we use it directly.
+    // If it's just the 'stats' array (legacy), we wrap it.
+    const statsObj = Array.isArray(initialStats) ? { stats: initialStats } : initialStats;
+    
     const [jlptSubTab, setJlptSubTab] = useState('summary')
     const [selectedJlptClass, setSelectedJlptClass] = useState('')
     const [nationalStats] = useState(initialNationalStats)
@@ -37,15 +41,15 @@ export default function JlptTab({
     }
 
     const classSummaryList = useMemo(() => {
-        if (!initialStats?.studentStats) return [];
-        return [...initialStats.studentStats]
+        if (!statsObj?.studentStats) return [];
+        return [...statsObj.studentStats]
             .sort((a, b) => parseFloat(b.n3PlusRate || 0) - parseFloat(a.n3PlusRate || 0));
-    }, [initialStats])
+    }, [statsObj])
 
     const currentClassStats = useMemo(() => {
-        if (!selectedJlptClass || !initialStats?.studentStats) return null;
-        return initialStats.studentStats.find(c => c.className === selectedJlptClass);
-    }, [selectedJlptClass, initialStats])
+        if (!selectedJlptClass || !statsObj?.studentStats) return null;
+        return statsObj.studentStats.find(c => c.className === selectedJlptClass);
+    }, [selectedJlptClass, statsObj])
 
     return (
         <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
@@ -59,7 +63,7 @@ export default function JlptTab({
             {jlptSubTab === 'summary' && (
                 <div className={styles.tabContent}>
                     <div className={styles.statsGrid}>
-                        {(initialStats?.levelStats || []).map(stat => (
+                        {(statsObj?.levelStats || []).map(stat => (
                             <div className={styles.statCard} key={stat.level}>
                                 <span className={`${styles.badge} ${styles[`badge${stat.level}`]}`}>{stat.level}</span>
                                 <div className={styles.statValueRow}>
@@ -76,9 +80,9 @@ export default function JlptTab({
                             <div className={styles.chartContainer}>
                                 <Bar
                                     data={{
-                                        labels: (initialStats?.levelStats || []).map(s => s.level),
+                                        labels: (statsObj?.levelStats || []).map(s => s.level),
                                         datasets: [{
-                                            data: (initialStats?.levelStats || []).map(s => s.passRate),
+                                            data: (statsObj?.levelStats || []).map(s => s.passRate),
                                             backgroundColor: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#3b82f6'],
                                         }]
                                     }}
@@ -91,10 +95,10 @@ export default function JlptTab({
                             <div className={styles.chartContainer}>
                                 <Line
                                     data={{
-                                        labels: (initialStats?.yearlyTrend || []).map(d => `${d.year}年度`),
+                                        labels: (statsObj?.yearlyTrend || []).map(d => `${d.year}年度`),
                                         datasets: [{
                                             label: '合格率',
-                                            data: (initialStats?.yearlyTrend || []).map(d => d.passRate),
+                                            data: (statsObj?.yearlyTrend || []).map(d => d.passRate),
                                             borderColor: '#3b82f6',
                                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                             fill: true,
@@ -109,7 +113,7 @@ export default function JlptTab({
 
                     <h3 className={styles.sectionTitle}>試験回別詳細</h3>
                     <div className={styles.sessionsList}>
-                        {(initialStats?.sessionStats || []).map(session => (
+                        {(statsObj?.sessionStats || []).map(session => (
                             <JlptSessionRow key={session.session} sessionData={session} />
                         ))}
                     </div>
@@ -217,7 +221,7 @@ export default function JlptTab({
                                             data={{
                                                 labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
                                                 datasets: [
-                                                    { label: '本校', data: (initialStats?.levelStats || []).map(s => s.passRate), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+                                                    { label: '本校', data: (statsObj?.levelStats || []).map(s => s.passRate), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
                                                     { label: '全国', data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(l => nationalStats.averageRates?.japan?.[l]?.average || 0), backgroundColor: 'rgba(239, 68, 68, 0.7)' }
                                                 ]
                                             }}
