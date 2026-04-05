@@ -1,64 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import AnnouncementCard from './AnnouncementCard'
 import styles from './page.module.css'
 import Link from 'next/link'
 
-export default function AnnouncementList({ adminMember, profileRole }) {
-    const [announcements, setAnnouncements] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const supabase = createClient()
-
-    useEffect(() => {
-        const fetchAnnouncements = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('announcements')
-                    .select(`
-                        id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
-                        author:profiles!author_id (
-                            id,
-                            full_name,
-                            avatar_url
-                        ),
-                        course:courses (
-                            id,
-                            title
-                        )
-                    `)
-                    .order('is_pinned', { ascending: false })
-                    .order('created_at', { ascending: false })
-
-                if (error) throw error
-                setAnnouncements(data || [])
-            } catch (err) {
-                console.error('Error fetching announcements:', err)
-                setError(err.message)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchAnnouncements()
-    }, [supabase])
-
-    if (loading) {
-        return (
-            <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p>お知らせを読み込み中...</p>
-            </div>
-        )
+export default function AnnouncementList({ adminMember, profileRole, initialAnnouncements = [], initialError = null }) {
+    if (initialError) {
+        return <div className={styles.error}>お知らせの取得に失敗しました: {initialError}</div>
     }
 
-    if (error) {
-        return <div className={styles.error}>お知らせの取得に失敗しました: {error}</div>
-    }
-
-    if (announcements.length === 0) {
+    if (initialAnnouncements.length === 0) {
         const isTeacherOrAdmin = true // Based on current logic
         return (
             <div className={styles.empty}>
@@ -79,7 +30,7 @@ export default function AnnouncementList({ adminMember, profileRole }) {
 
     return (
         <div className={styles.list}>
-            {announcements.map(announcement => (
+            {initialAnnouncements.map(announcement => (
                 <AnnouncementCard
                     key={announcement.id}
                     announcement={announcement}

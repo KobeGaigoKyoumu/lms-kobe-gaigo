@@ -3,6 +3,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import AnnouncementList from './AnnouncementList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getAnnouncements } from '@/app/actions/announcement'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,8 +14,9 @@ export default async function AnnouncementsPage() {
         redirect('/login')
     }
 
-    const isTeacherOrAdmin = true // Admin member is always teacher or admin
+    const { data: initialAnnouncements, error } = await getAnnouncements()
     const profileRole = adminMember.role
+    const isTeacherOrAdmin = true
 
     return (
         <div className={styles.page}>
@@ -33,7 +35,12 @@ export default async function AnnouncementsPage() {
                 )}
             </header>
 
-            <AnnouncementList adminMember={adminMember} profileRole={profileRole} />
+            <AnnouncementList 
+                adminMember={adminMember} 
+                profileRole={profileRole} 
+                initialAnnouncements={initialAnnouncements}
+                initialError={error}
+            />
         </div>
     )
 }
