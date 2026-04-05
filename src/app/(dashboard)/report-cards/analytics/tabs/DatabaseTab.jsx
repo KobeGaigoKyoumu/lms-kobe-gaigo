@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import styles from '../page.module.css'
 
-export default function DatabaseTab({ studentDb }) {
+export default function DatabaseTab({ studentDb = [] }) {
     const [dbSearchQuery, setDbSearchQuery] = useState('')
     const [dbYearFilter, setDbYearFilter] = useState('')
     const [dbClassFilter, setDbClassFilter] = useState('')
@@ -17,17 +17,22 @@ export default function DatabaseTab({ studentDb }) {
     const COLOR_FAIL = '#ef4444'
 
     const dbFilterOptions = useMemo(() => {
-        const years = [...new Set(studentDb.map(s => s.enrollmentYear))].filter(Boolean).sort().reverse()
-        const classes = [...new Set(studentDb.map(s => s.class))].filter(Boolean).sort()
-        const nationalities = [...new Set(studentDb.map(s => s.nationality))].filter(Boolean).sort()
+        const data = studentDb || []
+        const years = [...new Set(data.map(s => s.enrollmentYear))].filter(Boolean).sort().reverse()
+        const classes = [...new Set(data.map(s => s.class))].filter(Boolean).sort()
+        const nationalities = [...new Set(data.map(s => s.nationality))].filter(Boolean).sort()
         const levels = ['N1', 'N2', 'N3', 'N4', 'N5']
         return { years, classes, nationalities, levels }
     }, [studentDb])
 
     const dbFilteredStudents = useMemo(() => {
-        return studentDb.filter(student => {
+        const data = studentDb || []
+        return data.filter(student => {
             const query = dbSearchQuery.toLowerCase().replace(/\s+/g, '')
-            const nameMatch = !query || student.name.toLowerCase().includes(query) || (student.studentId || '').toLowerCase().includes(query) || (student.destination || '').toLowerCase().includes(query)
+            const nameMatch = !query || 
+                (student.name || '').toLowerCase().includes(query) || 
+                (student.studentId || '').toLowerCase().includes(query) || 
+                (student.destination || '').toLowerCase().includes(query)
             const yearMatch = !dbYearFilter || student.enrollmentYear === dbYearFilter
             const classMatch = !dbClassFilter || student.class === dbClassFilter
             const nationalityMatch = !dbNationalityFilter || student.nationality === dbNationalityFilter
@@ -58,28 +63,28 @@ export default function DatabaseTab({ studentDb }) {
                     <label className={styles.filterLabel}>入学年度</label>
                     <select className={styles.filterSelect} value={dbYearFilter} onChange={(e) => setDbYearFilter(e.target.value)}>
                         <option value="">すべて</option>
-                        {dbFilterOptions.years.map(y => <option key={y} value={y}>{y}年度</option>)}
+                        {(dbFilterOptions?.years || []).map(y => <option key={y} value={y}>{y}年度</option>)}
                     </select>
                 </div>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>クラス</label>
                     <select className={styles.filterSelect} value={dbClassFilter} onChange={(e) => setDbClassFilter(e.target.value)}>
                         <option value="">すべて</option>
-                        {dbFilterOptions.classes.map(c => <option key={c} value={c}>{c}</option>)}
+                        {(dbFilterOptions?.classes || []).map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>国籍</label>
                     <select className={styles.filterSelect} value={dbNationalityFilter} onChange={(e) => setDbNationalityFilter(e.target.value)}>
                         <option value="">すべて</option>
-                        {dbFilterOptions.nationalities.map(n => <option key={n} value={n}>{n}</option>)}
+                        {(dbFilterOptions?.nationalities || []).map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                 </div>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>JLPT最高レベル</label>
                     <select className={styles.filterSelect} value={dbLevelFilter} onChange={(e) => setDbLevelFilter(e.target.value)}>
                         <option value="">すべて</option>
-                        {dbFilterOptions.levels.map(l => <option key={l} value={l}>{l}</option>)}
+                        {(dbFilterOptions?.levels || []).map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                 </div>
             </div>
@@ -103,9 +108,9 @@ export default function DatabaseTab({ studentDb }) {
                             <tr><td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>データが見つかりません</td></tr>
                         ) : (
                             dbFilteredStudents.slice((dbCurrentPage - 1) * DB_ITEMS_PER_PAGE, dbCurrentPage * DB_ITEMS_PER_PAGE).map((student, idx) => (
-                                <tr key={idx}>
+                                <tr key={student.studentId || idx}>
                                     <td>{student.studentId || '-'}</td>
-                                    <td style={{ fontWeight: 600 }}>{student.name}</td>
+                                    <td style={{ fontWeight: 600 }}>{student.name || '-'}</td>
                                     <td>{student.enrollmentYear || '-'}</td>
                                     <td>{student.class || '-'}</td>
                                     <td>{student.nationality || '-'}</td>
@@ -117,7 +122,7 @@ export default function DatabaseTab({ studentDb }) {
                                                 const s = student.levels?.[lvl]
                                                 if (!s) return null
                                                 const color = s.status === '合格' ? COLOR_PASS : COLOR_FAIL
-                                                return <span key={lvl} style={{ color, fontWeight: 'bold' }}>{lvl}: {s.score}点</span>
+                                                return <span key={lvl} style={{ color, fontWeight: 'bold' }}>{lvl}: {s.score || 0}点</span>
                                             })}
                                         </div>
                                     </td>

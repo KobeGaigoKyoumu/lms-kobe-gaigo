@@ -36,12 +36,12 @@ ChartJS.register(
 )
 
 export default function AnalyticsDashboard({ 
-    initialGradeData,
-    initialJlptData,
-    initialNationalStats,
-    initialSectionStats,
-    initialCareerStats,
-    initialStudentDb
+    initialGradeData = [],
+    initialJlptData = {},
+    initialNationalStats = null,
+    initialSectionStats = null,
+    initialCareerStats = null,
+    initialStudentDb = []
 }) {
     const [activeTab, setActiveTab] = useState('grade')
     const [chartFontSize, setChartFontSize] = useState(12)

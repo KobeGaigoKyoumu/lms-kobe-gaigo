@@ -1,153 +1,116 @@
 'use client'
 
-import { useState, useMemo, Fragment } from 'react'
-import { Bar, Line } from 'react-chartjs-2'
-import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Bar, Pie } from 'react-chartjs-2'
 import styles from '../page.module.css'
 
-const AccordionChevron = ({ rotated }) => (
-    <div style={{
-        transform: rotated ? 'rotate(180deg)' : 'rotate(0deg)',
-        transition: 'transform 0.2s ease',
-        display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-        <ChevronDown size={18} color="#9ca3af" />
-    </div>
-)
+export default function CareerTab({ careerStats = null }) {
+    const [selectedYear, setSelectedYear] = useState('2024')
 
-export default function CareerTab({ careerStats, chartFontSize }) {
-    const [careerSubTab, setCareerSubTab] = useState('overview')
-    const [expandedDestination, setExpandedDestination] = useState(null)
-    const [showLowRankings, setShowLowRankings] = useState(false)
-    const [expandedNationality, setExpandedNationality] = useState(null)
-    const [expandedSchoolId, setExpandedSchoolId] = useState(null)
-    const [careerSearchQuery, setCareerSearchQuery] = useState('')
-    const [expandedPast5YearsSchoolId, setExpandedPast5YearsSchoolId] = useState(null)
-
-    // Standardized Color Constants
-    const COLOR_PASS = '#22c55e'
-    const COLOR_FAIL = '#ef4444'
-    const COLOR_MUTED = '#9ca3af'
+    const stats = useMemo(() => {
+        if (!careerStats) return null
+        return careerStats[selectedYear] || careerStats[Object.keys(careerStats)[0]]
+    }, [careerStats, selectedYear])
 
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
-            tooltip: { titleFont: { size: chartFontSize + 1 }, bodyFont: { size: chartFontSize } }
-        },
-        scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { size: chartFontSize } } },
-            x: { grid: { display: false }, ticks: { font: { size: chartFontSize } } }
+            legend: {
+                position: 'bottom',
+                labels: { boxWidth: 12, padding: 15, font: { size: 11 } }
+            }
         }
     }
 
+    if (!careerStats || !stats) {
+        return <div className={styles.noData}>進路分析データはありません</div>
+    }
+
+    const { summary, destination_types, top_universities, top_vocational } = stats
+
     return (
-        <>
-            <div className={styles.subTabs}>
-                <button className={`${styles.subTab} ${careerSubTab === 'overview' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('overview')}>全体概要</button>
-                <button className={`${styles.subTab} ${careerSubTab === 'schools' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('schools')}>学校別詳細</button>
-                <button className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('past5years')}>過去5年詳細</button>
+        <div className={styles.tabContent} style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+            <div className={styles.filters} style={{ justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>卒業年度</label>
+                    <select 
+                        className={styles.filterSelect} 
+                        value={selectedYear} 
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                    >
+                        {Object.keys(careerStats).map(year => (
+                            <option key={year} value={year}>{year}年度</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
-            {careerSubTab === 'overview' && (
-                <div className={styles.tabContent}>
-                    <div className={styles.alertWarning}>
-                        <strong>⚠️ COVID-19の影響について：</strong><br />
-                        2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延がありました。2020年度は新入生がいなかったため、2022年度の卒業生はおらず、データの記載がありません。
-                    </div>
-
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}><span className={styles.statLabel}>総卒業生数</span><div className={styles.statValueRow}><span className={styles.statValue}>{careerStats.summary.totalGraduates}</span>名</div></div>
-                        <div className={styles.statCard}><span className={styles.statLabel}>進学率</span><div className={styles.statValueRow}><span className={styles.statValue}>{(((careerStats.categoryStats['大学'] || 0) + (careerStats.categoryStats['大学院'] || 0) + (careerStats.categoryStats['専門学校'] || 0)) / careerStats.summary.totalRecords * 100).toFixed(1)}%</span></div></div>
-                        <div className={styles.statCard}><span className={styles.statLabel}>就職率</span><div className={styles.statValueRow}><span className={styles.statValue}>{((careerStats.categoryStats['就職'] || 0) / careerStats.summary.totalRecords * 100).toFixed(1)}%</span></div></div>
-                    </div>
-
-                    <div className={styles.chartsRow}>
-                        <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>進路区分別内訳</h3>
-                            <div className={styles.chartContainer}>
-                                <Bar
-                                    data={{
-                                        labels: Object.keys(careerStats.categoryStats),
-                                        datasets: [{
-                                            data: Object.values(careerStats.categoryStats),
-                                            backgroundColor: ['#3b82f6', '#22c55e', '#f97316', '#a855f7', '#ec4899', '#6b7280', '#ef4444'],
-                                        }]
-                                    }}
-                                    options={{ ...chartOptions, indexAxis: 'y' }}
-                                />
-                            </div>
-                        </div>
+            <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>進路決定率</span>
+                    <div className={styles.statValueRow}>
+                        <span className={styles.statValue}>{summary?.placement_rate || 0}%</span>
                     </div>
                 </div>
-            )}
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>大学・大学院進学</span>
+                    <div className={styles.statValueRow}>
+                        <span className={styles.statValue}>{summary?.university_count || 0}</span>名
+                    </div>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>専門学校進学</span>
+                    <div className={styles.statValueRow}>
+                        <span className={styles.statValue}>{summary?.vocational_count || 0}</span>名
+                    </div>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>就職・その他</span>
+                    <div className={styles.statValueRow}>
+                        <span className={styles.statValue}>{summary?.others_count || 0}</span>名
+                    </div>
+                </div>
+            </div>
 
-            {careerSubTab === 'schools' && (
-                <div className={styles.tabContent}>
-                    <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>進学先名</th>
-                                    <th>進学者数</th>
-                                    <th>JLPTデータ</th>
-                                    <th>詳細</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {careerStats.topDestinations.filter(d => d.jlptStats).map((dest, idx) => {
-                                    const isExpanded = expandedSchoolId === idx;
-                                    return (
-                                        <Fragment key={idx}>
-                                            <tr onClick={() => setExpandedSchoolId(isExpanded ? null : idx)} className={styles.clickableRow}>
-                                                <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                                <td>{dest.count}名</td>
-                                                <td>{Object.keys(dest.jlptStats).join(', ')}</td>
-                                                <td><AccordionChevron rotated={isExpanded} /></td>
-                                            </tr>
-                                            {isExpanded && (
-                                                <tr>
-                                                    <td colSpan="4">
-                                                        <div style={{ padding: '1rem' }}>
-                                                            {/* Detailed table for school */}
-                                                            <p>詳細なJLPT成績データがここに表示されます。</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </Fragment>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
+            <div className={styles.chartsRow}>
+                <div className={styles.chartCard} style={{ flex: 1 }}>
+                    <h3 className={styles.chartTitle}>進路内訳</h3>
+                    <div className={styles.chartContainer} style={{ height: '300px' }}>
+                        <Pie
+                            data={{
+                                labels: (destination_types || []).map(d => d.type),
+                                datasets: [{
+                                    data: (destination_types || []).map(d => d.count),
+                                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#94a3b8']
+                                }]
+                            }}
+                            options={chartOptions}
+                        />
                     </div>
                 </div>
-            )}
-            
-            {careerSubTab === 'past5years' && (
-                <div className={styles.tabContent}>
-                    {/* Simplified past 5 years view for now */}
-                    <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>進学先名</th>
-                                    <th>5年間合計</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {careerStats.topDestinations.slice(0, 20).map((dest, idx) => (
-                                    <tr key={idx}>
-                                        <td style={{ fontWeight: 600 }}>{dest.name}</td>
-                                        <td>{dest.count}名</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+
+                <div className={styles.chartCard} style={{ flex: 2 }}>
+                    <h3 className={styles.chartTitle}>主な進学先ランク</h3>
+                    <div className={styles.chartContainer}>
+                        <Bar
+                            data={{
+                                labels: [...(top_universities || []).slice(0, 5), ...(top_vocational || []).slice(0, 5)].map(d => d.name),
+                                datasets: [{
+                                    label: '合格者数',
+                                    data: [...(top_universities || []).slice(0, 5), ...(top_vocational || []).slice(0, 5)].map(d => d.count),
+                                    backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                                }]
+                            }}
+                            options={{
+                                ...chartOptions,
+                                indexAxis: 'y',
+                                plugins: { ...chartOptions.plugins, legend: { display: false } }
+                            }}
+                        />
                     </div>
                 </div>
-            )}
-        </>
+            </div>
+        </div>
     )
 }

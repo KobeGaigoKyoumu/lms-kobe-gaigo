@@ -6,8 +6,8 @@ import { ArrowUp, ArrowDown } from 'lucide-react'
 import { MultiSelect } from '../components/MultiSelect'
 import styles from '../page.module.css'
 
-export default function GradeTab({ initialGrades, chartFontSize }) {
-    const [grades] = useState(initialGrades)
+export default function GradeTab({ initialGrades = [], chartFontSize }) {
+    const [grades] = useState(initialGrades || [])
     const [selectedTerm, setSelectedTerm] = useState('')
     const [selectedClasses, setSelectedClasses] = useState([])
     const [selectedGrades, setSelectedGrades] = useState([])
@@ -20,11 +20,17 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
     const COLOR_FAIL = '#ef4444'
     const COLOR_WARN = '#f59e0b'
     const COLOR_INFO = '#3b82f6'
-    const COLOR_MUTED = '#9ca3af'
 
-    // Derived Data
-    const terms = useMemo(() => [...new Set(grades.map(item => item.year_term))].sort().reverse(), [grades])
-    const classes = useMemo(() => [...new Set(grades.map(item => item.class_name))].sort(), [grades])
+    // Derived Data with Safety Checks
+    const terms = useMemo(() => {
+        const data = grades || []
+        return [...new Set(data.map(item => item.year_term))].filter(Boolean).sort().reverse()
+    }, [grades])
+
+    const classes = useMemo(() => {
+        const data = grades || []
+        return [...new Set(data.map(item => item.class_name))].filter(Boolean).sort()
+    }, [grades])
 
     useEffect(() => {
         if (terms.length > 0 && !selectedTerm) {
@@ -67,7 +73,8 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
     }
 
     const filteredGrades = useMemo(() => {
-        return grades.filter(g => {
+        const data = grades || []
+        return data.filter(g => {
             const targetTerm = selectedTerm || g.year_term
             const studentId = g.student_id_text || g.student_id
             let studentGradeLabel = '不明'
@@ -247,7 +254,7 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
     const isReportFirst = ['report_total', 'attendance', 'participation'].includes(sortConfig.key)
 
     return (
-        <>
+        <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
             <div className={styles.filters}>
                 <div className={styles.filterGroup}>
                     <label className={styles.filterLabel}>学期</label>
@@ -269,7 +276,7 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
 
             <div className={styles.tableCard}>
                 <h3 className={styles.chartTitle}>学生成績順位表 ({filteredGrades.length}名)</h3>
-                <div style={{ overflowX: 'auto' }}>
+                <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
@@ -302,13 +309,15 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedGrades.map((student, idx) => {
+                            {paginatedGrades.length === 0 ? (
+                                <tr><td colSpan="15" style={{ textAlign: 'center', padding: '2rem' }}>データが見つかりません</td></tr>
+                            ) : paginatedGrades.map((student, idx) => {
                                 const finalTotal = student.final_exam_data ? Object.values(student.final_exam_data).reduce((a, b) => a + (parseFloat(b) || 0), 0) : 0
                                 const finalGrade = getFinalGrade(finalTotal)
                                 const reportTotal = student.report_card_total || 0
                                 const reportGrade = getReportGrade(reportTotal)
                                 return (
-                                    <tr key={student.id}>
+                                    <tr key={student.id || idx}>
                                         <td>{student.originalRank}</td>
                                         <td>{student.student_id_text}</td>
                                         <td>{student.class_name}</td>
@@ -349,6 +358,6 @@ export default function GradeTab({ initialGrades, chartFontSize }) {
                     </div>
                 )}
             </div>
-        </>
+        </div>
     )
 }
