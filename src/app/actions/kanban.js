@@ -12,35 +12,27 @@ const createAdminClient = () => {
 
 // ===== Fetching Functions =====
 
-export async function getKanbanColumns(userId) {
-  console.log("getKanbanColumns: fetching for userId", userId);
+export async function getKanbanColumns() {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("kanban_columns")
     .select("*")
-    .eq("user_id", userId)
     .order("order_index")
   
   if (error) console.error("getKanbanColumns error:", error);
   return { data: data || [], error: error?.message }
 }
 
-export async function getKanbanCards(userId) {
+export async function getKanbanCards() {
   const supabase = createAdminClient()
   
-  let query = supabase
+  const { data, error } = await supabase
     .from("kanban_cards")
     .select(`
       *,
       admin_members:user_id(name)
     `)
     .order("position")
-  
-  if (userId) {
-    query = query.eq("user_id", userId)
-  }
-  
-  const { data, error } = await query
   
   if (error) return { data: [], error: error.message }
 
