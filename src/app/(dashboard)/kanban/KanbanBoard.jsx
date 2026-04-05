@@ -98,9 +98,10 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                     getAllKanbanReminders()
                 ])
 
-                if (colError || cardError || labelError || reminderError) {
-                    throw new Error(colError || cardError || labelError || reminderError)
-                }
+                if (colError) throw new Error("カラム取得に失敗: " + colError)
+                if (cardError) throw new Error("カード取得に失敗: " + cardError)
+                if (labelError) throw new Error("ラベル取得に失敗: " + labelError)
+                if (reminderError) throw new Error("通知取得に失敗: " + reminderError)
 
                 if (colData) setColumns(colData)
                 if (cardData) setCards(cardData)
@@ -115,7 +116,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                 }
             } catch (err) {
                 console.error('Failed to fetch Kanban data:', err)
-                setError('データの読み込みに失敗しました。再読み込みしてください。')
+                setError(`データの読み込みに失敗しました (${err.message})。再読み込みしてください。`)
             } finally {
                 setIsLoading(false)
             }

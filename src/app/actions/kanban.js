@@ -13,35 +13,52 @@ const createAdminClient = () => {
 // ===== Fetching Functions =====
 
 export async function getKanbanColumns() {
-  const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from("kanban_columns")
-    .select("*")
-    .order("order_index")
-  
-  if (error) console.error("getKanbanColumns error:", error);
-  return { data: data || [], error: error?.message }
+  try {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from("kanban_columns")
+      .select("*")
+      .order("order_index")
+    
+    if (error) {
+      console.error("getKanbanColumns DB error:", error);
+      return { data: [], error: error.message }
+    }
+    return { data: data || [], error: null }
+  } catch (e) {
+    console.error("getKanbanColumns exception:", e);
+    return { data: [], error: e.message }
+  }
 }
 
 export async function getKanbanCards() {
-  const supabase = createAdminClient()
-  
-  const { data, error } = await supabase
-    .from("kanban_cards")
-    .select(`
-      *,
-      admin_members:user_id(name)
-    `)
-    .order("position")
-  
-  if (error) return { data: [], error: error.message }
+  try {
+    const supabase = createAdminClient()
+    
+    // Attempting a safer select first to isolate if the join is causing issues
+    const { data, error } = await supabase
+      .from("kanban_cards")
+      .select(`
+        *,
+        admin_members:user_id(name)
+      `)
+      .order("position")
+    
+    if (error) {
+      console.error("getKanbanCards DB error:", error);
+      return { data: [], error: error.message }
+    }
 
-  const formattedData = data.map(card => ({
-    ...card,
-    student_name: card.admin_members?.name || "Unknown"
-  }))
+    const formattedData = (data || []).map(card => ({
+      ...card,
+      student_name: card.admin_members?.name || "Unknown"
+    }))
 
-  return { data: formattedData, error: null }
+    return { data: formattedData, error: null }
+  } catch (e) {
+    console.error("getKanbanCards exception:", e);
+    return { data: [], error: e.message }
+  }
 }
 
 export async function getKanbanLabels() {

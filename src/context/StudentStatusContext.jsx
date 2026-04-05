@@ -106,16 +106,32 @@ export function StudentStatusProvider({ children, role, userId, className: userC
                     } else {
                         // For teacher/admin, we can use a direct query to get unread count to save Vercel CPU
                         // And skip the complex dashboard stats here as they are shown on the dashboard page anyway
-                        const { count: unreadCount } = await supabase
-                            .from('messages')
-                            .select('*', { count: 'exact', head: true })
-                            .eq('receiver_id', userId)
-                            .eq('is_read', false)
+                        
+                        // Validate UUID format before querying to avoid "invalid input syntax for type uuid"
+                        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                        if (userId && uuidRegex.test(userId)) {
+                            const { count: unreadCount, error: countError } = await supabase
+                                .from('messages')
+                                .select('*', { count: 'exact', head: true })
+                                .eq('teacher_id', userId)
+                                .eq('read', false)
+                            
+                            if (countError) {
+                                console.error('Status check query error:', countError);
+                            }
 
-                        data = {
-                            hasNewAnnouncement: false, // Will be fetched on dashboard
-                            unsubmittedAssignmentCount: 0,
-                            unreadMessageCount: unreadCount || 0
+                            data = {
+                                hasNewAnnouncement: false, // Will be fetched on dashboard
+                                unsubmittedAssignmentCount: 0,
+                                unreadMessageCount: unreadCount || 0
+                            }
+                        } else {
+                            // Non-UUID user (e.g. "member" or "undefined")
+                            data = {
+                                hasNewAnnouncement: false,
+                                unsubmittedAssignmentCount: 0,
+                                unreadMessageCount: 0
+                            }
                         }
                     }
 
