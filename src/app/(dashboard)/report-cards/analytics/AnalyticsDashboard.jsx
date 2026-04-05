@@ -98,7 +98,7 @@ export default function AnalyticsDashboard({
                 )}
                 {activeTab === 'jlpt' && (
                     <JlptTab 
-                        initialStats={initialJlptData?.stats || {}}
+                        initialStats={initialJlptData?.enhanced || { stats: initialJlptData?.stats || [] }}
                         nationalStats={initialNationalStats}
                         sectionScoreStats={initialSectionStats}
                         chartFontSize={chartFontSize} 

@@ -102,6 +102,7 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
                         <Link
                             key={item.href}
                             href={item.href}
+                            prefetch={false}
                             className={`${styles.navItem} ${pathname === item.href ? styles.active : ''} ${showShimmer ? styles.shineEffect : ''}`}
                         >
                             <div className={styles.iconContainer}>
