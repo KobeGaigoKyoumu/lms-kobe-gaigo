@@ -9,7 +9,8 @@ export default function CareerTab({ careerStats = null }) {
 
     const stats = useMemo(() => {
         if (!careerStats) return null
-        return careerStats[selectedYear] || careerStats[Object.keys(careerStats)[0]]
+        const years = Object.keys(careerStats).filter(key => /^\d{4}$/.test(key))
+        return careerStats[selectedYear] || careerStats[years[0]] || null
     }, [careerStats, selectedYear])
 
     const chartOptions = {

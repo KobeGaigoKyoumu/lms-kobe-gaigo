@@ -37,11 +37,13 @@ export async function GET() {
             process.env.NEXT_PUBLIC_SUPABASE_URL,
             process.env.SUPABASE_SERVICE_ROLE_KEY
         )
-        const { count, error } = await supabase
+        const { data: sampleData, count, error } = await supabase
             .from('grade_records')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
+            .limit(1)
         
         debug.database.grade_records_count = count
+        debug.database.grade_records_sample = sampleData?.[0]
         debug.database.grade_records_error = error
     } catch (e) {
         debug.database.error = e.message
