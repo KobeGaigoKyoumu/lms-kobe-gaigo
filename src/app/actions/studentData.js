@@ -47,7 +47,7 @@ export const getCachedStudentList = unstable_cache(
         return data
     },
     ['student-list-v1'],
-    { revalidate: 86400, tags: ['students'] }
+    { tags: ['students'] }
 )
 
 // Fetch Full Student Detail (On Demand)

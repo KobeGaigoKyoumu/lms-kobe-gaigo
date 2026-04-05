@@ -1,7 +1,7 @@
 "use server"
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-import { revalidatePath } from "next/cache"
+import { revalidateTag, unstable_cache } from "next/cache"
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
@@ -12,73 +12,87 @@ const createAdminClient = () => {
 
 // ===== Fetching Functions =====
 
-export async function getKanbanColumns() {
-  try {
+export const getKanbanColumns = unstable_cache(
+  async () => {
+    try {
+      const supabase = createAdminClient()
+      const { data, error } = await supabase
+        .from("kanban_columns")
+        .select("*")
+        .order("order_index")
+      
+      if (error) {
+        console.error("getKanbanColumns DB error:", error);
+        return { data: [], error: error.message }
+      }
+      return { data: data || [], error: null }
+    } catch (e) {
+      console.error("getKanbanColumns exception:", e);
+      return { data: [], error: e.message }
+    }
+  },
+  ['kanban-columns'],
+  { tags: ['kanban'] }
+)
+
+export const getKanbanCards = unstable_cache(
+  async () => {
+    try {
+      const supabase = createAdminClient()
+      const { data, error } = await supabase
+        .from("kanban_cards")
+        .select(`
+          *,
+          admin_members:user_id(name)
+        `)
+        .order("position")
+      
+      if (error) {
+        console.error("getKanbanCards DB error:", error);
+        return { data: [], error: error.message }
+      }
+
+      const formattedData = (data || []).map(card => ({
+        ...card,
+        student_name: card.admin_members?.name || "Unknown"
+      }))
+
+      return { data: formattedData, error: null }
+    } catch (e) {
+      console.error("getKanbanCards exception:", e);
+      return { data: [], error: e.message }
+    }
+  },
+  ['kanban-cards'],
+  { tags: ['kanban'] }
+)
+
+export const getKanbanLabels = unstable_cache(
+  async () => {
     const supabase = createAdminClient()
     const { data, error } = await supabase
-      .from("kanban_columns")
+      .from("kanban_labels")
       .select("*")
-      .order("order_index")
+      .order("id")
     
-    if (error) {
-      console.error("getKanbanColumns DB error:", error);
-      return { data: [], error: error.message }
-    }
-    return { data: data || [], error: null }
-  } catch (e) {
-    console.error("getKanbanColumns exception:", e);
-    return { data: [], error: e.message }
-  }
-}
+    return { data: data || [], error: error?.message }
+  },
+  ['kanban-labels'],
+  { tags: ['kanban'] }
+)
 
-export async function getKanbanCards() {
-  try {
+export const getAllKanbanReminders = unstable_cache(
+  async () => {
     const supabase = createAdminClient()
-    
-    // Attempting a safer select first to isolate if the join is causing issues
     const { data, error } = await supabase
-      .from("kanban_cards")
-      .select(`
-        *,
-        admin_members:user_id(name)
-      `)
-      .order("position")
+      .from("kanban_reminders")
+      .select("*")
     
-    if (error) {
-      console.error("getKanbanCards DB error:", error);
-      return { data: [], error: error.message }
-    }
-
-    const formattedData = (data || []).map(card => ({
-      ...card,
-      student_name: card.admin_members?.name || "Unknown"
-    }))
-
-    return { data: formattedData, error: null }
-  } catch (e) {
-    console.error("getKanbanCards exception:", e);
-    return { data: [], error: e.message }
-  }
-}
-
-export async function getKanbanLabels() {
-  const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from("kanban_labels")
-    .select("*")
-    .order("id")
-  
-  return { data: data || [], error: error?.message }
-}
-
-export async function getAllKanbanReminders() {
-  const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from("kanban_reminders")
-    .select("*")
-  
-  return { data: data || [], error: error?.message }
-}
+    return { data: data || [], error: error?.message }
+  },
+  ['kanban-reminders-all'],
+  { tags: ['kanban'] }
+)
 
 export async function getKanbanReminders(cardId) {
   const supabase = createAdminClient()
@@ -100,7 +114,7 @@ export async function addKanbanColumn(title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { data, error: error?.message }
 }
 
@@ -113,7 +127,7 @@ export async function updateKanbanColumnTitle(colId, title) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, data, error: error?.message }
 }
 
@@ -124,7 +138,7 @@ export async function deleteKanbanColumn(colId) {
     .delete()
     .eq("id", colId)
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, error: error?.message }
 }
 
@@ -136,7 +150,7 @@ export async function updateKanbanColumnPosition(colId, newPosition, userId) {
     .update({ order_index: newPosition })
     .eq("id", colId)
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, error: error?.message }
 }
 
@@ -155,7 +169,7 @@ export async function addKanbanCard(columnId, title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { data, error: error?.message }
 }
 
@@ -177,7 +191,7 @@ export async function updateKanbanCard(cardId, updates) {
     .select()
     .single()
     
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, data, error: error?.message }
 }
 
@@ -188,7 +202,7 @@ export async function deleteKanbanCard(cardId) {
     .delete()
     .eq("id", cardId)
     
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, error: error?.message }
 }
 
@@ -212,7 +226,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newPosition) {
 
     if (error) throw error
 
-    revalidatePath("/kanban", "page")
+    revalidateTag("kanban")
     return { success: true, data }
   } catch (err) {
     console.error("updateKanbanCardPosition error:", err)
@@ -237,7 +251,7 @@ export async function addKanbanReminder(cardId, reminderType, remindTime, remind
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { data, error: error?.message }
 }
 
@@ -250,7 +264,7 @@ export async function updateKanbanReminder(reminderId, updates) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { data, error: error?.message }
 }
 
@@ -261,7 +275,7 @@ export async function deleteKanbanReminder(reminderId) {
     .delete()
     .eq("id", reminderId)
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, error: error?.message }
 }
 
@@ -276,6 +290,6 @@ export async function updateKanbanLabelName(labelId, newName) {
     .select()
     .single()
   
-  if (!error) revalidatePath("/kanban", "page")
+  if (!error) revalidateTag("kanban")
   return { success: !error, data, error: error?.message }
 }

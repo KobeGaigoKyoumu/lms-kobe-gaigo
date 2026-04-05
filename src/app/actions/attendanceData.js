@@ -81,7 +81,7 @@ export const getAvailableAttendanceFiles = unstable_cache(
         }
     },
     ['attendance-files-v8'],
-    { revalidate: 86400, tags: ['attendance-files'] }
+    { tags: ['attendance-files'] }
 )
 
 export const getSchoolAttendanceStats = unstable_cache(
@@ -168,7 +168,7 @@ export const getSchoolAttendanceStats = unstable_cache(
         return result;
     },
     ['attendance-school-stats-v8'],
-    { revalidate: 86400, tags: ['attendance-stats'] }
+    { tags: ['attendance-stats'] }
 )
 
 export const getClassAttendanceStats = unstable_cache(
@@ -287,7 +287,7 @@ export const getClassAttendanceStats = unstable_cache(
         return result;
     },
     ['attendance-class-stats-v8'],
-    { revalidate: 86400, tags: ['attendance-stats'] }
+    { tags: ['attendance-stats'] }
 )
 
 // Internal cached fetch (returns ALL data)
@@ -363,7 +363,7 @@ const _getCachedStudentListAttendance = unstable_cache(
         return { students: processedStudents, year, month, isCumulative }
     },
     ['attendance-student-list-v8'],
-    { revalidate: 86400, tags: ['attendance-stats'] }
+    { tags: ['attendance-stats'] }
 )
 
 // Public: Paginated & Filtered Fetch (Server-Side Processing)
@@ -501,5 +501,5 @@ export const getStudentAttendanceHistory = unstable_cache(
         }
     },
     ['attendance-student-history-v8'],
-    { revalidate: 86400, tags: ['attendance-stats'] }
+    { tags: ['attendance-stats'] }
 )

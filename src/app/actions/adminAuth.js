@@ -4,7 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { unstable_cache, revalidateTag } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 
 const COOKIE_NAME = 'kobe_admin_member'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
@@ -121,7 +121,7 @@ export async function getAdminMembers() {
 }
 
 // Fetch member names only (for login dropdown)
-// Cache the member names list for 1 hour
+// Cache the member names list
 const getCachedMemberNames = unstable_cache(
     async () => {
         try {
@@ -150,7 +150,7 @@ const getCachedMemberNames = unstable_cache(
         }
     },
     ['admin-member-names-v2'],
-    { revalidate: 3600, tags: ['admin_members'] }
+    { tags: ['admin_members'] }
 )
 
 // Fetch member names only (for login dropdown)

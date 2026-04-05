@@ -38,7 +38,7 @@ export const fetchGradeFilters = unstable_cache(
         return { yearTerms: terms, classes: cls }
     },
     ['grade-filters-v1'],
-    { revalidate: 86400, tags: ['grade-records'] }
+    { tags: ['grade-records'] }
 )
 
 // 2. Fetch Records for a Term - Cached 1h
@@ -79,23 +79,8 @@ const getCachedTermRecords = unstable_cache(
 
         return data || []
     },
-    ['grade-records-term-v1'], // We append term key dynamically by usage? No, unstable_cache keyParts must be static or arguments.
-    // Wait, unstable_cache receives arguments. The key parts should identify the "function". 
-    // The arguments are automatically part of the cache key generation mechanism in Next.js?
-    // Actually, for unstable_cache(cb, keyParts, options), keyParts is used to identify the cache entry GLOBALLY.
-    // If we want it to vary by 'term', 'term' must be inside the callback scope OR we rely on Next.js to auto-key based on args?
-    // Documentation says: "keyParts: An array of strings that globally identifies the values."
-    // If we use the SAME keyParts ['grade-records-term-v1'] for all calls, will it mix up terms?
-    // YES, it might if we don't include the argument in the keyParts explicitly or if Next.js doesn't handle it.
-    // Actually, unstable_cache creates a cached version of the function. 
-    // "You should provide a unique key for each varying input if you are caching inside a component, slightly different for server actions wrapper."
-    // Best practice: include the argument in the keyParts if it's dynamic? 
-    // Actually, the standard way is: unstable_cache(fn, keys). Next.js automatically hashes the ARGUMENTS passed to the fn to create the specific cache key variation.
-    // The 'keys' array is for invalidation grouping/namespaces.
-    // So ['grade-records-term-v1'] is fine, calling with fetchTermGradeRecords('TermA') and fetchTermGradeRecords('TermB') will theoretically store separate entries.
-    // BUT to be safe and explicit, usually people don't put args in the static key array unless it's a closure. 
-    // Here we pass 'term' to the cached function. Next.js handles the arg hashing.
-    { revalidate: 3600, tags: ['grade-records'] }
+    ['grade-records-term-v1'],
+    { tags: ['grade-records'] }
 );
 
 // 3. Save Records (Bulk) - Invalidate Cache
@@ -132,7 +117,7 @@ export async function saveGradeRecords(records, yearTerm) {
     }
 
     if (successCount > 0) {
-        revalidateTag('grade-records', 'max')
+        revalidateTag('grade-records')
     }
 
     return { success: successCount, errors }

@@ -17,7 +17,8 @@ export const updateStudentStatus = async (studentId, newStatus) => {
 
     if (error) throw error
 
-    revalidateTag('students', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
     return { success: true }
 }
 
@@ -31,7 +32,8 @@ export const updateStudentGrade = async (studentId, newAcademicYear) => {
 
     if (error) throw error
 
-    revalidateTag('students', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
     return { success: true }
 }
 
@@ -45,7 +47,8 @@ export const deleteStudent = async (studentId) => {
 
     if (error) throw error
 
-    revalidateTag('students', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
     return { success: true }
 }
 
@@ -59,7 +62,8 @@ export const bulkDeleteStudents = async (studentIds) => {
 
     if (error) throw error
 
-    revalidateTag('students', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
     return { success: true }
 }
 
@@ -73,7 +77,8 @@ export const resetAllGrades = async () => {
 
     if (error) throw error
 
-    revalidateTag('students', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
     return { success: true }
 }
 
@@ -252,8 +257,9 @@ export const performGradeReset = async (studentsData) => {
         // 致命的なエラーにはしないがログに残す
     }
 
-    revalidateTag('students', 'max')
-    revalidateTag('homework-assignments', 'max')
+    revalidateTag('students')
+    revalidateTag('jlpt-analytics')
+    revalidateTag('homework-assignments')
     return {
         success: true,
         graduatedCount,

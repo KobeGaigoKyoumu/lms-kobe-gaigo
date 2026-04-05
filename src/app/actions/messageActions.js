@@ -116,7 +116,7 @@ export const getRecentConversations = unstable_cache(
         }
     },
     ['chat-conversations-list'],
-    { revalidate: 60, tags: ['chat-messages'] } // 60s cache or invalidation
+    { tags: ['chat-messages'] } // Removed revalidate for on-demand invalidation
 )
 
 // Fetch Messages Action (Securely using service_role for students)

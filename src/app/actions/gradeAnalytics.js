@@ -42,7 +42,7 @@ async function getGradeAnalyticsData() {
 const getCachedGradeAnalytics = unstable_cache(
     getGradeAnalyticsData,
     ['grade-analytics-v3'],
-    { revalidate: 3600, tags: ['grade-analytics'] } // 1 hour cache
+    { tags: ['grade-records', 'grade-analytics'] }
 )
 
 export async function fetchGradeAnalytics() {

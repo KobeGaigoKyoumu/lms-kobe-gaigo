@@ -358,6 +358,7 @@ export async function createAssignment(formData) {
     revalidateTag('homework-assignments', 'max')
     revalidateTag('homework-stats', 'max')
     revalidateTag('schedules', 'max')
+    revalidateTag('storage-usage')
     revalidatePath('/assignments')
     revalidatePath('/assignments/new')
     
@@ -603,6 +604,8 @@ export async function uploadSubmissionFile(formData) {
     } catch (err) {
         console.error('ImageKit Submission Upload Error:', err)
         return { error: `アップロードに失敗しました: ${err.message}` }
+    } finally {
+        revalidateTag('storage-usage')
     }
 }
 
