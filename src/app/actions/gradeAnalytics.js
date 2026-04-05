@@ -1,19 +1,24 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 
-// Internal fetch function using Service Role (No Cookies) for Caching
-async function getGradeAnalyticsData() {
+/**
+ * Internal core logic for Grade Analytics.
+ * This function bypasses cookie requirements by using the Service Role.
+ */
+async function getGradeAnalyticsDataInternal() {
     console.log('Cache MISS: Fetching Grade Analytics from DB (Admin Client)...')
 
-    // Use Service Role to bypass RLS and Cookie requirements inside unstable_cache
-    const supabase = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Grade Analytics: Missing Supabase environment variables')
+    }
+
+    const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
 
     try {
         const { data, error } = await supabase
@@ -30,43 +35,46 @@ async function getGradeAnalyticsData() {
             return !isJlptTerm && !isJlptType
         })
 
-        console.log(`Server Action: Fetched and filtered ${filteredData.length} grade records.`)
+        console.log(`Grade Analytics: Fetched and filtered ${filteredData.length} records.`)
         return { data: filteredData }
     } catch (error) {
-        console.error('Grade Analytics Fetch Error:', error)
+        console.error('Grade Analytics DB Fetch Error:', error)
         return { error: error.message }
     }
 }
 
 // Cache the grade analytics data for 1 hour
-// Key: 'grade-analytics-v3' (Force refresh)
 const getCachedGradeAnalytics = unstable_cache(
     getGradeAnalyticsDataInternal,
     ['grade-analytics-v3'],
-    { tags: ['grade-records', 'grade-analytics'] }
+    { tags: ['grade-records', 'grade-analytics'], revalidate: 3600 }
 )
 
 /**
- * Internal logic for Grade Analytics, can be called from Server Components safely.
+ * Public function to get Grade Analytics data, safe for Server Components.
  */
 export async function getGradeAnalyticsData(session) {
     if (!session) return { error: 'Unauthorized' }
     
-    console.log('getGradeAnalyticsData: Starting fetch...')
+    console.log('getGradeAnalyticsData: Retrieving cached data...')
     const result = await getCachedGradeAnalytics()
 
+    // Optionally push to Cloudflare
     if (result && !result.error && result.data) {
         try {
-            const { pushCloudflareSnapshot } = await import('./cloudflare');
-            await pushCloudflareSnapshot('grades', result);
+            const { pushCloudflareSnapshot } = await import('../cloudflare')
+            await pushCloudflareSnapshot('grades', result)
         } catch (e) {
-            console.error('Proactive grades snapshot push failed:', e);
+            console.error('Proactive grades snapshot push failed:', e)
         }
     }
 
     return result || { data: [], error: 'No data returned' }
 }
 
+/**
+ * Server Action for client-side consumption
+ */
 export async function fetchGradeAnalytics() {
     const session = await getAdminMemberSession()
     return getGradeAnalyticsData(session)
