@@ -13,7 +13,7 @@ const createAdminClient = () => {
 
 // Cached Student List for Main Table
 // Includes fields used for Display AND Client-side Search
-export const getCachedStudentList = unstable_cache(
+const _getCachedStudentList = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         console.log('Cache MISS: Fetching Student List...')
@@ -49,6 +49,10 @@ export const getCachedStudentList = unstable_cache(
     ['student-list-v1'],
     { tags: ['students'] }
 )
+
+export async function getCachedStudentList() {
+    return _getCachedStudentList()
+}
 
 // Fetch Full Student Detail (On Demand)
 // Not heavily cached (1 hour or less) or just standard fetch

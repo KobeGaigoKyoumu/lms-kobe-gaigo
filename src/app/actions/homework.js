@@ -16,7 +16,7 @@ const createAdminClient = () => {
 }
 
 // Cache classes list for 1 hour
-export const getClassesList = unstable_cache(
+const _getClassesList = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data: classes, error } = await supabase
@@ -32,11 +32,15 @@ export const getClassesList = unstable_cache(
         return classes
     },
     ['classes-list-v5'],
-    { revalidate: 3600, tags: ['classes'] }
+    { tags: ['classes'] }
 )
 
+export async function getClassesList() {
+    return _getClassesList()
+}
+
 // Fetch all unique subject names from the timetable (schedules)
-export const getTimetableSubjects = unstable_cache(
+const _getTimetableSubjects = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data: schedules, error } = await supabase
@@ -59,8 +63,12 @@ export const getTimetableSubjects = unstable_cache(
         return subjects
     },
     ['timetable-subjects-list-v2'],
-    { revalidate: 3600, tags: ['schedules'] }
+    { tags: ['schedules'] }
 )
+
+export async function getTimetableSubjects() {
+    return _getTimetableSubjects()
+}
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 async function _getStudentAssignments(studentId, className) {
@@ -180,7 +188,7 @@ const _getCachedAssignment = unstable_cache(
         return assignment
     },
     ['assignment-details-v2'],
-    { revalidate: 3600, tags: ['homework-assignments'] }
+    { tags: ['homework-assignments'] }
 )
 
 // Fetch a single assignment details
@@ -285,8 +293,8 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
         return { error: '提出に失敗しました。' }
     }
 
-    revalidateTag('homework-stats', 'max')
-    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments')
     revalidatePath(`/student/homework/${assignmentId}`)
     revalidatePath('/student/dashboard')
 
@@ -355,9 +363,9 @@ export async function createAssignment(formData) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments', 'max')
-    revalidateTag('homework-stats', 'max')
-    revalidateTag('schedules', 'max')
+    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
+    revalidateTag('schedules')
     revalidateTag('storage-usage')
     revalidatePath('/assignments')
     revalidatePath('/assignments/new')
@@ -386,8 +394,8 @@ export async function deleteAssignment(id) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments', 'max')
-    revalidateTag('homework-stats', 'max')
+    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
     revalidatePath('/assignments')
     revalidatePath('/assignments/new')
     
@@ -426,15 +434,15 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments', 'max')
-    revalidateTag('homework-stats', 'max')
+    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats')
     revalidatePath(`/assignments/${assignmentId}`)
     revalidatePath('/assignments')
     
     return { success: true }
 }
 
-export const getTeacherAssignments = unstable_cache(
+const _getTeacherAssignments = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data: assignments, error } = await supabase
@@ -450,8 +458,12 @@ export const getTeacherAssignments = unstable_cache(
         return assignments
     },
     ['teacher-assignments-list'],
-    { revalidate: 3600, tags: ['homework-assignments'] }
+    { tags: ['homework-assignments'] }
 )
+
+export async function getTeacherAssignments() {
+    return _getTeacherAssignments()
+}
 
 export async function getAssignmentsByClass(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
@@ -484,7 +496,7 @@ export async function getAssignmentsByClass(className, isArchived = false) {
             return assignments
         },
         ['class-assignments-v3', decodedClassName, String(isArchived)],
-        { revalidate: 3600, tags: ['homework-assignments'] }
+        { tags: ['homework-assignments'] }
     )
     return fetcher()
 }
@@ -542,8 +554,8 @@ export async function gradeSubmission(submissionId, score, feedback) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-stats', 'max')
-    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments')
     revalidatePath('/assignments', 'layout') // Revalidate entire tree
     
     return { success: true }
@@ -568,8 +580,8 @@ export async function returnSubmission(submissionId, feedback) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-stats', 'max')
-    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments')
     revalidatePath('/assignments', 'layout') // Revalidate entire tree
     
     return { success: true }
@@ -609,7 +621,7 @@ export async function uploadSubmissionFile(formData) {
     }
 }
 
-export const getAllStudentSubmissionStats = unstable_cache(
+const _getAllStudentSubmissionStats = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data: submissions, error } = await supabase
@@ -643,10 +655,14 @@ export const getAllStudentSubmissionStats = unstable_cache(
         }))
     },
     ['all-student-submission-stats-v1'],
-    { revalidate: 3600, tags: ['homework-stats'] }
+    { tags: ['homework-stats'] }
 )
 
-export const getClassSubmissionStats = unstable_cache(
+export async function getAllStudentSubmissionStats() {
+    return _getAllStudentSubmissionStats()
+}
+
+const _getClassSubmissionStats = unstable_cache(
     async (className) => {
         const supabase = createAdminClient()
         const { data: students } = await supabase
@@ -691,8 +707,12 @@ export const getClassSubmissionStats = unstable_cache(
         }))
     },
     ['class-submission-stats'],
-    { revalidate: 3600, tags: ['homework-stats'] }
+    { tags: ['homework-stats'] }
 )
+
+export async function getClassSubmissionStats(className) {
+    return _getClassSubmissionStats(className)
+}
 
 export async function getClassSubmissionMatrix(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
@@ -793,7 +813,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
             }
         },
         ['class-submission-matrix-v4', decodedClassName, String(isArchived)],
-        { revalidate: 3600, tags: ['homework-stats', 'homework-assignments'] }
+        { tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()
 }

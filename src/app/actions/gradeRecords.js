@@ -11,7 +11,7 @@ const getSupabaseAdmin = () => {
 }
 
 // 1. Fetch Filters (Years and Classes) - Cached 24h
-export const fetchGradeFilters = unstable_cache(
+const _fetchGradeFilters = unstable_cache(
     async () => {
         const supabase = getSupabaseAdmin()
 
@@ -40,6 +40,10 @@ export const fetchGradeFilters = unstable_cache(
     ['grade-filters-v1'],
     { tags: ['grade-records'] }
 )
+
+export async function fetchGradeFilters() {
+    return _fetchGradeFilters()
+}
 
 // 2. Fetch Records for a Term - Cached 1h
 export const fetchTermGradeRecords = async (term) => {
@@ -138,7 +142,7 @@ export async function deleteGradeRecords(yearTerm, classNames) {
         throw error
     }
 
-    revalidateTag('grade-records', 'max')
+    revalidateTag('grade-records')
     return { success: true }
 }
 

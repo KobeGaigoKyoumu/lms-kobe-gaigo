@@ -12,7 +12,7 @@ const getSupabaseAdmin = () => {
     )
 }
 
-export const getCachedClasses = unstable_cache(
+const _getCachedClasses = unstable_cache(
     async () => {
         const supabase = getSupabaseAdmin()
         console.log('Cache MISS: Fetching Classes (Admin)...')
@@ -43,10 +43,14 @@ export const getCachedClasses = unstable_cache(
         return data
     },
     ['classes-list-v2'],
-    { revalidate: 86400, tags: ['classes'] }
+    { tags: ['classes'] }
 )
 
-export const getCachedStudentClassCounts = unstable_cache(
+export async function getCachedClasses() {
+    return _getCachedClasses()
+}
+
+const _getCachedStudentClassCounts = unstable_cache(
     async () => {
         const supabase = getSupabaseAdmin()
         console.log('Cache MISS: Fetching Student Class Counts (Admin)...')
@@ -71,13 +75,17 @@ export const getCachedStudentClassCounts = unstable_cache(
         return counts
     },
     ['student-class-counts-v2'],
-    { revalidate: 86400, tags: ['students', 'classes'] }
+    { tags: ['students', 'classes'] }
 )
+
+export async function getCachedStudentClassCounts() {
+    return _getCachedStudentClassCounts()
+}
 
 export async function fetchCachedClassesData() {
     const [classes, studentCounts] = await Promise.all([
-        getCachedClasses(),
-        getCachedStudentClassCounts()
+        _getCachedClasses(),
+        _getCachedStudentClassCounts()
     ])
 
     return { classes, studentCounts }
@@ -143,7 +151,7 @@ export async function cleanupDuplicateClasses() {
     
     if (delError) return { error: delError.message }
     
-    revalidateTag('classes', 'max')
+    revalidateTag('classes')
     return { success: true, deletedCount: idsToDelete.length }
 }
 
@@ -164,6 +172,6 @@ export async function deleteOldAcademicYearData(year) {
         return { error: delError.message }
     }
 
-    revalidateTag('classes', 'max')
+    revalidateTag('classes')
     return { success: true, count: deletedClasses.length }
 }

@@ -12,7 +12,7 @@ const createAdminClient = () => {
 
 // ===== Fetching Functions =====
 
-export const getKanbanColumns = unstable_cache(
+const _getKanbanColumns = unstable_cache(
   async () => {
     try {
       const supabase = createAdminClient()
@@ -35,7 +35,11 @@ export const getKanbanColumns = unstable_cache(
   { tags: ['kanban'] }
 )
 
-export const getKanbanCards = unstable_cache(
+export async function getKanbanColumns() {
+  return _getKanbanColumns()
+}
+
+const _getKanbanCards = unstable_cache(
   async () => {
     try {
       const supabase = createAdminClient()
@@ -67,7 +71,11 @@ export const getKanbanCards = unstable_cache(
   { tags: ['kanban'] }
 )
 
-export const getKanbanLabels = unstable_cache(
+export async function getKanbanCards() {
+  return _getKanbanCards()
+}
+
+const _getKanbanLabels = unstable_cache(
   async () => {
     const supabase = createAdminClient()
     const { data, error } = await supabase
@@ -81,7 +89,11 @@ export const getKanbanLabels = unstable_cache(
   { tags: ['kanban'] }
 )
 
-export const getAllKanbanReminders = unstable_cache(
+export async function getKanbanLabels() {
+  return _getKanbanLabels()
+}
+
+const _getAllKanbanReminders = unstable_cache(
   async () => {
     const supabase = createAdminClient()
     const { data, error } = await supabase
@@ -93,6 +105,10 @@ export const getAllKanbanReminders = unstable_cache(
   ['kanban-reminders-all'],
   { tags: ['kanban'] }
 )
+
+export async function getAllKanbanReminders() {
+  return _getAllKanbanReminders()
+}
 
 export async function getKanbanReminders(cardId) {
   const supabase = createAdminClient()

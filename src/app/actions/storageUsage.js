@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 /**
  * ImageKit の API から現在の使用量を取得する（1時間キャッシュ）
  */
-export const getImageKitUsage = unstable_cache(
+const _getImageKitUsage = unstable_cache(
     async () => {
         try {
             const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
@@ -49,12 +49,16 @@ export const getImageKitUsage = unstable_cache(
             console.error("ImageKit Usage Error:", error);
             return { success: false, error: error.message };
         }
-    }, ["imagekit-usage"], { revalidate: 3600 });
+    }, ["imagekit-usage"], { tags: ['storage-usage'] });
+
+export async function getImageKitUsage() {
+    return _getImageKitUsage();
+}
 
 /**
  * Supabase Storage API から現在の使用量を取得する（1時間キャッシュ）
  */
-export const getSupabaseStorageUsage = unstable_cache(
+const _getSupabaseStorageUsage = unstable_cache(
     async () => {
         try {
             const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -86,5 +90,9 @@ export const getSupabaseStorageUsage = unstable_cache(
         }
     },
     ["supabase-storage-usage"],
-    { revalidate: 3600 }
+    { tags: ['storage-usage'] }
 );
+
+export async function getSupabaseStorageUsage() {
+    return _getSupabaseStorageUsage();
+}

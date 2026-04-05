@@ -13,7 +13,7 @@ const getSupabaseAdmin = () => {
     )
 }
 
-export const getCachedCourses = unstable_cache(
+const _getCachedCourses = unstable_cache(
     async () => {
         const supabase = getSupabaseAdmin()
         console.log('Cache MISS: Fetching Courses (Admin)...')
@@ -38,8 +38,12 @@ export const getCachedCourses = unstable_cache(
         return data
     },
     ['courses-list-v1'],
-    { revalidate: 86400, tags: ['courses'] }
+    { tags: ['courses'] }
 )
+
+export async function getCachedCourses() {
+    return _getCachedCourses()
+}
 
 export async function fetchCachedCourses() {
     // Auth Check: Allow both Supabase Auth users AND Admin Members

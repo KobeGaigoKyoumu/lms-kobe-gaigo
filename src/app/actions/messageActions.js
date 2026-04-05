@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { unstable_cache, revalidateTag } from 'next/cache'
 
 // Reuse the service key approach from api/chat/route.js for admin access
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
@@ -52,9 +53,7 @@ export async function getUnreadCount() {
 }
 
 // Optimization: Cached Conversation List
-import { unstable_cache, revalidateTag } from 'next/cache'
-
-export const getRecentConversations = unstable_cache(
+const _getRecentConversations = unstable_cache(
     async () => {
         try {
             // 1. Fetch recent messages (e.g., last 2000)
@@ -116,8 +115,12 @@ export const getRecentConversations = unstable_cache(
         }
     },
     ['chat-conversations-list'],
-    { tags: ['chat-messages'] } // Removed revalidate for on-demand invalidation
+    { tags: ['chat-messages'] }
 )
+
+export async function getRecentConversations() {
+    return _getRecentConversations()
+}
 
 // Fetch Messages Action (Securely using service_role for students)
 export async function getMessages(studentId, options = {}) {

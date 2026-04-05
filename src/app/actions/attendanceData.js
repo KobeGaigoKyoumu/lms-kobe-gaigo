@@ -29,7 +29,7 @@ function calculateGrade(studentId, year, month) {
     return grade
 }
 
-export const getAvailableAttendanceFiles = unstable_cache(
+const _getAvailableAttendanceFiles = unstable_cache(
     async () => {
         const supabase = getSupabaseAdmin()
         const monthlySet = new Set()
@@ -84,7 +84,11 @@ export const getAvailableAttendanceFiles = unstable_cache(
     { tags: ['attendance-files'] }
 )
 
-export const getSchoolAttendanceStats = unstable_cache(
+export async function getAvailableAttendanceFiles() {
+    return _getAvailableAttendanceFiles()
+}
+
+const _getSchoolAttendanceStats = unstable_cache(
     async (year, month, isCumulative, enrollmentFilter = 'all') => {
         const supabase = getSupabaseAdmin()
         const { data: students, error } = await supabase
@@ -171,7 +175,11 @@ export const getSchoolAttendanceStats = unstable_cache(
     { tags: ['attendance-stats'] }
 )
 
-export const getClassAttendanceStats = unstable_cache(
+export async function getSchoolAttendanceStats(year, month, isCumulative, enrollmentFilter = 'all') {
+    return _getSchoolAttendanceStats(year, month, isCumulative, enrollmentFilter)
+}
+
+const _getClassAttendanceStats = unstable_cache(
     async (year, month, isCumulative, enrollmentFilter = 'all') => {
         const supabase = getSupabaseAdmin()
 
@@ -290,8 +298,12 @@ export const getClassAttendanceStats = unstable_cache(
     { tags: ['attendance-stats'] }
 )
 
+export async function getClassAttendanceStats(year, month, isCumulative, enrollmentFilter = 'all') {
+    return _getClassAttendanceStats(year, month, isCumulative, enrollmentFilter)
+}
+
 // Internal cached fetch (returns ALL data)
-const _getCachedStudentListAttendance = unstable_cache(
+const _getCachedStudentListAttendancePrivate = unstable_cache(
     async (year, month, isCumulative) => {
         const supabase = getSupabaseAdmin()
 
@@ -380,7 +392,7 @@ export const getPaginatedAttendance = async ({
     enrollmentFilter = 'all'
 }) => {
     // 1. Get Cached Full List
-    const data = await _getCachedStudentListAttendance(year, month, isCumulative)
+    const data = await _getCachedStudentListAttendancePrivate(year, month, isCumulative)
     let students = data.students || []
 
     // 1.5 Filter (Enrollment)
@@ -440,7 +452,7 @@ export const getAllStudentIdsForBulk = async ({
     rateFilterValue = 0,
     enrollmentFilter = 'all'
 }) => {
-    const data = await _getCachedStudentListAttendance(year, month, isCumulative)
+    const data = await _getCachedStudentListAttendancePrivate(year, month, isCumulative)
     let students = data.students || []
 
     if (enrollmentFilter === 'enrolled') {
@@ -466,9 +478,11 @@ export const getAllStudentIdsForBulk = async ({
 }
 
 // Keep backward compatibility if needed, or just export the cached one as getStudentListAttendance for other uses
-export const getStudentListAttendance = _getCachedStudentListAttendance
+export async function getStudentListAttendance(year, month, isCumulative) {
+    return _getCachedStudentListAttendancePrivate(year, month, isCumulative)
+}
 
-export const getStudentAttendanceHistory = unstable_cache(
+const _getStudentAttendanceHistory = unstable_cache(
     async (studentId) => {
         const supabase = getSupabaseAdmin()
 
@@ -503,3 +517,7 @@ export const getStudentAttendanceHistory = unstable_cache(
     ['attendance-student-history-v8'],
     { tags: ['attendance-stats'] }
 )
+
+export async function getStudentAttendanceHistory(studentId) {
+    return _getStudentAttendanceHistory(studentId)
+}

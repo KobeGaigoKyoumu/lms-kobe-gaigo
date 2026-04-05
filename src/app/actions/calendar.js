@@ -53,7 +53,7 @@ export const getAppliedClassesForPackages = async (packageIds) => {
 }
 
 // クラス一覧取得
-export const getClassesForPackages = unstable_cache(
+const _getClassesForPackages = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data, error } = await supabase
@@ -71,11 +71,15 @@ export const getClassesForPackages = unstable_cache(
         return { data: unique }
     },
     ['event-packages-classes'],
-    { tags: ['students'] } // classes や students テーブルの更新時にタグ指定すればリロード可能（今回は念のため）
+    { tags: ['students'] } 
 )
 
+export async function getClassesForPackages() {
+    return _getClassesForPackages();
+}
+
 // 入学期一覧取得
-export const getTermsForPackages = unstable_cache(
+const _getTermsForPackages = unstable_cache(
     async () => {
         const supabase = createAdminClient()
         const { data, error } = await supabase
@@ -96,6 +100,10 @@ export const getTermsForPackages = unstable_cache(
     { tags: ['students'] }
 )
 
+export async function getTermsForPackages() {
+    return _getTermsForPackages();
+}
+
 // パッケージ作成
 export async function createEventPackage(packageData) {
     const supabase = createAdminClient()
@@ -108,7 +116,7 @@ export async function createEventPackage(packageData) {
         console.error('createEventPackage error:', error)
         return { error: 'Failed to create package' }
     }
-    revalidateTag('event-packages', 'max')
+    revalidateTag('event-packages')
     return { success: true, data }
 }
 
@@ -125,7 +133,7 @@ export async function updateEventPackage(id, packageData) {
         console.error('updateEventPackage error:', error)
         return { error: 'Failed to update package' }
     }
-    revalidateTag('event-packages', 'max')
+    revalidateTag('event-packages')
     return { success: true, data }
 }
 
@@ -141,7 +149,7 @@ export async function deleteEventPackage(id) {
         console.error('deleteEventPackage error:', error)
         return { error: 'Failed to delete package' }
     }
-    revalidateTag('event-packages', 'max')
+    revalidateTag('event-packages')
     return { success: true }
 }
 
@@ -178,7 +186,7 @@ export async function copyEventPackage(id) {
         return { error: 'Failed to clone package' }
     }
     
-    revalidateTag('event-packages', 'max')
+    revalidateTag('event-packages')
     return { success: true, data: data[0] }
 }
 
@@ -199,7 +207,7 @@ export async function applyPackageToTarget(newEvents) {
         console.error('applyPackageToTarget Database error:', error)
         return { error: `Failed to apply package: ${error.message}` }
     }
-    revalidateTag('calendar-events', 'max')
+    revalidateTag('calendar-events')
     return { success: true }
 }
 
@@ -218,7 +226,7 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
     }
     
     // イベント削除されたためカレンダー関連のキャッシュを無効化
-    revalidateTag('calendar-events', 'max')
+    revalidateTag('calendar-events')
     return { success: true }
 }
 
@@ -239,7 +247,7 @@ export async function createSingleEvent(eventData) {
         console.error('createSingleEvent error:', error)
         return { error: 'Failed to create event' }
     }
-    revalidateTag('calendar-events', 'max')
+    revalidateTag('calendar-events')
     return { success: true, data: data[0] }
 }
 
@@ -259,7 +267,7 @@ export async function updateSingleEvent(id, eventData) {
         console.error('updateSingleEvent error:', error)
         return { error: 'Failed to update event' }
     }
-    revalidateTag('calendar-events', 'max')
+    revalidateTag('calendar-events')
     return { success: true, data: data[0] }
 }
 
@@ -270,6 +278,6 @@ export async function deleteSingleEvent(id) {
         console.error('deleteSingleEvent error:', error)
         return { error: 'Failed to delete event' }
     }
-    revalidateTag('calendar-events', 'max')
+    revalidateTag('calendar-events')
     return { success: true }
 }

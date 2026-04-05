@@ -90,7 +90,7 @@ export async function createAnnouncement(announcementData) {
 
         if (error) throw error
 
-        revalidateTag('announcements', 'max')
+        revalidateTag('announcements')
         return { success: true, data }
     } catch (err) {
         console.error('Create Announcement Error:', err)
