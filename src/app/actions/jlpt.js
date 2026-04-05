@@ -31,7 +31,7 @@ async function getJlptAnalyticsDataInternal() {
 
         // Also need student info for nationality breakdown
         const { data: students, error: sError } = await supabase
-            .from('student_master')
+            .from('students')
             .select('student_id, full_name, enrollment_date, status')
 
         if (sError) throw sError;
