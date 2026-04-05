@@ -12,13 +12,16 @@ const createAdminClient = () => {
 
 // ===== Fetching Functions =====
 
-export async function getKanbanColumns() {
+export async function getKanbanColumns(userId) {
+  console.log("getKanbanColumns: fetching for userId", userId);
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("kanban_columns")
     .select("*")
+    .eq("user_id", userId)
     .order("order_index")
   
+  if (error) console.error("getKanbanColumns error:", error);
   return { data: data || [], error: error?.message }
 }
 
