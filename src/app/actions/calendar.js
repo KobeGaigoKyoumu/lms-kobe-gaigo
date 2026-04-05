@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import { revalidateTag } from 'next/cache'
+import { getAdminMemberSession } from './adminAuth'
 
 const createAdminClient = () => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -193,13 +194,12 @@ export async function copyEventPackage(id) {
 // パッケージの適用
 export async function applyPackageToTarget(newEvents) {
     const supabaseAdmin = createAdminClient()
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
     
     // Authユーザーでない（管理者など）場合は created_by を null にして制約エラーを回避
     const sanitizedEvents = (newEvents || []).map(e => ({
         ...e,
-        created_by: user ? e.created_by : null
+        created_by: adminMember ? e.created_by : null
     }))
 
     const { error } = await supabaseAdmin.from('calendar_events').insert(sanitizedEvents)
@@ -233,13 +233,12 @@ export async function unapplyPackageFromTarget(packageId, targetClass) {
 // === 単独イベントの管理アクション ===
 export async function createSingleEvent(eventData) {
     const supabaseAdmin = createAdminClient()
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
     
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: user ? eventData.created_by : null
+        created_by: adminMember ? eventData.created_by : null
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').insert(sanitizedData).select()
@@ -253,13 +252,12 @@ export async function createSingleEvent(eventData) {
 
 export async function updateSingleEvent(id, eventData) {
     const supabaseAdmin = createAdminClient()
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
     
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: user ? eventData.created_by : null
+        created_by: adminMember ? eventData.created_by : null
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').update(sanitizedData).eq('id', id).select()

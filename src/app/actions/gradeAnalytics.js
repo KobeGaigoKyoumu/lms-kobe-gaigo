@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { unstable_cache } from 'next/cache'
+import { getAdminMemberSession } from './adminAuth'
 
 // Internal fetch function using Service Role (No Cookies) for Caching
 async function getGradeAnalyticsData() {
@@ -47,10 +48,9 @@ const getCachedGradeAnalytics = unstable_cache(
 
 export async function fetchGradeAnalytics() {
     // 1. Verify Auth (Security Check)
-    const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const session = await getAdminMemberSession()
 
-    if (error || !user) {
+    if (!session) {
         console.error('Unauthorized access to Grade Analytics')
         return { error: 'Unauthorized' }
     }

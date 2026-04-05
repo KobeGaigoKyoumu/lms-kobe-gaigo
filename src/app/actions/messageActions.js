@@ -15,8 +15,6 @@ const adminSupabase = createClient(SUPABASE_URL, SERVICE_KEY)
 export async function getUnreadCount() {
     try {
         // 1. Identify User
-        const supabase = await createServerClient()
-        const { data: { user: teacherUser } } = await supabase.auth.getUser()
         const studentSession = await getStudentSession()
         const adminMember = await getAdminMemberSession()
 
@@ -26,7 +24,7 @@ export async function getUnreadCount() {
             .eq('read', false)
             .neq('student_id', 'SYSTEM_REMINDER')
 
-        if (teacherUser || adminMember) {
+        if (adminMember) {
             // Teacher/Admin/Staff: Count all unread messages from students
             countQuery = countQuery.eq('sender_type', 'student')
         } else if (studentSession) {
@@ -170,13 +168,13 @@ export async function sendMessage(studentId, content, options = {}) {
         // Verify session for staff if needed
         const adminMember = await getAdminMemberSession()
         const studentSession = await getStudentSession()
-        const supabase = await createServerClient()
-        const { data: { user } } = await supabase.auth.getUser()
 
-        const senderId = user?.id || adminMember?.memberId || 'admin'
+        // Admin/Teacher take precedence as we are in teacher dash
+        const senderId = adminMember?.memberId || studentSession?.studentId || 'unknown'
         
-        // Profiles table only contains Auth users (students/teachers)
-        const profileId = user ? user.id : null
+        // Profiles table only contains Auth users (but teachers use admin_members)
+        // For teacher-sent messages from dash, user_id can be null or link to an admin table ID if refactored
+        const profileId = (senderType === 'teacher') ? null : (studentSession?.studentId || null)
 
         const payload = {
             student_id: studentId,

@@ -73,13 +73,12 @@ export async function createAnnouncement(announcementData) {
     }
 
     try {
-        // Authenticate the user - only profiles exist for Auth users
-        const supabase = await createServerClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        // Authenticate the user
+        const adminMember = await getAdminMemberSession()
 
         const sanitizedData = {
             ...announcementData,
-            author_id: user ? user.id : null
+            author_id: null
         }
 
         const { data, error } = await adminSupabase

@@ -46,22 +46,17 @@ export async function getCachedCourses() {
 }
 
 export async function fetchCachedCourses() {
-    // Auth Check: Allow both Supabase Auth users AND Admin Members
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    // Auth Check: Allow both Supabase Auth users (students for some views) AND Admin Members
     const adminMember = await getAdminMemberSession()
-
-    if (!user && !adminMember) return []
+    if (!adminMember) return []
 
     return await getCachedCourses()
 }
 
 export async function createCourse(formData) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
 
-    if (!user && !adminMember) throw new Error('Unauthorized')
+    if (!adminMember) throw new Error('Unauthorized')
 
     // Use admin client to ensure we can insert regardless of RLS, 
     // but try to associate with a teacher_id if possible
@@ -73,7 +68,7 @@ export async function createCourse(formData) {
             description: formData.description,
             syllabus: formData.syllabus,
             is_published: formData.is_published,
-            teacher_id: user?.id || null, // Can be null if created by adminMember without profile
+            teacher_id: null, // Can be null if created by adminMember without profile
             // We could add admin_member_id here if we update the schema
         })
         .select()
