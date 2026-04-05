@@ -1,9 +1,10 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createClientServer } from '@/lib/supabase/server'
 import { createClient as createClientJs } from '@supabase/supabase-js'
 import { getEnhancedJlptStats, getAccurateGraduationStats, getStudentsJlptSummary, getJlptData, getJlptSectionScoreStats } from '@/lib/jlpt'
 import { unstable_cache } from 'next/cache'
+import { getAdminMemberSession } from './adminAuth'
 
 // Cache the entire analytics computation for 1 hour
 // Key: 'jlpt-analytics-v2' (fresh key to avoid stale data from previous deployments)
@@ -20,7 +21,9 @@ const getCachedAnalytics = unstable_cache(
         try {
             let data = null;
             let error = null;
-            let supabase;
+
+            // Admin session check is handled in the public side of the action,
+            // but here we use the Service Role to bypass RLS for analytics computation.
             if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
                 console.log('Server Action: Using Service Role Key for full analytics access');
                 const adminSupabase = createClientJs(
@@ -44,10 +47,10 @@ const getCachedAnalytics = unstable_cache(
                 }
             }
 
-            // Fallback to Cookie Auth if Service Role failed or not available
+            // Fallback to Server Cookie Client if Service Role not available
             if (!data || data.length === 0) {
-                console.log('Server Action: Falling back to Cookie Session (RLS active)');
-                supabase = await createClient();
+                console.log('Server Action: Falling back to Cookie Session (RLS may apply)');
+                const supabase = await createClientServer();
 
                 let res = await supabase
                     .from('students')
@@ -162,6 +165,13 @@ const getCachedAnalytics = unstable_cache(
 );
 
 export async function fetchJlptAnalyticsData() {
+    // 1. Verify Auth for Admins/Teachers
+    const session = await getAdminMemberSession()
+    if (!session) {
+        console.error('Unauthorized access to JLPT Analytics')
+        return { error: 'Unauthorized' }
+    }
+
     console.log('Server Action: Fetching JLPT Analytics Data (cached)...');
     const result = await getCachedAnalytics();
 
