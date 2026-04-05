@@ -204,16 +204,18 @@
     padding: 8px 10px;
     margin-bottom: 4px;
     cursor: grab;
-    transition: box-shadow 0.15s, transform 0.1s;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
     position: relative;
     font-size: 11px;
     line-height: 1.5;
     color: #333;
     user-select: none;
+    will-change: transform;
 }
 
 .card:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(212, 160, 23, 0.15);
+    border-color: #d4a017;
 }
 
 .card:active {
@@ -224,15 +226,44 @@
 }
 
 .cardDragging {
-    opacity: 0.4;
+    opacity: 0.5;
+    background: #f9f9f9;
+    border: 1px dashed #d4a017;
+    box-shadow: none;
 }
 
 .cardDropBefore {
-    border-top: 2px solid #3b82f6 !important;
+    transform: translateY(20px);
 }
 
 .cardDropAfter {
-    border-bottom: 2px solid #3b82f6 !important;
+    transform: translateY(-20px);
+}
+
+/* Make sure the indicator itself is visible if needed, 
+   but gap-shifting is often enough. Let's add a subtle line too. */
+.cardDropBefore::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #3b82f6;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.cardDropAfter::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #3b82f6;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
 .cardColorBar {

@@ -264,7 +264,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         })
     }, [])
 
-    const handleCardDragOver = useCallback((e, card) => {
+    const handleCardDragOver = useCallback((e, cardId) => {
         if (!dragCard.current || dragColumn.current) return
         e.preventDefault()
         e.stopPropagation()
@@ -275,7 +275,9 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         const midY = rect.top + rect.height / 2
         const isAbove = e.clientY < midY
 
-        // Clean old indicators
+        // Use a more targeted approach to update indicators
+        if (dragOverCardId.current?.id === cardId && dragOverCardId.current?.above === isAbove) return
+
         document.querySelectorAll(`.${styles.cardDropBefore}, .${styles.cardDropAfter}`).forEach(el => {
             el.classList.remove(styles.cardDropBefore)
             el.classList.remove(styles.cardDropAfter)
@@ -287,7 +289,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             e.currentTarget.classList.add(styles.cardDropAfter)
         }
 
-        dragOverCardId.current = { id: card.id, above: isAbove }
+        dragOverCardId.current = { id: cardId, above: isAbove }
     }, [])
 
     const handleColumnAreaDragOver = useCallback((e) => {
@@ -314,19 +316,33 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
             .filter(c => c.column_id === targetColumnId && c.id !== card.id)
             .sort((a, b) => a.position - b.position)
 
-        let newIndex
+        const DEFAULT_STEP = 1000
+        let newPosition
+
         if (overInfo) {
             const targetIdx = colCards.findIndex(c => c.id === overInfo.id)
             if (targetIdx === -1) {
-                newIndex = colCards.length
+                const lastPos = colCards.length > 0 ? colCards[colCards.length - 1].position : 0
+                newPosition = lastPos + DEFAULT_STEP
             } else {
-                newIndex = overInfo.above ? targetIdx : targetIdx + 1
+                const prevCard = overInfo.above ? colCards[targetIdx - 1] : colCards[targetIdx]
+                const nextCard = overInfo.above ? colCards[targetIdx] : colCards[targetIdx + 1]
+
+                if (prevCard && nextCard) {
+                    newPosition = (prevCard.position + nextCard.position) / 2
+                } else if (prevCard) {
+                    newPosition = prevCard.position + DEFAULT_STEP
+                } else if (nextCard) {
+                    newPosition = nextCard.position / 2
+                } else {
+                    newPosition = DEFAULT_STEP
+                }
             }
         } else {
-            // Dropped on empty area
-            newIndex = colCards.length
+            // Dropped on empty area or between cards
+            const lastCard = colCards[colCards.length - 1]
+            newPosition = lastCard ? lastCard.position + DEFAULT_STEP : DEFAULT_STEP
         }
-
 
         // Store original cards for rollback
         const originalCards = [...cards]
@@ -334,17 +350,13 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
         // Optimistic update
         setCards(prev => {
             const filtered = prev.filter(c => c.id !== card.id)
-            const updatedCard = { ...card, column_id: targetColumnId, position: newIndex }
-            const result = [...filtered, updatedCard].sort((a, b) => {
-                if (a.column_id !== b.column_id) return 0
-                return a.position - b.position
-            })
-            return result
+            const updatedCard = { ...card, column_id: targetColumnId, position: newPosition }
+            return [...filtered, updatedCard] // position is now a float, we just re-render
         })
 
         // Persist
         try {
-            const { success, error } = await updateKanbanCardPosition(card.id, targetColumnId, newIndex)
+            const { success, error } = await updateKanbanCardPosition(card.id, targetColumnId, newPosition)
             
             if (!success) {
                 throw new Error(error || 'Unknown server error')
@@ -645,7 +657,7 @@ export default function KanbanBoard({ initialColumns, initialCards, initialLabel
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, card)}
                                         onDragEnd={handleDragEnd}
-                                        onDragOver={(e) => handleCardDragOver(e, card)}
+                                        onDragOver={(e) => handleCardDragOver(e, card.id)}
                                         onClick={() => openEditModal(card)}
                                     >
                                         {card.color && (

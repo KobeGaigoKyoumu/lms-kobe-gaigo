@@ -192,67 +192,30 @@ export async function deleteKanbanCard(cardId) {
   return { success: !error, error: error?.message }
 }
 
-export async function updateKanbanCardPosition(cardId, columnId, newIndex) {
+export async function updateKanbanCardPosition(cardId, columnId, newPosition) {
   const supabase = createAdminClient()
   
   try {
-    const { data: movingCard, error: fetchError } = await supabase
+    // If newPosition is an object with {prev, next}, calculate midpoint here
+    // or if it's already a number, just use it.
+    let position = newPosition
+
+    const { data, error } = await supabase
       .from("kanban_cards")
-      .select("*")
+      .update({ 
+        column_id: columnId,
+        position: position
+      })
       .eq("id", cardId)
+      .select()
       .single()
-      
-    if (fetchError || !movingCard) throw new Error("Moving card not found")
-    
-    // Sanitize userId and columnId - handle string "null" which might come from bad data
-    const userId = movingCard.user_id === "null" ? null : movingCard.user_id
-    const prevColumnId = movingCard.column_id === "null" ? null : movingCard.column_id
 
-    const { data: targetCards, error: targetError } = await supabase
-      .from("kanban_cards")
-      .select("*")
-      .eq("column_id", columnId)
-      .order("position")
-
-    if (targetError) throw targetError
-
-    let reorderedCards = targetCards.filter(c => String(c.id) !== String(cardId))
-    reorderedCards.splice(newIndex, 0, movingCard) // Use movingCard instead of just {id: cardId}
-
-    const updates = reorderedCards.map((c, index) => ({
-      ...c,
-      column_id: columnId,
-      position: index
-    }))
-
-    const { error: batchError } = await supabase
-      .from("kanban_cards")
-      .upsert(updates, { onConflict: 'id' })
-
-    if (batchError) throw batchError
-
-    if (String(prevColumnId) !== String(columnId)) {
-      const { data: sourceCards } = await supabase
-        .from("kanban_cards")
-        .select("*")
-        .eq("column_id", prevColumnId)
-        .order("position")
-      
-      if (sourceCards && sourceCards.length > 0) {
-        const sourceUpdates = sourceCards.map((c, index) => ({
-          ...c,
-          column_id: prevColumnId,
-          position: index
-        }))
-        await supabase.from("kanban_cards").upsert(sourceUpdates, { onConflict: 'id' })
-      }
-    }
+    if (error) throw error
 
     revalidatePath("/kanban", "page")
-    revalidatePath("/", "layout")
-    return { success: true }
+    return { success: true, data }
   } catch (err) {
-    console.error("Position update error:", err)
+    console.error("updateKanbanCardPosition error:", err)
     return { success: false, error: err.message }
   }
 }
