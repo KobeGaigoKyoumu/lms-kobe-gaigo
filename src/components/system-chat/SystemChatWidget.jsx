@@ -52,9 +52,38 @@ export default function SystemChatWidget({ userId }) {
     // 初回ロード・ポーリング
     useEffect(() => {
         fetchUnreadCount()
-        intervalRef.current = setInterval(fetchUnreadCount, 60000)
+        
+        let intervalId = null;
+        
+        const startPolling = () => {
+            if (intervalId) return;
+            // 5分(300000ms)間隔に延長してVercelのCPU消費を削減
+            intervalId = setInterval(fetchUnreadCount, 300000)
+        }
+        
+        const stopPolling = () => {
+            if (intervalId) {
+                clearInterval(intervalId)
+                intervalId = null;
+            }
+        }
+
+        // タブがアクティブな時だけポーリングを実行する
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                stopPolling()
+            } else {
+                fetchUnreadCount() // 復帰時に即座に取得
+                startPolling()
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        startPolling()
+
         return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current)
+            stopPolling()
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
     }, [fetchUnreadCount])
 

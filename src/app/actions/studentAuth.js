@@ -134,12 +134,14 @@ export async function getStudentSessionLight() {
     }
 }
 
-// Global variable to store the memoized cache function
-let _cachedStudentMasterDataFunc = null;
+// Global variable to store the memoized cache function generator
+const _studentMasterCacheFuncs = new Map();
 
 function getStudentMasterDataCached(studentId) {
-    if (!_cachedStudentMasterDataFunc) {
-        _cachedStudentMasterDataFunc = next_unstable_cache(
+    if (!studentId) return null;
+    
+    if (!_studentMasterCacheFuncs.has(studentId)) {
+        const fetcher = next_unstable_cache(
             async (id) => {
                 try {
                     const supabase = createAdminClient()
@@ -156,11 +158,12 @@ function getStudentMasterDataCached(studentId) {
                     return null
                 }
             },
-            ['student-master-v1'],
-            { revalidate: 3600, tags: ['students'] }
+            [`student-master-v2-${studentId}`],
+            { revalidate: 3600, tags: ['students', `student-${studentId}`] }
         )
+        _studentMasterCacheFuncs.set(studentId, fetcher);
     }
-    return _cachedStudentMasterDataFunc(studentId);
+    return _studentMasterCacheFuncs.get(studentId)(studentId);
 }
 
 /**
