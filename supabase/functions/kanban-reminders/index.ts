@@ -126,13 +126,12 @@ Deno.serve(async (req) => {
             })
         }
 
-        // 教職員のIDをprofilesテーブルから取得（push_subscriptionsに依存しない）
-        const { data: staffProfiles } = await supabase
-            .from('profiles')
+        // 教職員のIDを取得（Source of Truthがadmin_membersに移動したため）
+        const { data: staffMembers } = await supabase
+            .from('admin_members')
             .select('id')
-            .in('role', ['teacher', 'admin'])
 
-        const staffUserIds: string[] = (staffProfiles || []).map((p: any) => p.id)
+        const staffUserIds: string[] = (staffMembers || []).map((m: any) => m.id)
 
         // 教職員のプッシュ購読を取得（プッシュ通知送信用）
         const { data: allSubs } = await supabase
@@ -143,12 +142,11 @@ Deno.serve(async (req) => {
         const staffSubs = (allSubs || []).filter((s: any) => uuidRegex.test(s.user_id) || s.user_id === 'member')
 
         // memberアカウント（cookie認証の教職員）は常にメッセージ対象に含める
-        // profilesテーブルには存在しないため、明示的に追加
         if (!staffUserIds.includes('member')) {
             staffUserIds.push('member')
         }
 
-        console.log(`[Kanban Reminders] Staff users (profiles): ${staffUserIds.length}, Staff push subs: ${staffSubs.length}`)
+        console.log(`[Kanban Reminders] Staff users (admin_members): ${staffUserIds.length}, Staff push subs: ${staffSubs.length}`)
 
         // web-push 設定
         const vapidPublicKey = Deno.env.get('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
@@ -209,15 +207,18 @@ Deno.serve(async (req) => {
                     }
                 }
 
-                // 2. コミュニケーションにチャットボットメッセージ送信
+                // 2. コミュニケーションにシステムメッセージ送信
                 const cardDesc = (reminder as any).kanban_cards?.description || ''
                 const messageContent = `🔔 リマインダー\n\nタスク: ${cardTitle}\nスケジュール: ${typeLabel} ${timeStr}${cardDesc ? '\n説明: ' + cardDesc : ''}`
 
                 if (staffUserIds.length > 0) {
-                    const messagePayloads = staffUserIds.map((userId: string) => ({
+                    const messagePayloads = staffUserIds.map((_userId: string) => ({
                         student_id: SYSTEM_STUDENT_ID,
-                        teacher_id: userId === 'member' ? null : userId,
-                        sender_type: 'student',
+                        // IMPORTANT: teacher_id references auth.users(id). 
+                        // To avoid FK violations with admin_members IDs, we set to null.
+                        // Frontend fetches these global system messages where teacher_id is null.
+                        teacher_id: null, 
+                        sender_type: 'teacher',
                         content: messageContent,
                         read: false
                     }))

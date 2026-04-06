@@ -16,10 +16,12 @@ const isUUID = (id) => typeof id === 'string' && UUID_REGEX.test(id)
 export async function getSystemNotifications(teacherId) {
     const supabase = createAdminClient()
 
-    let isProfileUser = false;
+    let isStaff = false;
     if (isUUID(teacherId)) {
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
-        if (count > 0) isProfileUser = true;
+        // Source of truth for staff has moved to admin_members.
+        // We only show global notifications (teacher_id IS NULL) to staff.
+        const { count } = await supabase.from('admin_members').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isStaff = true;
     }
 
     let query = supabase
@@ -29,10 +31,12 @@ export async function getSystemNotifications(teacherId) {
         .order('created_at', { ascending: false })
         .limit(50)
 
-    if (isProfileUser) {
-        query = query.eq('teacher_id', teacherId)
-    } else {
+    if (isStaff) {
+        // Staff see global system notifications.
         query = query.is('teacher_id', null)
+    } else {
+        // Non-staff (students/parents) see notifications specifically mapped to their UUID.
+        query = query.eq('teacher_id', teacherId)
     }
 
     const { data: messages, error } = await query
@@ -48,10 +52,10 @@ export async function getSystemNotifications(teacherId) {
 export async function getUnreadSystemCount(teacherId) {
     const supabase = createAdminClient()
 
-    let isProfileUser = false;
+    let isStaff = false;
     if (isUUID(teacherId)) {
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
-        if (count > 0) isProfileUser = true;
+        const { count } = await supabase.from('admin_members').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isStaff = true;
     }
 
     let query = supabase
@@ -60,10 +64,10 @@ export async function getUnreadSystemCount(teacherId) {
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (isProfileUser) {
-        query = query.eq('teacher_id', teacherId)
-    } else {
+    if (isStaff) {
         query = query.is('teacher_id', null)
+    } else {
+        query = query.eq('teacher_id', teacherId)
     }
 
     const { count, error } = await query
@@ -79,10 +83,10 @@ export async function getUnreadSystemCount(teacherId) {
 export async function markSystemNotificationsRead(teacherId) {
     const supabase = createAdminClient()
 
-    let isProfileUser = false;
+    let isStaff = false;
     if (isUUID(teacherId)) {
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('id', teacherId)
-        if (count > 0) isProfileUser = true;
+        const { count } = await supabase.from('admin_members').select('*', { count: 'exact', head: true }).eq('id', teacherId)
+        if (count > 0) isStaff = true;
     }
 
     let query = supabase
@@ -91,10 +95,10 @@ export async function markSystemNotificationsRead(teacherId) {
         .eq('student_id', SYSTEM_STUDENT_ID)
         .eq('read', false)
 
-    if (isProfileUser) {
-        query = query.eq('teacher_id', teacherId)
-    } else {
+    if (isStaff) {
         query = query.is('teacher_id', null)
+    } else {
+        query = query.eq('teacher_id', teacherId)
     }
 
     const { error } = await query
