@@ -1,7 +1,7 @@
 'use server'
 
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
 
@@ -30,7 +30,14 @@ export async function getStudentDashboardDataCached() {
 
         // LAYER 3: Supabase RPC (Final Fallback)
         console.log(`Cache MISS (Cloudflare): Fetching from Supabase for ${cacheKey}...`);
-        const supabase = await createClient()
+        
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!supabaseUrl || !supabaseServiceKey) {
+            throw new Error('Supabase configuration missing')
+        }
+        
+        const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
         const { data, error } = await supabase.rpc('get_student_dashboard_data', {
             p_student_id: studentId,
             p_class_name: className,
