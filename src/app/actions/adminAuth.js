@@ -102,6 +102,7 @@ export async function getAdminMemberSession() {
             return null
         }
     } catch (e) {
+        if (e?.digest === 'DYNAMIC_SERVER_USAGE') throw e
         console.error('getAdminMemberSession Critical Error:', e)
         return null
     }

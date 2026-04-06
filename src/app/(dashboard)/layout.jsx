@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
-export const revalidate = 30
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({ children }) {
     // Check for admin/teacher session (cookie-based only for better CPU performance)

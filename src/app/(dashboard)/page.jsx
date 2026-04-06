@@ -4,8 +4,6 @@ import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import DashboardContent from './DashboardContent'
 
-// 30秒間キャッシュ（再訪問時の高速化）
-export const revalidate = 30
 
 export default async function DashboardPage() {
     const adminMember = await getAdminMemberSession()

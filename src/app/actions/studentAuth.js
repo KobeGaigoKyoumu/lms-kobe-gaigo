@@ -128,6 +128,7 @@ export async function getStudentSessionLight() {
         }
         return null
     } catch (e) {
+        if (e?.digest === 'DYNAMIC_SERVER_USAGE') throw e
         console.error('getStudentSessionLight Critical Error:', e)
         return null
     }
