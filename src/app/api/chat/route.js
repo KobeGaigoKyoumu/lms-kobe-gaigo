@@ -99,8 +99,11 @@ export async function POST(request) {
 
         // 1. Identify User
         const supabase = await createServerClient()
-        const studentSession = await getStudentSession()
-        const adminMemberSession = await getAdminMemberSession()
+        const [studentSession, adminMemberSession, { data: { user: teacherUser } }] = await Promise.all([
+            getStudentSession(),
+            getAdminMemberSession(),
+            supabase.auth.getUser()
+        ])
 
         // 2. Construct Payload based on Role
         let payload = null
@@ -160,11 +163,19 @@ export async function POST(request) {
 
         // 4. Send Push Notification
         try {
-            webpush.setVapidDetails(
-                'mailto:admin@lms-kobe-gaigo.vercel.app',
-                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                process.env.VAPID_PRIVATE_KEY
-            )
+            const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+            const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+
+            if (vapidPublic && vapidPrivate) {
+                webpush.setVapidDetails(
+                    'mailto:admin@lms-kobe-gaigo.vercel.app',
+                    vapidPublic,
+                    vapidPrivate
+                )
+            } else {
+                console.warn('Push: VAPID keys missing in environment');
+                return NextResponse.json({ message: data }) // Early exit but with success since message is saved
+            }
 
             // Determine Recipient
             let recipientId = null
@@ -173,7 +184,9 @@ export async function POST(request) {
 
             if (data.sender_type === 'teacher') {
                 recipientId = data.student_id
-                title = `${data.sender_name || '先生'}からのメッセージ`
+                // Use sender name from session or default
+                const senderName = adminMemberSession?.name || '先生'
+                title = `${senderName}からのメッセージ`
                 url = '/student/communication'
             } else {
                 title = '学生からのメッセージ'
