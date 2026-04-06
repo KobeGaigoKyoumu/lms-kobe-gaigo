@@ -32,7 +32,7 @@ const _getClassesList = unstable_cache(
         return classes
     },
     ['classes-list-v5'],
-    { tags: ['classes'] }
+    { tags: ['classes'], revalidate: 3600 }
 )
 
 export async function getClassesList() {
@@ -63,7 +63,7 @@ const _getTimetableSubjects = unstable_cache(
         return subjects
     },
     ['timetable-subjects-list-v2'],
-    { tags: ['schedules'] }
+    { tags: ['schedules'], revalidate: 3600 }
 )
 
 export async function getTimetableSubjects() {
@@ -188,7 +188,7 @@ const _getCachedAssignment = unstable_cache(
         return assignment
     },
     ['assignment-details-v2'],
-    { tags: ['homework-assignments'] }
+    { tags: ['homework-assignments'], revalidate: 3600 }
 )
 
 // Fetch a single assignment details
@@ -458,7 +458,7 @@ const _getTeacherAssignments = unstable_cache(
         return assignments
     },
     ['teacher-assignments-list'],
-    { tags: ['homework-assignments'] }
+    { tags: ['homework-assignments'], revalidate: 3600 }
 )
 
 export async function getTeacherAssignments() {
@@ -496,7 +496,7 @@ export async function getAssignmentsByClass(className, isArchived = false) {
             return assignments
         },
         ['class-assignments-v3', decodedClassName, String(isArchived)],
-        { tags: ['homework-assignments'] }
+        { tags: ['homework-assignments'], revalidate: 3600 }
     )
     return fetcher()
 }
@@ -655,7 +655,7 @@ const _getAllStudentSubmissionStats = unstable_cache(
         }))
     },
     ['all-student-submission-stats-v1'],
-    { tags: ['homework-stats'] }
+    { tags: ['homework-stats'], revalidate: 3600 }
 )
 
 export async function getAllStudentSubmissionStats() {
@@ -707,7 +707,7 @@ const _getClassSubmissionStats = unstable_cache(
         }))
     },
     ['class-submission-stats'],
-    { tags: ['homework-stats'] }
+    { tags: ['homework-stats'], revalidate: 3600 }
 )
 
 export async function getClassSubmissionStats(className) {

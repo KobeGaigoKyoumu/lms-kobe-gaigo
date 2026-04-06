@@ -14,6 +14,6 @@ export const config = {
          * - Standard image extensions
          * - /api/* (API routes should handle their own auth or return 401 JSON)
          */
-        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icon-192.png|icon-512.png|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icon-192.png|icon-512.png|apple-touch-icon.png|favicon-32x32.png|favicon-16x16.png|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }

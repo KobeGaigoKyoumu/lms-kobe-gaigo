@@ -169,6 +169,7 @@ const getCachedAnnouncements = unstable_cache(
         .from('announcements')
         .select(`
           id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
+          target_type, target_class, target_grade, target_student_ids,
           author:profiles!author_id (
             id,
             full_name,
@@ -194,7 +195,7 @@ const getCachedAnnouncements = unstable_cache(
     }
   },
   ['announcements-list-v1'],
-  { tags: ['announcements'] }
+  { tags: ['announcements'], revalidate: 3600 }
 )
 
 export async function getAnnouncements() {
@@ -210,6 +211,9 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
     }
 
     try {
+        const { data, error } = await getCachedAnnouncements();
+        if (error) throw new Error(error);
+
         const now = new Date();
         const currentYear = now.getFullYear();
         const isBeforeApril = now.getMonth() < 3; // 0, 1, 2 is Jan, Feb, Mar
@@ -219,21 +223,7 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
         // クラス名の正規化
         const normStudentClass = normalizeClassName(className);
 
-        console.log(`[getStudentAnnouncements] Debug: studentId=${studentId}, grade=${studentGrade}, normalizedClass=${normStudentClass}`);
-
-        const { data, error } = await adminSupabase
-            .from('announcements')
-            .select(`
-                id, title, content, is_pinned, created_at, sender_name, target_type, target_class, target_grade, target_student_ids, file_urls,
-                author:profiles!author_id (
-                    full_name,
-                    avatar_url
-                )
-            `)
-            .order('is_pinned', { ascending: false })
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
+        console.log(`[getStudentAnnouncements] Using cached announcements for studentId=${studentId}, grade=${studentGrade}, normalizedClass=${normStudentClass}`);
 
         // 手動フィルタリング
         const filteredAnnouncements = (data || []).filter(a => {

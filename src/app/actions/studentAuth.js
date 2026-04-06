@@ -133,6 +133,30 @@ export async function getStudentSessionLight() {
 }
 
 /**
+ * Cached fetcher for student master data (class, grade, etc.)
+ */
+const _getStudentMasterData = unstable_cache(
+    async (studentId) => {
+        try {
+            const supabase = createAdminClient()
+            const { data, error } = await supabase
+                .from('students')
+                .select('class_name, academic_year, enrollment_period, status')
+                .eq('student_id_text', studentId)
+                .single()
+            
+            if (error) throw error
+            return data
+        } catch (e) {
+            console.error('Error in _getStudentMasterData:', e)
+            return null
+        }
+    },
+    ['student-master-v1'],
+    { revalidate: 3600, tags: ['students'] }
+)
+
+/**
  * Get the current student session.
  * Now retrieves data directly from the cookie (Base64) for maximum speed and stability.
  */
@@ -153,12 +177,7 @@ export const getStudentSession = cache(async () => {
                 // 毎回DBから最新の情報を取得するよう方針変更（cacheされているためリクエスト毎に1回のみ）
                 if (data.studentId && data.name) {
                     try {
-                        const supabase = createAdminClient()
-                        const { data: latestData } = await supabase
-                            .from('students')
-                            .select('class_name, academic_year, enrollment_period, status')
-                            .eq('student_id_text', data.studentId)
-                            .single()
+                        const latestData = await _getStudentMasterData(data.studentId)
                         
                         if (latestData) {
                             return {

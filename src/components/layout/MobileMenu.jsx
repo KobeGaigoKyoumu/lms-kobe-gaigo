@@ -56,6 +56,7 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
                     <Link
                         key={item.href}
                         href={item.href}
+                        prefetch={false}
                         className={`${styles.menuItem} ${isActive ? styles.active : ''} ${showShimmer ? styles.shineEffect : ''}`}
                     >
                         <div
