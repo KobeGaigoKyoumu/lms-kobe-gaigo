@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { normalizeClassName } from '@/lib/utils'
+import { unstable_cache } from 'next/cache'
 
 // Helper to create admin client
 const createAdminClient = () => {
