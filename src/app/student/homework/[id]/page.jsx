@@ -32,32 +32,30 @@ export default function HomeworkPage({ params }) {
                 const session = await getStudentSession()
                 if (!session) throw new Error('Unauthorized')
 
-                // Fetch assignment and submission in one go
-                // Note: We use the admin client logic via RPC or simple select if RLS allows
-                const { data: assignmentData, error: fetchError } = await supabase
+                // 1. Fetch assignment first
+                const { data: assignmentData, error: assignmentError } = await supabase
                     .from('homework_assignments')
-                    .select(`
-                        *,
-                        submission:homework_submissions(*)
-                    `)
+                    .select('*')
                     .eq('id', id)
-                    .eq('submission.student_id_text', session.studentId)
                     .single()
-
-                if (fetchError || !assignmentData) {
+                
+                if (assignmentError || !assignmentData) {
                     if (isMounted) setError('Not Found')
                     return
                 }
 
+                // 2. Fetch submission separately if assignment exists
+                const { data: submissionData } = await supabase
+                    .from('homework_submissions')
+                    .select('*')
+                    .eq('assignment_id', id)
+                    .eq('student_id_text', session.studentId)
+                    .maybeSingle()
+
                 if (isMounted) {
-                    // Normalize submission from array to object if needed (depending on how select joins)
-                    const submission = Array.isArray(assignmentData.submission) 
-                        ? assignmentData.submission[0] 
-                        : assignmentData.submission
-                    
                     setAssignment({
                         ...assignmentData,
-                        submission: submission || null
+                        submission: submissionData || null
                     })
                 }
             } catch (err) {
