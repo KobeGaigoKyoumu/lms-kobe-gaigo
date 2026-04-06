@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
+import { normalizeClassName } from '@/lib/utils'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -211,9 +212,14 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
     try {
         const now = new Date();
         const currentYear = now.getFullYear();
-        const isBeforeApril = now.getMonth() < 3; // 0-indexed, 3 is April
+        const isBeforeApril = now.getMonth() < 3; // 0, 1, 2 is Jan, Feb, Mar
         const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
         const studentGrade = (academicYearBase - academicYear + 1).toString();
+
+        // クラス名の正規化
+        const normStudentClass = normalizeClassName(className);
+
+        console.log(`[getStudentAnnouncements] Debug: studentId=${studentId}, grade=${studentGrade}, normalizedClass=${normStudentClass}`);
 
         const { data, error } = await adminSupabase
             .from('announcements')
@@ -229,30 +235,41 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
 
         if (error) throw error;
 
-        // 手動フィルタリング (複雑なOR条件をJS側で処理)
+        // 手動フィルタリング
         const filteredAnnouncements = (data || []).filter(a => {
+            const type = (a.target_type || 'all').toLowerCase();
+
             // 全体向け
-            if (a.target_type === 'all' || !a.target_type) return true;
+            if (type === 'all') return true;
 
             // 学年向け
-            if (a.target_type === 'grade' && String(a.target_grade) === studentGrade) return true;
+            if (type === 'grade') {
+                return String(a.target_grade) === studentGrade;
+            }
 
             // クラス向け
-            if (a.target_type === 'class') {
-                const normTargetClass = (a.target_class || '').replace(/\s+/g, '');
-                const normStudentClass = (className || '').replace(/\s+/g, '');
-                if (normTargetClass === normStudentClass) return true;
+            if (type === 'class') {
+                const normTargetClass = normalizeClassName(a.target_class || '');
+                return normTargetClass === normStudentClass;
             }
 
             // 個人向け
-            if (a.target_type === 'individual' && Array.isArray(a.target_student_ids)) {
-                if (a.target_student_ids.includes(studentId)) return true;
+            if (type === 'individual' && Array.isArray(a.target_student_ids)) {
+                return a.target_student_ids.includes(studentId);
             }
 
             return false;
         });
 
-        return { data: filteredAnnouncements, error: null };
+        console.log(`[getStudentAnnouncements] Found ${data?.length || 0} total, filtered to ${filteredAnnouncements.length}`);
+
+        return { 
+            data: filteredAnnouncements.map(a => ({
+                ...a,
+                author_name: a.author?.full_name || a.sender_name || '管理者'
+            })), 
+            error: null 
+        };
     } catch (err) {
         console.error('getStudentAnnouncements Error:', err);
         return { data: [], error: err.message };
