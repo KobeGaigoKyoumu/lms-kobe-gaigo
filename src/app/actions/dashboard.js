@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
+import { normalizeClassName } from '@/lib/utils'
 
 /**
  * Fetches student dashboard data with Next.js Data Cache.
@@ -28,7 +29,7 @@ export async function getStudentDashboardDataCached() {
             console.error('Cloudflare fetch error:', e);
         }
 
-        // LAYER 3: Supabase RPC (Final Fallback)
+        // LAYER 3: Supabase Direct Query (Fallback)
         console.log(`Cache MISS (Cloudflare): Fetching from Supabase for ${cacheKey}...`);
         
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -38,23 +39,87 @@ export async function getStudentDashboardDataCached() {
         }
         
         const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
-        const { data, error } = await supabase.rpc('get_student_dashboard_data', {
-            p_student_id: studentId,
-            p_class_name: className,
-            p_academic_year: academicYear
-        })
+        const normalizedClassName = normalizeClassName(className)
+        const now = new Date()
+        const nowIso = now.toISOString()
 
-        if (error) {
-            console.error('RPC Error (get_student_dashboard_data):', error)
-            throw error
+        // 1. Fetch Assignments (Active only, released)
+        const { data: rawAssignments, error: assignmentsError } = await supabase
+            .from('homework_assignments')
+            .select('*')
+            .ilike('class_name', normalizedClassName)
+            .lte('released_at', nowIso)
+            .or('is_archived.is.null,is_archived.is.false')
+            .order('deadline', { ascending: true })
+
+        if (assignmentsError) {
+            console.error('Fetch assignments error:', assignmentsError)
+            throw assignmentsError
+        }
+
+        // 2. Fetch Submissions for this student
+        const { data: submissions, error: submissionsError } = await supabase
+            .from('homework_submissions')
+            .select('*')
+            .eq('student_id_text', studentId)
+
+        if (submissionsError) {
+            console.error('Fetch submissions error:', submissionsError)
+            throw submissionsError
+        }
+
+        // 3. Fetch Announcements
+        const { data: announcements, error: announcementsError } = await supabase
+            .from('announcements')
+            .select(`
+                id, title, content, is_pinned, created_at, sender_name,
+                author:profiles!author_id (full_name)
+            `)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(10)
+
+        if (announcementsError) {
+            console.error('Fetch announcements error:', announcementsError)
+        }
+
+        // Merge submissions into assignments
+        const submissionMap = new Map(submissions?.map(s => [s.assignment_id, s]) || [])
+        const assignmentsWithSubmissions = rawAssignments.map(a => ({
+            ...a,
+            submission: submissionMap.get(a.id) || null
+        }))
+
+        // Calculate Stats
+        const nextWeek = new Date(now)
+        nextWeek.setDate(nextWeek.getDate() + 7)
+
+        const unsubmittedCount = assignmentsWithSubmissions.filter(a => !a.submission).length
+        const completedCount = assignmentsWithSubmissions.filter(a => !!a.submission).length
+        const submissionPoints = assignmentsWithSubmissions.reduce((sum, a) => sum + (a.submission?.score || 0), 0)
+        const dueThisWeekCount = assignmentsWithSubmissions.filter(a => {
+            if (!a.deadline) return false
+            const deadline = new Date(a.deadline)
+            return deadline >= now && deadline <= nextWeek
+        }).length
+
+        const result = {
+            stats: {
+                unsubmittedCount,
+                completedCount,
+                submissionPoints,
+                dueThisWeekCount
+            },
+            recentAssignments: assignmentsWithSubmissions.slice(0, 10),
+            announcements: announcements || []
         }
 
         // Update Cloudflare Snapshot for next time
-        if (data) {
-            await pushCloudflareSnapshot(cacheKey, data).catch(console.error);
+        if (result) {
+            await pushCloudflareSnapshot(cacheKey, result).catch(console.error);
         }
 
-        return data
+        return result
     }
 
     // Cache the result based on student identity and class
