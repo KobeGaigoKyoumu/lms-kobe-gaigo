@@ -7,6 +7,7 @@ import { Calendar, ChevronLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/client'
+import { getStudentSession } from '@/app/actions/studentAuth'
 
 export default function HomeworkPage({ params }) {
     const resolvedParams = use(params)
@@ -27,10 +28,9 @@ export default function HomeworkPage({ params }) {
             try {
                 const supabase = createClient()
                 
-                // Get session
-                const resSession = await fetch('/api/auth/student-session')
-                const session = await resSession.json()
-                if (!session || session.error) throw new Error('Unauthorized')
+                // Get session via server action
+                const session = await getStudentSession()
+                if (!session) throw new Error('Unauthorized')
 
                 // Fetch assignment and submission in one go
                 // Note: We use the admin client logic via RPC or simple select if RLS allows
