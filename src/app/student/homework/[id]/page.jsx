@@ -7,7 +7,7 @@ import { Calendar, ChevronLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/client'
-import { getStudentSession } from '@/app/actions/studentAuth'
+import { getAssignmentDetails } from '@/app/actions/homework'
 
 export default function HomeworkPage({ params }) {
     const resolvedParams = use(params)
@@ -26,37 +26,16 @@ export default function HomeworkPage({ params }) {
         let isMounted = true
         async function fetchAssignment() {
             try {
-                const supabase = createClient()
+                // Use the ultra-safe server action that bypasses RLS using Admin Client
+                const data = await getAssignmentDetails(id)
                 
-                // Get session via server action
-                const session = await getStudentSession()
-                if (!session) throw new Error('Unauthorized')
-
-                // 1. Fetch assignment first
-                const { data: assignmentData, error: assignmentError } = await supabase
-                    .from('homework_assignments')
-                    .select('*')
-                    .eq('id', id)
-                    .single()
-                
-                if (assignmentError || !assignmentData) {
+                if (!data || data.error) {
                     if (isMounted) setError('Not Found')
                     return
                 }
 
-                // 2. Fetch submission separately if assignment exists
-                const { data: submissionData } = await supabase
-                    .from('homework_submissions')
-                    .select('*')
-                    .eq('assignment_id', id)
-                    .eq('student_id_text', session.studentId)
-                    .maybeSingle()
-
                 if (isMounted) {
-                    setAssignment({
-                        ...assignmentData,
-                        submission: submissionData || null
-                    })
+                    setAssignment(data)
                 }
             } catch (err) {
                 console.error(err)
