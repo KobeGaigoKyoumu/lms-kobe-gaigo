@@ -6,6 +6,7 @@ import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
 import { Loader2 } from 'lucide-react'
 import { getStudentAnnouncements } from '@/app/actions/announcements'
+import { getStudentSession } from '@/app/actions/studentAuth'
 
 export default function StudentAnnouncementsPage() {
     const [announcements, setAnnouncements] = useState([])
@@ -16,11 +17,8 @@ export default function StudentAnnouncementsPage() {
         let isMounted = true
         const fetchAnnouncements = async () => {
             try {
-                const supabase = createClient()
-                
-                // Get student session from our helper API
-                const resSession = await fetch('/api/auth/student-session')
-                const session = await resSession.json()
+                // Get student session from server action
+                const session = await getStudentSession()
 
                 if (!session || session.error) throw new Error('Unauthorized')
 
