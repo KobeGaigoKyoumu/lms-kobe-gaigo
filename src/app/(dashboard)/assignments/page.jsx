@@ -6,6 +6,8 @@ import { Plus } from 'lucide-react'
 
 
 
+export const dynamic = 'force-dynamic'
+
 export default async function AssignmentsPage() {
     const [assignments, classes] = await Promise.all([
         getTeacherAssignments(),

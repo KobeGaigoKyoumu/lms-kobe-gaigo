@@ -6,8 +6,8 @@ import { revalidateTag, unstable_cache as next_unstable_cache } from 'next/cache
 import { getAdminMemberSession } from './adminAuth'
 import { normalizeClassName } from '@/lib/utils'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE'
 
 // Initialize Admin Client
 const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -159,12 +159,9 @@ export async function deleteAnnouncement(id) {
     }
 }
 
-// Global variable to store memoized cache function
-let _cachedAnnouncementsFunc = null;
-
 function getCachedAnnouncementsInternal() {
-  if (!_cachedAnnouncementsFunc) {
-    _cachedAnnouncementsFunc = next_unstable_cache(
+  if (!global._cachedAnnouncementsFunc) {
+    global._cachedAnnouncementsFunc = next_unstable_cache(
       async () => {
         try {
           const { data, error } = await adminSupabase
@@ -196,11 +193,11 @@ function getCachedAnnouncementsInternal() {
           return { data: [], error: e.message }
         }
       },
-      ['announcements-list-v1'],
+      ['announcements-list-v1-final'],
       { tags: ['announcements'], revalidate: 3600 }
     );
   }
-  return _cachedAnnouncementsFunc();
+  return global._cachedAnnouncementsFunc();
 }
 
 export async function getAnnouncements() {
@@ -216,7 +213,7 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
     }
 
     try {
-        const { data, error } = await getCachedAnnouncements();
+        const { data, error } = await getAnnouncements();
         if (error) throw new Error(error);
 
         const now = new Date();

@@ -5,69 +5,85 @@ import { createClient } from '@/lib/supabase/server'
 import { normalizeClassName } from '@/lib/utils'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
-import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache'
+import { revalidatePath, unstable_cache as next_unstable_cache, revalidateTag } from 'next/cache'
 import { uploadToImageKit } from './imagekit'
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE'
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
 // Cache classes list for 1 hour
-const _getClassesList = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        const { data: classes, error } = await supabase
-            .from('classes')
-            .select('*')
-            .eq('academic_year', 2026) // Filter for current year
-            .order('name', { ascending: true })
+async function _getClassesListInternal() {
+    const supabase = createAdminClient()
+    const { data: classes, error } = await supabase
+        .from('classes')
+        .select('*')
+        .eq('academic_year', 2026) // Filter for current year
+        .order('name', { ascending: true })
 
-        if (error) {
-            console.error('Fetch classes error:', error)
-            return []
-        }
-        return classes
-    },
-    ['classes-list-v5'],
-    { tags: ['classes'], revalidate: 3600 }
-)
+    if (error) {
+        console.error('Fetch classes error:', error)
+        return []
+    }
+    return classes
+}
+
+let _cachedClassesListFunc = null;
+function getCachedClassesList() {
+    if (!_cachedClassesListFunc) {
+        _cachedClassesListFunc = next_unstable_cache(
+            _getClassesListInternal,
+            ['classes-list-v5'],
+            { tags: ['classes'], revalidate: 3600 }
+        );
+    }
+    return _cachedClassesListFunc();
+}
 
 export async function getClassesList() {
-    return _getClassesList()
+    return getCachedClassesList()
 }
 
 // Fetch all unique subject names from the timetable (schedules)
-const _getTimetableSubjects = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        const { data: schedules, error } = await supabase
-            .from('schedules')
-            .select('subject')
-            .not('subject', 'is', null)
-        
-        if (error) {
-            console.error('Fetch timetable subjects error:', error)
-            return []
-        }
+async function _getTimetableSubjectsInternal() {
+    const supabase = createAdminClient()
+    const { data: schedules, error } = await supabase
+        .from('schedules')
+        .select('subject')
+        .not('subject', 'is', null)
+    
+    if (error) {
+        console.error('Fetch timetable subjects error:', error)
+        return []
+    }
 
-        // Extract unique subject names and filter out empty strings
-        const subjects = [...new Set(
-            schedules
-                .map(s => s.subject.trim())
-                .filter(s => s.length > 0)
-        )].sort()
+    // Extract unique subject names and filter out empty strings
+    const subjects = [...new Set(
+        schedules
+            .map(s => s.subject.trim())
+            .filter(s => s.length > 0)
+    )].sort()
 
-        return subjects
-    },
-    ['timetable-subjects-list-v2'],
-    { tags: ['schedules'], revalidate: 3600 }
-)
+    return subjects
+}
+
+let _cachedTimetableSubjectsFunc = null;
+function getCachedTimetableSubjects() {
+    if (!_cachedTimetableSubjectsFunc) {
+        _cachedTimetableSubjectsFunc = next_unstable_cache(
+            _getTimetableSubjectsInternal,
+            ['timetable-subjects-list-v2'],
+            { tags: ['schedules'], revalidate: 3600 }
+        );
+    }
+    return _cachedTimetableSubjectsFunc();
+}
 
 export async function getTimetableSubjects() {
-    return _getTimetableSubjects()
+    return getCachedTimetableSubjects()
 }
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
@@ -172,24 +188,31 @@ export async function getStudentAssignments() {
 }
 
 // Internal cached assignment fetcher (Ultra-safe select('*'))
-const _getCachedAssignment = unstable_cache(
-    async (id) => {
-        const supabase = createAdminClient()
-        const { data: assignment, error } = await supabase
-            .from('homework_assignments')
-            .select('*')
-            .eq('id', id)
-            .single()
+async function _getAssignmentInternal(id) {
+    const supabase = createAdminClient()
+    const { data: assignment, error } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', id)
+        .single()
 
-        if (error) {
-            console.error('Error fetching assignment detail:', error)
-            return null
-        }
-        return assignment
-    },
-    ['assignment-details-v2'],
-    { tags: ['homework-assignments'], revalidate: 3600 }
-)
+    if (error) {
+        console.error('Error fetching assignment detail:', error)
+        return null
+    }
+    return assignment
+}
+
+function getCachedAssignment(id) {
+    if (!global._cachedAssignmentFunc) {
+        global._cachedAssignmentFunc = next_unstable_cache(
+            async (id) => _getAssignmentInternal(id),
+            ['assignment-details-v3-final'],
+            { tags: ['homework-assignments'], revalidate: 3600 }
+        );
+    }
+    return global._cachedAssignmentFunc(id);
+}
 
 // Fetch a single assignment details
 export async function getAssignmentDetails(id) {
@@ -199,7 +222,7 @@ export async function getAssignmentDetails(id) {
     const supabase = createAdminClient()
 
     // 1. Get Assignment (Cached)
-    const assignment = await _getCachedAssignment(id)
+    const assignment = await getCachedAssignment(id)
 
     if (!assignment) {
         console.warn('Assignment not found:', id)
@@ -442,33 +465,43 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     return { success: true }
 }
 
-const _getTeacherAssignments = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        const { data: assignments, error } = await supabase
-            .from('homework_assignments')
-            .select('*')
-            .order('created_at', { ascending: false })
+async function _getTeacherAssignmentsInternal() {
+    const supabase = createAdminClient()
+    const { data: assignments, error } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-        if (error) {
-            console.error('Fetch teacher assignments error:', error)
-            return []
-        }
+    if (error) {
+        console.error('Fetch teacher assignments error:', error)
+        return []
+    }
 
-        return assignments
-    },
-    ['teacher-assignments-list'],
-    { tags: ['homework-assignments'], revalidate: 3600 }
-)
+    return assignments
+}
+
+let _cachedTeacherAssignmentsFunc = null;
+function getCachedTeacherAssignments() {
+    if (!_cachedTeacherAssignmentsFunc) {
+        _cachedTeacherAssignmentsFunc = next_unstable_cache(
+            _getTeacherAssignmentsInternal,
+            ['teacher-assignments-list'],
+            { tags: ['homework-assignments'], revalidate: 3600 }
+        );
+    }
+    return _cachedTeacherAssignmentsFunc();
+}
 
 export async function getTeacherAssignments() {
-    return _getTeacherAssignments()
+    return getCachedTeacherAssignments()
 }
 
 export async function getAssignmentsByClass(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
     
-    const fetcher = unstable_cache(
+    // We can still use next_unstable_cache directly inside the function if we don't call it at top level,
+    // but for consistency with others, let's use a memoized factory.
+    const fetcher = next_unstable_cache(
         async () => {
             const supabase = createAdminClient()
             let query = supabase
@@ -621,103 +654,118 @@ export async function uploadSubmissionFile(formData) {
     }
 }
 
-const _getAllStudentSubmissionStats = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        const { data: submissions, error } = await supabase
-            .from('homework_submissions')
-            .select('student_id_text, score, status')
+async function _getAllStudentSubmissionStatsInternal() {
+    const supabase = createAdminClient()
+    const { data: submissions, error } = await supabase
+        .from('homework_submissions')
+        .select('student_id_text, score, status')
 
-        if (error) {
-            console.error('Error fetching all stats:', error)
-            return []
+    if (error) {
+        console.error('Error fetching all stats:', error)
+        return []
+    }
+
+    const statsMap = new Map()
+    submissions.forEach(sub => {
+        if (!statsMap.has(sub.student_id_text)) {
+            statsMap.set(sub.student_id_text, {
+                count: 0,
+                totalScore: 0
+            })
         }
+        const stat = statsMap.get(sub.student_id_text)
+        if (sub.status === 'submitted' || sub.status === 'graded') {
+            stat.count += 1
+            stat.totalScore += (sub.score || 0)
+        }
+    })
 
-        const statsMap = new Map()
-        submissions.forEach(sub => {
-            if (!statsMap.has(sub.student_id_text)) {
-                statsMap.set(sub.student_id_text, {
-                    count: 0,
-                    totalScore: 0
-                })
-            }
+    return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
+        student_id_text: studentId,
+        submission_count: stat.count,
+        total_score: stat.totalScore
+    }))
+}
+
+let _cachedAllStudentSubmissionStatsFunc = null;
+function getCachedAllStudentSubmissionStats() {
+    if (!_cachedAllStudentSubmissionStatsFunc) {
+        _cachedAllStudentSubmissionStatsFunc = next_unstable_cache(
+            _getAllStudentSubmissionStatsInternal,
+            ['all-student-submission-stats-v1'],
+            { tags: ['homework-stats'], revalidate: 3600 }
+        );
+    }
+    return _cachedAllStudentSubmissionStatsFunc();
+}
+
+export async function getAllStudentSubmissionStats() {
+    return getCachedAllStudentSubmissionStats()
+}
+
+async function _getClassSubmissionStatsInternal(className) {
+    const supabase = createAdminClient()
+    const { data: students } = await supabase
+        .from('students')
+        .select('student_id_text')
+        .eq('class_name', className)
+        .eq('status', 'active')
+
+    if (!students || students.length === 0) return []
+
+    const studentIds = students.map(s => s.student_id_text)
+
+    const { data: submissions, error } = await supabase
+        .from('homework_submissions')
+        .select('student_id_text, score, status')
+        .in('student_id_text', studentIds)
+
+    if (error) {
+        console.error('Error fetching class stats:', error)
+        return []
+    }
+
+    const statsMap = new Map()
+    studentIds.forEach(id => {
+        statsMap.set(id, { count: 0, totalScore: 0 })
+    })
+
+    submissions.forEach(sub => {
+        if (statsMap.has(sub.student_id_text)) {
             const stat = statsMap.get(sub.student_id_text)
             if (sub.status === 'submitted' || sub.status === 'graded') {
                 stat.count += 1
                 stat.totalScore += (sub.score || 0)
             }
-        })
+        }
+    })
 
-        return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
-            student_id_text: studentId,
-            submission_count: stat.count,
-            total_score: stat.totalScore
-        }))
-    },
-    ['all-student-submission-stats-v1'],
-    { tags: ['homework-stats'], revalidate: 3600 }
-)
-
-export async function getAllStudentSubmissionStats() {
-    return _getAllStudentSubmissionStats()
+    return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
+        student_id_text: studentId,
+        submission_count: stat.count,
+        total_score: stat.totalScore
+    }))
 }
 
-const _getClassSubmissionStats = unstable_cache(
-    async (className) => {
-        const supabase = createAdminClient()
-        const { data: students } = await supabase
-            .from('students')
-            .select('student_id_text')
-            .eq('class_name', className)
-            .eq('status', 'active')
-
-        if (!students || students.length === 0) return []
-
-        const studentIds = students.map(s => s.student_id_text)
-
-        const { data: submissions, error } = await supabase
-            .from('homework_submissions')
-            .select('student_id_text, score, status')
-            .in('student_id_text', studentIds)
-
-        if (error) {
-            console.error('Error fetching class stats:', error)
-            return []
-        }
-
-        const statsMap = new Map()
-        studentIds.forEach(id => {
-            statsMap.set(id, { count: 0, totalScore: 0 })
-        })
-
-        submissions.forEach(sub => {
-            if (statsMap.has(sub.student_id_text)) {
-                const stat = statsMap.get(sub.student_id_text)
-                if (sub.status === 'submitted' || sub.status === 'graded') {
-                    stat.count += 1
-                    stat.totalScore += (sub.score || 0)
-                }
-            }
-        })
-
-        return Array.from(statsMap.entries()).map(([studentId, stat]) => ({
-            student_id_text: studentId,
-            submission_count: stat.count,
-            total_score: stat.totalScore
-        }))
-    },
-    ['class-submission-stats'],
-    { tags: ['homework-stats'], revalidate: 3600 }
-)
+function getCachedClassSubmissionStats(className) {
+    if (!global._cachedClassSubmissionStatsFunc) {
+        global._cachedClassSubmissionStatsFunc = next_unstable_cache(
+            async (className) => _getClassSubmissionStatsInternal(className),
+            ['class-submission-stats-v2-final'],
+            { tags: ['homework-stats'], revalidate: 3600 }
+        );
+    }
+    return global._cachedClassSubmissionStatsFunc(className);
+}
 
 export async function getClassSubmissionStats(className) {
-    return _getClassSubmissionStats(className)
+    return getCachedClassSubmissionStats(className)
 }
 
 export async function getClassSubmissionMatrix(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
 
-    const fetcher = unstable_cache(
+    const fetcher = next_unstable_cache(
         async () => {
             const supabase = createAdminClient()
 

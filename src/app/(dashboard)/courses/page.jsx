@@ -9,6 +9,8 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 import { fetchCachedCourses } from '@/app/actions/courseData'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CoursesPage() {
     const adminMember = await getAdminMemberSession()
 
