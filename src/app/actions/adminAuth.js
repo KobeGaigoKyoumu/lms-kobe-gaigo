@@ -4,7 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 
 const COOKIE_NAME = 'kobe_admin_member'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
@@ -126,43 +126,49 @@ export async function getAdminMembers() {
     }
 }
 
-// Fetch member names only (for login dropdown)
-// Cache the member names list
-const getCachedMemberNames = unstable_cache(
-    async () => {
-        try {
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-            const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'MISSING'
-            
-            if (!supabaseUrl || supabaseServiceKey === 'MISSING') {
-                console.warn('getAdminMemberNames: Missing Supabase environment variables');
-                return []
-            }
+// Global variable to store memoized cache function
+let _cachedMemberNamesFunc = null;
 
-            const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
-            const { data, error } = await supabase
-                .from('admin_members')
-                .select('name')
-                .order('name', { ascending: true })
+function getCachedMemberNamesInternal() {
+    if (!_cachedMemberNamesFunc) {
+        _cachedMemberNamesFunc = next_unstable_cache(
+            async () => {
+                try {
+                    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+                    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'MISSING'
+                    
+                    if (!supabaseUrl || supabaseServiceKey === 'MISSING') {
+                        console.warn('getAdminMemberNames: Missing Supabase environment variables');
+                        return []
+                    }
 
-            if (error) {
-                console.error('getAdminMemberNames DB Error:', error);
-                return []
-            }
-            return (data || []).map(m => m.name)
-        } catch (e) {
-            console.error('getAdminMemberNames (Cache) Error:', e)
-            return []
-        }
-    },
-    ['admin-member-names-v2'],
-    { tags: ['admin_members'] }
-)
+                    const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey)
+                    const { data, error } = await supabase
+                        .from('admin_members')
+                        .select('name')
+                        .order('name', { ascending: true })
+
+                    if (error) {
+                        console.error('getAdminMemberNames DB Error:', error);
+                        return []
+                    }
+                    return (data || []).map(m => m.name)
+                } catch (e) {
+                    console.error('getAdminMemberNames (Cache) Error:', e)
+                    return []
+                }
+            },
+            ['admin-member-names-v2'],
+            { tags: ['admin_members'] }
+        )
+    }
+    return _cachedMemberNamesFunc();
+}
 
 // Fetch member names only (for login dropdown)
 export async function getAdminMemberNames() {
     try {
-        return await getCachedMemberNames()
+        return await getCachedMemberNamesInternal()
     } catch (e) {
         console.error('getAdminMemberNames Wrapper Error:', e)
         return []

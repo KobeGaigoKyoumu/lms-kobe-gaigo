@@ -9,8 +9,37 @@ export default function CareerTab({ careerStats = null }) {
 
     const stats = useMemo(() => {
         if (!careerStats) return null
-        const years = Object.keys(careerStats).filter(key => /^\d{4}$/.test(key))
-        return careerStats[selectedYear] || careerStats[years[0]] || null
+        
+        // Transform yearlyTrends array into a lookup object
+        const trendMap = {}
+        if (careerStats.yearlyTrends && Array.isArray(careerStats.yearlyTrends)) {
+            careerStats.yearlyTrends.forEach(trend => {
+                // Map the new JSON structure to the props expected by the component
+                const mappedTrend = {
+                    ...trend,
+                    summary: {
+                        placement_rate: trend.graduationRate || 0,
+                        university_count: trend.categories?.["大学"] || 0,
+                        vocational_count: trend.categories?.["専門学校"] || 0,
+                        others_count: (trend.total || 0) - (trend.categories?.["大学"] || 0) - (trend.categories?.["専門学校"] || 0)
+                    },
+                    destination_types: Object.entries(trend.categories || {}).map(([type, count]) => ({ type, count })),
+                    // For universities/vocational, we'd need to filter topDestinations but let's keep it simple for now or extract from topDestinations
+                    top_universities: (careerStats.topDestinations || [])
+                        .filter(d => (d.name?.includes("大学") || d.name?.includes("大学院")) && d.years?.[trend.year])
+                        .map(d => ({ name: d.name, count: d.years[trend.year] }))
+                        .sort((a, b) => b.count - a.count),
+                    top_vocational: (careerStats.topDestinations || [])
+                        .filter(d => !d.name?.includes("大学") && !d.name?.includes("大学院") && d.years?.[trend.year])
+                        .map(d => ({ name: d.name, count: d.years[trend.year] }))
+                        .sort((a, b) => b.count - a.count)
+                }
+                trendMap[String(trend.year)] = mappedTrend
+            })
+        }
+        
+        const years = Object.keys(trendMap).sort((a, b) => b - a)
+        return trendMap[selectedYear] || trendMap[years[0]] || null
     }, [careerStats, selectedYear])
 
     const chartOptions = {
@@ -40,11 +69,11 @@ export default function CareerTab({ careerStats = null }) {
                         value={selectedYear} 
                         onChange={(e) => setSelectedYear(e.target.value)}
                     >
-                        {Object.keys(careerStats)
-                            .filter(key => !isNaN(parseInt(key)) && key.length === 4)
-                            .sort((a, b) => b.localeCompare(a))
-                            .map(year => (
-                                <option key={year} value={year}>{year}年度</option>
+                        {(careerStats?.yearlyTrends || [])
+                            .slice()
+                            .sort((a, b) => b.year - a.year)
+                            .map(trend => (
+                                <option key={trend.year} value={String(trend.year)}>{trend.year}年度</option>
                             ))}
                     </select>
                 </div>

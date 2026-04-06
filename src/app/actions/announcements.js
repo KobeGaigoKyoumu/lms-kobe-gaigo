@@ -2,7 +2,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { revalidateTag, unstable_cache } from 'next/cache'
+import { revalidateTag, unstable_cache as next_unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 import { normalizeClassName } from '@/lib/utils'
 
@@ -159,47 +159,52 @@ export async function deleteAnnouncement(id) {
     }
 }
 
-/**
- * お知らせ一覧をキャッシュ付きで取得する
- */
-const getCachedAnnouncements = unstable_cache(
-  async () => {
-    try {
-      const { data, error } = await adminSupabase
-        .from('announcements')
-        .select(`
-          id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
-          target_type, target_class, target_grade, target_student_ids,
-          author:profiles!author_id (
-            id,
-            full_name,
-            avatar_url
-          ),
-          course:courses (
-            id,
-            title
-          )
-        `)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
+// Global variable to store memoized cache function
+let _cachedAnnouncementsFunc = null;
 
-      if (error) {
-        console.error("getAnnouncements DB error:", error);
-        return { data: [], error: error.message }
-      }
-      
-      return { data: data || [], error: null }
-    } catch (e) {
-      console.error("getAnnouncements exception:", e);
-      return { data: [], error: e.message }
-    }
-  },
-  ['announcements-list-v1'],
-  { tags: ['announcements'], revalidate: 3600 }
-)
+function getCachedAnnouncementsInternal() {
+  if (!_cachedAnnouncementsFunc) {
+    _cachedAnnouncementsFunc = next_unstable_cache(
+      async () => {
+        try {
+          const { data, error } = await adminSupabase
+            .from('announcements')
+            .select(`
+              id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
+              target_type, target_class, target_grade, target_student_ids,
+              author:profiles!author_id (
+                id,
+                full_name,
+                avatar_url
+              ),
+              course:courses (
+                id,
+                title
+              )
+            `)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false })
+
+          if (error) {
+            console.error("getAnnouncements DB error:", error);
+            return { data: [], error: error.message }
+          }
+          
+          return { data: data || [], error: null }
+        } catch (e) {
+          console.error("getAnnouncements exception:", e);
+          return { data: [], error: e.message }
+        }
+      },
+      ['announcements-list-v1'],
+      { tags: ['announcements'], revalidate: 3600 }
+    );
+  }
+  return _cachedAnnouncementsFunc();
+}
 
 export async function getAnnouncements() {
-    return await getCachedAnnouncements()
+    return await getCachedAnnouncementsInternal()
 }
 
 /**

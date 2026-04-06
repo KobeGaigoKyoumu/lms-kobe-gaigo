@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 import { pushCloudflareSnapshot } from './cloudflare'
 
@@ -9,7 +9,19 @@ import { pushCloudflareSnapshot } from './cloudflare'
  * Internal core logic for Grade Analytics.
  */
 async function getGradeAnalyticsDataInternal() {
-    console.log('Cache MISS: Fetching Grade Analytics from DB (Admin Client)...')
+    // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
+    try {
+        console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot (Grades)...')
+        const snapshot = await getCloudflareSnapshot('grades')
+        if (snapshot && snapshot.data) {
+            console.log('Cache HIT (Cloudflare): Using snapshot for grades.')
+            return snapshot
+        }
+    } catch (e) {
+        console.error('Cloudflare fetch failed for grades, falling back to DB:', e)
+    }
+
+    console.log('Cache MISS (Cloudflare): Fetching Grade Analytics from DB...')
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -41,16 +53,24 @@ async function getGradeAnalyticsDataInternal() {
     }
 }
 
-const getCachedGradeAnalytics = unstable_cache(
-    getGradeAnalyticsDataInternal,
-    ['grade-analytics-v3'],
-    { tags: ['grade-records', 'grade-analytics'], revalidate: 3600 }
-)
+// Global variable to store memoized cache function
+let _cachedGradeAnalyticsFunc = null;
+
+function getCachedGradeAnalyticsInternal() {
+    if (!_cachedGradeAnalyticsFunc) {
+        _cachedGradeAnalyticsFunc = next_unstable_cache(
+            getGradeAnalyticsDataInternal,
+            ['grade-analytics-v3'],
+            { tags: ['grade-records', 'grade-analytics'], revalidate: 3600 }
+        );
+    }
+    return _cachedGradeAnalyticsFunc();
+}
 
 export async function getGradeAnalyticsData(session) {
     if (!session) return { error: 'Unauthorized' }
     
-    const result = await getCachedGradeAnalytics()
+    const result = await getCachedGradeAnalyticsInternal()
 
     if (result && !result.error && result.data) {
         try {

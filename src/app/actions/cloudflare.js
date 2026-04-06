@@ -53,7 +53,7 @@ export async function getCloudflareSnapshot(type) {
     const apiSecret = process.env.CLOUDFLARE_API_SECRET;
 
     if (!workerUrl || !apiSecret) {
-        return { success: false, error: 'Config missing' };
+        return null;
     }
 
     let targetUrl = workerUrl;

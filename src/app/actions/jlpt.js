@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 import { pushCloudflareSnapshot, getCloudflareSnapshot } from './cloudflare'
 import { getEnhancedJlptStats } from '@/lib/jlpt'
@@ -18,7 +18,7 @@ async function getJlptAnalyticsDataInternal() {
     try {
         console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot...');
         const snapshot = await getCloudflareSnapshot('jlpt');
-        if (snapshot) {
+        if (snapshot && (snapshot.levelStats || snapshot.stats)) {
             console.log('Cache HIT (Cloudflare): Using snapshot.');
             return snapshot;
         }
@@ -59,12 +59,19 @@ async function getJlptAnalyticsDataInternal() {
     }
 }
 
-// Cache the JLPT analytics data for 1 hour
-const getCachedJlptAnalytics = unstable_cache(
-    getJlptAnalyticsDataInternal,
-    ['jlpt-analytics-v3'],
-    { tags: ['jlpt-analytics'], revalidate: 3600 }
-);
+// Global variable to store memoized cache function
+let _cachedJlptAnalyticsFunc = null;
+
+function getCachedJlptAnalyticsInternal() {
+    if (!_cachedJlptAnalyticsFunc) {
+        _cachedJlptAnalyticsFunc = next_unstable_cache(
+            getJlptAnalyticsDataInternal,
+            ['jlpt-analytics-v3'],
+            { tags: ['jlpt-analytics'], revalidate: 3600 }
+        );
+    }
+    return _cachedJlptAnalyticsFunc();
+}
 
 /**
  * Public function for Server Components
@@ -73,7 +80,7 @@ export async function getJlptAnalyticsData(session) {
     if (!session) return { error: 'Unauthorized' }
 
     console.log('getJlptAnalyticsData: Retrieving cached data...');
-    const result = await getCachedJlptAnalytics();
+    const result = await getCachedJlptAnalyticsInternal();
 
     // Proactively push to Cloudflare
     if (result && !result.error) {

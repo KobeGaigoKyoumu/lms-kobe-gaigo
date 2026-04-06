@@ -1,6 +1,6 @@
 'use server'
 
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
@@ -124,7 +124,7 @@ export async function getStudentDashboardDataCached() {
     }
 
     // Cache the result based on student identity and class
-    const cachedData = await unstable_cache(
+    const cachedData = await next_unstable_cache(
         async () => fetcher(session.studentId, session.className, session.academicYear),
         [`dashboard-v2-${session.studentId}`],
         {
