@@ -3,7 +3,7 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
-import { pushCloudflareSnapshot } from './cloudflare'
+import { pushCloudflareSnapshot, getCloudflareSnapshot } from './cloudflare'
 import { getEnhancedJlptStats } from '@/lib/jlpt'
 
 /**
@@ -11,10 +11,22 @@ import { getEnhancedJlptStats } from '@/lib/jlpt'
  * This function bypasses cookie requirements by using the Service Role.
  */
 async function getJlptAnalyticsDataInternal() {
-    console.log('Cache MISS: Calculating JLPT Analytics (Internal Logic)...');
-    
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
+    try {
+        console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot...');
+        const snapshot = await getCloudflareSnapshot('jlpt');
+        if (snapshot) {
+            console.log('Cache HIT (Cloudflare): Using snapshot.');
+            return snapshot;
+        }
+    } catch (e) {
+        console.error('Cloudflare fetch failed, falling back to DB:', e);
+    }
+
+    console.log('Cache MISS (Cloudflare): Fetching from Supabase...');
     if (!supabaseUrl || !supabaseServiceKey) {
         throw new Error('JLPT Analytics: Missing Supabase environment variables')
     }
