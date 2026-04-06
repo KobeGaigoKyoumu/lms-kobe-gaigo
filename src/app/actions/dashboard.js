@@ -69,19 +69,50 @@ export async function getStudentDashboardDataCached() {
         }
 
         // 3. Fetch Announcements
-        const { data: announcements, error: announcementsError } = await supabase
+        const { data: rawAnnouncements, error: announcementsError } = await supabase
             .from('announcements')
             .select(`
                 id, title, content, is_pinned, created_at, sender_name,
+                target_type, target_class, target_grade, target_student_ids,
                 author:profiles!author_id (full_name)
             `)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false })
-            .limit(10)
+            // Increase limit slightly before manual filtering to ensure we get enough items
+            .limit(30)
 
         if (announcementsError) {
             console.error('Fetch announcements error:', announcementsError)
         }
+
+        // Calculate student grade for filtering
+        const nowObj = new Date();
+        const currentYear = nowObj.getFullYear();
+        const isBeforeApril = nowObj.getMonth() < 3;
+        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+        const studentGrade = (academicYearBase - academicYear + 1).toString();
+        const normStudentClass = normalizeClassName(className);
+
+        const filteredAnnouncements = (rawAnnouncements || []).filter(a => {
+            const type = (a.target_type || 'all').toLowerCase();
+            
+            if (type === 'all' || type === '全体' || !a.target_type) return true;
+
+            if (type === 'grade' || type === '学年') {
+                return String(a.target_grade) === studentGrade;
+            }
+
+            if (type === 'class' || type === 'クラス') {
+                const normTargetClass = normalizeClassName(a.target_class || '');
+                return normTargetClass === normStudentClass;
+            }
+
+            if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
+                return a.target_student_ids.includes(studentId);
+            }
+
+            return false;
+        }).slice(0, 10); // Limit to top 10 after filtering
 
         // Merge submissions into assignments
         const submissionMap = new Map(submissions?.map(s => [s.assignment_id, s]) || [])
@@ -111,7 +142,7 @@ export async function getStudentDashboardDataCached() {
                 dueThisWeekCount
             },
             recentAssignments: assignmentsWithSubmissions.slice(0, 10),
-            announcements: announcements || []
+            announcements: filteredAnnouncements || []
         }
 
         // Update Cloudflare Snapshot for next time
