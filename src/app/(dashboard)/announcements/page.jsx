@@ -3,9 +3,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import AnnouncementList from './AnnouncementList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
-import { getAnnouncements } from '@/app/actions/announcement'
-
-export const dynamic = 'force-dynamic'
+import { getAnnouncements } from '@/app/actions/announcements'
 
 export default async function AnnouncementsPage() {
     const adminMember = await getAdminMemberSession()

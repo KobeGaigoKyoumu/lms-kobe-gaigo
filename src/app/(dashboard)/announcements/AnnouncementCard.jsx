@@ -84,7 +84,7 @@ export default function AnnouncementCard({ announcement, canEdit }) {
             <div className={styles.cardFooter}>
                 <div className={styles.author}>
                     <div className={styles.authorAvatar}>
-                        {announcement.author?.avatar_url ? (
+                        {announcement.author?.avatar_url && announcement.author.avatar_url !== 'undefined' && announcement.author.avatar_url !== 'null' ? (
                             <img src={toCDNUrl(announcement.author.avatar_url)} alt="" />
                         ) : (
                             (announcement.sender_name || announcement.admin_author_name || announcement.author?.full_name)?.[0] || '?'

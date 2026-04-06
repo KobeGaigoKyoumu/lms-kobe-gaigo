@@ -121,7 +121,7 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
             <div className={styles.userSection}>
                 <div className={styles.userInfo}>
                     <div className={styles.avatar}>
-                        {avatarUrl ? (
+                        {avatarUrl && avatarUrl !== 'undefined' && avatarUrl !== 'null' ? (
                             <img src={toCDNUrl(avatarUrl)} alt="" />
                         ) : (
                             getInitials(displayName)

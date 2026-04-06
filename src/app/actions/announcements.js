@@ -2,7 +2,8 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, unstable_cache } from 'next/cache'
+import { getAdminMemberSession } from './adminAuth'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -132,6 +133,8 @@ export async function deleteAnnouncement(id) {
             return { success: false, error: deleteError.message }
         }
 
+        revalidateTag('announcements')
+
         // 3. ストレージ内のファイルも削除
         if (announcement.file_urls && announcement.file_urls.length > 0) {
             const filesToDelete = announcement.file_urls
@@ -153,4 +156,46 @@ export async function deleteAnnouncement(id) {
         console.error('Unexpected Delete Error:', err)
         return { success: false, error: err.message }
     }
+}
+
+/**
+ * お知らせ一覧をキャッシュ付きで取得する
+ */
+const getCachedAnnouncements = unstable_cache(
+  async () => {
+    try {
+      const { data, error } = await adminSupabase
+        .from('announcements')
+        .select(`
+          id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
+          author:profiles!author_id (
+            id,
+            full_name,
+            avatar_url
+          ),
+          course:courses (
+            id,
+            title
+          )
+        `)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error("getAnnouncements DB error:", error);
+        return { data: [], error: error.message }
+      }
+      
+      return { data: data || [], error: null }
+    } catch (e) {
+      console.error("getAnnouncements exception:", e);
+      return { data: [], error: e.message }
+    }
+  },
+  ['announcements-list-v1'],
+  { tags: ['announcements'] }
+)
+
+export async function getAnnouncements() {
+    return await getCachedAnnouncements()
 }

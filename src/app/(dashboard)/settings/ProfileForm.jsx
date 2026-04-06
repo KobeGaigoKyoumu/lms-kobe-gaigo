@@ -57,7 +57,8 @@ export default function ProfileForm({ profile, user }) {
 
             <div className={styles.avatarSection}>
                 <div className={styles.avatar}>
-                    {profile?.avatar_url || user?.user_metadata?.avatar_url ? (
+                    {((profile?.avatar_url && profile.avatar_url !== 'undefined' && profile.avatar_url !== 'null') || 
+                      (user?.user_metadata?.avatar_url && user.user_metadata.avatar_url !== 'undefined' && user.user_metadata.avatar_url !== 'null')) ? (
                         <img
                             src={toCDNUrl(profile?.avatar_url || user?.user_metadata?.avatar_url)}
                             alt=""

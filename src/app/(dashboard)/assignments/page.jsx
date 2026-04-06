@@ -1,5 +1,5 @@
 import { getTeacherAssignments, getClassesList } from '@/app/actions/homework'
-export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import styles from './page.module.css'
 import { Plus } from 'lucide-react'

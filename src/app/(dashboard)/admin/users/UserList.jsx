@@ -112,7 +112,7 @@ export default function UserList({ users: initialUsers, currentUserId }) {
                                 <td>
                                     <div className={styles.userCell}>
                                         <div className={styles.avatar}>
-                                            {user.avatar_url ? (
+                                            {user.avatar_url && user.avatar_url !== 'undefined' && user.avatar_url !== 'null' ? (
                                                 <img src={toCDNUrl(user.avatar_url)} alt="" />
                                             ) : (
                                                 user.full_name?.[0] || '?'

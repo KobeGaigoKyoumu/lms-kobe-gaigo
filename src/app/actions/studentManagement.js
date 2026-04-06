@@ -260,6 +260,7 @@ export const performGradeReset = async (studentsData) => {
     revalidateTag('students')
     revalidateTag('jlpt-analytics')
     revalidateTag('homework-assignments')
+    revalidateTag('classes')
     return {
         success: true,
         graduatedCount,
