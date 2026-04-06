@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { unstable_cache as next_unstable_cache, revalidateTag } from 'next/cache'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { getAdminMemberSession } from './adminAuth'
 
 const getSupabaseAdmin = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
