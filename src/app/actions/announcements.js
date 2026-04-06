@@ -238,26 +238,35 @@ export async function getStudentAnnouncements({ studentId, className, academicYe
         // 手動フィルタリング
         const filteredAnnouncements = (data || []).filter(a => {
             const type = (a.target_type || 'all').toLowerCase();
-
+            
             // 全体向け
-            if (type === 'all') return true;
+            if (type === 'all' || type === '全体' || !a.target_type) {
+                return true;
+            }
 
             // 学年向け
-            if (type === 'grade') {
-                return String(a.target_grade) === studentGrade;
+            if (type === 'grade' || type === '学年') {
+                const match = String(a.target_grade) === studentGrade;
+                if (!match) console.log(`[getStudentAnnouncements] Skip grade: target=${a.target_grade}, student=${studentGrade}`);
+                return match;
             }
 
             // クラス向け
-            if (type === 'class') {
+            if (type === 'class' || type === 'クラス') {
                 const normTargetClass = normalizeClassName(a.target_class || '');
-                return normTargetClass === normStudentClass;
+                const match = normTargetClass === normStudentClass;
+                if (!match) console.log(`[getStudentAnnouncements] Skip class: target=${normTargetClass}, student=${normStudentClass}`);
+                return match;
             }
 
             // 個人向け
-            if (type === 'individual' && Array.isArray(a.target_student_ids)) {
-                return a.target_student_ids.includes(studentId);
+            if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
+                const match = a.target_student_ids.includes(studentId);
+                if (!match) console.log(`[getStudentAnnouncements] Skip individual: studentId=${studentId} not in ${a.target_student_ids}`);
+                return match;
             }
 
+            console.log(`[getStudentAnnouncements] Unknown target type: ${type}`);
             return false;
         });
 

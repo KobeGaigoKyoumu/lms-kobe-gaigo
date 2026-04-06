@@ -17,6 +17,9 @@ export default function StudentAnnouncementsPage() {
         let isMounted = true
         const fetchAnnouncements = async () => {
             try {
+                setLoading(true)
+                setError(null)
+
                 // Get student session from server action
                 const session = await getStudentSession()
 
@@ -33,7 +36,14 @@ export default function StudentAnnouncementsPage() {
                 if (isMounted) setAnnouncements(data || [])
             } catch (err) {
                 console.error('Failed to fetch student announcements:', err)
-                if (isMounted) setError('お知らせの取得に失敗しました。')
+                if (isMounted) {
+                    const message = err.message || ''
+                    if (message.includes('Server Action') || message.includes('not found')) {
+                        setError('最新の情報を取得するために、ページを強制的に再読み込み（Ctrl + F5）してください。')
+                    } else {
+                        setError('お知らせの取得に失敗しました。時間をおいて再度お試しください。')
+                    }
+                }
             } finally {
                 if (isMounted) setLoading(false)
             }
