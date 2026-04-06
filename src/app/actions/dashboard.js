@@ -15,7 +15,7 @@ export async function getStudentDashboardDataCached() {
     if (!session) return null
 
     const fetcher = async (studentId, className, academicYear) => {
-        const cacheKey = `dashboard-${studentId}`;
+        const cacheKey = `dashboard-v2-${studentId}`;
         
         // LAYER 2: Cloudflare Snapshot
         try {
@@ -68,7 +68,7 @@ export async function getStudentDashboardDataCached() {
             throw submissionsError
         }
 
-        // 3. Fetch Announcements
+        // 3. Fetch Announcements (Fetch all relevant metadata for filtering)
         const { data: rawAnnouncements, error: announcementsError } = await supabase
             .from('announcements')
             .select(`
@@ -78,41 +78,11 @@ export async function getStudentDashboardDataCached() {
             `)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false })
-            // Increase limit slightly before manual filtering to ensure we get enough items
-            .limit(30)
+            .limit(50) // Higher limit for raw data
 
         if (announcementsError) {
             console.error('Fetch announcements error:', announcementsError)
         }
-
-        // Calculate student grade for filtering
-        const nowObj = new Date();
-        const currentYear = nowObj.getFullYear();
-        const isBeforeApril = nowObj.getMonth() < 3;
-        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
-        const studentGrade = (academicYearBase - academicYear + 1).toString();
-        const normStudentClass = normalizeClassName(className);
-
-        const filteredAnnouncements = (rawAnnouncements || []).filter(a => {
-            const type = (a.target_type || 'all').toLowerCase();
-            
-            if (type === 'all' || type === '全体' || !a.target_type) return true;
-
-            if (type === 'grade' || type === '学年') {
-                return String(a.target_grade) === studentGrade;
-            }
-
-            if (type === 'class' || type === 'クラス') {
-                const normTargetClass = normalizeClassName(a.target_class || '');
-                return normTargetClass === normStudentClass;
-            }
-
-            if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
-                return a.target_student_ids.includes(studentId);
-            }
-
-            return false;
-        }).slice(0, 10); // Limit to top 10 after filtering
 
         // Merge submissions into assignments
         const submissionMap = new Map(submissions?.map(s => [s.assignment_id, s]) || [])
@@ -142,10 +112,10 @@ export async function getStudentDashboardDataCached() {
                 dueThisWeekCount
             },
             recentAssignments: assignmentsWithSubmissions.slice(0, 10),
-            announcements: filteredAnnouncements || []
+            rawAnnouncements: rawAnnouncements || [] // Store raw for later filtering
         }
 
-        // Update Cloudflare Snapshot for next time
+        // Update Cloudflare Snapshot
         if (result) {
             await pushCloudflareSnapshot(cacheKey, result).catch(console.error);
         }
@@ -156,15 +126,47 @@ export async function getStudentDashboardDataCached() {
     // Cache the result based on student identity and class
     const cachedData = await unstable_cache(
         async () => fetcher(session.studentId, session.className, session.academicYear),
-        [`dashboard-${session.studentId}`],
+        [`dashboard-v2-${session.studentId}`],
         {
             tags: ['homework-assignments', 'announcements', 'student-stats'],
-            revalidate: 3600 // Fallback revalidation (1 hour)
+            revalidate: 3600
         }
     )()
 
+    // --- ROBUST FILTERING (Always runs, even on cache hit) ---
+    const nowObj = new Date();
+    const currentYear = nowObj.getFullYear();
+    const isBeforeApril = nowObj.getMonth() < 3;
+    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+    const studentGrade = (academicYearBase - session.academicYear + 1).toString();
+    const normStudentClass = normalizeClassName(session.className);
+
+    const filteredAnnouncements = (cachedData?.rawAnnouncements || []).filter(a => {
+        const type = (a.target_type || 'all').toLowerCase();
+        
+        if (type === 'all' || type === '全体' || !a.target_type) return true;
+
+        if (type === 'grade' || type === '学年') {
+            return String(a.target_grade) === studentGrade;
+        }
+
+        if (type === 'class' || type === 'クラス') {
+            const normTargetClass = normalizeClassName(a.target_class || '');
+            return normTargetClass === normStudentClass;
+        }
+
+        if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
+            return a.target_student_ids.includes(session.studentId);
+        }
+
+        return false;
+    }).slice(0, 10);
+
     return {
         session,
-        content: cachedData
+        content: {
+            ...cachedData,
+            announcements: filteredAnnouncements
+        }
     }
 }
