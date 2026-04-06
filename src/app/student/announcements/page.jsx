@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
 import { Loader2 } from 'lucide-react'
+import { getStudentAnnouncements } from '@/app/actions/announcements'
 
 export default function StudentAnnouncementsPage() {
     const [announcements, setAnnouncements] = useState([])
@@ -23,15 +24,14 @@ export default function StudentAnnouncementsPage() {
 
                 if (!session || session.error) throw new Error('Unauthorized')
 
-                // Use the new optimized RPC for announcements
-                const { data, error: rpcError } = await supabase
-                    .rpc('get_student_announcements', {
-                        p_student_id: session.studentId,
-                        p_class_name: session.className,
-                        p_academic_year: session.academicYear
-                    })
+                // Use the new server action instead of RPC
+                const { data, error: fetchError } = await getStudentAnnouncements({
+                    studentId: session.studentId,
+                    className: session.className,
+                    academicYear: session.academicYear
+                })
 
-                if (rpcError) throw rpcError
+                if (fetchError) throw new Error(fetchError)
                 if (isMounted) setAnnouncements(data || [])
             } catch (err) {
                 console.error('Failed to fetch student announcements:', err)

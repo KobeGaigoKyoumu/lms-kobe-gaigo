@@ -199,3 +199,62 @@ const getCachedAnnouncements = unstable_cache(
 export async function getAnnouncements() {
     return await getCachedAnnouncements()
 }
+
+/**
+ * 学生向けのお知らせを取得する（フィルタリング機能付き）
+ */
+export async function getStudentAnnouncements({ studentId, className, academicYear }) {
+    if (!SUPABASE_SERVICE_KEY) {
+        return { data: [], error: 'SUPABASE_SERVICE_ROLE_KEY is missing' }
+    }
+
+    try {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const isBeforeApril = now.getMonth() < 3; // 0-indexed, 3 is April
+        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+        const studentGrade = (academicYearBase - academicYear + 1).toString();
+
+        const { data, error } = await adminSupabase
+            .from('announcements')
+            .select(`
+                id, title, content, is_pinned, created_at, sender_name, target_type, target_class, target_grade, target_student_ids, file_urls,
+                author:profiles!author_id (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // 手動フィルタリング (複雑なOR条件をJS側で処理)
+        const filteredAnnouncements = (data || []).filter(a => {
+            // 全体向け
+            if (a.target_type === 'all' || !a.target_type) return true;
+
+            // 学年向け
+            if (a.target_type === 'grade' && String(a.target_grade) === studentGrade) return true;
+
+            // クラス向け
+            if (a.target_type === 'class') {
+                const normTargetClass = (a.target_class || '').replace(/\s+/g, '');
+                const normStudentClass = (className || '').replace(/\s+/g, '');
+                if (normTargetClass === normStudentClass) return true;
+            }
+
+            // 個人向け
+            if (a.target_type === 'individual' && Array.isArray(a.target_student_ids)) {
+                if (a.target_student_ids.includes(studentId)) return true;
+            }
+
+            return false;
+        });
+
+        return { data: filteredAnnouncements, error: null };
+    } catch (err) {
+        console.error('getStudentAnnouncements Error:', err);
+        return { data: [], error: err.message };
+    }
+}
