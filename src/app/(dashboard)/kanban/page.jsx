@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import styles from './page.module.css'
 import KanbanBoard from './KanbanBoard'
-import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanban'
+import { getKanbanColumns, getKanbanCards, getKanbanLabels, getAllKanbanReminders } from '@/app/actions/kanbanData'
 
 export default async function KanbanPage() {
     // Check for admin/teacher session (cookie-based only for better CPU performance)
