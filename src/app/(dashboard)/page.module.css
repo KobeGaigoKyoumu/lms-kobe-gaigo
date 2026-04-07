@@ -53,15 +53,14 @@
     display: flex;
     align-items: center;
     position: relative;
-    overflow: hidden;
-    transition: all var(--transition-base);
+    transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
     box-shadow: var(--shadow-md);
 }
 
 .statCard:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-xl);
-    border-color: var(--primary-300);
+    border-color: var(--primary-400);
 }
 
 .statIcon {
@@ -97,8 +96,9 @@
 
 .classList {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-top: 2px;
 }
 
@@ -107,6 +107,7 @@
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 .classMore {
