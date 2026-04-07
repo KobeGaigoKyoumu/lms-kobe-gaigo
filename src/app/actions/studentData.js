@@ -74,5 +74,5 @@ export const getStudentDetail = async (studentId) => {
 // Allow cache revalidation manually if needed
 import { revalidateTag } from 'next/cache'
 export const revalidateStudents = async () => {
-    revalidateTag('students')
+    revalidateTag('students', "max")
 }

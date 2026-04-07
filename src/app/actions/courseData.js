@@ -76,7 +76,7 @@ export async function createCourse(formData) {
 
     if (error) throw error
 
-    revalidateTag('courses')
+    revalidateTag('courses', 'max')
     return data
 }
 
@@ -92,7 +92,7 @@ export async function updateCourse(id, updates) {
         .eq('id', id)
 
     if (error) throw error
-    revalidateTag('courses')
+    revalidateTag('courses', 'max')
     return { success: true }
 }
 
@@ -104,6 +104,6 @@ export async function deleteCourse(id) {
         .eq('id', id)
 
     if (error) throw error
-    revalidateTag('courses')
+    revalidateTag('courses', 'max')
     return { success: true }
 }

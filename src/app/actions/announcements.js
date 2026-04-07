@@ -90,7 +90,7 @@ export async function createAnnouncement(announcementData) {
 
         if (error) throw error
 
-        revalidateTag('announcements')
+        revalidateTag('announcements', 'max')
         return { success: true, data }
     } catch (err) {
         console.error('Create Announcement Error:', err)
@@ -133,7 +133,7 @@ export async function deleteAnnouncement(id) {
             return { success: false, error: deleteError.message }
         }
 
-        revalidateTag('announcements')
+        revalidateTag('announcements', 'max')
 
         // 3. ストレージ内のファイルも削除
         if (announcement.file_urls && announcement.file_urls.length > 0) {

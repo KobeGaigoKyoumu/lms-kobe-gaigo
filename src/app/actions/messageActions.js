@@ -199,7 +199,7 @@ export async function sendMessage(studentId, content, options = {}) {
         if (error) throw error
 
         // Invalidate the conversations cache so listing updates immediately
-        revalidateTag('chat-messages')
+        revalidateTag('chat-messages', 'max')
         return { success: true, data }
     } catch (err) {
         console.error('Send message error:', err)

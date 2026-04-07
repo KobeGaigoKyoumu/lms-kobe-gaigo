@@ -61,7 +61,7 @@ export async function updateClass(id, formData) {
     console.log('[ACTION] updateClass: Success. Revalidating paths...')
 
     // Comprehensive revalidation
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     revalidatePath('/classes')
     revalidatePath(`/classes/${id}`)
     revalidatePath('/student/course')
@@ -85,7 +85,7 @@ export async function deleteClass(id) {
 
     console.log('[ACTION] deleteClass: Success. Revalidating paths...')
 
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     revalidatePath('/classes')
     revalidatePath('/student/course')
 

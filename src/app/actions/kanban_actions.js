@@ -31,7 +31,7 @@ export async function addKanbanColumn(title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { data, error: error?.message }
 }
 
@@ -44,7 +44,7 @@ export async function updateKanbanColumnTitle(colId, title) {
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, data, error: error?.message }
 }
 
@@ -55,7 +55,7 @@ export async function deleteKanbanColumn(colId) {
     .delete()
     .eq("id", colId)
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, error: error?.message }
 }
 
@@ -67,7 +67,7 @@ export async function updateKanbanColumnPosition(colId, newPosition, userId) {
     .update({ order_index: newPosition })
     .eq("id", colId)
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, error: error?.message }
 }
 
@@ -86,7 +86,7 @@ export async function addKanbanCard(columnId, title, position, userId) {
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { data, error: error?.message }
 }
 
@@ -108,7 +108,7 @@ export async function updateKanbanCard(cardId, updates) {
     .select()
     .single()
     
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, data, error: error?.message }
 }
 
@@ -119,7 +119,7 @@ export async function deleteKanbanCard(cardId) {
     .delete()
     .eq("id", cardId)
     
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, error: error?.message }
 }
 
@@ -143,7 +143,7 @@ export async function updateKanbanCardPosition(cardId, columnId, newPosition) {
 
     if (error) throw error
 
-    revalidateTag("kanban")
+    revalidateTag("kanban", "max")
     return { success: true, data }
   } catch (err) {
     console.error("updateKanbanCardPosition error:", err)
@@ -168,7 +168,7 @@ export async function addKanbanReminder(cardId, reminderType, remindTime, remind
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { data, error: error?.message }
 }
 
@@ -181,7 +181,7 @@ export async function updateKanbanReminder(reminderId, updates) {
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { data, error: error?.message }
 }
 
@@ -192,7 +192,7 @@ export async function deleteKanbanReminder(reminderId) {
     .delete()
     .eq("id", reminderId)
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, error: error?.message }
 }
 
@@ -207,6 +207,6 @@ export async function updateKanbanLabelName(labelId, newName) {
     .select()
     .single()
   
-  if (!error) revalidateTag("kanban")
+  if (!error) revalidateTag("kanban", "max")
   return { success: !error, data, error: error?.message }
 }

@@ -121,7 +121,7 @@ export async function saveGradeRecords(records, yearTerm) {
     }
 
     if (successCount > 0) {
-        revalidateTag('grade-records')
+        revalidateTag('grade-records', 'max')
     }
 
     return { success: successCount, errors }
@@ -142,11 +142,11 @@ export async function deleteGradeRecords(yearTerm, classNames) {
         throw error
     }
 
-    revalidateTag('grade-records')
+    revalidateTag('grade-records', 'max')
     return { success: true }
 }
 
 // Invalidate Cache Action (Manual)
 export async function invalidateGradeCache() {
-    revalidateTag('grade-records')
+    revalidateTag('grade-records', 'max')
 }

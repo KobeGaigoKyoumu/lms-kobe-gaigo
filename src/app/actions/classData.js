@@ -151,7 +151,7 @@ export async function cleanupDuplicateClasses() {
     
     if (delError) return { error: delError.message }
     
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     return { success: true, deletedCount: idsToDelete.length }
 }
 
@@ -172,6 +172,6 @@ export async function deleteOldAcademicYearData(year) {
         return { error: delError.message }
     }
 
-    revalidateTag('classes')
+    revalidateTag('classes', 'max')
     return { success: true, count: deletedClasses.length }
 }

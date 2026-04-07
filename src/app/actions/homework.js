@@ -293,8 +293,8 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
         return { error: '提出に失敗しました。' }
     }
 
-    revalidateTag('homework-stats')
-    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats', 'max')
+    revalidateTag('homework-assignments', 'max')
     revalidatePath(`/student/homework/${assignmentId}`)
     revalidatePath('/student/dashboard')
 
@@ -363,10 +363,10 @@ export async function createAssignment(formData) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments')
-    revalidateTag('homework-stats')
-    revalidateTag('schedules')
-    revalidateTag('storage-usage')
+    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats', 'max')
+    revalidateTag('schedules', 'max')
+    revalidateTag('storage-usage', 'max')
     revalidatePath('/assignments')
     revalidatePath('/assignments/new')
     
@@ -394,8 +394,8 @@ export async function deleteAssignment(id) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments')
-    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats', 'max')
     revalidatePath('/assignments')
     revalidatePath('/assignments/new')
     
@@ -434,8 +434,8 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-assignments')
-    revalidateTag('homework-stats')
+    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats', 'max')
     revalidatePath(`/assignments/${assignmentId}`)
     revalidatePath('/assignments')
     
@@ -554,8 +554,8 @@ export async function gradeSubmission(submissionId, score, feedback) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-stats')
-    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats', 'max')
+    revalidateTag('homework-assignments', 'max')
     revalidatePath('/assignments', 'layout') // Revalidate entire tree
     
     return { success: true }
@@ -580,8 +580,8 @@ export async function returnSubmission(submissionId, feedback) {
     }
 
     // Comprehensive revalidation for immediate reflection
-    revalidateTag('homework-stats')
-    revalidateTag('homework-assignments')
+    revalidateTag('homework-stats', 'max')
+    revalidateTag('homework-assignments', 'max')
     revalidatePath('/assignments', 'layout') // Revalidate entire tree
     
     return { success: true }
@@ -617,7 +617,7 @@ export async function uploadSubmissionFile(formData) {
         console.error('ImageKit Submission Upload Error:', err)
         return { error: `アップロードに失敗しました: ${err.message}` }
     } finally {
-        revalidateTag('storage-usage')
+        revalidateTag('storage-usage', 'max')
     }
 }
 
