@@ -18,7 +18,7 @@ import {
     updateKanbanReminder,
     deleteKanbanReminder,
     getKanbanReminders
-} from '@/app/actions/kanban'
+} from '@/app/actions/kanban_actions'
 
 const CARD_COLORS = [
     null, '#e74c3c', '#27ae60', '#f39c12', '#9b59b6',
