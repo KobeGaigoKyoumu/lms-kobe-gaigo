@@ -68,16 +68,40 @@ export async function getStudentDashboardDataCached() {
             throw submissionsError
         }
 
-        // 3. Fetch Announcements
-        const { data: announcements, error: announcementsError } = await supabase
+        // 3. Fetch Announcements (Filter for student)
+        const { data: rawAnnouncements, error: announcementsError } = await supabase
             .from('announcements')
             .select(`
                 id, title, content, is_pinned, created_at, sender_name,
+                target_type, target_class, target_grade, target_student_ids, course_id,
                 author:profiles!author_id (full_name)
             `)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false })
-            .limit(10)
+
+        if (announcementsError) {
+            console.error('Fetch announcements error:', announcementsError)
+        }
+
+        // Student-side filtering logic
+        const filteredAnnouncements = (rawAnnouncements || []).filter(ann => {
+            // Include if target is 'all'
+            if (!ann.target_type || ann.target_type === 'all') return true;
+            
+            // Include if target matches student's class
+            if (ann.target_type === 'class' && normalizeClassName(ann.target_class) === normalizedClassName) return true;
+            
+            // Include if target matches student's grade (academicYear)
+            if (ann.target_type === 'grade' && ann.target_grade?.toString() === academicYear?.toString()) return true;
+            
+            // Include if target matches student specifically
+            if (ann.target_type === 'individual' && Array.isArray(ann.target_student_ids)) {
+                return ann.target_student_ids.includes(studentId);
+            }
+            
+            // Fallback: exclude by default
+            return false;
+        }).slice(0, 10);
 
         if (announcementsError) {
             console.error('Fetch announcements error:', announcementsError)
@@ -111,7 +135,7 @@ export async function getStudentDashboardDataCached() {
                 dueThisWeekCount
             },
             recentAssignments: assignmentsWithSubmissions.slice(0, 10),
-            announcements: announcements || []
+            announcements: filteredAnnouncements || []
         }
 
         // Update Cloudflare Snapshot for next time
