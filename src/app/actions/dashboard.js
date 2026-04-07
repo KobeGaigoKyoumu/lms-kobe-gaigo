@@ -3,6 +3,7 @@
 import { unstable_cache } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
+import { getAdminMemberSession } from './adminAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
 import { normalizeClassName } from '@/lib/utils'
 
@@ -158,6 +159,89 @@ export async function getStudentDashboardDataCached() {
 
     return {
         session,
+        content: cachedData
+    }
+}
+
+/**
+ * 教職員ダッシュボード用データをキャッシュ付きで一括取得する
+ */
+export async function getAdminDashboardDataCached() {
+    const adminMember = await getAdminMemberSession()
+    if (!adminMember) return null
+
+    const fetcher = async (memberId, adminName) => {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase configuration missing')
+        const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
+        const now = new Date().toISOString()
+
+        // 1. Fetch Teacher Classes
+        const { data: teacherClasses } = await supabase
+            .from('classes')
+            .select('name, teacher_id, homeroom_teacher_name')
+            .or(`teacher_id.eq.${memberId},homeroom_teacher_name.eq."${adminName}"`)
+
+        const teacherClassNames = (teacherClasses || []).map(c => normalizeClassName(c.name))
+        const enrolledClassesCount = teacherClassNames.length
+
+        // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
+        const [annResult, pendingResult, assignmentsResult] = await Promise.all([
+            // Announcements
+            supabase
+                .from('announcements')
+                .select(`
+                    id, title, content, is_pinned, created_at, sender_name,
+                    author:profiles!author_id (full_name)
+                `)
+                .order('is_pinned', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(5),
+            
+            // Pending Submission Count
+            enrolledClassesCount > 0 ? supabase
+                .from('homework_submissions')
+                .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
+                .eq('status', 'submitted')
+                .in('assignment.class_name', teacherClassNames)
+                .or(`is_archived.is.null,is_archived.is.false`, { foreignTable: 'homework_assignments' })
+                : { count: 0 },
+
+            // Recent Assignments
+            enrolledClassesCount > 0 ? supabase
+                .from('homework_assignments')
+                .select('id, title, deadline, class_name, released_at, is_archived')
+                .in('class_name', teacherClassNames)
+                .or('is_archived.is.null,is_archived.is.false')
+                .or(`released_at.is.null,released_at.lte."${now}"`)
+                .order('created_at', { ascending: false })
+                .limit(5) : { data: [] }
+        ])
+
+        return {
+            announcements: annResult.data || [],
+            stats: {
+                enrolledClasses: (teacherClasses || []).map(c => c.name),
+                enrolledClassesCount,
+                pendingAssignmentsCount: pendingResult.count || 0,
+                recentAssignments: assignmentsResult.data || []
+            }
+        }
+    }
+
+    // Cache based on administrative member ID
+    const cachedData = await unstable_cache(
+        async () => fetcher(adminMember.memberId, adminMember.name),
+        [`admin-dashboard-${adminMember.memberId}`],
+        {
+            tags: ['homework-assignments', 'announcements', 'classes', 'homework-submissions'],
+            revalidate: 3600
+        }
+    )()
+
+    return {
+        adminMember,
         content: cachedData
     }
 }

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState } from 'react'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { 
@@ -13,105 +12,17 @@ import {
     LayoutDashboard
 } from 'lucide-react'
 
-export default function DashboardContent({ adminMember }) {
-    const [announcements, setAnnouncements] = useState([])
-    const [stats, setStats] = useState({
+export default function DashboardContent({ adminMember, initialData }) {
+    // Initialize state with pre-fetched server-side data to eliminate client-side loading time and authentication issues
+    const [announcements] = useState(initialData?.announcements || [])
+    const [stats] = useState(initialData?.stats || {
         enrolledClasses: [],
         enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
         recentAssignments: []
     })
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!adminMember) return
-            setLoading(true)
-
-            try {
-                const userId = adminMember.memberId
-                const adminName = adminMember.name
-                const now = new Date().toISOString()
-
-                // 1. Fetch Teacher Classes
-                const { data: teacherClasses } = await supabase
-                    .from('classes')
-                    .select('name, teacher_id, homeroom_teacher_name')
-                    .or(`teacher_id.eq.${userId},homeroom_teacher_name.eq."${adminName}"`)
-
-                const normalizeClassName = (name) => {
-                    if (!name) return ''
-                    return typeof name === 'string' 
-                        ? name.trim()
-                            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-                            .replace(/[－ー—―]/g, '-')
-                            .replace(/\s+/g, '') 
-                        : name
-                }
-
-                const teacherClassNames = (teacherClasses || []).map(c => normalizeClassName(c.name))
-                const enrolledClassesCount = teacherClassNames.length
-
-                // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
-                const [annResult, pendingResult, assignmentsResult] = await Promise.all([
-                    supabase
-                        .from('announcements')
-                        .select(`
-                            id, title, content, is_pinned, created_at, sender_name,
-                            author:profiles!author_id (full_name)
-                        `)
-                        .order('is_pinned', { ascending: false })
-                        .order('created_at', { ascending: false })
-                        .limit(5),
-                    
-                    enrolledClassesCount > 0 ? supabase
-                        .from('homework_submissions')
-                        .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
-                        .eq('status', 'submitted')
-                        .in('assignment.class_name', teacherClassNames)
-                        // Note: Complex OR filters on joined columns can trigger 400 Bad Request in some PostgREST versions.
-                        // We will simplify this to just filtering by class_name and handle the rest in the count if necessary,
-                        // or better, ensure released_at logic is handled consistently.
-                        .or(`is_archived.is.null,is_archived.is.false`, { foreignTable: 'homework_assignments' })
-                        : { count: 0 },
-
-                    enrolledClassesCount > 0 ? supabase
-                        .from('homework_assignments')
-                        .select('id, title, deadline, class_name, released_at, is_archived')
-                        .in('class_name', teacherClassNames)
-                        .or('is_archived.is.null,is_archived.is.false')
-                        .or(`released_at.is.null,released_at.lte."${now}"`)
-                        .order('created_at', { ascending: false })
-                        .limit(5) : { data: [] }
-                ])
-
-                setAnnouncements(annResult.data || [])
-                setStats({
-                    enrolledClasses: (teacherClasses || []).map(c => c.name),
-                    enrolledClassesCount,
-                    pendingAssignmentsCount: pendingResult.count || 0,
-                    recentAssignments: assignmentsResult.data || []
-                })
-            } catch (err) {
-                console.error('Dashboard data fetch error:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchData()
-    }, [adminMember, supabase])
-
-    if (loading) {
-        return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.spinner}></div>
-                <p>ダッシュボードを読み込み中...</p>
-            </div>
-        )
-    }
-
+    // No longer need useEffect for initial fetching as data is provided by RSC
     return (
         <>
             <div className={styles.statsGrid}>

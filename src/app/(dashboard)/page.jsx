@@ -1,14 +1,13 @@
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
-import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getAdminDashboardDataCached } from '@/app/actions/dashboard'
 import DashboardContent from './DashboardContent'
 
 // 30秒間キャッシュ（再訪問時の高速化）
 export const revalidate = 30
 
 export default async function DashboardPage() {
-    const adminMember = await getAdminMemberSession()
     const studentSession = await getStudentSessionLight()
 
     // Redirect students to their portal if they hit the root dashboard
@@ -16,10 +15,15 @@ export default async function DashboardPage() {
         redirect('/student/dashboard')
     }
 
-    if (!adminMember) {
+    // Fetch administrative dashboard data using a secure server action
+    // This pre-fetches announcements, stats, and assignments to avoid client-side 406/401 errors
+    const dashboardResult = await getAdminDashboardDataCached()
+
+    if (!dashboardResult) {
         redirect('/login')
     }
 
+    const { adminMember, content } = dashboardResult
     const firstName = adminMember.name || 'ユーザー'
 
     return (
@@ -39,7 +43,10 @@ export default async function DashboardPage() {
                 </div>
             </header>
 
-            <DashboardContent adminMember={adminMember} />
+            <DashboardContent 
+                adminMember={adminMember} 
+                initialData={content}
+            />
         </div>
     )
 }
