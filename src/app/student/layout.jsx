@@ -6,7 +6,7 @@ import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 
-export const revalidate = 30
+// revalidate = 30 removed to reduce CPU load.
 
 export default async function StudentLayout({ children }) {
     const session = await getStudentSessionLight()

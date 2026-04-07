@@ -4,14 +4,26 @@ import { useState, useEffect } from 'react'
 import { getClassSubmissionStats } from '@/app/actions/homework'
 import styles from './page.module.css'
 
-export default function StudentList({ students }) {
+export default function StudentList({ students, initialStats }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [jlptHistory, setJlptHistory] = useState([])
     const [loadingJlpt, setLoadingJlpt] = useState(false)
-    const [stats, setStats] = useState(new Map())
+    const [stats, setStats] = useState(() => {
+        const statsMap = new Map()
+        if (Array.isArray(initialStats)) {
+            initialStats.forEach(s => statsMap.set(s.student_id_text, s))
+        }
+        return statsMap
+    })
 
-    // Fetch Stats
+    // Fetch Stats (Only if not provided as initial)
     useEffect(() => {
+        // Skip fetching if we already have initialStats for these students
+        // unless initialStats is empty and we have students
+        if (initialStats && Array.isArray(initialStats) && initialStats.length > 0) {
+            return
+        }
+
         const fetchStats = async () => {
             if (students && students.length > 0) {
                 const className = students[0].class_name
@@ -30,7 +42,7 @@ export default function StudentList({ students }) {
             }
         }
         fetchStats()
-    }, [students])
+    }, [students, initialStats])
 
     // Fetch JLPT history when student is selected
     useEffect(() => {

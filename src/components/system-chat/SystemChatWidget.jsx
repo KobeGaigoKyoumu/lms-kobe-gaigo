@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { getSystemNotifications, getUnreadSystemCount, markSystemNotificationsRead } from '@/app/actions/systemNotifications'
+import { getSystemNotifications, markSystemNotificationsRead } from '@/app/actions/systemNotifications'
+import { createClient } from '@/lib/supabase/client'
 import styles from './SystemChatWidget.module.css'
 
 export default function SystemChatWidget({ userId }) {
@@ -11,12 +12,22 @@ export default function SystemChatWidget({ userId }) {
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const intervalRef = useRef(null)
+    const supabase = createClient()
 
     // 未読数取得
     const fetchUnreadCount = useCallback(async () => {
         if (!userId) return
         try {
-            const count = await getUnreadSystemCount(userId)
+            // Direct Supabase query to save Vercel CPU time
+            const { count, error } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('student_id', 'SYSTEM_REMINDER')
+                .eq('read', false)
+                .is('teacher_id', null) // Current SystemChatWidget is only for staff
+
+            if (error) throw error
+
             setUnreadCount(prev => {
                 // 未読数が増えた場合のみ自動で開く
                 if (count > prev) {
@@ -28,7 +39,7 @@ export default function SystemChatWidget({ userId }) {
         } catch (e) {
             console.error('Failed to fetch unread count:', e)
         }
-    }, [userId])
+    }, [userId, supabase, fetchMessages])
 
     // メッセージ取得
     const fetchMessages = useCallback(async () => {

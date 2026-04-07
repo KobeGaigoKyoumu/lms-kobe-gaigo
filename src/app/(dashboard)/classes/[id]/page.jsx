@@ -5,6 +5,7 @@ import styles from './page.module.css'
 import courseStyles from '@/app/(dashboard)/courses/[id]/page.module.css'
 import StudentList from './StudentList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getClassSubmissionStats } from '@/app/actions/homework'
 
 const DAY_NAMES = ['月', '火', '水', '木', '金']
 
@@ -85,7 +86,6 @@ export default async function ClassDetailPage({ params }) {
         `)
         .eq('class_id', id)
         .order('day_of_week', { ascending: true })
-
     // コースに紐づく課題取得
     let assignments = []
     if (classData.course_id) {
@@ -97,6 +97,9 @@ export default async function ClassDetailPage({ params }) {
             .order('due_date', { ascending: true })
         assignments = data || []
     }
+
+    // 提出状況統計をサーバーサイドで事前取得
+    const statsData = await getClassSubmissionStats(classData.name)
 
     const dayNames = ['日', '月', '火', '水', '木', '金', '土']
 
@@ -291,7 +294,7 @@ export default async function ClassDetailPage({ params }) {
                         <div className={styles.sectionHeader}>
                             <h2>在籍者一覧 ({students?.length || 0}名)</h2>
                         </div>
-                        <StudentList students={students} />
+                        <StudentList students={students} initialStats={statsData} />
                     </section>
                 </main>
             </div>
