@@ -237,6 +237,7 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
             }
         }
 
+        console.log('Applying events:', newEvents)
         const { error } = await applyPackageToTarget(newEvents)
         if (error) {
             console.error(error)

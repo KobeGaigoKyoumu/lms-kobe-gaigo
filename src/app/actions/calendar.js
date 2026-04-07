@@ -3,7 +3,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 
 const createAdminClient = () => {
@@ -114,6 +114,51 @@ const _getTermsForPackages = unstable_cache(
 
 export async function getTermsForPackages() {
     return _getTermsForPackages();
+}
+
+// 管理者・教職員用カレンダーデータの一括取得（キャッシュ付き）
+export const getAdminCalendarDataCached = async () => {
+    const adminMember = await getAdminMemberSession()
+    
+    // 1年前までのデータを取得対象とする（表示範囲を広げる）
+    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString()
+    
+    return await unstable_cache(
+        async () => {
+            const supabase = createAdminClient() // Service Roleで全件取得
+            
+            // カレンダーイベント取得
+            const { data: events, error: eErr } = await supabase
+                .from('calendar_events')
+                .select(`
+                    id, title, description, start_date, end_date, all_day, 
+                    event_type, color, course_id, target_class, created_by,
+                    course:courses ( title )
+                `)
+                .gte('start_date', startDate)
+                .order('start_date', { ascending: true })
+
+            // 課題（締切のあるもの）を取得
+            const { data: assignments, error: aErr } = await supabase
+                .from('assignments')
+                .select(`
+                    id, title, due_date,
+                    course:courses ( title )
+                `)
+                .not('due_date', 'is', null)
+                .gte('due_date', startDate)
+                .order('due_date', { ascending: true })
+
+            if (eErr || aErr) {
+                console.error('getAdminCalendarDataCached error:', eErr || aErr)
+                return { events: [], assignments: [], error: 'Failed to fetch calendar data' }
+            }
+
+            return { events: events || [], assignments: assignments || [] }
+        },
+        [`calendar-admin-data-${adminMember?.memberId || 'public'}`],
+        { tags: ['calendar-events', 'assignments'], revalidate: 60 } // 1分キャッシュ
+    )()
 }
 
 // パッケージ作成
@@ -232,7 +277,10 @@ export async function applyPackageToTarget(newEvents) {
         console.error('applyPackageToTarget Database error:', error)
         return { error: `Failed to apply package: ${error.message}` }
     }
-    revalidateTag('calendar-events', 'max')
+    
+    // キャッシュを無効化
+    revalidateTag('calendar-events') 
+    revalidatePath('/calendar')
     return { success: true }
 }
 

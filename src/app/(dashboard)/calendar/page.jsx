@@ -2,22 +2,21 @@ import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 import CalendarView from './CalendarView'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { getAdminCalendarDataCached } from '@/app/actions/calendar'
 
 export const dynamic = 'force-dynamic'
 export default async function CalendarPage() {
     const adminMember = await getAdminMemberSession()
-    const supabase = await createClient()
     
     let isTeacherOrAdmin = false
     let userId = null
-    let authUser = null
 
     if (adminMember) {
         isTeacherOrAdmin = true
         userId = 'admin'
     } else {
+        const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        authUser = user
         if (user) {
             const { data: profile } = await supabase
                 .from('profiles')
@@ -29,44 +28,10 @@ export default async function CalendarPage() {
         }
     }
 
-    // 課題（締切のあるもの）を取得
-    const { data: assignments } = await supabase
-        .from('assignments')
-        .select(`
-      id,
-      title,
-      due_date,
-      course:courses (
-        title
-      )
-    `)
-        .not('due_date', 'is', null)
-        .gte('due_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
-        .order('due_date', { ascending: true })
+    // キャッシュ付きのアクションを使用して一括取得 (Service Roleを使用)
+    const { events: calendarEvents, assignments } = await getAdminCalendarDataCached()
 
-    // カレンダーイベントを取得
-    const { data: calendarEvents } = await supabase
-        .from('calendar_events')
-        .select(`
-      id,
-      title,
-      description,
-      start_date,
-      end_date,
-      all_day,
-      event_type,
-      color,
-      course_id,
-      target_class,
-      course:courses (
-        title
-      ),
-      created_by
-    `)
-        .gte('start_date', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString())
-        .order('start_date', { ascending: true })
-
-    // イベントデータに変換
+    // 課題データに変換
     const assignmentEvents = (assignments || []).map(a => ({
         id: a.id,
         title: a.title,
