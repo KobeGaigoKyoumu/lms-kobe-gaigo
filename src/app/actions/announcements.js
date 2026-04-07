@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
+import { getStudentSession } from './studentAuth'
+import { normalizeClassName } from '@/lib/utils'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -198,4 +200,54 @@ const getCachedAnnouncements = unstable_cache(
 
 export async function getAnnouncements() {
     return await getCachedAnnouncements()
+}
+
+/**
+ * 学生向けのお知らせ一覧をフィルタリングして取得する（サーバーサイドで実行）
+ */
+export async function getStudentAnnouncements() {
+    const session = await getStudentSession()
+    if (!session) return { data: [], error: 'Unauthorized' }
+
+    const fetcher = unstable_cache(
+        async (studentId, className, academicYear) => {
+            try {
+                const normalizedClassName = normalizeClassName(className)
+                
+                // Fetch all announcements (Admin Client)
+                const { data: rawAnnouncements, error } = await adminSupabase
+                    .from('announcements')
+                    .select(`
+                        id, title, content, is_pinned, created_at, sender_name,
+                        target_type, target_class, target_grade, target_student_ids, course_id,
+                        author:profiles!author_id (full_name),
+                        course:courses (id, title)
+                    `)
+                    .order('is_pinned', { ascending: false })
+                    .order('created_at', { ascending: false })
+
+                if (error) throw error
+
+                // Filter logic identical to dashboard
+                const filtered = (rawAnnouncements || []).filter(ann => {
+                    if (!ann.target_type || ann.target_type === 'all') return true;
+                    if (ann.target_type === 'class' && normalizeClassName(ann.target_class) === normalizedClassName) return true;
+                    if (ann.target_type === 'grade' && ann.target_grade?.toString() === academicYear?.toString()) return true;
+                    if (ann.target_type === 'individual' && Array.isArray(ann.target_student_ids)) {
+                        return ann.target_student_ids.includes(studentId);
+                    }
+                    return false;
+                })
+
+                return { data: filtered, error: null }
+            } catch (e) {
+                console.error('getStudentAnnouncements error:', e)
+                return { data: [], error: e.message }
+            }
+        },
+        [`student-announcements-${session.studentId}`],
+        { tags: ['announcements'], revalidate: 3600 }
+    )
+
+    return await fetcher(session.studentId, session.className, session.academicYear)
 }

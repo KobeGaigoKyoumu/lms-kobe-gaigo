@@ -1,62 +1,10 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { getStudentAnnouncements } from '@/app/actions/announcements'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
-import { Loader2 } from 'lucide-react'
 
-export default function StudentAnnouncementsPage() {
-    const [announcements, setAnnouncements] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-        let isMounted = true
-        const fetchAnnouncements = async () => {
-            try {
-                const supabase = createClient()
-                
-                // Get student session from our helper API
-                const resSession = await fetch('/api/auth/student-session')
-                const session = await resSession.json()
-
-                if (!session || session.error) throw new Error('Unauthorized')
-
-                // Use the new optimized RPC for announcements
-                const { data, error: rpcError } = await supabase
-                    .rpc('get_student_announcements', {
-                        p_student_id: session.studentId,
-                        p_class_name: session.className,
-                        p_academic_year: session.academicYear
-                    })
-
-                if (rpcError) throw rpcError
-                if (isMounted) setAnnouncements(data || [])
-            } catch (err) {
-                console.error('Failed to fetch student announcements:', err)
-                if (isMounted) setError('お知らせの取得に失敗しました。')
-            } finally {
-                if (isMounted) setLoading(false)
-            }
-        }
-
-        fetchAnnouncements()
-        return () => { isMounted = false }
-    }, [])
-
-    if (loading) {
-        return (
-            <div className={styles.page}>
-                <header className={styles.header}>
-                    <h1 className={styles.title}>お知らせ</h1>
-                </header>
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
-                    <Loader2 className="animate-spin text-gray-400" size={32} />
-                </div>
-            </div>
-        )
-    }
+export default async function StudentAnnouncementsPage() {
+    // Fetch filtered announcements on server side (Secure & Fast)
+    const { data: announcements, error } = await getStudentAnnouncements()
 
     return (
         <div className={styles.page}>
@@ -68,10 +16,10 @@ export default function StudentAnnouncementsPage() {
             </header>
 
             {error && (
-                <div className={styles.error}>{error}</div>
+                <div className={styles.error}>お知らせの取得に失敗しました。</div>
             )}
 
-            {!loading && announcements.length === 0 ? (
+            {!error && (!announcements || announcements.length === 0) ? (
                 <div className={styles.empty}>
                     <p>現在、お知らせはありません。</p>
                 </div>
