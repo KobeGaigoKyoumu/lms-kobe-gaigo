@@ -16,9 +16,20 @@ const createAdminClient = () => {
 }
 
 const isUUID = (str) => {
-    if (!str) return false;
+    if (!str || typeof str !== 'string') return false;
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(str);
+}
+
+const sanitizeCreatedBy = (id, adminMember) => {
+    // If we have an adminMember session (staff portal), always return null
+    // as they don't have a record in auth.users or profiles tables.
+    if (adminMember) return null;
+    
+    // If it's the 'admin' placeholder or not a valid UUID, return null
+    if (id === 'admin' || !isUUID(id)) return null;
+    
+    return id;
 }
 
 // パッケージ一覧取得（全アカウント共有）
@@ -108,9 +119,16 @@ export async function getTermsForPackages() {
 // パッケージ作成
 export async function createEventPackage(packageData) {
     const supabase = createAdminClient()
+    const adminMember = await getAdminMemberSession()
+    
+    const sanitizedData = {
+        ...packageData,
+        created_by: sanitizeCreatedBy(packageData.created_by, adminMember)
+    }
+
     const { data, error } = await supabase
         .from('event_packages')
-        .insert(packageData)
+        .insert(sanitizedData)
         .select()
 
     if (error) {
@@ -124,9 +142,16 @@ export async function createEventPackage(packageData) {
 // パッケージ更新
 export async function updateEventPackage(id, packageData) {
     const supabase = createAdminClient()
+    const adminMember = await getAdminMemberSession()
+
+    const sanitizedData = {
+        ...packageData,
+        created_by: sanitizeCreatedBy(packageData.created_by, adminMember)
+    }
+
     const { data, error } = await supabase
         .from('event_packages')
-        .update(packageData)
+        .update(sanitizedData)
         .eq('id', id)
         .select()
 
@@ -196,10 +221,10 @@ export async function applyPackageToTarget(newEvents) {
     const supabaseAdmin = createAdminClient()
     const adminMember = await getAdminMemberSession()
     
-    // Authユーザーでない（管理者など）場合は created_by を null にして制約エラーを回避
+    // Authユーザーでない（教職員ポータルなど）場合は created_by を null にして制約エラーを回避
     const sanitizedEvents = (newEvents || []).map(e => ({
         ...e,
-        created_by: adminMember ? e.created_by : null
+        created_by: sanitizeCreatedBy(e.created_by, adminMember)
     }))
 
     const { error } = await supabaseAdmin.from('calendar_events').insert(sanitizedEvents)
@@ -235,10 +260,10 @@ export async function createSingleEvent(eventData) {
     const supabaseAdmin = createAdminClient()
     const adminMember = await getAdminMemberSession()
     
-    // Sanitize created_by for staff accounts
+    // Sanitize created_by for staff accounts to avoid UUID foreign key errors
     const sanitizedData = {
         ...eventData,
-        created_by: adminMember ? eventData.created_by : null
+        created_by: sanitizeCreatedBy(eventData.created_by, adminMember)
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').insert(sanitizedData).select()
@@ -254,10 +279,10 @@ export async function updateSingleEvent(id, eventData) {
     const supabaseAdmin = createAdminClient()
     const adminMember = await getAdminMemberSession()
     
-    // Sanitize created_by for staff accounts
+    // Sanitize created_by for staff accounts to avoid UUID foreign key errors
     const sanitizedData = {
         ...eventData,
-        created_by: adminMember ? eventData.created_by : null
+        created_by: sanitizeCreatedBy(eventData.created_by, adminMember)
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').update(sanitizedData).eq('id', id).select()
