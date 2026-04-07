@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import styles from '../../new/page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -96,6 +96,9 @@ export default async function EditClassPage({ params }) {
         }
 
         revalidateTag('classes')
+        revalidatePath('/classes')
+        revalidatePath(`/classes/${id}`)
+        revalidatePath('/student/course')
         redirect(`/classes/${id}`)
     }
 
@@ -114,6 +117,8 @@ export default async function EditClassPage({ params }) {
         }
 
         revalidateTag('classes')
+        revalidatePath('/classes')
+        revalidatePath('/student/course')
         redirect('/classes')
     }
 
