@@ -103,7 +103,7 @@
 }
 
 .className {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-4xl);
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.2;
