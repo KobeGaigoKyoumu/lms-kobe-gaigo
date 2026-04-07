@@ -10,13 +10,13 @@ import {
     Bell, 
     Calendar as CalendarIcon,
     ChevronRight,
-    TrendingUp,
     LayoutDashboard
 } from 'lucide-react'
 
 export default function DashboardContent({ adminMember }) {
     const [announcements, setAnnouncements] = useState([])
     const [stats, setStats] = useState({
+        enrolledClasses: [],
         enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
         recentAssignments: []
@@ -88,6 +88,7 @@ export default function DashboardContent({ adminMember }) {
 
                 setAnnouncements(annResult.data || [])
                 setStats({
+                    enrolledClasses: (teacherClasses || []).map(c => c.name),
                     enrolledClassesCount,
                     pendingAssignmentsCount: pendingResult.count || 0,
                     recentAssignments: assignmentsResult.data || []
@@ -120,11 +121,20 @@ export default function DashboardContent({ adminMember }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue}>{stats.enrolledClassesCount}</p>
-                    </div>
-                    <div className={styles.statTrend}>
-                        <TrendingUp size={14} className={styles.trendIcon} />
-                        <span>Active</span>
+                        <div className={styles.classList}>
+                            {stats.enrolledClasses.length > 0 ? (
+                                <>
+                                    {stats.enrolledClasses.slice(0, 3).map((name, i) => (
+                                        <div key={i} className={styles.className}>{name}</div>
+                                    ))}
+                                    {stats.enrolledClasses.length > 3 && (
+                                        <div className={styles.classMore}>外 {stats.enrolledClasses.length - 3}クラス</div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className={styles.className}>なし</div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className={styles.statCard}>

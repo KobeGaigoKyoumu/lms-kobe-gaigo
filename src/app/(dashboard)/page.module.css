@@ -95,16 +95,25 @@
     line-height: 1;
 }
 
-.statTrend {
+.classList {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 4px;
-    padding: 4px 8px;
-    background: var(--success-50);
-    color: var(--success-600);
-    border-radius: var(--radius-full);
+    margin-top: 2px;
+}
+
+.className {
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.classMore {
     font-size: var(--font-size-xs);
-    font-weight: 700;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-top: 2px;
 }
 
 .statStatus {
