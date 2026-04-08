@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
+export const dynamic = 'force-dynamic'
 // revalidate = 30 removed to reduce CPU load. Dynamic data is fetched on demand or with longer cache.
 
 export default async function DashboardLayout({ children }) {

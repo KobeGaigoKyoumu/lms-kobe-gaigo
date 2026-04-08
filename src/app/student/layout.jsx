@@ -6,6 +6,7 @@ import MobileMenu from '@/components/layout/MobileMenu'
 import styles from './layout.module.css'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 
+export const dynamic = 'force-dynamic'
 // revalidate = 30 removed to reduce CPU load.
 
 export default async function StudentLayout({ children }) {

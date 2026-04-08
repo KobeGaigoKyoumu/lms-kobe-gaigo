@@ -9,22 +9,26 @@ export default function SystemChatWidget({ userId }) {
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([])
     const [unreadCount, setUnreadCount] = useState(0)
-    const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const intervalRef = useRef(null)
-    const supabase = createClient()
+    const supabaseRef = useRef(null)
+
+    // Initialize Supabase only on client
+    if (!supabaseRef.current && typeof window !== 'undefined') {
+        supabaseRef.current = createClient()
+    }
 
     // 未読数取得
     const fetchUnreadCount = useCallback(async () => {
-        if (!userId) return
+        if (!userId || !supabaseRef.current) return
         try {
             // Direct Supabase query to save Vercel CPU time
-            const { count, error } = await supabase
+            const { count, error } = await supabaseRef.current
                 .from('messages')
                 .select('*', { count: 'exact', head: true })
                 .eq('student_id', 'SYSTEM_REMINDER')
                 .eq('read', false)
-                .is('teacher_id', null) // Current SystemChatWidget is only for staff
+                .is('teacher_id', null)
 
             if (error) throw error
 
@@ -32,14 +36,13 @@ export default function SystemChatWidget({ userId }) {
                 // 未読数が増えた場合のみ自動で開く
                 if (count > prev) {
                     setIsOpen(true)
-                    fetchMessages()
                 }
                 return count
             })
         } catch (e) {
             console.error('Failed to fetch unread count:', e)
         }
-    }, [userId, supabase, fetchMessages])
+    }, [userId]) 
 
     // メッセージ取得
     const fetchMessages = useCallback(async () => {
@@ -48,17 +51,20 @@ export default function SystemChatWidget({ userId }) {
         try {
             const data = await getSystemNotifications(userId)
             setMessages(data)
-            // 開いた場合は既読にする
-            if (unreadCount > 0) {
-                await markSystemNotificationsRead(userId)
-                setUnreadCount(0)
-            }
+            // 開いた場合は既読にする。最新の状態を確認するために機能的アップデートを使用。
+            setUnreadCount(prev => {
+                if (prev > 0) {
+                    markSystemNotificationsRead(userId)
+                    return 0
+                }
+                return prev
+            })
         } catch (e) {
             console.error('Failed to fetch system notifications:', e)
         } finally {
             setIsLoading(false)
         }
-    }, [userId, unreadCount])
+    }, [userId])
 
     // 初回ロード・ポーリング
     useEffect(() => {
@@ -68,6 +74,13 @@ export default function SystemChatWidget({ userId }) {
             if (intervalRef.current) clearInterval(intervalRef.current)
         }
     }, [fetchUnreadCount])
+
+    // ウィンドウが開いたときにメッセージを取得
+    useEffect(() => {
+        if (isOpen) {
+            fetchMessages()
+        }
+    }, [isOpen, fetchMessages])
 
     // ウィジェットを開くとき (手動)
     const handleOpen = async () => {

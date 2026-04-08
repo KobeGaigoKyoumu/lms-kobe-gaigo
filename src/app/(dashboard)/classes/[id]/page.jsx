@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 import courseStyles from '@/app/(dashboard)/courses/[id]/page.module.css'

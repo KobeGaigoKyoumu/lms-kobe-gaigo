@@ -5,6 +5,7 @@ import AnnouncementList from './AnnouncementList'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { getAnnouncements } from '@/app/actions/announcements'
 
+export const dynamic = 'force-dynamic'
 export default async function AnnouncementsPage() {
     const adminMember = await getAdminMemberSession()
 

@@ -2,6 +2,7 @@ import { getStudentAnnouncements } from '@/app/actions/announcements'
 import styles from './page.module.css'
 import AnnouncementCard from '@/app/(dashboard)/announcements/AnnouncementCard'
 
+export const dynamic = 'force-dynamic'
 export default async function StudentAnnouncementsPage() {
     // Fetch filtered announcements on server side (Secure & Fast)
     const { data: announcements, error } = await getStudentAnnouncements()
