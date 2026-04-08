@@ -1,7 +1,7 @@
 import styles from './layout.module.css'
 import Sidebar from '@/components/layout/Sidebar'
 import MobileMenu from '@/components/layout/MobileMenu'
-import SystemChatWidget from '@/components/system-chat/SystemChatWidget'
+// import SystemChatWidget from '@/components/system-chat/SystemChatWidget'
 import { redirect } from 'next/navigation'
 import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
@@ -45,7 +45,7 @@ export default async function DashboardLayout({ children }) {
                     />
                     {children}
                 </main>
-                <SystemChatWidget userId={userId} />
+                {/* <SystemChatWidget userId={userId} /> */}
             </div>
         </StudentStatusProvider>
     )
