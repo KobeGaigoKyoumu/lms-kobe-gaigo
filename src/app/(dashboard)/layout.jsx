@@ -1,9 +1,9 @@
 import styles from './layout.module.css'
-import Sidebar from '@/components/layout/Sidebar'
-import MobileMenu from '@/components/layout/MobileMenu'
+// import Sidebar from '@/components/layout/Sidebar'
+// import MobileMenu from '@/components/layout/MobileMenu'
 // import SystemChatWidget from '@/components/system-chat/SystemChatWidget'
 import { redirect } from 'next/navigation'
-import { StudentStatusProvider } from '@/context/StudentStatusContext'
+// import { StudentStatusProvider } from '@/context/StudentStatusContext'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
 export const dynamic = 'force-dynamic'
@@ -25,29 +25,11 @@ export default async function DashboardLayout({ children }) {
     const userAvatar = '' // No more Google avatar, can be added to admin_members table later if needed
 
     return (
-        <StudentStatusProvider role={userRole} userId={userId}>
-            <div className={styles.wrapper}>
-                <Sidebar
-                    role={userRole}
-                    hideOnMobile={true}
-                    userId={userId}
-                    userEmail={userEmail}
-                    userName={userName}
-                    userAvatar={userAvatar}
-                />
-                <main className={styles.main}>
-                    <MobileMenu
-                        role={userRole}
-                        userId={userId}
-                        userEmail={userEmail}
-                        userName={userName}
-                        userAvatar={userAvatar}
-                    />
-                    {children}
-                </main>
-                {/* <SystemChatWidget userId={userId} /> */}
-            </div>
-        </StudentStatusProvider>
+        <div style={{ padding: '20px' }}>
+            <main>
+                {children}
+            </main>
+        </div>
     )
 }
 
