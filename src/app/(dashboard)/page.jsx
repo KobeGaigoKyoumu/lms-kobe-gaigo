@@ -3,7 +3,7 @@ import styles from './page.module.css'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminDashboardDataCached } from '@/app/actions/dashboard'
 import DashboardContent from './DashboardContent'
-// Triggering deployment...
+// Force triggering deployment v2...
 
 export const dynamic = 'force-dynamic'
 // 30秒間キャッシュ（再訪問時の高速化）
