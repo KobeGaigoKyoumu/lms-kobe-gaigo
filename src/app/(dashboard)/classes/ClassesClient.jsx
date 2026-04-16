@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap, ChevronRight, Users, School, Plus, User, Star, Trash2, RefreshCw } from 'lucide-react'
+import { GraduationCap, ChevronRight, Users, School, Plus, User, Star, ChevronLeft } from 'lucide-react'
 import styles from './page.module.css'
-import { cleanupDuplicateClasses, deleteOldAcademicYearData } from '@/app/actions/classData'
 
 export default function ClassesClient({ adminMember, initialClasses = [], initialStudentCounts = {} }) {
     const [searchTerm, setSearchTerm] = useState('')
-    const [isCleaning, setIsCleaning] = useState(false)
-    const [cleanupResult, setCleanupResult] = useState(null)
 
     const isAdmin = adminMember?.role === 'admin'
     const isTeacher = adminMember?.role === 'teacher'
@@ -36,44 +33,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
         cls.homeroom_teacher_name !== adminMember?.name
     )
 
-    const handleCleanup = async () => {
-        if (!confirm('重複した空のクラス（担当者・時間割なし）を削除しますか？')) return
-        
-        setIsCleaning(true)
-        try {
-            const { success, deletedCount, error, message } = await cleanupDuplicateClasses()
-            if (success) {
-                setCleanupResult(`クリーンアップ完了: ${deletedCount || 0}件の重複を削除しました。`)
-                setTimeout(() => window.location.reload(), 2000)
-            } else {
-                alert('エラー: ' + (error || message))
-            }
-        } catch (err) {
-            alert('通信エラーが発生しました')
-        } finally {
-            setIsCleaning(false)
-        }
-    }
-
-    const handleDeleteOldYear = async () => {
-        if (!confirm('【重要】2024年度のすべてのクラスデータを完全に削除しますか？\nこの操作は取り消せません。')) return
-        if (!confirm('本当によろしいですか？')) return
-
-        setIsCleaning(true)
-        try {
-            const { success, count, error } = await deleteOldAcademicYearData(2024)
-            if (success) {
-                setCleanupResult(`2024年度データの削除完了: ${count}件のクラスを削除しました。`)
-                setTimeout(() => window.location.reload(), 2000)
-            } else {
-                alert('エラー: ' + error)
-            }
-        } catch (err) {
-            alert('通信エラーが発生しました')
-        } finally {
-            setIsCleaning(false)
-        }
-    }
 
     const ClassCard = ({ cls, isMyClass = false, showAdminBadge = false }) => (
         <Link href={`/classes/${cls.id}`} className={`${styles.card} ${isMyClass ? styles.myClassCard : ''} ${showAdminBadge ? styles.adminCard : ''}`}>
@@ -130,28 +89,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
                 </div>
                 {isTeacherOrAdmin && (
                     <div className={styles.headerActions}>
-                        {isAdmin && !cleanupResult && (
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <button 
-                                    onClick={handleCleanup} 
-                                    disabled={isCleaning}
-                                    className={styles.cleanupBtn}
-                                    title="重複した空クラスを削除"
-                                >
-                                    {isCleaning ? <RefreshCw size={18} className={styles.spin} /> : <Trash2 size={18} />}
-                                    重複整理
-                                </button>
-                                <button 
-                                    onClick={handleDeleteOldYear} 
-                                    disabled={isCleaning}
-                                    className={styles.deleteYearBtn}
-                                    title="2024年度データを一括削除"
-                                >
-                                    {isCleaning ? <RefreshCw size={18} className={styles.spin} /> : <Trash2 size={18} />}
-                                    2024削除
-                                </button>
-                            </div>
-                        )}
                         <Link href="/classes/new" className={styles.createBtn}>
                             <Plus size={20} />
                             新規クラス作成
@@ -160,11 +97,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
                 )}
             </header>
 
-            {cleanupResult && (
-                <div className={styles.cleanupAlert}>
-                    {cleanupResult}
-                </div>
-            )}
 
             <div className={styles.searchBar}>
                 <input 
