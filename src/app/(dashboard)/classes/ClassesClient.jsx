@@ -71,7 +71,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
                     <span>{cls.studentCount}名</span>
                 </div>
             </div>
-            <ChevronRight size={18} className={styles.arrowIcon} />
         </Link>
     )
 
