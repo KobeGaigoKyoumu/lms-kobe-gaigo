@@ -371,7 +371,7 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
             let colName = headers.findIndex(h => h && String(h).includes('氏名'))
             let colClass = headers.findIndex(h => h && (String(h).includes('クラス') || String(h).replace(/\r?\n/g, '').includes('現')))
             let colEmail = headers.findIndex(h => h && String(h).includes('メール'))
-            let colYear = headers.findIndex(h => h && (String(h).includes('年度') || String(h).includes('コース')))
+            let colYear = headers.findIndex(h => h && String(h).includes('年度'))
 
             // デフォルト値（在籍者.xlsx形式）
             if (colStudentId === -1) colStudentId = 2
@@ -461,10 +461,22 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                     email: colEmail >= 0 && row[colEmail] ? String(row[colEmail]).trim() : null,
                     class_name: String(row[colClass] || '').trim() || null,
                     academic_year: (function () {
+                        // 1. 学籍番号の先頭2桁から計算 (最も確実)
+                        const idStr = String(row[colStudentId]).trim()
+                        if (idStr.length >= 2) {
+                            const idYear = parseInt(idStr.substring(0, 2))
+                            if (!isNaN(idYear)) return 2000 + idYear
+                        }
+                        
+                        // 2. Excelの年度カラムがあれば使用
                         let y = parseInt(row[colYear])
-                        if (isNaN(y)) return new Date().getFullYear()
-                        if (y > 0 && y < 100) y += 2000
-                        return y
+                        if (!isNaN(y)) {
+                            if (y > 0 && y < 100) y += 2000
+                            return y
+                        }
+
+                        // 3. 全て失敗した場合は現在の西暦
+                        return new Date().getFullYear()
                     })(),
                     status: 'active'
                 }

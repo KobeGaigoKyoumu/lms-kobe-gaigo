@@ -42,10 +42,14 @@ export function parseStudentId(studentId, baseDate = new Date(), academicYearOve
     if (academicYearOverride) {
         let over = Number(academicYearOverride)
         // If 2-digit year (e.g. 26), normalize to 2000s
+        // Also ensure it's a reasonable year (e.g. > 1900)
         if (over > 0 && over < 100) {
             over += 2000
         }
-        enrollmentYear = over
+        
+        if (over > 1900) {
+            enrollmentYear = over
+        }
     }
 
     // 入学月（3-4桁目）
