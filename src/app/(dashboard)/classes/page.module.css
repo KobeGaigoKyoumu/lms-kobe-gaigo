@@ -166,6 +166,29 @@
     color: var(--text-tertiary);
 }
 
+.searchBar {
+    margin-bottom: var(--spacing-6);
+}
+
+.searchInput {
+    width: 100%;
+    max-width: 500px;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    background: var(--bg-elevated);
+}
+
 .cardTitle {
     font-size: var(--font-size-lg);
     font-weight: 600;
