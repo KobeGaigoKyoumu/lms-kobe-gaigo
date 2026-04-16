@@ -52,7 +52,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
             
             {cls.course && (
                 <div className={styles.cardCourse}>
-                    <GraduationCap size={14} />
                     <span>コース:</span> {cls.course.title}
                 </div>
             )}
@@ -69,7 +68,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
                     <span>{cls.homeroom_teacher_name || cls.teacher?.full_name || '担当未設定'}</span>
                 </div>
                 <div className={styles.memberCount}>
-                    <Users size={14} />
                     <span>{cls.studentCount}名</span>
                 </div>
             </div>
@@ -126,13 +124,11 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
             <section className={styles.adminSection}>
                 {isTeacher && myClasses.length > 0 && (
                     <h2 className={styles.sectionTitle}>
-                        <School size={20} className={styles.sectionIcon} />
                         その他のクラス ({otherClasses.length})
                     </h2>
                 )}
                 {isAdmin && (
                     <h2 className={styles.sectionTitle}>
-                        <School size={20} className={styles.sectionIcon} />
                         全クラス ({filteredClasses.length})
                     </h2>
                 )}
@@ -150,7 +146,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
 
                 {filteredClasses.length === 0 && (
                     <div className={styles.empty}>
-                        <School size={64} opacity={0.2} />
                         <p>クラスが見つかりません</p>
                         {isTeacherOrAdmin && (
                             <Link href="/classes/new" className={styles.emptyBtn}>
