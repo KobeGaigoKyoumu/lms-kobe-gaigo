@@ -70,12 +70,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
         notFound()
     }
 
-    const { data: assignments } = await supabase
-        .from('assignments')
-        .select('*')
-        .eq('course_id', id)
-        .order('due_date', { ascending: true })
-
     // このコースに紐付くクラス一覧取得
     const { data: classes } = await supabase
         .from('classes')
@@ -258,10 +252,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
                                 <dd>{new Date(course.updated_at).toLocaleDateString('ja-JP')}</dd>
                             </div>
                             <div>
-                                <dt>課題数</dt>
-                                <dd>{assignments?.length || 0}件</dd>
-                            </div>
-                            <div>
                                 <dt>登録者数</dt>
                                 <dd>{enrollments?.length || 0}名</dd>
                             </div>
@@ -334,46 +324,6 @@ export default async function CourseDetailPage({ params, searchParams }) {
                         )}
                     </section>
 
-                    {/* 課題一覧 */}
-                    <section className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <h2>課題</h2>
-                            {canEdit && (
-                                <Link href={`/courses/${id}/assignments/new`} className={styles.addBtn}>
-                                    + 課題を追加
-                                </Link>
-                            )}
-                        </div>
-
-                        {assignments?.length === 0 ? (
-                            <p className={styles.empty}>課題がありません</p>
-                        ) : (
-                            <div className={styles.assignmentList}>
-                                {assignments?.map(assignment => (
-                                    <Link
-                                        href={`/assignments/${assignment.id}`}
-                                        key={assignment.id}
-                                        className={styles.assignmentCard}
-                                    >
-                                        <div>
-                                            <h4>{assignment.title}</h4>
-                                            <p>{assignment.description || '説明なし'}</p>
-                                        </div>
-                                        <div className={styles.dueDate}>
-                                            {assignment.due_date ? (
-                                                <>
-                                                    <span>締切:</span>
-                                                    {new Date(assignment.due_date).toLocaleDateString('ja-JP')}
-                                                </>
-                                            ) : (
-                                                '締切なし'
-                                            )}
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                    </section>
                 </main>
             </div>
         </div>
