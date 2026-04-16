@@ -143,9 +143,13 @@ async function _getStudentAssignmentsWithClient(supabase, studentId, className) 
                 }
                 
                 // Active/Archived split
-                // If it is ALREADY passed deadline, it is archived.
-                // If it is manually archived, it is archived.
-                if (isArchived || (deadline && deadline < now)) {
+                // 1. Manually archived or past deadline
+                const isGlobalArchived = isArchived || (deadline && deadline < now)
+
+                // 2. Class mismatch (Past class data)
+                const isClassMismatch = a.class_name && normalizeClassName(a.class_name) !== normalizedClassName
+
+                if (isGlobalArchived || isClassMismatch) {
                     archived.push(item)
                 } else {
                     active.push(item)
@@ -722,17 +726,14 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
             const supabase = createAdminClient()
 
             if (isArchived) {
-                // =============== アーカイブモード (過去の課題) ===============
-                // 過去のクラスのため現在の「students.class_name」で探すと誰もいない可能性がある。
-                // そのため、課題 → 提出物 → 提出した学生 という順番で取得し、過去の提出履歴から名簿を復元する。
-
-                // 1. Get assignments for this class (sorted by deadline)
-                const { data: assignments, error: assignmentsError } = await supabase
+                // =============== アーカイブモード (過去の課題・転出した学生) ===============
+                // 1. Get assignments for this class
+                let query = supabase
                     .from('homework_assignments')
-                    .select('id, title, deadline, created_at, course_id, subject')
+                    .select('id, title, deadline, created_at, course_id, subject, is_archived')
                     .eq('class_name', decodedClassName)
-                    .eq('is_archived', true)
-                    .order('deadline', { ascending: true })
+
+                const { data: assignments, error: assignmentsError } = await query.order('deadline', { ascending: true })
 
                 if (assignmentsError || !assignments || assignments.length === 0) {
                     return { students: [], assignments: [], submissions: [] }
@@ -740,35 +741,67 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
 
                 const assignmentIds = assignments.map(a => a.id)
 
-                // 2. Get all submissions for these assignments (クラス制限なしで全取得)
+                // 2. このクラスの課題に対する全提出物を取得
                 const { data: submissions, error: subError } = await supabase
                     .from('homework_submissions')
                     .select('student_id_text, assignment_id, status, score')
                     .in('assignment_id', assignmentIds)
 
-                if (subError || !submissions || submissions.length === 0) {
+                if (subError || !submissions) {
                     return { students: [], assignments, submissions: [] }
                 }
 
-                // 3. 提出物から過去の学生ID（student_id_text）を抽出
-                const submittedStudentIds = [...new Set(submissions.map(s => s.student_id_text))]
-
-                // 4. その学生たちの現在の名前などを取得
-                const { data: students, error: studentsError } = await supabase
+                // 3. 提出物がある学生、または以前このクラスにいた学生をリストアップ
+                const studentIdsWithRecords = [...new Set(submissions.map(s => s.student_id_text))]
+                
+                // 現在のクラス名簿を取得して、比較用にする
+                const { data: currentStudents } = await supabase
                     .from('students')
-                    .select('student_id_text, full_name')
-                    .in('student_id_text', submittedStudentIds)
+                    .select('student_id_text')
+                    .eq('class_name', decodedClassName)
+                    .eq('status', 'active')
+                
+                const currentStudentIds = new Set((currentStudents || []).map(s => s.student_id_text))
+
+                // アーカイブ表示対象：
+                // A: 現在はこのクラスにいないが、以前提出記録がある学生
+                // B: (グローバルにアーカイブされた課題がある場合)
+                const archivedStudentIds = studentIdsWithRecords.filter(id => !currentStudentIds.has(id))
+
+                if (archivedStudentIds.length === 0) {
+                    // 異動した学生がいない場合、アーカイブ済みの課題があれば現在の学生で表示
+                    const hasGlobalArchived = assignments.some(a => a.is_archived)
+                    if (hasGlobalArchived) {
+                        const { data: students } = await supabase
+                            .from('students')
+                            .select('student_id_text, full_name')
+                            .in('student_id_text', Array.from(currentStudentIds))
+                            .order('full_name', { ascending: true })
+                        
+                        return { students: students || [], assignments: assignments.filter(a => a.is_archived), submissions }
+                    }
+                    return { students: [], assignments: [], submissions: [] }
+                }
+
+                // 4. 該当学生の詳細を取得
+                const { data: students } = await supabase
+                    .from('students')
+                    .select('student_id_text, full_name, class_name')
+                    .in('student_id_text', archivedStudentIds)
                     .order('full_name', { ascending: true })
+
+                // アーカイブモードでは、グローバルアーカイブ済み課題 or 異動学生のデータがある課題を表示
+                const targetAssignments = assignments.filter(a => a.is_archived || archivedStudentIds.length > 0)
 
                 return {
                     students: students || [], 
-                    assignments,
+                    assignments: targetAssignments,
                     submissions
                 }
 
             } else {
                 // =============== 通常モード (今年の課題) ===============
-                // 現在そのクラスに在籍している学生をベースにマトリクスを作成する（未提出の学生も一覧に並べるため）
+                // 現在そのクラスに在籍している学生をベースにマトリクスを作成する
                 
                 // 1. Get current students in this class
                 const { data: students, error: studentsError } = await supabase
@@ -782,7 +815,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                     return { students: [], assignments: [], submissions: [] }
                 }
 
-                // 2. Get assignments for this class
+                // 2. Get active assignments for this class
                 const { data: assignments, error: assignmentsError } = await supabase
                     .from('homework_assignments')
                     .select('id, title, deadline, created_at, course_id, subject')

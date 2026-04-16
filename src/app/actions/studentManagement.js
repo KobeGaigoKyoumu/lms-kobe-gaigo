@@ -103,9 +103,10 @@ export const performGradeReset = async (studentsData) => {
     const oldSecondYearAY = targetAcademicYear - 2
 
     // `academic_year` カラムが null の場合（学籍番号フォールバック）も考慮するため、全 active 学生を取得して判定する
+    // 変更検知のため、class_name も取得する
     const { data: allActiveStudents, error: fetchError } = await supabase
         .from('students')
-        .select('student_id_text, academic_year')
+        .select('student_id_text, academic_year, class_name')
         .eq('status', 'active')
 
     if (fetchError) throw fetchError
@@ -113,7 +114,7 @@ export const performGradeReset = async (studentsData) => {
     const studentsToGraduate = (allActiveStudents || []).filter(student => {
         let enrollYear = student.academic_year
         if (!enrollYear) {
-            // academic_yearがnullの場合は学籍番号から類推 (parseStudentIdと同じロジック)
+            // academic_yearがnullの場合は学籍番号から類推
             const idPrefix = String(student.student_id_text).substring(0, 2)
             enrollYear = 2000 + parseInt(idPrefix, 10)
         }
@@ -131,8 +132,7 @@ export const performGradeReset = async (studentsData) => {
         graduatedCount = studentsToGraduate.length
     }
 
-    // ===== Step 2 & 3: Excelデータのupsert =====
-    // 新2年生（25xx）と新1年生（26xx）を分類してacademic_yearを設定
+    // ===== Step 2 & 3: Excelデータのupsert用加工 =====
     const processedStudents = studentsData.map(s => {
         const idPrefix = String(s.student_id_text).substring(0, 2)
         const enrollYear = 2000 + parseInt(idPrefix, 10)
@@ -146,6 +146,35 @@ export const performGradeReset = async (studentsData) => {
             status: studentStatus
         }
     })
+
+    // ===== 変更検知ロジック =====
+    // 学生データに重要な変更（進級、クラス変更、卒業、新規登録）がある場合のみ課題をアーカイブする
+    let hasChanges = false
+
+    // 1. 卒業処理が発生したか
+    if (graduatedCount > 0) {
+        hasChanges = true
+    }
+
+    if (!hasChanges) {
+        // 2. 新規学生の追加、または「学年（入学年度）」の変更（進級）があるか
+        // ※クラス名の変更のみでは、全課題をアーカイブせず個別の異動として扱う
+        const existingMap = new Map((allActiveStudents || []).map(s => [s.student_id_text, s]))
+        
+        for (const s of processedStudents) {
+            const existing = existingMap.get(s.student_id_text)
+            if (!existing) {
+                // 新規学生（新入生など）
+                hasChanges = true
+                break
+            }
+            if (existing.academic_year !== s.academic_year) {
+                // 学年の変更（進級）
+                hasChanges = true
+                break
+            }
+        }
+    }
 
     // Upsert（学籍番号で重複時は更新）
     const { error: upsertError } = await supabase
@@ -165,21 +194,18 @@ export const performGradeReset = async (studentsData) => {
     )
 
     // ===== クラス関連処理 =====
-    // ユニークなクラス名を抽出
     const uniqueClasses = [...new Set(
         processedStudents
             .map(s => String(s.class_name || '').trim())
             .filter(cls => cls && /^\d+-\d+$/.test(cls))
     )]
 
-    // 既存のクラスを取得
     const { data: existingClasses } = await supabase
         .from('classes')
         .select('id, name')
 
     const existingClassMap = new Map((existingClasses || []).map(c => [c.name, c.id]))
 
-    // 新規クラスを作成
     const newClassNames = uniqueClasses.filter(cls => !existingClassMap.has(cls))
     let classesCreated = 0
 
@@ -246,15 +272,19 @@ export const performGradeReset = async (studentsData) => {
     }
 
     // ===== 課題データのアーカイブ化 =====
-    // 学年リセットに伴い、現在アクティブな全課題を一括でアーカイブ（過去分）に移動する
-    const { error: archiveError } = await supabase
-        .from('homework_assignments')
-        .update({ is_archived: true })
-        .eq('is_archived', false)
+    // 変更が検知された場合のみ、現在アクティブな全課題を一括でアーカイブ（過去分）に移動する
+    let archivedCount = 0
+    if (hasChanges) {
+        const { error: archiveError } = await supabase
+            .from('homework_assignments')
+            .update({ is_archived: true })
+            .eq('is_archived', false)
 
-    if (archiveError) {
-        console.error('Failed to archive assignments:', archiveError)
-        // 致命的なエラーにはしないがログに残す
+        if (archiveError) {
+            console.error('Failed to archive assignments:', archiveError)
+        } else {
+            archivedCount = -1 // 実行されたことを示すフラグ
+        }
     }
 
     revalidateTag('students', "max")
@@ -267,6 +297,7 @@ export const performGradeReset = async (studentsData) => {
         updatedCount: newSecondYears.length,
         createdCount: newFirstYears.length,
         classesCreated,
-        membersRegistered
+        membersRegistered,
+        wasArchived: archivedCount !== 0
     }
 }
