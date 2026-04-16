@@ -460,7 +460,12 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                     full_name: String(row[colName] || '').trim(),
                     email: colEmail >= 0 && row[colEmail] ? String(row[colEmail]).trim() : null,
                     class_name: String(row[colClass] || '').trim() || null,
-                    academic_year: parseInt(row[colYear]) || new Date().getFullYear(),
+                    academic_year: (function () {
+                        let y = parseInt(row[colYear])
+                        if (isNaN(y)) return new Date().getFullYear()
+                        if (y > 0 && y < 100) y += 2000
+                        return y
+                    })(),
                     status: 'active'
                 }
 
