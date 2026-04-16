@@ -195,7 +195,6 @@
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
-    transition: all var(--transition-base);
 }
 
 .assignmentItem {
@@ -205,12 +204,6 @@
     text-decoration: none;
 }
 
-.assignmentItem:hover {
-    background: var(--bg-primary);
-    border-color: var(--primary-400);
-    transform: translateX(6px);
-    box-shadow: var(--shadow-md);
-}
 
 .assignmentInfo h4 {
     font-size: var(--font-size-base);
@@ -226,11 +219,6 @@
 
 .itemArrow {
     color: var(--text-tertiary);
-    transition: color var(--transition-fast);
-}
-
-.assignmentItem:hover .itemArrow {
-    color: var(--primary-500);
 }
 
 /* Announcements */
