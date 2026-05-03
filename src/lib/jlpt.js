@@ -1078,17 +1078,50 @@ export async function getEnhancedJlptStats(students = []) {
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 
+    // 5. Session-by-session statistics
+    const bySession = {};
+    validData.forEach(record => {
+        const session = record.session;
+        if (!bySession[session]) {
+            bySession[session] = { session, total: 0, passed: 0, levels: {} };
+        }
+        bySession[session].total++;
+        if (record.result === '合格') bySession[session].passed++;
+        
+        const lvl = record.level;
+        if (!bySession[session].levels[lvl]) {
+            bySession[session].levels[lvl] = { total: 0, passed: 0 };
+        }
+        bySession[session].levels[lvl].total++;
+        if (record.result === '合格') bySession[session].levels[lvl].passed++;
+    });
+
+    const sessionStats = Object.values(bySession)
+        .map(s => ({
+            ...s,
+            passRate: ((s.passed / s.total) * 100).toFixed(1),
+            levelBreakdown: Object.entries(s.levels).map(([lvl, stats]) => ({
+                level: lvl,
+                total: stats.total,
+                passed: stats.passed,
+                passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+            })).sort((a, b) => a.level.localeCompare(b.level))
+        }))
+        .sort((a, b) => b.session.localeCompare(a.session));
+
     return {
         nationalityStats,
         levelStats,
         yearlyTrend,
         graduationN3PlusRates,
+        sessionStats,
         overallN3PlusRate: {
             totalUniqueStudents,
             n3PlusStudents,
             rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
         }
     };
+
 }
 
 /**

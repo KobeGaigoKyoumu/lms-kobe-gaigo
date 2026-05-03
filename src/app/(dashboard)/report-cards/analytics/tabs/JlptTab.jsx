@@ -57,6 +57,7 @@ export default function JlptTab({
         <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
             <div className={styles.subTabs}>
                 <button className={`${styles.subTab} ${jlptSubTab === 'summary' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('summary')}>年度別分析</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'nationality' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('nationality')}>国籍別分析</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('class')}>クラス別分析</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('compare')}>全国比較</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('section')}>科目得点分析</button>
@@ -142,6 +143,53 @@ export default function JlptTab({
                         {(statsObj?.sessionStats || []).map(session => (
                             <JlptSessionRow key={session.session} sessionData={session} />
                         ))}
+                    </div>
+                </div>
+            )}
+            {jlptSubTab === 'nationality' && (
+                <div className={styles.tabContent}>
+                    <div className={styles.chartsRow}>
+                        <div className={styles.chartCard} style={{ flex: 1 }}>
+                            <h3 className={styles.chartTitle}>国籍別合格率 (%)</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar
+                                    data={{
+                                        labels: (statsObj?.nationalityStats || []).map(s => s.country),
+                                        datasets: [{
+                                            label: '合格率',
+                                            data: (statsObj?.nationalityStats || []).map(s => s.passRate),
+                                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                        }]
+                                    }}
+                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.chartCard} style={{ flex: 1.5 }}>
+                            <h3 className={styles.chartTitle}>国籍別詳細統計</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>国籍</th>
+                                            <th>受験者数</th>
+                                            <th>合格者数</th>
+                                            <th>合格率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {(statsObj?.nationalityStats || []).map((row, idx) => (
+                                            <tr key={idx}>
+                                                <td style={{ fontWeight: 600 }}>{row.country}</td>
+                                                <td>{row.total}名</td>
+                                                <td>{row.passed}名</td>
+                                                <td style={{ fontWeight: 600, color: parseFloat(row.passRate) >= 50 ? COLOR_PASS : COLOR_WARN }}>{row.passRate}%</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
