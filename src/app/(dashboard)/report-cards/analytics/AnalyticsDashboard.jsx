@@ -97,11 +97,11 @@ export default function AnalyticsDashboard({
                         }
                         if (cfJlptRes.ok) {
                             const cfData = await cfJlptRes.json();
-                            if (cfData && (cfData.stats || cfData.enhanced)) {
+                            if (cfData && (cfData.levelStats || cfData.stats || cfData.enhanced)) {
                                 jlptResData = cfData;
-                                debug.push(`CF JLPT data: OK`)
+                                debug.push(`CF JLPT data: OK (keys: ${Object.keys(cfData).join(',')})`)
                             } else {
-                                debug.push(`CF JLPT: no stats/enhanced, keys: ${Object.keys(cfData || {}).join(',')}`)
+                                debug.push(`CF JLPT: no data, keys: ${Object.keys(cfData || {}).join(',')}`)
                             }
                         }
                     } catch (e) {
@@ -230,8 +230,8 @@ export default function AnalyticsDashboard({
                         )}
                         {activeTab === 'jlpt' && (
                             <JlptTab 
-                                initialStats={jlptData?.enhanced || { stats: jlptData?.stats || [] }}
-                                nationalStats={jlptData?.nationalStats || null}
+                                initialStats={jlptData}
+                                nationalStats={jlptData?.nationalityStats || null}
                                 sectionScoreStats={jlptData?.sectionScores || null}
                                 chartFontSize={chartFontSize} 
                             />
