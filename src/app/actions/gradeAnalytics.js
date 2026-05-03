@@ -1,33 +1,22 @@
 'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
 import { pushCloudflareSnapshot } from './cloudflare'
 
 /**
  * Internal core logic for Grade Analytics.
+ * Fetches directly from Supabase (Cloudflare KV is used on the client side via GET).
  */
 async function getGradeAnalyticsDataInternal() {
-    // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
-    try {
-        console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot (Grades)...')
-        const snapshot = await getCloudflareSnapshot('grades_v4')
-        if (snapshot && snapshot.data) {
-            console.log('Cache HIT (Cloudflare): Using snapshot for grades.')
-            return snapshot
-        }
-    } catch (e) {
-        console.error('Cloudflare fetch failed for grades, falling back to DB:', e)
-    }
-
-    console.log('Cache MISS (Cloudflare): Fetching Grade Analytics from DB...')
+    console.log('[GradeAnalytics] Fetching from Supabase...')
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
     if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Grade Analytics: Missing Supabase environment variables')
+        console.error('[GradeAnalytics] Missing Supabase environment variables')
+        return { error: 'Missing Supabase environment variables', data: [] }
     }
 
     const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
@@ -38,7 +27,12 @@ async function getGradeAnalyticsDataInternal() {
             .select('id, student_id_text, student_name, class_name, year_term, final_exam_total, report_card_total, final_exam_data, report_card_data')
             .order('year_term', { ascending: false })
 
-        if (error) throw error
+        if (error) {
+            console.error('[GradeAnalytics] Supabase query error:', error)
+            throw error
+        }
+
+        console.log(`[GradeAnalytics] Fetched ${data?.length || 0} raw records from Supabase`)
 
         const filteredData = (data || []).filter(item => {
             const isJlptTerm = item.year_term?.startsWith('JLPT')
@@ -46,29 +40,30 @@ async function getGradeAnalyticsDataInternal() {
             return !isJlptTerm && !isJlptType
         })
 
+        console.log(`[GradeAnalytics] Filtered to ${filteredData.length} grade records`)
+
         return { data: filteredData }
     } catch (error) {
-        console.error('Grade Analytics DB Fetch Error:', error)
-        return { error: error.message }
+        console.error('[GradeAnalytics] DB Fetch Error:', error)
+        return { error: error.message, data: [] }
     }
 }
 
 export async function getGradeAnalyticsData(session) {
-    if (!session) return { error: 'Unauthorized' }
+    if (!session) return { error: 'Unauthorized', data: [] }
     
-    // Bypass next_unstable_cache completely to avoid Vercel KV 2MB limits.
-    // We rely solely on Cloudflare KV for caching.
     const result = await getGradeAnalyticsDataInternal()
 
-    if (result && !result.error && result.data) {
+    // Non-blocking: push to Cloudflare for future client-side reads
+    if (result && !result.error && result.data?.length > 0) {
         try {
             await pushCloudflareSnapshot('grades_v4', result)
         } catch (e) {
-            console.error('Snapshot push failed (non-critical):', e)
+            console.error('[GradeAnalytics] Snapshot push failed (non-critical):', e)
         }
     }
 
-    return result || { data: [], error: 'No data returned' }
+    return result
 }
 
 export async function fetchGradeAnalytics() {
