@@ -3,8 +3,85 @@
 import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
+import { getAdminMemberSession } from './adminAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
 import { normalizeClassName } from '@/lib/utils'
+
+/**
+ * Fetches teacher dashboard data using Service Role Client to bypass RLS.
+ * Includes assigned classes, pending submissions count, and recent assignments.
+ */
+export async function getTeacherDashboardData() {
+    try {
+        const adminMember = await getAdminMemberSession()
+        if (!adminMember) return null
+
+        const userId = adminMember.memberId
+        const adminName = adminMember.name
+        
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase config missing')
+        
+        const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
+
+        // 1. Fetch Teacher Classes
+        const { data: teacherClasses } = await supabase
+            .from('classes')
+            .select('name, teacher_id, homeroom_teacher_name')
+            .or(`teacher_id.eq.${userId || 0},homeroom_teacher_name.eq."${adminName || '不明'}"`)
+
+        if (!teacherClasses || teacherClasses.length === 0) {
+            return {
+                teacherClasses: [],
+                pendingAssignmentsCount: 0,
+                recentAssignments: []
+            }
+        }
+
+        const teacherClassNames = teacherClasses.map(c => c.name)
+
+        // 2. Fetch Assignments
+        const { data: allAssignments } = await supabase
+            .from('homework_assignments')
+            .select('id, title, deadline, class_name, released_at, is_archived, created_at')
+            .in('class_name', teacherClassNames)
+            .order('created_at', { ascending: false })
+            .limit(100)
+
+        const now = new Date()
+        const activeAssignments = (allAssignments || []).filter(a => {
+            const isNotArchived = !a.is_archived
+            const releasedAtRaw = a.released_at || a.release_date || a.created_at
+            const isReleased = !releasedAtRaw || new Date(releasedAtRaw) <= now
+            return isNotArchived && isReleased
+        })
+
+        const activeAssignmentIds = activeAssignments.map(a => a.id)
+
+        // 3. Fetch Pending Submissions Count
+        let pendingCount = 0
+        if (activeAssignmentIds.length > 0) {
+            const { count } = await supabase
+                .from('homework_submissions')
+                .select('id', { count: 'exact', head: true })
+                .eq('status', 'submitted')
+                .in('assignment_id', activeAssignmentIds)
+            
+            pendingCount = count || 0
+        }
+
+        return {
+            teacherClasses,
+            pendingAssignmentsCount: pendingCount,
+            recentAssignments: activeAssignments.slice(0, 5)
+        }
+    } catch (e) {
+        console.error('getTeacherDashboardData error:', e)
+        return null
+    }
+}
+
 
 /**
  * Fetches student dashboard data with Next.js Data Cache.

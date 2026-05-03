@@ -13,6 +13,7 @@ import {
     TrendingUp,
     LayoutDashboard
 } from 'lucide-react'
+import { getTeacherDashboardData } from '@/app/actions/dashboard'
 
 export default function DashboardContent({ adminMember }) {
     const [announcements, setAnnouncements] = useState([])
@@ -31,86 +32,31 @@ export default function DashboardContent({ adminMember }) {
             setLoading(true)
 
             try {
-                const userId = adminMember.memberId
-                const adminName = adminMember.name
-                const now = new Date().toISOString()
-
-                // 1. Fetch Teacher Classes
-                // We use both ID and Name to cover different assignments
-                const { data: teacherClasses, error: classError } = await supabase
-                    .from('classes')
-                    .select('name, teacher_id, homeroom_teacher_name')
-                    .or(`teacher_id.eq.${userId || 0},homeroom_teacher_name.eq."${adminName || '不明'}"`)
-
-                if (classError) console.error('Class fetch error:', classError)
-
-                const normalizeClassName = (name) => {
-                    if (!name) return ''
-                    return typeof name === 'string' 
-                        ? name.trim()
-                            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-                            .replace(/[－ー—―]/g, '-')
-                            .replace(/\s+/g, '') 
-                        : name
-                }
-
-                const teacherClassNames = (teacherClasses || []).map(c => c.name)
-                const enrolledClassesCount = teacherClassNames.length
-
-                // 2. Parallel Fetch: Announcements and Homework Data
-                // We'll fetch announcements and assignments in parallel, then fetch pending count
-                const [annResult, assignmentsResult] = await Promise.all([
-                    supabase
-                        .from('announcements')
-                        .select(`
-                            id, title, content, is_pinned, created_at, sender_name,
-                            author:profiles!author_id (full_name)
-                        `)
-                        .order('is_pinned', { ascending: false })
-                        .order('created_at', { ascending: false })
-                        .limit(5),
-                    
-                    enrolledClassesCount > 0 ? supabase
-                        .from('homework_assignments')
-                        .select('id, title, deadline, class_name, released_at, is_archived, created_at')
-                        .in('class_name', teacherClassNames)
-                        .order('created_at', { ascending: false })
-                        .limit(50) : { data: [] }
-                ])
-
-                const allAssignments = assignmentsResult.data || []
+                // 1. Fetch Teacher Data (Classes, Pending Count, Recent Homework) via Server Action
+                // This bypasses RLS issues by using Service Role client on the server.
+                const teacherData = await getTeacherDashboardData()
                 
-                // Filter active assignments for "Recently Created"
-                const activeAssignments = allAssignments.filter(a => {
-                    const isNotArchived = !a.is_archived
-                    const isReleased = !a.released_at || new Date(a.released_at) <= new Date()
-                    return isNotArchived && isReleased
-                }).slice(0, 5)
+                // 2. Fetch Announcements (Keep via Client if RLS allows, or use server action)
+                const { data: annData } = await supabase
+                    .from('announcements')
+                    .select(`
+                        id, title, content, is_pinned, created_at, sender_name,
+                        author:profiles!author_id (full_name)
+                    `)
+                    .order('is_pinned', { ascending: false })
+                    .order('created_at', { ascending: false })
+                    .limit(5)
 
-                // For pending count, we need to check ALL active assignments, not just the top 5
-                // So we fetch a broader list of assignment IDs if needed, or just use the ones we have if 50 is enough
-                const activeAssignmentIds = allAssignments
-                    .filter(a => !a.is_archived)
-                    .map(a => a.id)
+                setAnnouncements(annData || [])
 
-                let pendingAssignmentsCount = 0
-                if (activeAssignmentIds.length > 0) {
-                    const { count } = await supabase
-                        .from('homework_submissions')
-                        .select('id', { count: 'exact', head: true })
-                        .eq('status', 'submitted')
-                        .in('assignment_id', activeAssignmentIds)
-                    
-                    pendingAssignmentsCount = count || 0
+                if (teacherData) {
+                    setStats({
+                        teacherClasses: teacherData.teacherClasses || [],
+                        enrolledClassesCount: teacherData.teacherClasses?.length || 0,
+                        pendingAssignmentsCount: teacherData.pendingAssignmentsCount || 0,
+                        recentAssignments: teacherData.recentAssignments || []
+                    })
                 }
-
-                setAnnouncements(annResult.data || [])
-                setStats({
-                    teacherClasses: teacherClasses || [],
-                    enrolledClassesCount,
-                    pendingAssignmentsCount,
-                    recentAssignments: activeAssignments
-                })
             } catch (err) {
                 console.error('Dashboard data fetch error:', err)
             } finally {
@@ -118,11 +64,11 @@ export default function DashboardContent({ adminMember }) {
             }
         }
 
-
         fetchData()
     }, [adminMember, supabase])
 
     if (loading) {
+
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.spinner}></div>
