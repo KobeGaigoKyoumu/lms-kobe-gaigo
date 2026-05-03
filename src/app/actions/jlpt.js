@@ -36,14 +36,9 @@ async function getJlptAnalyticsDataInternal() {
         console.log(`[JlptAnalytics] Fetched ${gradeRecords?.length || 0} grade records`)
 
         // Also need student info for nationality breakdown
-        const { data: students, error: sError } = await supabase
-            .from('students')
-            .select('*')
+        const { getCachedStudentList } = require('@/app/actions/studentData');
+        const students = await getCachedStudentList();
 
-        if (sError) {
-            console.error('[JlptAnalytics] students query error:', sError)
-            throw sError
-        }
 
         console.log(`[JlptAnalytics] Fetched ${students?.length || 0} students`)
 

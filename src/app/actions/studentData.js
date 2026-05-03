@@ -41,6 +41,7 @@ function getCachedStudentListInternal() {
                     `)
                     .order('class_name', { ascending: true })
                     .order('student_id_text', { ascending: true })
+                    .range(0, 49999)
 
                 if (error) {
                     console.error('Fetch Student List Error:', error)

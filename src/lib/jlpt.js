@@ -1217,21 +1217,29 @@ export async function getStudentsJlptSummary(students) {
         studentResults.get(key).push(record);
     };
 
+    const normalize = (str) => {
+        if (!str) return '';
+        return str.toLowerCase().replace(/[\s\u3000]/g, '').trim();
+    };
+
     rawData.forEach(record => {
         if (record.studentId) {
             addResult(String(record.studentId), record);
         }
-        if (record.name) {
-            addResult(record.name.toLowerCase().trim(), record);
+        const normalizedName = normalize(record.name);
+        if (normalizedName) {
+            addResult(normalizedName, record);
         }
         // Also add variants for Chinese names
         const nameVariants = getAllNameVariants(record.name);
         nameVariants.forEach(variant => {
-            if (variant !== record.name?.toLowerCase()?.trim()) {
-                addResult(variant, record);
+            const normalizedVariant = normalize(variant);
+            if (normalizedVariant && normalizedVariant !== normalizedName) {
+                addResult(normalizedVariant, record);
             }
         });
     });
+
 
     // Load career destinations for additional info and identify missing students
     const careerMap = new Map();
@@ -1321,20 +1329,27 @@ export async function getStudentsJlptSummary(students) {
             });
         }
 
-        // 2. Match by Name (if ID match didn't find everything, or to cover missing IDs)
-        // Note: Name matching can be risky, but we filter loosely. 
-        // Ideally we prioritize ID matches.
+        // 2. Match by Name
         if (name) {
-            // Check direct match and variants
+            const normalizedName = normalize(student.full_name);
+            if (studentResults.has(normalizedName)) {
+                studentResults.get(normalizedName).forEach(r => {
+                    const key = `${r.session}-${r.level}-${r.date}`;
+                    if (!seenRecordKeys.has(key)) {
+                        myRecords.push(r);
+                        seenRecordKeys.add(key);
+                    }
+                });
+            }
+            
+            // Check variants
             const variants = getAllNameVariants(student.full_name);
             variants.forEach(variant => {
-                if (studentResults.has(variant)) {
-                    studentResults.get(variant).forEach(r => {
+                const normalizedVariant = normalize(variant);
+                if (normalizedVariant !== normalizedName && studentResults.has(normalizedVariant)) {
+                    studentResults.get(normalizedVariant).forEach(r => {
                         const key = `${r.session}-${r.level}-${r.date}`;
                         if (!seenRecordKeys.has(key)) {
-                            // Optional: Check enrollment date if strictly needed, 
-                            // but for class analysis we generally assume name match is valid
-                            // unless common name.
                             myRecords.push(r);
                             seenRecordKeys.add(key);
                         }
@@ -1342,6 +1357,7 @@ export async function getStudentsJlptSummary(students) {
                 }
             });
         }
+
 
         // Aggregate by level
         const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
