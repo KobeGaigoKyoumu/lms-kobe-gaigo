@@ -1280,34 +1280,57 @@ export async function getStudentsJlptSummary(students) {
         console.error('Error loading career stats for summary:', e);
     }
 
-    const allStudentsToProcess = [...students, ...virtualStudents];
+    const allStudentsList = [...students, ...virtualStudents];
     
-    // Also identify students from JLPT CSV data who are NOT in the DB or career list
-    // This is crucial for historical class-based analysis
-    const processedKeys = new Set();
-    allStudentsToProcess.forEach(s => {
-        if (s.student_id_text || s.student_id) processedKeys.add(String(s.student_id_text || s.student_id));
-        if (s.full_name) processedKeys.add(s.full_name.toLowerCase().trim());
-    });
-
+    // Also identify students from JLPT CSV data
     rawData.forEach(record => {
         const sid = record.studentId ? String(record.studentId) : null;
-        const name = record.name ? record.name.toLowerCase().trim() : null;
+        const name = record.name;
+        if (!name) return;
         
-        const alreadyIn = (sid && processedKeys.has(sid)) || (name && processedKeys.has(name));
-        
-        if (!alreadyIn) {
-            allStudentsToProcess.push({
-                student_id_text: sid,
-                full_name: record.name,
-                class_name: '過去の学生', // Generic class for historical data
-                nationality: record.country,
-                is_historical: true
-            });
-            if (sid) processedKeys.add(sid);
-            if (name) processedKeys.add(name);
+        // Add as a potential student if not in the list yet
+        // We'll merge them by name later
+        allStudentsList.push({
+            student_id_text: sid,
+            full_name: name,
+            class_name: '過去の学生',
+            nationality: record.country,
+            is_historical: true
+        });
+    });
+
+    // Merge students by normalized name to avoid duplicates
+    const mergedStudentsMap = new Map(); // normalizedName -> student object
+    
+    allStudentsList.forEach(s => {
+        const normName = normalize(s.full_name);
+        if (!normName) return;
+
+        if (!mergedStudentsMap.has(normName)) {
+            mergedStudentsMap.set(normName, s);
+        } else {
+            const existing = mergedStudentsMap.get(normName);
+            // Merge logic: Prioritize DB student over virtual/historical
+            const isExistingHistorical = existing.is_historical || existing.is_virtual;
+            const isNewHistorical = s.is_historical || s.is_virtual;
+
+            if (isExistingHistorical && !isNewHistorical) {
+                // Replace historical with DB student but keep some fields if missing
+                const merged = { ...s };
+                if (!merged.destination) merged.destination = existing.destination;
+                if (!merged.nationality) merged.nationality = existing.nationality;
+                mergedStudentsMap.set(normName, merged);
+            } else {
+                // Keep existing (DB student) but maybe update missing fields
+                if (!existing.student_id_text && s.student_id_text) existing.student_id_text = s.student_id_text;
+                if (!existing.nationality && s.nationality) existing.nationality = s.nationality;
+                if (!existing.destination && s.destination) existing.destination = s.destination;
+                if (!existing.enrollment_date && s.enrollment_date) existing.enrollment_date = s.enrollment_date;
+            }
         }
     });
+
+    const allStudentsToProcess = Array.from(mergedStudentsMap.values());
 
 
     // Process each student
