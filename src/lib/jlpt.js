@@ -1119,7 +1119,8 @@ export async function getEnhancedJlptStats(students = []) {
             totalUniqueStudents,
             n3PlusStudents,
             rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
-        }
+        },
+        allStudentStats: [] // Placeholder, can be populated if needed
     };
 
 }
@@ -1272,6 +1273,34 @@ export async function getStudentsJlptSummary(students) {
     }
 
     const allStudentsToProcess = [...students, ...virtualStudents];
+    
+    // Also identify students from JLPT CSV data who are NOT in the DB or career list
+    // This is crucial for historical class-based analysis
+    const processedKeys = new Set();
+    allStudentsToProcess.forEach(s => {
+        if (s.student_id_text || s.student_id) processedKeys.add(String(s.student_id_text || s.student_id));
+        if (s.full_name) processedKeys.add(s.full_name.toLowerCase().trim());
+    });
+
+    rawData.forEach(record => {
+        const sid = record.studentId ? String(record.studentId) : null;
+        const name = record.name ? record.name.toLowerCase().trim() : null;
+        
+        const alreadyIn = (sid && processedKeys.has(sid)) || (name && processedKeys.has(name));
+        
+        if (!alreadyIn) {
+            allStudentsToProcess.push({
+                student_id_text: sid,
+                full_name: record.name,
+                class_name: '過去の学生', // Generic class for historical data
+                nationality: record.country,
+                is_historical: true
+            });
+            if (sid) processedKeys.add(sid);
+            if (name) processedKeys.add(name);
+        }
+    });
+
 
     // Process each student
     const studentSummaries = allStudentsToProcess.map(student => {
