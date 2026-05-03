@@ -618,10 +618,11 @@ export async function getEnhancedJlptStats(students = []) {
                 });
             }
             // Store by student ID if available
-            if (s.student_id) {
-                const parsed = parseStudentIdForEnrollment(s.student_id);
+            const sid = s.student_id_text || s.student_id;
+            if (sid) {
+                const parsed = parseStudentIdForEnrollment(sid);
                 if (parsed) {
-                    studentIdMap.set(String(s.student_id), {
+                    studentIdMap.set(String(sid), {
                         enrollmentYear: parsed.enrollmentYear,
                         enrollmentMonth: parsed.enrollmentMonth,
                         graduationYear: parsed.graduationYear,
@@ -744,7 +745,7 @@ export async function getEnhancedJlptStats(students = []) {
     if (students && students.length > 0) {
         students.forEach(s => {
             // Some checks for valid ID
-            const sid = s.student_id;
+            const sid = s.student_id_text || s.student_id;
             if (sid) processedStudentIds.add(sid);
 
             let enrollYear = 0;
