@@ -1217,28 +1217,41 @@ export async function getStudentsJlptSummary(students) {
         studentResults.get(key).push(record);
     };
 
-    const normalize = (str) => {
+    const normalizeBasic = (str) => {
         if (!str) return '';
         return str.toLowerCase().replace(/[\s\u3000]/g, '').trim();
+    };
+
+    const normalizeSorted = (str) => {
+        if (!str) return '';
+        const parts = str.toLowerCase().replace(/\u3000/g, ' ').split(/\s+/).filter(Boolean);
+        if (parts.length <= 1) return parts[0] || '';
+        return parts.sort().join('');
     };
 
     rawData.forEach(record => {
         if (record.studentId) {
             addResult(String(record.studentId), record);
         }
-        const normalizedName = normalize(record.name);
-        if (normalizedName) {
-            addResult(normalizedName, record);
-        }
+        const name = record.name;
+        if (!name) return;
+
+        const key1 = normalizeBasic(name);
+        const key2 = normalizeSorted(name);
+        
+        if (key1) addResult(key1, record);
+        if (key2 && key2 !== key1) addResult(key2, record);
+
         // Also add variants for Chinese names
-        const nameVariants = getAllNameVariants(record.name);
+        const nameVariants = getAllNameVariants(name);
         nameVariants.forEach(variant => {
-            const normalizedVariant = normalize(variant);
-            if (normalizedVariant && normalizedVariant !== normalizedName) {
-                addResult(normalizedVariant, record);
-            }
+            const v1 = normalizeBasic(variant);
+            const v2 = normalizeSorted(variant);
+            if (v1) addResult(v1, record);
+            if (v2 && v2 !== v1) addResult(v2, record);
         });
     });
+
 
 
     // Load career destinations for additional info and identify missing students
@@ -1303,7 +1316,7 @@ export async function getStudentsJlptSummary(students) {
     const mergedStudentsMap = new Map(); // normalizedName -> student object
     
     allStudentsList.forEach(s => {
-        const normName = normalize(s.full_name);
+        const normName = normalizeSorted(s.full_name); // Use sorted for merging logic
         if (!normName) return;
 
         if (!mergedStudentsMap.has(normName)) {
@@ -1336,7 +1349,7 @@ export async function getStudentsJlptSummary(students) {
     // Process each student
     const studentSummaries = allStudentsToProcess.map(student => {
         const studentId = String(student.student_id_text || student.student_id || '');
-        const name = student.full_name?.toLowerCase()?.trim();
+        const name = student.full_name;
 
         let myRecords = [];
         const seenRecordKeys = new Set(); // Avoid duplicates from ID + Name matching
@@ -1354,23 +1367,17 @@ export async function getStudentsJlptSummary(students) {
 
         // 2. Match by Name
         if (name) {
-            const normalizedName = normalize(student.full_name);
-            if (studentResults.has(normalizedName)) {
-                studentResults.get(normalizedName).forEach(r => {
-                    const key = `${r.session}-${r.level}-${r.date}`;
-                    if (!seenRecordKeys.has(key)) {
-                        myRecords.push(r);
-                        seenRecordKeys.add(key);
-                    }
-                });
-            }
+            const keys = [
+                normalizeBasic(name),
+                normalizeSorted(name),
+                ...getAllNameVariants(name).flatMap(v => [normalizeBasic(v), normalizeSorted(v)])
+            ];
             
-            // Check variants
-            const variants = getAllNameVariants(student.full_name);
-            variants.forEach(variant => {
-                const normalizedVariant = normalize(variant);
-                if (normalizedVariant !== normalizedName && studentResults.has(normalizedVariant)) {
-                    studentResults.get(normalizedVariant).forEach(r => {
+            const uniqueKeys = [...new Set(keys.filter(Boolean))];
+            
+            uniqueKeys.forEach(k => {
+                if (studentResults.has(k)) {
+                    studentResults.get(k).forEach(r => {
                         const key = `${r.session}-${r.level}-${r.date}`;
                         if (!seenRecordKeys.has(key)) {
                             myRecords.push(r);
@@ -1380,6 +1387,7 @@ export async function getStudentsJlptSummary(students) {
                 }
             });
         }
+
 
 
         // Aggregate by level
