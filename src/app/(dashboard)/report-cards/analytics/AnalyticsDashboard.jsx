@@ -59,7 +59,7 @@ export default function AnalyticsDashboard({
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
-    const [debugInfo, setDebugInfo] = useState([])
+
 
     useEffect(() => {
         const fetchAnalyticsData = async () => {
@@ -146,18 +146,15 @@ export default function AnalyticsDashboard({
                 }
 
                 const finalGrades = gradeResData?.data || []
-                debug.push(`Final: grades=${finalGrades.length}, jlpt=${jlptResData ? 'has data' : 'empty'}`)
-
                 setGradeData(finalGrades);
                 setJlptData(jlptResData || {});
-                setStudentDb(jlptResData?.enhanced?.allStudentStats || []);
+                setStudentDb(jlptResData?.studentStats ? jlptResData.studentStats.flatMap(c => c.students) : []);
 
             } catch (err) {
                 debug.push(`FATAL: ${err.message}`)
                 console.error('Analytics Data Fetch Error:', err)
                 setError('データの取得に失敗しました。')
             } finally {
-                setDebugInfo(debug)
                 setIsLoading(false)
             }
         }
@@ -172,15 +169,6 @@ export default function AnalyticsDashboard({
                 <p className={styles.subtitle}>学生の学力推移と進路実績の多角的な分析</p>
             </header>
 
-            {/* Debug Panel - remove after fixing */}
-            {debugInfo.length > 0 && (
-                <div style={{ margin: '1rem', padding: '1rem', backgroundColor: '#1e293b', color: '#94a3b8', borderRadius: '0.5rem', fontSize: '0.75rem', fontFamily: 'monospace', maxHeight: '200px', overflowY: 'auto' }}>
-                    <strong style={{ color: '#f8fafc' }}>🔍 Debug Info:</strong>
-                    {debugInfo.map((line, i) => (
-                        <div key={i} style={{ marginTop: '2px' }}>{line}</div>
-                    ))}
-                </div>
-            )}
 
             <div className={styles.tabs}>
                 <button 
@@ -231,7 +219,7 @@ export default function AnalyticsDashboard({
                         {activeTab === 'jlpt' && (
                             <JlptTab 
                                 initialStats={jlptData}
-                                nationalStats={jlptData?.nationalityStats || null}
+                                nationalStats={jlptData?.nationalStats || null}
                                 sectionScoreStats={jlptData?.sectionScores || null}
                                 chartFontSize={chartFontSize} 
                             />

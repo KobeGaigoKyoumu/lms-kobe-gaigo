@@ -47,13 +47,63 @@ async function getJlptAnalyticsDataInternal() {
 
         console.log(`[JlptAnalytics] Fetched ${students?.length || 0} students`)
 
-        // Perform the heavy calculation using the verified lib function
-        const result = await getEnhancedJlptStats(students || []);
+        // Import additional functions from lib
+        const { 
+            getStudentsJlptSummary, 
+            getJlptSectionScoreStats, 
+            getJlptNationalStats 
+        } = require('@/lib/jlpt');
+
+        // Perform all calculations
+        const [enhanced, sectionScores, nationalStats, studentSummaries] = await Promise.all([
+            getEnhancedJlptStats(students || []),
+            getJlptSectionScoreStats(),
+            getJlptNationalStats(),
+            getStudentsJlptSummary(students || [])
+        ]);
         
-        console.log('[JlptAnalytics] Enhanced stats calculated successfully')
+        console.log('[JlptAnalytics] All stats calculated successfully')
+
+        // Group students by class for studentStats
+        const classStatsMap = new Map();
+        studentSummaries.forEach(s => {
+            const className = s.class || '不明';
+            if (!classStatsMap.has(className)) {
+                classStatsMap.set(className, {
+                    className,
+                    total: 0,
+                    n3Plus: 0,
+                    students: []
+                });
+            }
+            const c = classStatsMap.get(className);
+            c.total++;
+            // Consider N1, N2, N3 as N3+
+            const hasN3Plus = s.highestLevel && ['N1', 'N2', 'N3'].includes(s.highestLevel);
+            if (hasN3Plus) {
+                c.n3Plus++;
+            }
+            c.students.push(s);
+        });
+
+        // Convert map to array and calculate rates
+        const studentStats = Array.from(classStatsMap.values()).map(c => ({
+            ...c,
+            n3PlusRate: c.total > 0 ? ((c.n3Plus / c.total) * 100).toFixed(1) : 0
+        })).sort((a, b) => b.n3PlusRate - a.n3PlusRate);
+
+        // Combine everything into a single response object
+        const result = {
+            ...enhanced,
+            studentStats,
+            sectionScores,
+            nationalStats,
+            lastUpdated: new Date().toISOString()
+        };
 
         // Ensure result is serializable for Next.js
         return JSON.parse(JSON.stringify(result));
+
     } catch (error) {
         console.error('[JlptAnalytics] Internal Error:', error);
         return { error: error.message, stats: [] };

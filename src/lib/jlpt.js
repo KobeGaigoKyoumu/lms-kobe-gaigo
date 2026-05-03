@@ -12,6 +12,25 @@ const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_st
 const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
 const ENROLLMENT_STATS_JSON = path.join(process.cwd(), 'data', 'enrollment_stats.json');
 const CAREER_STATS_JSON = path.join(process.cwd(), 'src', 'data', 'career_stats_v2.json');
+const JLPT_NATIONAL_STATS_JSON = path.join(process.cwd(), 'data', 'jlpt_national_stats.json');
+
+/**
+ * Loads national JLPT statistics (average pass rates etc.)
+ */
+export function getJlptNationalStats() {
+    try {
+        if (!fs.existsSync(JLPT_NATIONAL_STATS_JSON)) {
+            console.warn('National stats file not found:', JLPT_NATIONAL_STATS_JSON);
+            return null;
+        }
+        const content = fs.readFileSync(JLPT_NATIONAL_STATS_JSON, 'utf-8');
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error loading national stats:', error);
+        return null;
+    }
+}
+
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;

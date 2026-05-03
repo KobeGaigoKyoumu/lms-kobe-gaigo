@@ -56,7 +56,7 @@ export default function JlptTab({
     return (
         <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
             <div className={styles.subTabs}>
-                <button className={`${styles.subTab} ${jlptSubTab === 'summary' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('summary')}>全体要約</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'summary' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('summary')}>年度別分析</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('class')}>クラス別分析</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('compare')}>全国比較</button>
                 <button className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('section')}>科目得点分析</button>
@@ -111,6 +111,30 @@ export default function JlptTab({
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    <h3 className={styles.sectionTitle}>年度別 N3以上保有率 (2年終了時)</h3>
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>卒業時期</th>
+                                    <th>生徒数</th>
+                                    <th>N3以上取得者</th>
+                                    <th>N3以上保有率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(statsObj?.graduationN3PlusRates || []).map((row, idx) => (
+                                    <tr key={idx}>
+                                        <td>{row.year}</td>
+                                        <td>{row.totalStudents}名</td>
+                                        <td>{row.n3PlusStudents}名</td>
+                                        <td style={{ fontWeight: 600, color: parseFloat(row.rate) >= 50 ? COLOR_PASS : COLOR_WARN }}>{row.rate}%</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <h3 className={styles.sectionTitle}>試験回別詳細</h3>
@@ -232,6 +256,45 @@ export default function JlptTab({
                                     </div>
                                 </div>
                             </div>
+
+                            <h3 className={styles.sectionTitle}>レベル別詳細比較</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>レベル</th>
+                                            <th>本校合格率</th>
+                                            <th>本校受験者数</th>
+                                            <th>全国平均</th>
+                                            <th>差分</th>
+                                            <th>評価</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {['N1', 'N2', 'N3', 'N4', 'N5'].map(lvl => {
+                                            const myStat = (statsObj?.levelStats || []).find(s => s.level === lvl) || { passRate: 0, total: 0 };
+                                            const natAvg = nationalStats.averageRates?.japan?.[lvl]?.average || 0;
+                                            const diff = (myStat.passRate - natAvg).toFixed(1);
+                                            const isBetter = parseFloat(diff) >= 0;
+                                            
+                                            return (
+                                                <tr key={lvl}>
+                                                    <td><span className={`${styles.badge} ${styles[`badge${lvl}`]}`}>{lvl}</span></td>
+                                                    <td style={{ fontWeight: 600 }}>{myStat.passRate}%</td>
+                                                    <td>{myStat.total}名</td>
+                                                    <td>{natAvg}%</td>
+                                                    <td style={{ color: isBetter ? COLOR_PASS : COLOR_FAIL, fontWeight: 600 }}>
+                                                        {isBetter ? `+${diff}` : diff}%
+                                                    </td>
+                                                    <td style={{ color: isBetter ? COLOR_PASS : COLOR_FAIL }}>
+                                                        {parseFloat(diff) > 5 ? '◎ 優秀' : isBetter ? '○ 良好' : '△ 課題'}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </>
                     ) : (
                         <div className={styles.noData}>全国比較データはありません</div>
@@ -253,24 +316,68 @@ export default function JlptTab({
                                     <div className={styles.statValueRow}><span className={styles.statValue}>{sectionScoreStats.overall?.avgScore || 0}</span>点</div>
                                 </div>
                             </div>
-                            <div className={styles.chartsRow}>
-                                <div className={styles.chartCard}>
-                                    <h3 className={styles.chartTitle}>科目別平均点</h3>
-                                    <div className={styles.chartContainer}>
-                                        <Bar
-                                            data={{
-                                                labels: Object.keys(sectionScoreStats.bySection || {}),
-                                                datasets: [{
-                                                    label: '平均点',
-                                                    data: Object.values(sectionScoreStats.bySection || {}).map(s => s.avgScore || 0),
-                                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                                                }]
-                                            }}
-                                            options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 60 } } }}
-                                        />
-                                    </div>
-                                </div>
+                            <h3 className={styles.sectionTitle}>科目別全体平均</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>科目</th>
+                                            <th>データ数</th>
+                                            <th>平均点</th>
+                                            <th>最高点</th>
+                                            <th>最低点</th>
+                                            <th>合格者平均</th>
+                                            <th>不合格者平均</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(sectionScoreStats.bySection || {}).map(([name, s]) => (
+                                            <tr key={name}>
+                                                <td style={{ fontWeight: 600 }}>{name}</td>
+                                                <td>{s.count}</td>
+                                                <td style={{ fontWeight: 600 }}>{s.avgScore}点</td>
+                                                <td>{s.maxScore}点</td>
+                                                <td>{s.minScore}点</td>
+                                                <td style={{ color: COLOR_PASS }}>{s.passedAvg}点</td>
+                                                <td style={{ color: COLOR_FAIL }}>{s.failedAvg}点</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
+
+                            <h3 className={styles.sectionTitle}>科目×レベル別詳細</h3>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>科目</th>
+                                            <th>レベル</th>
+                                            <th>データ数</th>
+                                            <th>平均点</th>
+                                            <th>最高点</th>
+                                            <th>最低点</th>
+                                            <th>合格者平均</th>
+                                            <th>不合格者平均</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {(sectionScoreStats.bySectionLevel || []).map((s, idx) => (
+                                            <tr key={idx}>
+                                                <td>{s.section}</td>
+                                                <td><span className={`${styles.badge} ${styles[`badge${s.level}`]}`}>{s.level}</span></td>
+                                                <td>{s.count}</td>
+                                                <td style={{ fontWeight: 600 }}>{s.avgScore}点</td>
+                                                <td>{s.maxScore}点</td>
+                                                <td>{s.minScore}点</td>
+                                                <td style={{ color: COLOR_PASS }}>{s.passedAvg}点</td>
+                                                <td style={{ color: COLOR_FAIL }}>{s.failedAvg}点</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </>
                     ) : (
                         <div className={styles.noData}>科目別得点データはありません</div>
