@@ -17,6 +17,7 @@ import {
 export default function DashboardContent({ adminMember }) {
     const [announcements, setAnnouncements] = useState([])
     const [stats, setStats] = useState({
+        teacherClasses: [],
         enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
         recentAssignments: []
@@ -35,10 +36,13 @@ export default function DashboardContent({ adminMember }) {
                 const now = new Date().toISOString()
 
                 // 1. Fetch Teacher Classes
-                const { data: teacherClasses } = await supabase
+                // We use both ID and Name to cover different assignments
+                const { data: teacherClasses, error: classError } = await supabase
                     .from('classes')
                     .select('name, teacher_id, homeroom_teacher_name')
-                    .or(`teacher_id.eq.${userId},homeroom_teacher_name.eq."${adminName}"`)
+                    .or(`teacher_id.eq.${userId || 0},homeroom_teacher_name.eq."${adminName || '不明'}"`)
+
+                if (classError) console.error('Class fetch error:', classError)
 
                 const normalizeClassName = (name) => {
                     if (!name) return ''
@@ -70,9 +74,6 @@ export default function DashboardContent({ adminMember }) {
                         .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
                         .eq('status', 'submitted')
                         .in('assignment.class_name', teacherClassNames)
-                        // Note: Complex OR filters on joined columns can trigger 400 Bad Request in some PostgREST versions.
-                        // We will simplify this to just filtering by class_name and handle the rest in the count if necessary,
-                        // or better, ensure released_at logic is handled consistently.
                         .or(`is_archived.is.null,is_archived.is.false`, { foreignTable: 'homework_assignments' })
                         : { count: 0 },
 
@@ -88,6 +89,7 @@ export default function DashboardContent({ adminMember }) {
 
                 setAnnouncements(annResult.data || [])
                 setStats({
+                    teacherClasses: teacherClasses || [],
                     enrolledClassesCount,
                     pendingAssignmentsCount: pendingResult.count || 0,
                     recentAssignments: assignmentsResult.data || []
@@ -120,13 +122,18 @@ export default function DashboardContent({ adminMember }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue}>{stats.enrolledClassesCount}</p>
+                        <p className={styles.statValue} style={{ fontSize: '1.5rem', whiteSpace: 'nowrap' }}>
+                            {stats.teacherClasses.length > 0 
+                                ? stats.teacherClasses.map(c => c.name).join(' ') 
+                                : '-'}
+                        </p>
                     </div>
                     <div className={styles.statTrend}>
                         <TrendingUp size={14} className={styles.trendIcon} />
                         <span>Active</span>
                     </div>
                 </div>
+
                 <div className={styles.statCard}>
                     <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                         <ClipboardCheck size={24} color="white" />
