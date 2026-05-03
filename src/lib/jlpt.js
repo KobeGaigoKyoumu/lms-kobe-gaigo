@@ -1109,13 +1109,115 @@ export async function getEnhancedJlptStats(students = []) {
         }))
         .sort((a, b) => b.session.localeCompare(a.session));
 
+    // 6. Subject-specific scores (言語知識, 読解, 聴解)
+
+    const subjects = {
+        knowledge: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 },
+        reading: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 },
+        listening: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 }
+    };
+
+    const levelSubjects = {}; // N1: { knowledge: { total: 0, count: 0 }, ... }
+
+    validData.forEach(record => {
+        const lvl = record.level;
+        if (!levelSubjects[lvl]) {
+            levelSubjects[lvl] = {
+                knowledge: { total: 0, count: 0 },
+                reading: { total: 0, count: 0 },
+                listening: { total: 0, count: 0 }
+            };
+        }
+
+        const addScore = (subjKey, scoreStr) => {
+            if (!scoreStr) return;
+            const score = parseInt(scoreStr.split('/')[0]);
+            if (isNaN(score)) return;
+
+            const s = subjects[subjKey];
+            s.total += score;
+            s.count++;
+            s.max = Math.max(s.max, score);
+            s.min = Math.min(s.min, score);
+            if (record.result === '合格') {
+                s.passedTotal += score;
+                s.passedCount++;
+            } else {
+                s.failedTotal += score;
+                s.failedCount++;
+            }
+
+            levelSubjects[lvl][subjKey].total += score;
+            levelSubjects[lvl][subjKey].count++;
+        };
+
+        if (/^N[1-3]$/.test(lvl) && record.sectionScores) {
+            addScore('knowledge', record.sectionScores.knowledge);
+            addScore('reading', record.sectionScores.reading);
+            addScore('listening', record.sectionScores.listening);
+        } else if (/^N[4-5]$/.test(lvl) && record.sectionScores) {
+            // N4-N5: Knowledge and Reading are combined in record.sectionScores.knowledge_reading
+            // For analysis, we'll put it in knowledge or reading?
+            // Usually, these are 120 points total (N4/N5 Knowledge + Reading)
+            // Let's skip them for the 3-way breakdown or handle separately if needed.
+            // But to match the UI which likely wants 3 columns, we skip or use placeholders.
+            addScore('listening', record.sectionScores.listening);
+        }
+    });
+
+    const subjectStats = {
+        totalRecords: validData.length,
+        averages: {
+            knowledge: subjects.knowledge.count > 0 ? (subjects.knowledge.total / subjects.knowledge.count).toFixed(1) : 0,
+            reading: subjects.reading.count > 0 ? (subjects.reading.total / subjects.reading.count).toFixed(1) : 0,
+            listening: subjects.listening.count > 0 ? (subjects.listening.total / subjects.listening.count).toFixed(1) : 0
+        },
+        byLevel: Object.entries(levelSubjects).map(([level, data]) => ({
+            level,
+            knowledge: data.knowledge.count > 0 ? (data.knowledge.total / data.knowledge.count).toFixed(1) : 0,
+            reading: data.reading.count > 0 ? (data.reading.total / data.reading.count).toFixed(1) : 0,
+            listening: data.listening.count > 0 ? (data.listening.total / data.listening.count).toFixed(1) : 0
+        })).sort((a, b) => a.level.localeCompare(b.level)),
+        details: [
+            {
+                name: '言語知識',
+                total: subjects.knowledge.count,
+                avg: subjects.knowledge.count > 0 ? (subjects.knowledge.total / subjects.knowledge.count).toFixed(1) : 0,
+                max: subjects.knowledge.max,
+                min: subjects.knowledge.min === 60 ? 0 : subjects.knowledge.min,
+                passAvg: subjects.knowledge.passedCount > 0 ? (subjects.knowledge.passedTotal / subjects.knowledge.passedCount).toFixed(1) : 0,
+                failAvg: subjects.knowledge.failedCount > 0 ? (subjects.knowledge.failedTotal / subjects.knowledge.failedCount).toFixed(1) : 0
+            },
+            {
+                name: '読解',
+                total: subjects.reading.count,
+                avg: subjects.reading.count > 0 ? (subjects.reading.total / subjects.reading.count).toFixed(1) : 0,
+                max: subjects.reading.max,
+                min: subjects.reading.min === 60 ? 0 : subjects.reading.min,
+                passAvg: subjects.reading.passedCount > 0 ? (subjects.reading.passedTotal / subjects.reading.passedCount).toFixed(1) : 0,
+                failAvg: subjects.reading.failedCount > 0 ? (subjects.reading.failedTotal / subjects.reading.failedCount).toFixed(1) : 0
+            },
+            {
+                name: '聴解',
+                total: subjects.listening.count,
+                avg: subjects.listening.count > 0 ? (subjects.listening.total / subjects.listening.count).toFixed(1) : 0,
+                max: subjects.listening.max,
+                min: subjects.listening.min === 60 ? 0 : subjects.listening.min,
+                passAvg: subjects.listening.passedCount > 0 ? (subjects.listening.passedTotal / subjects.listening.passedCount).toFixed(1) : 0,
+                failAvg: subjects.listening.failedCount > 0 ? (subjects.listening.failedTotal / subjects.listening.failedCount).toFixed(1) : 0
+            }
+        ]
+    };
+
     return {
         nationalityStats,
         levelStats,
         yearlyTrend,
         graduationN3PlusRates,
         sessionStats,
+        subjectStats,
         overallN3PlusRate: {
+
             totalUniqueStudents,
             n3PlusStudents,
             rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
