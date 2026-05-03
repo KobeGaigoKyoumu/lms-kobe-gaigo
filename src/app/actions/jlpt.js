@@ -17,7 +17,7 @@ async function getJlptAnalyticsDataInternal() {
     // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
     try {
         console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot...');
-        const snapshot = await getCloudflareSnapshot('jlpt');
+        const snapshot = await getCloudflareSnapshot('jlpt_v4');
         if (snapshot && (snapshot.levelStats || snapshot.stats)) {
             console.log('Cache HIT (Cloudflare): Using snapshot.');
             return snapshot;
@@ -66,7 +66,7 @@ function getCachedJlptAnalyticsInternal() {
     if (!_cachedJlptAnalyticsFunc) {
         _cachedJlptAnalyticsFunc = next_unstable_cache(
             getJlptAnalyticsDataInternal,
-            ['jlpt-analytics-v3'],
+            ['jlpt-analytics-v4'],
             { tags: ['jlpt-analytics'], revalidate: 3600 }
         );
     }
@@ -85,7 +85,7 @@ export async function getJlptAnalyticsData(session) {
     // Proactively push to Cloudflare
     if (result && !result.error) {
         try {
-            await pushCloudflareSnapshot('jlpt', result);
+            await pushCloudflareSnapshot('jlpt_v4', result);
         } catch (e) {
             console.error('Proactive JLPT snapshot push failed:', e);
         }

@@ -12,7 +12,7 @@ async function getGradeAnalyticsDataInternal() {
     // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
     try {
         console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot (Grades)...')
-        const snapshot = await getCloudflareSnapshot('grades')
+        const snapshot = await getCloudflareSnapshot('grades_v4')
         if (snapshot && snapshot.data) {
             console.log('Cache HIT (Cloudflare): Using snapshot for grades.')
             return snapshot
@@ -60,7 +60,7 @@ function getCachedGradeAnalyticsInternal() {
     if (!_cachedGradeAnalyticsFunc) {
         _cachedGradeAnalyticsFunc = next_unstable_cache(
             getGradeAnalyticsDataInternal,
-            ['grade-analytics-v3'],
+            ['grade-analytics-v4'],
             { tags: ['grade-records', 'grade-analytics'], revalidate: 3600 }
         );
     }
@@ -74,7 +74,7 @@ export async function getGradeAnalyticsData(session) {
 
     if (result && !result.error && result.data) {
         try {
-            await pushCloudflareSnapshot('grades', result)
+            await pushCloudflareSnapshot('grades_v4', result)
         } catch (e) {
             console.error('Snapshot push failed (non-critical):', e)
         }
