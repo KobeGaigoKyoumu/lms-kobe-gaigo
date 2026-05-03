@@ -54,15 +54,9 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    transition: all var(--transition-base);
     box-shadow: var(--shadow-md);
 }
 
-.statCard:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
-    border-color: var(--primary-300);
-}
 
 .statIcon {
     width: 56px;
@@ -121,14 +115,8 @@
 .urgent {
     background: var(--error-50);
     color: var(--error-600);
-    animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.8; }
-    50% { opacity: 1; }
-    100% { opacity: 0.8; }
-}
 
 /* Main Grid */
 .mainGrid {
@@ -165,13 +153,8 @@
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--primary-600);
-    transition: color var(--transition-fast);
 }
 
-.viewMore:hover {
-    color: var(--primary-700);
-    text-decoration: underline;
-}
 
 /* Lists */
 .assignmentList, .announcementList {
@@ -185,7 +168,6 @@
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
-    transition: all var(--transition-base);
 }
 
 .assignmentItem {
@@ -195,12 +177,6 @@
     text-decoration: none;
 }
 
-.assignmentItem:hover {
-    background: var(--bg-primary);
-    border-color: var(--primary-400);
-    transform: translateX(6px);
-    box-shadow: var(--shadow-md);
-}
 
 .assignmentInfo h4 {
     font-size: var(--font-size-base);
@@ -216,12 +192,8 @@
 
 .itemArrow {
     color: var(--text-tertiary);
-    transition: color var(--transition-fast);
 }
 
-.assignmentItem:hover .itemArrow {
-    color: var(--primary-500);
-}
 
 /* Announcements */
 .announcementHeader {
