@@ -110,11 +110,9 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
                     <span>{cls.homeroom_teacher_name || cls.teacher?.full_name || '担当未設定'}</span>
                 </div>
                 <div className={styles.memberCount}>
-                    <Users size={14} />
                     <span>{cls.studentCount}名</span>
                 </div>
             </div>
-            <ChevronRight size={18} className={styles.arrowIcon} />
         </Link>
     )
 
@@ -180,7 +178,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
             {isTeacher && myClasses.length > 0 && (
                 <section className={styles.myClassesSection}>
                     <h2 className={styles.sectionTitle}>
-                        <Star size={20} className={styles.sectionIcon} />
                         担当クラス ({myClasses.length})
                     </h2>
                     <div className={styles.grid}>
@@ -194,13 +191,11 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
             <section className={styles.adminSection}>
                 {isTeacher && myClasses.length > 0 && (
                     <h2 className={styles.sectionTitle}>
-                        <School size={20} className={styles.sectionIcon} />
                         その他のクラス ({otherClasses.length})
                     </h2>
                 )}
                 {isAdmin && (
                     <h2 className={styles.sectionTitle}>
-                        <School size={20} className={styles.sectionIcon} />
                         全クラス ({filteredClasses.length})
                     </h2>
                 )}
@@ -218,7 +213,6 @@ export default function ClassesClient({ adminMember, initialClasses = [], initia
 
                 {filteredClasses.length === 0 && (
                     <div className={styles.empty}>
-                        <School size={64} opacity={0.2} />
                         <p>クラスが見つかりません</p>
                         {isTeacherOrAdmin && (
                             <Link href="/classes/new" className={styles.emptyBtn}>

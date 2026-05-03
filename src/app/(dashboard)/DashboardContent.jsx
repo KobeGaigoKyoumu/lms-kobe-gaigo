@@ -86,11 +86,12 @@ export default function DashboardContent({ adminMember }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue} style={{ fontSize: '2.5rem', whiteSpace: 'nowrap' }}>
+                        <p className={styles.statValue} style={{ fontSize: '2.4rem', whiteSpace: 'nowrap' }}>
                             {stats.teacherClasses.length > 0 
                                 ? stats.teacherClasses.map(c => c.name).join(' ') 
                                 : '-'}
                         </p>
+
                     </div>
                 </div>
 
