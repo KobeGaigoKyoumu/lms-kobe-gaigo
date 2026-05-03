@@ -59,28 +59,11 @@ async function getJlptAnalyticsDataInternal() {
     }
 }
 
-// Global variable to store memoized cache function
-let _cachedJlptAnalyticsFunc = null;
-
-function getCachedJlptAnalyticsInternal() {
-    if (!_cachedJlptAnalyticsFunc) {
-        _cachedJlptAnalyticsFunc = next_unstable_cache(
-            getJlptAnalyticsDataInternal,
-            ['jlpt-analytics-v4'],
-            { tags: ['jlpt-analytics'], revalidate: 3600 }
-        );
-    }
-    return _cachedJlptAnalyticsFunc();
-}
-
-/**
- * Public function for Server Components
- */
 export async function getJlptAnalyticsData(session) {
     if (!session) return { error: 'Unauthorized' }
 
-    console.log('getJlptAnalyticsData: Retrieving cached data...');
-    const result = await getCachedJlptAnalyticsInternal();
+    console.log('getJlptAnalyticsData: Retrieving data (bypassing next_unstable_cache)...');
+    const result = await getJlptAnalyticsDataInternal();
 
     // Proactively push to Cloudflare
     if (result && !result.error) {

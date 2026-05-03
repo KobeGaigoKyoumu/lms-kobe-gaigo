@@ -53,24 +53,12 @@ async function getGradeAnalyticsDataInternal() {
     }
 }
 
-// Global variable to store memoized cache function
-let _cachedGradeAnalyticsFunc = null;
-
-function getCachedGradeAnalyticsInternal() {
-    if (!_cachedGradeAnalyticsFunc) {
-        _cachedGradeAnalyticsFunc = next_unstable_cache(
-            getGradeAnalyticsDataInternal,
-            ['grade-analytics-v4'],
-            { tags: ['grade-records', 'grade-analytics'], revalidate: 3600 }
-        );
-    }
-    return _cachedGradeAnalyticsFunc();
-}
-
 export async function getGradeAnalyticsData(session) {
     if (!session) return { error: 'Unauthorized' }
     
-    const result = await getCachedGradeAnalyticsInternal()
+    // Bypass next_unstable_cache completely to avoid Vercel KV 2MB limits.
+    // We rely solely on Cloudflare KV for caching.
+    const result = await getGradeAnalyticsDataInternal()
 
     if (result && !result.error && result.data) {
         try {
