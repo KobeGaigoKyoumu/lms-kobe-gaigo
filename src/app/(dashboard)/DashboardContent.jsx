@@ -54,7 +54,7 @@ export default function DashboardContent({ adminMember }) {
                         : name
                 }
 
-                const teacherClassNames = (teacherClasses || []).map(c => normalizeClassName(c.name))
+                const teacherClassNames = (teacherClasses || []).map(c => c.name)
                 const enrolledClassesCount = teacherClassNames.length
 
                 // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
@@ -122,15 +122,11 @@ export default function DashboardContent({ adminMember }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue} style={{ fontSize: '1.5rem', whiteSpace: 'nowrap' }}>
+                        <p className={styles.statValue} style={{ fontSize: '2.5rem', whiteSpace: 'nowrap' }}>
                             {stats.teacherClasses.length > 0 
                                 ? stats.teacherClasses.map(c => c.name).join(' ') 
                                 : '-'}
                         </p>
-                    </div>
-                    <div className={styles.statTrend}>
-                        <TrendingUp size={14} className={styles.trendIcon} />
-                        <span>Active</span>
                     </div>
                 </div>
 
