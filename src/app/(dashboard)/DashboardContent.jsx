@@ -57,8 +57,9 @@ export default function DashboardContent({ adminMember }) {
                 const teacherClassNames = (teacherClasses || []).map(c => c.name)
                 const enrolledClassesCount = teacherClassNames.length
 
-                // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
-                const [annResult, pendingResult, assignmentsResult] = await Promise.all([
+                // 2. Parallel Fetch: Announcements and Homework Data
+                // We'll fetch announcements and assignments in parallel, then fetch pending count
+                const [annResult, assignmentsResult] = await Promise.all([
                     supabase
                         .from('announcements')
                         .select(`
@@ -70,29 +71,45 @@ export default function DashboardContent({ adminMember }) {
                         .limit(5),
                     
                     enrolledClassesCount > 0 ? supabase
-                        .from('homework_submissions')
-                        .select('id, assignment:homework_assignments!inner(class_name, released_at, is_archived)', { count: 'exact', head: true })
-                        .eq('status', 'submitted')
-                        .in('assignment.class_name', teacherClassNames)
-                        .or(`is_archived.is.null,is_archived.is.false`, { foreignTable: 'homework_assignments' })
-                        : { count: 0 },
-
-                    enrolledClassesCount > 0 ? supabase
                         .from('homework_assignments')
-                        .select('id, title, deadline, class_name, released_at, is_archived')
+                        .select('id, title, deadline, class_name, released_at, is_archived, created_at')
                         .in('class_name', teacherClassNames)
-                        .or('is_archived.is.null,is_archived.is.false')
-                        .or(`released_at.is.null,released_at.lte."${now}"`)
                         .order('created_at', { ascending: false })
-                        .limit(5) : { data: [] }
+                        .limit(50) : { data: [] }
                 ])
+
+                const allAssignments = assignmentsResult.data || []
+                
+                // Filter active assignments for "Recently Created"
+                const activeAssignments = allAssignments.filter(a => {
+                    const isNotArchived = !a.is_archived
+                    const isReleased = !a.released_at || new Date(a.released_at) <= new Date()
+                    return isNotArchived && isReleased
+                }).slice(0, 5)
+
+                // For pending count, we need to check ALL active assignments, not just the top 5
+                // So we fetch a broader list of assignment IDs if needed, or just use the ones we have if 50 is enough
+                const activeAssignmentIds = allAssignments
+                    .filter(a => !a.is_archived)
+                    .map(a => a.id)
+
+                let pendingAssignmentsCount = 0
+                if (activeAssignmentIds.length > 0) {
+                    const { count } = await supabase
+                        .from('homework_submissions')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('status', 'submitted')
+                        .in('assignment_id', activeAssignmentIds)
+                    
+                    pendingAssignmentsCount = count || 0
+                }
 
                 setAnnouncements(annResult.data || [])
                 setStats({
                     teacherClasses: teacherClasses || [],
                     enrolledClassesCount,
-                    pendingAssignmentsCount: pendingResult.count || 0,
-                    recentAssignments: assignmentsResult.data || []
+                    pendingAssignmentsCount,
+                    recentAssignments: activeAssignments
                 })
             } catch (err) {
                 console.error('Dashboard data fetch error:', err)
@@ -100,6 +117,7 @@ export default function DashboardContent({ adminMember }) {
                 setLoading(false)
             }
         }
+
 
         fetchData()
     }, [adminMember, supabase])
