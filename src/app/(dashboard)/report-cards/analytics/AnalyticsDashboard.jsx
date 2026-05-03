@@ -22,9 +22,7 @@ import JlptTab from './tabs/JlptTab'
 import DatabaseTab from './tabs/DatabaseTab'
 import CareerTab from './tabs/CareerTab'
 
-// Server Actions for fallback
-import { fetchGradeAnalytics } from '@/app/actions/gradeAnalytics'
-import { fetchJlptAnalyticsData } from '@/app/actions/jlpt'
+
 
 ChartJS.register(
     CategoryScale,
@@ -93,14 +91,20 @@ export default function AnalyticsDashboard({
                     }
                 }
 
-                // 2. Fallback to Next.js Server Actions if Cloudflare fails or is missing data
+                // 2. Fallback to Next.js API Route if Cloudflare fails or is missing data
                 if (!gradeResData) {
-                    console.log('Falling back to Server Action for grades...');
-                    gradeResData = await fetchGradeAnalytics();
+                    console.log('Falling back to API Route for grades...');
+                    const res = await fetch('/api/analytics?type=grades');
+                    if (res.ok) {
+                        gradeResData = await res.json();
+                    }
                 }
                 if (!jlptResData) {
-                    console.log('Falling back to Server Action for jlpt...');
-                    jlptResData = await fetchJlptAnalyticsData();
+                    console.log('Falling back to API Route for jlpt...');
+                    const res = await fetch('/api/analytics?type=jlpt');
+                    if (res.ok) {
+                        jlptResData = await res.json();
+                    }
                 }
 
                 setGradeData(gradeResData?.data || []);
