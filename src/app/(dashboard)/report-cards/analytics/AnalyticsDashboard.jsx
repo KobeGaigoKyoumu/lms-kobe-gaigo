@@ -97,11 +97,8 @@ export default function AnalyticsDashboard({
                         }
                         if (cfJlptRes.ok) {
                             const cfData = await cfJlptRes.json();
-                            if (cfData && (cfData.levelStats || cfData.stats || cfData.enhanced)) {
+                            if (cfData && cfData.studentStats && (cfData.levelStats || cfData.stats)) {
                                 jlptResData = cfData;
-                                debug.push(`CF JLPT data: OK (keys: ${Object.keys(cfData).join(',')})`)
-                            } else {
-                                debug.push(`CF JLPT: no data, keys: ${Object.keys(cfData || {}).join(',')}`)
                             }
                         }
                     } catch (e) {
