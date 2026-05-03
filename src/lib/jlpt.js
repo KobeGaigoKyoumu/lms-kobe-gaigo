@@ -1403,6 +1403,7 @@ export async function getStudentsJlptSummary(students) {
             nationality: student.nationality || student.country,
             destination: student.destination || student.career_destination || careerMap.get(studentId) || null,
             enrollmentYear: enrollmentYear,
+            status: student.status || (student.is_virtual || student.is_historical ? 'graduated' : 'active'),
             levels: levelStatus,
             highestLevel: highestLevel,
             records: myRecords,

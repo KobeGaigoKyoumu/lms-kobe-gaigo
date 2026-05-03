@@ -45,7 +45,14 @@ export default function JlptTab({
     const classSummaryList = useMemo(() => {
         if (!statsObj?.studentStats) return [];
         return [...statsObj.studentStats]
-            .sort((a, b) => parseFloat(b.n3PlusRate || 0) - parseFloat(a.n3PlusRate || 0));
+            .sort((a, b) => {
+                // Priority 1: Active classes first
+                if (a.isHistorical !== b.isHistorical) {
+                    return a.isHistorical ? 1 : -1;
+                }
+                // Priority 2: Higher N3+ rate first
+                return parseFloat(b.n3PlusRate || 0) - parseFloat(a.n3PlusRate || 0);
+            });
     }, [statsObj])
 
     const currentClassStats = useMemo(() => {

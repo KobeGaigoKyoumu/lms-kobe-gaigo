@@ -67,16 +67,28 @@ async function getJlptAnalyticsDataInternal() {
         // Group students by class for studentStats
         const classStatsMap = new Map();
         studentSummaries.forEach(s => {
-            const className = s.class || '不明';
-            if (!classStatsMap.has(className)) {
-                classStatsMap.set(className, {
-                    className,
+            let groupName = '不明';
+            
+            if (s.status === 'active' && s.class) {
+                groupName = s.class;
+            } else if (s.enrollmentYear) {
+                // For non-active students, group by estimated graduation year
+                const gradYear = parseInt(s.enrollmentYear) + 2;
+                groupName = `${gradYear}年3月卒 (過去データ)`;
+            } else if (s.isVirtual || s.isHistorical) {
+                groupName = '過去の学生 (年度不明)';
+            }
+
+            if (!classStatsMap.has(groupName)) {
+                classStatsMap.set(groupName, {
+                    className: groupName,
                     total: 0,
                     n3Plus: 0,
-                    students: []
+                    students: [],
+                    isHistorical: groupName.includes('過去')
                 });
             }
-            const c = classStatsMap.get(className);
+            const c = classStatsMap.get(groupName);
             c.total++;
             // Consider N1, N2, N3 as N3+
             const hasN3Plus = s.highestLevel && ['N1', 'N2', 'N3'].includes(s.highestLevel);
@@ -85,6 +97,7 @@ async function getJlptAnalyticsDataInternal() {
             }
             c.students.push(s);
         });
+
 
         // Convert map to array and calculate rates
         const studentStats = Array.from(classStatsMap.values()).map(c => ({
