@@ -199,7 +199,7 @@ export async function applyPackageToTarget(newEvents) {
     // Authユーザーでない（管理者など）場合は created_by を null にして制約エラーを回避
     const sanitizedEvents = (newEvents || []).map(e => ({
         ...e,
-        created_by: adminMember ? e.created_by : null
+        created_by: adminMember ? null : (isUUID(e.created_by) ? e.created_by : null)
     }))
 
     const { error } = await supabaseAdmin.from('calendar_events').insert(sanitizedEvents)
@@ -238,7 +238,7 @@ export async function createSingleEvent(eventData) {
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: adminMember ? eventData.created_by : null
+        created_by: adminMember ? null : (isUUID(eventData.created_by) ? eventData.created_by : null)
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').insert(sanitizedData).select()
@@ -257,7 +257,7 @@ export async function updateSingleEvent(id, eventData) {
     // Sanitize created_by for staff accounts
     const sanitizedData = {
         ...eventData,
-        created_by: adminMember ? eventData.created_by : null
+        created_by: adminMember ? null : (isUUID(eventData.created_by) ? eventData.created_by : null)
     }
 
     const { data, error } = await supabaseAdmin.from('calendar_events').update(sanitizedData).eq('id', id).select()
