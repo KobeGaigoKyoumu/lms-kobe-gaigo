@@ -11,71 +11,17 @@ import {
     ChevronRight,
     LayoutDashboard
 } from 'lucide-react'
-import { getTeacherDashboardData } from '@/app/actions/dashboard'
 
-export default function DashboardContent({ adminMember }) {
-    const [announcements, setAnnouncements] = useState([])
-    const [stats, setStats] = useState({
+export default function DashboardContent({ adminMember, initialData }) {
+    // Use initialData provided by Server Component
+    const [announcements] = useState(initialData?.announcements || [])
+    const [stats] = useState(initialData?.stats || {
         teacherClasses: [],
         enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
         recentAssignments: []
     })
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!adminMember) return
-            setLoading(true)
-
-            try {
-                // 1. Fetch Teacher Data (Classes, Pending Count, Recent Homework) via Server Action
-                // This bypasses RLS issues by using Service Role client on the server.
-                const teacherData = await getTeacherDashboardData()
-                
-                // 2. Fetch Announcements (Keep via Client if RLS allows, or use server action)
-                const { data: annData } = await supabase
-                    .from('announcements')
-                    .select(`
-                        id, title, content, is_pinned, created_at, sender_name,
-                        author:profiles!author_id (full_name)
-                    `)
-                    .order('is_pinned', { ascending: false })
-                    .order('created_at', { ascending: false })
-                    .limit(5)
-
-                setAnnouncements(annData || [])
-
-                if (teacherData) {
-                    setStats({
-                        teacherClasses: teacherData.teacherClasses || [],
-                        enrolledClassesCount: teacherData.teacherClasses?.length || 0,
-                        pendingAssignmentsCount: teacherData.pendingAssignmentsCount || 0,
-                        recentAssignments: teacherData.recentAssignments || []
-                    })
-                }
-            } catch (err) {
-                console.error('Dashboard data fetch error:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchData()
-    }, [adminMember, supabase])
-
-    if (loading) {
-
-        return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.spinner}></div>
-                <p>ダッシュボードを読み込み中...</p>
-            </div>
-        )
-    }
-
-    // No longer need useEffect for initial fetching as data is provided by RSC
     return (
         <>
             <div className={styles.statsGrid}>
@@ -85,12 +31,11 @@ export default function DashboardContent({ adminMember }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue} style={{ fontSize: '2.4rem', whiteSpace: 'nowrap' }}>
-                            {stats.teacherClasses.length > 0 
-                                ? stats.teacherClasses.map(c => c.name).join(' ') 
+                        <p className={styles.statValue} style={{ fontSize: '1.4rem', whiteSpace: 'nowrap' }}>
+                            {stats.enrolledClasses && stats.enrolledClasses.length > 0 
+                                ? stats.enrolledClasses.join(' ') 
                                 : '-'}
                         </p>
-
                     </div>
                 </div>
 
@@ -120,7 +65,7 @@ export default function DashboardContent({ adminMember }) {
                         <Link href="/assignments" className={styles.viewMore}>すべて見る</Link>
                     </div>
                     <div className={styles.assignmentList}>
-                        {stats.recentAssignments.length > 0 ? (
+                        {stats.recentAssignments && stats.recentAssignments.length > 0 ? (
                             stats.recentAssignments.map(a => (
                                 <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
                                     <div className={styles.assignmentInfo}>

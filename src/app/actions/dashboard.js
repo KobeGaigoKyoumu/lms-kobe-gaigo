@@ -316,7 +316,7 @@ export async function getAdminDashboardDataCached() {
     }
 
     // Cache based on administrative member ID
-    const cachedData = await unstable_cache(
+    const cachedData = await next_unstable_cache(
         async () => fetcher(adminMember.memberId, adminMember.name),
         [`admin-dashboard-${adminMember.memberId}`],
         {
