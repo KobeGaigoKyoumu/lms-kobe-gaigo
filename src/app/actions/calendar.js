@@ -136,19 +136,121 @@ export async function updateEventPackage(id, packageData) {
         created_by: adminMember ? null : (isUUID(packageData.created_by) ? packageData.created_by : null)
     }
 
-    const { data, error } = await supabase
+    // 1. パッケージ自体の更新
+    const { data: updatedPkg, error: updateErr } = await supabase
         .from('event_packages')
         .update(sanitizedData)
         .eq('id', id)
         .select()
+        .single()
 
-    if (error) {
-        console.error('updateEventPackage error:', error)
+    if (updateErr) {
+        console.error('updateEventPackage error:', updateErr)
         return { error: 'Failed to update package' }
     }
+
+    // 2. 既にこのパッケージが適用されているクラスがあれば同期する
+    try {
+        // 適用先のクラス一覧を取得
+        const { data: existingEvents } = await supabase
+            .from('calendar_events')
+            .select('target_class')
+            .eq('package_id', id)
+            .not('target_class', 'is', null)
+        
+        const targetClasses = [...new Set((existingEvents || []).map(e => e.target_class))]
+        
+        if (targetClasses.length > 0) {
+            // 既存のイベントを一旦削除
+            await supabase.from('calendar_events').delete().eq('package_id', id)
+            
+            // 新しい内容で再作成
+            const newEvents = []
+            for (const targetClass of targetClasses) {
+                const converted = convertPackageEventsToDbEvents(
+                    id, 
+                    updatedPkg.events || [], 
+                    targetClass, 
+                    sanitizedData.created_by,
+                    updatedPkg.description
+                )
+                newEvents.push(...converted)
+            }
+            
+            if (newEvents.length > 0) {
+                await supabase.from('calendar_events').insert(newEvents)
+            }
+            revalidateTag('calendar-events')
+        }
+    } catch (syncErr) {
+        console.error('Package sync error:', syncErr)
+        // パッケージ自体の更新は成功しているので、ここではエラーを返さずログのみ
+    }
+
     revalidateTag('event-packages')
-    return { success: true, data }
+    return { success: true, data: updatedPkg }
 }
+
+// パッケージのイベントデータをDB形式に変換するヘルパー
+function convertPackageEventsToDbEvents(packageId, events, targetClass, userId, description) {
+    const currentYear = new Date().getFullYear()
+    return events.map(evt => {
+        const startYear = evt.start_year || currentYear
+        const endYear = evt.end_year || startYear
+        const start = new Date(startYear, evt.start_month - 1, evt.start_day)
+        
+        let isoStart, isoEnd
+        if (evt.all_day) {
+            const s = new Date(start)
+            s.setHours(0, 0, 0, 0)
+            isoStart = s.toISOString()
+            if (evt.end_month && evt.end_day) {
+                const end = new Date(endYear, evt.end_month - 1, evt.end_day)
+                end.setHours(23, 59, 59, 999)
+                isoEnd = end.toISOString()
+            }
+        } else {
+            if (evt.start_time) {
+                const [h, m] = evt.start_time.split(':')
+                start.setHours(h, m, 0, 0)
+                isoStart = start.toISOString()
+            } else {
+                start.setHours(0, 0, 0, 0)
+                isoStart = start.toISOString()
+            }
+
+            if (evt.end_month && evt.end_day) {
+                const end = new Date(endYear, evt.end_month - 1, evt.end_day)
+                if (evt.end_time) {
+                    const [eh, em] = evt.end_time.split(':')
+                    end.setHours(eh, em, 0, 0)
+                } else {
+                    end.setHours(23, 59, 59, 999)
+                }
+                isoEnd = end.toISOString()
+            } else if (evt.end_time) {
+                const end = new Date(start)
+                const [eh, em] = evt.end_time.split(':')
+                end.setHours(eh, em, 0, 0)
+                isoEnd = end.toISOString()
+            }
+        }
+
+        return {
+            title: evt.title,
+            description: description,
+            start_date: isoStart,
+            end_date: isoEnd,
+            all_day: evt.all_day,
+            event_type: evt.event_type,
+            color: evt.color,
+            target_class: targetClass,
+            created_by: userId,
+            package_id: packageId
+        }
+    })
+}
+
 
 // パッケージ削除
 export async function deleteEventPackage(id) {
