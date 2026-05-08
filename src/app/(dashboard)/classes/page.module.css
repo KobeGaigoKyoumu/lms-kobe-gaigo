@@ -354,4 +354,28 @@
 @keyframes skeleton-loading {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
-}
+}
+.searchBar {
+    margin-bottom: var(--spacing-8);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.searchInput::placeholder {
+    color: #94a3b8;
+}
