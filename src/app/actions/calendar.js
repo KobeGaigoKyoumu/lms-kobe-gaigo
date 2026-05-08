@@ -108,9 +108,15 @@ export async function getTermsForPackages() {
 // パッケージ作成
 export async function createEventPackage(packageData) {
     const supabase = createAdminClient()
+    const adminMember = await getAdminMemberSession()
+    const sanitizedData = {
+        ...packageData,
+        created_by: adminMember ? null : (isUUID(packageData.created_by) ? packageData.created_by : null)
+    }
+
     const { data, error } = await supabase
         .from('event_packages')
-        .insert(packageData)
+        .insert(sanitizedData)
         .select()
 
     if (error) {
@@ -124,9 +130,15 @@ export async function createEventPackage(packageData) {
 // パッケージ更新
 export async function updateEventPackage(id, packageData) {
     const supabase = createAdminClient()
+    const adminMember = await getAdminMemberSession()
+    const sanitizedData = {
+        ...packageData,
+        created_by: adminMember ? null : (isUUID(packageData.created_by) ? packageData.created_by : null)
+    }
+
     const { data, error } = await supabase
         .from('event_packages')
-        .update(packageData)
+        .update(sanitizedData)
         .eq('id', id)
         .select()
 
