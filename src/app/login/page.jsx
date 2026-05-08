@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }) {
             redirect(nextPath.startsWith('/student') ? '/' : (nextPath || '/'))
         }
 
-        // 3. Fetch member names for the dropdown
+        // 3. Fetch member names for the dropdown (Throttled or cached)
         try {
             memberNames = await getAdminMemberNames() || []
         } catch (namesErr) {
@@ -59,8 +59,10 @@ export default async function LoginPage({ searchParams }) {
         // If it's a redirect error, re-throw it so Next.js can handle it
         if (e.digest?.includes('NEXT_REDIRECT')) throw e
         
-        console.error('LoginPage: Critical Render Error Blocked', e)
-        // Ensure some names are available even on failure (fallback handled by LoginForm)
+        console.error('LoginPage: Critical Render Error', e)
+        errorType = 'error'
+        errorMsg = 'エラーが発生しました'
+        errorDesc = 'しばらくしてからもう一度お試しください。'
     }
 
     return (

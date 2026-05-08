@@ -2,7 +2,7 @@
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
@@ -11,47 +11,54 @@ const createAdminClient = () => {
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
-// Cached Student List for Main Table
-// Includes fields used for Display AND Client-side Search
-const _getCachedStudentList = unstable_cache(
-    async () => {
-        const supabase = createAdminClient()
-        console.log('Cache MISS: Fetching Student List...')
+// Global variable to store memoized cache function
+let _cachedStudentListFunc = null;
 
-        const { data, error } = await supabase
-            .from('students')
-            .select(`
-                student_id_text,
-                full_name,
-                name_kana,
-                name_romaji,
-                academic_year,
-                class_name,
-                status,
-                course,
-                email,
-                nationality,
-                visa_status,
-                phone,
-                destination,
-                address
-            `)
-            .order('class_name', { ascending: true })
-            .order('student_id_text', { ascending: true })
+function getCachedStudentListInternal() {
+    if (!_cachedStudentListFunc) {
+        _cachedStudentListFunc = next_unstable_cache(
+            async () => {
+                const supabase = createAdminClient()
+                console.log('Cache MISS: Fetching Student List...')
 
-        if (error) {
-            console.error('Fetch Student List Error:', error)
-            throw error
-        }
+                const { data, error } = await supabase
+                    .from('students')
+                    .select(`
+                        student_id_text,
+                        full_name,
+                        name_kana,
+                        name_romaji,
+                        academic_year,
+                        class_name,
+                        status,
+                        course,
+                        email,
+                        nationality,
+                        visa_status,
+                        phone,
+                        destination,
+                        address
+                    `)
+                    .order('class_name', { ascending: true })
+                    .order('student_id_text', { ascending: true })
+                    .range(0, 49999)
 
-        return data
-    },
-    ['student-list-v1'],
-    { tags: ['students'] }
-)
+                if (error) {
+                    console.error('Fetch Student List Error:', error)
+                    throw error
+                }
+
+                return data
+            },
+            ['student-list-v1'],
+            { tags: ['students'] }
+        );
+    }
+    return _cachedStudentListFunc();
+}
 
 export async function getCachedStudentList() {
-    return _getCachedStudentList()
+    return getCachedStudentListInternal()
 }
 
 // Fetch Full Student Detail (On Demand)

@@ -182,31 +182,53 @@ export function StudentStatusProvider({ children, role, userId, className: userC
         }
     }, [statuses.unreadMessageCount, mounted])
 
-    // Initial fetch and periodic refresh
+    // Initial fetch and periodic refresh (visibility-aware to save Vercel CPU)
     useEffect(() => {
         if (!mounted || !role || !userId) return
 
-        // 1. Initial hydration from cache (done in another useEffect, but ensure we fetch fresh)
+        // 1. Initial hydration
         fetchStatuses('regular')
 
-        // 2. Periodic background refresh (every 10 mins)
-        const refreshInterval = setInterval(() => {
-            fetchStatuses('regular')
-        }, 600000)
+        // 2. Visibility-aware periodic refresh
+        //    タブが非表示の間はポーリングを完全停止し、Vercel関数の無駄な呼び出しを防ぐ
+        let refreshInterval = null
 
-        // 3. Re-fetch on visibility change (Throttled)
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                const now = Date.now()
-                if (now - lastFetchRef.current > 30000) { // 30 seconds throttle for visibility change
-                    fetchStatuses('regular')
-                }
+        const startPolling = () => {
+            if (refreshInterval) return
+            refreshInterval = setInterval(() => {
+                fetchStatuses('regular')
+            }, 600000) // 10分間隔
+        }
+
+        const stopPolling = () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval)
+                refreshInterval = null
             }
         }
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                stopPolling()
+            } else {
+                // タブ復帰時: 30秒のスロットルを超えていれば即座に取得
+                const now = Date.now()
+                if (now - lastFetchRef.current > 30000) {
+                    fetchStatuses('regular')
+                }
+                startPolling()
+            }
+        }
+
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
+        // 初回は画面が表示されている場合のみポーリング開始
+        if (document.visibilityState === 'visible') {
+            startPolling()
+        }
+
         return () => {
-            clearInterval(refreshInterval)
+            stopPolling()
             document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
     }, [role, userId, supabase, mounted])

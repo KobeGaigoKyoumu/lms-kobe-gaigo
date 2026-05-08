@@ -1,48 +1,55 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { unstable_cache, revalidateTag } from 'next/cache'
-import { getAdminMemberSession } from '@/app/actions/adminAuth'
+import { unstable_cache as next_unstable_cache, revalidateTag } from 'next/cache'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { getAdminMemberSession } from './adminAuth'
 
 const getSupabaseAdmin = () => {
-    return createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE'
+    return createAdminClient(supabaseUrl, supabaseServiceKey)
 }
 
-const _getCachedCourses = unstable_cache(
-    async () => {
-        const supabase = getSupabaseAdmin()
-        console.log('Cache MISS: Fetching Courses (Admin)...')
+async function _getCachedCoursesInternal() {
+    const supabase = getSupabaseAdmin()
+    console.log('Cache MISS: Fetching Courses (Admin)...')
 
-        const { data, error } = await supabase
-            .from('courses')
-            .select(`
-                *,
-                teacher:profiles!teacher_id (
-                    id,
-                    full_name,
-                    avatar_url
-                )
-            `)
-            .order('created_at', { ascending: false })
+    const { data, error } = await supabase
+        .from('courses')
+        .select(`
+            *,
+            teacher:profiles!teacher_id (
+                id,
+                full_name,
+                avatar_url
+            )
+        `)
+        .order('created_at', { ascending: false })
 
-        if (error) {
-            console.error('Fetch Courses Error:', error)
-            throw error
-        }
+    if (error) {
+        console.error('Fetch Courses Error:', error)
+        throw error
+    }
 
-        return data
-    },
-    ['courses-list-v1'],
-    { tags: ['courses'] }
-)
+    return data
+}
+
+let _cachedCoursesListFunc = null;
+function getCachedCoursesList() {
+    if (!_cachedCoursesListFunc) {
+        _cachedCoursesListFunc = next_unstable_cache(
+            _getCachedCoursesInternal,
+            ['courses-list-v1'],
+            { tags: ['courses'] }
+        );
+    }
+    return _cachedCoursesListFunc();
+}
 
 export async function getCachedCourses() {
-    return _getCachedCourses()
+    return getCachedCoursesList()
 }
 
 export async function fetchCachedCourses() {

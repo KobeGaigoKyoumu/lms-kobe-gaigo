@@ -1,34 +1,23 @@
 'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
-import { pushCloudflareSnapshot, getCloudflareSnapshot } from './cloudflare'
+import { pushCloudflareSnapshot } from './cloudflare'
 import { getEnhancedJlptStats } from '@/lib/jlpt'
 
 /**
  * Internal core logic for JLPT Analytics.
- * This function bypasses cookie requirements by using the Service Role.
+ * Fetches directly from Supabase (Cloudflare KV is used on the client side via GET).
  */
 async function getJlptAnalyticsDataInternal() {
+    console.log('[JlptAnalytics] Fetching from Supabase...')
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
-    // LAYER 2: Try Cloudflare Snapshot before hitting Supabase
-    try {
-        console.log('Cache MISS (Next.js): Checking Cloudflare Snapshot...');
-        const snapshot = await getCloudflareSnapshot('jlpt');
-        if (snapshot) {
-            console.log('Cache HIT (Cloudflare): Using snapshot.');
-            return snapshot;
-        }
-    } catch (e) {
-        console.error('Cloudflare fetch failed, falling back to DB:', e);
-    }
-
-    console.log('Cache MISS (Cloudflare): Fetching from Supabase...');
     if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('JLPT Analytics: Missing Supabase environment variables')
+        console.error('[JlptAnalytics] Missing Supabase environment variables')
+        return { error: 'Missing Supabase environment variables', stats: [] }
     }
 
     const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
@@ -39,48 +28,108 @@ async function getJlptAnalyticsDataInternal() {
             .from('grade_records')
             .select('*')
 
-        if (gError) throw gError;
+        if (gError) {
+            console.error('[JlptAnalytics] grade_records query error:', gError)
+            throw gError
+        }
+
+        console.log(`[JlptAnalytics] Fetched ${gradeRecords?.length || 0} grade records`)
 
         // Also need student info for nationality breakdown
-        const { data: students, error: sError } = await supabase
-            .from('students')
-            .select('*')
+        const { getCachedStudentList } = require('@/app/actions/studentData');
+        const students = await getCachedStudentList();
 
-        if (sError) throw sError;
 
-        // Perform the heavy calculation using the verified lib function
-        const result = await getEnhancedJlptStats(students || []);
+        console.log(`[JlptAnalytics] Fetched ${students?.length || 0} students`)
+
+        // Import additional functions from lib
+        const { 
+            getStudentsJlptSummary, 
+            getJlptSectionScoreStats, 
+            getJlptNationalStats 
+        } = require('@/lib/jlpt');
+
+        // Perform all calculations
+        const [enhanced, sectionScores, nationalStats, studentSummaries] = await Promise.all([
+            getEnhancedJlptStats(students || []),
+            getJlptSectionScoreStats(),
+            getJlptNationalStats(),
+            getStudentsJlptSummary(students || [])
+        ]);
         
+        console.log('[JlptAnalytics] All stats calculated successfully')
+
+        // Group students by class for studentStats
+        const classStatsMap = new Map();
+        studentSummaries.forEach(s => {
+            let groupName = '不明';
+            
+            if (s.status === 'active' && s.class) {
+                groupName = s.class;
+            } else if (s.enrollmentYear) {
+                // For non-active students, group by estimated graduation year
+                const gradYear = parseInt(s.enrollmentYear) + 2;
+                groupName = `${gradYear}年3月卒 (過去データ)`;
+            } else if (s.isVirtual || s.isHistorical) {
+                groupName = '過去の学生 (年度不明)';
+            }
+
+            if (!classStatsMap.has(groupName)) {
+                classStatsMap.set(groupName, {
+                    className: groupName,
+                    total: 0,
+                    n3Plus: 0,
+                    students: [],
+                    isHistorical: groupName.includes('過去')
+                });
+            }
+            const c = classStatsMap.get(groupName);
+            c.total++;
+            // Consider N1, N2, N3 as N3+
+            const hasN3Plus = s.highestLevel && ['N1', 'N2', 'N3'].includes(s.highestLevel);
+            if (hasN3Plus) {
+                c.n3Plus++;
+            }
+            c.students.push(s);
+        });
+
+
+        // Convert map to array and calculate rates
+        const studentStats = Array.from(classStatsMap.values()).map(c => ({
+            ...c,
+            n3PlusRate: c.total > 0 ? ((c.n3Plus / c.total) * 100).toFixed(1) : 0
+        })).sort((a, b) => b.n3PlusRate - a.n3PlusRate);
+
+        // Combine everything into a single response object
+        const result = {
+            ...enhanced,
+            studentStats,
+            sectionScores,
+            nationalStats,
+            lastUpdated: new Date().toISOString()
+        };
+
         // Ensure result is serializable for Next.js
         return JSON.parse(JSON.stringify(result));
+
     } catch (error) {
-        console.error('JLPT Analytics Internal Error:', error);
+        console.error('[JlptAnalytics] Internal Error:', error);
         return { error: error.message, stats: [] };
     }
 }
 
-// Cache the JLPT analytics data for 1 hour
-const getCachedJlptAnalytics = unstable_cache(
-    getJlptAnalyticsDataInternal,
-    ['jlpt-analytics-v3'],
-    { tags: ['jlpt-analytics'], revalidate: 3600 }
-);
-
-/**
- * Public function for Server Components
- */
 export async function getJlptAnalyticsData(session) {
-    if (!session) return { error: 'Unauthorized' }
+    if (!session) return { error: 'Unauthorized', stats: [] }
 
-    console.log('getJlptAnalyticsData: Retrieving cached data...');
-    const result = await getCachedJlptAnalytics();
+    console.log('[JlptAnalytics] Retrieving data...');
+    const result = await getJlptAnalyticsDataInternal();
 
-    // Proactively push to Cloudflare
+    // Non-blocking: push to Cloudflare for future client-side reads
     if (result && !result.error) {
         try {
-            await pushCloudflareSnapshot('jlpt', result);
+            await pushCloudflareSnapshot('jlpt_v4', result);
         } catch (e) {
-            console.error('Proactive JLPT snapshot push failed:', e);
+            console.error('[JlptAnalytics] Snapshot push failed (non-critical):', e);
         }
     }
 

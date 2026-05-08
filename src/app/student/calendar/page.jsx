@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-export const revalidate = 60
 import { redirect } from 'next/navigation'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import styles from './page.module.css'

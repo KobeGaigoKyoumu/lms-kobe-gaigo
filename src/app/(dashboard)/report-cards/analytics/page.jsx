@@ -1,6 +1,4 @@
 import AnalyticsDashboard from './AnalyticsDashboard'
-import { getJlptAnalyticsData } from '@/app/actions/jlpt'
-import { getGradeAnalyticsData } from '@/app/actions/gradeAnalytics'
 import careerStatsData from '@/data/career_stats_v2.json'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { redirect } from 'next/navigation'
@@ -17,25 +15,13 @@ export default async function AnalyticsPage() {
         redirect('/login')
     }
 
-    console.log('AnalyticsPage: Fetching components for admin:', adminMember.name)
+    console.log('AnalyticsPage: Rendering for admin:', adminMember.name)
 
-    // 2. Direct internal calls (avoids Server Action context issues)
-    const fetchResults = await Promise.allSettled([
-        getGradeAnalyticsData(adminMember),
-        getJlptAnalyticsData(adminMember)
-    ])
-
-    const gradeResult = fetchResults[0].status === 'fulfilled' ? fetchResults[0].value : { error: 'Grade fetch failed' }
-    const jlptResult = fetchResults[1].status === 'fulfilled' ? fetchResults[1].value : { error: 'JLPT fetch failed' }
-
+    // Pass only the static careerStatsData. Heavy analytics data (grades, jlpt) 
+    // is now fetched on the client side via Cloudflare to minimize Vercel bandwidth limits.
     return (
         <AnalyticsDashboard 
-            initialGradeData={gradeResult?.data || []}
-            initialJlptData={jlptResult || {}}
-            initialNationalStats={jlptResult?.nationalStats || null}
-            initialSectionStats={jlptResult?.sectionScores || null}
             initialCareerStats={careerStatsData}
-            initialStudentDb={jlptResult?.enhanced?.allStudentStats || []}
         />
     )
 }

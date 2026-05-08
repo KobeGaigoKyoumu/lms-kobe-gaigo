@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { normalizeClassName } from '@/lib/utils'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 
 // Helper to create admin client
 const createAdminClient = () => {
@@ -127,9 +128,42 @@ export async function getStudentSessionLight() {
         }
         return null
     } catch (e) {
+        if (e?.digest === 'DYNAMIC_SERVER_USAGE') throw e
         console.error('getStudentSessionLight Critical Error:', e)
         return null
     }
+}
+
+// Global variable to store the memoized cache function generator
+const _studentMasterCacheFuncs = new Map();
+
+function getStudentMasterDataCached(studentId) {
+    if (!studentId) return null;
+    
+    if (!_studentMasterCacheFuncs.has(studentId)) {
+        const fetcher = next_unstable_cache(
+            async (id) => {
+                try {
+                    const supabase = createAdminClient()
+                    const { data, error } = await supabase
+                        .from('students')
+                        .select('class_name, academic_year, enrollment_period, status')
+                        .eq('student_id_text', id)
+                        .single()
+                    
+                    if (error) throw error
+                    return data
+                } catch (e) {
+                    console.error('Error in _getStudentMasterData:', e)
+                    return null
+                }
+            },
+            [`student-master-v2-${studentId}`],
+            { revalidate: 3600, tags: ['students', `student-${studentId}`] }
+        )
+        _studentMasterCacheFuncs.set(studentId, fetcher);
+    }
+    return _studentMasterCacheFuncs.get(studentId)(studentId);
 }
 
 /**
@@ -153,12 +187,7 @@ export const getStudentSession = cache(async () => {
                 // 毎回DBから最新の情報を取得するよう方針変更（cacheされているためリクエスト毎に1回のみ）
                 if (data.studentId && data.name) {
                     try {
-                        const supabase = createAdminClient()
-                        const { data: latestData } = await supabase
-                            .from('students')
-                            .select('class_name, academic_year, enrollment_period, status')
-                            .eq('student_id_text', data.studentId)
-                            .single()
+                        const latestData = await getStudentMasterDataCached(data.studentId)
                         
                         if (latestData) {
                             return {

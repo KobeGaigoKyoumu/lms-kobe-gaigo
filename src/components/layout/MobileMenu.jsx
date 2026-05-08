@@ -50,13 +50,13 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
                 } else if (isHomework) {
                     showShimmer = statuses.unsubmittedAssignmentCount > 0
                     count = statuses.unsubmittedAssignmentCount
-                    console.log('MobileMenu Homework Badge:', { count, statuses })
                 }
 
                 return (
                     <Link
                         key={item.href}
                         href={item.href}
+                        prefetch={false}
                         className={`${styles.menuItem} ${isActive ? styles.active : ''} ${showShimmer ? styles.shineEffect : ''}`}
                     >
                         <div

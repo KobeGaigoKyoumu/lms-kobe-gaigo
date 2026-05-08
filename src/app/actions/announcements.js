@@ -2,13 +2,12 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { revalidateTag, unstable_cache } from 'next/cache'
+import { revalidateTag, unstable_cache as next_unstable_cache } from 'next/cache'
 import { getAdminMemberSession } from './adminAuth'
-import { getStudentSession } from './studentAuth'
 import { normalizeClassName } from '@/lib/utils'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE'
 
 // Initialize Admin Client
 const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -160,46 +159,122 @@ export async function deleteAnnouncement(id) {
     }
 }
 
-/**
- * お知らせ一覧をキャッシュ付きで取得する
- */
-const getCachedAnnouncements = unstable_cache(
-  async () => {
-    try {
-      const { data, error } = await adminSupabase
-        .from('announcements')
-        .select(`
-          id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
-          author:profiles!author_id (
-            id,
-            full_name,
-            avatar_url
-          ),
-          course:courses (
-            id,
-            title
-          )
-        `)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
+function getCachedAnnouncementsInternal() {
+  if (!global._cachedAnnouncementsFunc) {
+    global._cachedAnnouncementsFunc = next_unstable_cache(
+      async () => {
+        try {
+          const { data, error } = await adminSupabase
+            .from('announcements')
+            .select(`
+              id, title, content, is_pinned, created_at, author_id, sender_name, course_id, file_urls,
+              target_type, target_class, target_grade, target_student_ids,
+              author:profiles!author_id (
+                id,
+                full_name,
+                avatar_url
+              ),
+              course:courses (
+                id,
+                title
+              )
+            `)
+            .order('is_pinned', { ascending: false })
+            .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error("getAnnouncements DB error:", error);
-        return { data: [], error: error.message }
-      }
-      
-      return { data: data || [], error: null }
-    } catch (e) {
-      console.error("getAnnouncements exception:", e);
-      return { data: [], error: e.message }
-    }
-  },
-  ['announcements-list-v1'],
-  { tags: ['announcements'] }
-)
+          if (error) {
+            console.error("getAnnouncements DB error:", error);
+            return { data: [], error: error.message }
+          }
+          
+          return { data: data || [], error: null }
+        } catch (e) {
+          console.error("getAnnouncements exception:", e);
+          return { data: [], error: e.message }
+        }
+      },
+      ['announcements-list-v1-final'],
+      { tags: ['announcements'], revalidate: 3600 }
+    );
+  }
+  return global._cachedAnnouncementsFunc();
+}
 
 export async function getAnnouncements() {
-    return await getCachedAnnouncements()
+    return await getCachedAnnouncementsInternal()
+}
+
+/**
+ * 学生向けのお知らせを取得する（フィルタリング機能付き）
+ */
+export async function getStudentAnnouncements({ studentId, className, academicYear }) {
+    if (!SUPABASE_SERVICE_KEY) {
+        return { data: [], error: 'SUPABASE_SERVICE_ROLE_KEY is missing' }
+    }
+
+    try {
+        const { data, error } = await getAnnouncements();
+        if (error) throw new Error(error);
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const isBeforeApril = now.getMonth() < 3; // 0, 1, 2 is Jan, Feb, Mar
+        const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+        const studentGrade = (academicYearBase - academicYear + 1).toString();
+
+        // クラス名の正規化
+        const normStudentClass = normalizeClassName(className);
+
+        console.log(`[getStudentAnnouncements] Using cached announcements for studentId=${studentId}, grade=${studentGrade}, normalizedClass=${normStudentClass}`);
+
+        // 手動フィルタリング
+        const filteredAnnouncements = (data || []).filter(a => {
+            const type = (a.target_type || 'all').toLowerCase();
+            
+            // 全体向け
+            if (type === 'all' || type === '全体' || !a.target_type) {
+                return true;
+            }
+
+            // 学年向け
+            if (type === 'grade' || type === '学年') {
+                const match = String(a.target_grade) === studentGrade;
+                if (!match) console.log(`[getStudentAnnouncements] Skip grade: target=${a.target_grade}, student=${studentGrade}`);
+                return match;
+            }
+
+            // クラス向け
+            if (type === 'class' || type === 'クラス') {
+                const normTargetClass = normalizeClassName(a.target_class || '');
+                const match = normTargetClass === normStudentClass;
+                if (!match) console.log(`[getStudentAnnouncements] Skip class: target=${normTargetClass}, student=${normStudentClass}`);
+                return match;
+            }
+
+            // 個人向け
+            if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
+                const match = a.target_student_ids.includes(studentId);
+                if (!match) console.log(`[getStudentAnnouncements] Skip individual: studentId=${studentId} not in ${a.target_student_ids}`);
+                return match;
+            }
+
+            console.log(`[getStudentAnnouncements] Unknown target type: ${type}`);
+            return false;
+        });
+
+        console.log(`[getStudentAnnouncements] Found ${data?.length || 0} total, filtered to ${filteredAnnouncements.length}`);
+
+        return { 
+            data: filteredAnnouncements.map(a => ({
+                ...a,
+                author_name: a.author?.full_name || a.sender_name || '管理者'
+            })), 
+            error: null 
+        };
+    } catch (err) {
+        console.error('getStudentAnnouncements Error:', err);
+        return { data: [], error: err.message };
+    }
 }
 
 /**

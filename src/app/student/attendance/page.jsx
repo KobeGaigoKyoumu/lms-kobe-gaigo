@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 
-export const revalidate = 60
 
 export default async function StudentAttendancePage() {
     // 1. Check Student Session

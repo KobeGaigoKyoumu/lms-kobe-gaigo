@@ -5,9 +5,6 @@ import { getAdminDashboardDataCached } from '@/app/actions/dashboard'
 import DashboardContent from './DashboardContent'
 // Triggering deployment...
 
-export const dynamic = 'force-dynamic'
-// 30秒間キャッシュ（再訪問時の高速化）
-export const revalidate = 30
 
 export default async function DashboardPage() {
     const studentSession = await getStudentSessionLight()

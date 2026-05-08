@@ -4,8 +4,6 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import styles from './page.module.css'
 import { getAdminMemberSession } from '@/app/actions/adminAuth'
 
-// 24時間キャッシュ（ISR）
-export const revalidate = 86400
 
 export default async function GradesPage() {
     const adminMember = await getAdminMemberSession()

@@ -22,6 +22,8 @@ import JlptTab from './tabs/JlptTab'
 import DatabaseTab from './tabs/DatabaseTab'
 import CareerTab from './tabs/CareerTab'
 
+
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -36,15 +38,17 @@ ChartJS.register(
 )
 
 export default function AnalyticsDashboard({ 
-    initialGradeData = [],
-    initialJlptData = {},
-    initialNationalStats = null,
-    initialSectionStats = null,
-    initialCareerStats = null,
-    initialStudentDb = []
+    initialCareerStats = null
 }) {
     const [activeTab, setActiveTab] = useState('grade')
     const [chartFontSize, setChartFontSize] = useState(12)
+
+    // Data State
+    const [gradeData, setGradeData] = useState([])
+    const [jlptData, setJlptData] = useState({})
+    const [studentDb, setStudentDb] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
         const handleResize = () => {
@@ -55,12 +59,113 @@ export default function AnalyticsDashboard({
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
+
+
+    useEffect(() => {
+        const fetchAnalyticsData = async () => {
+            setIsLoading(true)
+            setError(null)
+            const debug = []
+            try {
+                const workerUrl = process.env.NEXT_PUBLIC_CHAT_WORKER_URL;
+                debug.push(`Worker URL: ${workerUrl || 'NOT SET'}`)
+                let targetUrl = workerUrl ? (workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`) : null;
+
+                let gradeResData = null;
+                let jlptResData = null;
+
+                // 1. Try Cloudflare Worker first (Ultra-fast, zero Vercel CPU)
+                if (targetUrl) {
+                    try {
+                        debug.push(`Trying Cloudflare: ${targetUrl}`)
+                        const [cfGradeRes, cfJlptRes] = await Promise.all([
+                            fetch(`${targetUrl}?action=get-analytics&type=grades_v4`),
+                            fetch(`${targetUrl}?action=get-analytics&type=jlpt_v4`)
+                        ]);
+
+                        debug.push(`CF Grades: ${cfGradeRes.status} ${cfGradeRes.statusText}`)
+                        debug.push(`CF JLPT: ${cfJlptRes.status} ${cfJlptRes.statusText}`)
+
+                        if (cfGradeRes.ok) {
+                            const cfData = await cfGradeRes.json();
+                            if (cfData && cfData.data) {
+                                gradeResData = cfData;
+                                debug.push(`CF Grades data: ${cfData.data.length} records`)
+                            } else {
+                                debug.push(`CF Grades: no .data field, keys: ${Object.keys(cfData || {}).join(',')}`)
+                            }
+                        }
+                        if (cfJlptRes.ok) {
+                            const cfData = await cfJlptRes.json();
+                            if (cfData && cfData.studentStats && (cfData.levelStats || cfData.stats)) {
+                                jlptResData = cfData;
+                            }
+                        }
+                    } catch (e) {
+                        debug.push(`CF Error: ${e.message}`)
+                    }
+                } else {
+                    debug.push('No Worker URL configured, skipping Cloudflare')
+                }
+
+                // 2. Fallback to Next.js API Route if Cloudflare fails or is missing data
+                if (!gradeResData) {
+                    debug.push('Fallback: fetching grades from /api/analytics')
+                    try {
+                        const res = await fetch('/api/analytics?type=grades');
+                        debug.push(`API Grades: ${res.status} ${res.statusText}`)
+                        if (res.ok) {
+                            gradeResData = await res.json();
+                            debug.push(`API Grades data: ${gradeResData?.data?.length || 0} records`)
+                        } else {
+                            const errText = await res.text()
+                            debug.push(`API Grades error body: ${errText.substring(0, 200)}`)
+                        }
+                    } catch (e) {
+                        debug.push(`API Grades fetch error: ${e.message}`)
+                    }
+                }
+                if (!jlptResData) {
+                    debug.push('Fallback: fetching JLPT from /api/analytics')
+                    try {
+                        const res = await fetch('/api/analytics?type=jlpt');
+                        debug.push(`API JLPT: ${res.status} ${res.statusText}`)
+                        if (res.ok) {
+                            jlptResData = await res.json();
+                            debug.push(`API JLPT data: keys=${Object.keys(jlptResData || {}).join(',')}`)
+                        } else {
+                            const errText = await res.text()
+                            debug.push(`API JLPT error body: ${errText.substring(0, 200)}`)
+                        }
+                    } catch (e) {
+                        debug.push(`API JLPT fetch error: ${e.message}`)
+                    }
+                }
+
+                const finalGrades = gradeResData?.data || []
+                setGradeData(finalGrades);
+                setJlptData(jlptResData || {});
+                setStudentDb(jlptResData?.studentStats ? jlptResData.studentStats.flatMap(c => c.students) : []);
+
+            } catch (err) {
+                debug.push(`FATAL: ${err.message}`)
+                console.error('Analytics Data Fetch Error:', err)
+                setError('データの取得に失敗しました。')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchAnalyticsData()
+    }, [])
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
                 <h1 className={styles.title}>成績・進路分析ダッシュボード</h1>
                 <p className={styles.subtitle}>学生の学力推移と進路実績の多角的な分析</p>
             </header>
+
 
             <div className={styles.tabs}>
                 <button 
@@ -90,30 +195,44 @@ export default function AnalyticsDashboard({
             </div>
 
             <main className={styles.mainContent}>
-                {activeTab === 'grade' && (
-                    <GradeTab 
-                        initialGrades={initialGradeData} 
-                        chartFontSize={chartFontSize} 
-                    />
-                )}
-                {activeTab === 'jlpt' && (
-                    <JlptTab 
-                        initialStats={initialJlptData?.enhanced || { stats: initialJlptData?.stats || [] }}
-                        nationalStats={initialNationalStats}
-                        sectionScoreStats={initialSectionStats}
-                        chartFontSize={chartFontSize} 
-                    />
-                )}
-                {activeTab === 'career' && (
-                    <CareerTab 
-                        careerStats={initialCareerStats}
-                        chartFontSize={chartFontSize} 
-                    />
-                )}
-                {activeTab === 'database' && (
-                    <DatabaseTab 
-                        studentDb={initialStudentDb} 
-                    />
+                {isLoading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '1rem' }}>
+                        <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid rgba(59, 130, 246, 0.2)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        <p style={{ color: '#6b7280' }}>データを読み込んでいます...</p>
+                        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                    </div>
+                ) : error ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', backgroundColor: '#fef2f2', borderRadius: '0.5rem' }}>
+                        {error}
+                    </div>
+                ) : (
+                    <>
+                        {activeTab === 'grade' && (
+                            <GradeTab 
+                                initialGrades={gradeData} 
+                                chartFontSize={chartFontSize} 
+                            />
+                        )}
+                        {activeTab === 'jlpt' && (
+                            <JlptTab 
+                                initialStats={jlptData}
+                                nationalStats={jlptData?.nationalStats || null}
+                                sectionScoreStats={jlptData?.sectionScores || null}
+                                chartFontSize={chartFontSize} 
+                            />
+                        )}
+                        {activeTab === 'career' && (
+                            <CareerTab 
+                                careerStats={initialCareerStats}
+                                chartFontSize={chartFontSize} 
+                            />
+                        )}
+                        {activeTab === 'database' && (
+                            <DatabaseTab 
+                                studentDb={studentDb} 
+                            />
+                        )}
+                    </>
                 )}
             </main>
         </div>

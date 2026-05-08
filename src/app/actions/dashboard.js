@@ -1,11 +1,87 @@
 'use server'
 
-import { unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { getCloudflareSnapshot, pushCloudflareSnapshot } from './cloudflare'
 import { normalizeClassName } from '@/lib/utils'
+
+/**
+ * Fetches teacher dashboard data using Service Role Client to bypass RLS.
+ * Includes assigned classes, pending submissions count, and recent assignments.
+ */
+export async function getTeacherDashboardData() {
+    try {
+        const adminMember = await getAdminMemberSession()
+        if (!adminMember) return null
+
+        const userId = adminMember.memberId
+        const adminName = adminMember.name
+        
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase config missing')
+        
+        const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
+
+        // 1. Fetch Teacher Classes
+        const { data: teacherClasses } = await supabase
+            .from('classes')
+            .select('name, teacher_id, homeroom_teacher_name')
+            .or(`teacher_id.eq.${userId || 0},homeroom_teacher_name.eq."${adminName || '不明'}"`)
+
+        if (!teacherClasses || teacherClasses.length === 0) {
+            return {
+                teacherClasses: [],
+                pendingAssignmentsCount: 0,
+                recentAssignments: []
+            }
+        }
+
+        const teacherClassNames = teacherClasses.map(c => c.name)
+
+        // 2. Fetch Assignments
+        const { data: allAssignments } = await supabase
+            .from('homework_assignments')
+            .select('id, title, deadline, class_name, released_at, is_archived, created_at')
+            .in('class_name', teacherClassNames)
+            .order('created_at', { ascending: false })
+            .limit(100)
+
+        const now = new Date()
+        const activeAssignments = (allAssignments || []).filter(a => {
+            const isNotArchived = !a.is_archived
+            const releasedAtRaw = a.released_at || a.release_date || a.created_at
+            const isReleased = !releasedAtRaw || new Date(releasedAtRaw) <= now
+            return isNotArchived && isReleased
+        })
+
+        const activeAssignmentIds = activeAssignments.map(a => a.id)
+
+        // 3. Fetch Pending Submissions Count
+        let pendingCount = 0
+        if (activeAssignmentIds.length > 0) {
+            const { count } = await supabase
+                .from('homework_submissions')
+                .select('id', { count: 'exact', head: true })
+                .eq('status', 'submitted')
+                .in('assignment_id', activeAssignmentIds)
+            
+            pendingCount = count || 0
+        }
+
+        return {
+            teacherClasses,
+            pendingAssignmentsCount: pendingCount,
+            recentAssignments: activeAssignments.slice(0, 5)
+        }
+    } catch (e) {
+        console.error('getTeacherDashboardData error:', e)
+        return null
+    }
+}
+
 
 /**
  * Fetches student dashboard data with Next.js Data Cache.
@@ -16,7 +92,7 @@ export async function getStudentDashboardDataCached() {
     if (!session) return null
 
     const fetcher = async (studentId, className, academicYear) => {
-        const cacheKey = `dashboard-${studentId}`;
+        const cacheKey = `dashboard-v2-${studentId}`;
         
         // LAYER 2: Cloudflare Snapshot
         try {
@@ -69,40 +145,17 @@ export async function getStudentDashboardDataCached() {
             throw submissionsError
         }
 
-        // 3. Fetch Announcements (Filter for student)
+        // 3. Fetch Announcements (Fetch all relevant metadata for filtering)
         const { data: rawAnnouncements, error: announcementsError } = await supabase
             .from('announcements')
             .select(`
                 id, title, content, is_pinned, created_at, sender_name,
-                target_type, target_class, target_grade, target_student_ids, course_id,
+                target_type, target_class, target_grade, target_student_ids,
                 author:profiles!author_id (full_name)
             `)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false })
-
-        if (announcementsError) {
-            console.error('Fetch announcements error:', announcementsError)
-        }
-
-        // Student-side filtering logic
-        const filteredAnnouncements = (rawAnnouncements || []).filter(ann => {
-            // Include if target is 'all'
-            if (!ann.target_type || ann.target_type === 'all') return true;
-            
-            // Include if target matches student's class
-            if (ann.target_type === 'class' && normalizeClassName(ann.target_class) === normalizedClassName) return true;
-            
-            // Include if target matches student's grade (academicYear)
-            if (ann.target_type === 'grade' && ann.target_grade?.toString() === academicYear?.toString()) return true;
-            
-            // Include if target matches student specifically
-            if (ann.target_type === 'individual' && Array.isArray(ann.target_student_ids)) {
-                return ann.target_student_ids.includes(studentId);
-            }
-            
-            // Fallback: exclude by default
-            return false;
-        }).slice(0, 10);
+            .limit(50) // Higher limit for raw data
 
         if (announcementsError) {
             console.error('Fetch announcements error:', announcementsError)
@@ -136,10 +189,10 @@ export async function getStudentDashboardDataCached() {
                 dueThisWeekCount
             },
             recentAssignments: assignmentsWithSubmissions.slice(0, 10),
-            announcements: filteredAnnouncements || []
+            rawAnnouncements: rawAnnouncements || [] // Store raw for later filtering
         }
 
-        // Update Cloudflare Snapshot for next time
+        // Update Cloudflare Snapshot
         if (result) {
             await pushCloudflareSnapshot(cacheKey, result).catch(console.error);
         }
@@ -148,18 +201,50 @@ export async function getStudentDashboardDataCached() {
     }
 
     // Cache the result based on student identity and class
-    const cachedData = await unstable_cache(
+    const cachedData = await next_unstable_cache(
         async () => fetcher(session.studentId, session.className, session.academicYear),
-        [`dashboard-${session.studentId}`],
+        [`dashboard-v2-${session.studentId}`],
         {
             tags: ['homework-assignments', 'announcements', 'student-stats'],
-            revalidate: 3600 // Fallback revalidation (1 hour)
+            revalidate: 3600
         }
     )()
 
+    // --- ROBUST FILTERING (Always runs, even on cache hit) ---
+    const nowObj = new Date();
+    const currentYear = nowObj.getFullYear();
+    const isBeforeApril = nowObj.getMonth() < 3;
+    const academicYearBase = isBeforeApril ? currentYear - 1 : currentYear;
+    const studentGrade = (academicYearBase - session.academicYear + 1).toString();
+    const normStudentClass = normalizeClassName(session.className);
+
+    const filteredAnnouncements = (cachedData?.rawAnnouncements || []).filter(a => {
+        const type = (a.target_type || 'all').toLowerCase();
+        
+        if (type === 'all' || type === '全体' || !a.target_type) return true;
+
+        if (type === 'grade' || type === '学年') {
+            return String(a.target_grade) === studentGrade;
+        }
+
+        if (type === 'class' || type === 'クラス') {
+            const normTargetClass = normalizeClassName(a.target_class || '');
+            return normTargetClass === normStudentClass;
+        }
+
+        if ((type === 'individual' || type === '個人') && Array.isArray(a.target_student_ids)) {
+            return a.target_student_ids.includes(session.studentId);
+        }
+
+        return false;
+    }).slice(0, 10);
+
     return {
         session,
-        content: cachedData
+        content: {
+            ...cachedData,
+            announcements: filteredAnnouncements
+        }
     }
 }
 

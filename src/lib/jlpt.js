@@ -12,6 +12,25 @@ const HISTORICAL_STUDENTS_JSON = path.join(process.cwd(), 'data', 'historical_st
 const GRADUATION_STATS_JSON = path.join(process.cwd(), 'data', 'graduation_n3_stats.json');
 const ENROLLMENT_STATS_JSON = path.join(process.cwd(), 'data', 'enrollment_stats.json');
 const CAREER_STATS_JSON = path.join(process.cwd(), 'src', 'data', 'career_stats_v2.json');
+const JLPT_NATIONAL_STATS_JSON = path.join(process.cwd(), 'data', 'jlpt_national_stats.json');
+
+/**
+ * Loads national JLPT statistics (average pass rates etc.)
+ */
+export function getJlptNationalStats() {
+    try {
+        if (!fs.existsSync(JLPT_NATIONAL_STATS_JSON)) {
+            console.warn('National stats file not found:', JLPT_NATIONAL_STATS_JSON);
+            return null;
+        }
+        const content = fs.readFileSync(JLPT_NATIONAL_STATS_JSON, 'utf-8');
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error loading national stats:', error);
+        return null;
+    }
+}
+
 
 // Cache for name mappings (kanji <-> romanized)
 let nameMappingsCache = null;
@@ -618,10 +637,11 @@ export async function getEnhancedJlptStats(students = []) {
                 });
             }
             // Store by student ID if available
-            if (s.student_id) {
-                const parsed = parseStudentIdForEnrollment(s.student_id);
+            const sid = s.student_id_text || s.student_id;
+            if (sid) {
+                const parsed = parseStudentIdForEnrollment(sid);
                 if (parsed) {
-                    studentIdMap.set(String(s.student_id), {
+                    studentIdMap.set(String(sid), {
                         enrollmentYear: parsed.enrollmentYear,
                         enrollmentMonth: parsed.enrollmentMonth,
                         graduationYear: parsed.graduationYear,
@@ -744,7 +764,7 @@ export async function getEnhancedJlptStats(students = []) {
     if (students && students.length > 0) {
         students.forEach(s => {
             // Some checks for valid ID
-            const sid = s.student_id;
+            const sid = s.student_id_text || s.student_id;
             if (sid) processedStudentIds.add(sid);
 
             let enrollYear = 0;
@@ -1058,17 +1078,153 @@ export async function getEnhancedJlptStats(students = []) {
         }))
         .sort((a, b) => a.year.localeCompare(b.year));
 
+    // 5. Session-by-session statistics
+    const bySession = {};
+    validData.forEach(record => {
+        const session = record.session;
+        if (!bySession[session]) {
+            bySession[session] = { session, total: 0, passed: 0, levels: {} };
+        }
+        bySession[session].total++;
+        if (record.result === '合格') bySession[session].passed++;
+        
+        const lvl = record.level;
+        if (!bySession[session].levels[lvl]) {
+            bySession[session].levels[lvl] = { total: 0, passed: 0 };
+        }
+        bySession[session].levels[lvl].total++;
+        if (record.result === '合格') bySession[session].levels[lvl].passed++;
+    });
+
+    const sessionStats = Object.values(bySession)
+        .map(s => ({
+            ...s,
+            passRate: ((s.passed / s.total) * 100).toFixed(1),
+            levelBreakdown: Object.entries(s.levels).map(([lvl, stats]) => ({
+                level: lvl,
+                total: stats.total,
+                passed: stats.passed,
+                passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+            })).sort((a, b) => a.level.localeCompare(b.level))
+        }))
+        .sort((a, b) => b.session.localeCompare(a.session));
+
+    // 6. Subject-specific scores (言語知識, 読解, 聴解)
+
+    const subjects = {
+        knowledge: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 },
+        reading: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 },
+        listening: { total: 0, count: 0, max: 0, min: 60, passedTotal: 0, passedCount: 0, failedTotal: 0, failedCount: 0 }
+    };
+
+    const levelSubjects = {}; // N1: { knowledge: { total: 0, count: 0 }, ... }
+
+    validData.forEach(record => {
+        const lvl = record.level;
+        if (!levelSubjects[lvl]) {
+            levelSubjects[lvl] = {
+                knowledge: { total: 0, count: 0 },
+                reading: { total: 0, count: 0 },
+                listening: { total: 0, count: 0 }
+            };
+        }
+
+        const addScore = (subjKey, scoreStr) => {
+            if (!scoreStr) return;
+            const score = parseInt(scoreStr.split('/')[0]);
+            if (isNaN(score)) return;
+
+            const s = subjects[subjKey];
+            s.total += score;
+            s.count++;
+            s.max = Math.max(s.max, score);
+            s.min = Math.min(s.min, score);
+            if (record.result === '合格') {
+                s.passedTotal += score;
+                s.passedCount++;
+            } else {
+                s.failedTotal += score;
+                s.failedCount++;
+            }
+
+            levelSubjects[lvl][subjKey].total += score;
+            levelSubjects[lvl][subjKey].count++;
+        };
+
+        if (/^N[1-3]$/.test(lvl) && record.sectionScores) {
+            addScore('knowledge', record.sectionScores.knowledge);
+            addScore('reading', record.sectionScores.reading);
+            addScore('listening', record.sectionScores.listening);
+        } else if (/^N[4-5]$/.test(lvl) && record.sectionScores) {
+            // N4-N5: Knowledge and Reading are combined in record.sectionScores.knowledge_reading
+            // For analysis, we'll put it in knowledge or reading?
+            // Usually, these are 120 points total (N4/N5 Knowledge + Reading)
+            // Let's skip them for the 3-way breakdown or handle separately if needed.
+            // But to match the UI which likely wants 3 columns, we skip or use placeholders.
+            addScore('listening', record.sectionScores.listening);
+        }
+    });
+
+    const subjectStats = {
+        totalRecords: validData.length,
+        averages: {
+            knowledge: subjects.knowledge.count > 0 ? (subjects.knowledge.total / subjects.knowledge.count).toFixed(1) : 0,
+            reading: subjects.reading.count > 0 ? (subjects.reading.total / subjects.reading.count).toFixed(1) : 0,
+            listening: subjects.listening.count > 0 ? (subjects.listening.total / subjects.listening.count).toFixed(1) : 0
+        },
+        byLevel: Object.entries(levelSubjects).map(([level, data]) => ({
+            level,
+            knowledge: data.knowledge.count > 0 ? (data.knowledge.total / data.knowledge.count).toFixed(1) : 0,
+            reading: data.reading.count > 0 ? (data.reading.total / data.reading.count).toFixed(1) : 0,
+            listening: data.listening.count > 0 ? (data.listening.total / data.listening.count).toFixed(1) : 0
+        })).sort((a, b) => a.level.localeCompare(b.level)),
+        details: [
+            {
+                name: '言語知識',
+                total: subjects.knowledge.count,
+                avg: subjects.knowledge.count > 0 ? (subjects.knowledge.total / subjects.knowledge.count).toFixed(1) : 0,
+                max: subjects.knowledge.max,
+                min: subjects.knowledge.min === 60 ? 0 : subjects.knowledge.min,
+                passAvg: subjects.knowledge.passedCount > 0 ? (subjects.knowledge.passedTotal / subjects.knowledge.passedCount).toFixed(1) : 0,
+                failAvg: subjects.knowledge.failedCount > 0 ? (subjects.knowledge.failedTotal / subjects.knowledge.failedCount).toFixed(1) : 0
+            },
+            {
+                name: '読解',
+                total: subjects.reading.count,
+                avg: subjects.reading.count > 0 ? (subjects.reading.total / subjects.reading.count).toFixed(1) : 0,
+                max: subjects.reading.max,
+                min: subjects.reading.min === 60 ? 0 : subjects.reading.min,
+                passAvg: subjects.reading.passedCount > 0 ? (subjects.reading.passedTotal / subjects.reading.passedCount).toFixed(1) : 0,
+                failAvg: subjects.reading.failedCount > 0 ? (subjects.reading.failedTotal / subjects.reading.failedCount).toFixed(1) : 0
+            },
+            {
+                name: '聴解',
+                total: subjects.listening.count,
+                avg: subjects.listening.count > 0 ? (subjects.listening.total / subjects.listening.count).toFixed(1) : 0,
+                max: subjects.listening.max,
+                min: subjects.listening.min === 60 ? 0 : subjects.listening.min,
+                passAvg: subjects.listening.passedCount > 0 ? (subjects.listening.passedTotal / subjects.listening.passedCount).toFixed(1) : 0,
+                failAvg: subjects.listening.failedCount > 0 ? (subjects.listening.failedTotal / subjects.listening.failedCount).toFixed(1) : 0
+            }
+        ]
+    };
+
     return {
         nationalityStats,
         levelStats,
         yearlyTrend,
         graduationN3PlusRates,
+        sessionStats,
+        subjectStats,
         overallN3PlusRate: {
+
             totalUniqueStudents,
             n3PlusStudents,
             rate: totalUniqueStudents > 0 ? ((n3PlusStudents / totalUniqueStudents) * 100).toFixed(1) : 0
-        }
+        },
+        allStudentStats: [] // Placeholder, can be populated if needed
     };
+
 }
 
 /**
@@ -1163,21 +1319,42 @@ export async function getStudentsJlptSummary(students) {
         studentResults.get(key).push(record);
     };
 
+    const normalizeBasic = (str) => {
+        if (!str) return '';
+        return str.toLowerCase().replace(/[\s\u3000]/g, '').trim();
+    };
+
+    const normalizeSorted = (str) => {
+        if (!str) return '';
+        const parts = str.toLowerCase().replace(/\u3000/g, ' ').split(/\s+/).filter(Boolean);
+        if (parts.length <= 1) return parts[0] || '';
+        return parts.sort().join('');
+    };
+
     rawData.forEach(record => {
         if (record.studentId) {
             addResult(String(record.studentId), record);
         }
-        if (record.name) {
-            addResult(record.name.toLowerCase().trim(), record);
-        }
+        const name = record.name;
+        if (!name) return;
+
+        const key1 = normalizeBasic(name);
+        const key2 = normalizeSorted(name);
+        
+        if (key1) addResult(key1, record);
+        if (key2 && key2 !== key1) addResult(key2, record);
+
         // Also add variants for Chinese names
-        const nameVariants = getAllNameVariants(record.name);
+        const nameVariants = getAllNameVariants(name);
         nameVariants.forEach(variant => {
-            if (variant !== record.name?.toLowerCase()?.trim()) {
-                addResult(variant, record);
-            }
+            const v1 = normalizeBasic(variant);
+            const v2 = normalizeSorted(variant);
+            if (v1) addResult(v1, record);
+            if (v2 && v2 !== v1) addResult(v2, record);
         });
     });
+
+
 
     // Load career destinations for additional info and identify missing students
     const careerMap = new Map();
@@ -1218,12 +1395,63 @@ export async function getStudentsJlptSummary(students) {
         console.error('Error loading career stats for summary:', e);
     }
 
-    const allStudentsToProcess = [...students, ...virtualStudents];
+    const allStudentsList = [...students, ...virtualStudents];
+    
+    // Also identify students from JLPT CSV data
+    rawData.forEach(record => {
+        const sid = record.studentId ? String(record.studentId) : null;
+        const name = record.name;
+        if (!name) return;
+        
+        // Add as a potential student if not in the list yet
+        // We'll merge them by name later
+        allStudentsList.push({
+            student_id_text: sid,
+            full_name: name,
+            class_name: '過去の学生',
+            nationality: record.country,
+            is_historical: true
+        });
+    });
+
+    // Merge students by normalized name to avoid duplicates
+    const mergedStudentsMap = new Map(); // normalizedName -> student object
+    
+    allStudentsList.forEach(s => {
+        const normName = normalizeSorted(s.full_name); // Use sorted for merging logic
+        if (!normName) return;
+
+        if (!mergedStudentsMap.has(normName)) {
+            mergedStudentsMap.set(normName, s);
+        } else {
+            const existing = mergedStudentsMap.get(normName);
+            // Merge logic: Prioritize DB student over virtual/historical
+            const isExistingHistorical = existing.is_historical || existing.is_virtual;
+            const isNewHistorical = s.is_historical || s.is_virtual;
+
+            if (isExistingHistorical && !isNewHistorical) {
+                // Replace historical with DB student but keep some fields if missing
+                const merged = { ...s };
+                if (!merged.destination) merged.destination = existing.destination;
+                if (!merged.nationality) merged.nationality = existing.nationality;
+                mergedStudentsMap.set(normName, merged);
+            } else {
+                // Keep existing (DB student) but maybe update missing fields
+                if (!existing.student_id_text && s.student_id_text) existing.student_id_text = s.student_id_text;
+                if (!existing.nationality && s.nationality) existing.nationality = s.nationality;
+                if (!existing.destination && s.destination) existing.destination = s.destination;
+                if (!existing.enrollment_date && s.enrollment_date) existing.enrollment_date = s.enrollment_date;
+            }
+        }
+    });
+
+    const allStudentsToProcess = Array.from(mergedStudentsMap.values());
+
 
     // Process each student
     const studentSummaries = allStudentsToProcess.map(student => {
         const studentId = String(student.student_id_text || student.student_id || '');
-        const name = student.full_name?.toLowerCase()?.trim();
+        const name = student.full_name;
 
         let myRecords = [];
         const seenRecordKeys = new Set(); // Avoid duplicates from ID + Name matching
@@ -1239,20 +1467,21 @@ export async function getStudentsJlptSummary(students) {
             });
         }
 
-        // 2. Match by Name (if ID match didn't find everything, or to cover missing IDs)
-        // Note: Name matching can be risky, but we filter loosely. 
-        // Ideally we prioritize ID matches.
+        // 2. Match by Name
         if (name) {
-            // Check direct match and variants
-            const variants = getAllNameVariants(student.full_name);
-            variants.forEach(variant => {
-                if (studentResults.has(variant)) {
-                    studentResults.get(variant).forEach(r => {
+            const keys = [
+                normalizeBasic(name),
+                normalizeSorted(name),
+                ...getAllNameVariants(name).flatMap(v => [normalizeBasic(v), normalizeSorted(v)])
+            ];
+            
+            const uniqueKeys = [...new Set(keys.filter(Boolean))];
+            
+            uniqueKeys.forEach(k => {
+                if (studentResults.has(k)) {
+                    studentResults.get(k).forEach(r => {
                         const key = `${r.session}-${r.level}-${r.date}`;
                         if (!seenRecordKeys.has(key)) {
-                            // Optional: Check enrollment date if strictly needed, 
-                            // but for class analysis we generally assume name match is valid
-                            // unless common name.
                             myRecords.push(r);
                             seenRecordKeys.add(key);
                         }
@@ -1260,6 +1489,8 @@ export async function getStudentsJlptSummary(students) {
                 }
             });
         }
+
+
 
         // Aggregate by level
         const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
@@ -1321,6 +1552,7 @@ export async function getStudentsJlptSummary(students) {
             nationality: student.nationality || student.country,
             destination: student.destination || student.career_destination || careerMap.get(studentId) || null,
             enrollmentYear: enrollmentYear,
+            status: student.status || (student.is_virtual || student.is_historical ? 'graduated' : 'active'),
             levels: levelStatus,
             highestLevel: highestLevel,
             records: myRecords,
