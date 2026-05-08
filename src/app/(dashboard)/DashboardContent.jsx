@@ -31,11 +31,13 @@ export default function DashboardContent({ adminMember, initialData }) {
                     </div>
                     <div className={styles.statContent}>
                         <p className={styles.statLabel}>担当クラス</p>
-                        <p className={styles.statValue} style={{ fontSize: '1.4rem', whiteSpace: 'nowrap' }}>
+                        <div className={styles.classList}>
                             {stats.enrolledClasses && stats.enrolledClasses.length > 0 
-                                ? stats.enrolledClasses.join(' ') 
-                                : '-'}
-                        </p>
+                                ? stats.enrolledClasses.map((c, i) => (
+                                    <span key={i} className={styles.className}>{c}</span>
+                                  ))
+                                : <span className={styles.statValue}>-</span>}
+                        </div>
                     </div>
                 </div>
 
