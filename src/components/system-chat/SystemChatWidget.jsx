@@ -9,6 +9,7 @@ export default function SystemChatWidget({ userId }) {
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([])
     const [unreadCount, setUnreadCount] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const intervalRef = useRef(null)
     const supabaseRef = useRef(null)
