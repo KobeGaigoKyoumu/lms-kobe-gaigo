@@ -20,6 +20,16 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
     const COLOR_WARN = '#f59e0b'
     const COLOR_INFO = '#3b82f6'
 
+    const LABEL_MAP = {
+        vocab: '語彙',
+        listening: '聴解',
+        reading: '読解',
+        grammar: '文法',
+        writing: '記述',
+        conversation: '会話'
+    }
+
+
     // Derived Data with Safety Checks
     const terms = useMemo(() => {
         const data = initialGrades || []
@@ -279,34 +289,79 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort('rank')}>順位</th>
-                                <th onClick={() => handleSort('student_id')}>学籍番号</th>
-                                <th onClick={() => handleSort('class_name')}>クラス</th>
-                                <th onClick={() => handleSort('name')}>氏名</th>
+                                <th onClick={() => handleSort('rank')} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        順位 {sortConfig.key === 'rank' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
+                                <th onClick={() => handleSort('student_id')} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        学籍番号 {sortConfig.key === 'student_id' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
+                                <th onClick={() => handleSort('class_name')} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        クラス {sortConfig.key === 'class_name' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
+                                <th onClick={() => handleSort('name')} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        氏名 {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
                                 {!isReportFirst && (
                                     <>
-                                        <th onClick={() => handleSort('final_total')} style={{ backgroundColor: '#eff6ff' }}>期末合計</th>
+                                        <th onClick={() => handleSort('final_total')} style={{ backgroundColor: '#eff6ff' }} className={styles.sortableHeader}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                期末合計 {sortConfig.key === 'final_total' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                            </div>
+                                        </th>
                                         <th style={{ backgroundColor: '#eff6ff' }}>評定</th>
                                         {['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => (
-                                            <th key={k} onClick={() => handleSort(k)} style={{ backgroundColor: '#f0f9ff' }}>{k}</th>
+                                            <th key={k} onClick={() => handleSort(k)} style={{ backgroundColor: '#f0f9ff' }} className={styles.sortableHeader}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    {LABEL_MAP[k] || k} {sortConfig.key === k ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                                </div>
+                                            </th>
                                         ))}
                                     </>
                                 )}
-                                <th onClick={() => handleSort('report_total')} style={{ backgroundColor: '#dcfce7' }}>成績総合</th>
+                                <th onClick={() => handleSort('report_total')} style={{ backgroundColor: '#dcfce7' }} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        成績総合 {sortConfig.key === 'report_total' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
                                 <th style={{ backgroundColor: '#dcfce7' }}>評定</th>
-                                <th onClick={() => handleSort('attendance')} style={{ backgroundColor: '#f0fdf4' }}>出席</th>
-                                <th onClick={() => handleSort('participation')} style={{ backgroundColor: '#f0fdf4' }}>平常</th>
+                                <th onClick={() => handleSort('attendance')} style={{ backgroundColor: '#f0fdf4' }} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        出席 {sortConfig.key === 'attendance' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
+                                <th onClick={() => handleSort('participation')} style={{ backgroundColor: '#f0fdf4' }} className={styles.sortableHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        平常 {sortConfig.key === 'participation' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                    </div>
+                                </th>
                                 {isReportFirst && (
                                     <>
-                                        <th onClick={() => handleSort('final_total')} style={{ backgroundColor: '#eff6ff' }}>期末合計</th>
+                                        <th onClick={() => handleSort('final_total')} style={{ backgroundColor: '#eff6ff' }} className={styles.sortableHeader}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                期末合計 {sortConfig.key === 'final_total' ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                            </div>
+                                        </th>
                                         <th style={{ backgroundColor: '#eff6ff' }}>評定</th>
                                         {['vocab', 'listening', 'reading', 'grammar', 'writing', 'conversation'].map(k => (
-                                            <th key={k} onClick={() => handleSort(k)} style={{ backgroundColor: '#f0f9ff' }}>{k}</th>
+                                            <th key={k} onClick={() => handleSort(k)} style={{ backgroundColor: '#f0f9ff' }} className={styles.sortableHeader}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    {LABEL_MAP[k] || k} {sortConfig.key === k ? (sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />) : <ArrowUp size={14} style={{ opacity: 0.2 }} />}
+                                                </div>
+                                            </th>
                                         ))}
                                     </>
                                 )}
                             </tr>
                         </thead>
+
                         <tbody>
                             {paginatedGrades.length === 0 ? (
                                 <tr><td colSpan="15" style={{ textAlign: 'center', padding: '2rem' }}>データが見つかりません</td></tr>
