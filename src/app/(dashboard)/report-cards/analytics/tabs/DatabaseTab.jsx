@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import styles from '../page.module.css'
+
 
 export default function DatabaseTab({ studentDb = [] }) {
     const [dbSearchQuery, setDbSearchQuery] = useState('')
@@ -118,11 +120,11 @@ export default function DatabaseTab({ studentDb = [] }) {
                                     <td>{student.highestLevel ? <span className={`${styles.badge} ${styles[`badge${student.highestLevel}`]}`}>{student.highestLevel}</span> : '-'}</td>
                                     <td>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
-                                            {['N1', 'N2', 'N3'].map(lvl => {
+                                            {['N1', 'N2', 'N3', 'N4', 'N5'].map(lvl => {
                                                 const s = student.levels?.[lvl]
-                                                if (!s) return null
+                                                if (!s || !s.score || s.score === 0 || s.score === '0' || s.score === '0点') return null
                                                 const color = s.status === '合格' ? COLOR_PASS : COLOR_FAIL
-                                                return <span key={lvl} style={{ color, fontWeight: 'bold' }}>{lvl}: {s.score || 0}点</span>
+                                                return <span key={lvl} style={{ color, fontWeight: 'bold' }}>{lvl}: {s.score}</span>
                                             })}
                                         </div>
                                     </td>
@@ -135,11 +137,30 @@ export default function DatabaseTab({ studentDb = [] }) {
 
             {dbFilteredStudents.length > DB_ITEMS_PER_PAGE && (
                 <div className={styles.pagination}>
-                    <button onClick={() => setDbCurrentPage(p => Math.max(1, p - 1))} disabled={dbCurrentPage === 1}>前へ</button>
-                    <span>{dbCurrentPage} / {Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}</span>
-                    <button onClick={() => setDbCurrentPage(p => Math.min(p + 1, Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)))} disabled={dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}>次へ</button>
+                    <button 
+                        className={styles.pageBtn} 
+                        onClick={() => setDbCurrentPage(p => Math.max(1, p - 1))} 
+                        disabled={dbCurrentPage === 1}
+                        title="前のページ"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                    <div className={styles.pageInfo}>
+                        <span className={styles.currentPage}>{dbCurrentPage}</span>
+                        <span className={styles.pageDivider}>/</span>
+                        <span className={styles.totalPages}>{Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}</span>
+                    </div>
+                    <button 
+                        className={styles.pageBtn} 
+                        onClick={() => setDbCurrentPage(p => Math.min(p + 1, Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)))} 
+                        disabled={dbCurrentPage >= Math.ceil(dbFilteredStudents.length / DB_ITEMS_PER_PAGE)}
+                        title="次のページ"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
                 </div>
             )}
+
         </div>
     )
 }
