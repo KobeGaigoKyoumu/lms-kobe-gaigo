@@ -656,3 +656,58 @@
     margin-top: 0px;
     z-index: 9999;
 }
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-6);
+    margin-top: var(--spacing-8);
+    padding: var(--spacing-4);
+}
+
+.pageBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: var(--primary-50);
+    border-color: var(--primary-300);
+    color: var(--primary-600);
+}
+
+.pageBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-weight: 600;
+}
+
+.currentPage {
+    font-size: var(--font-size-lg);
+    color: var(--primary-600);
+}
+
+.pageDivider {
+    color: var(--text-tertiary);
+}
+
+.totalPages {
+    color: var(--text-secondary);
+}

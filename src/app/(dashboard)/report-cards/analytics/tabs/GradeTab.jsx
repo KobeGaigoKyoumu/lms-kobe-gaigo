@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Bar } from 'react-chartjs-2'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react'
+
 import { MultiSelect } from '../components/MultiSelect'
 import styles from '../page.module.css'
 
@@ -25,9 +26,10 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
         listening: '聴解',
         reading: '読解',
         grammar: '文法',
-        writing: '記述',
+        writing: '作文',
         conversation: '会話'
     }
+
 
 
     // Derived Data with Safety Checks
@@ -406,12 +408,31 @@ export default function GradeTab({ initialGrades = [], chartFontSize }) {
                 </div>
                 {totalPages > 1 && (
                     <div className={styles.pagination}>
-                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>前へ</button>
-                        <span>{page} / {totalPages}</span>
-                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>次へ</button>
+                        <button 
+                            className={styles.pageBtn} 
+                            onClick={() => setPage(p => Math.max(1, p - 1))} 
+                            disabled={page === 1}
+                            title="前のページ"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <div className={styles.pageInfo}>
+                            <span className={styles.currentPage}>{page}</span>
+                            <span className={styles.pageDivider}>/</span>
+                            <span className={styles.totalPages}>{totalPages}</span>
+                        </div>
+                        <button 
+                            className={styles.pageBtn} 
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                            disabled={page === totalPages}
+                            title="次のページ"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
             </div>
         </div>
     )
 }
+
