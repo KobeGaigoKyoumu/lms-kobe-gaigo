@@ -1495,7 +1495,7 @@ export async function getStudentsJlptSummary(students) {
             const keys = [
                 normalizeBasic(name),
                 normalizeSorted(name),
-                ...getAllNameVariants(name).flatMap(v => [normalizeBasic(v), normalizeSorted(v)])
+                ...Array.from(getAllNameVariants(name)).flatMap(v => [normalizeBasic(v), normalizeSorted(v)])
             ];
             
             const uniqueKeys = [...new Set(keys.filter(Boolean))];
