@@ -162,6 +162,24 @@ export default function JlptTab({
                         </div>
 
                         <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>レベル別合格率 (%)</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar
+                                    data={{
+                                        labels: (statsObj?.levelStats || []).map(s => s.level),
+                                        datasets: [{
+                                            label: '合格率 (%)',
+                                            data: (statsObj?.levelStats || []).map(s => s.passRate),
+                                            backgroundColor: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#3b82f6'],
+                                            borderRadius: 4
+                                        }]
+                                    }}
+                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.chartCard}>
                             <h3 className={styles.chartTitle}>レベル別 平均点</h3>
                             <div className={styles.chartContainer}>
                                 <Bar
@@ -169,7 +187,10 @@ export default function JlptTab({
                                         labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
                                         datasets: [{
                                             label: '平均点 (全期間)',
-                                            data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(l => statsObj?.sectionScores?.byLevel?.[l]?.avgScore || 0),
+                                            data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(l => {
+                                                const s = (statsObj?.levelStats || []).find(x => x.level === l);
+                                                return s ? s.avgScore : 0;
+                                            }),
                                             backgroundColor: [
                                                 'rgba(248, 113, 113, 0.7)', // N1 Red
                                                 'rgba(251, 146, 60, 0.7)',  // N2 Orange
@@ -194,6 +215,7 @@ export default function JlptTab({
                                 />
                             </div>
                         </div>
+
                     </div>
 
 

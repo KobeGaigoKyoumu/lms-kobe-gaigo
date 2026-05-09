@@ -695,10 +695,16 @@ export async function getEnhancedJlptStats(students = []) {
     validData.forEach(record => {
         const level = record.level;
         if (!byLevel[level]) {
-            byLevel[level] = { total: 0, passed: 0 };
+            byLevel[level] = { total: 0, passed: 0, scoreSum: 0, scoreCount: 0 };
         }
         byLevel[level].total++;
         if (record.result === '合格') byLevel[level].passed++;
+
+        const scoreVal = parseInt(record.totalScore?.split('/')[0]);
+        if (!isNaN(scoreVal) && scoreVal > 0) {
+            byLevel[level].scoreSum += scoreVal;
+            byLevel[level].scoreCount++;
+        }
     });
 
     const levelStats = Object.entries(byLevel)
@@ -706,9 +712,11 @@ export async function getEnhancedJlptStats(students = []) {
             level,
             total: stats.total,
             passed: stats.passed,
-            passRate: ((stats.passed / stats.total) * 100).toFixed(1)
+            passRate: ((stats.passed / stats.total) * 100).toFixed(1),
+            avgScore: stats.scoreCount > 0 ? (stats.scoreSum / stats.scoreCount).toFixed(1) : 0
         }))
         .sort((a, b) => a.level.localeCompare(b.level));
+
 
     // 3. Yearly Trend (Pass Rate)
     // 3. Yearly Trend (Pass Rate)
