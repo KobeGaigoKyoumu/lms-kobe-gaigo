@@ -106,10 +106,11 @@ export default function JlptTab({
                                     options={{ 
                                         ...chartOptions, 
                                         scales: { 
-                                            y: { beginAtZero: true, max: 50, ticks: { stepSize: 5, font: { size: chartFontSize } } },
+                                            y: { beginAtZero: true, max: 100, ticks: { stepSize: 10, font: { size: chartFontSize } } },
                                             x: { ticks: { font: { size: chartFontSize - 2 }, maxRotation: 45, minRotation: 45 } }
                                         } 
                                     }}
+
                                 />
                             </div>
                         </div>
@@ -188,9 +189,10 @@ export default function JlptTab({
                                         datasets: [{
                                             label: '平均点 (全期間)',
                                             data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(l => {
-                                                const s = (statsObj?.levelStats || []).find(x => x.level === l);
-                                                return s ? s.avgScore : 0;
+                                                const s = (statsObj?.levelStats || []).find(x => x.level?.trim() === l);
+                                                return s && s.avgScore ? parseFloat(s.avgScore) : 0;
                                             }),
+
                                             backgroundColor: [
                                                 'rgba(248, 113, 113, 0.7)', // N1 Red
                                                 'rgba(251, 146, 60, 0.7)',  // N2 Orange
