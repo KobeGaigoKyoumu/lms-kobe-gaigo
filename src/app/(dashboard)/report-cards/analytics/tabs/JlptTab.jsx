@@ -408,7 +408,8 @@ export default function JlptTab({
                 const displayYears = recentYears.length >= 3 ? recentYears : [2025, 2024, 2023];
                 
                 const yearlyCompare = displayYears.map(year => {
-                    const myStat = (statsObj?.yearlyTrend || []).find(y => parseInt(y.year) === year)?.passRate || 0;
+                    const myStatRaw = (statsObj?.yearlyTrend || []).find(y => parseInt(y.year) === year)?.passRate || 0;
+                    const myStat = parseFloat(myStatRaw) || 0;
                     // national pass rate for this year (average of all sessions in this year, average of all levels)
                     const yearSessions = nationalSessions.filter(s => s.year === year);
                     let natSum = 0;
