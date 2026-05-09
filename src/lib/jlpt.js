@@ -711,11 +711,12 @@ export async function getEnhancedJlptStats(students = []) {
         .map(([level, stats]) => ({
             level,
             total: stats.total,
-            passed: stats.passed,
+            passers: stats.passed,
             passRate: ((stats.passed / stats.total) * 100).toFixed(1),
             avgScore: stats.scoreCount > 0 ? (stats.scoreSum / stats.scoreCount).toFixed(1) : 0
         }))
         .sort((a, b) => a.level.localeCompare(b.level));
+
 
 
     // 3. Yearly Trend (Pass Rate)
@@ -1098,24 +1099,38 @@ export async function getEnhancedJlptStats(students = []) {
         
         const lvl = record.level;
         if (!bySession[session].levels[lvl]) {
-            bySession[session].levels[lvl] = { total: 0, passed: 0 };
+            bySession[session].levels[lvl] = { total: 0, passed: 0, scoreSum: 0, scoreCount: 0 };
         }
         bySession[session].levels[lvl].total++;
         if (record.result === '合格') bySession[session].levels[lvl].passed++;
+
+        const scoreVal = parseInt(record.totalScore?.split('/')[0]);
+        if (!isNaN(scoreVal) && scoreVal > 0) {
+            bySession[session].levels[lvl].scoreSum += scoreVal;
+            bySession[session].levels[lvl].scoreCount++;
+        }
     });
 
     const sessionStats = Object.values(bySession)
         .map(s => ({
-            ...s,
-            passRate: ((s.passed / s.total) * 100).toFixed(1),
-            levelBreakdown: Object.entries(s.levels).map(([lvl, stats]) => ({
+            session: s.session,
+            totalExaminees: s.total,
+            totalPassers: s.passed,
+            passRate: s.total > 0 ? ((s.passed / s.total) * 100).toFixed(1) : 0,
+            items: Object.entries(s.levels).map(([lvl, stats]) => ({
                 level: lvl,
-                total: stats.total,
-                passed: stats.passed,
-                passRate: ((stats.passed / stats.total) * 100).toFixed(1)
-            })).sort((a, b) => a.level.localeCompare(b.level))
+                examinees: stats.total,
+                passers: stats.passed,
+                passRate: stats.total > 0 ? ((stats.passed / stats.total) * 100).toFixed(1) : 0,
+                averageScore: stats.scoreCount > 0 ? (stats.scoreSum / stats.scoreCount).toFixed(1) : 0
+            })).sort((a, b) => {
+                const levelOrder = { N1: 1, N2: 2, N3: 3, N4: 4, N5: 5 };
+                return (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+            })
         }))
         .sort((a, b) => b.session.localeCompare(a.session));
+
+
 
     // 6. Subject-specific scores (言語知識, 読解, 聴解)
 
