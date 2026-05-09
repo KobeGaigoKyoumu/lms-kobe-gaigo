@@ -84,42 +84,118 @@ export default function JlptTab({
                         ))}
                     </div>
 
-                    <div className={styles.chartsRow}>
+                    <div className={styles.chartsRow} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
                         <div className={styles.chartCard}>
-                            <h3 className={styles.chartTitle}>レベル別合格率 (%)</h3>
-                            <div className={styles.chartContainer}>
-                                <Bar
-                                    data={{
-                                        labels: (statsObj?.levelStats || []).map(s => s.level),
-                                        datasets: [{
-                                            data: (statsObj?.levelStats || []).map(s => s.passRate),
-                                            backgroundColor: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#3b82f6'],
-                                        }]
-                                    }}
-                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
-                                />
-                            </div>
-                        </div>
-                        <div className={styles.chartCard} style={{ flex: 2 }}>
-                            <h3 className={styles.chartTitle}>合格率の推移 (年度別)</h3>
+                            <h3 className={styles.chartTitle}>合格率の推移</h3>
                             <div className={styles.chartContainer}>
                                 <Line
                                     data={{
-                                        labels: (statsObj?.yearlyTrend || []).map(d => `${d.year}年度`),
+                                        labels: [...(statsObj?.sessionStats || [])].reverse().map(s => s.session),
                                         datasets: [{
-                                            label: '合格率',
-                                            data: (statsObj?.yearlyTrend || []).map(d => d.passRate),
+                                            label: '合格率 (%)',
+                                            data: [...(statsObj?.sessionStats || [])].reverse().map(s => s.passRate),
                                             borderColor: '#3b82f6',
                                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                            fill: true,
+                                            borderWidth: 3,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#3b82f6',
+                                            fill: false,
                                             tension: 0.4
                                         }]
                                     }}
-                                    options={{ ...chartOptions, scales: { y: { beginAtZero: true, max: 100 } } }}
+                                    options={{ 
+                                        ...chartOptions, 
+                                        scales: { 
+                                            y: { beginAtZero: true, max: 50, ticks: { stepSize: 5, font: { size: chartFontSize } } },
+                                            x: { ticks: { font: { size: chartFontSize - 2 }, maxRotation: 45, minRotation: 45 } }
+                                        } 
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>年度別 合格率推移</h3>
+                            <div className={styles.chartContainer}>
+                                <Line
+                                    data={{
+                                        labels: (statsObj?.yearlyTrend || []).map(d => `${d.year}年`),
+                                        datasets: [
+                                            {
+                                                label: '合格率 (%)',
+                                                data: (statsObj?.yearlyTrend || []).map(d => d.passRate),
+                                                borderColor: '#22c55e',
+                                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                borderWidth: 3,
+                                                pointRadius: 4,
+                                                pointBackgroundColor: '#22c55e',
+                                                fill: false,
+                                                tension: 0.4
+                                            },
+                                            {
+                                                label: 'トレンド',
+                                                data: (statsObj?.yearlyTrend || []).map((d, i, arr) => {
+                                                    // Simple moving average for trend line
+                                                    const start = Math.max(0, i - 1);
+                                                    const end = Math.min(arr.length - 1, i + 1);
+                                                    const subset = arr.slice(start, end + 1);
+                                                    return subset.reduce((acc, curr) => acc + parseFloat(curr.passRate), 0) / subset.length;
+                                                }),
+                                                borderColor: '#f97316',
+                                                borderDash: [5, 5],
+                                                borderWidth: 2,
+                                                pointRadius: 0,
+                                                fill: false,
+                                                tension: 0.4
+                                            }
+                                        ]
+                                    }}
+                                    options={{ 
+                                        ...chartOptions, 
+                                        scales: { 
+                                            y: { beginAtZero: true, max: 100, ticks: { stepSize: 10, font: { size: chartFontSize } } },
+                                            x: { ticks: { font: { size: chartFontSize } } }
+                                        } 
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.chartCard}>
+                            <h3 className={styles.chartTitle}>レベル別 平均点</h3>
+                            <div className={styles.chartContainer}>
+                                <Bar
+                                    data={{
+                                        labels: ['N1', 'N2', 'N3', 'N4', 'N5'],
+                                        datasets: [{
+                                            label: '平均点 (全期間)',
+                                            data: ['N1', 'N2', 'N3', 'N4', 'N5'].map(l => statsObj?.sectionScores?.byLevel?.[l]?.avgScore || 0),
+                                            backgroundColor: [
+                                                'rgba(248, 113, 113, 0.7)', // N1 Red
+                                                'rgba(251, 146, 60, 0.7)',  // N2 Orange
+                                                'rgba(251, 191, 36, 0.7)',  // N3 Yellow
+                                                'rgba(163, 230, 53, 0.7)',  // N4 Green
+                                                'rgba(96, 165, 250, 0.7)'   // N5 Blue
+                                            ],
+                                            borderRadius: 4
+                                        }]
+                                    }}
+                                    options={{ 
+                                        ...chartOptions, 
+                                        plugins: {
+                                            ...chartOptions.plugins,
+                                            legend: { display: true, position: 'top', labels: { boxWidth: 20, font: { size: chartFontSize - 2 } } }
+                                        },
+                                        scales: { 
+                                            y: { beginAtZero: true, max: 180, ticks: { stepSize: 20, font: { size: chartFontSize } } },
+                                            x: { ticks: { font: { size: chartFontSize } } }
+                                        } 
+                                    }}
                                 />
                             </div>
                         </div>
                     </div>
+
 
                     <h3 className={styles.sectionTitle}>年度別 N3以上保有率 (2年終了時)</h3>
                     <div className={styles.tableContainer}>
