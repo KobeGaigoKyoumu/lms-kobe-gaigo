@@ -366,8 +366,22 @@ export async function applyPackageToTarget(newEvents) {
     const supabaseAdmin = createAdminClient()
     const adminMember = await getAdminMemberSession()
     
+    if (!newEvents || newEvents.length === 0) return { success: true }
+
+    // 重複防止：適用対象のクラスとパッケージIDの組み合わせで既存イベントを削除
+    const packageId = newEvents[0].package_id
+    const targetClasses = [...new Set(newEvents.map(e => e.target_class))]
+    
+    if (packageId && targetClasses.length > 0) {
+        await supabaseAdmin
+            .from('calendar_events')
+            .delete()
+            .eq('package_id', packageId)
+            .in('target_class', targetClasses)
+    }
+
     // Authユーザーでない（教職員ポータルなど）場合は created_by を null にして制約エラーを回避
-    const sanitizedEvents = (newEvents || []).map(e => ({
+    const sanitizedEvents = newEvents.map(e => ({
         ...e,
         created_by: adminMember ? null : (isUUID(e.created_by) ? e.created_by : null)
     }))

@@ -15,6 +15,8 @@ export default function ClassAssignmentsPage({ params }) {
     const [error, setError] = useState(null)
     const [isArchived, setIsArchived] = useState(false)
     const [selectedSubject, setSelectedSubject] = useState('all')
+    const [pastPage, setPastPage] = useState(1)
+    const PAGE_SIZE = 10
 
     useEffect(() => {
         let isMounted = true
@@ -37,6 +39,10 @@ export default function ClassAssignmentsPage({ params }) {
         fetchData()
         return () => { isMounted = false }
     }, [className, isArchived])
+
+    useEffect(() => {
+        setPastPage(1)
+    }, [selectedSubject, isArchived])
 
     if (error) {
         return (
@@ -114,6 +120,9 @@ export default function ClassAssignmentsPage({ params }) {
 
     const upcoming = filteredAssignments.filter(a => !a.deadline || new Date(a.deadline) >= now)
     const past = filteredAssignments.filter(a => a.deadline && new Date(a.deadline) < now)
+    
+    const totalPastPages = Math.ceil(past.length / PAGE_SIZE)
+    const paginatedPast = past.slice((pastPage - 1) * PAGE_SIZE, pastPage * PAGE_SIZE)
 
     // Filter matrix data for SubmissionMatrix
     const filteredMatrixAssignments = selectedSubject === 'all' 
@@ -246,7 +255,7 @@ export default function ClassAssignmentsPage({ params }) {
                     </h2>
 
                     <div className={styles.list}>
-                        {past.map(assignment => (
+                        {paginatedPast.map(assignment => (
                             <Link
                                 href={`/assignments/${assignment.id}`}
                                 key={assignment.id}
@@ -263,6 +272,28 @@ export default function ClassAssignmentsPage({ params }) {
                             </Link>
                         ))}
                     </div>
+
+                    {totalPastPages > 1 && (
+                        <div className={styles.pagination}>
+                            <button 
+                                onClick={() => setPastPage(p => Math.max(1, p - 1))}
+                                disabled={pastPage === 1}
+                                className={styles.pageBtn}
+                            >
+                                前へ
+                            </button>
+                            <span className={styles.pageIndicator}>
+                                {pastPage} / {totalPastPages}
+                            </span>
+                            <button 
+                                onClick={() => setPastPage(p => Math.min(totalPastPages, p + 1))}
+                                disabled={pastPage === totalPastPages}
+                                className={styles.pageBtn}
+                            >
+                                次へ
+                            </button>
+                        </div>
+                    )}
                 </section>
             )}
 
