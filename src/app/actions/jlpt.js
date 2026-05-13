@@ -46,15 +46,17 @@ async function getJlptAnalyticsDataInternal() {
         const { 
             getStudentsJlptSummary, 
             getJlptSectionScoreStats, 
-            getJlptNationalStats 
+            getJlptNationalStats,
+            getAccurateGraduationStats
         } = require('@/lib/jlpt');
 
         // Perform all calculations
-        const [enhanced, sectionScores, nationalStats, studentSummaries] = await Promise.all([
+        const [enhanced, sectionScores, nationalStats, studentSummaries, accurateGrad] = await Promise.all([
             getEnhancedJlptStats(students || []),
             getJlptSectionScoreStats(),
             getJlptNationalStats(),
-            getStudentsJlptSummary(students || [])
+            getStudentsJlptSummary(students || []),
+            getAccurateGraduationStats()
         ]);
         
         console.log('[JlptAnalytics] All stats calculated successfully')
@@ -103,6 +105,7 @@ async function getJlptAnalyticsDataInternal() {
         // Combine everything into a single response object
         const result = {
             ...enhanced,
+            graduationN3PlusRates: accurateGrad.stats,
             studentStats,
             sectionScores,
             nationalStats,

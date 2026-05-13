@@ -666,6 +666,39 @@ export async function getEnhancedJlptStats(students = []) {
             }
         }
     });
+    
+    // 3. From career stats (for historical graduates)
+    try {
+        if (fs.existsSync(CAREER_STATS_JSON)) {
+            const careerData = JSON.parse(fs.readFileSync(CAREER_STATS_JSON, 'utf8'));
+            if (careerData.topDestinations) {
+                careerData.topDestinations.forEach(dest => {
+                    if (dest.students) {
+                        dest.students.forEach(s => {
+                            const sid = String(s.id);
+                            if (sid && !studentIdMap.has(sid)) {
+                                const parsed = parseStudentIdForEnrollment(sid);
+                                if (parsed) {
+                                    studentIdMap.set(sid, {
+                                        enrollmentYear: parsed.enrollmentYear,
+                                        enrollmentMonth: parsed.enrollmentMonth,
+                                        graduationYear: s.year || parsed.graduationYear, // Prefer year from career stats
+                                        name: s.name
+                                    });
+                                    // Also add to studentMap if enrollment date can be estimated
+                                    if (!studentMap.has(s.name.toLowerCase())) {
+                                        studentMap.set(s.name.toLowerCase(), new Date(parsed.enrollmentYear, parsed.enrollmentMonth - 1, 1));
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error loading career stats in getEnhancedJlptStats:', e);
+    }
 
     console.log(`Student map size: ${studentMap.size}, StudentId map size: ${studentIdMap.size}`);
 
@@ -1294,31 +1327,67 @@ export function getHistoricalStudents() {
  * Falls back to calculated data if official data not available
  */
 export async function getAccurateGraduationStats() {
-    // First try to get pre-calculated stats from official data
-    const officialStats = getGraduationN3Stats();
+    // 1. Get dynamic calculation first
+    const calculated = await getEnhancedJlptStats([]);
+    const calculatedStats = calculated.graduationN3PlusRates || [];
 
-    if (officialStats && officialStats.graduation_stats) {
+    // 2. Try to get official data
+    const officialData = getGraduationN3Stats();
+    
+    if (!officialData || !officialData.graduation_stats) {
         return {
-            source: 'official',
-            stats: officialStats.graduation_stats.map(s => ({
-                year: s.year,
-                totalStudents: s.total,
-                n3PlusStudents: s.n3_plus,
-                rate: s.rate.toFixed(1),
-                matchRate: s.match_rate.toFixed(1),
-                kanji_stats: s.kanji_stats,
-                non_kanji_stats: s.non_kanji_stats
-            })),
-            summary: officialStats.summary
+            source: 'calculated',
+            stats: calculatedStats,
+            summary: calculated.overallN3PlusRate
         };
     }
 
-    // Fallback to calculated stats
-    const calculated = await getEnhancedJlptStats([]);
+    const officialStats = officialData.graduation_stats.map(s => {
+        let yearLabel = s.year;
+        if (!yearLabel.includes('年')) yearLabel = `${s.year}年3月卒`;
+        else if (yearLabel.endsWith('3月')) yearLabel += '卒';
+
+        return {
+            year: yearLabel,
+            totalStudents: s.total_graduates || s.total || 0,
+            n3PlusStudents: s.n3_plus || s.n3_or_higher || 0,
+            rate: (s.rate || 0).toFixed(1),
+            kanji_stats: s.kanji_stats,
+            non_kanji_stats: s.non_kanji_stats,
+            source: 'official'
+        };
+    });
+
+    // 3. Merge: Use official if available for that year, otherwise use calculated
+    const mergedMap = new Map();
+    
+    // Start with calculated
+    calculatedStats.forEach(s => {
+        mergedMap.set(s.year, { ...s, source: 'calculated' });
+    });
+
+    // Overwrite with official
+    officialStats.forEach(s => {
+        // Ensure matching keys by normalizing both to 'YYYY年3月卒'
+        let key = s.year;
+        if (!key.endsWith('卒')) key += '卒';
+        mergedMap.set(key, { ...s, year: key, source: 'official' });
+    });
+
+    // Convert back to array and sort by year descending
+    const mergedStats = Array.from(mergedMap.values()).sort((a, b) => {
+        const yearA = parseInt(a.year) || 0;
+        const yearB = parseInt(b.year) || 0;
+        return yearB - yearA;
+    });
+
     return {
-        source: 'calculated',
-        stats: calculated.graduationN3PlusRates,
-        summary: calculated.overallN3PlusRate
+        source: 'merged',
+        stats: mergedStats,
+        summary: {
+            totalGraduates: mergedStats.reduce((sum, s) => sum + (s.totalStudents || 0), 0),
+            totalN3Plus: mergedStats.reduce((sum, s) => sum + (s.n3PlusStudents || 0), 0)
+        }
     };
 }
 
