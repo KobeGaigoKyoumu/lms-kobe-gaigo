@@ -338,38 +338,47 @@ export default function JlptTab({
                                         <div className={styles.statCard}><span className={styles.statLabel}>在籍数</span><div className={styles.statValueRow}><span className={styles.statValue}>{currentClassStats.total || 0}</span>名</div></div>
                                         <div className={styles.statCard}><span className={styles.statLabel}>N3以上取得率</span><div className={styles.statValueRow}><span className={styles.statValue}>{currentClassStats.n3PlusRate || 0}%</span></div></div>
                                     </div>
-                                    <div className={styles.tableContainer}>
-                                        <table className={styles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th>学籍番号</th>
-                                                    <th>氏名</th>
-                                                    <th>N1</th>
-                                                    <th>N2</th>
-                                                    <th>N3</th>
-                                                    <th>N4</th>
-                                                    <th>N5</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {(currentClassStats.students || []).map((student, idx) => (
-                                                    <tr key={student.studentId || idx}>
-                                                        <td>{student.studentId || '-'}</td>
-                                                        <td>{student.name || '-'}</td>
-                                                        {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
-                                                            const stat = student.levels?.[level] || { status: '未受験' }
-                                                            const badgeClass = stat.status === '合格' ? styles.badgePassed : stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone
-                                                            return (
-                                                                <td key={level}>
-                                                                    {stat.status !== '未受験' && <span className={`${styles.badge} ${badgeClass}`}>{stat.score || stat.status}</span>}
-                                                                </td>
-                                                            )
-                                                        })}
+                                    {currentClassStats.students && currentClassStats.students.length > 0 ? (
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>学籍番号</th>
+                                                        <th>氏名</th>
+                                                        <th>N1</th>
+                                                        <th>N2</th>
+                                                        <th>N3</th>
+                                                        <th>N4</th>
+                                                        <th>N5</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </thead>
+                                                <tbody>
+                                                    {currentClassStats.students.map((student, idx) => (
+                                                        <tr key={student.studentId || idx}>
+                                                            <td>{student.studentId || '-'}</td>
+                                                            <td>{student.name || '-'}</td>
+                                                            {['N1', 'N2', 'N3', 'N4', 'N5'].map(level => {
+                                                                const stat = student.levels?.[level] || { status: '未受験' }
+                                                                const badgeClass = stat.status === '合格' ? styles.badgePassed : stat.status === '不合格' ? styles.badgeFailed : styles.badgeNone
+                                                                return (
+                                                                    <td key={level}>
+                                                                        {stat.status !== '未受験' && <span className={`${styles.badge} ${badgeClass}`}>{stat.score || stat.status}</span>}
+                                                                    </td>
+                                                                )
+                                                            })}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className={styles.noData} style={{ marginTop: '2rem', padding: '3rem', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db' }}>
+                                            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.95rem' }}>
+                                                過去の公式集計データのため、個別の学生リストは表示できません。<br/>
+                                                （上部の集計数値は正確な実績値です）
+                                            </p>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
