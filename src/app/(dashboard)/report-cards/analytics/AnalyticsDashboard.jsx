@@ -81,10 +81,14 @@ export default function AnalyticsDashboard({
                 // 1. Try Cloudflare Worker first (Ultra-fast, zero Vercel CPU)
                 if (targetUrl && !forceRefresh) {
                     try {
-                        debug.push(`Trying Cloudflare: ${targetUrl}`)
+                        const cacheBuster = `cb=${Math.floor(Date.now() / 600000)}`; // 10-minute cache buster
+                        const cfGradeUrl = `${targetUrl}?action=get-analytics&type=grades_v4&${cacheBuster}`;
+                        const cfJlptUrl = `${targetUrl}?action=get-analytics&type=jlpt_v4&${cacheBuster}`;
+                        
+                        debug.push(`Trying Cloudflare with cache buster: ${cacheBuster}`)
                         const [cfGradeRes, cfJlptRes] = await Promise.all([
-                            fetch(`${targetUrl}?action=get-analytics&type=grades_v4`),
-                            fetch(`${targetUrl}?action=get-analytics&type=jlpt_v4`)
+                            fetch(cfGradeUrl),
+                            fetch(cfJlptUrl)
                         ]);
 
                         debug.push(`CF Grades: ${cfGradeRes.status} ${cfGradeRes.statusText}`)
