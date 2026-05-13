@@ -1374,11 +1374,11 @@ export async function getAccurateGraduationStats() {
         mergedMap.set(key, { ...s, year: key, source: 'official' });
     });
 
-    // Convert back to array and sort by year descending
+    // Convert back to array and sort by year ascending (oldest first)
     const mergedStats = Array.from(mergedMap.values()).sort((a, b) => {
         const yearA = parseInt(a.year) || 0;
         const yearB = parseInt(b.year) || 0;
-        return yearB - yearA;
+        return yearA - yearB;
     });
 
     return {
