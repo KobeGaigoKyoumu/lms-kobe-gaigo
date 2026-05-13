@@ -559,9 +559,9 @@ function parseStudentIdForEnrollment(studentId, firstExamSession = null) {
             };
         }
 
-        // New format: Western year (19=2019, 20=2020, 21=2021, ...)
+        // New format: Western year (e.g., 17=2017, 18=2018, 19=2019, 20=2020)
         const yearShort = parseInt(prefix, 10);
-        if (!isNaN(yearShort) && yearShort >= 19 && yearShort <= 30) {
+        if (!isNaN(yearShort) && yearShort >= 15 && yearShort <= 30) {
             const enrollmentYear = 2000 + yearShort;
 
             // Special Case: 2501 (Jan 2025) -> March 2026 Grad (1.3 years)
