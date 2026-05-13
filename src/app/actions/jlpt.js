@@ -97,10 +97,29 @@ async function getJlptAnalyticsDataInternal() {
 
 
         // Convert map to array and calculate rates
-        const studentStats = Array.from(classStatsMap.values()).map(c => ({
+        let studentStats = Array.from(classStatsMap.values()).map(c => ({
             ...c,
             n3PlusRate: c.total > 0 ? ((c.n3Plus / c.total) * 100).toFixed(1) : 0
-        })).sort((a, b) => b.n3PlusRate - a.n3PlusRate);
+        }));
+
+        // Filter out inaccurate historical data generated from incomplete student lists
+        studentStats = studentStats.filter(c => !c.isHistorical);
+
+        // Inject the perfectly accurate historical data from the official graduation stats
+        if (accurateGrad && accurateGrad.stats) {
+            accurateGrad.stats.forEach(stat => {
+                studentStats.push({
+                    className: `${stat.year} (過去データ)`,
+                    total: stat.totalStudents,
+                    n3Plus: stat.n3PlusStudents,
+                    students: [], // Individual details omitted for historical accurate stats
+                    isHistorical: true,
+                    n3PlusRate: parseFloat(stat.rate).toFixed(1)
+                });
+            });
+        }
+
+        studentStats.sort((a, b) => b.n3PlusRate - a.n3PlusRate);
 
         // Combine everything into a single response object
         const result = {
