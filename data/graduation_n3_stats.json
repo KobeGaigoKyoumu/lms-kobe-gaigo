@@ -20,52 +20,52 @@
     {
       "year": "2019年3月卒",
       "graduation_date": "2019年3月卒",
-      "total_graduates": 159,
-      "n3_plus": 17,
-      "rate": 10.69182389937107,
+      "total_graduates": 143,
+      "n3_plus": 39,
+      "rate": 27.27272727272727,
       "kanji_stats": {
         "total": 0,
         "n3_plus": 0,
         "rate": 0
       },
       "non_kanji_stats": {
-        "total": 159,
-        "n3_plus": 17,
-        "rate": 10.69182389937107
+        "total": 143,
+        "n3_plus": 39,
+        "rate": 27.27272727272727
       }
     },
     {
       "year": "2020年3月卒",
       "graduation_date": "2020年3月卒",
-      "total_graduates": 276,
-      "n3_plus": 58,
-      "rate": 21.014492753623188,
+      "total_graduates": 138,
+      "n3_plus": 59,
+      "rate": 42.7536231884058,
       "kanji_stats": {
         "total": 0,
         "n3_plus": 0,
         "rate": 0
       },
       "non_kanji_stats": {
-        "total": 276,
-        "n3_plus": 58,
-        "rate": 21.014492753623188
+        "total": 138,
+        "n3_plus": 59,
+        "rate": 42.7536231884058
       }
     },
     {
       "year": "2021年3月卒",
       "graduation_date": "2021年3月卒",
-      "total_graduates": 59,
-      "n3_plus": 26,
-      "rate": 44.06779661016949,
+      "total_graduates": 52,
+      "n3_plus": 27,
+      "rate": 51.92307692307693,
       "kanji_stats": {
         "total": 0,
         "n3_plus": 0,
         "rate": 0
       },
       "non_kanji_stats": {
-        "total": 59,
-        "n3_plus": 26,
-        "rate": 44.06779661016949
+        "total": 52,
+        "n3_plus": 27,
+        "rate": 51.92307692307693
       }
     },
     {
@@ -155,9 +155,9 @@
     }
   ],
   "summary": {
-    "total_graduates": 1412,
-    "n3_plus_count": 648,
-    "n3_plus_rate": 45.892351274787536,
+    "total_graduates": 1251,
+    "n3_plus_count": 672,
+    "n3_plus_rate": 53.71702637889688,
     "last_updated": "2026-05-13"
   }
 }
