@@ -74,8 +74,12 @@ export default function AnalyticsDashboard({
                 let gradeResData = null;
                 let jlptResData = null;
 
+                // 0. Check for force refresh
+                const params = new URLSearchParams(window.location.search);
+                const forceRefresh = params.get('force_refresh') === 'true';
+
                 // 1. Try Cloudflare Worker first (Ultra-fast, zero Vercel CPU)
-                if (targetUrl) {
+                if (targetUrl && !forceRefresh) {
                     try {
                         debug.push(`Trying Cloudflare: ${targetUrl}`)
                         const [cfGradeRes, cfJlptRes] = await Promise.all([
