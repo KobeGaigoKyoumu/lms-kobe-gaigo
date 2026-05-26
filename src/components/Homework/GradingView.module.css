@@ -687,3 +687,41 @@
     }
 }
 
+.fixedHoverPreview {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-2xl);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2);
+    width: 320px;
+    max-height: 450px;
+    animation: previewFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fixedHoverPreview img {
+    width: 100%;
+    height: auto;
+    max-height: 430px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    display: block;
+}
+
+@keyframes previewFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+

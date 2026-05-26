@@ -12,6 +12,7 @@ function SubmissionRow({ submission, student, onImageClick }) {
     const [score, setScore] = useState(submission.score ?? '')
     const [feedback, setFeedback] = useState(submission.feedback ?? '')
     const [saving, setSaving] = useState(false)
+    const [hoveredImage, setHoveredImage] = useState(null)
     const router = useRouter()
 
     const handleSave = async () => {
@@ -73,6 +74,18 @@ function SubmissionRow({ submission, student, onImageClick }) {
                                 <div
                                     className={styles.imageWrapper}
                                     onClick={() => onImageClick(file)}
+                                    onMouseEnter={(e) => {
+                                        const rect = e.currentTarget.getBoundingClientRect()
+                                        setHoveredImage({
+                                            url: file.url,
+                                            x: rect.right + 15,
+                                            y: rect.top - 100
+                                        })
+                                    }}
+                                    onMouseMove={(e) => {
+                                        setHoveredImage(prev => prev ? { ...prev, y: e.clientY - 150, x: e.clientX + 15 } : null)
+                                    }}
+                                    onMouseLeave={() => setHoveredImage(null)}
                                 >
                                     <img
                                         src={file.url}
@@ -138,6 +151,17 @@ function SubmissionRow({ submission, student, onImageClick }) {
                     </button>
                 </div>
             </div>
+            {hoveredImage && (
+                <div
+                    className={styles.fixedHoverPreview}
+                    style={{
+                        top: `${hoveredImage.y}px`,
+                        left: `${hoveredImage.x}px`
+                    }}
+                >
+                    <img src={hoveredImage.url} alt="Preview" />
+                </div>
+            )}
         </div>
     )
 }
