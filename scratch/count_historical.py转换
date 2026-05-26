@@ -1,0 +1,28 @@
+
+import json
+import os
+
+HISTORICAL_STUDENTS_JSON = './data/historical_students.json'
+
+def count_cohorts():
+    with open(HISTORICAL_STUDENTS_JSON, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    students = data.get('students', [])
+    cohorts = {}
+    
+    for s in students:
+        enroll_date = s.get('enrollment_date')
+        if not enroll_date: continue
+        
+        # Format: "2024-04-01 00:00:00"
+        try:
+            year = int(enroll_date[:4])
+            grad_year = year + 2
+            cohorts[grad_year] = cohorts.get(grad_year, 0) + 1
+        except:
+            continue
+            
+    print(json.dumps(cohorts, indent=2))
+
+count_cohorts()

@@ -481,3 +481,209 @@
         justify-content: center;
     }
 }
+
+.subjectBadge {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 0.25rem 0.6rem;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--primary-700);
+    background: var(--primary-50);
+    border: 1px solid var(--primary-100);
+    border-radius: var(--radius-full);
+    margin-bottom: 0.25rem;
+}
+
+.editAssignmentButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.editAssignmentButton:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+}
+
+.editModalContent {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 600px;
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-2xl);
+    animation: zoomIn 0.2s ease-out;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-6);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-4);
+}
+
+.modalTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeModalButton {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeModalButton:hover {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.formLabel {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.required {
+    color: #ef4444;
+}
+
+.hint {
+    font-size: var(--font-size-xs);
+    font-weight: normal;
+    color: var(--text-tertiary);
+}
+
+.formInput,
+.formTextarea {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.formInput:focus,
+.formTextarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-4);
+}
+
+.cancelButton {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.cancelButton:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.submitBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--primary-600);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: var(--primary-700);
+}
+
+.submitBtn:disabled,
+.cancelButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.headerActions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+@media (max-width: 640px) {
+    .headerActions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .editAssignmentButton {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .formRow {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+}
+

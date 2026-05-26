@@ -8,7 +8,7 @@ import datetime
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-repo_root = r'c:\Users\神戸外語03\Desktop\lms-kobe-gaigo-repo'
+repo_root = r'c:\Users\神戸外語03\Desktop\lms-kobe-gaigo'
 excel_dir = r'c:\Users\神戸外語03\Desktop\lms-kobe-gaigo\卒業生進路一覧'
 jlpt_path = os.path.join(repo_root, 'data', 'jlpt_historical.json')
 output_path = os.path.join(repo_root, 'data', 'graduation_n3_stats.json')

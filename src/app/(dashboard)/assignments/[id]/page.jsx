@@ -1,4 +1,4 @@
-import { getAssignmentSubmissions } from '@/app/actions/homework'
+import { getAssignmentSubmissions, getTimetableSubjects } from '@/app/actions/homework'
 import AssignmentGradingView from '@/components/Homework/GradingView'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -11,6 +11,7 @@ export default async function AssignmentPage({ params }) {
     const resolvedParams = await params
     const id = resolvedParams.id
     const data = await getAssignmentSubmissions(id)
+    const subjects = await getTimetableSubjects()
 
     if (!data) {
         return <div className={styles.empty}>課題が見つかりません。</div>
@@ -30,6 +31,7 @@ export default async function AssignmentPage({ params }) {
             <AssignmentGradingView
                 assignment={data.assignment}
                 submissions={data.submissions}
+                subjects={subjects}
             />
         </div>
     )

@@ -1,0 +1,42 @@
+
+import json
+import sys
+from collections import defaultdict
+
+# Path to the repo copy since it has the latest data
+json_path = r'data/jlpt_historical.json'
+
+def analyze_year(enroll_year):
+    with open(json_path, 'r', encoding='utf-8') as f:
+        jlpt_data = json.load(f)
+
+    records = jlpt_data.get('records', [])
+    grad_year = enroll_year + 2
+    prefix = str(enroll_year)[2:]
+    
+    students = {}
+    for r in records:
+        sid = str(r.get('studentId', ''))
+        if len(sid) == 7 and sid.startswith(prefix):
+            if sid not in students:
+                students[sid] = {'best_level': None}
+            if r['result'] == '合格':
+                level_num = int(r['level'].replace('N', ''))
+                if level_num <= 3:
+                    current_best = students[sid]['best_level']
+                    if current_best is None or level_num < int(current_best.replace('N', '')):
+                        students[sid]['best_level'] = r['level']
+    
+    total = len(students)
+    n3_plus = sum(1 for s in students.values() if s['best_level'] is not None)
+    rate = (n3_plus / total * 100) if total > 0 else 0
+    
+    print(f"{grad_year}年3月卒 (Enroll {enroll_year}): {total} students, {n3_plus} N3+ ({rate:.1f}%)")
+    return {"year": f"{grad_year}年3月", "total": total, "n3_plus": n3_plus}
+
+print("Analyzing years...")
+analyze_year(2020)
+analyze_year(2021)
+analyze_year(2022)
+analyze_year(2023)
+analyze_year(2024)

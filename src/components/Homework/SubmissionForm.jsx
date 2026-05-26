@@ -6,6 +6,7 @@ import { getImageKitAuthParams } from '@/app/actions/imagekit'
 import { useRouter } from 'next/navigation'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
 import styles from './SubmissionForm.module.css'
+import ImagePreviewModal from './ImagePreviewModal'
 
 export default function SubmissionForm({ assignmentId, initialComment = '', initialFiles = [] }) {
     const [comment, setComment] = useState(initialComment)
@@ -255,21 +256,11 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
 
             {/* Lightbox Modal */}
             {selectedImage && (
-                <div className={styles.modalOverlay} onClick={() => setSelectedImage(null)}>
-                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <button
-                            className={styles.closeButton}
-                            onClick={() => setSelectedImage(null)}
-                        >
-                            <X size={24} />
-                        </button>
-                        <img
-                            src={selectedImage.url}
-                            alt={selectedImage.name}
-                            className={styles.modalImage}
-                        />
-                    </div>
-                </div>
+                <ImagePreviewModal
+                    imageUrl={selectedImage.url}
+                    imageName={selectedImage.name}
+                    onClose={() => setSelectedImage(null)}
+                />
             )}
         </>
     )

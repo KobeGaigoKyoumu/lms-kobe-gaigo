@@ -53,6 +53,8 @@ export default function StudentDashboardClient({ initialData }) {
 
     // Assignment Stats & Sorting: assignments is { active: [...], archived: [...] }
     const safeAssignments = assignments?.active || []
+    const allAssignments = [...(assignments?.active || []), ...(assignments?.archived || [])]
+    
     const unsubmitted = safeAssignments.filter(a => !a.submission)
     const completed = safeAssignments.filter(a => !!a.submission)
     const dueThisWeek = safeAssignments.filter(a => {
@@ -60,6 +62,17 @@ export default function StudentDashboardClient({ initialData }) {
         const deadline = new Date(a.deadline)
         return deadline >= now && deadline <= nextWeek
     })
+
+    const gradedAssignments = allAssignments.filter(a => {
+        // 日本の年度（4月始まり）の開始日を計算
+        const itemDate = new Date(a.deadline || a.created_at || now);
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        const academicYearStart = new Date(currentMonth < 3 ? currentYear - 1 : currentYear, 3, 1);
+        
+        // 今年度の課題のみ対象とし、かつ採点済みのものをカウントする
+        return itemDate >= academicYearStart && a.submission && a.submission.status === 'graded';
+    });
 
     const sortedAssignments = safeAssignments.sort((a, b) => {
         const aSubmitted = !!a.submission
@@ -88,7 +101,7 @@ export default function StudentDashboardClient({ initialData }) {
             <DashboardStats
                 unsubmittedCount={unsubmitted.length}
                 completedCount={completed.length}
-                submissionPoints={completed.reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
+                submissionPoints={gradedAssignments.reduce((sum, a) => sum + (a.submission?.score || 0), 0)}
                 dueThisWeekCount={dueThisWeek.length}
             />
 

@@ -465,6 +465,58 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     return { success: true }
 }
 
+export async function updateAssignment(assignmentId, { title, subject, description, deadline, released_at }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
+
+    if (!user && !adminMember) {
+        return { error: 'Unauthorized' }
+    }
+
+    let parsedDeadline = deadline
+    if (parsedDeadline && !parsedDeadline.includes('Z') && !parsedDeadline.includes('+')) {
+        parsedDeadline = `${parsedDeadline}:00+09:00`
+    }
+
+    let parsedReleasedAt = released_at
+    if (parsedReleasedAt && !parsedReleasedAt.includes('Z') && !parsedReleasedAt.includes('+')) {
+        parsedReleasedAt = `${parsedReleasedAt}:00+09:00`
+    }
+
+    const adminSupabase = createAdminClient()
+    let query = adminSupabase
+        .from('homework_assignments')
+        .update({
+            title,
+            subject: subject || null,
+            description,
+            deadline: parsedDeadline,
+            released_at: parsedReleasedAt
+        })
+        .eq('id', assignmentId)
+
+    if (user && !adminMember) {
+        query = query.eq('teacher_id', user.id)
+    }
+
+    const { error } = await query
+
+    if (error) {
+        console.error('Update assignment error:', error)
+        return { error: '課題の更新に失敗しました' }
+    }
+
+    // Comprehensive revalidation for immediate reflection
+    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats', 'max')
+    revalidatePath(`/assignments/${assignmentId}`)
+    revalidatePath('/assignments')
+    
+    return { success: true }
+}
+
+
 async function _getTeacherAssignmentsInternal() {
     const supabase = createAdminClient()
     const { data: assignments, error } = await supabase
@@ -574,7 +626,7 @@ export async function gradeSubmission(submissionId, score, feedback) {
     const { error } = await adminSupabase
         .from('homework_submissions')
         .update({
-            score: score ? parseInt(score) : null,
+            score: (score !== '' && score !== null && score !== undefined) ? parseInt(score) : null,
             feedback,
             status: 'graded',
             updated_at: new Date().toISOString()
