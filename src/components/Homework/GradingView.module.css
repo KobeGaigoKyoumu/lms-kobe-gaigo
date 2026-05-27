@@ -689,6 +689,9 @@
 
 .fixedHoverPreview {
     position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 9999;
     pointer-events: none;
     background: var(--bg-elevated);
@@ -696,9 +699,9 @@
     box-shadow: var(--shadow-2xl);
     border-radius: var(--radius-xl);
     padding: var(--spacing-3);
-    width: 800px;
-    max-width: 90vw;
-    max-height: 85vh;
+    width: 98vw;
+    max-width: 98vw;
+    max-height: 98vh;
     animation: previewFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     justify-content: center;
@@ -709,7 +712,7 @@
 .fixedHoverPreview img {
     width: 100%;
     height: auto;
-    max-height: 82vh;
+    max-height: 95vh;
     object-fit: contain;
     border-radius: var(--radius-lg);
     display: block;
@@ -718,11 +721,11 @@
 @keyframes previewFadeIn {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translate(-50%, -50%) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 

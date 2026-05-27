@@ -74,16 +74,10 @@ function SubmissionRow({ submission, student, onImageClick }) {
                                 <div
                                     className={styles.imageWrapper}
                                     onClick={() => onImageClick(file)}
-                                    onMouseEnter={(e) => {
-                                        const rect = e.currentTarget.getBoundingClientRect()
+                                    onMouseEnter={() => {
                                         setHoveredImage({
-                                            url: file.url,
-                                            x: rect.right + 15,
-                                            y: rect.top - 100
+                                            url: file.url
                                         })
-                                    }}
-                                    onMouseMove={(e) => {
-                                        setHoveredImage(prev => prev ? { ...prev, y: e.clientY - 150, x: e.clientX + 15 } : null)
                                     }}
                                     onMouseLeave={() => setHoveredImage(null)}
                                 >
@@ -152,13 +146,7 @@ function SubmissionRow({ submission, student, onImageClick }) {
                 </div>
             </div>
             {hoveredImage && (
-                <div
-                    className={styles.fixedHoverPreview}
-                    style={{
-                        top: `${hoveredImage.y}px`,
-                        left: `${hoveredImage.x}px`
-                    }}
-                >
+                <div className={styles.fixedHoverPreview}>
                     <img src={hoveredImage.url} alt="Preview" />
                 </div>
             )}
