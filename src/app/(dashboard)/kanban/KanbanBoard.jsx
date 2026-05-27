@@ -170,6 +170,7 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
     }
 
     const deleteCard = async (cardId) => {
+        if (!confirm('このタスクを完全に削除してもよろしいですか？')) return
         const { success, error } = await deleteKanbanCard(cardId)
         if (success) {
             setCards(prev => prev.filter(c => c.id !== cardId))

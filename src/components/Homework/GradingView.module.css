@@ -694,10 +694,11 @@
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-2xl);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-2);
-    width: 320px;
-    max-height: 450px;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-3);
+    width: 800px;
+    max-width: 90vw;
+    max-height: 85vh;
     animation: previewFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     justify-content: center;
@@ -708,9 +709,9 @@
 .fixedHoverPreview img {
     width: 100%;
     height: auto;
-    max-height: 430px;
+    max-height: 82vh;
     object-fit: contain;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     display: block;
 }
 
