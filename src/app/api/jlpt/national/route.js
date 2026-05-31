@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * JLPT全国統計データを取得するAPI
  * 国際交流基金が公開する公式統計データをJSONから読み込んで返す
