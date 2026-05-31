@@ -412,10 +412,11 @@ export default function JlptTab({
                                                 （上部の集計数値は正確な実績値です）
                                             </p>
                                         </div>
-                                    </>
-                                );
-                            })()}
-                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
                     )}
                 </div>
             )}
