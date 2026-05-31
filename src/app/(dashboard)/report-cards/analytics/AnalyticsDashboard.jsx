@@ -177,25 +177,25 @@ export default function AnalyticsDashboard({
 
             <div className={styles.tabs}>
                 <button 
-                    className={`${styles.tab} ${activeTab === 'grade' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${activeTab === 'grade' ? styles.active : ''}`}
                     onClick={() => setActiveTab('grade')}
                 >
-                    成績分析
+                    成績統計
                 </button>
                 <button 
-                    className={`${styles.tab} ${activeTab === 'jlpt' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${activeTab === 'jlpt' ? styles.active : ''}`}
                     onClick={() => setActiveTab('jlpt')}
                 >
                     JLPT分析
                 </button>
                 <button 
-                    className={`${styles.tab} ${activeTab === 'career' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${activeTab === 'career' ? styles.active : ''}`}
                     onClick={() => setActiveTab('career')}
                 >
                     進路分析
                 </button>
                 <button 
-                    className={`${styles.tab} ${activeTab === 'database' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${activeTab === 'database' ? styles.active : ''}`}
                     onClick={() => setActiveTab('database')}
                 >
                     学生データベース

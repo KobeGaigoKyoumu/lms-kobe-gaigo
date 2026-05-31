@@ -76,9 +76,9 @@ export default function CareerTab({ careerStats, chartFontSize }) {
             {/* Action Bar / Filters */}
             <div className={styles.filters} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
                 <div className={styles.subTabs}>
-                    <button className={`${styles.subTab} ${careerSubTab === 'overview' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('overview')}>全体概要</button>
-                    <button className={`${styles.subTab} ${careerSubTab === 'schools' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('schools')}>学校別詳細</button>
-                    <button className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.activeSubTab : ''}`} onClick={() => setCareerSubTab('past5years')}>全体実績</button>
+                    <button className={`${styles.subTab} ${careerSubTab === 'overview' ? styles.active : ''}`} onClick={() => setCareerSubTab('overview')}>全体概要</button>
+                    <button className={`${styles.subTab} ${careerSubTab === 'schools' ? styles.active : ''}`} onClick={() => setCareerSubTab('schools')}>学校別詳細</button>
+                    <button className={`${styles.subTab} ${careerSubTab === 'past5years' ? styles.active : ''}`} onClick={() => setCareerSubTab('past5years')}>全体実績</button>
                 </div>
 
                 <div className={styles.filterGroup}>

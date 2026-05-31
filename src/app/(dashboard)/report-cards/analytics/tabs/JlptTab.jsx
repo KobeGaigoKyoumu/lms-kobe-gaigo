@@ -63,11 +63,11 @@ export default function JlptTab({
     return (
         <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
             <div className={styles.subTabs}>
-                <button className={`${styles.subTab} ${jlptSubTab === 'summary' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('summary')}>年度別分析</button>
-                <button className={`${styles.subTab} ${jlptSubTab === 'nationality' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('nationality')}>国籍別分析</button>
-                <button className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('class')}>クラス別分析</button>
-                <button className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('compare')}>全国比較</button>
-                <button className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.activeSubTab : ''}`} onClick={() => setJlptSubTab('section')}>科目得点分析</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'summary' ? styles.active : ''}`} onClick={() => setJlptSubTab('summary')}>年度別分析</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'nationality' ? styles.active : ''}`} onClick={() => setJlptSubTab('nationality')}>国籍別分析</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'class' ? styles.active : ''}`} onClick={() => setJlptSubTab('class')}>クラス別分析</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'compare' ? styles.active : ''}`} onClick={() => setJlptSubTab('compare')}>全国比較</button>
+                <button className={`${styles.subTab} ${jlptSubTab === 'section' ? styles.active : ''}`} onClick={() => setJlptSubTab('section')}>科目得点分析</button>
             </div>
 
             {jlptSubTab === 'summary' && (
@@ -329,15 +329,49 @@ export default function JlptTab({
                     ) : (
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                                <button onClick={() => setSelectedJlptClass('')} className={styles.backButton}><ArrowLeft size={16} /> 戻る</button>
-                                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>{selectedJlptClass} の詳細</h2>
+                                <button onClick={() => setSelectedJlptClass('')} className={styles.backButton}>← 一覧に戻る</button>
+                                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>詳細分析: {selectedJlptClass}</h2>
                             </div>
-                            {currentClassStats && (
-                                <>
-                                    <div className={styles.statsGrid}>
-                                        <div className={styles.statCard}><span className={styles.statLabel}>在籍数</span><div className={styles.statValueRow}><span className={styles.statValue}>{currentClassStats.total || 0}</span>名</div></div>
-                                        <div className={styles.statCard}><span className={styles.statLabel}>N3以上取得率</span><div className={styles.statValueRow}><span className={styles.statValue}>{currentClassStats.n3PlusRate || 0}%</span></div></div>
-                                    </div>
+                            {currentClassStats && (() => {
+                                const hasStudents = currentClassStats.students && currentClassStats.students.length > 0;
+                                const n1Count = hasStudents ? currentClassStats.students.filter(s => s.levels?.['N1']?.status === '合格').length : '-';
+                                const n2Count = hasStudents ? currentClassStats.students.filter(s => s.levels?.['N2']?.status === '合格').length : '-';
+                                const n3Count = hasStudents ? currentClassStats.students.filter(s => s.levels?.['N3']?.status === '合格').length : '-';
+                                return (
+                                    <>
+                                        <div className={styles.statsGrid}>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>在籍数</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{currentClassStats.total || 0}</span>
+                                                    <span className={styles.statUnit} style={{ marginLeft: '0.2rem' }}>名</span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>N3以上取得率</span>
+                                                <div className={styles.statValueRow}>
+                                                    <span className={styles.statValue}>{currentClassStats.n3PlusRate || 0}%</span>
+                                                    <span className={styles.statUnit} style={{ marginLeft: '0.5rem', alignSelf: 'center', fontSize: '0.875rem' }}>{currentClassStats.n3Plus || 0}/{currentClassStats.total || 0}名</span>
+                                                </div>
+                                            </div>
+                                            <div className={styles.statCard}>
+                                                <span className={styles.statLabel}>合格者内訳</span>
+                                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.15rem' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>N1</span>
+                                                        <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b91c1c', marginTop: '1px' }}>{n1Count}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>N2</span>
+                                                        <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b91c1c', marginTop: '1px' }}>{n2Count}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>N3</span>
+                                                        <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b91c1c', marginTop: '1px' }}>{n3Count}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     {currentClassStats.students && currentClassStats.students.length > 0 ? (
                                         <div className={styles.tableContainer}>
                                             <table className={styles.table}>
@@ -378,9 +412,9 @@ export default function JlptTab({
                                                 （上部の集計数値は正確な実績値です）
                                             </p>
                                         </div>
-                                    )}
-                                </>
-                            )}
+                                    </>
+                                );
+                            })()}
                         </div>
                     )}
                 </div>
