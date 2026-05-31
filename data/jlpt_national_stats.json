@@ -823,6 +823,56 @@
         }
       },
       "total": {}
+    },
+    {
+      "year": 2025,
+      "session": 2,
+      "session_name": "2025年12月",
+      "japan": {
+        "N1": {
+          "examinees": 52291,
+          "pass_rate": 24.0
+        },
+        "N2": {
+          "examinees": 118354,
+          "pass_rate": 25.4
+        },
+        "N3": {
+          "examinees": 139328,
+          "pass_rate": 26.2
+        },
+        "N4": {
+          "examinees": 87608,
+          "pass_rate": 33.6
+        },
+        "N5": {
+          "examinees": 4647,
+          "pass_rate": 53.5
+        }
+      },
+      "overseas": {
+        "N1": {
+          "examinees": 68942,
+          "pass_rate": 34.2
+        },
+        "N2": {
+          "examinees": 114010,
+          "pass_rate": 40.9
+        },
+        "N3": {
+          "examinees": 110061,
+          "pass_rate": 37.5
+        },
+        "N4": {
+          "examinees": 106407,
+          "pass_rate": 35.3
+        },
+        "N5": {
+          "examinees": 74836,
+          "pass_rate": 50.0
+        }
+      },
+      "total": {}
     }
   ]
 }
