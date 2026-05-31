@@ -60,6 +60,22 @@ export default function JlptTab({
         return statsObj.studentStats.find(c => c.className === selectedJlptClass);
     }, [selectedJlptClass, statsObj])
 
+    const sortedSectionLevel = useMemo(() => {
+        if (!sectionScoreStats?.bySectionLevel) return [];
+        const levelOrder = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+        const sectionOrder = { '言語知識': 1, '読解': 2, '聴解': 3 };
+        return [...sectionScoreStats.bySectionLevel].sort((a, b) => {
+            const lvlA = a.level || '';
+            const lvlB = b.level || '';
+            const ordA = levelOrder[lvlA] || 99;
+            const ordB = levelOrder[lvlB] || 99;
+            if (ordA !== ordB) return ordA - ordB;
+            const secA = sectionOrder[a.section] || 99;
+            const secB = sectionOrder[b.section] || 99;
+            return secA - secB;
+        });
+    }, [sectionScoreStats])
+
     return (
         <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
             <div className={styles.subTabs}>
@@ -726,7 +742,7 @@ export default function JlptTab({
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {(sectionScoreStats.bySectionLevel || []).map((s, idx) => (
+                                        {sortedSectionLevel.map((s, idx) => (
                                             <tr key={idx}>
                                                 <td>{s.section}</td>
                                                 <td><span className={`${styles.badge} ${styles[`badge${s.level}`]}`}>{s.level}</span></td>
