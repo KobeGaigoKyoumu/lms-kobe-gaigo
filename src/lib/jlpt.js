@@ -1506,38 +1506,77 @@ export async function getStudentsJlptSummary(students) {
         });
     });
 
-    // Merge students by normalized name to avoid duplicates
-    const mergedStudentsMap = new Map(); // normalizedName -> student object
+    // Enhanced Merging: Separate primary (DB & Virtual) and historical raw records
+    const primaryStudents = [];
+    const historicalStudents = [];
     
     allStudentsList.forEach(s => {
-        const normName = normalizeSorted(s.full_name); // Use sorted for merging logic
-        if (!normName) return;
-
-        if (!mergedStudentsMap.has(normName)) {
-            mergedStudentsMap.set(normName, s);
+        if (s.is_historical) {
+            historicalStudents.push(s);
         } else {
-            const existing = mergedStudentsMap.get(normName);
-            // Merge logic: Prioritize DB student over virtual/historical
-            const isExistingHistorical = existing.is_historical || existing.is_virtual;
-            const isNewHistorical = s.is_historical || s.is_virtual;
-
-            if (isExistingHistorical && !isNewHistorical) {
-                // Replace historical with DB student but keep some fields if missing
-                const merged = { ...s };
-                if (!merged.destination) merged.destination = existing.destination;
-                if (!merged.nationality) merged.nationality = existing.nationality;
-                mergedStudentsMap.set(normName, merged);
-            } else {
-                // Keep existing (DB student) but maybe update missing fields
-                if (!existing.student_id_text && s.student_id_text) existing.student_id_text = s.student_id_text;
-                if (!existing.nationality && s.nationality) existing.nationality = s.nationality;
-                if (!existing.destination && s.destination) existing.destination = s.destination;
-                if (!existing.enrollment_date && s.enrollment_date) existing.enrollment_date = s.enrollment_date;
-            }
+            primaryStudents.push(s);
         }
     });
 
-    const allStudentsToProcess = Array.from(mergedStudentsMap.values());
+    const uniqueStudentsList = [];
+    const nameMap = new Map();   // normalized name -> student object
+    const romajiMap = new Map(); // normalized romaji -> student object
+    const idMap = new Map();     // student id -> student object
+
+    const registerStudent = (s) => {
+        uniqueStudentsList.push(s);
+        if (s.student_id_text) {
+            idMap.set(String(s.student_id_text).trim(), s);
+        }
+        const normName = normalizeSorted(s.full_name);
+        if (normName) {
+            nameMap.set(normName, s);
+        }
+        const normRomaji = normalizeSorted(s.name_romaji);
+        if (normRomaji) {
+            romajiMap.set(normRomaji, s);
+        }
+    };
+
+    // 1. First, register all primary DB/Virtual students
+    primaryStudents.forEach(registerStudent);
+
+    // 2. Process historical students and attempt enhanced matching by ID or Kanji/Romaji variants
+    historicalStudents.forEach(hs => {
+        let matched = null;
+        
+        // Match by student ID first
+        if (hs.student_id_text) {
+            matched = idMap.get(String(hs.student_id_text).trim());
+        }
+        
+        // Match by normalized name or romaji name variants (English spellings of Chinese names etc.)
+        if (!matched && hs.full_name) {
+            const variants = [hs.full_name, ...Array.from(getAllNameVariants(hs.full_name))];
+            for (const variant of variants) {
+                const norm = normalizeSorted(variant);
+                if (!norm) continue;
+                
+                matched = nameMap.get(norm) || romajiMap.get(norm);
+                if (matched) break;
+            }
+        }
+        
+        if (matched) {
+            // Found a match! Keep primary DB fields but fill in missing metadata
+            matched.is_historical = true; // Mark as having historical records so it gets grouped correctly
+            if (!matched.nationality && hs.nationality) matched.nationality = hs.nationality;
+            if (!matched.student_id_text && hs.student_id_text) {
+                matched.student_id_text = hs.student_id_text;
+                idMap.set(String(hs.student_id_text).trim(), matched);
+            }
+        } else {
+            // No match found, add as a new unique student
+            registerStudent(hs);
+        }
+    });
+
+    const allStudentsToProcess = uniqueStudentsList;
 
 
     // Process each student
@@ -1634,6 +1673,20 @@ export async function getStudentsJlptSummary(students) {
             const parsed = parseStudentIdForEnrollment(studentId);
             if (parsed) {
                 enrollmentYear = parsed.enrollmentYear;
+            }
+        }
+        // Fallback: Estimate enrollment year from earliest exam session
+        if (!enrollmentYear && myRecords && myRecords.length > 0) {
+            const sortedSessions = myRecords
+                .map(r => r.session)
+                .filter(Boolean)
+                .sort((a, b) => a.localeCompare(b));
+            if (sortedSessions.length > 0) {
+                const earliestSession = sortedSessions[0];
+                const match = earliestSession.match(/^(\d{4})年/);
+                if (match) {
+                    enrollmentYear = parseInt(match[1]);
+                }
             }
         }
 
