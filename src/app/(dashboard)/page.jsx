@@ -8,6 +8,8 @@ import DashboardContent from './DashboardContent'
 
 export const dynamic = 'force-dynamic'
 
+import DashboardDate from './DashboardDate'
+
 export default async function DashboardPage() {
     const studentSession = await getStudentSessionLight()
 
@@ -35,12 +37,7 @@ export default async function DashboardPage() {
                     <p className={styles.subtitle}>教職員ポータルへようこそ</p>
                 </div>
                 <div className={styles.date}>
-                    {new Date().toLocaleDateString('ja-JP', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        weekday: 'long'
-                    })}
+                    <DashboardDate />
                 </div>
             </header>
 
