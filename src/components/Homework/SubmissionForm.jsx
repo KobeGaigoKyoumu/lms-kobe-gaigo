@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { submitHomework } from '@/app/actions/homework'
-import { getImageKitAuthParams } from '@/app/actions/imagekit'
+import { submitHomework, uploadSubmissionFile } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
 import styles from './SubmissionForm.module.css'
@@ -55,11 +54,20 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                             reject(new Error('Canvas is empty'));
                             return;
                         }
-                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        resolve(newFile);
+                        const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                        let compressedFile;
+                        try {
+                            compressedFile = new File([blob], newName, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now(),
+                            });
+                        } catch (e) {
+                            // Fileコンストラクタが古いブラウザやWebViewで失敗した場合のBlobフォールバック
+                            compressedFile = blob;
+                            compressedFile.name = newName;
+                            compressedFile.lastModified = Date.now();
+                        }
+                        resolve(compressedFile);
                     }, 'image/jpeg', 0.7);
                 };
                 img.onerror = (error) => reject(error);
@@ -77,12 +85,6 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
         const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
         try {
-            // 認証パラメータを取得
-            const authParams = await getImageKitAuthParams()
-            if (!authParams.success) {
-                throw new Error('アップロード用認証情報の取得に失敗しました')
-            }
-
             for (const file of e.target.files) {
                 let processedFile = file;
 
@@ -99,32 +101,21 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                     continue;
                 }
 
-                // ImageKit へ直接アップロード
+                // サーバーアクションを介して Supabase Storage へアップロード
                 const formData = new FormData()
-                formData.append('file', processedFile)
-                formData.append('fileName', processedFile.name)
-                formData.append('publicKey', authParams.publicKey)
-                formData.append('signature', authParams.signature)
-                formData.append('expire', authParams.expire)
-                formData.append('token', authParams.token)
-                formData.append('folder', '/lms')
+                formData.append('file', processedFile, file.name)
+                formData.append('assignmentId', assignmentId)
 
-                // Vercel Edge ではなく直接 ImageKit の API を叩く
-                const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
-                    method: 'POST',
-                    body: formData
-                })
+                const result = await uploadSubmissionFile(formData)
 
-                if (!response.ok) {
-                    const errorData = await response.json()
-                    throw new Error(errorData.message || 'ImageKit upload failed')
+                if (result.error) {
+                    throw new Error(result.error)
                 }
 
-                const result = await response.json()
-
                 newFiles.push({
-                    name: processedFile.name,
-                    url: result.url
+                    name: file.name,
+                    url: result.url,
+                    path: result.path
                 })
             }
 

@@ -7,6 +7,7 @@ import { getStudentSession } from './studentAuth'
 import { getAdminMemberSession } from './adminAuth'
 import { revalidatePath, unstable_cache as next_unstable_cache, revalidateTag } from 'next/cache'
 import { uploadToImageKit } from './imagekit'
+import cloudinary from '@/lib/cloudinary'
 
 // Helper for admin client (Service Role)
 const createAdminClient = () => {
@@ -683,24 +684,101 @@ export async function uploadSubmissionFile(formData) {
         return { error: 'ファイルが見つかりません' }
     }
 
+    const folder = `submissions/${assignmentId}`
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    // -----------------------------------------------------------------
+    // 優先順位 1: Cloudinary (プライマリーメイン)
+    // -----------------------------------------------------------------
     try {
-        const folder = `/submissions/${assignmentId}`
-        const result = await uploadToImageKit(formData, folder)
+        console.log('[uploadSubmissionFile] Attempting Cloudinary upload...')
+        const uploadResult = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: folder,
+                    resource_type: 'auto',
+                    use_filename: true,
+                    unique_filename: true
+                },
+                (error, result) => {
+                    if (error) reject(error)
+                    else resolve(result)
+                }
+            )
+            uploadStream.end(buffer)
+        })
 
-        if (!result.success) {
-            throw new Error(result.error)
-        }
-
+        console.log('[uploadSubmissionFile] Cloudinary upload success.')
         return {
             success: true,
-            url: result.url,
+            url: uploadResult.secure_url,
             name: file.name,
-            fileId: result.fileId,
-            path: result.path
+            path: uploadResult.public_id,
+            storageUsed: 'cloudinary'
         }
-    } catch (err) {
-        console.error('ImageKit Submission Upload Error:', err)
-        return { error: `アップロードに失敗しました: ${err.message}` }
+    } catch (cloudinaryError) {
+        console.error('[uploadSubmissionFile] Cloudinary upload failed, falling back to ImageKit:', cloudinaryError)
+    }
+
+    // -----------------------------------------------------------------
+    // 優先順位 2: ImageKit (セカンダリーメイン)
+    // -----------------------------------------------------------------
+    try {
+        console.log('[uploadSubmissionFile] Attempting ImageKit upload...')
+        const result = await uploadToImageKit(formData, `/${folder}`)
+        if (result && result.success) {
+            console.log('[uploadSubmissionFile] ImageKit upload success.')
+            return {
+                success: true,
+                url: result.url,
+                name: file.name,
+                path: result.fileId,
+                storageUsed: 'imagekit'
+            }
+        }
+        throw new Error(result?.error || 'ImageKit upload failed')
+    } catch (imageKitError) {
+        console.error('[uploadSubmissionFile] ImageKit upload failed, falling back to Supabase:', imageKitError)
+    }
+
+    // -----------------------------------------------------------------
+    // 優先順位 3: Supabase Storage (緊急用フォールバック)
+    // -----------------------------------------------------------------
+    try {
+        console.log('[uploadSubmissionFile] Attempting Supabase Storage upload (Emergency)...')
+        const fileExt = file.name.split('.').pop()
+        const fileName = `submission-${assignmentId}-${session.studentId}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const bucketName = 'chat-attachments'
+        const adminSupabase = createAdminClient()
+
+        const { data, error } = await adminSupabase
+            .storage
+            .from(bucketName)
+            .upload(fileName, buffer, {
+                contentType: file.type,
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (error) throw error
+
+        const { data: { publicUrl } } = adminSupabase
+            .storage
+            .from(bucketName)
+            .getPublicUrl(fileName)
+
+        console.log('[uploadSubmissionFile] Supabase Storage upload success.')
+        return {
+            success: true,
+            url: publicUrl,
+            name: file.name,
+            path: fileName,
+            storageUsed: 'supabase'
+        }
+    } catch (supabaseError) {
+        console.error('[uploadSubmissionFile] All storages failed:', supabaseError)
+        return { error: `アップロードに失敗しました: ${supabaseError.message}` }
     } finally {
         revalidateTag('storage-usage', 'max')
     }
