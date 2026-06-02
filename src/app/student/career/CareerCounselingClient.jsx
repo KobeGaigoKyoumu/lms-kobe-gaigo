@@ -505,7 +505,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>両親による学費の仕送り支援</label>
+                                                    <label>両親による学費の支援</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
