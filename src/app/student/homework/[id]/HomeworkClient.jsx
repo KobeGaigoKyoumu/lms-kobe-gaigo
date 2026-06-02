@@ -17,7 +17,7 @@ export default function HomeworkClient({ assignment }) {
 
     return (
         <div className={styles.container}>
-            <Link href="/student/dashboard" className={styles.backLink}>
+            <Link href="/student/homework" className={styles.backLink}>
                 <ChevronLeft size={16} />
                 一覧に戻る
             </Link>
