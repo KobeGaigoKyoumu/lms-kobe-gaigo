@@ -24,17 +24,6 @@ export const getMenuItems = (role) => {
         return [
             ...baseItems.map(i => ({ ...i, color: '#3b82f6' })), // Dashboard Blue
             {
-                href: '/student/grades',
-                label: '成績確認',
-                color: '#f59e0b', // Amber/Orange
-                icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                        <path d="M7 12l2 2 4-4" />
-                    </svg>
-                )
-            },
-            {
                 href: '/student/homework',
                 label: '課題',
                 color: '#ec4899', // Pink
@@ -47,7 +36,7 @@ export const getMenuItems = (role) => {
             },
             {
                 href: '/student/attendance',
-                label: '出席率',
+                label: '出席率・成績',
                 color: '#22c55e', // Green
                 icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
