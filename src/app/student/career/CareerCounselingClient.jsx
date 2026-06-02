@@ -187,6 +187,9 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                             回答を修正する
                                         </button>
                                     </div>
+                                    <p className={styles.wizardInstruction}>
+                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入。
+                                    </p>
 
                                     {/* Main Info Grid */}
                                     <div className={styles.infoGrid}>
@@ -306,7 +309,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                         </div>
                                     </div>
                                     <p className={styles.wizardInstruction}>
-                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入
+                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入。
                                     </p>
 
                                     {error && <div className={styles.errorAlert}>{error}</div>}
