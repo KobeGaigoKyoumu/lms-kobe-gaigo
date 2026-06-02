@@ -62,6 +62,10 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (step < 4) {
+            nextStep()
+            return
+        }
         setSaving(true)
         setError(null)
         
@@ -602,6 +606,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
 
                                             {step < 4 ? (
                                                 <button 
+                                                    key="next-btn"
                                                     type="button" 
                                                     onClick={nextStep}
                                                     className={styles.nextBtn}
@@ -611,6 +616,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                                 </button>
                                             ) : (
                                                 <button 
+                                                    key="submit-btn"
                                                     type="submit" 
                                                     disabled={saving}
                                                     className={styles.submitBtn}
