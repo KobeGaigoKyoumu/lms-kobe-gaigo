@@ -32,6 +32,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
         can_move: initialData?.can_move || '可',
         tuition_budget: initialData?.tuition_budget || '',
         parent_support: initialData?.parent_support || '可',
+        parent_support_amount: initialData?.parent_support_amount || '',
         passbook_updated: initialData?.passbook_updated || 'している',
         pay_slips_available: initialData?.pay_slips_available || '有',
         exam_schedule: initialData?.exam_schedule || '',
@@ -104,6 +105,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
             can_move: data?.can_move || '可',
             tuition_budget: data?.tuition_budget || '',
             parent_support: data?.parent_support || '可',
+            parent_support_amount: data?.parent_support_amount || '',
             passbook_updated: data?.passbook_updated || 'している',
             pay_slips_available: data?.pay_slips_available || '有',
             exam_schedule: data?.exam_schedule || '',
@@ -165,7 +167,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                             <div className={styles.lockIcon}>
                                 <Lock size={48} color="var(--text-tertiary)" />
                             </div>
-                            <h2>進路アンケート (2年生専用)</h2>
+                            <h2>進路登録 (2年生専用)</h2>
                             <p className={styles.lockText}>
                                 進路登録および関連情報の閲覧機能は、**2年生になってから（2年生のみ）**開放されます。
                             </p>
@@ -256,7 +258,10 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                             </div>
                                             <div className={styles.infoRow}>
                                                 <span className={styles.infoLabel}>両親の援助:</span>
-                                                <span className={styles.infoVal}>{data.parent_support}</span>
+                                                <span className={styles.infoVal}>
+                                                    {data.parent_support}
+                                                    {data.parent_support === '可' && data.parent_support_amount ? ` (月額: ${data.parent_support_amount}万円)` : ''}
+                                                </span>
                                             </div>
                                             <div className={styles.infoRow}>
                                                 <span className={styles.infoLabel}>通帳の定期記帳:</span>
@@ -289,7 +294,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                 /* Wizard/Step Form mode */
                                 <div className={styles.wizardContainer}>
                                     <div className={styles.wizardHeader}>
-                                        <h2>進路希望状況アンケートの入力</h2>
+                                        <h2>進路希望状況の入力</h2>
                                         <div className={styles.stepProgress}>
                                             <div className={styles.progressBar}>
                                                 <div 
@@ -300,6 +305,9 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                             <span className={styles.stepText}>ステップ {step} / 4</span>
                                         </div>
                                     </div>
+                                    <p className={styles.wizardInstruction}>
+                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入
+                                    </p>
 
                                     {error && <div className={styles.errorAlert}>{error}</div>}
 
@@ -507,6 +515,19 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                                             onClick={() => handleFieldChange('parent_support', '不可')}
                                                         >不可</button>
                                                     </div>
+                                                    {form.parent_support === '可' && (
+                                                        <div className={styles.inputGroup} style={{ marginTop: 'var(--spacing-3)' }}>
+                                                            <label>仕送り支援額 (月額)</label>
+                                                            <input 
+                                                                type="number" 
+                                                                value={form.parent_support_amount}
+                                                                onChange={(e) => handleFieldChange('parent_support_amount', e.target.value)}
+                                                                placeholder="金額を万円単位で入力 (例: 5)"
+                                                                style={{ width: '200px', display: 'inline-block', marginRight: '8px' }}
+                                                            />
+                                                            <span>万円</span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className={styles.radioGroup}>

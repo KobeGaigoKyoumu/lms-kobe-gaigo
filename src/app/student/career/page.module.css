@@ -523,3 +523,15 @@
         grid-template-columns: 1fr;
     }
 }
+
+.wizardInstruction {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    border-left: 4px solid var(--primary-500);
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    margin-bottom: var(--spacing-6);
+    line-height: 1.6;
+}
+
