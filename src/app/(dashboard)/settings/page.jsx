@@ -5,7 +5,7 @@ import NotificationDebug from './NotificationDebug'
 import StorageUsage from './StorageUsage'
 import TelegramConnect from '@/components/telegram/TelegramConnect'
 import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
-import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
+import { getImageKitUsage, getSupabaseStorageUsage, getCloudinaryUsage } from '@/app/actions/storageUsage'
 import { getAdminMembers, getAdminMemberSession } from '@/app/actions/adminAuth'
 import QRCodeDisplay from './QRCodeDisplay'
 
@@ -48,10 +48,12 @@ export default async function SettingsPage() {
     // ストレージ使用量取得（管理者のみ）
     let imageKitUsage = null
     let supabaseUsage = null
+    let cloudinaryUsage = null
     if (isAdmin) {
-        ;[imageKitUsage, supabaseUsage] = await Promise.all([
+        ;[imageKitUsage, supabaseUsage, cloudinaryUsage] = await Promise.all([
             getImageKitUsage(),
-            getSupabaseStorageUsage()
+            getSupabaseStorageUsage(),
+            getCloudinaryUsage()
         ])
     }
 
@@ -73,7 +75,7 @@ export default async function SettingsPage() {
                 {isAdmin && imageKitUsage && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
-                        <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
+                        <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} cloudinary={cloudinaryUsage} />
                     </section>
                 )}
 

@@ -8,7 +8,7 @@ const formatSize = (bytes) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-export default function StorageUsage({ imageKit, supabase }) {
+export default function StorageUsage({ imageKit, supabase, cloudinary }) {
     return (
         <div className={styles.container}>
             {/* ImageKit Card */}
@@ -80,6 +80,43 @@ export default function StorageUsage({ imageKit, supabase }) {
                     </div>
                 </div>
             </div>
+
+            {/* Cloudinary Card */}
+            {cloudinary && (
+                <div className={styles.card}>
+                    <div className={styles.cardHeader}>
+                        <div className={styles.iconWrapper} style={{ backgroundColor: '#3448C5' }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <path d="M12 2a3 3 0 0 0-3 3v12a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" fill="white" />
+                                <path d="M19 10a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0v-4a3 3 0 0 0-3-3Z" fill="white" />
+                                <path d="M5 10a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0v-4a3 3 0 0 0-3-3Z" fill="white" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className={styles.cardTitle}>Cloudinary</h3>
+                            <p className={styles.cardSubtitle}>進路・面談ファイル管理用</p>
+                        </div>
+                    </div>
+
+                    <div className={styles.usageInfo}>
+                        <div className={styles.progressBar}>
+                            <div
+                                className={styles.progressFill}
+                                style={{
+                                    width: `${cloudinary.percent || 0}%`,
+                                    background: 'linear-gradient(90deg, #3448C5, #6366f1)'
+                                }}
+                            />
+                        </div>
+                        <div className={styles.stats}>
+                            <span className={styles.percentage}>{cloudinary.percent || 0}% 使用中</span>
+                            <span className={styles.raw}>
+                                {formatSize(cloudinary.used || 0)} / {formatSize(cloudinary.limit || (25 * 1024 * 1024 * 1024))}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
