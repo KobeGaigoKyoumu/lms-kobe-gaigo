@@ -1,0 +1,525 @@
+.page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--spacing-6);
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-6);
+    color: var(--text-primary);
+}
+
+/* Tab Navigation */
+.tabContainer {
+    display: flex;
+    gap: var(--spacing-2);
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: var(--spacing-6);
+    padding-bottom: 2px;
+}
+
+.tabButton {
+    background: transparent;
+    border: none;
+    padding: var(--spacing-3) var(--spacing-6);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition-base);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.tabButton:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+}
+
+.tabButtonActive {
+    color: var(--primary-600);
+}
+
+.tabButtonActive::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--primary-600);
+    border-radius: var(--radius-full);
+}
+
+.tabContent {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Lock Card for 1st year students */
+.lockCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-10);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    max-width: 600px;
+    margin: 3rem auto;
+}
+
+.lockIcon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-6) auto;
+}
+
+.lockCard h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.lockText {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-2);
+}
+
+.lockSubText {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* Notice Card for Interview Setup */
+.noticeCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-10);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    max-width: 600px;
+    margin: 3rem auto;
+}
+
+.noticeIcon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-6) auto;
+}
+
+.noticeCard h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.noticeText {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-4);
+}
+
+.noticeSubText {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    line-height: 1.5;
+}
+
+/* Wizard Stepper Form styling */
+.wizardContainer {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    box-shadow: var(--shadow-sm);
+}
+
+.wizardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-6);
+}
+
+.wizardHeader h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stepProgress {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.progressBar {
+    width: 150px;
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progressInner {
+    height: 100%;
+    background-color: var(--primary-600);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.stepText {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.wizardForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.formStep h3 {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-6);
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.inputGroup label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.inputGroup input[type="text"],
+.inputGroup input[type="number"],
+.inputGroup select,
+.inputGroup textarea {
+    padding: var(--spacing-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus,
+.inputGroup textarea:focus {
+    border-color: var(--primary-500);
+}
+
+.disabledInput {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    cursor: not-allowed;
+}
+
+.formRow2Col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+.choiceFormBlock {
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+    background-color: var(--bg-subtle);
+}
+
+.choiceFormBlock h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--primary-700);
+    margin-bottom: var(--spacing-4);
+}
+
+.subStepTitle {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: var(--spacing-6);
+    margin-bottom: var(--spacing-2);
+    border-left: 3px solid var(--primary-600);
+    padding-left: var(--spacing-2);
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.radioGroup label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.radioOptions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.radioBtn {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: var(--spacing-2) var(--spacing-5);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.radioBtnActive {
+    background-color: var(--primary-50);
+    border-color: var(--primary-500);
+    color: var(--primary-700);
+    font-weight: 600;
+}
+
+/* Form Action Buttons */
+.formNavigation {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-6);
+}
+
+.prevBtn, .cancelBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-6);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.prevBtn:hover, .cancelBtn:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.nextBtn, .submitBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-6);
+    background-color: var(--primary-600);
+    border: 1px solid var(--primary-600);
+    color: white;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity var(--transition-fast);
+}
+
+.nextBtn:hover, .submitBtn:hover {
+    opacity: 0.9;
+}
+
+.errorAlert {
+    background-color: var(--error-50);
+    border: 1px solid var(--error-200);
+    color: var(--error-700);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* Career Info Dashboard Styling */
+.careerDashboard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+}
+
+.dashboardHeader h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.editButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.editButton:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-6);
+}
+
+.infoCard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.infoCard h3 {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--primary-800);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.infoLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.infoVal {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+}
+
+.badge {
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+    padding: 2px var(--spacing-3);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    border: 1px solid var(--primary-100);
+}
+
+.choiceGroup {
+    border-top: 1px dashed var(--border-color);
+    padding-top: var(--spacing-3);
+    margin-top: var(--spacing-2);
+}
+
+.choiceGroup:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.choiceHeader {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-2);
+}
+
+.infoValText {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    line-height: 1.5;
+    background-color: var(--bg-elevated);
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    width: 100%;
+}
+
+/* Mobile styling */
+@media (max-width: 640px) {
+    .page {
+        padding: var(--spacing-4);
+    }
+
+    .formRow2Col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .wizardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}
