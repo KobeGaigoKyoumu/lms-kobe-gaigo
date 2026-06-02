@@ -263,7 +263,7 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                                 <span className={styles.infoLabel}>両親の援助:</span>
                                                 <span className={styles.infoVal}>
                                                     {data.parent_support}
-                                                    {data.parent_support === '可' && data.parent_support_amount ? ` (月額: ${data.parent_support_amount}万円)` : ''}
+                                                    {data.parent_support === '可' && data.parent_support_amount ? ` (年額: ${data.parent_support_amount}万円)` : ''}
                                                 </span>
                                             </div>
                                             <div className={styles.infoRow}>
@@ -520,12 +520,12 @@ export default function CareerCounselingClient({ initialData, isSecondYear, sess
                                                     </div>
                                                     {form.parent_support === '可' && (
                                                         <div className={styles.inputGroup} style={{ marginTop: 'var(--spacing-3)' }}>
-                                                            <label>仕送り支援額 (月額)</label>
+                                                            <label>仕送り支援額 (年額)</label>
                                                             <input 
                                                                 type="number" 
                                                                 value={form.parent_support_amount}
                                                                 onChange={(e) => handleFieldChange('parent_support_amount', e.target.value)}
-                                                                placeholder="金額を万円単位で入力 (例: 5)"
+                                                                placeholder="金額を万円単位で入力 (例: 60)"
                                                                 style={{ width: '200px', display: 'inline-block', marginRight: '8px' }}
                                                             />
                                                             <span>万円</span>
