@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
+import cloudinary from "@/lib/cloudinary";
 
 /**
  * ImageKit の API から現在の使用量を取得する（1時間キャッシュ）
@@ -36,7 +37,7 @@ const _getImageKitUsage = unstable_cache(
             }
 
             const data = await response.json();
-            const limit = 20 * 1024 * 1024 * 1024; // 20GB limit
+            const limit = 3 * 1024 * 1024 * 1024; // Actual 3GB free limit
             const used = data.mediaLibraryStorageBytes || 0;
 
             return {
@@ -96,3 +97,46 @@ const _getSupabaseStorageUsage = unstable_cache(
 export async function getSupabaseStorageUsage() {
     return _getSupabaseStorageUsage();
 }
+
+/**
+ * Cloudinary の API から現在の使用量を取得する（1時間キャッシュ）
+ */
+const _getCloudinaryUsage = unstable_cache(
+    async () => {
+        try {
+            const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+            if (!cloudName || cloudName === 'dummy_cloud') {
+                throw new Error("Missing CLOUDINARY_CLOUD_NAME");
+            }
+
+            let used = 0;
+            let limit = 25 * 1024 * 1024 * 1024; // 25GB limit
+
+            try {
+                const usage = await cloudinary.api.usage();
+                used = usage.storage?.usage || 0;
+                // Cloudinary storage object does not contain 'limit', so we keep the default 25GB limit.
+            } catch (apiError) {
+                console.warn("Cloudinary API usage fetch failed, using fallback 0B:", apiError);
+                // APIエラー（認証ミスマッチや保留中など）が発生した場合でも、0%として進行状況バーを確実に表示させる
+            }
+
+            return {
+                success: true,
+                used,
+                limit,
+                percent: Math.min(100, Math.round((used / limit) * 100)),
+            };
+        } catch (error) {
+            console.error("Cloudinary Usage Error:", error);
+            return { success: false, error: error.message };
+        }
+    },
+    ["cloudinary-usage"],
+    { tags: ['storage-usage'] }
+);
+
+export async function getCloudinaryUsage() {
+    return _getCloudinaryUsage();
+}
+
