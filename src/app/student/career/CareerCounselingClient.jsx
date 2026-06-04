@@ -1055,8 +1055,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 onChange={(e) => handleFieldChange('second_choice_school', e.target.value)}
                                                             />
                                                         </div>
-                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
-                                                            <label>学部・学科・コースの名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                        <div className={styles.inputGroup}>
+                                                            <label>学部・学科・コースの名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.second_choice_department}
@@ -1064,8 +1064,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_reason') ? styles.inputGroupError : ''}`}>
-                                                        <label>行きたい理由 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                    <div className={styles.inputGroup}>
+                                                        <label>行きたい理由</label>
                                                         <textarea 
                                                             value={form.second_choice_reason}
                                                             onChange={(e) => handleFieldChange('second_choice_reason', e.target.value)}
@@ -1085,14 +1085,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 onChange={(e) => handleFieldChange('third_choice_school', e.target.value)}
                                                             />
                                                         </div>
-                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
-                                                            <label>学部・学科・コースの名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                        <div className={styles.inputGroup}>
+                                                            <label>学部・学科・コースの名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.third_choice_department}
-                                                                 onChange={(e) => handleFieldChange('third_choice_department', e.target.value)}
-                                                             />
-                                                         </div>
+                                                                onChange={(e) => handleFieldChange('third_choice_department', e.target.value)}
+                                                            />
+                                                        </div>
                                                      </div>
                                                      <div className={styles.inputGroup}>
                                                          <label>行きたい理由</label>
