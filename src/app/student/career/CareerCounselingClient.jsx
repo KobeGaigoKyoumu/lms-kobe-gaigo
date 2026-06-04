@@ -530,7 +530,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <span className={styles.infoVal}>{data.student_name}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>希望進路:</span>
+                                                <span className={styles.infoLabel}>行きたい学校の種類:</span>
                                                 <span className={`${styles.infoVal} ${styles.badge}`}>{data.path_type}</span>
                                             </div>
                                         </div>
@@ -540,26 +540,26 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>志望校希望</h3>
                                                 {data.first_choice_school && (
                                                     <div className={styles.choiceGroup}>
-                                                        <div className={styles.choiceHeader}>第一志望</div>
+                                                        <div className={styles.choiceHeader}>1番行きたい学校</div>
                                                         <div className={styles.infoRow}>
-                                                            <span className={styles.infoLabel}>学校名:</span>
+                                                            <span className={styles.infoLabel}>行きたい学校の名前:</span>
                                                             <span className={styles.infoVal}>{data.first_choice_school} ({data.first_choice_department})</span>
                                                         </div>
                                                         <div className={styles.infoRow}>
-                                                            <span className={styles.infoLabel}>志望理由:</span>
+                                                            <span className={styles.infoLabel}>行きたい理由:</span>
                                                             <span className={styles.infoValText}>{data.first_choice_reason}</span>
                                                         </div>
                                                     </div>
                                                 )}
                                                 {data.second_choice_school && (
                                                     <div className={styles.choiceGroup}>
-                                                        <div className={styles.choiceHeader}>第二志望</div>
+                                                        <div className={styles.choiceHeader}>2番目に行きたい学校</div>
                                                         <div className={styles.infoRow}>
-                                                            <span className={styles.infoLabel}>学校名:</span>
+                                                            <span className={styles.infoLabel}>行きたい学校の名前:</span>
                                                             <span className={styles.infoVal}>{data.second_choice_school} ({data.second_choice_department})</span>
                                                         </div>
                                                         <div className={styles.infoRow}>
-                                                            <span className={styles.infoLabel}>志望理由:</span>
+                                                            <span className={styles.infoLabel}>行きたい理由:</span>
                                                             <span className={styles.infoValText}>{data.second_choice_reason}</span>
                                                         </div>
                                                     </div>
@@ -570,42 +570,42 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         <div className={styles.infoCard}>
                                             <h3>希望条件 & 確認事項</h3>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>希望分野:</span>
+                                                <span className={styles.infoLabel}>勉強したい専門分野:</span>
                                                 <span className={styles.infoVal}>{data.preferred_field || '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>希望地域:</span>
+                                                <span className={styles.infoLabel}>進学したい場所:</span>
                                                 <span className={styles.infoVal}>{data.preferred_region || '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>引っ越し可否:</span>
-                                                <span className={styles.infoVal}>{data.can_move}</span>
+                                                <span className={styles.infoLabel}>進学で引っ越しできるかどうか:</span>
+                                                <span className={styles.infoVal}>{data.can_move === '可' ? 'できる' : data.can_move === '不可' ? 'できない' : data.can_move}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>学費準備可能額:</span>
+                                                <span className={styles.infoLabel}>自分で準備できる1年目の学費:</span>
                                                 <span className={styles.infoVal}>{data.tuition_budget ? `${data.tuition_budget}万円` : '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>両親の援助:</span>
+                                                <span className={styles.infoLabel}>両親が学費のお金を出せるかどうか:</span>
                                                 <span className={styles.infoVal}>
-                                                    {data.parent_support}
-                                                    {data.parent_support === '可' && data.parent_support_amount ? ` (年額: ${data.parent_support_amount}万円)` : ''}
+                                                    {data.parent_support === '可' ? '出せる' : data.parent_support === '不可' ? '出せない' : data.parent_support}
+                                                    {data.parent_support === '可' && data.parent_support_amount ? ` (1年目の学費で両親が出せるお金: ${data.parent_support_amount}万円)` : ''}
                                                 </span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>通帳の定期記帳:</span>
-                                                <span className={styles.infoVal}>{data.passbook_updated}</span>
+                                                <span className={styles.infoLabel}>アルバイトの給料が入る銀行通帳を銀行で使っているかどうか:</span>
+                                                <span className={styles.infoVal}>{data.passbook_updated === 'している' ? '使っている' : data.passbook_updated === 'していない' ? '使っていない' : data.passbook_updated}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>給与明細保管:</span>
-                                                <span className={styles.infoVal}>{data.pay_slips_available}</span>
+                                                <span className={styles.infoLabel}>日本に来てから今までの全部のアルバイトの給与明細書があるかどうか:</span>
+                                                <span className={styles.infoVal}>{data.pay_slips_available === '有' ? 'ある' : data.pay_slips_available === '無' ? 'ない' : data.pay_slips_available}</span>
                                             </div>
                                         </div>
 
                                         <div className={styles.infoCard}>
                                             <h3>今後のスケジュール & 相談</h3>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>受験予定時期:</span>
+                                                <span className={styles.infoLabel}>入学試験を受けるだいたいの時期:</span>
                                                 <span className={styles.infoVal}>{data.exam_schedule || '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
@@ -655,7 +655,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>氏名</label>
+                                                    <label>名前</label>
                                                     <input 
                                                         type="text" 
                                                         value={form.student_name} 
@@ -664,7 +664,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>希望する進路区分</label>
+                                                    <label>行きたい学校の種類</label>
                                                     <select 
                                                         value={form.path_type}
                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
@@ -682,13 +682,13 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         {/* STEP 2: School Choice (Only for Higher Education / 進学) */}
                                         {step === 2 && form.path_type === '進学' && (
                                             <div className={styles.formStep}>
-                                                <h3>2. 志望校の希望</h3>
+                                                <h3>2. 志望校</h3>
                                                 
                                                 <div className={styles.choiceFormBlock}>
-                                                    <h4>■ 第一志望</h4>
+                                                    <h4>■ 1番行きたい学校</h4>
                                                     <div className={styles.formRow2Col}>
                                                         <div className={styles.inputGroup}>
-                                                            <label>志望校名</label>
+                                                            <label>行きたい学校の名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.first_choice_school}
@@ -698,7 +698,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コース</label>
+                                                            <label>学部・学科・コースの名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.first_choice_department}
@@ -709,7 +709,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         </div>
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>志望理由</label>
+                                                        <label>行きたい理由</label>
                                                         <textarea 
                                                             value={form.first_choice_reason}
                                                             onChange={(e) => handleFieldChange('first_choice_reason', e.target.value)}
@@ -721,10 +721,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.choiceFormBlock}>
-                                                    <h4>■ 第二志望</h4>
+                                                    <h4>■ 2番目に行きたい学校</h4>
                                                     <div className={styles.formRow2Col}>
                                                         <div className={styles.inputGroup}>
-                                                            <label>志望校名</label>
+                                                            <label>行きたい学校の名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.second_choice_school}
@@ -732,7 +732,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コース</label>
+                                                            <label>学部・学科・コースの名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.second_choice_department}
@@ -741,7 +741,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         </div>
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>志望理由</label>
+                                                        <label>行きたい理由</label>
                                                         <textarea 
                                                             value={form.second_choice_reason}
                                                             onChange={(e) => handleFieldChange('second_choice_reason', e.target.value)}
@@ -751,10 +751,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.choiceFormBlock}>
-                                                    <h4>■ 第三志望</h4>
+                                                    <h4>■ 3番目に行きたい学校</h4>
                                                     <div className={styles.formRow2Col}>
                                                         <div className={styles.inputGroup}>
-                                                            <label>志望校名</label>
+                                                            <label>行きたい学校の名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.third_choice_school}
@@ -762,7 +762,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コース</label>
+                                                            <label>学部・学科・コースの名前</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.third_choice_department}
@@ -781,7 +781,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 
                                                 <div className={styles.formRow2Col}>
                                                     <div className={styles.inputGroup}>
-                                                        <label>希望分野</label>
+                                                        <label>勉強したい専門分野</label>
                                                         <input 
                                                             type="text" 
                                                             value={form.preferred_field}
@@ -790,7 +790,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>希望地域</label>
+                                                        <label>進学したい場所</label>
                                                         <input 
                                                             type="text" 
                                                             value={form.preferred_region}
@@ -801,7 +801,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>進路決定に伴う引っ越しの可否</label>
+                                                    <label>進学で引っ越しできるかどうか</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -819,7 +819,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h4 className={styles.subStepTitle}>■ 留学維持・進学資金確認</h4>
 
                                                 <div className={styles.inputGroup}>
-                                                    <label>自己準備可能な学費予算額 (年間)</label>
+                                                    <label>自分で準備できる1年目の学費</label>
                                                     <input 
                                                         type="number" 
                                                         value={form.tuition_budget}
@@ -831,7 +831,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>両親による学費の支援</label>
+                                                    <label>両親が学費のお金を出せるかどうか</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -846,7 +846,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     </div>
                                                     {form.parent_support === '可' && (
                                                         <div className={styles.inputGroup} style={{ marginTop: 'var(--spacing-3)' }}>
-                                                            <label>仕送り支援額 (年額)</label>
+                                                            <label>1年目の学費で両親が出せるお金</label>
                                                             <input 
                                                                 type="number" 
                                                                 value={form.parent_support_amount}
