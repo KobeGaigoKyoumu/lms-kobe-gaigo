@@ -1096,21 +1096,50 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     onClick={prevStep}
                                                     className={styles.prevBtn}
                                                 >
-                                                    <ChevronLeft size={16} />
                                                     前へ
                                                 </button>
                                             )}
                                             
-                                            {/* Cancel/Back button if we had data previously */}
-                                            {step === 1 && data && (
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => setIsEditing(false)}
-                                                    className={styles.cancelBtn}
-                                                >
-                                                    戻る
-                                                </button>
-                                            )}
+                                            <button 
+                                                type="button" 
+                                                onClick={() => {
+                                                    if (data) {
+                                                        setIsEditing(false)
+                                                    } else {
+                                                        setStep(1)
+                                                        setForm({
+                                                            class_name: session?.className || '',
+                                                            student_name: session?.name || '',
+                                                            path_type: '進学',
+                                                            first_choice_school: '',
+                                                            first_choice_reason: '',
+                                                            first_choice_department: '',
+                                                            second_choice_school: '',
+                                                            second_choice_reason: '',
+                                                            second_choice_department: '',
+                                                            third_choice_school: '',
+                                                            third_choice_reason: '',
+                                                            third_choice_department: '',
+                                                            preferred_field: '',
+                                                            preferred_region: '',
+                                                            can_move: '可',
+                                                            tuition_budget: '',
+                                                            parent_support: '可',
+                                                            parent_support_amount: '',
+                                                            passbook_updated: 'している',
+                                                            pay_slips_available: '有',
+                                                            exam_schedule: '',
+                                                            post_grad_plans: '',
+                                                            teacher_questions: ''
+                                                        })
+                                                    }
+                                                    setError(null)
+                                                }}
+                                                className={styles.cancelBtn}
+                                                style={{ marginRight: 'auto' }}
+                                            >
+                                                キャンセル
+                                            </button>
 
                                             {step < 4 ? (
                                                 <button 
@@ -1120,7 +1149,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     className={styles.nextBtn}
                                                 >
                                                     次へ
-                                                    <ChevronRight size={16} />
                                                 </button>
                                             ) : (
                                                 <button 
@@ -1445,17 +1473,23 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                     {/* モード1: アンケート一覧 (list) */}
                     {surveyModalMode === 'list' && (
                         <div>
-                            <div className={styles.detailHeaderActions} style={{ marginBottom: 'var(--spacing-4)' }}>
-                                <button onClick={() => startEditingSurvey(null)} className={styles.addBtn}>
-                                    <Plus size={16} />
-                                    アンケートに回答する
-                                </button>
-                            </div>
+                            {examSurveysList.length > 0 && (
+                                <div className={styles.detailHeaderActions} style={{ marginBottom: 'var(--spacing-4)' }}>
+                                    <button onClick={() => startEditingSurvey(null)} className={styles.addBtn}>
+                                        <Plus size={16} />
+                                        アンケートに回答する
+                                    </button>
+                                </div>
+                            )}
 
                             {examSurveysList.length === 0 ? (
                                 <div className={styles.emptyState}>
                                     <FileText size={48} color="var(--text-tertiary)" />
                                     <p>入試アンケート回答が登録されていません。</p>
+                                    <button onClick={() => startEditingSurvey(null)} className={styles.addBtn}>
+                                        <Plus size={16} />
+                                        アンケートに回答する
+                                    </button>
                                 </div>
                             ) : (
                                 <div className={styles.tableCard}>
