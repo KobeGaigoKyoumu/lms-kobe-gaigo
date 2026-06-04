@@ -514,7 +514,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         </button>
                                     </div>
                                     <p className={styles.wizardInstruction}>
-                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入。
+                                        わかるところを書いてください。今わからないところは書かなくてもいいです。新しい情報はすぐにアップデートしてください。
                                     </p>
 
                                     {/* Main Info Grid */}
@@ -530,7 +530,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <span className={styles.infoVal}>{data.student_name}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>行きたい学校の種類:</span>
+                                                <span className={styles.infoLabel}>日本語学校卒業後の予定:</span>
                                                 <span className={`${styles.infoVal} ${styles.badge}`}>{data.path_type}</span>
                                             </div>
                                         </div>
@@ -650,7 +650,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         </div>
                                     </div>
                                     <p className={styles.wizardInstruction}>
-                                        現在の状況をわかる範囲で記入。分からない所は空欄でもOK。情報に変更があり次第、即座に変更した情報を記入。
+                                        わかるところを書いてください。今わからないところは書かなくてもいいです。新しい情報はすぐにアップデートしてください。
                                     </p>
 
                                     {error && <div className={styles.errorAlert}>{error}</div>}
@@ -679,7 +679,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>行きたい学校の種類</label>
+                                                    <label>日本語学校卒業後の予定</label>
                                                     <select 
                                                         value={form.path_type}
                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
