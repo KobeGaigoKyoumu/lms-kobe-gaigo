@@ -535,3 +535,432 @@
     line-height: 1.6;
 }
 
+/* ====================================================
+   入試予定＆アンケート用の追加スタイル
+   ==================================================== */
+
+/* モーダル表示用 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-4);
+}
+
+.modalContent {
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-6);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.closeModalBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-1);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.closeModalBtn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+}
+
+.modalBody {
+    padding: var(--spacing-6);
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* 成功・エラーのアラート */
+.successAlert, .errorAlert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-5);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.successAlert {
+    background-color: var(--success-50);
+    border: 1px solid var(--success-200);
+    color: var(--success-800);
+}
+
+.errorAlert {
+    background-color: var(--error-50);
+    border: 1px solid var(--error-200);
+    color: var(--error-700);
+}
+
+/* 入試予定テーブル */
+.tableCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th, .table td {
+    padding: var(--spacing-4);
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.table tr:hover {
+    background-color: var(--bg-subtle);
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.fontWeightMedium {
+    font-weight: 500;
+}
+
+/* バッジ */
+.badgeSuccess, .badgeDanger, .badgeWarning, .badgeSecondary {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    border-radius: var(--radius-full);
+}
+
+.badgeSuccess {
+    background-color: var(--success-50);
+    color: var(--success-700);
+    border: 1px solid var(--success-100);
+}
+
+.badgeDanger {
+    background-color: var(--error-50);
+    color: var(--error-700);
+    border: 1px solid var(--error-100);
+}
+
+.badgeWarning {
+    background-color: var(--warning-50);
+    color: var(--warning-700);
+    border: 1px solid var(--warning-100);
+}
+
+.badgeSecondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+/* 削除ボタン・追加ボタン */
+.deleteRowBtn {
+    background: transparent;
+    border: none;
+    color: var(--error-600);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-weight: 600;
+}
+
+.deleteRowBtn:hover {
+    color: var(--error-700);
+}
+
+.addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.addBtn:hover {
+    background-color: var(--bg-tertiary);
+}
+
+/* 空の状態 */
+.noDataState, .emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-4);
+    padding: 3rem 0;
+    color: var(--text-secondary);
+}
+
+.noDataState p, .emptyState p {
+    font-size: var(--font-size-base);
+}
+
+/* 詳細表示 */
+.detailContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.detailHeaderActions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.detailGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-6);
+}
+
+.detailCard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.detailCard h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--primary-800);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-2);
+    margin-bottom: var(--spacing-1);
+}
+
+.detailRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+}
+
+.detailLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.detailValue {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.detailValueBlock {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    line-height: 1.5;
+    background-color: var(--bg-elevated);
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    width: 100%;
+}
+
+/* 予定入力行カード */
+.examFormRows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.examFormRowCard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.examFormRowHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: var(--spacing-2);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* 3列/4列グリッド */
+.formRow3Col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+.formRow4Col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+/* スマホ用カード表示 */
+.examCardList {
+    display: none;
+}
+
+.examCard {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+
+.examCardSchool {
+    font-weight: 700;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+}
+
+.examCardDept {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.examCardRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+}
+
+.examCardLabel {
+    color: var(--text-secondary);
+}
+
+.examCardValue {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* メディアクエリによるレスポンシブ調整 */
+@media (max-width: 768px) {
+    .detailGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .formRow2Col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .formRow4Col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-3);
+    }
+
+    .formRow3Col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-3);
+    }
+    .formRow3Col > div:nth-child(3) {
+        grid-column: span 2;
+    }
+    
+    .tableWrapper {
+        display: none;
+    }
+
+    .examCardList {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        padding: var(--spacing-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .formRow4Col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .formRow3Col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    .formRow3Col > div:nth-child(3) {
+        grid-column: span 1;
+    }
+}
+
+

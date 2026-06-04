@@ -384,3 +384,124 @@ export async function deleteStudentExamSurvey(surveyId) {
 
     return { success: true }
 }
+
+/**
+ * 学生用: 自身の入試予定を取得する
+ */
+export async function getStudentExamSchedulesSelf() {
+    const session = await getStudentSessionLight()
+    if (!session) return []
+
+    const supabase = getAdminSupabase()
+    const { data, error } = await supabase
+        .from('student_exam_schedules')
+        .select('*')
+        .eq('student_id', session.studentId)
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('getStudentExamSchedulesSelf error:', error)
+        return []
+    }
+    return data
+}
+
+/**
+ * 学生用: 自身の入試アンケート回答を取得する
+ */
+export async function getStudentExamSurveysSelf() {
+    const session = await getStudentSessionLight()
+    if (!session) return []
+
+    const supabase = getAdminSupabase()
+    const { data, error } = await supabase
+        .from('student_exam_surveys')
+        .select('*')
+        .eq('student_id', session.studentId)
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('getStudentExamSurveysSelf error:', error)
+        return []
+    }
+    return data
+}
+
+/**
+ * 学生用: 自身の入試予定を一括保存する
+ */
+export async function saveStudentExamSchedulesSelf(schedules) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+    
+    const res = await saveStudentExamSchedules(session.studentId, schedules)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
+}
+
+/**
+ * 学生用: 自身の入試アンケートを保存する
+ */
+export async function saveStudentExamSurveySelf(payload) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const supabase = getAdminSupabase()
+    if (payload.id) {
+        const { data } = await supabase
+            .from('student_exam_surveys')
+            .select('student_id')
+            .eq('id', payload.id)
+            .maybeSingle()
+        if (!data || data.student_id !== session.studentId) {
+            return { success: false, error: 'Unauthorized' }
+        }
+    }
+
+    const fullPayload = {
+        ...payload,
+        student_id: session.studentId,
+        student_name: session.name,
+        class_name: session.className
+    }
+
+    const res = await saveStudentExamSurvey(fullPayload)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
+}
+
+/**
+ * 学生用: 自身の入試アンケートを削除する
+ */
+export async function deleteStudentExamSurveySelf(surveyId) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const supabase = getAdminSupabase()
+    const { data } = await supabase
+        .from('student_exam_surveys')
+        .select('student_id')
+        .eq('id', surveyId)
+        .maybeSingle()
+
+    if (!data || data.student_id !== session.studentId) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const res = await deleteStudentExamSurvey(surveyId)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
+}
+
