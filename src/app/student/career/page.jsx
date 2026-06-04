@@ -1,6 +1,6 @@
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { redirect } from 'next/navigation'
-import { getStudentCareerInfo, getStudentExamSchedules, getStudentExamSurveys } from '@/app/actions/career'
+import { getStudentCareerInfo, getStudentExamSchedulesSelf, getStudentExamSurveysSelf } from '@/app/actions/career'
 import CareerCounselingClient from './CareerCounselingClient'
 
 export default async function StudentCareerPage() {
@@ -22,20 +22,19 @@ export default async function StudentCareerPage() {
 
     // Fetch existing career responses
     const initialData = await getStudentCareerInfo()
-    
-    // Fetch existing exam schedules
-    const initialExamSchedules = await getStudentExamSchedules(session.studentId)
 
-    // Fetch existing exam surveys
-    const initialExamSurveys = await getStudentExamSurveys(session.studentId)
+    // Fetch existing exam schedules and surveys
+    const examSchedules = await getStudentExamSchedulesSelf()
+    const examSurveys = await getStudentExamSurveysSelf()
 
     return (
         <CareerCounselingClient 
             initialData={initialData}
-            initialExamSchedules={initialExamSchedules}
-            initialExamSurveys={initialExamSurveys}
+            examSchedules={examSchedules}
+            examSurveys={examSurveys}
             isSecondYear={isSecondYear}
             session={session}
         />
     )
 }
+
