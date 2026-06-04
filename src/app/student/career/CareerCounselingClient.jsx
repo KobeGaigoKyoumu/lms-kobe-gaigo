@@ -1055,7 +1055,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <th>受験予定校 (学部・学科・コースの名前)</th>
                                                         <th>書類を出す期間</th>
                                                         <th>入学試験の日</th>
-                                                        <th>合格/不合格の状況</th>
+                                                        <th>合格/不合格がわかる日</th>
                                                         <th className={styles.textCenter}>合否</th>
                                                         <th className={styles.textCenter}>操作</th>
                                                     </tr>
@@ -1132,7 +1132,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <span className={styles.examCardValue}>{schedule.exam_date || '-'}</span>
                                                     </div>
                                                     <div className={styles.examCardRow}>
-                                                        <span className={styles.examCardLabel}>合格/不合格の状況</span>
+                                                        <span className={styles.examCardLabel}>合格/不合格がわかる日</span>
                                                         <span className={styles.examCardValue}>{schedule.results_date || '-'}</span>
                                                     </div>
                                                     <div className={styles.examCardRow}>
@@ -1180,7 +1180,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             
                                             <div className={styles.formRow2Col}>
                                                 <div className={styles.inputGroup}>
-                                                    <label>入学試験を受けるの学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                    <label>入学試験を受ける学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <SchoolAutocomplete
                                                         value={item.school_name}
                                                         onChange={(val) => handleExamFieldChange(index, 'school_name', val)}
@@ -1218,7 +1218,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>合格/不合格の状況</label>
+                                                    <label>合格/不合格がわかる日</label>
                                                     <input 
                                                         type="text" 
                                                         value={item.results_date}
@@ -1227,7 +1227,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>合否状況</label>
+                                                    <label>合格/不合格の状況</label>
                                                     <select
                                                         value={item.status}
                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
