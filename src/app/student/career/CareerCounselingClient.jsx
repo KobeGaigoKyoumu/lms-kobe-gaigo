@@ -1965,12 +1965,19 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     </div>
                                                     <div className={`${styles.inputGroup} ${surveyErrors.includes('exam_type') ? styles.inputGroupError : ''}`}>
                                                         <label>試験の種類 <span style={{ color: 'var(--error-500)' }}>*</span></label>
-                                                        <input 
-                                                            type="text" 
-                                                            value={surveyForm.exam_type}
-                                                            onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
-                                                            placeholder="例: AO入試、指定校推薦、一般"
-                                                        />
+                                                         <select
+                                                             value={surveyForm.exam_type || ''}
+                                                             onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
+                                                             className={styles.selectInput}
+                                                         >
+                                                             <option value="">選択してください</option>
+                                                             <option value="指定校推薦入試">指定校推薦入試</option>
+                                                             <option value="公募推薦入試">公募推薦入試</option>
+                                                             <option value="一般入試">一般入試</option>
+                                                             <option value="AO入試">AO入試</option>
+                                                             <option value="外国人留学生特別入試">外国人留学生特別入試</option>
+                                                             <option value="その他">その他</option>
+                                                         </select>
                                                     </div>
                                                 </div>
 
