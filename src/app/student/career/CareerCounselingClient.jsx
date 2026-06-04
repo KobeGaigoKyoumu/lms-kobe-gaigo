@@ -67,6 +67,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [savingSurvey, setSavingSurvey] = useState(false)
     const [surveyError, setSurveyError] = useState(null)
     const [surveySuccessMsg, setSurveySuccessMsg] = useState(null)
+
+    // validation states for red section styling
+    const [careerErrors, setCareerErrors] = useState([])
+    const [examErrors, setExamErrors] = useState([]) // indices of invalid exams
+    const [surveyErrors, setSurveyErrors] = useState([])
+
     const [surveyForm, setSurveyForm] = useState({
         school_type: '大学',
         school_name: '',
@@ -124,9 +130,48 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
     const handleFieldChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }))
+        if (value && (typeof value !== 'string' || value.trim())) {
+            setCareerErrors(prev => prev.filter(f => f !== field))
+        }
+    }
+
+    const validateCareerStep = (currentStep) => {
+        const errors = []
+        const fields = []
+
+        if (currentStep === 1) {
+            if (!form.path_type) {
+                errors.push('日本語学校卒業後の予定')
+                fields.push('path_type')
+            }
+        } else if (currentStep === 2 && form.path_type === '進学') {
+            if (!form.first_choice_school || !form.first_choice_school.trim()) {
+                errors.push('1番行きたい学校の名前')
+                fields.push('first_choice_school')
+            }
+            if (!form.first_choice_department || !form.first_choice_department.trim()) {
+                errors.push('1番行きたい学校の学部・学科・コースの名前')
+                fields.push('first_choice_department')
+            }
+            if (!form.first_choice_reason || !form.first_choice_reason.trim()) {
+                errors.push('1番行きたい学校の行きたい理由')
+                fields.push('first_choice_reason')
+            }
+        }
+
+        return { errors, fields }
     }
 
     const nextStep = () => {
+        const { errors, fields } = validateCareerStep(step)
+        if (errors.length > 0) {
+            setCareerErrors(fields)
+            setError(`未回答の項目があります：${errors.join('、')} を入力してください。`)
+            return
+        }
+        setError(null)
+        setCareerErrors([])
+
         // Skip step 2 if not pursuing higher education (進学)
         if (step === 1 && form.path_type !== '進学') {
             setStep(3)
@@ -136,6 +181,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     }
 
     const prevStep = () => {
+        setError(null)
+        setCareerErrors([])
         if (step === 3 && form.path_type !== '進学') {
             setStep(1)
         } else {
@@ -145,6 +192,15 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        const { errors, fields } = validateCareerStep(step)
+        if (errors.length > 0) {
+            setCareerErrors(fields)
+            setError(`未回答の項目があります：${errors.join('、')} を入力してください。`)
+            return
+        }
+        setError(null)
+        setCareerErrors([])
+
         if (step < 4) {
             nextStep()
             return
@@ -196,6 +252,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         })
         setIsEditing(true)
         setStep(1)
+        setCareerErrors([])
+        setError(null)
     }
 
     // ====================================================
@@ -241,6 +299,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setIsEditingExams(true)
         setExamError(null)
         setExamSuccessMsg(null)
+        setExamErrors([])
     }
 
     const addExamRow = () => {
@@ -260,6 +319,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
     const removeExamRow = (index) => {
         setExamFormList(prev => prev.filter((_, i) => i !== index))
+        setExamErrors(prev => prev.filter(idx => idx !== index).map(idx => idx > index ? idx - 1 : idx))
     }
 
     const handleExamFieldChange = (index, field, value) => {
@@ -268,6 +328,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             copy[index] = { ...copy[index], [field]: value }
             return copy
         })
+        if (field === 'school_name' && value && value.trim()) {
+            setExamErrors(prev => prev.filter(idx => idx !== index))
+        }
     }
 
     const handleSaveExams = async (e) => {
@@ -275,15 +338,23 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setSavingExam(true)
         setExamError(null)
         setExamSuccessMsg(null)
+        setExamErrors([])
 
-        const filteredList = examFormList.filter(item => item.school_name.trim() !== '')
-        if (filteredList.length === 0) {
-            setExamError('少なくとも1つの学校名を入力してください。')
+        const invalidIndices = []
+        examFormList.forEach((item, idx) => {
+            if (!item.school_name || !item.school_name.trim()) {
+                invalidIndices.push(idx)
+            }
+        })
+
+        if (invalidIndices.length > 0) {
+            setExamErrors(invalidIndices)
+            setExamError('入力されていない学校名があります。すべての学校名を入力するか、不要な行を削除してください。')
             setSavingExam(false)
             return
         }
 
-        const validSchedules = filteredList.map(s => {
+        const validSchedules = examFormList.map(s => {
             let appPeriod = ''
             if (s._app_period_start && s._app_period_end) {
                 appPeriod = `${formatToSave(s._app_period_start)} 〜 ${formatToSave(s._app_period_end)}`
@@ -353,6 +424,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     // ====================================================
     const handleSurveyFieldChange = (field, value) => {
         setSurveyForm(prev => ({ ...prev, [field]: value }))
+        if (value && (typeof value !== 'string' || value.trim())) {
+            setSurveyErrors(prev => prev.filter(f => f !== field))
+        }
     }
 
     const handleSurveyCheckboxChange = (item, isChecked) => {
@@ -361,6 +435,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             const next = isChecked 
                 ? [...current, item] 
                 : current.filter(c => c !== item)
+            
+            if (next.length > 0) {
+                setSurveyErrors(prev => prev.filter(f => f !== 'japanese_content'))
+            }
             return { ...prev, japanese_content: next }
         })
     }
@@ -432,48 +510,96 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setSurveyModalMode('edit')
         setSurveyError(null)
         setSurveySuccessMsg(null)
+        setSurveyErrors([])
     }
 
-    const nextSurveyStep = () => {
+    const validateSurveyStep = (currentStep) => {
         const errors = []
-        if (surveyStep === 1) {
-            if (!surveyForm.school_type) errors.push('学校の種類')
-            if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
-            if (!surveyForm.department_name || !surveyForm.department_name.trim()) errors.push('学部・学科・コース')
-            if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) errors.push('試験の種類')
-        } else if (surveyStep === 2) {
-            if (surveyForm.essay_exists === 'あり') {
-                if (!surveyForm.essay_time) errors.push('作文・小論文の試験時間')
-                if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) errors.push('作文・小論文のテーマ')
+        const fields = []
+
+        if (currentStep === 1) {
+            if (!surveyForm.school_type) {
+                errors.push('学校の種類')
+                fields.push('school_type')
             }
-        } else if (surveyStep === 3) {
-            if (surveyForm.japanese_exists === 'あり') {
-                if (!surveyForm.japanese_time) errors.push('日本語の試験時間')
-                if (!surveyForm.japanese_level) errors.push('難しさのレベル')
-                if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
-                    errors.push('日本語の試験内容')
+            if (!surveyForm.school_name || !surveyForm.school_name.trim()) {
+                errors.push('学校名')
+                fields.push('school_name')
+            }
+            if (!surveyForm.department_name || !surveyForm.department_name.trim()) {
+                errors.push('学部・学科・コース')
+                fields.push('department_name')
+            }
+            if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) {
+                errors.push('試験の種類')
+                fields.push('exam_type')
+            }
+        } else if (currentStep === 2) {
+            if (surveyForm.essay_exists === 'あり') {
+                if (!surveyForm.essay_time) {
+                    errors.push('作文・小論文の試験時間')
+                    fields.push('essay_time')
+                }
+                if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) {
+                    errors.push('作文・小論文のテーマ')
+                    fields.push('essay_theme')
                 }
             }
-        } else if (surveyStep === 4) {
+        } else if (currentStep === 3) {
+            if (surveyForm.japanese_exists === 'あり') {
+                if (!surveyForm.japanese_time) {
+                    errors.push('日本語の試験時間')
+                    fields.push('japanese_time')
+                }
+                if (!surveyForm.japanese_level) {
+                    errors.push('難しさのレベル')
+                    fields.push('japanese_level')
+                }
+                if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
+                    errors.push('日本語の試験内容')
+                    fields.push('japanese_content')
+                }
+            }
+        } else if (currentStep === 4) {
             if (surveyForm.interview_exists === 'あり') {
-                if (!surveyForm.interview_time) errors.push('面接時間')
-                if (!surveyForm.interview_teachers) errors.push('面接の先生の人数')
-                if (!surveyForm.interview_students) errors.push('一緒に面接を受けた学生の人数')
-                if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) errors.push('面接の質問①')
+                if (!surveyForm.interview_time) {
+                    errors.push('面接時間')
+                    fields.push('interview_time')
+                }
+                if (!surveyForm.interview_teachers) {
+                    errors.push('面接の先生の人数')
+                    fields.push('interview_teachers')
+                }
+                if (!surveyForm.interview_students) {
+                    errors.push('一緒に面接を受けた学生の人数')
+                    fields.push('interview_students')
+                }
+                if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) {
+                    errors.push('面接の質問①')
+                    fields.push('interview_question_1')
+                }
             }
         }
 
+        return { errors, fields }
+    }
+
+    const nextSurveyStep = () => {
+        const { errors, fields } = validateSurveyStep(surveyStep)
         if (errors.length > 0) {
+            setSurveyErrors(fields)
             setSurveyError(`未回答の項目があります：${errors.join('、')} を入力・選択してください。`)
             return
         }
 
         setSurveyError(null)
+        setSurveyErrors([])
         setSurveyStep(prev => prev + 1)
     }
 
     const prevSurveyStep = () => {
         setSurveyError(null)
+        setSurveyErrors([])
         setSurveyStep(prev => prev - 1)
     }
 
@@ -488,46 +614,30 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setSavingSurvey(true)
         setSurveyError(null)
         setSurveySuccessMsg(null)
+        setSurveyErrors([])
 
-        // JSバリデーションチェック (全ステップ分)
-        const errors = []
-        if (!surveyForm.school_type) errors.push('学校の種類')
-        if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
-        if (!surveyForm.department_name || !surveyForm.department_name.trim()) errors.push('学部・学科・コース')
-        if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) errors.push('試験の種類')
-
-        if (surveyForm.essay_exists === 'あり') {
-            if (!surveyForm.essay_time) errors.push('作文・小論文の試験時間')
-            if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) errors.push('作文・小論文のテーマ')
+        // Validate all steps from 1 to 4
+        let allErrors = []
+        let allFields = []
+        for (let s = 1; s <= 4; s++) {
+            const { errors, fields } = validateSurveyStep(s)
+            allErrors = [...allErrors, ...errors]
+            allFields = [...allFields, ...fields]
         }
 
-        if (surveyForm.japanese_exists === 'あり') {
-            if (!surveyForm.japanese_time) errors.push('日本語の試験時間')
-            if (!surveyForm.japanese_level) errors.push('難しさのレベル')
-            if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
-                errors.push('日本語の試験内容')
-            }
-        }
-
-        if (surveyForm.interview_exists === 'あり') {
-            if (!surveyForm.interview_time) errors.push('面接時間')
-            if (!surveyForm.interview_teachers) errors.push('面接の先生の人数')
-            if (!surveyForm.interview_students) errors.push('一緒に面接を受けた学生の人数')
-            if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) errors.push('面接の質問①')
-        }
-
-        if (errors.length > 0) {
-            setSurveyError(`未回答の項目があります：${errors.join('、')} を入力・選択してください。`)
+        if (allErrors.length > 0) {
+            setSurveyErrors(allFields)
+            setSurveyError(`未回答の項目があります：${allErrors.join('、')} を入力・選択してください。`)
             
-            // 最初のエラー項目に基づいて適切なステップに戻る
-            const firstError = errors[0]
-            if (['学校の種類', '学校名', '学部・学科・コース', '試験の種類'].includes(firstError)) {
+            // Go back to the first step containing an error
+            const firstField = allFields[0]
+            if (['school_type', 'school_name', 'department_name', 'exam_type'].includes(firstField)) {
                 setSurveyStep(1)
-            } else if (['作文・小論文の試験時間', '作文・小論文のテーマ'].includes(firstError)) {
+            } else if (['essay_time', 'essay_theme'].includes(firstField)) {
                 setSurveyStep(2)
-            } else if (['日本語 of 試験の内容', '日本語の試験内容', '日本語の試験時間', '難しさのレベル'].includes(firstError)) {
+            } else if (['japanese_time', 'japanese_level', 'japanese_content'].includes(firstField)) {
                 setSurveyStep(3)
-            } else if (['面接時間', '面接の先生の人数', '一緒に面接を受けた学生の人数', '面接の質問①'].includes(firstError)) {
+            } else if (['interview_time', 'interview_teachers', 'interview_students', 'interview_question_1'].includes(firstField)) {
                 setSurveyStep(4)
             }
             
@@ -820,7 +930,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         わかるところを書いてください。今わからないところは書かなくてもいいです。新しい情報はすぐにアップデートしてください。
                                     </p>
 
-                                    {error && <div className={styles.errorAlert}>{error}</div>}
+                                    {error && (
+                                        <div className={styles.errorAlert}>
+                                            <AlertCircle size={16} />
+                                            <span>{error}</span>
+                                        </div>
+                                    )}
 
                                     <form onSubmit={handleSubmit} className={styles.wizardForm}>
                                         {/* STEP 1: Basic Info */}
@@ -845,13 +960,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         className={styles.disabledInput}
                                                     />
                                                 </div>
-                                                <div className={styles.inputGroup}>
+                                                <div className={`${styles.inputGroup} ${careerErrors.includes('path_type') ? styles.inputGroupError : ''}`}>
                                                     <label>日本語学校卒業後の予定 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select 
                                                         value={form.path_type}
                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
                                                         className={styles.selectInput}
-                                                        required
                                                     >
                                                         <option value="">選択してください</option>
                                                         <option value="進学">進学</option>
@@ -871,29 +985,29 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <div className={styles.choiceFormBlock}>
                                                     <h4>■ 1番行きたい学校</h4>
                                                     <div className={styles.formRow2Col}>
-                                                        <div className={styles.inputGroup}>
-                                                            <label>行きたい学校の名前</label>
+                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_school') ? styles.inputGroupError : ''}`}>
+                                                            <label>行きたい学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.first_choice_school}
                                                                 onChange={(e) => handleFieldChange('first_choice_school', e.target.value)}
                                                                 placeholder="例: 神戸国際大学"
-                                                                required
+
                                                             />
                                                         </div>
-                                                        <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コースの名前</label>
+                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
+                                                            <label>学部・学科・コースの名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.first_choice_department}
                                                                 onChange={(e) => handleFieldChange('first_choice_department', e.target.value)}
                                                                 placeholder="例: 経済学部"
-                                                                required
+   
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className={styles.inputGroup}>
-                                                        <label>行きたい理由</label>
+                                                    <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_reason') ? styles.inputGroupError : ''}`}>
+                                                        <label>行きたい理由 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <textarea 
                                                             value={form.first_choice_reason}
                                                             onChange={(e) => handleFieldChange('first_choice_reason', e.target.value)}
@@ -915,8 +1029,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 onChange={(e) => handleFieldChange('second_choice_school', e.target.value)}
                                                             />
                                                         </div>
-                                                        <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コースの名前</label>
+                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
+                                                            <label>学部・学科・コースの名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.second_choice_department}
@@ -924,8 +1038,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className={styles.inputGroup}>
-                                                        <label>行きたい理由</label>
+                                                    <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_reason') ? styles.inputGroupError : ''}`}>
+                                                        <label>行きたい理由 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <textarea 
                                                             value={form.second_choice_reason}
                                                             onChange={(e) => handleFieldChange('second_choice_reason', e.target.value)}
@@ -945,8 +1059,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 onChange={(e) => handleFieldChange('third_choice_school', e.target.value)}
                                                             />
                                                         </div>
-                                                        <div className={styles.inputGroup}>
-                                                            <label>学部・学科・コースの名前</label>
+                                                        <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
+                                                            <label>学部・学科・コースの名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="text" 
                                                                 value={form.third_choice_department}
@@ -1376,7 +1490,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             </div>
                                             
                                             <div className={styles.formRow2Col}>
-                                                <div className={styles.inputGroup}>
+                                                <div className={`${styles.inputGroup} ${examErrors.includes(index) ? styles.inputGroupError : ''}`}>
                                                     <label>入学試験を受ける学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <SchoolAutocomplete
                                                         value={item.school_name}
@@ -1775,12 +1889,18 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                 </div>
                                 <div className={styles.modalBody} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                                     <form onSubmit={handleSaveSurvey} className={styles.wizardForm}>
+                                        {surveyError && (
+                                            <div className={styles.errorAlert}>
+                                                <AlertCircle size={16} />
+                                                <span>{surveyError}</span>
+                                            </div>
+                                        )}
                                         {/* ステップ1: 基本情報 */}
                                         {surveyStep === 1 && (
                                             <div className={styles.formStep}>
                                                 <h3>1. 受験校の基本情報</h3>
                                                 
-                                                <div className={styles.inputGroup}>
+                                                <div className={`${styles.inputGroup} ${surveyErrors.includes('school_type') ? styles.inputGroupError : ''}`}>
                                                     <label>試験を受けた学校の種類 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select
                                                         value={surveyForm.school_type}
@@ -1795,7 +1915,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     </select>
                                                 </div>
 
-                                                <div className={styles.inputGroup}>
+                                                <div className={`${styles.inputGroup} ${surveyErrors.includes('school_name') ? styles.inputGroupError : ''}`}>
                                                     <label>学校名 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <SchoolAutocomplete
                                                         value={surveyForm.school_name}
@@ -1805,7 +1925,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.formRow2Col}>
-                                                    <div className={styles.inputGroup}>
+                                                    <div className={`${styles.inputGroup} ${surveyErrors.includes('department_name') ? styles.inputGroupError : ''}`}>
                                                         <label>学部・学科・コース <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <input 
                                                             type="text" 
@@ -1814,7 +1934,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             placeholder="例: グローバルビジネスコース"
                                                         />
                                                     </div>
-                                                    <div className={styles.inputGroup}>
+                                                    <div className={`${styles.inputGroup} ${surveyErrors.includes('exam_type') ? styles.inputGroupError : ''}`}>
                                                         <label>試験の種類 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <input 
                                                             type="text" 
@@ -1859,7 +1979,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
                                                 {surveyForm.essay_exists === 'あり' && (
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
-                                                        <div className={styles.inputGroup}>
+                                                        <div className={`${styles.inputGroup} ${surveyErrors.includes('essay_time') ? styles.inputGroupError : ''}`}>
                                                             <label>試験時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="number" 
@@ -1868,7 +1988,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 placeholder="例: 60"
                                                             />
                                                         </div>
-                                                        <div className={styles.inputGroup}>
+                                                        <div className={`${styles.inputGroup} ${surveyErrors.includes('essay_theme') ? styles.inputGroupError : ''}`}>
                                                             <label>テーマ <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <textarea 
                                                                 value={surveyForm.essay_theme}
@@ -1906,7 +2026,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 {surveyForm.japanese_exists === 'あり' && (
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                         <div className={styles.formRow2Col}>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('japanese_time') ? styles.inputGroupError : ''}`}>
                                                                 <label>試験時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
@@ -1915,7 +2035,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     placeholder="例: 45"
                                                                 />
                                                             </div>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('japanese_level') ? styles.inputGroupError : ''}`}>
                                                                 <label>難しさのレベル (目安) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <select
                                                                     value={surveyForm.japanese_level}
@@ -1932,7 +2052,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             </div>
                                                         </div>
 
-                                                        <div className={styles.inputGroup}>
+                                                        <div className={`${styles.inputGroup} ${surveyErrors.includes('japanese_content') ? styles.inputGroupError : ''}`}>
                                                             <label>日本語の試験の内容 (あったものはすべて選んでください)</label>
                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
                                                                 {['漢字', '語彙', '文法', '読解', '聴解', '(短)作文', 'その他'].map(item => {
@@ -1979,7 +2099,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 {surveyForm.interview_exists === 'あり' && (
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                         <div className={styles.formRow3Col}>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('interview_time') ? styles.inputGroupError : ''}`}>
                                                                 <label>面接時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
@@ -1988,7 +2108,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     placeholder="例: 15"
                                                                 />
                                                             </div>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('interview_teachers') ? styles.inputGroupError : ''}`}>
                                                                 <label>面接の先生の人数 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
@@ -1997,7 +2117,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     placeholder="例: 2"
                                                                 />
                                                             </div>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('interview_students') ? styles.inputGroupError : ''}`}>
                                                                 <label>一緒に面接を受けた学生の人数 (自分も入れる) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
@@ -2010,7 +2130,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
                                                             <label style={{ fontWeight: '600' }}>どんな質問をされましたか？</label>
-                                                            <div className={styles.inputGroup}>
+                                                            <div className={`${styles.inputGroup} ${surveyErrors.includes('interview_question_1') ? styles.inputGroupError : ''}`}>
                                                                 <label style={{ fontSize: 'var(--font-size-xs)' }}>質問① <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="text" 

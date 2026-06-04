@@ -957,4 +957,23 @@
     }
 }
 
+/* Validation error styling */
+.inputGroupError label {
+    color: var(--error-700) !important;
+}
+
+.inputGroupError input,
+.inputGroupError select,
+.inputGroupError textarea {
+    border-color: var(--error-300) !important;
+    background-color: var(--error-50) !important;
+}
+
+.inputGroupError input:focus,
+.inputGroupError select:focus,
+.inputGroupError textarea:focus {
+    border-color: var(--error-500) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
+}
+
 
