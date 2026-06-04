@@ -71,101 +71,6 @@ export async function saveStudentCareerInfo(formData) {
 }
 
 /**
-<<<<<<< HEAD
- * Fetches the list of active students and their career counseling info for a class.
- * Accessible only to authenticated admin members/teachers.
- */
-export async function getStudentsCareerList(className) {
-    const session = await getAdminMemberSession()
-    if (!session) return []
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Supabase config missing')
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // Build the query to get active students
-    let query = supabase
-        .from('students')
-        .select('student_id_text, full_name, class_name, academic_year')
-        .eq('status', 'active')
-        .order('student_id_text', { ascending: true })
-
-    if (className && className !== 'all') {
-        query = query.eq('class_name', className)
-    }
-
-    const { data: students, error: studentError } = await query
-
-    if (studentError) {
-        console.error('getStudentsCareerList students error:', studentError)
-        return []
-    }
-
-    if (!students || students.length === 0) {
-        return []
-    }
-
-    const studentIds = students.map(s => s.student_id_text)
-
-    // Fetch career infos for these students
-    const { data: careerInfos, error: careerError } = await supabase
-        .from('student_career_info')
-        .select('*')
-        .in('student_id', studentIds)
-
-    if (careerError) {
-        console.error('getStudentsCareerList careerInfo error:', careerError)
-        return students.map(s => ({ ...s, career_info: null }))
-    }
-
-    const careerMap = new Map(careerInfos?.map(info => [info.student_id, info]) || [])
-
-    return students.map(student => ({
-        ...student,
-        career_info: careerMap.get(student.student_id_text) || null
-    }))
-}
-
-/**
- * Saves/Upserts a student's career counseling info responses by an admin or teacher.
- */
-export async function saveStudentCareerInfoByAdmin(studentId, formData) {
-    const session = await getAdminMemberSession()
-    if (!session) {
-        return { success: false, error: 'Unauthorized' }
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!supabaseUrl || !supabaseServiceKey) {
-        return { success: false, error: 'Supabase configuration missing' }
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    const { data, error } = await supabase
-        .from('student_career_info')
-        .upsert({
-            student_id: studentId,
-            ...formData,
-            updated_at: new Date().toISOString()
-        }, {
-            onConflict: 'student_id'
-        })
-
-    if (error) {
-        console.error('saveStudentCareerInfoByAdmin error:', error)
-        return { success: false, error: error.message }
-    }
-
-    return { success: true }
-}
-
-/**
  * Fetches the list of active students and their career counseling info for a class.
  * Accessible only to authenticated admin members/teachers.
  */
@@ -631,4 +536,133 @@ export async function getStudentsExamSurveysList(className) {
         ...student,
         exam_surveys: surveysMap.get(student.student_id_text) || []
     }))
+}
+
+function getAdminSupabase() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Supabase config missing')
+    }
+    return createClient(supabaseUrl, supabaseServiceKey)
+}
+
+/**
+ * 学生用: 自身の入試予定を取得する
+ */
+export async function getStudentExamSchedulesSelf() {
+    const session = await getStudentSessionLight()
+    if (!session) return []
+
+    const supabase = getAdminSupabase()
+    const { data, error } = await supabase
+        .from('student_exam_schedules')
+        .select('*')
+        .eq('student_id', session.studentId)
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('getStudentExamSchedulesSelf error:', error)
+        return []
+    }
+    return data
+}
+
+/**
+ * 学生用: 自身の入試アンケート回答を取得する
+ */
+export async function getStudentExamSurveysSelf() {
+    const session = await getStudentSessionLight()
+    if (!session) return []
+
+    const supabase = getAdminSupabase()
+    const { data, error } = await supabase
+        .from('student_exam_surveys')
+        .select('*')
+        .eq('student_id', session.studentId)
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('getStudentExamSurveysSelf error:', error)
+        return []
+    }
+    return data
+}
+
+/**
+ * 学生用: 自身の入試予定を一括保存する
+ */
+export async function saveStudentExamSchedulesSelf(schedules) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+    
+    const res = await saveStudentExamSchedules(session.studentId, schedules)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
+}
+
+/**
+ * 学生用: 自身の入試アンケートを保存する
+ */
+export async function saveStudentExamSurveySelf(payload) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const supabase = getAdminSupabase()
+    if (payload.id) {
+        const { data } = await supabase
+            .from('student_exam_surveys')
+            .select('student_id')
+            .eq('id', payload.id)
+            .maybeSingle()
+        if (!data || data.student_id !== session.studentId) {
+            return { success: false, error: 'Unauthorized' }
+        }
+    }
+
+    const fullPayload = {
+        ...payload,
+        student_id: session.studentId,
+        student_name: session.name,
+        class_name: session.className
+    }
+
+    const res = await saveStudentExamSurvey(fullPayload)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
+}
+
+/**
+ * 学生用: 自身の入試アンケートを削除する
+ */
+export async function deleteStudentExamSurveySelf(surveyId) {
+    const session = await getStudentSessionLight()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const supabase = getAdminSupabase()
+    const { data } = await supabase
+        .from('student_exam_surveys')
+        .select('student_id')
+        .eq('id', surveyId)
+        .maybeSingle()
+
+    if (!data || data.student_id !== session.studentId) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const res = await deleteStudentExamSurvey(surveyId)
+    if (res.success) {
+        revalidatePath('/student/career')
+    }
+    return res
 }

@@ -2655,22 +2655,27 @@ export default function CareerManagementClient({
                                             キャンセル
                                         </button>
 
-                                        <button 
-                                            key="survey-submit-next-btn"
-                                            type={surveyStep < 5 ? 'button' : 'submit'}
-                                            onClick={surveyStep < 5 ? () => setSurveyStep(prev => prev + 1) : undefined}
-                                            className={surveyStep < 5 ? styles.nextBtn : styles.submitBtn}
-                                            disabled={savingSurvey}
-                                        >
-                                            {surveyStep < 5 ? (
-                                                '次へ'
-                                            ) : (
-                                                <>
-                                                    <Save size={16} />
-                                                    {savingSurvey ? '保存中...' : '変更を保存する'}
-                                                </>
-                                            )}
-                                        </button>
+                                         {surveyStep < 5 ? (
+                                             <button 
+                                                 key="survey-next-btn"
+                                                 type="button" 
+                                                 onClick={() => setSurveyStep(prev => prev + 1)}
+                                                 className={styles.nextBtn}
+                                                 disabled={savingSurvey}
+                                             >
+                                                 次へ
+                                             </button>
+                                         ) : (
+                                             <button 
+                                                 key="survey-submit-btn"
+                                                 type="submit"
+                                                 className={styles.submitBtn}
+                                                 disabled={savingSurvey}
+                                             >
+                                                 <Save size={16} />
+                                                 {savingSurvey ? '保存中...' : '変更を保存する'}
+                                             </button>
+                                         )}
                                     </div>
                                 </form>
                             )}

@@ -229,6 +229,8 @@
 .inputGroup input[type="number"],
 .inputGroup select,
 .inputGroup textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: var(--spacing-3);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -952,14 +954,6 @@
     .formRow4Col {
         grid-template-columns: 1fr;
         gap: 0;
-    }
-    
-    .formRow3Col {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    .formRow3Col > div:nth-child(3) {
-        grid-column: span 1;
     }
 }
 
