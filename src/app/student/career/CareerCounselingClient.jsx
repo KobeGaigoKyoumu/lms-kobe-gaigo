@@ -349,7 +349,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
         if (invalidIndices.length > 0) {
             setExamErrors(invalidIndices)
-            setExamError('入力されていない学校名があります。すべての学校名を入力するか、不要な行を削除してください。')
+            setExamError('入力されていない学校名があります。すべての学校名を入力してください。')
             setSavingExam(false)
             return
         }
@@ -1468,7 +1468,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                         /* EDIT MODE */
                         <div className={styles.wizardContainer}>
                             <p className={styles.wizardInstruction}>
-                                受験予定の学校について入力・修正してください。不要な行は削除してください。
+                                受験予定の学校について入力・修正してください。
                             </p>
 
                             <form onSubmit={handleSaveExams} className={styles.wizardForm}>
@@ -1545,13 +1545,15 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>合格/不合格の状況 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                    <label>試験の状況 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select
                                                         value={item.status}
                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
                                                         className={styles.selectInput}
                                                         required
                                                     >
+                                                        <option value="準備中">準備中</option>
+                                                        <option value="試験待ち">試験待ち</option>
                                                         <option value="結果待ち">結果待ち</option>
                                                         <option value="合格">合格</option>
                                                         <option value="不合格">不合格</option>
