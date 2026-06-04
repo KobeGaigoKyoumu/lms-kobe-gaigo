@@ -4,12 +4,18 @@ import { useState, useEffect } from 'react'
 import styles from './page.module.css'
 import { parseStudentId } from '@/lib/utils/studentId'
 import { getStudentDetail } from '@/app/actions/studentData'
+import { getStudentExamSchedules, deleteStudentExamSchedule } from '@/app/actions/career'
+
 
 export default function StudentDetailModal({ student: initialStudent, onClose }) {
     const [student, setStudent] = useState(initialStudent)
     const [loadingDetail, setLoadingDetail] = useState(true)
     const [jlptHistory, setJlptHistory] = useState([])
     const [loadingJlpt, setLoadingJlpt] = useState(true)
+    const [schedules, setSchedules] = useState([])
+    const [loadingSchedules, setLoadingSchedules] = useState(true)
+    const [showSchedulesModal, setShowSchedulesModal] = useState(false)
+
 
     // Fetch Full Detail
     useEffect(() => {
@@ -26,9 +32,21 @@ export default function StudentDetailModal({ student: initialStudent, onClose })
                     setLoadingDetail(false)
                 }
             }
+            const loadSchedules = async () => {
+                try {
+                    const data = await getStudentExamSchedules(initialStudent.student_id_text)
+                    setSchedules(data || [])
+                } catch (err) {
+                    console.error('Error fetching student exam schedules:', err)
+                } finally {
+                    setLoadingSchedules(false)
+                }
+            }
             loadDetail()
+            loadSchedules()
         }
     }, [initialStudent])
+
 
     useEffect(() => {
         if (student?.full_name || student?.student_id_text) {
@@ -87,6 +105,22 @@ export default function StudentDetailModal({ student: initialStudent, onClose })
         if (result === '不合格') return styles.resultFail
         return ''
     }
+
+    const handleDeleteSchedule = async (id) => {
+        if (!confirm('この入試予定を削除しますか？')) return
+        try {
+            const res = await deleteStudentExamSchedule(id)
+            if (res.success) {
+                setSchedules(prev => prev.filter(s => s.id !== id))
+            } else {
+                alert(`削除に失敗しました: ${res.error || '不明なエラー'}`)
+            }
+        } catch (err) {
+            console.error('Delete schedule error:', err)
+            alert('削除中にエラーが発生しました')
+        }
+    }
+
 
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
@@ -225,11 +259,33 @@ export default function StudentDetailModal({ student: initialStudent, onClose })
 
                     {/* 進学先情報 */}
                     <section className={styles.detailSection}>
-                        <h3>進学先情報</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3>進学先情報</h3>
+                            <button
+                                onClick={() => setShowSchedulesModal(true)}
+                                style={{
+                                    padding: '6px 12px',
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '6px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    color: '#374151'
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                入試予定の確認
+                            </button>
+                        </div>
                         <div className={styles.destinationName}>
                             {student.destination || '-'}
                         </div>
                     </section>
+
 
                     {/* JLPT受験履歴 */}
                     <section className={styles.detailSection}>
@@ -269,6 +325,82 @@ export default function StudentDetailModal({ student: initialStudent, onClose })
                     </section>
                 </div>
             </div>
+            {/* 入試予定の確認モーダル */}
+            {showSchedulesModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowSchedulesModal(false)}>
+                    <div className={styles.modalContent} style={{ maxWidth: '900px' }} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>入試予定の確認 ({student.full_name || student.student_id_text} さん)</h2>
+                            <button onClick={() => setShowSchedulesModal(false)} className={styles.closeBtn}>×</button>
+                        </div>
+                        <div className={styles.modalBody} style={{ padding: '20px' }}>
+                            {loadingSchedules ? (
+                                <p>読み込み中...</p>
+                            ) : schedules.length > 0 ? (
+                                <div className={styles.jlptTable} style={{ marginTop: '0' }}>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>受験予定校 (学部・学科・コース)</th>
+                                                <th>出願期間</th>
+                                                <th>入試日</th>
+                                                <th>合否発表日</th>
+                                                <th>合否</th>
+                                                <th style={{ width: '80px', textAlign: 'center' }}>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {schedules.map((sched) => (
+                                                <tr key={sched.id}>
+                                                    <td>
+                                                        <div style={{ fontWeight: 'bold' }}>{sched.school_name}</div>
+                                                        {sched.department_name && (
+                                                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>{sched.department_name}</div>
+                                                        )}
+                                                    </td>
+                                                    <td>{sched.application_period || '-'}</td>
+                                                    <td>{sched.exam_date || '-'}</td>
+                                                    <td>{sched.results_date || '-'}</td>
+                                                    <td>
+                                                        <span className={`${styles.statusBadge}`} style={{
+                                                            backgroundColor: sched.status === '合格' ? '#f0fdf4' : sched.status === '不合格' ? '#fef2f2' : '#fef9c3',
+                                                            color: sched.status === '合格' ? '#166534' : sched.status === '不合格' ? '#991b1b' : '#854d0e',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: '600'
+                                                        }}>
+                                                            {sched.status || '結果待ち'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <button
+                                                            onClick={() => handleDeleteSchedule(sched.id)}
+                                                            style={{
+                                                                padding: '4px 8px',
+                                                                backgroundColor: '#fef2f2',
+                                                                color: '#991b1b',
+                                                                border: '1px solid #fee2e2',
+                                                                borderRadius: '4px',
+                                                                fontSize: '0.75rem',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            削除
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className={styles.noData}>登録された入試予定はありません。</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

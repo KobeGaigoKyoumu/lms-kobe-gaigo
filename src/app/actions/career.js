@@ -71,6 +71,7 @@ export async function saveStudentCareerInfo(formData) {
 }
 
 /**
+<<<<<<< HEAD
  * Fetches the list of active students and their career counseling info for a class.
  * Accessible only to authenticated admin members/teachers.
  */
@@ -165,7 +166,101 @@ export async function saveStudentCareerInfoByAdmin(studentId, formData) {
 }
 
 /**
- * Fetches the exam schedules for a student.
+ * Fetches the list of active students and their career counseling info for a class.
+ * Accessible only to authenticated admin members/teachers.
+ */
+export async function getStudentsCareerList(className) {
+    const session = await getAdminMemberSession()
+    if (!session) return []
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Supabase config missing')
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Build the query to get active students
+    let query = supabase
+        .from('students')
+        .select('student_id_text, full_name, class_name, academic_year')
+        .eq('status', 'active')
+        .order('student_id_text', { ascending: true })
+
+    if (className && className !== 'all') {
+        query = query.eq('class_name', className)
+    }
+
+    const { data: students, error: studentError } = await query
+
+    if (studentError) {
+        console.error('getStudentsCareerList students error:', studentError)
+        return []
+    }
+
+    if (!students || students.length === 0) {
+        return []
+    }
+
+    const studentIds = students.map(s => s.student_id_text)
+
+    // Fetch career infos for these students
+    const { data: careerInfos, error: careerError } = await supabase
+        .from('student_career_info')
+        .select('*')
+        .in('student_id', studentIds)
+
+    if (careerError) {
+        console.error('getStudentsCareerList careerInfo error:', careerError)
+        return students.map(s => ({ ...s, career_info: null }))
+    }
+
+    const careerMap = new Map(careerInfos?.map(info => [info.student_id, info]) || [])
+
+    return students.map(student => ({
+        ...student,
+        career_info: careerMap.get(student.student_id_text) || null
+    }))
+}
+
+/**
+ * Saves/Upserts a student's career counseling info responses by an admin or teacher.
+ */
+export async function saveStudentCareerInfoByAdmin(studentId, formData) {
+    const session = await getAdminMemberSession()
+    if (!session) {
+        return { success: false, error: 'Unauthorized' }
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+        return { success: false, error: 'Supabase configuration missing' }
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data, error } = await supabase
+        .from('student_career_info')
+        .upsert({
+            student_id: studentId,
+            ...formData,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'student_id'
+        })
+
+    if (error) {
+        console.error('saveStudentCareerInfoByAdmin error:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true }
+}
+
+/**
+ * Fetches the exam schedules for a given student ID.
  */
 export async function getStudentExamSchedules(studentId) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -185,8 +280,31 @@ export async function getStudentExamSchedules(studentId) {
         console.error('getStudentExamSchedules error:', error)
         return []
     }
-
     return data || []
+}
+
+/**
+ * Deletes a student exam schedule record.
+ */
+export async function deleteStudentExamSchedule(id) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+        return { success: false, error: 'Supabase config missing' }
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { error } = await supabase
+        .from('student_exam_schedules')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('deleteStudentExamSchedule error:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true }
 }
 
 /**
@@ -514,5 +632,3 @@ export async function getStudentsExamSurveysList(className) {
         exam_surveys: surveysMap.get(student.student_id_text) || []
     }))
 }
-
-
