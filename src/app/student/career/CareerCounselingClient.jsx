@@ -593,7 +593,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <span className={styles.infoVal}>{data.preferred_region || '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>進学で引っ越しできるかどうか:</span>
+                                                <span className={styles.infoLabel}>進学で引っこしできるかどうか:</span>
                                                 <span className={styles.infoVal}>{data.can_move === '可' ? 'できる' : data.can_move === '不可' ? 'できない' : data.can_move}</span>
                                             </div>
                                             <div className={styles.infoRow}>
@@ -824,7 +824,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>進学で引っ越しできるかどうか</label>
+                                                    <label>進学で引っこしできるかどうか</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -847,7 +847,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         type="number" 
                                                         value={form.tuition_budget}
                                                         onChange={(e) => handleFieldChange('tuition_budget', e.target.value)}
-                                                        placeholder="金額を万円単位で入力 (例: 80)"
+                                                        placeholder="例: 80万円"
                                                         style={{ width: '200px', display: 'inline-block', marginRight: '8px' }}
                                                     />
                                                     <span>万円</span>
@@ -874,7 +874,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 type="number" 
                                                                 value={form.parent_support_amount}
                                                                 onChange={(e) => handleFieldChange('parent_support_amount', e.target.value)}
-                                                                placeholder="金額を万円単位で入力 (例: 60)"
+                                                                placeholder="例: 60万円"
                                                                 style={{ width: '200px', display: 'inline-block', marginRight: '8px' }}
                                                             />
                                                             <span>万円</span>
