@@ -435,10 +435,45 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     }
 
     const nextSurveyStep = () => {
+        const errors = []
+        if (surveyStep === 1) {
+            if (!surveyForm.school_type) errors.push('学校の種類')
+            if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
+            if (!surveyForm.department_name || !surveyForm.department_name.trim()) errors.push('学部・学科・コース')
+            if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) errors.push('試験の種類')
+        } else if (surveyStep === 2) {
+            if (surveyForm.essay_exists === 'あり') {
+                if (!surveyForm.essay_time) errors.push('作文・小論文の試験時間')
+                if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) errors.push('作文・小論文のテーマ')
+            }
+        } else if (surveyStep === 3) {
+            if (surveyForm.japanese_exists === 'あり') {
+                if (!surveyForm.japanese_time) errors.push('日本語の試験時間')
+                if (!surveyForm.japanese_level) errors.push('難しさのレベル')
+                if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
+                    errors.push('日本語の試験内容')
+                }
+            }
+        } else if (surveyStep === 4) {
+            if (surveyForm.interview_exists === 'あり') {
+                if (!surveyForm.interview_time) errors.push('面接時間')
+                if (!surveyForm.interview_teachers) errors.push('面接の先生の人数')
+                if (!surveyForm.interview_students) errors.push('一緒に面接を受けた学生の人数')
+                if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) errors.push('面接の質問①')
+            }
+        }
+
+        if (errors.length > 0) {
+            setSurveyError(`未回答の項目があります：${errors.join('、')} を入力・選択してください。`)
+            return
+        }
+
+        setSurveyError(null)
         setSurveyStep(prev => prev + 1)
     }
 
     const prevSurveyStep = () => {
+        setSurveyError(null)
         setSurveyStep(prev => prev - 1)
     }
 
@@ -454,7 +489,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setSurveyError(null)
         setSurveySuccessMsg(null)
 
-        // JSバリデーションチェック
+        // JSバリデーションチェック (全ステップ分)
         const errors = []
         if (!surveyForm.school_type) errors.push('学校の種類')
         if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
@@ -533,7 +568,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             console.error('Error saving survey:', err)
             setSurveyError('通信エラーが発生しました。')
         } finally {
-            setSurveyModalMode('list') // モーダルを閉じる
             setSavingSurvey(false)
         }
     }

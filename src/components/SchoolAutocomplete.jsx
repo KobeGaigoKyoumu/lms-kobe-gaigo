@@ -33,9 +33,6 @@ export default function SchoolAutocomplete({
                 // 入力値が空の状態でフォーカスアウトしたら、選択をクリアする
                 if (!inputValue.trim()) {
                     onChange('');
-                } else if (value && inputValue !== value) {
-                    // 入力内容を破棄して以前の選択に戻す
-                    setInputValue(value);
                 }
             }
         }
@@ -43,7 +40,7 @@ export default function SchoolAutocomplete({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [inputValue, value, onChange]);
+    }, [inputValue, onChange]);
 
     // 検索APIを叩く処理（デバウンス適用）
     const triggerSearch = (query) => {
@@ -82,11 +79,7 @@ export default function SchoolAutocomplete({
         setInputValue(val);
         setIsOpen(true);
         triggerSearch(val);
-        
-        // ユーザーが手動で空文字にした場合は即時親に通知
-        if (!val.trim()) {
-            onChange('');
-        }
+        onChange(val);
     };
 
     // 選択ハンドラ
