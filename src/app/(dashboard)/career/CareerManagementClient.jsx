@@ -241,13 +241,49 @@ export default function CareerManagementClient({
             return
         }
 
-        if (!surveyForm.school_name.trim()) {
-            setSurveyError('学校名を入力してください。')
-            return
+        // JSバリデーションチェック
+        const errors = []
+        if (!surveyForm.school_type) errors.push('学校の種類')
+        if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
+        if (!surveyForm.department_name || !surveyForm.department_name.trim()) errors.push('学部、学科、コース')
+        if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) errors.push('試験の種類')
+
+        if (surveyForm.essay_exists === 'あり') {
+            if (!surveyForm.essay_time) errors.push('作文・小論文の試験時間')
+            if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) errors.push('作文・小論文のテーマ')
         }
 
-        if (surveyForm.japanese_exists === 'あり' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
-            setSurveyError('日本語の試験の内容を少なくとも1つ選択してください。')
+        if (surveyForm.japanese_exists === 'あり') {
+            if (!surveyForm.japanese_time) errors.push('日本語の試験時間')
+            if (!surveyForm.japanese_level) errors.push('日本語の試験のレベル')
+            if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
+                errors.push('日本語の試験内容')
+            }
+        }
+
+        if (surveyForm.interview_exists === 'あり') {
+            if (!surveyForm.interview_time) errors.push('面接時間')
+            if (!surveyForm.interview_teachers) errors.push('面接官の先生の人数')
+            if (!surveyForm.interview_students) errors.push('同室の学生人数')
+            if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) errors.push('面接の質問①')
+        }
+
+        if (errors.length > 0) {
+            setSurveyError(`未回答の項目があります：${errors.join('、')} を入力・選択してください。`)
+            
+            // 最初のエラー項目に基づいて適切なステップに戻る
+            const firstError = errors[0]
+            if (['学校の種類', '学校名', '学部、学科、コース', '試験の種類'].includes(firstError)) {
+                setSurveyStep(1)
+            } else if (['作文・小論文の試験時間', '作文・小論文のテーマ'].includes(firstError)) {
+                setSurveyStep(2)
+            } else if (['日本語の試験時間', '日本語の試験のレベル', '日本語の試験内容'].includes(firstError)) {
+                setSurveyStep(3)
+            } else if (['面接時間', '面接官の先生の人数', '同室の学生人数', '面接の質問①'].includes(firstError)) {
+                setSurveyStep(4)
+            }
+            
+            setSavingSurvey(false)
             return
         }
 
@@ -2300,7 +2336,6 @@ export default function CareerManagementClient({
                                                     value={surveyForm.school_type}
                                                     onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
                                                     className={styles.selectInput}
-                                                    required
                                                 >
                                                     <option value="大学">大学</option>
                                                     <option value="大学院">大学院</option>
@@ -2316,7 +2351,6 @@ export default function CareerManagementClient({
                                                     value={surveyForm.school_name}
                                                     onChange={(val) => handleSurveyFieldChange('school_name', val)}
                                                     placeholder="学校名を入力してください"
-                                                    required
                                                 />
                                             </div>
 
@@ -2327,19 +2361,16 @@ export default function CareerManagementClient({
                                                     value={surveyForm.department_name}
                                                     onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
                                                     placeholder="例: 国際ビジネス学科"
-                                                    required
                                                 />
                                             </div>
 
                                             <div className={styles.inputGroup}>
-                                                <label>試験を受けた日 <span style={{ color: 'red' }}>*</span></label>
+                                                <label>試験を受けた日</label>
                                                 <input 
                                                     type="date" 
                                                     value={surveyForm.exam_date}
                                                     onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
-                                                    required
-                                                />
-                                            </div>
+                                                /></div>
 
                                             <div className={styles.inputGroup}>
                                                 <label>試験の種類 <span style={{ color: 'red' }}>*</span></label>
@@ -2347,7 +2378,6 @@ export default function CareerManagementClient({
                                                     value={surveyForm.exam_type}
                                                     onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
                                                     className={styles.selectInput}
-                                                    required
                                                 >
                                                     <option value="指定校推薦入試">指定校推薦入試</option>
                                                     <option value="公募推薦入試">公募推薦入試</option>
@@ -2391,7 +2421,6 @@ export default function CareerManagementClient({
                                                             onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
                                                             placeholder="例: 60"
                                                             style={{ width: '150px' }}
-                                                            required
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
@@ -2401,7 +2430,6 @@ export default function CareerManagementClient({
                                                             onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
                                                             placeholder="出題された作文のテーマやキーワードを記入してください。"
                                                             rows={4}
-                                                            required
                                                         />
                                                     </div>
                                                 </div>
@@ -2440,7 +2468,6 @@ export default function CareerManagementClient({
                                                             onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
                                                             placeholder="例: 45"
                                                             style={{ width: '150px' }}
-                                                            required
                                                         />
                                                     </div>
                                                     
@@ -2451,7 +2478,6 @@ export default function CareerManagementClient({
                                                             onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
                                                             className={styles.selectInput}
                                                             style={{ width: '200px' }}
-                                                            required
                                                         >
                                                             <option value="N1">N1程度</option>
                                                             <option value="N2">N2程度</option>
@@ -2516,7 +2542,6 @@ export default function CareerManagementClient({
                                                                 value={surveyForm.interview_time}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
                                                                 placeholder="例: 15"
-                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
@@ -2526,7 +2551,6 @@ export default function CareerManagementClient({
                                                                 value={surveyForm.interview_teachers}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
                                                                 placeholder="例: 2"
-                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
@@ -2536,7 +2560,6 @@ export default function CareerManagementClient({
                                                                 value={surveyForm.interview_students}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
                                                                 placeholder="例: 1"
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -2549,7 +2572,6 @@ export default function CareerManagementClient({
                                                                 type="text" 
                                                                 value={surveyForm.interview_question_1}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
-                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>

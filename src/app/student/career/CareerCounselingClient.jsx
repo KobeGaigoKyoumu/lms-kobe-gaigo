@@ -363,14 +363,48 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setSurveyError(null)
         setSurveySuccessMsg(null)
 
-        if (!surveyForm.school_name) {
-            setSurveyError('学校名を入力してください。')
-            setSavingSurvey(false)
-            return
+        // JSバリデーションチェック
+        const errors = []
+        if (!surveyForm.school_type) errors.push('学校の種類')
+        if (!surveyForm.school_name || !surveyForm.school_name.trim()) errors.push('学校名')
+        if (!surveyForm.department_name || !surveyForm.department_name.trim()) errors.push('学部・学科・コース')
+        if (!surveyForm.exam_type || !surveyForm.exam_type.trim()) errors.push('試験の種類')
+
+        if (surveyForm.essay_exists === 'あり') {
+            if (!surveyForm.essay_time) errors.push('作文・小論文の試験時間')
+            if (!surveyForm.essay_theme || !surveyForm.essay_theme.trim()) errors.push('作文・小論文のテーマ')
         }
 
-        if (surveyForm.japanese_exists === 'あり' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
-            setSurveyError('日本語の試験の内容を少なくとも1つ選択してください。')
+        if (surveyForm.japanese_exists === 'あり') {
+            if (!surveyForm.japanese_time) errors.push('日本語の試験時間')
+            if (!surveyForm.japanese_level) errors.push('難しさのレベル')
+            if (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0) {
+                errors.push('日本語の試験内容')
+            }
+        }
+
+        if (surveyForm.interview_exists === 'あり') {
+            if (!surveyForm.interview_time) errors.push('面接時間')
+            if (!surveyForm.interview_teachers) errors.push('面接の先生の人数')
+            if (!surveyForm.interview_students) errors.push('一緒に面接を受けた学生の人数')
+            if (!surveyForm.interview_question_1 || !surveyForm.interview_question_1.trim()) errors.push('面接の質問①')
+        }
+
+        if (errors.length > 0) {
+            setSurveyError(`未回答の項目があります：${errors.join('、')} を入力・選択してください。`)
+            
+            // 最初のエラー項目に基づいて適切なステップに戻る
+            const firstError = errors[0]
+            if (['学校の種類', '学校名', '学部・学科・コース', '試験の種類'].includes(firstError)) {
+                setSurveyStep(1)
+            } else if (['作文・小論文の試験時間', '作文・小論文のテーマ'].includes(firstError)) {
+                setSurveyStep(2)
+            } else if (['日本語 of 試験の内容', '日本語の試験内容', '日本語の試験時間', '難しさのレベル'].includes(firstError)) {
+                setSurveyStep(3)
+            } else if (['面接時間', '面接の先生の人数', '一緒に面接を受けた学生の人数', '面接の質問①'].includes(firstError)) {
+                setSurveyStep(4)
+            }
+            
             setSavingSurvey(false)
             return
         }
@@ -1584,7 +1618,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         value={surveyForm.school_type}
                                                         onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
                                                         className={styles.selectInput}
-                                                        required
                                                     >
                                                         <option value="大学">大学</option>
                                                         <option value="大学院">大学院</option>
@@ -1600,7 +1633,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         value={surveyForm.school_name}
                                                         onChange={(val) => handleSurveyFieldChange('school_name', val)}
                                                         placeholder="学校名を入力または選択"
-                                                        required
                                                     />
                                                 </div>
 
@@ -1612,7 +1644,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             value={surveyForm.department_name}
                                                             onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
                                                             placeholder="例: グローバルビジネスコース"
-                                                            required
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
@@ -1622,19 +1653,17 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             value={surveyForm.exam_type}
                                                             onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
                                                             placeholder="例: AO入試、指定校推薦、一般"
-                                                            required
                                                         />
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.inputGroup}>
-                                                    <label>試験日 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                    <label>試験日</label>
                                                     <input 
                                                         type="text" 
                                                         value={surveyForm.exam_date}
                                                         onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
                                                         placeholder="例: 2026/10/10"
-                                                        required
                                                     />
                                                 </div>
                                             </div>
@@ -1670,7 +1699,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 value={surveyForm.essay_time}
                                                                 onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
                                                                 placeholder="例: 60"
-                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
@@ -1680,7 +1708,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                 onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
                                                                 placeholder="作文・小論文のテーマを書いてください。"
                                                                 rows={4}
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -1719,7 +1746,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     value={surveyForm.japanese_time}
                                                                     onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
                                                                     placeholder="例: 45"
-                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
@@ -1728,7 +1754,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     value={surveyForm.japanese_level}
                                                                     onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
                                                                     className={styles.selectInput}
-                                                                    required
                                                                 >
                                                                     <option value="N1">JLPT N1レベル</option>
                                                                     <option value="N2">JLPT N2レベル</option>
@@ -1794,7 +1819,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     value={surveyForm.interview_time}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
                                                                     placeholder="例: 15"
-                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
@@ -1804,7 +1828,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     value={surveyForm.interview_teachers}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
                                                                     placeholder="例: 2"
-                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
@@ -1814,7 +1837,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     value={surveyForm.interview_students}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
                                                                     placeholder="例: 1"
-                                                                    required
                                                                 />
                                                             </div>
                                                         </div>
@@ -1827,7 +1849,6 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                                     type="text" 
                                                                     value={surveyForm.interview_question_1}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
-                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
