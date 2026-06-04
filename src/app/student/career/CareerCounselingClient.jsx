@@ -1013,12 +1013,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <div className={styles.formRow2Col}>
                                                         <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_school') ? styles.inputGroupError : ''}`}>
                                                             <label>行きたい学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
-                                                            <input 
-                                                                type="text" 
+                                                            <SchoolAutocomplete
                                                                 value={form.first_choice_school}
-                                                                onChange={(e) => handleFieldChange('first_choice_school', e.target.value)}
+                                                                onChange={(val) => handleFieldChange('first_choice_school', val)}
                                                                 placeholder="例: 神戸国際大学"
-
                                                             />
                                                         </div>
                                                         <div className={`${styles.inputGroup} ${careerErrors.includes('first_choice_department') ? styles.inputGroupError : ''}`}>
@@ -1049,10 +1047,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <div className={styles.formRow2Col}>
                                                         <div className={styles.inputGroup}>
                                                             <label>行きたい学校の名前</label>
-                                                            <input 
-                                                                type="text" 
+                                                            <SchoolAutocomplete
                                                                 value={form.second_choice_school}
-                                                                onChange={(e) => handleFieldChange('second_choice_school', e.target.value)}
+                                                                onChange={(val) => handleFieldChange('second_choice_school', val)}
+                                                                placeholder="学校名を入力または選択"
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
@@ -1079,10 +1077,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <div className={styles.formRow2Col}>
                                                         <div className={styles.inputGroup}>
                                                             <label>行きたい学校の名前</label>
-                                                            <input 
-                                                                type="text" 
+                                                            <SchoolAutocomplete
                                                                 value={form.third_choice_school}
-                                                                onChange={(e) => handleFieldChange('third_choice_school', e.target.value)}
+                                                                onChange={(val) => handleFieldChange('third_choice_school', val)}
+                                                                placeholder="学校名を入力または選択"
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
