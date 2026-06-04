@@ -564,6 +564,21 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         </div>
                                                     </div>
                                                 )}
+                                                 {data.third_choice_school && (
+                                                     <div className={styles.choiceGroup}>
+                                                         <div className={styles.choiceHeader}>3番目に行きたい学校</div>
+                                                         <div className={styles.infoRow}>
+                                                             <span className={styles.infoLabel}>行きたい学校の名前:</span>
+                                                             <span className={styles.infoVal}>{data.third_choice_school} ({data.third_choice_department})</span>
+                                                         </div>
+                                                         {data.third_choice_reason && (
+                                                             <div className={styles.infoRow}>
+                                                                 <span className={styles.infoLabel}>行きたい理由:</span>
+                                                                 <span className={styles.infoValText}>{data.third_choice_reason}</span>
+                                                             </div>
+                                                         )}
+                                                     </div>
+                                                 )}
                                             </div>
                                         )}
 
@@ -613,7 +628,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <span className={styles.infoValText}>{data.post_grad_plans || '未記入'}</span>
                                             </div>
                                             <div className={styles.infoRow}>
-                                                <span className={styles.infoLabel}>担任への相談事項:</span>
+                                                <span className={styles.infoLabel}>クラスの先生に聞きたいこと、心配なこと:</span>
                                                 <span className={styles.infoValText}>{data.teacher_questions || '特になし'}</span>
                                             </div>
                                         </div>
@@ -766,11 +781,19 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             <input 
                                                                 type="text" 
                                                                 value={form.third_choice_department}
-                                                                onChange={(e) => handleFieldChange('third_choice_department', e.target.value)}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                                 onChange={(e) => handleFieldChange('third_choice_department', e.target.value)}
+                                                             />
+                                                         </div>
+                                                     </div>
+                                                     <div className={styles.inputGroup}>
+                                                         <label>行きたい理由</label>
+                                                         <textarea 
+                                                             value={form.third_choice_reason}
+                                                             onChange={(e) => handleFieldChange('third_choice_reason', e.target.value)}
+                                                             rows={2}
+                                                         />
+                                                     </div>
+                                                 </div>
                                             </div>
                                         )}
 
@@ -806,13 +829,13 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.can_move === '可' ? styles.radioBtnActive : ''}`}
-                                                            onClick={() => handleFieldChange('can_move', '可')}
-                                                        >可</button>
+                                                             onClick={() => handleFieldChange('can_move', '可')}
+                                                         >できる</button>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.can_move === '不可' ? styles.radioBtnActive : ''}`}
-                                                            onClick={() => handleFieldChange('can_move', '不可')}
-                                                        >不可</button>
+                                                             onClick={() => handleFieldChange('can_move', '不可')}
+                                                         >できない</button>
                                                     </div>
                                                 </div>
 
@@ -836,13 +859,13 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.parent_support === '可' ? styles.radioBtnActive : ''}`}
-                                                            onClick={() => handleFieldChange('parent_support', '可')}
-                                                        >可</button>
+                                                             onClick={() => handleFieldChange('parent_support', '可')}
+                                                         >出せる</button>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.parent_support === '不可' ? styles.radioBtnActive : ''}`}
-                                                            onClick={() => handleFieldChange('parent_support', '不可')}
-                                                        >不可</button>
+                                                             onClick={() => handleFieldChange('parent_support', '不可')}
+                                                         >出せない</button>
                                                     </div>
                                                     {form.parent_support === '可' && (
                                                         <div className={styles.inputGroup} style={{ marginTop: 'var(--spacing-3)' }}>
@@ -919,7 +942,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.inputGroup}>
-                                                    <label>担任に聞きたいこと・心配事</label>
+                                                    <label>クラスの先生に聞きたいこと、心配なこと</label>
                                                     <textarea 
                                                         value={form.teacher_questions}
                                                         onChange={(e) => handleFieldChange('teacher_questions', e.target.value)}
