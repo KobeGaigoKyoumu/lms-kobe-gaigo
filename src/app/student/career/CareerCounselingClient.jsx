@@ -369,6 +369,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             return
         }
 
+        if (surveyForm.japanese_exists === 'あり' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
+            setSurveyError('日本語の試験の内容を少なくとも1つ選択してください。')
+            setSavingSurvey(false)
+            return
+        }
+
         const payload = {
             ...surveyForm,
             japanese_content: JSON.stringify(surveyForm.japanese_content || [])
@@ -679,12 +685,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>日本語学校卒業後の予定</label>
+                                                    <label>日本語学校卒業後の予定 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select 
                                                         value={form.path_type}
                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
                                                         className={styles.selectInput}
+                                                        required
                                                     >
+                                                        <option value="">選択してください</option>
                                                         <option value="進学">進学</option>
                                                         <option value="就職">就職</option>
                                                         <option value="帰国">帰国</option>
@@ -1227,11 +1235,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>合格/不合格の状況</label>
+                                                    <label>合格/不合格の状況 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select
                                                         value={item.status}
                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
                                                         className={styles.selectInput}
+                                                        required
                                                     >
                                                         <option value="結果待ち">結果待ち</option>
                                                         <option value="合格">合格</option>
@@ -1570,11 +1579,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>1. 受験校の基本情報</h3>
                                                 
                                                 <div className={styles.inputGroup}>
-                                                    <label>試験を受けた学校の種類</label>
+                                                    <label>試験を受けた学校の種類 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select
                                                         value={surveyForm.school_type}
                                                         onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
                                                         className={styles.selectInput}
+                                                        required
                                                     >
                                                         <option value="大学">大学</option>
                                                         <option value="大学院">大学院</option>
@@ -1590,37 +1600,41 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         value={surveyForm.school_name}
                                                         onChange={(val) => handleSurveyFieldChange('school_name', val)}
                                                         placeholder="学校名を入力または選択"
+                                                        required
                                                     />
                                                 </div>
 
                                                 <div className={styles.formRow2Col}>
                                                     <div className={styles.inputGroup}>
-                                                        <label>学部・学科・コース</label>
+                                                        <label>学部・学科・コース <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <input 
                                                             type="text" 
                                                             value={surveyForm.department_name}
                                                             onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
                                                             placeholder="例: グローバルビジネスコース"
+                                                            required
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>試験の種類</label>
+                                                        <label>試験の種類 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                         <input 
                                                             type="text" 
                                                             value={surveyForm.exam_type}
                                                             onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
                                                             placeholder="例: AO入試、指定校推薦、一般"
+                                                            required
                                                         />
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.inputGroup}>
-                                                    <label>試験日</label>
+                                                    <label>試験日 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <input 
                                                         type="text" 
                                                         value={surveyForm.exam_date}
                                                         onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
                                                         placeholder="例: 2026/10/10"
+                                                        required
                                                     />
                                                 </div>
                                             </div>
@@ -1632,7 +1646,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>2. 作文・小論文試験</h3>
                                                 
                                                 <div className={styles.radioGroup}>
-                                                    <label>作文・小論文の試験がありましたか</label>
+                                                    <label>作文・小論文の試験がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1650,21 +1664,23 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 {surveyForm.essay_exists === 'あり' && (
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                         <div className={styles.inputGroup}>
-                                                            <label>試験時間 (分)</label>
+                                                            <label>試験時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <input 
                                                                 type="number" 
                                                                 value={surveyForm.essay_time}
                                                                 onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
                                                                 placeholder="例: 60"
+                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>テーマ</label>
+                                                            <label>テーマ <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                             <textarea 
                                                                 value={surveyForm.essay_theme}
                                                                 onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
                                                                 placeholder="作文・小論文のテーマを書いてください。"
                                                                 rows={4}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -1678,7 +1694,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>3. 日本語の筆記試験</h3>
                                                 
                                                 <div className={styles.radioGroup}>
-                                                    <label>日本語の試験がありましたか</label>
+                                                    <label>日本語の試験がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1697,20 +1713,22 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                         <div className={styles.formRow2Col}>
                                                             <div className={styles.inputGroup}>
-                                                                <label>試験時間 (分)</label>
+                                                                <label>試験時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
                                                                     value={surveyForm.japanese_time}
                                                                     onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
                                                                     placeholder="例: 45"
+                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
-                                                                <label>難しさのレベル (目安)</label>
+                                                                <label>難しさのレベル (目安) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <select
                                                                     value={surveyForm.japanese_level}
                                                                     onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
                                                                     className={styles.selectInput}
+                                                                    required
                                                                 >
                                                                     <option value="N1">JLPT N1レベル</option>
                                                                     <option value="N2">JLPT N2レベル</option>
@@ -1751,7 +1769,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>4. 面接試験</h3>
                                                 
                                                 <div className={styles.radioGroup}>
-                                                    <label>面接がありましたか</label>
+                                                    <label>面接がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1770,30 +1788,33 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                         <div className={styles.formRow3Col}>
                                                             <div className={styles.inputGroup}>
-                                                                <label>面接時間 (分)</label>
+                                                                <label>面接時間 (分) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
                                                                     value={surveyForm.interview_time}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
                                                                     placeholder="例: 15"
+                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
-                                                                <label>面接の先生の人数</label>
+                                                                <label>面接の先生の人数 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
                                                                     value={surveyForm.interview_teachers}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
                                                                     placeholder="例: 2"
+                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>
-                                                                <label>一緒に面接を受けた学生の人数 (自分も入れる)</label>
+                                                                <label>一緒に面接を受けた学生の人数 (自分も入れる) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="number" 
                                                                     value={surveyForm.interview_students}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
                                                                     placeholder="例: 1"
+                                                                    required
                                                                 />
                                                             </div>
                                                         </div>
@@ -1801,11 +1822,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
                                                             <label style={{ fontWeight: '600' }}>どんな質問をされましたか？</label>
                                                             <div className={styles.inputGroup}>
-                                                                <label style={{ fontSize: 'var(--font-size-xs)' }}>質問①</label>
+                                                                <label style={{ fontSize: 'var(--font-size-xs)' }}>質問① <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <input 
                                                                     type="text" 
                                                                     value={surveyForm.interview_question_1}
                                                                     onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
+                                                                    required
                                                                 />
                                                             </div>
                                                             <div className={styles.inputGroup}>

@@ -246,6 +246,11 @@ export default function CareerManagementClient({
             return
         }
 
+        if (surveyForm.japanese_exists === 'あり' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
+            setSurveyError('日本語の試験の内容を少なくとも1つ選択してください。')
+            return
+        }
+
         setSavingSurvey(true)
         setSurveyError(null)
         try {
@@ -2290,11 +2295,12 @@ export default function CareerManagementClient({
                                             <h3>1. 受験校の基本情報</h3>
                                             
                                             <div className={styles.inputGroup}>
-                                                <label>受験した学校の種別</label>
+                                                <label>受験した学校の種別 <span style={{ color: 'red' }}>*</span></label>
                                                 <select
                                                     value={surveyForm.school_type}
                                                     onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
                                                     className={styles.selectInput}
+                                                    required
                                                 >
                                                     <option value="大学">大学</option>
                                                     <option value="大学院">大学院</option>
@@ -2315,30 +2321,33 @@ export default function CareerManagementClient({
                                             </div>
 
                                             <div className={styles.inputGroup}>
-                                                <label>学部、学科、コース</label>
+                                                <label>学部、学科、コース <span style={{ color: 'red' }}>*</span></label>
                                                 <input 
                                                     type="text" 
                                                     value={surveyForm.department_name}
                                                     onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
                                                     placeholder="例: 国際ビジネス学科"
+                                                    required
                                                 />
                                             </div>
 
                                             <div className={styles.inputGroup}>
-                                                <label>試験を受けた日</label>
+                                                <label>試験を受けた日 <span style={{ color: 'red' }}>*</span></label>
                                                 <input 
                                                     type="date" 
                                                     value={surveyForm.exam_date}
                                                     onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
+                                                    required
                                                 />
                                             </div>
 
                                             <div className={styles.inputGroup}>
-                                                <label>試験の種類</label>
+                                                <label>試験の種類 <span style={{ color: 'red' }}>*</span></label>
                                                 <select
                                                     value={surveyForm.exam_type}
                                                     onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
                                                     className={styles.selectInput}
+                                                    required
                                                 >
                                                     <option value="指定校推薦入試">指定校推薦入試</option>
                                                     <option value="公募推薦入試">公募推薦入試</option>
@@ -2357,7 +2366,7 @@ export default function CareerManagementClient({
                                             <h3>2. 作文・小論文試験</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>作文・小論文がありましたか</label>
+                                                <label>作文・小論文がありましたか <span style={{ color: 'red' }}>*</span></label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
@@ -2375,22 +2384,24 @@ export default function CareerManagementClient({
                                             {surveyForm.essay_exists === 'あり' && (
                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                     <div className={styles.inputGroup}>
-                                                        <label>試験時間 (分)</label>
+                                                        <label>試験時間 (分) <span style={{ color: 'red' }}>*</span></label>
                                                         <input 
                                                             type="number" 
                                                             value={surveyForm.essay_time}
                                                             onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
                                                             placeholder="例: 60"
                                                             style={{ width: '150px' }}
+                                                            required
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>出題された作文・小論文のテーマを記入してください。</label>
+                                                        <label>出題された作文・小論文のテーマを記入してください。 <span style={{ color: 'red' }}>*</span></label>
                                                         <textarea 
                                                             value={surveyForm.essay_theme}
                                                             onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
                                                             placeholder="出題された作文のテーマやキーワードを記入してください。"
                                                             rows={4}
+                                                            required
                                                         />
                                                     </div>
                                                 </div>
@@ -2404,7 +2415,7 @@ export default function CareerManagementClient({
                                             <h3>3. 日本語の筆記試験</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>日本語の筆記試験がありましたか</label>
+                                                <label>日本語の筆記試験がありましたか <span style={{ color: 'red' }}>*</span></label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
@@ -2422,23 +2433,25 @@ export default function CareerManagementClient({
                                             {surveyForm.japanese_exists === 'あり' && (
                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                     <div className={styles.inputGroup}>
-                                                        <label>試験時間 (分)</label>
+                                                        <label>試験時間 (分) <span style={{ color: 'red' }}>*</span></label>
                                                         <input 
                                                             type="number" 
                                                             value={surveyForm.japanese_time}
                                                             onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
                                                             placeholder="例: 45"
                                                             style={{ width: '150px' }}
+                                                            required
                                                         />
                                                     </div>
                                                     
                                                     <div className={styles.inputGroup}>
-                                                        <label>日本語の試験のレベル</label>
+                                                        <label>日本語の試験のレベル <span style={{ color: 'red' }}>*</span></label>
                                                         <select
                                                             value={surveyForm.japanese_level}
                                                             onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
                                                             className={styles.selectInput}
                                                             style={{ width: '200px' }}
+                                                            required
                                                         >
                                                             <option value="N1">N1程度</option>
                                                             <option value="N2">N2程度</option>
@@ -2450,7 +2463,7 @@ export default function CareerManagementClient({
                                                     </div>
 
                                                     <div className={styles.inputGroup}>
-                                                        <label>日本語 of 試験の内容 (該当するものをすべて選択)</label>
+                                                        <label>日本語の試験の内容 (該当するものをすべて選択)</label>
                                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
                                                             {['漢字', '語彙', '文法', '読解', '聴解', '記述', 'その他'].map(item => {
                                                                 const isChecked = (surveyForm.japanese_content || []).includes(item)
@@ -2478,7 +2491,7 @@ export default function CareerManagementClient({
                                             <h3>4. 面接試験</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>面接がありましたか</label>
+                                                <label>面接がありましたか <span style={{ color: 'red' }}>*</span></label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
@@ -2497,30 +2510,33 @@ export default function CareerManagementClient({
                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                                                     <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--spacing-3)' }}>
                                                         <div className={styles.inputGroup}>
-                                                            <label>面接時間 (分)</label>
+                                                            <label>面接時間 (分) <span style={{ color: 'red' }}>*</span></label>
                                                             <input 
                                                                 type="number" 
                                                                 value={surveyForm.interview_time}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
                                                                 placeholder="例: 15"
+                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>面接官の先生の人数</label>
+                                                            <label>面接官の先生の人数 <span style={{ color: 'red' }}>*</span></label>
                                                             <input 
                                                                 type="number" 
                                                                 value={surveyForm.interview_teachers}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
                                                                 placeholder="例: 2"
+                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
-                                                            <label>同室の学生人数 (自身含む)</label>
+                                                            <label>同室の学生人数 (自身含む) <span style={{ color: 'red' }}>*</span></label>
                                                             <input 
                                                                 type="number" 
                                                                 value={surveyForm.interview_students}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
                                                                 placeholder="例: 1"
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -2528,11 +2544,12 @@ export default function CareerManagementClient({
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
                                                         <label style={{ fontWeight: '600' }}>どんな質問をされましたか？</label>
                                                         <div className={styles.inputGroup}>
-                                                            <label style={{ fontSize: 'var(--font-size-xs)' }}>質問①</label>
+                                                            <label style={{ fontSize: 'var(--font-size-xs)' }}>質問① <span style={{ color: 'red' }}>*</span></label>
                                                             <input 
                                                                 type="text" 
                                                                 value={surveyForm.interview_question_1}
                                                                 onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
+                                                                required
                                                             />
                                                         </div>
                                                         <div className={styles.inputGroup}>
