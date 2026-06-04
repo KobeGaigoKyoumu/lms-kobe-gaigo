@@ -860,34 +860,34 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>銀行預金通帳の定期的な記帳</label>
+                                                    <label>アルバイトの給料が入る銀行通帳を銀行で使っているかどうか</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.passbook_updated === 'している' ? styles.radioBtnActive : ''}`}
                                                             onClick={() => handleFieldChange('passbook_updated', 'している')}
-                                                        >している</button>
+                                                        >使っている</button>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.passbook_updated === 'していない' ? styles.radioBtnActive : ''}`}
                                                             onClick={() => handleFieldChange('passbook_updated', 'していない')}
-                                                        >していない</button>
+                                                        >使っていない</button>
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.radioGroup}>
-                                                    <label>全アルバイト履歴の給与明細書の保管</label>
+                                                    <label>日本に来てから今までの全部のアルバイトの給与明細書があるかどうか</label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.pay_slips_available === '有' ? styles.radioBtnActive : ''}`}
                                                             onClick={() => handleFieldChange('pay_slips_available', '有')}
-                                                        >有</button>
+                                                        >ある</button>
                                                         <button 
                                                             type="button" 
                                                             className={`${styles.radioBtn} ${form.pay_slips_available === '無' ? styles.radioBtnActive : ''}`}
                                                             onClick={() => handleFieldChange('pay_slips_available', '無')}
-                                                        >無</button>
+                                                        >ない</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -899,7 +899,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <h3>4. 受験予定・卒業後の予定</h3>
 
                                                 <div className={styles.inputGroup}>
-                                                    <label>受験予定時期</label>
+                                                    <label>入学試験を受けるだいたいの時期</label>
                                                     <input 
                                                         type="text" 
                                                         value={form.exam_schedule}
