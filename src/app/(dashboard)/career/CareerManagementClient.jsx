@@ -2354,10 +2354,10 @@ export default function CareerManagementClient({
                                     {/* ステップ2: 作文・小論文 */}
                                     {surveyStep === 2 && (
                                         <div className={styles.formStep}>
-                                            <h3>2. 作文・小論文の試験</h3>
+                                            <h3>2. 作文・小論文試験</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>作文、小論文の試験がありましたか</label>
+                                                <label>作文・小論文がありましたか</label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
@@ -2385,7 +2385,7 @@ export default function CareerManagementClient({
                                                         />
                                                     </div>
                                                     <div className={styles.inputGroup}>
-                                                        <label>作文・小論文のテーマを書いてください</label>
+                                                        <label>出題された作文・小論文のテーマを記入してください。</label>
                                                         <textarea 
                                                             value={surveyForm.essay_theme}
                                                             onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
@@ -2401,10 +2401,10 @@ export default function CareerManagementClient({
                                     {/* ステップ3: 日本語の試験 */}
                                     {surveyStep === 3 && (
                                         <div className={styles.formStep}>
-                                            <h3>3. 日本語の試験</h3>
+                                            <h3>3. 日本語の筆記試験</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>日本語の試験がありましたか</label>
+                                                <label>日本語の筆記試験がありましたか</label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
@@ -2450,7 +2450,7 @@ export default function CareerManagementClient({
                                                     </div>
 
                                                     <div className={styles.inputGroup}>
-                                                        <label>日本語の試験の内容 (該当するものをすべて選択)</label>
+                                                        <label>日本語 of 試験の内容 (該当するものをすべて選択)</label>
                                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
                                                             {['漢字', '語彙', '文法', '読解', '聴解', '記述', 'その他'].map(item => {
                                                                 const isChecked = (surveyForm.japanese_content || []).includes(item)
@@ -2579,7 +2579,7 @@ export default function CareerManagementClient({
                                             <h3>5. その他・後輩へのアドバイス</h3>
                                             
                                             <div className={styles.radioGroup}>
-                                                <label>その他に試験がありましたか</label>
+                                                <label>作文・小論文・日本語・面接以外の試験がありましたか</label>
                                                 <div className={styles.radioOptions}>
                                                     <button 
                                                         type="button" 
