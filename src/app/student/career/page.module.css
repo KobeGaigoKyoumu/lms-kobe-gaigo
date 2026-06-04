@@ -976,4 +976,15 @@
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
 }
 
+/* Radio group validation error styling */
+.radioGroupError label {
+    color: var(--error-700) !important;
+}
+
+.radioGroupError .radioBtn {
+    border-color: var(--error-300) !important;
+    background-color: var(--error-50) !important;
+}
+
+
 

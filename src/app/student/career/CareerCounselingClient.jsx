@@ -74,19 +74,19 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [surveyErrors, setSurveyErrors] = useState([])
 
     const [surveyForm, setSurveyForm] = useState({
-        school_type: '大学',
+        school_type: '',
         school_name: '',
         exam_date: '',
         department_name: '',
-        exam_type: '一般',
-        essay_exists: 'なし',
+        exam_type: '',
+        essay_exists: '',
         essay_time: '',
         essay_theme: '',
-        japanese_exists: 'なし',
+        japanese_exists: '',
         japanese_time: '',
-        japanese_level: 'N2',
+        japanese_level: '',
         japanese_content: [],
-        interview_exists: 'なし',
+        interview_exists: '',
         interview_time: '',
         interview_teachers: '',
         interview_students: '',
@@ -105,7 +105,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [form, setForm] = useState({
         class_name: initialData?.class_name || session?.className || '',
         student_name: initialData?.student_name || session?.name || '',
-        path_type: initialData?.path_type || '進学',
+        path_type: initialData?.path_type || '',
         first_choice_school: initialData?.first_choice_school || '',
         first_choice_reason: initialData?.first_choice_reason || '',
         first_choice_department: initialData?.first_choice_department || '',
@@ -117,12 +117,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         third_choice_department: initialData?.third_choice_department || '',
         preferred_field: initialData?.preferred_field || '',
         preferred_region: initialData?.preferred_region || '',
-        can_move: initialData?.can_move || '可',
+        can_move: initialData?.can_move || '',
         tuition_budget: initialData?.tuition_budget || '',
-        parent_support: initialData?.parent_support || '可',
+        parent_support: initialData?.parent_support || '',
         parent_support_amount: initialData?.parent_support_amount || '',
-        passbook_updated: initialData?.passbook_updated || 'している',
-        pay_slips_available: initialData?.pay_slips_available || '有',
+        passbook_updated: initialData?.passbook_updated || '',
+        pay_slips_available: initialData?.pay_slips_available || '',
         exam_schedule: initialData?.exam_schedule || '',
         post_grad_plans: initialData?.post_grad_plans || '',
         teacher_questions: initialData?.teacher_questions || ''
@@ -156,6 +156,23 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             if (!form.first_choice_reason || !form.first_choice_reason.trim()) {
                 errors.push('1番行きたい学校の行きたい理由')
                 fields.push('first_choice_reason')
+            }
+        } else if (currentStep === 3) {
+            if (!form.can_move) {
+                errors.push('進学で引っこしできるかどうか')
+                fields.push('can_move')
+            }
+            if (!form.parent_support) {
+                errors.push('両親が学費のお金を出せるかどうか')
+                fields.push('parent_support')
+            }
+            if (!form.passbook_updated) {
+                errors.push('銀行通帳を使っているかどうか')
+                fields.push('passbook_updated')
+            }
+            if (!form.pay_slips_available) {
+                errors.push('アルバイトの給与明細書があるかどうか')
+                fields.push('pay_slips_available')
             }
         }
 
@@ -228,7 +245,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setForm({
             class_name: data?.class_name || session?.className || '',
             student_name: data?.student_name || session?.name || '',
-            path_type: data?.path_type || '進学',
+            path_type: data?.path_type || '',
             first_choice_school: data?.first_choice_school || '',
             first_choice_reason: data?.first_choice_reason || '',
             first_choice_department: data?.first_choice_department || '',
@@ -240,12 +257,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             third_choice_department: data?.third_choice_department || '',
             preferred_field: data?.preferred_field || '',
             preferred_region: data?.preferred_region || '',
-            can_move: data?.can_move || '可',
+            can_move: data?.can_move || '',
             tuition_budget: data?.tuition_budget || '',
-            parent_support: data?.parent_support || '可',
+            parent_support: data?.parent_support || '',
             parent_support_amount: data?.parent_support_amount || '',
-            passbook_updated: data?.passbook_updated || 'している',
-            pay_slips_available: data?.pay_slips_available || '有',
+            passbook_updated: data?.passbook_updated || '',
+            pay_slips_available: data?.pay_slips_available || '',
             exam_schedule: data?.exam_schedule || '',
             post_grad_plans: data?.post_grad_plans || '',
             teacher_questions: data?.teacher_questions || ''
@@ -268,7 +285,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 _app_period_end: '',
                 exam_date: '', 
                 results_date: '', 
-                status: '結果待ち' 
+                status: '' 
             }])
         } else {
             setExamFormList(examSchedulesList.map(s => {
@@ -312,7 +329,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 _app_period_end: '',
                 exam_date: '', 
                 results_date: '', 
-                status: '結果待ち' 
+                status: '' 
             }
         ])
     }
@@ -342,14 +359,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
         const invalidIndices = []
         examFormList.forEach((item, idx) => {
-            if (!item.school_name || !item.school_name.trim()) {
+            if (!item.school_name || !item.school_name.trim() || !item.status) {
                 invalidIndices.push(idx)
             }
         })
 
         if (invalidIndices.length > 0) {
             setExamErrors(invalidIndices)
-            setExamError('入力されていない学校名があります。すべての学校名を入力してください。')
+            setExamError('入力されていない学校名または試験の状況があります。すべての項目を入力・選択してください。')
             setSavingExam(false)
             return
         }
@@ -461,19 +478,19 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
     const startEditingSurvey = (survey) => {
         const defaultForm = {
-            school_type: '大学',
+            school_type: '',
             school_name: '',
             exam_date: '',
             department_name: '',
-            exam_type: '一般',
-            essay_exists: 'なし',
+            exam_type: '',
+            essay_exists: '',
             essay_time: '',
             essay_theme: '',
-            japanese_exists: 'なし',
+            japanese_exists: '',
             japanese_time: '',
-            japanese_level: 'N2',
+            japanese_level: '',
             japanese_content: [],
-            interview_exists: 'なし',
+            interview_exists: '',
             interview_time: '',
             interview_teachers: '',
             interview_students: '',
@@ -535,7 +552,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 fields.push('exam_type')
             }
         } else if (currentStep === 2) {
-            if (surveyForm.essay_exists === 'あり') {
+            if (!surveyForm.essay_exists) {
+                errors.push('作文・小論文試験の有無')
+                fields.push('essay_exists')
+            } else if (surveyForm.essay_exists === 'あり') {
                 if (!surveyForm.essay_time) {
                     errors.push('作文・小論文の試験時間')
                     fields.push('essay_time')
@@ -546,7 +566,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 }
             }
         } else if (currentStep === 3) {
-            if (surveyForm.japanese_exists === 'あり') {
+            if (!surveyForm.japanese_exists) {
+                errors.push('日本語試験の有無')
+                fields.push('japanese_exists')
+            } else if (surveyForm.japanese_exists === 'あり') {
                 if (!surveyForm.japanese_time) {
                     errors.push('日本語の試験時間')
                     fields.push('japanese_time')
@@ -561,7 +584,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 }
             }
         } else if (currentStep === 4) {
-            if (surveyForm.interview_exists === 'あり') {
+            if (!surveyForm.interview_exists) {
+                errors.push('面接試験の有無')
+                fields.push('interview_exists')
+            } else if (surveyForm.interview_exists === 'あり') {
                 if (!surveyForm.interview_time) {
                     errors.push('面接時間')
                     fields.push('interview_time')
@@ -1106,8 +1132,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     </div>
                                                 </div>
 
-                                                <div className={styles.radioGroup}>
-                                                    <label>進学で引っこしできるかどうか</label>
+                                                <div className={`${styles.radioGroup} ${careerErrors.includes('can_move') ? styles.radioGroupError : ''}`}>
+                                                    <label>進学で引っこしできるかどうか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1136,8 +1162,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     <span>万円</span>
                                                 </div>
 
-                                                <div className={styles.radioGroup}>
-                                                    <label>両親が学費のお金を出せるかどうか</label>
+                                                <div className={`${styles.radioGroup} ${careerErrors.includes('parent_support') ? styles.radioGroupError : ''}`}>
+                                                    <label>両親が学費のお金を出せるかどうか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1165,8 +1191,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     )}
                                                 </div>
 
-                                                <div className={styles.radioGroup}>
-                                                    <label>アルバイトの給料が入る銀行通帳を銀行で使っているかどうか</label>
+                                                <div className={`${styles.radioGroup} ${careerErrors.includes('passbook_updated') ? styles.radioGroupError : ''}`}>
+                                                    <label>アルバイトの給料が入る銀行通帳を銀行で使っているかどうか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1181,8 +1207,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     </div>
                                                 </div>
 
-                                                <div className={styles.radioGroup}>
-                                                    <label>日本に来てから今までの全部のアルバイトの給与明細書があるかどうか</label>
+                                                <div className={`${styles.radioGroup} ${careerErrors.includes('pay_slips_available') ? styles.radioGroupError : ''}`}>
+                                                    <label>日本に来てから今までの全部のアルバイトの給与明細書があるかどうか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
                                                             type="button" 
@@ -1258,7 +1284,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         setForm({
                                                             class_name: session?.className || '',
                                                             student_name: session?.name || '',
-                                                            path_type: '進学',
+                                                            path_type: '',
                                                             first_choice_school: '',
                                                             first_choice_reason: '',
                                                             first_choice_department: '',
@@ -1270,12 +1296,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             third_choice_department: '',
                                                             preferred_field: '',
                                                             preferred_region: '',
-                                                            can_move: '可',
+                                                            can_move: '',
                                                             tuition_budget: '',
-                                                            parent_support: '可',
+                                                            parent_support: '',
                                                             parent_support_amount: '',
-                                                            passbook_updated: 'している',
-                                                            pay_slips_available: '有',
+                                                            passbook_updated: '',
+                                                            pay_slips_available: '',
                                                             exam_schedule: '',
                                                             post_grad_plans: '',
                                                             teacher_questions: ''
@@ -1544,14 +1570,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         onChange={(e) => handleExamFieldChange(index, 'results_date', e.target.value)}
                                                     />
                                                 </div>
-                                                <div className={styles.inputGroup}>
+                                                <div className={`${styles.inputGroup} ${examErrors.includes(index) && !item.status ? styles.inputGroupError : ''}`}>
                                                     <label>試験の状況 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <select
                                                         value={item.status}
                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
                                                         className={styles.selectInput}
-                                                        required
                                                     >
+                                                        <option value="">選択してください</option>
                                                         <option value="準備中">準備中</option>
                                                         <option value="試験待ち">試験待ち</option>
                                                         <option value="結果待ち">結果待ち</option>
@@ -1909,6 +1935,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
                                                         className={styles.selectInput}
                                                     >
+                                                        <option value="">選択してください</option>
                                                         <option value="大学">大学</option>
                                                         <option value="大学院">大学院</option>
                                                         <option value="短大">短大</option>
@@ -1963,7 +1990,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <div className={styles.formStep}>
                                                 <h3>2. 作文・小論文試験</h3>
                                                 
-                                                <div className={styles.radioGroup}>
+                                                <div className={`${styles.radioGroup} ${surveyErrors.includes('essay_exists') ? styles.radioGroupError : ''}`}>
                                                     <label>作文・小論文の試験がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
@@ -2009,7 +2036,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <div className={styles.formStep}>
                                                 <h3>3. 日本語の筆記試験</h3>
                                                 
-                                                <div className={styles.radioGroup}>
+                                                <div className={`${styles.radioGroup} ${surveyErrors.includes('japanese_exists') ? styles.radioGroupError : ''}`}>
                                                     <label>日本語の試験がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
@@ -2040,10 +2067,11 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                             <div className={`${styles.inputGroup} ${surveyErrors.includes('japanese_level') ? styles.inputGroupError : ''}`}>
                                                                 <label>難しさのレベル (目安) <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                                 <select
-                                                                    value={surveyForm.japanese_level}
+                                                                    value={surveyForm.japanese_level || ''}
                                                                     onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
                                                                     className={styles.selectInput}
                                                                 >
+                                                                    <option value="">選択してください</option>
                                                                     <option value="N1">JLPT N1レベル</option>
                                                                     <option value="N2">JLPT N2レベル</option>
                                                                     <option value="N3">JLPT N3レベル</option>
@@ -2082,7 +2110,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <div className={styles.formStep}>
                                                 <h3>4. 面接試験</h3>
                                                 
-                                                <div className={styles.radioGroup}>
+                                                <div className={`${styles.radioGroup} ${surveyErrors.includes('interview_exists') ? styles.radioGroupError : ''}`}>
                                                     <label>面接がありましたか <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <div className={styles.radioOptions}>
                                                         <button 
