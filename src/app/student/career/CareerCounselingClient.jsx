@@ -660,7 +660,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 const updatedSurveyItem = {
                     ...surveyForm,
                     exam_date: formatToSave(surveyForm.exam_date),
-                    id: selectedSurvey?.id || 'temp-' + Date.now()
+                    id: selectedSurvey?.id || res.id
                 }
 
                 if (selectedSurvey?.id) {

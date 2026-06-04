@@ -432,6 +432,8 @@ export async function saveStudentExamSurvey(surveyData) {
                 ...dataToSave,
                 created_at: new Date().toISOString()
             })
+            .select('id')
+            .single()
     }
     
     if (result.error) {
@@ -439,7 +441,7 @@ export async function saveStudentExamSurvey(surveyData) {
         return { success: false, error: result.error.message }
     }
     
-    return { success: true }
+    return { success: true, id: result.data?.id }
 }
 
 /**
