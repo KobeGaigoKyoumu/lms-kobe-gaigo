@@ -1052,10 +1052,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <table className={styles.table}>
                                                 <thead>
                                                     <tr>
-                                                        <th>受験予定校 (学部・学科・コース)</th>
-                                                        <th>出願期間</th>
-                                                        <th>入試日</th>
-                                                        <th>合否発表日</th>
+                                                        <th>受験予定校 (学部・学科・コースの名前)</th>
+                                                        <th>書類を出す期間</th>
+                                                        <th>入学試験の日</th>
+                                                        <th>合格/不合格の状況</th>
                                                         <th className={styles.textCenter}>合否</th>
                                                         <th className={styles.textCenter}>操作</th>
                                                     </tr>
@@ -1124,15 +1124,15 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                         <div className={styles.examCardDept}>{schedule.department_name}</div>
                                                     )}
                                                     <div className={styles.examCardRow}>
-                                                        <span className={styles.examCardLabel}>出願期間</span>
+                                                        <span className={styles.examCardLabel}>書類を出す期間</span>
                                                         <span className={styles.examCardValue}>{schedule.application_period || '-'}</span>
                                                     </div>
                                                     <div className={styles.examCardRow}>
-                                                        <span className={styles.examCardLabel}>入試日</span>
+                                                        <span className={styles.examCardLabel}>入学試験の日</span>
                                                         <span className={styles.examCardValue}>{schedule.exam_date || '-'}</span>
                                                     </div>
                                                     <div className={styles.examCardRow}>
-                                                        <span className={styles.examCardLabel}>合否発表日</span>
+                                                        <span className={styles.examCardLabel}>合格/不合格の状況</span>
                                                         <span className={styles.examCardValue}>{schedule.results_date || '-'}</span>
                                                     </div>
                                                     <div className={styles.examCardRow}>
@@ -1180,7 +1180,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             
                                             <div className={styles.formRow2Col}>
                                                 <div className={styles.inputGroup}>
-                                                    <label>受験校名 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                    <label>入学試験を受けるの学校の名前 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                                     <SchoolAutocomplete
                                                         value={item.school_name}
                                                         onChange={(val) => handleExamFieldChange(index, 'school_name', val)}
@@ -1188,7 +1188,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>学部・学科・コース</label>
+                                                    <label>学部・学科・コースの名前</label>
                                                     <input 
                                                         type="text" 
                                                         value={item.department_name}
@@ -1200,7 +1200,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
                                             <div className={styles.formRow4Col}>
                                                 <div className={styles.inputGroup}>
-                                                    <label>出願期間</label>
+                                                    <label>書類を出す期間</label>
                                                     <input 
                                                         type="text" 
                                                         value={item.application_period}
@@ -1209,7 +1209,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>入試日</label>
+                                                    <label>入学試験の日</label>
                                                     <input 
                                                         type="text" 
                                                         value={item.exam_date}
@@ -1218,7 +1218,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
-                                                    <label>合否発表日</label>
+                                                    <label>合格/不合格の状況</label>
                                                     <input 
                                                         type="text" 
                                                         value={item.results_date}
