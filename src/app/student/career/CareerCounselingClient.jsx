@@ -14,6 +14,35 @@ import {
 import SchoolAutocomplete from '@/components/SchoolAutocomplete'
 import styles from './page.module.css'
 
+// 日本語表記（例: 2月10日、2026/02/10、2026-02-10）を YYYY-MM-DD にパースする
+const parseToDateInput = (str) => {
+    if (!str) return ''
+    // 年月日形式 (例: 2026年2月10日, 2026/2/10, 2026-2-10)
+    let match = str.match(/(\d{4})[年\/\-](\d{1,2})[月\/\-](\d{1,2})日?/)
+    if (match) {
+        return `${match[1]}-${String(match[2]).padStart(2, '0')}-${String(match[3]).padStart(2, '0')}`
+    }
+    // 年なし形式 (例: 2月10日, 2/10) -> 現在の年を補完
+    match = str.match(/(\d{1,2})[月\/\-](\d{1,2})日?/)
+    if (match) {
+        const y = new Date().getFullYear()
+        return `${y}-${String(match[1]).padStart(2, '0')}-${String(match[2]).padStart(2, '0')}`
+    }
+    const parsed = Date.parse(str)
+    if (!isNaN(parsed)) {
+        return new Date(parsed).toISOString().split('T')[0]
+    }
+    return ''
+}
+
+// カレンダー入力値を保存用に YYYY/MM/DD にフォーマットする
+const formatToSave = (dateVal) => {
+    if (!dateVal) return ''
+    const d = new Date(dateVal)
+    if (isNaN(d.getTime())) return dateVal
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+}
+
 export default function CareerCounselingClient({ initialData, examSchedules, examSurveys, isSecondYear, session }) {
     const [activeTab, setActiveTab] = useState(isSecondYear ? 'career' : 'interview') // 2nd year default is career, 1st year default is interview
     const [data, setData] = useState(initialData || null)
@@ -173,9 +202,42 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     // 入試予定 (EXAM SCHEDULES) ロジック
     // ====================================================
     const startEditingExams = () => {
-        setExamFormList(examSchedulesList.length > 0 ? examSchedulesList.map(s => ({ ...s })) : [
-            { school_name: '', department_name: '', application_period: '', exam_date: '', results_date: '', status: '結果待ち' }
-        ])
+        if (examSchedulesList.length === 0) {
+            setExamFormList([{ 
+                school_name: '', 
+                department_name: '', 
+                _app_period_start: '',
+                _app_period_end: '',
+                exam_date: '', 
+                results_date: '', 
+                status: '結果待ち' 
+            }])
+        } else {
+            setExamFormList(examSchedulesList.map(s => {
+                let start = ''
+                let end = ''
+                if (s.application_period) {
+                    const parts = s.application_period.split(' 〜 ')
+                    if (parts.length === 2) {
+                        start = parseToDateInput(parts[0])
+                        end = parseToDateInput(parts[1])
+                    } else {
+                        const partsAlt = s.application_period.split('~')
+                        if (partsAlt.length === 2) {
+                            start = parseToDateInput(partsAlt[0])
+                            end = parseToDateInput(partsAlt[1])
+                        }
+                    }
+                }
+                return { 
+                    ...s, 
+                    _app_period_start: start,
+                    _app_period_end: end,
+                    exam_date: parseToDateInput(s.exam_date),
+                    results_date: parseToDateInput(s.results_date)
+                }
+            }))
+        }
         setIsEditingExams(true)
         setExamError(null)
         setExamSuccessMsg(null)
@@ -184,7 +246,15 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const addExamRow = () => {
         setExamFormList(prev => [
             ...prev,
-            { school_name: '', department_name: '', application_period: '', exam_date: '', results_date: '', status: '結果待ち' }
+            { 
+                school_name: '', 
+                department_name: '', 
+                _app_period_start: '',
+                _app_period_end: '',
+                exam_date: '', 
+                results_date: '', 
+                status: '結果待ち' 
+            }
         ])
     }
 
@@ -213,10 +283,30 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             return
         }
 
+        const validSchedules = filteredList.map(s => {
+            let appPeriod = ''
+            if (s._app_period_start && s._app_period_end) {
+                appPeriod = `${formatToSave(s._app_period_start)} 〜 ${formatToSave(s._app_period_end)}`
+            } else if (s._app_period_start) {
+                appPeriod = formatToSave(s._app_period_start)
+            } else if (s._app_period_end) {
+                appPeriod = formatToSave(s._app_period_end)
+            }
+
+            return {
+                school_name: s.school_name,
+                department_name: s.department_name,
+                application_period: appPeriod,
+                exam_date: formatToSave(s.exam_date),
+                results_date: formatToSave(s.results_date),
+                status: s.status
+            }
+        })
+
         try {
-            const res = await saveStudentExamSchedulesSelf(filteredList)
+            const res = await saveStudentExamSchedulesSelf(validSchedules)
             if (res.success) {
-                setExamSchedulesList(filteredList)
+                setExamSchedulesList(validSchedules)
                 setIsEditingExams(false)
                 setExamSuccessMsg('入試予定を保存しました。')
             } else {
@@ -324,6 +414,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             setSurveyForm({
                 ...defaultForm,
                 ...survey,
+                exam_date: parseToDateInput(survey.exam_date),
                 japanese_content: Array.isArray(survey.japanese_content) 
                     ? survey.japanese_content 
                     : (typeof survey.japanese_content === 'string' && survey.japanese_content.startsWith('[')
@@ -411,6 +502,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
         const payload = {
             ...surveyForm,
+            exam_date: formatToSave(surveyForm.exam_date),
             japanese_content: JSON.stringify(surveyForm.japanese_content || [])
         }
         if (selectedSurvey?.id) {
@@ -422,6 +514,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             if (res.success) {
                 const updatedSurveyItem = {
                     ...surveyForm,
+                    exam_date: formatToSave(surveyForm.exam_date),
                     id: selectedSurvey?.id || 'temp-' + Date.now()
                 }
 
@@ -1243,29 +1336,36 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <div className={styles.formRow4Col}>
                                                 <div className={styles.inputGroup}>
                                                     <label>書類を出す期間</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={item.application_period}
-                                                        onChange={(e) => handleExamFieldChange(index, 'application_period', e.target.value)}
-                                                        placeholder="例: 10/1〜10/15"
-                                                    />
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
+                                                        <input 
+                                                            type="date"
+                                                            value={item._app_period_start || ''}
+                                                            onChange={(e) => handleExamFieldChange(index, '_app_period_start', e.target.value)}
+                                                            style={{ flex: 1 }}
+                                                        />
+                                                        <span>〜</span>
+                                                        <input 
+                                                            type="date"
+                                                            value={item._app_period_end || ''}
+                                                            onChange={(e) => handleExamFieldChange(index, '_app_period_end', e.target.value)}
+                                                            style={{ flex: 1 }}
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <div className={styles.inputGroup}>
                                                     <label>入学試験の日</label>
                                                     <input 
-                                                        type="text" 
-                                                        value={item.exam_date}
+                                                        type="date" 
+                                                        value={item.exam_date || ''}
                                                         onChange={(e) => handleExamFieldChange(index, 'exam_date', e.target.value)}
-                                                        placeholder="例: 11/1"
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
                                                     <label>合格/不合格がわかる日</label>
                                                     <input 
-                                                        type="text" 
-                                                        value={item.results_date}
+                                                        type="date" 
+                                                        value={item.results_date || ''}
                                                         onChange={(e) => handleExamFieldChange(index, 'results_date', e.target.value)}
-                                                        placeholder="例: 11/10"
                                                     />
                                                 </div>
                                                 <div className={styles.inputGroup}>
@@ -1660,10 +1760,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <div className={styles.inputGroup}>
                                                     <label>試験日</label>
                                                     <input 
-                                                        type="text" 
-                                                        value={surveyForm.exam_date}
+                                                        type="date" 
+                                                        value={surveyForm.exam_date || ''}
                                                         onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
-                                                        placeholder="例: 2026/10/10"
                                                     />
                                                 </div>
                                             </div>
