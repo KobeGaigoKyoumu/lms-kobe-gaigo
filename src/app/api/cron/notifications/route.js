@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import webpush from 'web-push';
 
-// Telegram Bot Token
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+// Web Push VAPID Keys
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        'mailto:admin@lms-kobe-gaigo.vercel.app',
+        VAPID_PUBLIC_KEY,
+        VAPID_PRIVATE_KEY
+    );
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +21,6 @@ export async function GET(request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.SUPABASE_SERVICE_ROLE_KEY
     );
-
-    if (!TELEGRAM_BOT_TOKEN) {
-        return NextResponse.json({ error: 'Telegram Token missing' }, { status: 500 });
-    }
 
     try {
         const results = {
@@ -28,9 +34,6 @@ export async function GET(request) {
         const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
         // Target Date for deadlines (e.g., due tomorrow)
-        // Check for deadlines falling within the next 24 to 48 hours? 
-        // Or strictly "Tomorrow". Let's say due between now and +24h (Imminent) or +24h and +48h (Tomorrow).
-        // Let's go with "Due within 2 days" to be safe.
         const tomorrowStart = new Date(now);
         tomorrowStart.setDate(tomorrowStart.getDate() + 1);
         tomorrowStart.setHours(0, 0, 0, 0);
@@ -39,7 +42,7 @@ export async function GET(request) {
         tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
 
         // ---------------------------------------------------------
-        // 1. New Announcements Check (Keep)
+        // 1. New Announcements Check - Web Push通知
         // ---------------------------------------------------------
         const { data: newAnnouncements, error: annError } = await supabase
             .from('announcements')
@@ -48,23 +51,39 @@ export async function GET(request) {
 
         if (annError) {
             results.errors.push(`Announcement Error: ${annError.message}`);
-        } else if (newAnnouncements?.length > 0) {
-            // Broadcast to all linked students
-            // Optimization: Fetch all valid linked students once
-            const { data: students } = await supabase
-                .from('students')
-                .select('telegram_chat_id')
-                .not('telegram_chat_id', 'is', null);
+        } else if (newAnnouncements?.length > 0 && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+            // 全学生のpush subscriptionsを取得
+            const { data: subs } = await supabase
+                .from('push_subscriptions')
+                .select('*');
 
-            for (const ann of newAnnouncements) {
-                const message = `📢 **新しいお知らせ**\n\n**${ann.title}**\n${ann.content.substring(0, 50)}...\n\n[詳細を見る](https://lms-kobe-gaigo.vercel.app/student/announcements)`;
-                await broadcastMessage(students, message);
-                results.announcements++;
+            if (subs && subs.length > 0) {
+                for (const ann of newAnnouncements) {
+                    const pushPayload = JSON.stringify({
+                        title: '📢 新しいお知らせ',
+                        body: `${ann.title}: ${ann.content.substring(0, 80)}...`,
+                        url: '/student/announcements',
+                        icon: '/icon-192.png',
+                        badge: 1
+                    });
+
+                    await Promise.allSettled(subs.map(sub =>
+                        webpush.sendNotification({
+                            endpoint: sub.endpoint,
+                            keys: { p256dh: sub.p256dh, auth: sub.auth }
+                        }, pushPayload).catch(e => {
+                            if (e.statusCode === 410 || e.statusCode === 404) {
+                                supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+                            }
+                        })
+                    ));
+                    results.announcements++;
+                }
             }
         }
 
         // ---------------------------------------------------------
-        // 2. New Assignments Check
+        // 2. New Assignments Check - Web Push通知
         // ---------------------------------------------------------
         const { data: newAssignments, error: newAssError } = await supabase
             .from('assignments')
@@ -72,31 +91,50 @@ export async function GET(request) {
             .gt('created_at', oneDayAgo);
 
         if (newAssError) {
-            // created_at checks might fail if column doesn't exist, but it's standard default.
             results.errors.push(`New Assignment Error: ${newAssError.message}`);
-        } else if (newAssignments?.length > 0) {
-            // For each new assignment, find enrolled students and notify
+        } else if (newAssignments?.length > 0 && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
             for (const ass of newAssignments) {
-                const message = `🆕 **新しい課題が追加されました**\n\n**${ass.title}**\n\n[確認する](https://lms-kobe-gaigo.vercel.app/student/calendar)`;
-
-                // Get students enrolled in this course with Telegram linked
-                const { data: enrolledStudents } = await supabase
+                // Get students enrolled in this course
+                const { data: enrolled } = await supabase
                     .from('enrollments')
-                    .select('student_id, students!inner(telegram_chat_id)')
-                    .eq('course_id', ass.course_id)
-                    .not('students.telegram_chat_id', 'is', null);
+                    .select('student_id')
+                    .eq('course_id', ass.course_id);
 
-                if (enrolledStudents && enrolledStudents.length > 0) {
-                    // Flatten structure: enrollments -> students object
-                    const targets = enrolledStudents.map(e => ({ telegram_chat_id: e.students.telegram_chat_id }));
-                    await broadcastMessage(targets, message);
-                    results.assignments_new++;
+                if (enrolled && enrolled.length > 0) {
+                    const studentIds = enrolled.map(e => e.student_id);
+
+                    const { data: subs } = await supabase
+                        .from('push_subscriptions')
+                        .select('*')
+                        .in('user_id', studentIds);
+
+                    if (subs && subs.length > 0) {
+                        const pushPayload = JSON.stringify({
+                            title: '🆕 新しい課題が追加されました',
+                            body: ass.title,
+                            url: '/student/calendar',
+                            icon: '/icon-192.png',
+                            badge: 1
+                        });
+
+                        await Promise.allSettled(subs.map(sub =>
+                            webpush.sendNotification({
+                                endpoint: sub.endpoint,
+                                keys: { p256dh: sub.p256dh, auth: sub.auth }
+                            }, pushPayload).catch(e => {
+                                if (e.statusCode === 410 || e.statusCode === 404) {
+                                    supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+                                }
+                            })
+                        ));
+                        results.assignments_new++;
+                    }
                 }
             }
         }
 
         // ---------------------------------------------------------
-        // 3. Deadline Alerts (Unsubmitted & Due Tomorrow)
+        // 3. Deadline Alerts (Unsubmitted & Due Tomorrow) - Web Push通知
         // ---------------------------------------------------------
         const { data: dueAssignments, error: dueError } = await supabase
             .from('assignments')
@@ -111,9 +149,8 @@ export async function GET(request) {
                 // 1. Get all enrolled students for this course
                 const { data: enrolled } = await supabase
                     .from('enrollments')
-                    .select('student_id, students!inner(telegram_chat_id)')
-                    .eq('course_id', ass.course_id)
-                    .not('students.telegram_chat_id', 'is', null);
+                    .select('student_id')
+                    .eq('course_id', ass.course_id);
 
                 if (!enrolled || enrolled.length === 0) continue;
 
@@ -127,14 +164,37 @@ export async function GET(request) {
                 const submittedIds = new Set(submitted?.map(s => s.student_id));
 
                 // 3. Filter: Enrolled BUT NOT Submitted
-                const unsubmittedStudents = enrolled
-                    .filter(e => !submittedIds.has(e.student_id))
-                    .map(e => ({ telegram_chat_id: e.students.telegram_chat_id }));
+                const unsubmittedStudents = enrolled.filter(e => !submittedIds.has(e.student_id));
 
                 if (unsubmittedStudents.length > 0) {
                     const dateStr = new Date(ass.due_date).toLocaleDateString('ja-JP');
-                    const message = `⚠️ **課題の締切が近づいています**\n\n**${ass.title}**\n締切: ${dateStr}\n\nまだ提出されていません。お早むに対応してください。\n\n[提出する](https://lms-kobe-gaigo.vercel.app/student/calendar)`;
-                    await broadcastMessage(unsubmittedStudents, message);
+
+                    // Web Push Notifications
+                    const studentIds = unsubmittedStudents.map(e => e.student_id);
+                    if (studentIds.length > 0 && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+                        const { data: subs, error: subError } = await supabase
+                            .from('push_subscriptions')
+                            .select('*')
+                            .in('user_id', studentIds);
+
+                        if (!subError && subs && subs.length > 0) {
+                            const pushPayload = JSON.stringify({
+                                title: '⚠️ 課題の締切間近',
+                                body: `「${ass.title}」の締切が明日 (${dateStr}) に迫っています。未提出ですのでお早めに対応してください。`,
+                                url: `/student/homework/${ass.id}`,
+                                icon: '/icon-192.png',
+                                badge: 1
+                            });
+
+                            await Promise.allSettled(subs.map(sub =>
+                                webpush.sendNotification({
+                                    endpoint: sub.endpoint,
+                                    keys: { p256dh: sub.p256dh, auth: sub.auth }
+                                }, pushPayload)
+                            ));
+                        }
+                    }
+
                     results.assignments_due++;
                 }
             }
@@ -145,45 +205,5 @@ export async function GET(request) {
     } catch (error) {
         console.error('Cron Job Error:', error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-}
-
-async function broadcastMessage(students, text) {
-    if (!students || students.length === 0) return;
-
-    // Batch processing to respect Telegram rate limits (approx 30 msg/sec)
-    const BATCH_SIZE = 25;
-    const DELAY_MS = 1000;
-
-    const chunks = [];
-    for (let i = 0; i < students.length; i += BATCH_SIZE) {
-        chunks.push(students.slice(i, i + BATCH_SIZE));
-    }
-
-    for (const chunk of chunks) {
-        const promises = chunk.map(s => {
-            if (s.telegram_chat_id) return sendTelegramMessage(s.telegram_chat_id, text);
-            return Promise.resolve();
-        });
-
-        await Promise.all(promises);
-
-        // Wait before next batch
-        if (chunks.indexOf(chunk) < chunks.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-        }
-    }
-}
-
-async function sendTelegramMessage(chatId, text) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    try {
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
-        });
-    } catch (e) {
-        console.error('Failed to send Telegram msg:', e);
     }
 }

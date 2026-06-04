@@ -104,7 +104,7 @@ export async function getSupabaseStorageUsage() {
 const _getCloudinaryUsage = unstable_cache(
     async () => {
         try {
-            const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+            const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dgdkz3ri7';
             if (!cloudName || cloudName === 'dummy_cloud') {
                 throw new Error("Missing CLOUDINARY_CLOUD_NAME");
             }

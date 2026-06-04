@@ -8,10 +8,53 @@ const formatSize = (bytes) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-export default function StorageUsage({ imageKit, supabase }) {
+export default function StorageUsage({ imageKit, supabase, cloudinary }) {
     return (
         <div className={styles.container}>
-            {/* ImageKit Card */}
+            {/* Cloudinary Card (Primary Main) */}
+            {cloudinary && (
+                <div className={styles.card}>
+                    <div className={styles.cardHeader}>
+                        <div className={styles.iconWrapper} style={{ backgroundColor: '#f97316' }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className={styles.cardTitle}>Cloudinary (Primary)</h3>
+                            <p className={styles.cardSubtitle}>メイン・画像宿題提出用</p>
+                        </div>
+                    </div>
+
+                    <div className={styles.usageInfo}>
+                        {cloudinary.success ? (
+                            <>
+                                <div className={styles.progressBar}>
+                                    <div
+                                        className={styles.progressFill}
+                                        style={{
+                                            width: `${cloudinary.percent || 0}%`,
+                                            background: 'linear-gradient(90deg, #ea580c, #f97316)'
+                                        }}
+                                    />
+                                </div>
+                                <div className={styles.stats}>
+                                    <span className={styles.percentage}>{cloudinary.percent || 0}% 使用中</span>
+                                    <span className={styles.raw}>
+                                        {formatSize(cloudinary.used || 0)} / {formatSize(cloudinary.limit || (25 * 1024 * 1024 * 1024))}
+                                    </span>
+                                </div>
+                            </>
+                        ) : (
+                            <div className={styles.stats} style={{ color: 'var(--text-secondary)' }}>
+                                <span>連携中（キー設定済み）</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* ImageKit Card (Secondary Main) */}
             <div className={styles.card}>
                 <div className={styles.cardHeader}>
                     <div className={styles.iconWrapper} style={{ backgroundColor: '#0052FF' }}>
@@ -22,8 +65,8 @@ export default function StorageUsage({ imageKit, supabase }) {
                         </svg>
                     </div>
                     <div>
-                        <h3 className={styles.cardTitle}>ImageKit (Main)</h3>
-                        <p className={styles.cardSubtitle}>画像・動画・教材用</p>
+                        <h3 className={styles.cardTitle}>ImageKit (Secondary)</h3>
+                        <p className={styles.cardSubtitle}>メイン予備・教材用</p>
                     </div>
                 </div>
 
@@ -40,13 +83,13 @@ export default function StorageUsage({ imageKit, supabase }) {
                     <div className={styles.stats}>
                         <span className={styles.percentage}>{imageKit.percent || 0}% 使用中</span>
                         <span className={styles.raw}>
-                            {formatSize(imageKit.used || 0)} / {formatSize(imageKit.limit || (20 * 1024 * 1024 * 1024))}
+                            {formatSize(imageKit.used || 0)} / {formatSize(imageKit.limit || (3 * 1024 * 1024 * 1024))}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Supabase Card */}
+            {/* Supabase Card (Emergency Backup) */}
             <div className={styles.card}>
                 <div className={styles.cardHeader}>
                     <div className={styles.iconWrapper} style={{ backgroundColor: '#22c55e' }}>
@@ -58,7 +101,7 @@ export default function StorageUsage({ imageKit, supabase }) {
                     </div>
                     <div>
                         <h3 className={styles.cardTitle}>Supabase Storage</h3>
-                        <p className={styles.cardSubtitle}>レガシー・システム用</p>
+                        <p className={styles.cardSubtitle}>緊急用・チャット用</p>
                     </div>
                 </div>
 

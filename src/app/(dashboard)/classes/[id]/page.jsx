@@ -1,3 +1,4 @@
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -49,8 +50,12 @@ export default async function ClassDetailPage({ params }) {
     const isOwner = classData.teacher_id === adminMember.memberId || classData.homeroom_teacher_name === adminMember.name
     const canEdit = isOwner || isAdmin
 
-    // 学生マスターから該当クラスの学生を取得
-    const { data: students } = await supabase
+    // 学生マスターから該当クラスの学生を取得 (管理者権限で取得してRLSをバイパス)
+    const adminSupabase = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+    const { data: students } = await adminSupabase
         .from('students')
         .select('*')
         .eq('class_name', classData.name)

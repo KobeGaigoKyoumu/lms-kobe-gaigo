@@ -19,10 +19,23 @@ export async function POST(request) {
         }
 
         // 1. Identify User
-        const studentSession = await getStudentSession()
+        const cookieHeader = request.headers.get('cookie') || ''
+        console.log('[DEBUG] Push Subscribe Cookie Header:', cookieHeader)
+
+        let studentSession = null
+        try {
+            studentSession = await getStudentSession()
+            console.log('[DEBUG] Push Subscribe studentSession:', studentSession)
+        } catch (err) {
+            console.error('[DEBUG] Push Subscribe getStudentSession Error:', err)
+        }
+
         const adminMemberSession = await getAdminMemberSession()
+        console.log('[DEBUG] Push Subscribe adminMemberSession:', adminMemberSession)
+
         const supabase = await createServerClient()
         const { data: { user: authUser } } = await supabase.auth.getUser()
+        console.log('[DEBUG] Push Subscribe authUser:', authUser)
 
         let userId = null
         if (studentSession) {
@@ -35,6 +48,7 @@ export async function POST(request) {
             // Priority 3: Staff/Member (use 'member' or memberId)
             userId = 'member'
         } else {
+            console.log('[DEBUG] Push Subscribe: Unauthorized. Sessions are all null.')
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 

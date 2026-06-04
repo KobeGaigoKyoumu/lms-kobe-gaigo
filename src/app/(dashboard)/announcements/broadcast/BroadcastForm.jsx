@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { sendUnifiedBroadcast } from '@/actions/broadcast'
-import { Send, Users, UserCheck, AlertCircle, MessageCircle, Send as SendIcon } from 'lucide-react'
+import { Send, Users, UserCheck, AlertCircle } from 'lucide-react'
 
 export default function BroadcastForm({ classes }) {
-    const [targetType, setTargetType] = useState('class') // 'all', 'class', 'students'
+    const [targetType, setTargetType] = useState('class') // 'all', 'class'
     const [targetValue, setTargetValue] = useState('')
-    const [channels, setChannels] = useState(['telegram'])
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
@@ -20,12 +19,7 @@ export default function BroadcastForm({ classes }) {
         setLoading(true)
         setResult(null)
 
-        if (channels.length === 0) return alert('配信先アプリを選択してください')
-
-        setLoading(true)
-        setResult(null)
-
-        const res = await sendUnifiedBroadcast(message, targetType, targetValue, channels)
+        const res = await sendUnifiedBroadcast(message, targetType, targetValue, ['webpush'])
         setLoading(false)
         setResult(res)
 
@@ -73,7 +67,7 @@ export default function BroadcastForm({ classes }) {
                                 fontWeight: targetType === 'all' ? 'bold' : 'normal'
                             }}
                         >
-                            全員 (連携済みのみ)
+                            全員
                         </button>
                     </div>
 
@@ -95,24 +89,6 @@ export default function BroadcastForm({ classes }) {
                             ))}
                         </select>
                     )}
-                </div>
-
-                {/* Channel Selection */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>配信アプリ</label>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                            <input
-                                type="checkbox"
-                                checked={channels.includes('telegram')}
-                                onChange={(e) => {
-                                    if (e.target.checked) setChannels([...channels, 'telegram'])
-                                    else setChannels(channels.filter(c => c !== 'telegram'))
-                                }}
-                            />
-                            <span>Telegram</span>
-                        </label>
-                    </div>
                 </div>
 
                 {/* Message Input */}
@@ -175,23 +151,78 @@ export default function BroadcastForm({ classes }) {
                                 <UserCheck size={20} />
                                 送信完了
                             </div>
-                            <div>
+                            <div style={{ marginBottom: '8px' }}>
                                 送信数: <strong>{result.count}</strong> 件
-                                <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
-                                    (Telegram: {result.results?.telegram?.count || 0})
-                                </div>
-                                {result.failed > 0 && <span style={{ marginLeft: '12px', color: '#dc2626' }}>失敗: {result.failed} 件</span>}
+                                {result.failed > 0 && <span style={{ marginLeft: '12px', color: '#dc2626', fontWeight: 'bold' }}>失敗: {result.failed} 件</span>}
                             </div>
                             {result.count === 0 && result.failed === 0 && (
                                 <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>
-                                    ※ 連携済みの対象学生がいませんでした。
+                                    ※ プッシュ通知が登録されている対象学生がいませんでした。
                                 </p>
+                            )}
+
+                            {/* 設定しているのに届かなかった学生 */}
+                            {result.failedStudents && result.failedStudents.length > 0 && (
+                                <div style={{ marginTop: '12px', borderTop: '1px dashed #bbf7d0', paddingTop: '12px' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#b91c1c', fontSize: '0.85rem', display: 'block', marginBottom: '6px' }}>
+                                        ⚠️ 設定しているのに届かなかった学生 ({result.failedStudents.length}人):
+                                    </span>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {result.failedStudents.map((name, i) => (
+                                            <span key={i} style={{ backgroundColor: '#fef2f2', color: '#991b1b', border: '1px solid #fee2e2', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* プッシュ通知を設定していない学生 */}
+                            {result.unregisteredStudents && result.unregisteredStudents.length > 0 && (
+                                <div style={{ marginTop: '12px', borderTop: '1px dashed #bbf7d0', paddingTop: '12px' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.85rem', display: 'block', marginBottom: '6px' }}>
+                                        🚫 プッシュ通知を設定していない学生 ({result.unregisteredStudents.length}人):
+                                    </span>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {result.unregisteredStudents.map((name, i) => (
+                                            <span key={i} style={{ backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
-                            <AlertCircle size={20} />
-                            送信エラー: {result.error}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                <AlertCircle size={20} />
+                                送信エラーが発生しました
+                            </div>
+                            {result.error && <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>{result.error}</div>}
+                            {result.results?.errors && result.results.errors.length > 0 && (
+                                <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    {result.results.errors.map((err, i) => (
+                                        <li key={i}>{err}</li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {/* エラー時にもプッシュ通知を設定していない学生を表示 */}
+                            {result.unregisteredStudents && result.unregisteredStudents.length > 0 && (
+                                <div style={{ marginTop: '12px', borderTop: '1px dashed #fecaca', paddingTop: '12px' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.85rem', display: 'block', marginBottom: '6px' }}>
+                                        🚫 プッシュ通知を設定していない学生 ({result.unregisteredStudents.length}人):
+                                    </span>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {result.unregisteredStudents.map((name, i) => (
+                                            <span key={i} style={{ backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

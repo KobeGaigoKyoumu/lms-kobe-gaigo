@@ -3,9 +3,8 @@ import styles from './page.module.css'
 import ProfileForm from './ProfileForm'
 import NotificationDebug from './NotificationDebug'
 import StorageUsage from './StorageUsage'
-import TelegramConnect from '@/components/telegram/TelegramConnect'
-import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
-import { getImageKitUsage, getSupabaseStorageUsage } from '@/app/actions/storageUsage'
+
+import { getImageKitUsage, getSupabaseStorageUsage, getCloudinaryUsage } from '@/app/actions/storageUsage'
 import { getAdminMembers, getAdminMemberSession } from '@/app/actions/adminAuth'
 import QRCodeDisplay from './QRCodeDisplay'
 
@@ -37,21 +36,17 @@ export default async function SettingsPage() {
     const displayName = adminMember ? adminMember.name : (user?.user_metadata?.full_name || '')
     const displayCreatedAt = isGoogleUser ? user.created_at : null
 
-    // Telegram連携状態取得（学生の場合のみ）
-    let telegramStatus = null
-    let botUsername = null
-    if (isGoogleUser && profile?.role === 'student') {
-        telegramStatus = await getTelegramStatus()
-        botUsername = await getBotUsername()
-    }
+
 
     // ストレージ使用量取得（管理者のみ）
     let imageKitUsage = null
     let supabaseUsage = null
+    let cloudinaryUsage = null
     if (isAdmin) {
-        ;[imageKitUsage, supabaseUsage] = await Promise.all([
+        ;[imageKitUsage, supabaseUsage, cloudinaryUsage] = await Promise.all([
             getImageKitUsage(),
-            getSupabaseStorageUsage()
+            getSupabaseStorageUsage(),
+            getCloudinaryUsage()
         ])
     }
 
@@ -73,7 +68,7 @@ export default async function SettingsPage() {
                 {isAdmin && imageKitUsage && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>ストレージ使用状況</h2>
-                        <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} />
+                        <StorageUsage imageKit={imageKitUsage} supabase={supabaseUsage} cloudinary={cloudinaryUsage} />
                     </section>
                 )}
 
@@ -102,15 +97,7 @@ export default async function SettingsPage() {
                     </section>
                 )}
 
-                {/* Telegram連携 */}
-                {isGoogleUser && profile?.role === 'student' && (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Telegram 通知設定</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
-                        </div>
-                    </section>
-                )}
+
 
                 {/* 通知デバッグ（診断ツール） */}
                 <section className={styles.section}>

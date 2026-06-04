@@ -455,12 +455,25 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
 
             // 学生データを作成（在籍者.xlsxの全カラムに対応）
             const studentsToInsert = dataRows.map(row => {
+                let academicYear = parseInt(row[colYear]);
+                if (isNaN(academicYear) || academicYear < 2000 || academicYear > 2100) {
+                    // 学籍番号の先頭2桁から入学年度を類推
+                    const idText = String(row[colStudentId]).trim();
+                    const idPrefix = idText.substring(0, 2);
+                    const parsedPrefix = parseInt(idPrefix, 10);
+                    if (!isNaN(parsedPrefix)) {
+                        academicYear = 2000 + parsedPrefix;
+                    } else {
+                        academicYear = new Date().getFullYear();
+                    }
+                }
+
                 const studentData = {
                     student_id_text: String(row[colStudentId]).trim(),
                     full_name: String(row[colName] || '').trim(),
                     email: colEmail >= 0 && row[colEmail] ? String(row[colEmail]).trim() : null,
                     class_name: String(row[colClass] || '').trim() || null,
-                    academic_year: parseInt(row[colYear]) || new Date().getFullYear(),
+                    academic_year: academicYear,
                     status: 'active'
                 }
 

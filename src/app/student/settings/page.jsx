@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getStudentSession } from '@/app/actions/studentAuth'
 import styles from './page.module.css'
-import TelegramConnect from '@/components/telegram/TelegramConnect'
-import { getTelegramStatus, getBotUsername } from '@/actions/telegram'
 
 export default async function StudentSettingsPage() {
     const session = await getStudentSession()
@@ -11,23 +9,14 @@ export default async function StudentSettingsPage() {
         redirect('/login')
     }
 
-    // Telegram連携状態取得
-    const telegramStatus = await getTelegramStatus(session)
-    const botUsername = await getBotUsername()
-
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <h1 className={styles.title}>設定</h1>
-                <p className={styles.subtitle}>通知設定とアカウント情報</p>
+                <p className={styles.subtitle}>アカウント情報</p>
             </header>
 
             <div className={styles.content}>
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>通知設定</h2>
-                    <TelegramConnect initialStatus={telegramStatus} botUsername={botUsername} />
-                </section>
-
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>登録情報</h2>
                     <div className={styles.infoCard}>

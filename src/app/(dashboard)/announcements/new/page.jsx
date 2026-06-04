@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { sendTelegramBroadcast } from '@/actions/telegram'
+
 import { uploadAnnouncementFile, createAnnouncement } from '@/app/actions/announcements'
 import { useStudentStatus } from '@/context/StudentStatusContext'
 import styles from './page.module.css'
@@ -28,7 +28,7 @@ export default function NewAnnouncementPage() {
         target_class: '',
         course_id: '',
         is_pinned: false,
-        delivery_method: 'both',
+
         file_urls: [],
         sender_name: ''
     })
@@ -196,91 +196,31 @@ export default function NewAnnouncementPage() {
                 setUploading(false)
             }
 
-            const isAnnouncement = formData.delivery_method === 'announcement' || formData.delivery_method === 'both'
-            const isTelegram = formData.delivery_method === 'telegram' || formData.delivery_method === 'both'
+            const result = await createAnnouncement({
+                title: formData.title,
+                content: formData.content,
+                target_type: formData.target_type,
+                target_grade: formData.target_type === 'grade' ? formData.target_grade : null,
+                target_class: formData.target_type === 'class' ? formData.target_class : null,
+                target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
+                course_id: formData.target_type === 'course' ? formData.course_id : null,
+                is_pinned: formData.is_pinned,
+                author_id: contextUserId,
+                file_urls: uploadedFileUrls,
+                sender_name: formData.sender_name || null
+            })
 
-            let insertError = null
-            if (isAnnouncement) {
-                const result = await createAnnouncement({
-                    title: formData.title,
-                    content: formData.content,
-                    target_type: formData.target_type,
-                    target_grade: formData.target_type === 'grade' ? formData.target_grade : null,
-                    target_class: formData.target_type === 'class' ? formData.target_class : null,
-                    target_student_ids: formData.target_type === 'individual' ? selectedStudents.map(s => s.student_id_text) : null,
-                    course_id: formData.target_type === 'course' ? formData.course_id : null,
-                    is_pinned: formData.is_pinned,
-                    author_id: contextUserId,
-                    file_urls: uploadedFileUrls,
-                    sender_name: formData.sender_name || null
-                })
-
-                if (!result.success) {
-                    insertError = result.error
-                }
-            }
-
-            if (insertError) {
+            if (!result.success) {
                 alert('お知らせの作成に失敗しました')
-                console.error(insertError)
+                console.error(result.error)
                 setLoading(false)
                 return
-            }
-
-            let broadcastResults = null
-            // Telegram配信
-            if (isTelegram) {
-                let targetType = formData.target_type;
-                let targetValue = null;
-
-                if (targetType === 'all') {
-                    targetValue = 'all';
-                } else if (targetType === 'grade') {
-                    targetValue = formData.target_grade;
-                } else if (targetType === 'class') {
-                    targetValue = formData.target_class;
-                } else if (targetType === 'individual') {
-                    targetType = 'students';
-                    targetValue = selectedStudents.map(s => s.student_id_text);
-                } else if (targetType === 'course') {
-                    targetValue = formData.course_id;
-                }
-
-                let messageString = `【お知らせ：${formData.title}】\n\n${formData.content}`;
-                if (formData.sender_name) {
-                    messageString += `\n\n(${formData.sender_name}) より`;
-                }
-
-                // 添付ファイルがあればリンクを追加
-                if (uploadedFileUrls.length > 0) {
-                    messageString += '\n\n【添付ファイル】\nこのファイルを見てください。';
-                    uploadedFileUrls.forEach(file => {
-                        messageString += `\n📎 ${file.name}:\n${file.url}`;
-                    });
-                }
-
-                const result = await sendTelegramBroadcast(messageString, targetType, targetValue);
-                if (!result.success) {
-                    console.error('Telegram Broadcast Failed:', result.error);
-                    alert(`Telegram配信に失敗しました: ${result.error}`);
-                } else {
-                    broadcastResults = result;
-                    if (result.count === 0 && isTelegram && !isAnnouncement) {
-                        alert('Telegram送信対象の学生（連携済み）が見つかりませんでした。');
-                    }
-                }
             }
 
             // 完了メッセージの構築
             let successMessage = 'お知らせの投稿が完了しました！'
             if (uploadedFileUrls.length > 0) {
                 successMessage += `\n📎 ${uploadedFileUrls.length}件のファイルを添付しました。`
-            }
-            if (broadcastResults) {
-                successMessage += `\n💬 ${broadcastResults.count}人の学生にTelegramを送信しました。`
-                if (broadcastResults.failed > 0) {
-                    successMessage += ` (失敗: ${broadcastResults.failed}人)`
-                }
             }
 
             alert(successMessage)
@@ -516,43 +456,9 @@ export default function NewAnnouncementPage() {
                     </div>
                 )}
 
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>配信方法</label>
-                    <div className={styles.deliveryOptions}>
-                        <label className={styles.radioLabel}>
-                            <input
-                                type="radio"
-                                name="delivery_method"
-                                value="announcement"
-                                checked={formData.delivery_method === 'announcement'}
-                                onChange={handleChange}
-                            />
-                            お知らせ掲載のみ
-                        </label>
-                        <label className={styles.radioLabel}>
-                            <input
-                                type="radio"
-                                name="delivery_method"
-                                value="telegram"
-                                checked={formData.delivery_method === 'telegram'}
-                                onChange={handleChange}
-                            />
-                            Telegram配信のみ
-                        </label>
-                        <label className={styles.radioLabel}>
-                            <input
-                                type="radio"
-                                name="delivery_method"
-                                value="both"
-                                checked={formData.delivery_method === 'both'}
-                                onChange={handleChange}
-                            />
-                            お知らせとTelegram両方
-                        </label>
-                    </div>
-                </div>
 
-                {(formData.delivery_method === 'announcement' || formData.delivery_method === 'both') && (
+
+                {(
                     <div className={styles.checkboxGroup}>
                         <input
                             type="checkbox"

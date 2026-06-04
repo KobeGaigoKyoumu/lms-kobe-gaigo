@@ -1,10 +1,17 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { revalidateTag } from 'next/cache'
 
 const getSupabase = async () => {
-    return createClient()
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '')
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseServiceKey) {
+        // Fallback to client if key is missing (e.g. locally if not set)
+        const { createClient } = await import('@/lib/supabase/client')
+        return createClient()
+    }
+    return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
 export const updateStudentStatus = async (studentId, newStatus) => {

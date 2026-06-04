@@ -10,8 +10,8 @@ import { unstable_cache as next_unstable_cache } from 'next/cache'
 
 // Helper to create admin client
 const createAdminClient = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE'
     if (!supabaseUrl || !supabaseServiceKey) throw new Error('Server configuration error')
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
@@ -286,6 +286,7 @@ export const getStudentSession = cache(async () => {
 
         return null
     } catch (e) {
+        console.error('[DEBUG] getStudentSession Critical Error:', e)
         return null
     }
 })

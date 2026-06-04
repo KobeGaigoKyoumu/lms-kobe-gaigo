@@ -54,10 +54,8 @@ export const getMenuItems = (role) => {
                 color: '#a855f7', // Purple
                 icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                     </svg>
                 )
             },
@@ -189,6 +187,20 @@ export const getMenuItems = (role) => {
                 </svg>
             )
         },
+        {
+            href: '/attendance',
+            label: '出席率',
+            color: '#22c55e', // Green
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                    <path d="M9 16l2 2 4-4" />
+                </svg>
+            )
+        },
         /*
         {
             href: '/grades',
@@ -214,16 +226,13 @@ export const getMenuItems = (role) => {
             )
         },
         {
-            href: '/attendance',
-            label: '出席率',
-            color: '#22c55e', // Green
+            href: '/career',
+            label: '面談・進路',
+            color: '#a855f7', // Purple
             icon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                    <path d="M9 16l2 2 4-4" />
+                    <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                 </svg>
             )
         },

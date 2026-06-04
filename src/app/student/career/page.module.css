@@ -535,3 +535,237 @@
     line-height: 1.6;
 }
 
+/* Exam Schedule Tab Layout */
+.formRow4Col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-4);
+}
+
+.examFormRows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+}
+
+.examFormRowCard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.examFormRowHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: var(--spacing-2);
+}
+
+.deleteRowBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    background-color: transparent;
+    border: none;
+    color: var(--error-600);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.deleteRowBtn:hover {
+    color: var(--error-800);
+}
+
+.addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    background-color: var(--bg-elevated);
+    border: 1px dashed var(--border-color);
+    color: var(--primary-600);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    width: 100%;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.addBtn:hover {
+    border-color: var(--primary-500);
+    background-color: var(--primary-50);
+}
+
+.badgeDanger {
+    background-color: var(--error-50);
+    color: var(--error-700);
+    border: 1px solid var(--error-100);
+}
+
+.badgeWarning {
+    background-color: var(--warning-50);
+    color: var(--warning-700);
+    border: 1px solid var(--warning-100);
+}
+
+@media (max-width: 768px) {
+    .formRow4Col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-3);
+    }
+}
+
+@media (max-width: 480px) {
+    .formRow4Col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* Table Card (入試予定 一覧表示) */
+.tableCard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--font-size-sm);
+    min-width: 560px;
+}
+
+.table th {
+    background-color: var(--bg-subtle);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-subtle);
+}
+
+.textCenter {
+    text-align: center !important;
+}
+
+.fontWeightMedium {
+    font-weight: 500;
+}
+
+/* Exam Schedule mobile card view */
+.examCardList {
+    display: none;
+}
+
+.examCard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.examCardSchool {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.examCardDept {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: -2px;
+    margin-bottom: var(--spacing-1);
+}
+
+.examCardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-2);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-2);
+    margin-top: var(--spacing-1);
+}
+
+.examCardLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.examCardValue {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Badge styles */
+.badgeSuccess {
+    background-color: var(--success-50);
+    color: var(--success-700);
+    border: 1px solid var(--success-100);
+}
+
+.badgeSecondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+/* Mobile: hide table, show cards */
+@media (max-width: 640px) {
+    .tableWrapper {
+        display: none;
+    }
+
+    .examCardList {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        padding: var(--spacing-3);
+    }
+
+    .dashboardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-3);
+    }
+}
+
