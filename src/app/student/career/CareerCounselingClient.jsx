@@ -46,7 +46,7 @@ const formatToSave = (dateVal) => {
 export default function CareerCounselingClient({ initialData, examSchedules, examSurveys, isSecondYear, session }) {
     const [activeTab, setActiveTab] = useState(isSecondYear ? 'career' : 'interview') // 2nd year default is career, 1st year default is interview
     const [data, setData] = useState(initialData || null)
-    const [isEditing, setIsEditing] = useState(!initialData)
+    const [isEditing, setIsEditing] = useState(false)
     const [step, setStep] = useState(1)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState(null)
@@ -189,9 +189,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
         setError(null)
         setCareerErrors([])
 
-        // Skip step 2 if not pursuing higher education (進学)
+        // Skip step 2 and 3 if not pursuing higher education (進学)
         if (step === 1 && form.path_type !== '進学') {
-            setStep(3)
+            setStep(4)
         } else {
             setStep(prev => prev + 1)
         }
@@ -200,7 +200,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const prevStep = () => {
         setError(null)
         setCareerErrors([])
-        if (step === 3 && form.path_type !== '進学') {
+        if (step === 4 && form.path_type !== '進学') {
             setStep(1)
         } else {
             setStep(prev => prev - 1)
@@ -937,6 +937,15 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         </div>
                                     </div>
                                 </div>
+                            ) : !isEditing && !data ? (
+                                <div className={styles.emptyState}>
+                                    <Clipboard size={48} color="var(--text-tertiary)" />
+                                    <p>進路希望情報が登録されていません。</p>
+                                    <button onClick={startEditing} className={styles.addBtn}>
+                                        <Plus size={16} />
+                                        新規作成
+                                    </button>
+                                </div>
                             ) : (
                                 /* Wizard/Step Form mode */
                                 <div className={styles.wizardContainer}>
@@ -1275,9 +1284,8 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             <button 
                                                 type="button" 
                                                 onClick={() => {
-                                                    if (data) {
-                                                        setIsEditing(false)
-                                                    } else {
+                                                    setIsEditing(false)
+                                                    if (!data) {
                                                         setStep(1)
                                                         setForm({
                                                             class_name: session?.className || '',
