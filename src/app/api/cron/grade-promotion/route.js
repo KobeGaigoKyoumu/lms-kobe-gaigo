@@ -40,11 +40,15 @@ export async function GET(request) {
 
         if (fetchError) throw fetchError
 
-        // 2. 卒業判定が必要な学生を抽出
-        // 学籍番号のルールに基づき、3月31日時点で Grade が 3 (卒業) になる学生を特定
         const graduates = students.filter(s => {
             const enrollmentYearShort = parseInt(s.student_id_text.substring(0, 2), 10)
-            const enrollmentYear = 2000 + enrollmentYearShort
+            let enrollmentYear = 2000 + enrollmentYearShort
+            if (s.student_id_text.length >= 4) {
+                const enrollmentMonth = parseInt(s.student_id_text.substring(2, 4), 10)
+                if (enrollmentMonth >= 1 && enrollmentMonth <= 3) {
+                    enrollmentYear -= 1
+                }
+            }
             // 3月31日の進級処理： academicYear = currentYear
             const academicYear = year
             const grade = academicYear - enrollmentYear + 1
