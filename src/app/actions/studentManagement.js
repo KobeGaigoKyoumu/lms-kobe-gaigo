@@ -122,7 +122,14 @@ export const performGradeReset = async (studentsData) => {
         if (!enrollYear) {
             // academic_yearがnullの場合は学籍番号から類推 (parseStudentIdと同じロジック)
             const idPrefix = String(student.student_id_text).substring(0, 2)
-            enrollYear = 2000 + parseInt(idPrefix, 10)
+            let enrollYearTemp = 2000 + parseInt(idPrefix, 10)
+            if (String(student.student_id_text).length >= 4) {
+                const month = parseInt(String(student.student_id_text).substring(2, 4), 10)
+                if (month >= 1 && month <= 3) {
+                    enrollYearTemp -= 1
+                }
+            }
+            enrollYear = enrollYearTemp
         }
         return enrollYear <= oldSecondYearAY
     }).map(s => s.student_id_text)
@@ -142,7 +149,13 @@ export const performGradeReset = async (studentsData) => {
     // 新2年生（25xx）と新1年生（26xx）を分類してacademic_yearを設定
     const processedStudents = studentsData.map(s => {
         const idPrefix = String(s.student_id_text).substring(0, 2)
-        const enrollYear = 2000 + parseInt(idPrefix, 10)
+        let enrollYear = 2000 + parseInt(idPrefix, 10)
+        if (String(s.student_id_text).length >= 4) {
+            const month = parseInt(String(s.student_id_text).substring(2, 4), 10)
+            if (month >= 1 && month <= 3) {
+                enrollYear -= 1
+            }
+        }
 
         // Excelに旧2年生以下のデータが混ざっていた場合、強制的に 'graduated' にする
         const studentStatus = (enrollYear <= oldSecondYearAY) ? 'graduated' : (s.status || 'active')

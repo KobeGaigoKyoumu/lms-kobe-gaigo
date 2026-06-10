@@ -38,14 +38,19 @@ export function parseStudentId(studentId, baseDate = new Date(), academicYearOve
     let enrollmentYearShort = parseInt(idStr.substring(0, 2), 10)
     let enrollmentYear = 2000 + enrollmentYearShort
 
+    // 入学月（3-4桁目）
+    const enrollmentMonth = parseInt(idStr.substring(2, 4), 10)
+    const enrollmentPeriod = `${enrollmentMonth}月期`
+
+    // 1〜3月入学の場合は入学年度を1減算（年度ベースの入学年）
+    if (enrollmentMonth >= 1 && enrollmentMonth <= 3) {
+        enrollmentYear -= 1
+    }
+
     // Override if provided (allows manual grade adjustment)
     if (academicYearOverride) {
         enrollmentYear = Number(academicYearOverride)
     }
-
-    // 入学月（3-4桁目）
-    const enrollmentMonth = parseInt(idStr.substring(2, 4), 10)
-    const enrollmentPeriod = `${enrollmentMonth}月期`
 
     // 基準日の年度を計算（4月1日始まり）
     const currentYear = baseDate.getFullYear()
@@ -111,7 +116,14 @@ export function getEnrollmentPeriod(month) {
 export function getEnrollmentYear(studentId) {
     if (!studentId || String(studentId).length < 2) return null
     const yearShort = parseInt(String(studentId).substring(0, 2), 10)
-    return 2000 + yearShort
+    let enrollmentYear = 2000 + yearShort
+    if (String(studentId).length >= 4) {
+        const month = parseInt(String(studentId).substring(2, 4), 10)
+        if (month >= 1 && month <= 3) {
+            enrollmentYear -= 1
+        }
+    }
+    return enrollmentYear
 }
 
 /**

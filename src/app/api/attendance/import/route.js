@@ -85,7 +85,14 @@ export async function POST(request) {
             }
 
             // 学年を学籍番号から判定
-            const enrollmentYear = 2000 + parseInt(studentId.substring(0, 2))
+            const enrollmentYearShort = parseInt(studentId.substring(0, 2))
+            let enrollmentYear = 2000 + enrollmentYearShort
+            if (studentId.length >= 4) {
+                const enrollmentMonth = parseInt(studentId.substring(2, 4))
+                if (enrollmentMonth >= 1 && enrollmentMonth <= 3) {
+                    enrollmentYear -= 1
+                }
+            }
             let grade
             if (currentMonth >= 4) {
                 grade = currentYear - enrollmentYear + 1

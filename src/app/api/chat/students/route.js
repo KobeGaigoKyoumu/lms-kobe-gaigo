@@ -13,7 +13,13 @@ function calculateGrade(studentId, year, month) {
     if (!studentId || studentId.length < 2) return 0
     if (studentId.startsWith('23')) return 0 // Non-enrolled as per user request
     const enrollmentYearShort = parseInt(studentId.substring(0, 2), 10)
-    const enrollmentYear = 2000 + enrollmentYearShort
+    let enrollmentYear = 2000 + enrollmentYearShort
+    if (studentId.length >= 4) {
+        const enrollmentMonth = parseInt(studentId.substring(2, 4), 10)
+        if (enrollmentMonth >= 1 && enrollmentMonth <= 3) {
+            enrollmentYear -= 1
+        }
+    }
     const academicYear = month >= 4 ? year : year - 1
     let grade = academicYear - enrollmentYear + 1
     if (grade > 2 || grade < 0) return 0
