@@ -153,7 +153,7 @@ export default function AnalyticsDashboard({
                 const finalGrades = gradeResData?.data || []
                 setGradeData(finalGrades);
                 setJlptData(jlptResData || {});
-                setStudentDb(jlptResData?.studentStats ? jlptResData.studentStats.flatMap(c => c.students) : []);
+                setStudentDb(jlptResData?.studentSummaries || (jlptResData?.studentStats ? jlptResData.studentStats.flatMap(c => c.students) : []));
 
             } catch (err) {
                 debug.push(`FATAL: ${err.message}`)

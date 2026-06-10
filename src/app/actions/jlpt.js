@@ -128,6 +128,7 @@ async function getJlptAnalyticsDataInternal() {
             studentStats,
             sectionScores,
             nationalStats,
+            studentSummaries,
             lastUpdated: new Date().toISOString()
         };
 
