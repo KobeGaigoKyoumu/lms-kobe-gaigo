@@ -233,6 +233,7 @@ export default function AnalyticsDashboard({
                             <CareerTab 
                                 careerStats={initialCareerStats}
                                 chartFontSize={chartFontSize} 
+                                studentDb={studentDb}
                             />
                         )}
                         {activeTab === 'database' && (

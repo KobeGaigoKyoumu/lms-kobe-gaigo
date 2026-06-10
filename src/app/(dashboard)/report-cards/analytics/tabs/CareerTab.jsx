@@ -15,7 +15,7 @@ const AccordionChevron = ({ rotated }) => (
     </div>
 )
 
-export default function CareerTab({ careerStats, chartFontSize }) {
+export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }) {
     const [careerSubTab, setCareerSubTab] = useState('overview')
     const [selectedYear, setSelectedYear] = useState('2023') // Default to 2023 or latest available
     const [expandedSchoolId, setExpandedSchoolId] = useState(null)
@@ -23,6 +23,70 @@ export default function CareerTab({ careerStats, chartFontSize }) {
     // 過去5年実績詳細用のState
     const [careerSearchQuery, setCareerSearchQuery] = useState('')
     const [expandedPast5YearsSchoolId, setExpandedPast5YearsSchoolId] = useState(null)
+
+    // 各進学先の進学者リストのJLPT成績を集計する
+    const getStudentJlptStats = useMemo(() => {
+        return (schoolStudents) => {
+            if (!schoolStudents || schoolStudents.length === 0 || !studentDb || studentDb.length === 0) {
+                return [];
+            }
+            
+            const matchingDbStudents = schoolStudents.map(s => {
+                return studentDb.find(dbStudent => 
+                    String(dbStudent.studentId) === String(s.id) ||
+                    dbStudent.name === s.name
+                );
+            }).filter(Boolean);
+
+            const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+            const statsByLevel = {};
+
+            matchingDbStudents.forEach(dbStudent => {
+                levels.forEach(lvl => {
+                    const levelData = dbStudent.levels?.[lvl];
+                    if (levelData && levelData.score !== undefined && levelData.score !== null) {
+                        let score = parseFloat(levelData.score);
+                        if (isNaN(score) || score === 0) {
+                            const matches = String(levelData.score).match(/\d+/);
+                            if (matches) {
+                                score = parseFloat(matches[0]);
+                            } else {
+                                score = NaN;
+                            }
+                        }
+                        
+                        if (!isNaN(score) && score > 0) {
+                            if (!statsByLevel[lvl]) {
+                                statsByLevel[lvl] = {
+                                    level: lvl,
+                                    count: 0,
+                                    sum: 0,
+                                    max: -Infinity,
+                                    min: Infinity
+                                };
+                            }
+                            statsByLevel[lvl].count += 1;
+                            statsByLevel[lvl].sum += score;
+                            if (score > statsByLevel[lvl].max) statsByLevel[lvl].max = score;
+                            if (score < statsByLevel[lvl].min) statsByLevel[lvl].min = score;
+                        }
+                    }
+                });
+            });
+
+            return levels.map(lvl => {
+                const lvlStat = statsByLevel[lvl];
+                if (!lvlStat) return null;
+                return {
+                    level: lvl,
+                    count: lvlStat.count,
+                    average: parseFloat((lvlStat.sum / lvlStat.count).toFixed(1)),
+                    max: lvlStat.max,
+                    min: lvlStat.min
+                };
+            }).filter(Boolean);
+        };
+    }, [studentDb]);
 
     const targetYears = [2024, 2023, 2022, 2021, 2020]
 
@@ -181,37 +245,80 @@ export default function CareerTab({ careerStats, chartFontSize }) {
 
             {careerSubTab === 'schools' && (
                 <div className={styles.tabContent}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
+                            主な進学先と合格者JLPT成績 (全件表示)
+                        </h3>
+                        <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                            {stats.topDestinations.length}校
+                        </span>
+                    </div>
                     <div className={styles.tableContainer}>
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>進学・就職先名</th>
+                                    <th>進学先名</th>
                                     <th>進学者数</th>
+                                    <th>JLPTデータ</th>
                                     <th>詳細</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {stats.topDestinations.map((dest, idx) => {
                                     const isExpanded = expandedSchoolId === idx;
+                                    const jlptStats = getStudentJlptStats(dest.students);
+                                    const availableLevels = jlptStats.map(s => s.level);
+                                    
                                     return (
                                         <Fragment key={idx}>
                                             <tr onClick={() => setExpandedSchoolId(isExpanded ? null : idx)} className={styles.clickableRow}>
                                                 <td style={{ fontWeight: 600 }}>{dest.name}</td>
                                                 <td>{dest.count}名</td>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                                        {availableLevels.map(lvl => (
+                                                            <span key={lvl} className={`${styles.badge} ${styles[`badge${lvl}`]}`}>
+                                                                {lvl}
+                                                            </span>
+                                                        ))}
+                                                        {availableLevels.length === 0 && <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>-</span>}
+                                                    </div>
+                                                </td>
                                                 <td><AccordionChevron rotated={isExpanded} /></td>
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan="3">
+                                                    <td colSpan="4">
                                                         <div style={{ padding: '1rem', backgroundColor: '#f8fafc' }}>
-                                                            {dest.students && dest.students.length > 0 ? (
-                                                                <ul style={{ margin: 0, paddingLeft: '1.5rem', listStyle: 'disc' }}>
-                                                                    {dest.students.map(s => (
-                                                                        <li key={s.id}>{s.name} ({s.nationality})</li>
-                                                                    ))}
-                                                                </ul>
+                                                            {jlptStats.length > 0 ? (
+                                                                <table className={styles.table} style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '0.375rem', width: '100%' }}>
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>レベル</th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>データ数</th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>平均点</th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>最高点</th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>最低点</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {jlptStats.map(row => (
+                                                                            <tr key={row.level}>
+                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                    <span className={`${styles.badge} ${styles[`badge${row.level}`]}`}>
+                                                                                        {row.level}
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td style={{ padding: '0.5rem' }}>{row.count}</td>
+                                                                                <td style={{ padding: '0.5rem', fontWeight: 600 }}>{row.average}</td>
+                                                                                <td style={{ padding: '0.5rem' }}>{row.max}</td>
+                                                                                <td style={{ padding: '0.5rem' }}>{row.min}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
                                                             ) : (
-                                                                <p>学生データがありません。</p>
+                                                                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>JLPTの受験データがありません。</p>
                                                             )}
                                                         </div>
                                                     </td>
@@ -222,7 +329,7 @@ export default function CareerTab({ careerStats, chartFontSize }) {
                                 })}
                                 {stats.topDestinations.length === 0 && (
                                     <tr>
-                                        <td colSpan="3" style={{ textAlign: 'center', padding: '2rem' }}>この年度の実績データはありません</td>
+                                        <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>この年度の実績データはありません</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -304,7 +411,7 @@ export default function CareerTab({ careerStats, chartFontSize }) {
                                                                             <span style={{ color: '#1f2937', flex: 1 }}>
                                                                                 {studentsInYear.map((s, sIdx) => (
                                                                                     <span key={s.id || sIdx}>
-                                                                                        {s.name} ({s.nationality || '不明'}){sIdx < studentsInYear.length - 1 ? ', ' : ''}
+                                                                                        {s.name}{sIdx < studentsInYear.length - 1 ? ', ' : ''}
                                                                                     </span>
                                                                                 ))}
                                                                             </span>
