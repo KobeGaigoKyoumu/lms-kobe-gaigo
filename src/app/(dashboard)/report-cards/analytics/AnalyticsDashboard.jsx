@@ -105,8 +105,10 @@ export default function AnalyticsDashboard({
                         }
                         if (cfJlptRes.ok) {
                             const cfData = await cfJlptRes.json();
-                            if (cfData && cfData.studentStats && (cfData.levelStats || cfData.stats)) {
+                            if (cfData && cfData.studentStats && (cfData.levelStats || cfData.stats) && cfData.studentSummaries) {
                                 jlptResData = cfData;
+                            } else {
+                                debug.push('CF JLPT missing studentSummaries, skipping CF cache to trigger Vercel API and refresh KV cache')
                             }
                         }
                     } catch (e) {
