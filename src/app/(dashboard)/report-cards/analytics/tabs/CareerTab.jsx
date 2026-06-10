@@ -15,6 +15,19 @@ const AccordionChevron = ({ rotated }) => (
     </div>
 )
 
+const renderStatValue = (passedVal, failedVal, isAverage = false) => {
+    const passedStr = passedVal !== null && passedVal !== undefined ? (isAverage ? passedVal.toFixed(1) : passedVal) : '-';
+    const failedStr = failedVal !== null && failedVal !== undefined ? (isAverage ? failedVal.toFixed(1) : failedVal) : '-';
+    
+    return (
+        <span>
+            <span style={{ color: '#22c55e', fontWeight: 600 }}>{passedStr}</span>
+            <span style={{ color: '#9ca3af', margin: '0 0.25rem' }}>/</span>
+            <span style={{ color: '#ef4444', fontWeight: 600 }}>{failedStr}</span>
+        </span>
+    );
+};
+
 export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }) {
     const [careerSubTab, setCareerSubTab] = useState('overview')
     const [selectedYear, setSelectedYear] = useState('2023') // Default to 2023 or latest available
@@ -44,7 +57,8 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
             matchingDbStudents.forEach(dbStudent => {
                 levels.forEach(lvl => {
                     const levelData = dbStudent.levels?.[lvl];
-                    if (levelData && levelData.score !== undefined && levelData.score !== null) {
+                    if (levelData && levelData.status && (levelData.status === '合格' || levelData.status === '不合格')) {
+                        const status = levelData.status;
                         let score = parseFloat(levelData.score);
                         if (isNaN(score) || score === 0) {
                             const matches = String(levelData.score).match(/\d+/);
@@ -59,16 +73,16 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                             if (!statsByLevel[lvl]) {
                                 statsByLevel[lvl] = {
                                     level: lvl,
-                                    count: 0,
-                                    sum: 0,
-                                    max: -Infinity,
-                                    min: Infinity
+                                    passed: { count: 0, sum: 0, max: -Infinity, min: Infinity },
+                                    failed: { count: 0, sum: 0, max: -Infinity, min: Infinity }
                                 };
                             }
-                            statsByLevel[lvl].count += 1;
-                            statsByLevel[lvl].sum += score;
-                            if (score > statsByLevel[lvl].max) statsByLevel[lvl].max = score;
-                            if (score < statsByLevel[lvl].min) statsByLevel[lvl].min = score;
+                            
+                            const targetGroup = status === '合格' ? statsByLevel[lvl].passed : statsByLevel[lvl].failed;
+                            targetGroup.count += 1;
+                            targetGroup.sum += score;
+                            if (score > targetGroup.max) targetGroup.max = score;
+                            if (score < targetGroup.min) targetGroup.min = score;
                         }
                     }
                 });
@@ -77,12 +91,21 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
             return levels.map(lvl => {
                 const lvlStat = statsByLevel[lvl];
                 if (!lvlStat) return null;
+                
                 return {
                     level: lvl,
-                    count: lvlStat.count,
-                    average: parseFloat((lvlStat.sum / lvlStat.count).toFixed(1)),
-                    max: lvlStat.max,
-                    min: lvlStat.min
+                    passed: {
+                        count: lvlStat.passed.count,
+                        average: lvlStat.passed.count > 0 ? parseFloat((lvlStat.passed.sum / lvlStat.passed.count).toFixed(1)) : null,
+                        max: lvlStat.passed.count > 0 ? lvlStat.passed.max : null,
+                        min: lvlStat.passed.count > 0 ? lvlStat.passed.min : null
+                    },
+                    failed: {
+                        count: lvlStat.failed.count,
+                        average: lvlStat.failed.count > 0 ? parseFloat((lvlStat.failed.sum / lvlStat.failed.count).toFixed(1)) : null,
+                        max: lvlStat.failed.count > 0 ? lvlStat.failed.max : null,
+                        min: lvlStat.failed.count > 0 ? lvlStat.failed.min : null
+                    }
                 };
             }).filter(Boolean);
         };
@@ -247,7 +270,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                 <div className={styles.tabContent}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
-                            主な進学先と合格者JLPT成績 (全件表示)
+                            主な進学先とJLPT成績 (詳細:合格/不合格)
                         </h3>
                         <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                             {stats.topDestinations.length}校
@@ -295,10 +318,18 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                     <thead>
                                                                         <tr>
                                                                             <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>レベル</th>
-                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>データ数</th>
-                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>平均点</th>
-                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>最高点</th>
-                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>最低点</th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>
+                                                                                データ数<br/><span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</span>
+                                                                            </th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>
+                                                                                平均点<br/><span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</span>
+                                                                            </th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>
+                                                                                最高点<br/><span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</span>
+                                                                            </th>
+                                                                            <th style={{ backgroundColor: '#f3f4f6', padding: '0.5rem', fontWeight: 600 }}>
+                                                                                最低点<br/><span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: '#6b7280' }}>(合格/不合格)</span>
+                                                                            </th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -309,10 +340,18 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                                         {row.level}
                                                                                     </span>
                                                                                 </td>
-                                                                                <td style={{ padding: '0.5rem' }}>{row.count}</td>
-                                                                                <td style={{ padding: '0.5rem', fontWeight: 600 }}>{row.average}</td>
-                                                                                <td style={{ padding: '0.5rem' }}>{row.max}</td>
-                                                                                <td style={{ padding: '0.5rem' }}>{row.min}</td>
+                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                    {renderStatValue(row.passed.count, row.failed.count)}
+                                                                                </td>
+                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                    {renderStatValue(row.passed.average, row.failed.average, true)}
+                                                                                </td>
+                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                    {renderStatValue(row.passed.max, row.failed.max)}
+                                                                                </td>
+                                                                                <td style={{ padding: '0.5rem' }}>
+                                                                                    {renderStatValue(row.passed.min, row.failed.min)}
+                                                                                </td>
                                                                             </tr>
                                                                         ))}
                                                                     </tbody>
