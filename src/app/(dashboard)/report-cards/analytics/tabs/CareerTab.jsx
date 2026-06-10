@@ -30,7 +30,7 @@ const renderStatValue = (passedVal, failedVal, isAverage = false) => {
 
 export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }) {
     const [careerSubTab, setCareerSubTab] = useState('overview')
-    const [selectedYear, setSelectedYear] = useState('2023') // Default to 2023 or latest available
+    const [selectedYear, setSelectedYear] = useState('all') // Default to all years
     const [expandedSchoolId, setExpandedSchoolId] = useState(null)
 
     // 過去5年実績詳細用のState
@@ -168,26 +168,60 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
     const stats = useMemo(() => {
         if (!careerStats?.yearlyTrends) return null
         
-        let targetYear = selectedYear
-        if (!availableYears.includes(targetYear) && availableYears.length > 0) {
-            targetYear = availableYears[0]
-            // We shouldn't setState in useMemo, but we can just use the first available year safely
-        }
+        if (selectedYear === 'all') {
+            const totalRecords = careerStats.yearlyTrends.reduce((sum, t) => sum + (t.total || 0), 0)
+            const totalGraduates = careerStats.yearlyTrends.reduce((sum, t) => sum + (t.graduated || 0), 0)
+            
+            const categoryStats = {}
+            careerStats.yearlyTrends.forEach(t => {
+                if (t.categories) {
+                    Object.entries(t.categories).forEach(([cat, val]) => {
+                        categoryStats[cat] = (categoryStats[cat] || 0) + val
+                    })
+                }
+            })
 
-        const trend = careerStats.yearlyTrends.find(t => String(t.year) === targetYear)
-        if (!trend) return null
-
-        // Map the new JSON structure to the old format expected by the UI
-        return {
-            summary: {
-                totalRecords: trend.total || 0,
-                totalGraduates: trend.graduated || 0
-            },
-            categoryStats: trend.categories || {},
-            topDestinations: (careerStats.topDestinations || [])
-                .filter(d => d.years && d.years[targetYear])
-                .map(d => ({ name: d.name, count: d.years[targetYear], students: d.students?.filter(s => String(s.year) === targetYear) || [] }))
+            const topDestinations = (careerStats.topDestinations || [])
+                .map(d => ({ 
+                    name: d.name, 
+                    count: d.count || 0, 
+                    students: d.students || [] 
+                }))
+                .filter(d => d.count > 0)
                 .sort((a, b) => b.count - a.count)
+
+            return {
+                summary: {
+                    totalRecords,
+                    totalGraduates
+                },
+                categoryStats,
+                topDestinations
+            }
+        } else {
+            let targetYear = selectedYear
+            if (!availableYears.includes(targetYear) && availableYears.length > 0) {
+                targetYear = availableYears[0]
+            }
+
+            const trend = careerStats.yearlyTrends.find(t => String(t.year) === targetYear)
+            if (!trend) return null
+
+            return {
+                summary: {
+                    totalRecords: trend.total || 0,
+                    totalGraduates: trend.graduated || 0
+                },
+                categoryStats: trend.categories || {},
+                topDestinations: (careerStats.topDestinations || [])
+                    .filter(d => d.years && d.years[targetYear])
+                    .map(d => ({ 
+                        name: d.name, 
+                        count: d.years[targetYear], 
+                        students: d.students?.filter(s => String(s.year) === targetYear) || [] 
+                    }))
+                    .sort((a, b) => b.count - a.count)
+            }
         }
     }, [careerStats, selectedYear, availableYears])
 
@@ -223,9 +257,10 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                     <label className={styles.filterLabel}>卒業年度</label>
                     <select 
                         className={styles.filterSelect} 
-                        value={availableYears.includes(selectedYear) ? selectedYear : availableYears[0]} 
+                        value={selectedYear} 
                         onChange={(e) => setSelectedYear(e.target.value)}
                     >
+                        <option value="all">全年度</option>
                         {availableYears.map(year => (
                             <option key={year} value={year}>{year}年度</option>
                         ))}
