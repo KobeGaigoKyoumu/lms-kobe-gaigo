@@ -19,6 +19,9 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  outputFileTracingIncludes: {
+    '/api/career/download-survey': ['./public/templates/全学生進路希望調査票2025.xlsx'],
+  },
 };
 
 export default nextConfig;
