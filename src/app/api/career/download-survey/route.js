@@ -4,6 +4,16 @@ import ExcelJS from 'exceljs'
 import { cookies } from 'next/headers'
 import { careerSurveyTemplateBase64 } from '@/templates/career_survey_template_base64'
 
+const addManYen = (val) => {
+    if (!val) return ''
+    const s = String(val).trim()
+    if (s === '可' || s === '不可' || s === '可　・　不可') return s
+    if (s.endsWith('万円') || s.endsWith('万')) {
+        return s
+    }
+    return `${s}万円`
+}
+
 export async function GET(request) {
     try {
         // 1. 権限チェック（直接cookieから読み取り）
@@ -98,6 +108,9 @@ export async function GET(request) {
             // 出席番号 (Q1) -> Row: startRow + 1, Col: 17
             ws1.getCell(startRow + 1, 17).value = targetIdx + 1
 
+            // 項目ラベル「健康保険証の有無」の書き換え (A18 -> Row: startRow + 18, Col: 1)
+            ws1.getCell(startRow + 18, 1).value = '銀行通帳への記帳・来日から現在までのアルバイト給与明細の有無'
+
             if (info) {
                 // 記入日 (N2) -> Row: startRow + 2, Col: 14
                 let filledDate = ''
@@ -140,29 +153,27 @@ export async function GET(request) {
                 ws1.getCell(startRow + 14, 6).value = info.can_move || ''
 
                 // 学費準備可能額 (F16) -> Row: startRow + 16, Col: 6
-                ws1.getCell(startRow + 16, 6).value = info.tuition_budget || ''
+                ws1.getCell(startRow + 16, 6).value = addManYen(info.tuition_budget)
 
                 // 両親による学費の援助可否 (F17) -> Row: startRow + 17, Col: 6
                 let parentSupportText = ''
                 if (info.parent_support) {
                     parentSupportText = info.parent_support
                     if (info.parent_support === '可' && info.parent_support_amount) {
-                        parentSupportText += ` (経費支弁額: ${info.parent_support_amount})`
+                        const amountStr = addManYen(info.parent_support_amount)
+                        parentSupportText += ` (経費支弁額: ${amountStr})`
                     }
                 }
                 ws1.getCell(startRow + 17, 6).value = parentSupportText
+
+                // 通帳記帳・給与明細 (F18) -> Row: startRow + 18, Col: 6
+                ws1.getCell(startRow + 18, 6).value = `通帳記帳: ${info.passbook_updated || '未回答'} / 給与明細: ${info.pay_slips_available || '未回答'}`
 
                 // 進学先卒業後の予定 (F19) -> Row: startRow + 19, Col: 6
                 ws1.getCell(startRow + 19, 6).value = info.post_grad_plans || ''
 
                 // その他（心配に思っていることなど） (F20) -> Row: startRow + 20, Col: 6
-                let otherText = ''
-                if (info.passbook_updated || info.pay_slips_available) {
-                    otherText += `【確認事項】 通帳記帳: ${info.passbook_updated || '未回答'} / アルバイト給与明細: ${info.pay_slips_available || '未回答'}\n`
-                    otherText += `--------------------------------------------------\n`
-                }
-                otherText += info.teacher_questions || ''
-                ws1.getCell(startRow + 20, 6).value = otherText
+                ws1.getCell(startRow + 20, 6).value = info.teacher_questions || ''
             } else {
                 // 回答データがない場合
                 ws1.getCell(startRow + 2, 14).value = ''
@@ -181,6 +192,7 @@ export async function GET(request) {
                 ws1.getCell(startRow + 14, 6).value = '可　・　不可'
                 ws1.getCell(startRow + 16, 6).value = ''
                 ws1.getCell(startRow + 17, 6).value = '可　・　不可'
+                ws1.getCell(startRow + 18, 6).value = '通帳記帳: 未回答 / 給与明細: 未回答'
                 ws1.getCell(startRow + 19, 6).value = ''
                 ws1.getCell(startRow + 20, 6).value = ''
             }
