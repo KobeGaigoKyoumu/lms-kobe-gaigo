@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
-import path from 'path'
-import fs from 'fs'
 import { cookies } from 'next/headers'
+import { careerSurveyTemplateBase64 } from '@/templates/career_survey_template_base64'
 
 export async function GET(request) {
     try {
@@ -72,15 +71,9 @@ export async function GET(request) {
 
         const careerMap = new Map(careerInfos?.map(info => [info.student_id, info]) || [])
 
-        // 6. テンプレートExcelファイルを読み込み
-        // Vercel NFT (Next.js File Tracing) requires a relative literal path reference to include it in the build.
-        const templatePath = path.join(process.cwd(), 'src/templates/career_survey_template_2025.xlsx')
-        if (!fs.existsSync(templatePath)) {
-            console.error('Excel template file not found at:', templatePath)
-            return new Response(`Excel template file not found. Checked path: ${templatePath}`, { status: 500 })
-        }
-
-        const wb = XLSX.readFile(templatePath)
+        // 6. テンプレートExcelファイルをBase64からメモリ上で読み込み
+        const templateBuffer = Buffer.from(careerSurveyTemplateBase64, 'base64')
+        const wb = XLSX.read(templateBuffer, { type: 'buffer' })
         const ws1 = wb.Sheets['2025']
         const ws2 = wb.Sheets['名簿2025']
 

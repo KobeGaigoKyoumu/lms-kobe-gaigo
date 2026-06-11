@@ -19,9 +19,6 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
   },
-  outputFileTracingIncludes: {
-    '/api/career/download-survey': ['./src/templates/career_survey_template_2025.xlsx'],
-  },
 };
 
 export default nextConfig;
