@@ -649,9 +649,26 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
 
             {careerSubTab === 'overview' && (
                 <div className={styles.tabContent}>
-                    <div className={styles.alertWarning}>
-                        <strong>⚠️ COVID-19の影響について：</strong><br />
-                        2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延がありました。2020年度は新入生がいなかったため、2021年度に進学した学生はほとんどいませんでした。
+                    <div style={{
+                        backgroundColor: '#fffbeb',
+                        border: '1px solid #fde047',
+                        borderRadius: '0.5rem',
+                        padding: '1rem 1.25rem',
+                        marginBottom: '1.5rem',
+                        color: '#a16207',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.6',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.25rem'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                            <span style={{ color: '#d97706' }}>⚠️</span>
+                            <span>COVID-19の影響について：</span>
+                        </div>
+                        <div>
+                            2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延がありました。2020年度は新入生がいなかったため、2021年度に進学した学生はほとんどいませんでした。
+                        </div>
                     </div>
 
                     <div className={styles.statsGrid}>
