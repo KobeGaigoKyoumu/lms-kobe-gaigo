@@ -489,7 +489,11 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
             'N1': 144
         };
 
-        const rankings = stats.topDestinations.map(school => {
+        let totalScoreSum = 0;
+        let totalSampleCount = 0;
+        const rawSchoolData = [];
+
+        stats.topDestinations.forEach(school => {
             let scoreSum = 0;
             let scoreCount = 0;
             const levelScores = {};
@@ -525,24 +529,49 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                 }
             });
 
-            if (scoreCount === 0) return null;
+            if (scoreCount > 0) {
+                const averageScore = scoreSum / scoreCount;
+                totalScoreSum += scoreSum;
+                totalSampleCount += scoreCount;
 
-            const averageScore = scoreSum / scoreCount;
+                const levelsText = Object.entries(levelScores)
+                    .map(([lvl, count]) => `${lvl}: ${count}件`)
+                    .join(', ');
 
-            const levelsText = Object.entries(levelScores)
-                .map(([lvl, count]) => `${lvl}: ${count}件`)
-                .join(', ');
+                rawSchoolData.push({
+                    name: school.name,
+                    averageScore: averageScore,
+                    sampleCount: scoreCount,
+                    levelsText: levelsText
+                });
+            }
+        });
+
+        if (rawSchoolData.length === 0 || totalSampleCount === 0) return [];
+
+        // 全体の単純平均
+        const overallAverageScore = totalScoreSum / totalSampleCount;
+        
+        // 信頼度定数 m (最小サンプル数としてのウェイト、m=3.0)
+        const m = 3.0;
+
+        // 各校のベイズ平均スコア（信頼加重平均）を算出する
+        const rankings = rawSchoolData.map(school => {
+            const v = school.sampleCount;
+            const R = school.averageScore;
+            const C = overallAverageScore;
+            
+            // ベイズ平均 = (v * R + m * C) / (v + m)
+            const bayesianScore = (v * R + m * C) / (v + m);
 
             return {
-                name: school.name,
-                averageScore: averageScore,
-                sampleCount: scoreCount,
-                levelsText: levelsText
+                ...school,
+                bayesianScore: bayesianScore
             };
-        }).filter(Boolean);
+        });
 
-        // 平均点（入りやすさ難易度）の降順（高い順）でソート
-        return rankings.sort((a, b) => b.averageScore - a.averageScore);
+        // 入りやすい順（ベイズ平均スコアの昇順＝低い順）でソート
+        return rankings.sort((a, b) => a.bayesianScore - b.bayesianScore);
     }, [stats, studentDb]);
 
     // 学校別詳細のフィルタリング
@@ -700,7 +729,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                             JLPT結果から計る進学先別入りやすさランキング (データあり: {schoolJlptRankings.length}校)
                         </h3>
                         <p style={{ fontSize: '0.825rem', color: '#6b7280', marginBottom: '1.25rem', lineHeight: '1.4' }}>
-                            ※ 各進学先に進学・合格した学生のJLPT受験データより、全レベルをひとつの尺度（N5の0点〜N1の180点）に統合し、その平均値から算出した難易度指標です（数値が高いほど難関）。
+                            ※ 各進学先に合格・進学した学生のJLPT受験データより、全レベルをひとつの尺度（N5の0点〜N1の180点）に統合し、**ベイズ平均（信頼加重平均）**を用いて算出した入りやすさ指標です（数値が低いほど入りやすい）。サンプル数が極めて少ない学校の偏りを全体平均を用いて自動的に補正しています。
                         </p>
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
@@ -708,7 +737,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     <tr>
                                         <th style={{ width: '80px', textAlign: 'center' }}>順位</th>
                                         <th>学校名</th>
-                                        <th style={{ textAlign: 'right' }}>入りやすさ指標 (平均点: 0〜180)</th>
+                                        <th style={{ textAlign: 'right' }}>入りやすさ指標 (加重スコア: 0〜180)</th>
                                         <th style={{ textAlign: 'right' }}>受験データサンプル数</th>
                                         <th>対象レベル内訳 (受験件数)</th>
                                     </tr>
@@ -722,7 +751,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                 </td>
                                                 <td style={{ fontWeight: 600 }}>{school.name}</td>
                                                 <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>
-                                                    {school.averageScore.toFixed(1)}
+                                                    {school.bayesianScore.toFixed(1)}
                                                 </td>
                                                 <td style={{ textAlign: 'right', fontWeight: 600, color: '#10b981' }}>
                                                     {school.sampleCount} 件
