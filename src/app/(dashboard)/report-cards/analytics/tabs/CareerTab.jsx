@@ -171,6 +171,9 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
     const [expandedPast5YearsSchoolId, setExpandedPast5YearsSchoolId] = useState(null)
     const [past5YearsPage, setPast5YearsPage] = useState(1)
 
+    // JLPT入りやすさランキング用のState
+    const [rankingPage, setRankingPage] = useState(1)
+
     const ITEMS_PER_PAGE = 50
 
     // 各進学先の進学者リストのJLPT成績を集計する
@@ -574,6 +577,15 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         return rankings.sort((a, b) => a.bayesianScore - b.bayesianScore);
     }, [stats, studentDb]);
 
+    const ITEMS_PER_PAGE_RANKING = 50;
+
+    const paginatedRanking = useMemo(() => {
+        const startIndex = (rankingPage - 1) * ITEMS_PER_PAGE_RANKING;
+        return schoolJlptRankings.slice(startIndex, startIndex + ITEMS_PER_PAGE_RANKING);
+    }, [schoolJlptRankings, rankingPage]);
+
+    const totalRankingPages = Math.max(1, Math.ceil(schoolJlptRankings.length / ITEMS_PER_PAGE_RANKING));
+
     // 学校別詳細のフィルタリング
     const filteredSchools = useMemo(() => {
         if (!stats?.topDestinations) return []
@@ -760,11 +772,12 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {schoolJlptRankings.map((school, index) => {
+                                    {paginatedRanking.map((school, index) => {
+                                        const globalIndex = (rankingPage - 1) * ITEMS_PER_PAGE_RANKING + index;
                                         return (
                                             <tr key={school.name}>
-                                                <td style={{ textAlign: 'center', fontWeight: 'bold', color: index < 3 ? '#eab308' : '#4b5563' }}>
-                                                    #{index + 1}
+                                                <td style={{ textAlign: 'center', fontWeight: 'bold', color: globalIndex < 3 ? '#eab308' : '#4b5563' }}>
+                                                    #{globalIndex + 1}
                                                 </td>
                                                 <td style={{ fontWeight: 600 }}>{school.name}</td>
                                                 <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>
@@ -788,6 +801,11 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     )}
                                 </tbody>
                             </table>
+                            <Pagination 
+                                currentPage={rankingPage} 
+                                totalPages={totalRankingPages} 
+                                onPageChange={setRankingPage} 
+                            />
                         </div>
                     </div>
                 </div>

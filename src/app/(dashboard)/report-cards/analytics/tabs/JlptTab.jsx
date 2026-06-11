@@ -107,17 +107,34 @@ export default function JlptTab({
                                 <Line
                                     data={{
                                         labels: [...(statsObj?.sessionStats || [])].reverse().map(s => s.session),
-                                        datasets: [{
-                                            label: '合格率 (%)',
-                                            data: [...(statsObj?.sessionStats || [])].reverse().map(s => s.passRate),
-                                            borderColor: '#3b82f6',
-                                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                            borderWidth: 3,
-                                            pointRadius: 4,
-                                            pointBackgroundColor: '#3b82f6',
-                                            fill: false,
-                                            tension: 0.4
-                                        }]
+                                        datasets: [
+                                            {
+                                                label: '合格率 (%)',
+                                                data: [...(statsObj?.sessionStats || [])].reverse().map(s => s.passRate),
+                                                borderColor: '#3b82f6',
+                                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                borderWidth: 3,
+                                                pointRadius: 4,
+                                                pointBackgroundColor: '#3b82f6',
+                                                fill: false,
+                                                tension: 0.4
+                                            },
+                                            {
+                                                label: 'トレンド',
+                                                data: [...(statsObj?.sessionStats || [])].reverse().map((s, i, arr) => {
+                                                    const start = Math.max(0, i - 1);
+                                                    const end = Math.min(arr.length - 1, i + 1);
+                                                    const subset = arr.slice(start, end + 1);
+                                                    return subset.reduce((acc, curr) => acc + parseFloat(curr.passRate || 0), 0) / subset.length;
+                                                }),
+                                                borderColor: '#f97316',
+                                                borderDash: [5, 5],
+                                                borderWidth: 2,
+                                                pointRadius: 0,
+                                                fill: false,
+                                                tension: 0.4
+                                            }
+                                        ]
                                     }}
                                     options={{ 
                                         ...chartOptions, 
