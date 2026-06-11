@@ -157,7 +157,7 @@ async function run() {
     console.log('1. Fetching student nationality list from Supabase...');
     const { data: dbStudents, error: dbError } = await supabase
         .from('students')
-        .select('student_id_text, full_name, nationality');
+        .select('student_id_text, full_name, nationality, destination');
 
     if (dbError) {
         console.error('Error fetching students from DB:', dbError.message);
@@ -692,6 +692,51 @@ async function run() {
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(finalJsonData, null, 2), 'utf8');
     console.log(`\nSuccessfully rebuilt and saved to: ${OUTPUT_PATH}`);
+
+    // Update student destinations in Supabase
+    console.log('\n8. Updating student destinations in Supabase database...');
+    const updates = [];
+    dbStudents.forEach(dbStudent => {
+        const id = dbStudent.student_id_text;
+        if (!id) return;
+
+        const excelInfo = allStudentDestinations[id];
+        if (excelInfo) {
+            const newDest = excelInfo.destination || null;
+            const oldDest = dbStudent.destination || null;
+
+            if (newDest !== oldDest) {
+                updates.push({
+                    student_id_text: id,
+                    destination: newDest
+                });
+            }
+        }
+    });
+
+    console.log(`Found ${updates.length} students with modified destinations in Excel vs Supabase.`);
+
+    if (updates.length > 0) {
+        console.log(`Starting Supabase update for ${updates.length} students...`);
+        const CHUNK_SIZE = 25;
+        for (let i = 0; i < updates.length; i += CHUNK_SIZE) {
+            const chunk = updates.slice(i, i + CHUNK_SIZE);
+            await Promise.all(chunk.map(async (up) => {
+                const { error } = await supabase
+                    .from('students')
+                    .update({ destination: up.destination })
+                    .eq('student_id_text', up.student_id_text);
+                
+                if (error) {
+                    console.error(`Failed to update student ${up.student_id_text}:`, error.message);
+                }
+            }));
+            console.log(`  Updated progress: ${Math.min(i + CHUNK_SIZE, updates.length)} / ${updates.length}`);
+        }
+        console.log('Supabase student destinations updated successfully.');
+    } else {
+        console.log('No student destinations need to be updated in Supabase.');
+    }
 }
 
 run();
