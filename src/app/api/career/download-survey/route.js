@@ -14,6 +14,52 @@ const addManYen = (val) => {
     return `${s}万円`
 }
 
+const applyRowStylesAndMerge = (ws, startRow) => {
+    const rowsToMerge = [18, 19, 20, 21];
+    const borderStyle = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } }
+    };
+    
+    rowsToMerge.forEach(rNum => {
+        const actualRow = startRow + rNum;
+        
+        try {
+            ws.mergeCells(`A${actualRow}:E${actualRow}`);
+        } catch (e) {}
+        
+        try {
+            ws.mergeCells(`F${actualRow}:P${actualRow}`);
+        } catch (e) {}
+        
+        for (let col = 1; col <= 5; col++) {
+            const cell = ws.getCell(actualRow, col);
+            cell.border = borderStyle;
+            cell.font = { name: 'MS Mincho', size: 10, bold: false };
+            cell.alignment = { vertical: 'middle', horizontal: 'left' };
+        }
+        
+        for (let col = 6; col <= 16; col++) {
+            const cell = ws.getCell(actualRow, col);
+            cell.border = borderStyle;
+            cell.font = { name: 'MS Mincho', size: 10 };
+            cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+        }
+        
+        // 改ページの位置ずれを防ぐため、その他行(行21)の高さは45ptに抑え、通常の行は30ptとします
+        ws.getRow(actualRow).height = (rNum === 21) ? 45 : 30;
+    });
+};
+
+const setReasonAlignment = (ws, startRow) => {
+    [5, 7, 9].forEach(r => {
+        const cell = ws.getCell(startRow + r, 13);
+        cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'left' };
+    });
+};
+
 export async function GET(request) {
     try {
         // 1. 権限チェック（直接cookieから読み取り）
@@ -108,14 +154,17 @@ export async function GET(request) {
             // 出席番号 (Q1) -> Row: startRow + 1, Col: 17
             ws1.getCell(startRow + 1, 17).value = targetIdx + 1
 
+            // セルの結合と罫線・スタイル・行高さの設定を適用 (行18〜21)
+            applyRowStylesAndMerge(ws1, startRow)
+
             // 項目ラベルの書き換え (A18〜A21)
             ws1.getCell(startRow + 18, 1).value = '給与が入る通帳への記帳'
             ws1.getCell(startRow + 19, 1).value = '来日から現在までの給与明細'
             ws1.getCell(startRow + 20, 1).value = '進学先卒業後の予定'
             ws1.getCell(startRow + 21, 1).value = 'その他（心配に思っていることなど）'
 
-            // 「その他（心配に思っていることなど）」の行（行21）の高さを調整して複数行に対応
-            ws1.getRow(startRow + 21).height = 80
+            // 「理由」セルの折り返し表示を設定
+            setReasonAlignment(ws1, startRow)
 
             if (info) {
                 // 記入日 (N2) -> Row: startRow + 2, Col: 14
@@ -182,9 +231,7 @@ export async function GET(request) {
                 ws1.getCell(startRow + 20, 6).value = info.post_grad_plans || ''
 
                 // その他（心配に思っていることなど） (F21) -> Row: startRow + 21, Col: 6
-                const otherCell = ws1.getCell(startRow + 21, 6)
-                otherCell.value = info.teacher_questions || ''
-                otherCell.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' }
+                ws1.getCell(startRow + 21, 6).value = info.teacher_questions || ''
             } else {
                 // 回答データがない場合
                 ws1.getCell(startRow + 2, 14).value = ''
@@ -206,10 +253,7 @@ export async function GET(request) {
                 ws1.getCell(startRow + 18, 6).value = '通帳記帳：未回答'
                 ws1.getCell(startRow + 19, 6).value = '給与明細：未回答'
                 ws1.getCell(startRow + 20, 6).value = ''
-                
-                const otherCell = ws1.getCell(startRow + 21, 6)
-                otherCell.value = ''
-                otherCell.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' }
+                ws1.getCell(startRow + 21, 6).value = ''
             }
         })
 
