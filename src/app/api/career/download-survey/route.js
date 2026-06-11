@@ -108,8 +108,14 @@ export async function GET(request) {
             // 出席番号 (Q1) -> Row: startRow + 1, Col: 17
             ws1.getCell(startRow + 1, 17).value = targetIdx + 1
 
-            // 項目ラベル「健康保険証の有無」の書き換え (A18 -> Row: startRow + 18, Col: 1)
-            ws1.getCell(startRow + 18, 1).value = '銀行通帳への記帳・来日から現在までのアルバイト給与明細の有無'
+            // 項目ラベルの書き換え (A18〜A21)
+            ws1.getCell(startRow + 18, 1).value = '給与が入る通帳への記帳'
+            ws1.getCell(startRow + 19, 1).value = '来日から現在までの給与明細'
+            ws1.getCell(startRow + 20, 1).value = '進学先卒業後の予定'
+            ws1.getCell(startRow + 21, 1).value = 'その他（心配に思っていることなど）'
+
+            // 「その他（心配に思っていることなど）」の行（行21）の高さを調整して複数行に対応
+            ws1.getRow(startRow + 21).height = 80
 
             if (info) {
                 // 記入日 (N2) -> Row: startRow + 2, Col: 14
@@ -166,14 +172,19 @@ export async function GET(request) {
                 }
                 ws1.getCell(startRow + 17, 6).value = parentSupportText
 
-                // 通帳記帳・給与明細 (F18) -> Row: startRow + 18, Col: 6
-                ws1.getCell(startRow + 18, 6).value = `通帳記帳: ${info.passbook_updated || '未回答'} / 給与明細: ${info.pay_slips_available || '未回答'}`
+                // 給与が入る通帳への記帳 (F18) -> Row: startRow + 18, Col: 6
+                ws1.getCell(startRow + 18, 6).value = `通帳記帳：${info.passbook_updated || '未回答'}`
 
-                // 進学先卒業後の予定 (F19) -> Row: startRow + 19, Col: 6
-                ws1.getCell(startRow + 19, 6).value = info.post_grad_plans || ''
+                // 来日から現在までの給与明細 (F19) -> Row: startRow + 19, Col: 6
+                ws1.getCell(startRow + 19, 6).value = `給与明細：${info.pay_slips_available || '未回答'}`
 
-                // その他（心配に思っていることなど） (F20) -> Row: startRow + 20, Col: 6
-                ws1.getCell(startRow + 20, 6).value = info.teacher_questions || ''
+                // 進学先卒業後の予定 (F20) -> Row: startRow + 20, Col: 6
+                ws1.getCell(startRow + 20, 6).value = info.post_grad_plans || ''
+
+                // その他（心配に思っていることなど） (F21) -> Row: startRow + 21, Col: 6
+                const otherCell = ws1.getCell(startRow + 21, 6)
+                otherCell.value = info.teacher_questions || ''
+                otherCell.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' }
             } else {
                 // 回答データがない場合
                 ws1.getCell(startRow + 2, 14).value = ''
@@ -192,9 +203,13 @@ export async function GET(request) {
                 ws1.getCell(startRow + 14, 6).value = '可　・　不可'
                 ws1.getCell(startRow + 16, 6).value = ''
                 ws1.getCell(startRow + 17, 6).value = '可　・　不可'
-                ws1.getCell(startRow + 18, 6).value = '通帳記帳: 未回答 / 給与明細: 未回答'
-                ws1.getCell(startRow + 19, 6).value = ''
+                ws1.getCell(startRow + 18, 6).value = '通帳記帳：未回答'
+                ws1.getCell(startRow + 19, 6).value = '給与明細：未回答'
                 ws1.getCell(startRow + 20, 6).value = ''
+                
+                const otherCell = ws1.getCell(startRow + 21, 6)
+                otherCell.value = ''
+                otherCell.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' }
             }
         })
 
