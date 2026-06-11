@@ -73,7 +73,14 @@ function SubmissionRow({ submission, student, onImageClick }) {
                             {isImage(file.name) ? (
                                 <div
                                     className={styles.imageWrapper}
-                                    onClick={() => onImageClick(file)}
+                                    onClick={() => {
+                                        const imageFiles = fileUrls.filter(f => isImage(f.name))
+                                        const idx = imageFiles.findIndex(img => img.url === file.url)
+                                        onImageClick({
+                                            images: imageFiles,
+                                            index: idx
+                                        })
+                                    }}
                                     onMouseEnter={() => {
                                         setHoveredImage({
                                             url: file.url
@@ -432,8 +439,10 @@ export default function AssignmentGradingView({ assignment, submissions, subject
             {/* Lightbox Modal */}
             {selectedImage && (
                 <ImagePreviewModal
-                    imageUrl={selectedImage.url}
-                    imageName={selectedImage.name}
+                    images={selectedImage.images}
+                    initialIndex={selectedImage.index}
+                    imageUrl={selectedImage.images?.[selectedImage.index]?.url}
+                    imageName={selectedImage.images?.[selectedImage.index]?.name}
                     onClose={() => setSelectedImage(null)}
                 />
             )}

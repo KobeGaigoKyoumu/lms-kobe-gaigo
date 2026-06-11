@@ -1,10 +1,17 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ZoomIn, ZoomOut, RotateCw, RotateCcw, RefreshCw, X } from 'lucide-react'
+import { ZoomIn, ZoomOut, RotateCw, RotateCcw, RefreshCw, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import styles from './ImagePreviewModal.module.css'
 
-export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
+export default function ImagePreviewModal({ 
+    imageUrl, 
+    imageName, 
+    onClose,
+    images = [],
+    initialIndex = 0
+}) {
+    const [currentIndex, setCurrentIndex] = useState(initialIndex)
     const [zoom, setZoom] = useState(1)
     const [rotate, setRotate] = useState(0)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -12,15 +19,44 @@ export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
 
     const imageRef = useRef(null)
+    const touchStartX = useRef(0)
+    const touchEndX = useRef(0)
 
-    // Escキーで閉じる
+    const hasMultipleImages = images && images.length > 1
+    const currentImage = hasMultipleImages ? images[currentIndex] : { url: imageUrl, name: imageName }
+
+    const handleNext = () => {
+        if (hasMultipleImages) {
+            setCurrentIndex(prev => (prev + 1) % images.length)
+            handleReset()
+        }
+    }
+
+    const handlePrev = () => {
+        if (hasMultipleImages) {
+            setCurrentIndex(prev => (prev - 1 + images.length) % images.length)
+            handleReset()
+        }
+    }
+
+    // Escキー、左右キーで移動
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') onClose()
+            if (hasMultipleImages) {
+                if (e.key === 'ArrowRight' || e.key === 'Right') {
+                    e.preventDefault()
+                    handleNext()
+                }
+                if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                    e.preventDefault()
+                    handlePrev()
+                }
+            }
         }
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [onClose])
+    }, [onClose, hasMultipleImages, currentIndex, images.length])
 
     // マウスドラッグでの移動
     const handleMouseDown = (e) => {
@@ -41,12 +77,14 @@ export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
         setIsDragging(false)
     }
 
-    // タッチデバイスのドラッグ移動
+    // タッチデバイスのドラッグ移動 & スワイプ検知
     const handleTouchStart = (e) => {
         if (e.touches.length === 1) {
             setIsDragging(true)
             const touch = e.touches[0]
             setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y })
+            touchStartX.current = touch.clientX
+            touchEndX.current = touch.clientX
         }
     }
 
@@ -57,6 +95,22 @@ export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
             x: touch.clientX - dragStart.x,
             y: touch.clientY - dragStart.y
         })
+        touchEndX.current = touch.clientX
+    }
+
+    const handleTouchEnd = () => {
+        setIsDragging(false)
+        if (zoom === 1 && hasMultipleImages) {
+            const diffX = touchStartX.current - touchEndX.current
+            const threshold = 50 // px
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    handleNext()
+                } else {
+                    handlePrev()
+                }
+            }
+        }
     }
 
     // マウスホイールでのズーム
@@ -96,6 +150,28 @@ export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
                 <X size={24} />
             </button>
 
+            {hasMultipleImages && (
+                <>
+                    <div className={styles.imageCounter}>
+                        {currentIndex + 1} / {images.length}
+                    </div>
+                    <button 
+                        className={`${styles.navButton} ${styles.prevButton}`} 
+                        onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                        aria-label="前の画像"
+                    >
+                        <ChevronLeft size={28} />
+                    </button>
+                    <button 
+                        className={`${styles.navButton} ${styles.nextButton}`} 
+                        onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                        aria-label="次の画像"
+                    >
+                        <ChevronRight size={28} />
+                    </button>
+                </>
+            )}
+
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div 
                     className={styles.imageContainer}
@@ -105,13 +181,13 @@ export default function ImagePreviewModal({ imageUrl, imageName, onClose }) {
                     onMouseLeave={handleMouseUp}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
-                    onTouchEnd={handleMouseUp}
+                    onTouchEnd={handleTouchEnd}
                     onWheel={handleWheel}
                 >
                     <img
                         ref={imageRef}
-                        src={imageUrl}
-                        alt={imageName}
+                        src={currentImage?.url}
+                        alt={currentImage?.name}
                         className={styles.modalImage}
                         style={{
                             transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotate}deg)`,

@@ -7,6 +7,80 @@ import { MultiSelect } from '../components/MultiSelect'
 import { JlptSessionRow } from '../components/JlptSessionRow'
 import styles from '../page.module.css'
 
+// 二次多項式回帰 (y = ax^2 + bx + c) の計算
+function calculateLinearTrend(data) {
+    const n = data.length;
+    if (n === 0) return [];
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (let i = 0; i < n; i++) {
+        sumX += i;
+        sumY += data[i];
+        sumXY += i * data[i];
+        sumXX += i * i;
+    }
+    const denom = n * sumXX - sumX * sumX;
+    if (Math.abs(denom) < 1e-5) {
+        const avg = sumY / n;
+        return data.map(() => avg);
+    }
+    const slope = (n * sumXY - sumX * sumY) / denom;
+    const intercept = (sumY - slope * sumX) / n;
+    return data.map((_, i) => slope * i + intercept);
+}
+
+function calculatePolynomialTrend(data) {
+    const n = data.length;
+    if (n === 0) return [];
+    if (n < 3) {
+        return calculateLinearTrend(data);
+    }
+
+    let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
+    let sumY = 0, sumXY = 0, sumX2Y = 0;
+
+    for (let i = 0; i < n; i++) {
+        const x = i;
+        const y = data[i];
+        const x2 = x * x;
+        const x3 = x2 * x;
+        const x4 = x3 * x;
+
+        sumX += x;
+        sumX2 += x2;
+        sumX3 += x3;
+        sumX4 += x4;
+        sumY += y;
+        sumXY += x * y;
+        sumX2Y += x2 * y;
+    }
+
+    const det = sumX4 * (sumX2 * n - sumX * sumX) -
+                sumX3 * (sumX3 * n - sumX2 * sumX) +
+                sumX2 * (sumX3 * sumX - sumX2 * sumX2);
+
+    if (Math.abs(det) < 1e-5) {
+        return calculateLinearTrend(data);
+    }
+
+    const detA = sumX2Y * (sumX2 * n - sumX * sumX) -
+                 sumXY * (sumX3 * n - sumX2 * sumX) +
+                 sumY * (sumX3 * sumX - sumX2 * sumX2);
+
+    const detB = sumX4 * (sumXY * n - sumY * sumX) -
+                 sumX3 * (sumX2Y * n - sumY * sumX2) +
+                 sumX2 * (sumX2Y * sumX - sumXY * sumX2);
+
+    const detC = sumX4 * (sumX2 * sumY - sumX * sumXY) -
+                 sumX3 * (sumX3 * sumY - sumX2 * sumXY) +
+                 sumX2Y * (sumX3 * sumX - sumX2 * sumX2);
+
+    const a = detA / det;
+    const b = detB / det;
+    const c = detC / det;
+
+    return data.map((_, i) => a * i * i + b * i + c);
+}
+
 export default function JlptTab({ 
     initialStats = {}, 
     nationalStats: initialNationalStats = null,
@@ -121,12 +195,9 @@ export default function JlptTab({
                                             },
                                             {
                                                 label: 'トレンド',
-                                                data: [...(statsObj?.sessionStats || [])].reverse().map((s, i, arr) => {
-                                                    const start = Math.max(0, i - 1);
-                                                    const end = Math.min(arr.length - 1, i + 1);
-                                                    const subset = arr.slice(start, end + 1);
-                                                    return subset.reduce((acc, curr) => acc + parseFloat(curr.passRate || 0), 0) / subset.length;
-                                                }),
+                                                data: calculatePolynomialTrend(
+                                                    [...(statsObj?.sessionStats || [])].reverse().map(s => parseFloat(s.passRate || 0))
+                                                ),
                                                 borderColor: '#f97316',
                                                 borderDash: [5, 5],
                                                 borderWidth: 2,
@@ -168,13 +239,9 @@ export default function JlptTab({
                                             },
                                             {
                                                 label: 'トレンド',
-                                                data: (statsObj?.yearlyTrend || []).map((d, i, arr) => {
-                                                    // Simple moving average for trend line
-                                                    const start = Math.max(0, i - 1);
-                                                    const end = Math.min(arr.length - 1, i + 1);
-                                                    const subset = arr.slice(start, end + 1);
-                                                    return subset.reduce((acc, curr) => acc + parseFloat(curr.passRate), 0) / subset.length;
-                                                }),
+                                                data: calculatePolynomialTrend(
+                                                    (statsObj?.yearlyTrend || []).map(d => parseFloat(d.passRate || 0))
+                                                ),
                                                 borderColor: '#f97316',
                                                 borderDash: [5, 5],
                                                 borderWidth: 2,

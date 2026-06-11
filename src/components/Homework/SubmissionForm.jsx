@@ -80,12 +80,11 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
         if (!e.target.files?.length) return
 
         setUploading(true)
-        const newFiles = []
         const oversizedFiles = []
         const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
         try {
-            for (const file of e.target.files) {
+            const uploadPromises = Array.from(e.target.files).map(async (file) => {
                 let processedFile = file;
 
                 if (file.type.startsWith('image/')) {
@@ -98,7 +97,7 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
 
                 if (processedFile.size > MAX_SIZE) {
                     oversizedFiles.push(file.name);
-                    continue;
+                    return null;
                 }
 
                 // サーバーアクションを介して Supabase Storage へアップロード
@@ -112,12 +111,15 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                     throw new Error(result.error)
                 }
 
-                newFiles.push({
+                return {
                     name: file.name,
                     url: result.url,
                     path: result.path
-                })
-            }
+                }
+            })
+
+            const uploadedResults = await Promise.all(uploadPromises)
+            const newFiles = uploadedResults.filter(file => file !== null)
 
             if (oversizedFiles.length > 0) {
                 alert(`以下のファイルは圧縮後もサイズが大きすぎます（最大5MB）:\n${oversizedFiles.join('\n')}`);
@@ -187,7 +189,14 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
                                         {isImage(file.name) ? (
                                             <div
                                                 className={styles.imageWrapper}
-                                                onClick={() => setSelectedImage(file)}
+                                                onClick={() => {
+                                                    const imageFiles = files.filter(f => isImage(f.name))
+                                                    const idx = imageFiles.findIndex(img => img.url === file.url)
+                                                    setSelectedImage({
+                                                        images: imageFiles,
+                                                        index: idx
+                                                    })
+                                                }}
                                             >
                                                 <img
                                                     src={file.url}
@@ -248,8 +257,10 @@ export default function SubmissionForm({ assignmentId, initialComment = '', init
             {/* Lightbox Modal */}
             {selectedImage && (
                 <ImagePreviewModal
-                    imageUrl={selectedImage.url}
-                    imageName={selectedImage.name}
+                    images={selectedImage.images}
+                    initialIndex={selectedImage.index}
+                    imageUrl={selectedImage.images?.[selectedImage.index]?.url}
+                    imageName={selectedImage.images?.[selectedImage.index]?.name}
                     onClose={() => setSelectedImage(null)}
                 />
             )}
