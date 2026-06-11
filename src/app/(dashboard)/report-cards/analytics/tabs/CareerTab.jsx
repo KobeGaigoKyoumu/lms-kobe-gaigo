@@ -247,6 +247,79 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         };
     }, [studentDb]);
 
+    // 各年度ごとのJLPT平均点を集計する
+    const getYearlyJlptStats = useMemo(() => {
+        return (schoolStudents) => {
+            if (!schoolStudents || schoolStudents.length === 0 || !studentDb || studentDb.length === 0) {
+                return {};
+            }
+            
+            const matchingDbStudents = schoolStudents.map(s => {
+                const dbStudent = studentDb.find(dbStudent => 
+                    String(dbStudent.studentId) === String(s.id) ||
+                    dbStudent.name === s.name
+                );
+                if (dbStudent) {
+                    return {
+                        ...dbStudent,
+                        year: s.year
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            const yearlyData = {};
+
+            matchingDbStudents.forEach(dbStudent => {
+                const year = dbStudent.year;
+                if (!year) return;
+
+                if (!yearlyData[year]) {
+                    yearlyData[year] = { passed: [], failed: [] };
+                }
+
+                const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+                levels.forEach(lvl => {
+                    const levelData = dbStudent.levels?.[lvl];
+                    if (levelData && levelData.status && (levelData.status === '合格' || levelData.status === '不合格')) {
+                        const status = levelData.status;
+                        let score = parseFloat(levelData.score);
+                        if (isNaN(score) || score === 0) {
+                            const matches = String(levelData.score).match(/\d+/);
+                            if (matches) {
+                                score = parseFloat(matches[0]);
+                            } else {
+                                score = NaN;
+                            }
+                        }
+                        
+                        if (!isNaN(score) && score > 0) {
+                            if (status === '合格') {
+                                yearlyData[year].passed.push(score);
+                            } else {
+                                yearlyData[year].failed.push(score);
+                            }
+                        }
+                    }
+                });
+            });
+
+            const result = {};
+            Object.keys(yearlyData).forEach(year => {
+                const p = yearlyData[year].passed;
+                const f = yearlyData[year].failed;
+                result[year] = {
+                    passedAverage: p.length > 0 ? parseFloat((p.reduce((a, b) => a + b, 0) / p.length).toFixed(1)) : null,
+                    failedAverage: f.length > 0 ? parseFloat((f.reduce((a, b) => a + b, 0) / f.length).toFixed(1)) : null,
+                    passedCount: p.length,
+                    failedCount: f.length
+                };
+            });
+
+            return result;
+        };
+    }, [studentDb]);
+
     // Ensure the year selector is populated correctly
     const availableYears = useMemo(() => {
         if (!careerStats?.yearlyTrends) return []
@@ -648,7 +721,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     const isExpanded = expandedPast5YearsSchoolId === dest.name;
                                     const trendYears = [...targetYears].sort((a, b) => a - b);
                                     const trendData = trendYears.map(year => dest.counts[year] || 0);
-                                    const jlptStats = getStudentJlptStats(dest.students);
+                                    const yearlyJlptStats = getYearlyJlptStats(dest.students);
 
                                     return (
                                         <Fragment key={dest.name || idx}>
@@ -719,34 +792,36 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                     </div>
                                                                 </div>
 
-                                                                {/* グラフ2: JLPT各レベルの平均点 */}
+                                                                {/* グラフ2: JLPT平均点 (年度別折れ線グラフ) */}
                                                                 <div style={{ flex: '1 1 400px', minWidth: '280px', backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
                                                                     <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', textAlign: 'center' }}>
-                                                                        JLPTレベル別 平均点 (合格/不合格)
+                                                                        年度別 JLPT平均点 (合格/不合格)
                                                                     </h4>
                                                                     <div style={{ height: '180px', position: 'relative' }}>
-                                                                        {jlptStats.length > 0 ? (
-                                                                            <Bar
+                                                                        {Object.keys(yearlyJlptStats).length > 0 ? (
+                                                                            <Line
                                                                                 data={{
-                                                                                    labels: ['N5', 'N4', 'N3', 'N2', 'N1'],
+                                                                                    labels: trendYears.map(y => `${y}年度`),
                                                                                     datasets: [
                                                                                         {
                                                                                             label: '合格平均',
-                                                                                            data: ['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => {
-                                                                                                const stat = jlptStats.find(s => s.level === lvl);
-                                                                                                return stat?.passed?.average || null;
-                                                                                            }),
-                                                                                            backgroundColor: '#22c55e',
-                                                                                            borderRadius: 4
+                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.passedAverage ?? null),
+                                                                                            borderColor: '#22c55e',
+                                                                                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                                                            borderWidth: 2,
+                                                                                            tension: 0.3,
+                                                                                            pointBackgroundColor: '#22c55e',
+                                                                                            spanGaps: true
                                                                                         },
                                                                                         {
                                                                                             label: '不合格平均',
-                                                                                            data: ['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => {
-                                                                                                const stat = jlptStats.find(s => s.level === lvl);
-                                                                                                return stat?.failed?.average || null;
-                                                                                            }),
-                                                                                            backgroundColor: '#ef4444',
-                                                                                            borderRadius: 4
+                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.failedAverage ?? null),
+                                                                                            borderColor: '#ef4444',
+                                                                                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                                                            borderWidth: 2,
+                                                                                            tension: 0.3,
+                                                                                            pointBackgroundColor: '#ef4444',
+                                                                                            spanGaps: true
                                                                                         }
                                                                                     ]
                                                                                 }}
