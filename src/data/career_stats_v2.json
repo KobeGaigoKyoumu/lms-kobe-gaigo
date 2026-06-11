@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T08:21:56.100Z",
+  "generatedAt": "2026-06-11T08:32:45.920Z",
   "summary": {
     "totalRecords": 1362,
     "totalGraduates": 1310,
@@ -1261,13 +1261,13 @@
     },
     {
       "name": "専門学校アートカレッジ神戸",
-      "count": 124,
+      "count": 125,
       "years": {
         "2017": 18,
         "2018": 35,
         "2019": 18,
         "2020": 5,
-        "2022": 1,
+        "2022": 2,
         "2023": 20,
         "2024": 10,
         "2025": 17
@@ -1432,6 +1432,13 @@
           "name": "孫　正宵",
           "year": 2020,
           "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2004065,
+          "name": "PHAM PHUONG MAI",
+          "year": 2022,
+          "nationality": "ベトナム",
           "enrolled": true
         },
         {
@@ -2151,8 +2158,8 @@
             "min": 95
           },
           "failed": {
-            "count": 86,
-            "avg": 71.5,
+            "count": 89,
+            "avg": 70.9,
             "max": 102,
             "min": 25
           }
@@ -11700,40 +11707,6 @@
       }
     },
     {
-      "name": "不法滞在",
-      "count": 2,
-      "years": {
-        "2018": 2
-      },
-      "students": [
-        {
-          "id": 2904064,
-          "name": "HO MINH TUAN",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        },
-        {
-          "id": 2904078,
-          "name": "NGUYEN VAN DUONG",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 2,
-            "avg": 78,
-            "max": 90,
-            "min": 66
-          }
-        }
-      }
-    },
-    {
       "name": "大阪コミュニティワーカー専門学校",
       "count": 2,
       "years": {
@@ -11866,23 +11839,6 @@
           }
         }
       }
-    },
-    {
-      "name": "除籍",
-      "count": 1,
-      "years": {
-        "2020": 1
-      },
-      "students": [
-        {
-          "id": 1907008,
-          "name": "PHUNG NHAT LONG",
-          "year": 2020,
-          "nationality": "ベトナム",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {}
     },
     {
       "name": "至誠館大学",
@@ -12128,60 +12084,6 @@
             "min": 141
           },
           "failed": null
-        }
-      }
-    },
-    {
-      "name": "特例技能予定",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2004038,
-          "name": "郇 子譚",
-          "year": 2022,
-          "nationality": "中国",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 2,
-            "avg": 74,
-            "max": 77,
-            "min": 71
-          }
-        }
-      }
-    },
-    {
-      "name": "専門学校アートカレッジ神戸結果待ち",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2004065,
-          "name": "PHAM PHUONG MAI",
-          "year": 2022,
-          "nationality": "ベトナム",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 3,
-            "avg": 53,
-            "max": 57,
-            "min": 45
-          }
         }
       }
     },
@@ -14472,33 +14374,6 @@
             "avg": 67,
             "max": 67,
             "min": 67
-          }
-        }
-      }
-    },
-    {
-      "name": "就職希望",
-      "count": 1,
-      "years": {
-        "2018": 1
-      },
-      "students": [
-        {
-          "id": 2904113,
-          "name": "NGUYEN DUY THUAN",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 2,
-            "avg": 73.5,
-            "max": 74,
-            "min": 73
           }
         }
       }

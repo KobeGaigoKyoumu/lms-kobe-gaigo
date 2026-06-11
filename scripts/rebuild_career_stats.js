@@ -56,6 +56,7 @@ const normalizeDestination = (d) => {
         'アートカレッジ': '専門学校アートカレッジ神戸',
         'アートカレッジ神戸': '専門学校アートカレッジ神戸',
         '専門学校アートカレッジ神戸': '専門学校アートカレッジ神戸',
+        '専門学校アートカレッジ神戸結果待ち': '専門学校アートカレッジ神戸',
         '愛甲': '愛甲学院専門学校',
         '愛甲学院': '愛甲学院専門学校',
         '愛甲学院専門学校': '愛甲学院専門学校',
@@ -113,7 +114,10 @@ const isSchoolName = (name) => {
     if (nonSchools.includes(name)) return false;
 
     // Exclude school names/status containing specific keywords
-    const excludeKeywords = ['帰国', '退学', '家族滞在', '特定活動', '特定技能'];
+    const excludeKeywords = [
+        '帰国', '退学', '家族滞在', '特定活動', '特定技能',
+        '就職希望', '不法滞在', '除籍', '特例技能予定'
+    ];
     for (const kw of excludeKeywords) {
         if (name.includes(kw)) {
             return false;
