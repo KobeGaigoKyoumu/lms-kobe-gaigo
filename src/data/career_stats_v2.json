@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T05:54:42.269Z",
+  "generatedAt": "2026-06-11T08:07:19.526Z",
   "summary": {
     "totalRecords": 1362,
     "totalGraduates": 1310,
@@ -2956,10 +2956,10 @@
     },
     {
       "name": "愛甲学院専門学校",
-      "count": 97,
+      "count": 100,
       "years": {
         "2017": 28,
-        "2018": 30,
+        "2018": 33,
         "2019": 10,
         "2020": 1,
         "2022": 2,
@@ -3550,6 +3550,13 @@
           "enrolled": true
         },
         {
+          "id": 2907022,
+          "name": "NGUYEN HUY THACH",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": false
+        },
+        {
           "id": 2907023,
           "name": "NGUYEN KHANH VINH",
           "year": 2018,
@@ -3559,6 +3566,20 @@
         {
           "id": 2910015,
           "name": "NGUYEN VAN QUANG",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": false
+        },
+        {
+          "id": 2910017,
+          "name": "NGO LUONG BAO HA",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": false
+        },
+        {
+          "id": 2910022,
+          "name": "DINH THE NGHIA",
           "year": 2018,
           "nationality": "Unknown",
           "enrolled": false
@@ -3657,8 +3678,8 @@
             "min": 95
           },
           "failed": {
-            "count": 63,
-            "avg": 72,
+            "count": 65,
+            "avg": 71.6,
             "max": 95,
             "min": 48
           }
@@ -6662,6 +6683,125 @@
       }
     },
     {
+      "name": "大原簿記専門学校",
+      "count": 11,
+      "years": {
+        "2017": 4,
+        "2018": 4,
+        "2023": 2,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 1604089,
+          "name": "NGUYEN NGOC LAN",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 1607009,
+          "name": "DINH VAN PHA",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 1607016,
+          "name": "TRAN QUANG DUONG",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 1610024,
+          "name": "TRAN THI THANH CHAU",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 2107032,
+          "name": "DUDUL BARMAN",
+          "year": 2023,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2204041,
+          "name": "ARFAN CHOWDHURY",
+          "year": 2023,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407019,
+          "name": "KHIN MYAT NOE AYE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2904015,
+          "name": "NGUYEN THI HUONG",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        },
+        {
+          "id": 2904028,
+          "name": "NGUYEN TRONG DAI",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        },
+        {
+          "id": 2910020,
+          "name": "HOANG THIEN KET",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        },
+        {
+          "id": 2910024,
+          "name": "NGUYEN NGOC HUYEN",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": false
+        }
+      ],
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 3,
+            "avg": 117.7,
+            "max": 141,
+            "min": 104
+          },
+          "failed": {
+            "count": 8,
+            "avg": 85.1,
+            "max": 94,
+            "min": 72
+          }
+        },
+        "N2": {
+          "passed": {
+            "count": 1,
+            "avg": 94,
+            "max": 94,
+            "min": 94
+          },
+          "failed": {
+            "count": 1,
+            "avg": 65,
+            "max": 65,
+            "min": 65
+          }
+        }
+      }
+    },
+    {
       "name": "兵庫大学",
       "count": 10,
       "years": {
@@ -7240,90 +7380,6 @@
       }
     },
     {
-      "name": "大原簿記専門学校",
-      "count": 7,
-      "years": {
-        "2017": 4,
-        "2018": 3
-      },
-      "students": [
-        {
-          "id": 1604089,
-          "name": "NGUYEN NGOC LAN",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 1607009,
-          "name": "DINH VAN PHA",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 1607016,
-          "name": "TRAN QUANG DUONG",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 1610024,
-          "name": "TRAN THI THANH CHAU",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 2904015,
-          "name": "NGUYEN THI HUONG",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        },
-        {
-          "id": 2904028,
-          "name": "NGUYEN TRONG DAI",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        },
-        {
-          "id": 2910020,
-          "name": "HOANG THIEN KET",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 2,
-            "avg": 106,
-            "max": 108,
-            "min": 104
-          },
-          "failed": {
-            "count": 4,
-            "avg": 83.8,
-            "max": 90,
-            "min": 72
-          }
-        },
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 65,
-            "max": 65,
-            "min": 65
-          }
-        }
-      }
-    },
-    {
       "name": "大阪観光大学",
       "count": 7,
       "years": {
@@ -7503,6 +7559,99 @@
             "avg": 77,
             "max": 81,
             "min": 73
+          }
+        }
+      }
+    },
+    {
+      "name": "東京工科自動車大学校",
+      "count": 7,
+      "years": {
+        "2023": 1,
+        "2025": 6
+      },
+      "students": [
+        {
+          "id": 2110032,
+          "name": "BIREN TAMANG",
+          "year": 2023,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407033,
+          "name": "SABBIR SAJID AHMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407035,
+          "name": "MD OBAYED BIN ANWAR ZIHAD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407041,
+          "name": "MIA MD SABUZ",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407056,
+          "name": "MIYAJI JABED HOSEN SHISHIR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407057,
+          "name": "MIZAN MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407058,
+          "name": "ISLAM SAIFUL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ],
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 1,
+            "avg": 98,
+            "max": 98,
+            "min": 98
+          },
+          "failed": null
+        },
+        "N2": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 63,
+            "max": 63,
+            "min": 63
+          }
+        },
+        "N4": {
+          "passed": {
+            "count": 3,
+            "avg": 103,
+            "max": 116,
+            "min": 92
+          },
+          "failed": {
+            "count": 2,
+            "avg": 80,
+            "max": 88,
+            "min": 72
           }
         }
       }
@@ -8005,6 +8154,69 @@
             "avg": 57,
             "max": 61,
             "min": 53
+          }
+        }
+      }
+    },
+    {
+      "name": "神戸市外国語大学大学院",
+      "count": 5,
+      "years": {
+        "2017": 1,
+        "2021": 2,
+        "2023": 1,
+        "2024": 1
+      },
+      "students": [
+        {
+          "id": 1610002,
+          "name": "玄 暁",
+          "year": 2017,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2004007,
+          "name": "唐 成軒",
+          "year": 2021,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2007003,
+          "name": "呉 薇",
+          "year": 2023,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2007004,
+          "name": "張 梓業",
+          "year": 2021,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2304011,
+          "name": "王 福広",
+          "year": 2024,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ],
+      "jlptStats": {
+        "N1": {
+          "passed": {
+            "count": 1,
+            "avg": 103,
+            "max": 103,
+            "min": 103
+          },
+          "failed": {
+            "count": 4,
+            "avg": 83.8,
+            "max": 98,
+            "min": 69
           }
         }
       }
@@ -8955,6 +9167,54 @@
       }
     },
     {
+      "name": "東京テクニカルカレッジ",
+      "count": 4,
+      "years": {
+        "2025": 4
+      },
+      "students": [
+        {
+          "id": 2404027,
+          "name": "PHYO SI THU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404031,
+          "name": "NWAY NWAY TUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407045,
+          "name": "RATUL TANVIR HASAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407070,
+          "name": "TAMANG ALISHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ],
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 2,
+            "avg": 147,
+            "max": 159,
+            "min": 135
+          },
+          "failed": null
+        }
+      }
+    },
+    {
       "name": "日本理工情報専門学校",
       "count": 3,
       "years": {
@@ -9010,48 +9270,6 @@
             "avg": 73.5,
             "max": 79,
             "min": 68
-          }
-        }
-      }
-    },
-    {
-      "name": "神戸市外国語大学大学院研究生",
-      "count": 3,
-      "years": {
-        "2021": 2,
-        "2024": 1
-      },
-      "students": [
-        {
-          "id": 2004007,
-          "name": "唐 成軒",
-          "year": 2021,
-          "nationality": "中国",
-          "enrolled": true
-        },
-        {
-          "id": 2007004,
-          "name": "張 梓業",
-          "year": 2021,
-          "nationality": "中国",
-          "enrolled": true
-        },
-        {
-          "id": 2304011,
-          "name": "王 福広",
-          "year": 2024,
-          "nationality": "中国",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N1": {
-          "passed": null,
-          "failed": {
-            "count": 4,
-            "avg": 83.8,
-            "max": 98,
-            "min": 69
           }
         }
       }
@@ -9220,71 +9438,6 @@
             "avg": 63,
             "max": 72,
             "min": 49
-          }
-        }
-      }
-    },
-    {
-      "name": "東京工科自動車大学校",
-      "count": 3,
-      "years": {
-        "2023": 1,
-        "2025": 2
-      },
-      "students": [
-        {
-          "id": 2110032,
-          "name": "BIREN TAMANG",
-          "year": 2023,
-          "nationality": "ネパール",
-          "enrolled": true
-        },
-        {
-          "id": 2407035,
-          "name": "MD OBAYED BIN ANWAR ZIHAD",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        },
-        {
-          "id": 2407041,
-          "name": "MIA MD SABUZ",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 98,
-            "max": 98,
-            "min": 98
-          },
-          "failed": null
-        },
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 63,
-            "max": 63,
-            "min": 63
-          }
-        },
-        "N4": {
-          "passed": {
-            "count": 1,
-            "avg": 116,
-            "max": 116,
-            "min": 116
-          },
-          "failed": {
-            "count": 1,
-            "avg": 88,
-            "max": 88,
-            "min": 88
           }
         }
       }
@@ -9702,93 +9855,6 @@
             "avg": 77,
             "max": 79,
             "min": 75
-          }
-        }
-      }
-    },
-    {
-      "name": "東京テクニカルカレッジ",
-      "count": 3,
-      "years": {
-        "2025": 3
-      },
-      "students": [
-        {
-          "id": 2404027,
-          "name": "PHYO SI THU",
-          "year": 2025,
-          "nationality": "ミャンマー",
-          "enrolled": true
-        },
-        {
-          "id": 2404031,
-          "name": "NWAY NWAY TUN",
-          "year": 2025,
-          "nationality": "ミャンマー",
-          "enrolled": true
-        },
-        {
-          "id": 2407070,
-          "name": "TAMANG ALISHA",
-          "year": 2025,
-          "nationality": "ネパール",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 2,
-            "avg": 147,
-            "max": 159,
-            "min": 135
-          },
-          "failed": null
-        }
-      }
-    },
-    {
-      "name": "東京工科自動車大学校世田谷校",
-      "count": 3,
-      "years": {
-        "2025": 3
-      },
-      "students": [
-        {
-          "id": 2407033,
-          "name": "SABBIR SAJID AHMED",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        },
-        {
-          "id": 2407057,
-          "name": "MIZAN MD",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        },
-        {
-          "id": 2407058,
-          "name": "ISLAM SAIFUL",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N4": {
-          "passed": {
-            "count": 2,
-            "avg": 96.5,
-            "max": 101,
-            "min": 92
-          },
-          "failed": {
-            "count": 1,
-            "avg": 72,
-            "max": 72,
-            "min": 72
           }
         }
       }
@@ -10345,45 +10411,6 @@
             "count": 1,
             "avg": 75,
             "max": 75,
-            "min": 75
-          }
-        }
-      }
-    },
-    {
-      "name": "大原簿記専門学校三宮校",
-      "count": 2,
-      "years": {
-        "2023": 2
-      },
-      "students": [
-        {
-          "id": 2107032,
-          "name": "DUDUL BARMAN",
-          "year": 2023,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        },
-        {
-          "id": 2204041,
-          "name": "ARFAN CHOWDHURY",
-          "year": 2023,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 141,
-            "max": 141,
-            "min": 141
-          },
-          "failed": {
-            "count": 3,
-            "avg": 85.7,
-            "max": 94,
             "min": 75
           }
         }
@@ -11687,40 +11714,6 @@
       }
     },
     {
-      "name": "愛甲学院専門学校AO",
-      "count": 2,
-      "years": {
-        "2018": 2
-      },
-      "students": [
-        {
-          "id": 2910017,
-          "name": "NGO LUONG BAO HA",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        },
-        {
-          "id": 2910022,
-          "name": "DINH THE NGHIA",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 2,
-            "avg": 61.5,
-            "max": 67,
-            "min": 56
-          }
-        }
-      }
-    },
-    {
       "name": "大阪コミュニティワーカー専門学校",
       "count": 2,
       "years": {
@@ -11800,23 +11793,6 @@
           "name": "DUONG THI THU HOAI",
           "year": 2017,
           "nationality": "ベトナム",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {}
-    },
-    {
-      "name": "神戸市外国語大学大学院",
-      "count": 1,
-      "years": {
-        "2017": 1
-      },
-      "students": [
-        {
-          "id": 1610002,
-          "name": "玄 暁",
-          "year": 2017,
-          "nationality": "中国",
           "enrolled": true
         }
       ],
@@ -12267,33 +12243,6 @@
             "max": 68,
             "min": 68
           }
-        }
-      }
-    },
-    {
-      "name": "神戸市外国語大学大学院外国語学研究科",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2007003,
-          "name": "呉 薇",
-          "year": 2023,
-          "nationality": "中国",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N1": {
-          "passed": {
-            "count": 1,
-            "avg": 103,
-            "max": 103,
-            "min": 103
-          },
-          "failed": null
         }
       }
     },
@@ -14292,50 +14241,6 @@
       }
     },
     {
-      "name": "大原学園東京校",
-      "count": 1,
-      "years": {
-        "2025": 1
-      },
-      "students": [
-        {
-          "id": 2407019,
-          "name": "KHIN MYAT NOE AYE",
-          "year": 2025,
-          "nationality": "ミャンマー",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N2": {
-          "passed": {
-            "count": 1,
-            "avg": 94,
-            "max": 94,
-            "min": 94
-          },
-          "failed": null
-        }
-      }
-    },
-    {
-      "name": "東京テクニカルカレッジ中野校",
-      "count": 1,
-      "years": {
-        "2025": 1
-      },
-      "students": [
-        {
-          "id": 2407045,
-          "name": "RATUL TANVIR HASAN",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {}
-    },
-    {
       "name": "名古屋経済大学",
       "count": 1,
       "years": {
@@ -14345,23 +14250,6 @@
         {
           "id": 2407046,
           "name": "DEBNATH EMON",
-          "year": 2025,
-          "nationality": "バングラデシュ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {}
-    },
-    {
-      "name": "東京工科自動車大学校中野校",
-      "count": 1,
-      "years": {
-        "2025": 1
-      },
-      "students": [
-        {
-          "id": 2407056,
-          "name": "MIYAJI JABED HOSEN SHISHIR",
           "year": 2025,
           "nationality": "バングラデシュ",
           "enrolled": true
@@ -14694,23 +14582,6 @@
       }
     },
     {
-      "name": "愛甲学院専門学校ＡＯ",
-      "count": 1,
-      "years": {
-        "2018": 1
-      },
-      "students": [
-        {
-          "id": 2907022,
-          "name": "NGUYEN HUY THACH",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {}
-    },
-    {
       "name": "神戸国際大学出願準備",
       "count": 1,
       "years": {
@@ -14733,33 +14604,6 @@
             "avg": 75,
             "max": 86,
             "min": 64
-          }
-        }
-      }
-    },
-    {
-      "name": "専門学校大原学園神戸校",
-      "count": 1,
-      "years": {
-        "2018": 1
-      },
-      "students": [
-        {
-          "id": 2910024,
-          "name": "NGUYEN NGOC HUYEN",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 89,
-            "max": 89,
-            "min": 89
           }
         }
       }

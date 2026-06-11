@@ -30,12 +30,23 @@ const files = [
 // Mapping rules for name normalization
 const normalizeDestination = (d) => {
     if (!d) return '';
-    
+
     // Remove date patterns like (11/16) or （11/1） or （12月17) etc.
     let name = String(d).trim();
     name = name.replace(/[\(（]\s*\d+\s*[\/\-]\s*\d+\s*[\)）]/g, '');
     name = name.replace(/[\(（]\s*\d+\s*月\s*\d+\s*日\s*[\)）]/g, '');
     name = name.replace(/\s+/g, '').trim();
+
+    // Partial match integration rules
+    if (name.startsWith('神戸市外国語大学大学院')) {
+        return '神戸市外国語大学大学院';
+    }
+    if (name.startsWith('東京テクニカルカレッジ') || name.startsWith('専門学校東京テクニカルカレッジ')) {
+        return '東京テクニカルカレッジ';
+    }
+    if (name.startsWith('東京工科自動車大学校') || name.startsWith('専門学校東京工科自動車大学校')) {
+        return '東京工科自動車大学校';
+    }
 
     const mapping = {
         '東亜経理': '東亜経理専門学校',
@@ -48,6 +59,8 @@ const normalizeDestination = (d) => {
         '愛甲': '愛甲学院専門学校',
         '愛甲学院': '愛甲学院専門学校',
         '愛甲学院専門学校': '愛甲学院専門学校',
+        '愛甲学院専門学校AO': '愛甲学院専門学校',
+        '愛甲学院専門学校ＡＯ': '愛甲学院専門学校',
         'ICT': 'ICT専門学校',
         'ICT専門学校': 'ICT専門学校',
         '関西国際旅行ホテル専門学校': '関西国際旅行・ホテル専門学校',
@@ -55,8 +68,11 @@ const normalizeDestination = (d) => {
         'トヨタ自動車大学校': 'トヨタ自動車大学校神戸校',
         'トヨタ神戸自動車大学校': 'トヨタ自動車大学校神戸校',
         'トヨタ自動車大学校神戸校': 'トヨタ自動車大学校神戸校',
-        '大原': '大原簿記専門学校三宮校',
-        '大原簿記専門学校三宮校': '大原簿記専門学校三宮校',
+        '大原': '大原簿記専門学校',
+        '大原簿記専門学校三宮校': '大原簿記専門学校',
+        '専門学校大原学園神戸校': '大原簿記専門学校',
+        '大原学園東京校': '大原簿記専門学校',
+        '大原簿記専門学校': '大原簿記専門学校',
         '日本コンピュータ': '日本コンピュータ専門学校',
         '日本コンピュータ専門学校': '日本コンピュータ専門学校',
         '和歌山福祉専門学校': '和歌山社会福祉専門学校',
@@ -88,8 +104,8 @@ const normalizeDestination = (d) => {
 const isSchoolName = (name) => {
     if (!name) return false;
     const nonSchools = [
-        '就職', '帰国予定', '帰国', '特定活動ビザ', '就職予定', '未定', '失踪', 
-        '家族滞在', '特定活動', '帰国？', '進学以外', '進学未定', '留学国変更', 
+        '就職', '帰国予定', '帰国', '特定活動ビザ', '就職予定', '未定', '失踪',
+        '家族滞在', '特定活動', '帰国？', '進学以外', '進学未定', '留学国変更',
         '転校', '短期大学', 'その他', '進学希望なし', 'A1', 'A2', 'S', 'B'
     ];
     return !nonSchools.includes(name);
@@ -134,7 +150,7 @@ async function run() {
 
     const studentNationalityMap = {};
     const dbNameToIdMap = {};
-    
+
     dbStudents.forEach(s => {
         studentNationalityMap[s.student_id_text] = s.nationality || 'Unknown';
         const cName = cleanName(s.full_name);
@@ -183,7 +199,7 @@ async function run() {
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
         const yearStudents = []; // Store students processed in this year
-        
+
         if (f.year === 2017) {
             // Unique structure for 2017 (multiple class tables stacked vertically)
             let currentClass = '';
@@ -232,7 +248,7 @@ async function run() {
                     });
                 }
             }
-        } 
+        }
         else if (f.year >= 2018 && f.year <= 2022) {
             // Find header row with "学籍番号"
             let headerRowIdx = -1;
@@ -295,7 +311,7 @@ async function run() {
                     passedSchools: passedSchools
                 });
             }
-        } 
+        }
         else if (f.year === 2023 || f.year === 2024) {
             // Header is at Row 0
             const header = rows[0];
@@ -335,7 +351,7 @@ async function run() {
                 if (normEnrolled && isSchoolName(normEnrolled)) {
                     passedSchools.push({ school: normEnrolled, enrolled: true });
                 }
-                
+
                 // If final pass is different from enrolled and is a valid school name, add it as enrolled: false
                 if (normFinalPass && isSchoolName(normFinalPass) && normFinalPass !== normEnrolled) {
                     passedSchools.push({ school: normFinalPass, enrolled: false });
@@ -349,7 +365,7 @@ async function run() {
                     passedSchools: passedSchools
                 });
             }
-        } 
+        }
         else if (f.year === 2025) {
             // 2025 structure
             // Columns: 学籍番号(0), 氏名(2), 学校名(3), 状況(5), 進学以外(8), 進路決定(9)
@@ -446,7 +462,7 @@ async function run() {
         yearStudents.forEach(s => {
             const cat = determineCategory(s.rawDestination);
             categoriesCount[cat] = (categoriesCount[cat] || 0) + 1;
-            
+
             // Check if student graduated (any valid destination or explicit graduating status)
             if (s.rawDestination) {
                 graduatedCount++;
@@ -495,7 +511,7 @@ async function run() {
         if (ws) {
             const jlptRows = XLSX.utils.sheet_to_json(ws);
             console.log(`Loaded ${jlptRows.length} exam entries.`);
-            
+
             jlptRows.forEach(row => {
                 const id = row['学籍番号'] ? String(row['学籍番号']).trim() : '';
                 const level = row['レベル'] ? String(row['レベル']).trim() : '';
