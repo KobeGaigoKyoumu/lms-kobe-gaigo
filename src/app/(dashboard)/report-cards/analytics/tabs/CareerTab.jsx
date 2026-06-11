@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
-import { Bar } from 'react-chartjs-2'
+import { Bar, Line } from 'react-chartjs-2'
 import { ChevronDown } from 'lucide-react'
 import styles from '../page.module.css'
 
@@ -646,6 +646,10 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                             <tbody>
                                 {paginatedPast5YearsData.map((dest, idx) => {
                                     const isExpanded = expandedPast5YearsSchoolId === dest.name;
+                                    const trendYears = [...targetYears].sort((a, b) => a - b);
+                                    const trendData = trendYears.map(year => dest.counts[year] || 0);
+                                    const jlptStats = getStudentJlptStats(dest.students);
+
                                     return (
                                         <Fragment key={dest.name || idx}>
                                             <tr onClick={() => setExpandedPast5YearsSchoolId(isExpanded ? null : dest.name)} className={styles.clickableRow}>
@@ -667,38 +671,120 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                 <tr>
                                                     <td colSpan={3 + targetYears.length}>
                                                         <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
-                                                            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#374151', fontSize: '0.875rem' }}>
-                                                                合格者一覧 (年度別):
-                                                            </div>
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                                {targetYears.map(year => {
-                                                                    const studentsInYear = dest.displayStudents.filter(s => Number(s.year) === year);
-                                                                    if (studentsInYear.length === 0) return null;
-                                                                    return (
-                                                                        <div key={year} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.875rem' }}>
-                                                                            <span style={{ fontWeight: 600, minWidth: '70px', color: '#4b5563' }}>{year}年度:</span>
-                                                                            <span style={{ color: '#1f2937', flex: 1 }}>
-                                                                                {studentsInYear.map((s, sIdx) => {
-                                                                                    const isUnenrolled = s.enrolled === false;
-                                                                                    return (
-                                                                                        <span 
-                                                                                            key={s.id || sIdx}
-                                                                                            style={isUnenrolled ? { color: '#9ca3af', fontStyle: 'italic' } : undefined}
-                                                                                        >
-                                                                                            {s.name}{isUnenrolled ? ' (未進学)' : ''}
-                                                                                            {sIdx < studentsInYear.length - 1 ? ', ' : ''}
-                                                                                        </span>
-                                                                                    );
-                                                                                })}
-                                                                            </span>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                                {dest.displayStudents.length === 0 && (
-                                                                    <div style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '0.875rem' }}>
-                                                                        該当する合格者データがありません
+                                                            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                                                                {/* グラフ1: 受験者数のトレンド (合格・進学者数推移) */}
+                                                                <div style={{ flex: '1 1 300px', minWidth: '280px', backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                                                                    <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', textAlign: 'center' }}>
+                                                                        合格・進学者数の推移トレンド
+                                                                    </h4>
+                                                                    <div style={{ height: '180px', position: 'relative' }}>
+                                                                        <Line
+                                                                            data={{
+                                                                                labels: trendYears.map(y => `${y}年度`),
+                                                                                datasets: [{
+                                                                                    label: '合格・進学者数',
+                                                                                    data: trendData,
+                                                                                    borderColor: '#3b82f6',
+                                                                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                                                    borderWidth: 2,
+                                                                                    tension: 0.3,
+                                                                                    pointBackgroundColor: '#3b82f6',
+                                                                                    fill: true
+                                                                                }]
+                                                                            }}
+                                                                            options={{
+                                                                                responsive: true,
+                                                                                maintainAspectRatio: false,
+                                                                                plugins: {
+                                                                                    legend: { display: false },
+                                                                                    tooltip: {
+                                                                                        callbacks: {
+                                                                                            label: (context) => `${context.raw}名`
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                scales: {
+                                                                                    y: {
+                                                                                        beginAtZero: true,
+                                                                                        ticks: { stepSize: 1, font: { size: 10 } },
+                                                                                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                                                                    },
+                                                                                    x: {
+                                                                                        grid: { display: false },
+                                                                                        ticks: { font: { size: 10 } }
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                        />
                                                                     </div>
-                                                                )}
+                                                                </div>
+
+                                                                {/* グラフ2: JLPT各レベルの平均点 */}
+                                                                <div style={{ flex: '1 1 400px', minWidth: '280px', backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                                                                    <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', textAlign: 'center' }}>
+                                                                        JLPTレベル別 平均点 (合格/不合格)
+                                                                    </h4>
+                                                                    <div style={{ height: '180px', position: 'relative' }}>
+                                                                        {jlptStats.length > 0 ? (
+                                                                            <Bar
+                                                                                data={{
+                                                                                    labels: ['N5', 'N4', 'N3', 'N2', 'N1'],
+                                                                                    datasets: [
+                                                                                        {
+                                                                                            label: '合格平均',
+                                                                                            data: ['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => {
+                                                                                                const stat = jlptStats.find(s => s.level === lvl);
+                                                                                                return stat?.passed?.average || null;
+                                                                                            }),
+                                                                                            backgroundColor: '#22c55e',
+                                                                                            borderRadius: 4
+                                                                                        },
+                                                                                        {
+                                                                                            label: '不合格平均',
+                                                                                            data: ['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => {
+                                                                                                const stat = jlptStats.find(s => s.level === lvl);
+                                                                                                return stat?.failed?.average || null;
+                                                                                            }),
+                                                                                            backgroundColor: '#ef4444',
+                                                                                            borderRadius: 4
+                                                                                        }
+                                                                                    ]
+                                                                                }}
+                                                                                options={{
+                                                                                    responsive: true,
+                                                                                    maintainAspectRatio: false,
+                                                                                    plugins: {
+                                                                                        legend: {
+                                                                                            position: 'top',
+                                                                                            labels: { boxWidth: 12, font: { size: 10 } }
+                                                                                        },
+                                                                                        tooltip: {
+                                                                                            callbacks: {
+                                                                                                label: (context) => `${context.dataset.label}: ${context.raw}点`
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    scales: {
+                                                                                        y: {
+                                                                                            beginAtZero: true,
+                                                                                            max: 180,
+                                                                                            ticks: { font: { size: 10 } },
+                                                                                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                                                                        },
+                                                                                        x: {
+                                                                                            grid: { display: false },
+                                                                                            ticks: { font: { size: 10 } }
+                                                                                        }
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.875rem' }}>
+                                                                                JLPTの受験データがありません。
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </td>
