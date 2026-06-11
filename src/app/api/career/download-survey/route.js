@@ -73,7 +73,8 @@ export async function GET(request) {
         const careerMap = new Map(careerInfos?.map(info => [info.student_id, info]) || [])
 
         // 6. テンプレートExcelファイルを読み込み
-        const templatePath = path.join(process.cwd(), 'public', 'templates', 'career_survey_template_2025.xlsx')
+        // Vercel NFT (Next.js File Tracing) requires a relative literal path reference to include it in the build.
+        const templatePath = path.join(process.cwd(), 'src/templates/career_survey_template_2025.xlsx')
         if (!fs.existsSync(templatePath)) {
             console.error('Excel template file not found at:', templatePath)
             return new Response(`Excel template file not found. Checked path: ${templatePath}`, { status: 500 })

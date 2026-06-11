@@ -20,7 +20,7 @@ const nextConfig = {
     },
   },
   outputFileTracingIncludes: {
-    '/api/career/download-survey': ['./public/templates/career_survey_template_2025.xlsx'],
+    '/api/career/download-survey': ['./src/templates/career_survey_template_2025.xlsx'],
   },
 };
 
