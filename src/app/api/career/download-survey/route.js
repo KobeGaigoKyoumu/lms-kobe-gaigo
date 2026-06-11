@@ -1,15 +1,26 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import * as XLSX from 'xlsx'
 import path from 'path'
 import fs from 'fs'
+import { cookies } from 'next/headers'
 
 export async function GET(request) {
     try {
-        // 1. 権限チェック
-        const session = await getAdminMemberSession()
-        if (!session) {
+        // 1. 権限チェック（直接cookieから読み取り）
+        const cookieStore = await cookies()
+        const sessionCookie = cookieStore.get('kobe_admin_member')
+        if (!sessionCookie || !sessionCookie.value) {
+            return new Response('Unauthorized', { status: 401 })
+        }
+        let session = null
+        try {
+            const json = Buffer.from(sessionCookie.value, 'base64').toString('utf8')
+            session = JSON.parse(json)
+        } catch (e) {
+            return new Response('Unauthorized', { status: 401 })
+        }
+        if (!session || !session.memberId) {
             return new Response('Unauthorized', { status: 401 })
         }
 
