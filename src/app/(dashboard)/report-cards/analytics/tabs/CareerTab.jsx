@@ -436,7 +436,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                 <div className={styles.tabContent}>
                     <div className={styles.alertWarning}>
                         <strong>⚠️ COVID-19の影響について：</strong><br />
-                        2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延がありました。2020年度は新入生がいなかったため、2022年度の卒業生はおらず、データの記載がありません。
+                        2020年〜2022年は新型コロナウイルスの影響により、入学時期の遅延がありました。2020年度は新入生がいなかったため、2021年度に進学した学生はほとんどいませんでした。
                     </div>
 
                     <div className={styles.statsGrid}>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T08:07:19.526Z",
+  "generatedAt": "2026-06-11T08:21:56.100Z",
   "summary": {
     "totalRecords": 1362,
     "totalGraduates": 1310,
@@ -8159,6 +8159,82 @@
       }
     },
     {
+      "name": "日本コンピュータ専門学校",
+      "count": 5,
+      "years": {
+        "2017": 2,
+        "2018": 1,
+        "2024": 2
+      },
+      "students": [
+        {
+          "id": 1604025,
+          "name": "DO VAN THOAI",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 1604087,
+          "name": "NGUYEN VAN HOANG",
+          "year": 2017,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 2304020,
+          "name": "NGUYEN THI ANH THU",
+          "year": 2024,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 2307090,
+          "name": "MALIMBADAGE DILSHAN MADHUSHANKA",
+          "year": 2024,
+          "nationality": "スリランカ",
+          "enrolled": true
+        },
+        {
+          "id": 2904106,
+          "name": "NGUYEN HAI SON",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        }
+      ],
+      "jlptStats": {
+        "N3": {
+          "passed": {
+            "count": 1,
+            "avg": 97,
+            "max": 97,
+            "min": 97
+          },
+          "failed": {
+            "count": 1,
+            "avg": 76,
+            "max": 76,
+            "min": 76
+          }
+        },
+        "N4": {
+          "passed": {
+            "count": 1,
+            "avg": 138,
+            "max": 138,
+            "min": 138
+          },
+          "failed": {
+            "count": 2,
+            "avg": 68,
+            "max": 75,
+            "min": 61
+          }
+        }
+      }
+    },
+    {
       "name": "神戸市外国語大学大学院",
       "count": 5,
       "years": {
@@ -8729,69 +8805,6 @@
       "jlptStats": {}
     },
     {
-      "name": "日本コンピュータ専門学校",
-      "count": 4,
-      "years": {
-        "2017": 2,
-        "2024": 2
-      },
-      "students": [
-        {
-          "id": 1604025,
-          "name": "DO VAN THOAI",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 1604087,
-          "name": "NGUYEN VAN HOANG",
-          "year": 2017,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 2304020,
-          "name": "NGUYEN THI ANH THU",
-          "year": 2024,
-          "nationality": "ベトナム",
-          "enrolled": true
-        },
-        {
-          "id": 2307090,
-          "name": "MALIMBADAGE DILSHAN MADHUSHANKA",
-          "year": 2024,
-          "nationality": "スリランカ",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N4": {
-          "passed": {
-            "count": 1,
-            "avg": 138,
-            "max": 138,
-            "min": 138
-          },
-          "failed": {
-            "count": 2,
-            "avg": 68,
-            "max": 75,
-            "min": 61
-          }
-        },
-        "N3": {
-          "passed": {
-            "count": 1,
-            "avg": 97,
-            "max": 97,
-            "min": 97
-          },
-          "failed": null
-        }
-      }
-    },
-    {
       "name": "神戸学院大学",
       "count": 4,
       "years": {
@@ -9052,6 +9065,64 @@
             "avg": 77,
             "max": 89,
             "min": 51
+          }
+        }
+      }
+    },
+    {
+      "name": "西日本アカデミー航空専門学校",
+      "count": 4,
+      "years": {
+        "2018": 3,
+        "2023": 1
+      },
+      "students": [
+        {
+          "id": 2210015,
+          "name": "SANGHITA GHIMIRE",
+          "year": 2023,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2904086,
+          "name": "NGUYEN THI HOA",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        },
+        {
+          "id": 2904105,
+          "name": "NGUYEN QUOC CUONG",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": true
+        },
+        {
+          "id": 2904116,
+          "name": "VU TUAN HOANG",
+          "year": 2018,
+          "nationality": "Unknown",
+          "enrolled": false
+        }
+      ],
+      "jlptStats": {
+        "N3": {
+          "passed": null,
+          "failed": {
+            "count": 3,
+            "avg": 58.7,
+            "max": 68,
+            "min": 46
+          }
+        },
+        "N4": {
+          "passed": null,
+          "failed": {
+            "count": 1,
+            "avg": 68,
+            "max": 68,
+            "min": 68
           }
         }
       }
@@ -9546,57 +9617,6 @@
             "min": 138
           },
           "failed": null
-        }
-      }
-    },
-    {
-      "name": "西日本アカデミー航空専門学校",
-      "count": 3,
-      "years": {
-        "2018": 2,
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2210015,
-          "name": "SANGHITA GHIMIRE",
-          "year": 2023,
-          "nationality": "ネパール",
-          "enrolled": true
-        },
-        {
-          "id": 2904086,
-          "name": "NGUYEN THI HOA",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        },
-        {
-          "id": 2904116,
-          "name": "VU TUAN HOANG",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 3,
-            "avg": 58.7,
-            "max": 68,
-            "min": 46
-          }
-        },
-        "N4": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 68,
-            "max": 68,
-            "min": 68
-          }
         }
       }
     },
@@ -11843,33 +11863,6 @@
             "avg": 91,
             "max": 91,
             "min": 91
-          }
-        }
-      }
-    },
-    {
-      "name": "退学(2020年10月末)",
-      "count": 1,
-      "years": {
-        "2020": 1
-      },
-      "students": [
-        {
-          "id": 1904035,
-          "name": "NGUYEN　THI THUY",
-          "year": 2020,
-          "nationality": "ベトナム",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 2,
-            "avg": 87.5,
-            "max": 91,
-            "min": 84
           }
         }
       }
@@ -14484,50 +14477,6 @@
       }
     },
     {
-      "name": "西日本アカデミー専門学校",
-      "count": 1,
-      "years": {
-        "2018": 1
-      },
-      "students": [
-        {
-          "id": 2904105,
-          "name": "NGUYEN QUOC CUONG",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {}
-    },
-    {
-      "name": "日本コンピューター",
-      "count": 1,
-      "years": {
-        "2018": 1
-      },
-      "students": [
-        {
-          "id": 2904106,
-          "name": "NGUYEN HAI SON",
-          "year": 2018,
-          "nationality": "Unknown",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 76,
-            "max": 76,
-            "min": 76
-          }
-        }
-      }
-    },
-    {
       "name": "就職希望",
       "count": 1,
       "years": {
@@ -14641,60 +14590,6 @@
             "min": 129
           },
           "failed": null
-        }
-      }
-    },
-    {
-      "name": "家族滞在ビザ",
-      "count": 1,
-      "years": {
-        "2019": 1
-      },
-      "students": [
-        {
-          "id": 3004050,
-          "name": "NGUYEN HA CHAU",
-          "year": 2019,
-          "nationality": "Unknown",
-          "enrolled": true
-        }
-      ],
-      "jlptStats": {
-        "N2": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 57,
-            "max": 57,
-            "min": 57
-          }
-        }
-      }
-    },
-    {
-      "name": "就活中。無理なら帰国予定",
-      "count": 1,
-      "years": {
-        "2019": 1
-      },
-      "students": [
-        {
-          "id": 3004062,
-          "name": "TONG THI XUAN",
-          "year": 2019,
-          "nationality": "Unknown",
-          "enrolled": false
-        }
-      ],
-      "jlptStats": {
-        "N3": {
-          "passed": null,
-          "failed": {
-            "count": 1,
-            "avg": 55,
-            "max": 55,
-            "min": 55
-          }
         }
       }
     },

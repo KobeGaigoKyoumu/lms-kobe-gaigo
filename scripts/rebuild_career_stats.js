@@ -75,6 +75,7 @@ const normalizeDestination = (d) => {
         '大原簿記専門学校': '大原簿記専門学校',
         '日本コンピュータ': '日本コンピュータ専門学校',
         '日本コンピュータ専門学校': '日本コンピュータ専門学校',
+        '日本コンピューター': '日本コンピュータ専門学校',
         '和歌山福祉専門学校': '和歌山社会福祉専門学校',
         '和歌山社会福祉専門学校': '和歌山社会福祉専門学校',
         '駿台観光&外語ビジネス専門学校': '駿台観光＆外語ビジネス専門学校',
@@ -87,6 +88,7 @@ const normalizeDestination = (d) => {
         '新潟国際自動車大学校': '新潟国際自動車大学校',
         '西日本アカデミー': '西日本アカデミー航空専門学校',
         '西日本アカデミー航空専門学校': '西日本アカデミー航空専門学校',
+        '西日本アカデミー専門学校': '西日本アカデミー航空専門学校',
         '花壇自動車大学校': '専門学校花壇自動車大学校',
         '専門学校花壇自動車大学校': '専門学校花壇自動車大学校',
         '日本マンガ芸術学院': '専門学校日本マンガ芸術学院',
@@ -108,7 +110,17 @@ const isSchoolName = (name) => {
         '家族滞在', '特定活動', '帰国？', '進学以外', '進学未定', '留学国変更',
         '転校', '短期大学', 'その他', '進学希望なし', 'A1', 'A2', 'S', 'B'
     ];
-    return !nonSchools.includes(name);
+    if (nonSchools.includes(name)) return false;
+
+    // Exclude school names/status containing specific keywords
+    const excludeKeywords = ['帰国', '退学', '家族滞在', '特定活動', '特定技能'];
+    for (const kw of excludeKeywords) {
+        if (name.includes(kw)) {
+            return false;
+        }
+    }
+
+    return true;
 };
 
 const determineCategory = (dest) => {
