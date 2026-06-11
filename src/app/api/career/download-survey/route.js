@@ -73,9 +73,10 @@ export async function GET(request) {
         const careerMap = new Map(careerInfos?.map(info => [info.student_id, info]) || [])
 
         // 6. テンプレートExcelファイルを読み込み
-        const templatePath = path.join(process.cwd(), 'public', 'templates', '全学生進路希望調査票2025.xlsx')
+        const templatePath = path.join(process.cwd(), 'public', 'templates', 'career_survey_template_2025.xlsx')
         if (!fs.existsSync(templatePath)) {
-            return new Response('Excel template file not found', { status: 500 })
+            console.error('Excel template file not found at:', templatePath)
+            return new Response(`Excel template file not found. Checked path: ${templatePath}`, { status: 500 })
         }
 
         const wb = XLSX.readFile(templatePath)

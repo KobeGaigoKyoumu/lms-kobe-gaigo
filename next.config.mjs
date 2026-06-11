@@ -20,7 +20,7 @@ const nextConfig = {
     },
   },
   outputFileTracingIncludes: {
-    '/api/career/download-survey': ['./public/templates/全学生進路希望調査票2025.xlsx'],
+    '/api/career/download-survey': ['./public/templates/career_survey_template_2025.xlsx'],
   },
 };
 
