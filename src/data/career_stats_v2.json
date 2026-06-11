@@ -1,15 +1,18 @@
 {
-  "generatedAt": "2026-01-26T15:15:39.666Z",
+  "generatedAt": "2026-06-11T03:33:34.551Z",
   "summary": {
-    "totalRecords": 994,
-    "totalGraduates": 893,
+    "totalRecords": 1235,
+    "totalGraduates": 1133,
     "years": [
       2017,
       2018,
       2019,
       2020,
+      2021,
       2022,
-      2023
+      2023,
+      2024,
+      2025
     ],
     "categories": [
       "大学",
@@ -30,21 +33,21 @@
     ]
   },
   "categoryStats": {
-    "大学": 145,
-    "就職": 29,
-    "大学院": 28,
+    "大学": 210,
+    "就職": 31,
+    "大学院": 31,
     "進学未定": 7,
-    "専門学校": 658,
-    "帰国": 55,
+    "専門学校": 803,
+    "帰国": 56,
     "失踪": 10,
     "家族滞在": 7,
-    "帰国予定": 12,
+    "帰国予定": 14,
     "就職予定": 2,
-    "未定": 3,
+    "未定": 4,
     "留学国変更": 2,
     "転校": 2,
-    "短期大学": 3,
-    "特定活動ビザ": 10
+    "短期大学": 7,
+    "特定活動ビザ": 28
   },
   "yearlyTrends": [
     {
@@ -114,6 +117,14 @@
       }
     },
     {
+      "year": 2021,
+      "total": 0,
+      "graduated": 0,
+      "withdrawn": 0,
+      "graduationRate": 0,
+      "categories": {}
+    },
+    {
       "year": 2022,
       "total": 270,
       "graduated": 239,
@@ -148,49 +159,76 @@
         "留学国変更": 1,
         "就職": 2
       }
+    },
+    {
+      "year": 2024,
+      "total": 0,
+      "graduated": 0,
+      "withdrawn": 0,
+      "graduationRate": 0,
+      "categories": {}
+    },
+    {
+      "year": 2025,
+      "total": 241,
+      "graduated": 240,
+      "withdrawn": 1,
+      "graduationRate": 99.6,
+      "categories": {
+        "大学": 65,
+        "帰国予定": 2,
+        "専門学校": 145,
+        "特定活動ビザ": 18,
+        "就職": 2,
+        "短期大学": 4,
+        "大学院": 3,
+        "帰国": 1,
+        "未定": 1
+      }
     }
   ],
   "nationalityStats": [
     {
       "name": "ベトナム",
-      "total": 314,
+      "total": 319,
       "categories": {
         "大学": 44,
-        "専門学校": 201,
+        "専門学校": 204,
         "帰国": 23,
-        "就職": 9,
+        "就職": 10,
         "失踪": 8,
         "進学未定": 6,
-        "帰国予定": 10,
+        "帰国予定": 11,
         "家族滞在": 2,
         "Unknown": 11
       }
     },
     {
       "name": "ネパール",
-      "total": 199,
+      "total": 262,
       "categories": {
-        "専門学校": 178,
-        "大学": 15,
+        "専門学校": 229,
+        "大学": 26,
         "帰国": 2,
         "家族滞在": 1,
         "就職": 2,
-        "短期大学": 1
+        "短期大学": 1,
+        "帰国予定": 1
       }
     },
     {
       "name": "中国",
-      "total": 165,
+      "total": 179,
       "categories": {
-        "大学": 54,
+        "大学": 63,
         "就職": 7,
-        "大学院": 27,
+        "大学院": 30,
         "進学未定": 1,
         "帰国": 23,
-        "専門学校": 34,
+        "専門学校": 35,
         "Unknown": 10,
         "帰国予定": 1,
-        "未定": 3,
+        "未定": 4,
         "就職予定": 1,
         "家族滞在": 1,
         "転校": 2,
@@ -199,25 +237,25 @@
     },
     {
       "name": "バングラデシュ",
-      "total": 127,
+      "total": 215,
       "categories": {
-        "専門学校": 112,
-        "就職": 1,
-        "帰国": 1,
-        "短期大学": 2,
-        "大学": 10,
+        "専門学校": 166,
+        "就職": 2,
+        "帰国": 2,
+        "短期大学": 6,
+        "大学": 38,
         "大学院": 1
       }
     },
     {
       "name": "ミャンマー",
-      "total": 68,
+      "total": 139,
       "categories": {
         "留学国変更": 1,
-        "専門学校": 43,
+        "専門学校": 79,
         "就職": 1,
-        "大学": 13,
-        "特定活動ビザ": 10
+        "大学": 30,
+        "特定活動ビザ": 28
       }
     },
     {
@@ -263,14 +301,15 @@
   "topDestinations": [
     {
       "name": "東亜経理専門学校",
-      "count": 100,
+      "count": 105,
       "years": {
         "2017": 21,
         "2018": 27,
         "2019": 9,
         "2020": 6,
         "2022": 22,
-        "2023": 15
+        "2023": 15,
+        "2025": 5
       },
       "students": [
         {
@@ -872,19 +911,55 @@
           "name": "BHAWANA PANDEY",
           "year": 2023,
           "nationality": "ネパール"
+        },
+        {
+          "id": 2404010,
+          "name": "DUONG THANH TUNG",
+          "year": 2025,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 2404156,
+          "name": "HIMAL MALLA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404163,
+          "name": "SABITA GAMAL",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404181,
+          "name": "BHARAT B.K.",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407075,
+          "name": "DONG TAMANG USHA KUMARI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "東京国際ビジネスカレッジ神戸校",
-      "count": 98,
+      "count": 104,
       "years": {
         "2017": 17,
         "2018": 27,
         "2019": 9,
         "2020": 1,
         "2022": 27,
-        "2023": 17
+        "2023": 17,
+        "2025": 6
       },
       "students": [
         {
@@ -1474,19 +1549,62 @@
           "name": "DAS ANJALI",
           "year": 2023,
           "nationality": "ネパール"
+        },
+        {
+          "id": 2404011,
+          "name": "BUI NGOC ANH THU",
+          "year": 2025,
+          "nationality": "ベトナム",
+          "enrolled": true
+        },
+        {
+          "id": 2404066,
+          "name": "SIFAT",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404073,
+          "name": "FAKIR SHAKIB",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407024,
+          "name": "NAY MYO HTET",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2407064,
+          "name": "BHUJEL YAMUNA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407077,
+          "name": "SHRESTHA BHUWAN",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "専門学校アートカレッジ神戸",
-      "count": 79,
+      "count": 96,
       "years": {
         "2017": 24,
         "2018": 18,
         "2019": 5,
         "2020": 2,
         "2022": 20,
-        "2023": 10
+        "2023": 10,
+        "2025": 17
       },
       "students": [
         {
@@ -1962,19 +2080,139 @@
           "name": "ANU SHRESTHA",
           "year": 2023,
           "nationality": "ネパール"
+        },
+        {
+          "id": 2404008,
+          "name": "NGUYEN PHUONG LINH",
+          "year": 2025,
+          "nationality": "ベトナム",
+          "enrolled": false
+        },
+        {
+          "id": 2404086,
+          "name": "S.M.JONAYET",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404133,
+          "name": "SHRESTHA YAM KUMAR",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404134,
+          "name": "UPAHAR SEDAI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404142,
+          "name": "SWASTIKA THAMI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404145,
+          "name": "TILSARA MAHARA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404147,
+          "name": "TARA KUMARI BOHARA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404149,
+          "name": "GITA KUMARI RANA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404158,
+          "name": "DAHAL MANISHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404161,
+          "name": "SHRESTHA ROJINA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404168,
+          "name": "LAMICHHANE BHUWANESHOWARI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404171,
+          "name": "RAJ KUMAR CHAUDHARY",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404172,
+          "name": "LIMBU SUSHIL",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404175,
+          "name": "JYOTI PANDEY",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404178,
+          "name": "JOGI MILAN KUMAR",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404179,
+          "name": "KARKI ARUNA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407073,
+          "name": "HIMAL THAPA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "愛甲学院専門学校",
-      "count": 69,
+      "count": 75,
       "years": {
         "2017": 34,
         "2018": 10,
         "2019": 2,
         "2020": 2,
         "2022": 12,
-        "2023": 9
+        "2023": 9,
+        "2025": 6
       },
       "students": [
         {
@@ -2390,19 +2628,389 @@
           "name": "SUDIP SILWAL",
           "year": 2023,
           "nationality": "ネパール"
+        },
+        {
+          "id": 2404151,
+          "name": "RAJ KUMAR GIRI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404173,
+          "name": "DIPESH TAMANG",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407026,
+          "name": "SU SU WIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407062,
+          "name": "CHAUDHARY SIRANJAN PRASAD",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407063,
+          "name": "SUSMITA ARYAL",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407071,
+          "name": "SHRESTHA ASMITA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "流通科学大学",
+      "count": 48,
+      "years": {
+        "2017": 4,
+        "2018": 1,
+        "2019": 4,
+        "2020": 3,
+        "2022": 2,
+        "2023": 10,
+        "2025": 24
+      },
+      "students": [
+        {
+          "id": 2904103,
+          "name": "NGUYEN THI UT LINH",
+          "year": 2017,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2907002,
+          "name": "黄 林芳",
+          "year": 2017,
+          "nationality": "中国"
+        },
+        {
+          "id": 2907004,
+          "name": "于 歌",
+          "year": 2017,
+          "nationality": "中国"
+        },
+        {
+          "id": 2904004,
+          "name": "徐 煜尚",
+          "year": 2017,
+          "nationality": "中国"
+        },
+        {
+          "id": 3004031,
+          "name": "LAI THI HONG THUY",
+          "year": 2018,
+          "nationality": "Unknown"
+        },
+        {
+          "id": 1904001,
+          "name": "張 哲",
+          "year": 2019,
+          "nationality": "中国"
+        },
+        {
+          "id": 1904011,
+          "name": "PHAM NGOC SON",
+          "year": 2019,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 1904038,
+          "name": "NGUYEN THI HUONG GIANG",
+          "year": 2019,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 1910018,
+          "name": "周 澤灝",
+          "year": 2019,
+          "nationality": "中国"
+        },
+        {
+          "id": 2004062,
+          "name": "NGUYEN THI HUYEN TRANG",
+          "year": 2020,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2004070,
+          "name": "NGUYEN THAO NGUYEN",
+          "year": 2020,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2004041,
+          "name": "NGUYEN THI SONG THUONG",
+          "year": 2020,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2204026,
+          "name": "肖 頴",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2210009,
+          "name": "DO THI KIEU MAI",
+          "year": 2022,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2307010,
+          "name": "MARKARIO",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2307018,
+          "name": "HNIN YU YU HLAING",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2304133,
+          "name": "MD KAIUMUN HASAN OMI",
+          "year": 2023,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2304015,
+          "name": "矯 欣茹",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304019,
+          "name": "OUEDRAOGO SAHOUDATOU",
+          "year": 2023,
+          "nationality": "ブルキナファソ"
+        },
+        {
+          "id": 2310008,
+          "name": "PHOO EAIN SI",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2310012,
+          "name": "THA ZIN PHYU",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2310018,
+          "name": "NYAN LIN HTET",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2310024,
+          "name": "WINE",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2310028,
+          "name": "THU ZAR WIN",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404015,
+          "name": "NAY LIN OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2404052,
+          "name": "SAW YU HNIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404063,
+          "name": "FOYSAL MD ATIK",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404076,
+          "name": "MD. RAYHAN PRODHAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404083,
+          "name": "RAGIB SHAHRIAR TUSAR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404084,
+          "name": "MD. MATIUR RAHMAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404088,
+          "name": "MD.EMTEAZ HOSEN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404093,
+          "name": "DELWAR HOSHEN SAYED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404103,
+          "name": "AKHAND MD RAJBIR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404118,
+          "name": "ARNOB JAHIN SHAHRIAR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404120,
+          "name": "MAHBUB",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404121,
+          "name": "AKASH MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404125,
+          "name": "MD. EMRAN HOSSAIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404143,
+          "name": "GHARTI MAGAR ESTHER",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404177,
+          "name": "KHADKA SARASWOTI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404182,
+          "name": "NABID TANJIM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407022,
+          "name": "SHWE SIN PHYOE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407044,
+          "name": "SUTA DHAR SHABAK",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407048,
+          "name": "HASAN MD RAKIBUL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407049,
+          "name": "AHMAD SABBIR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2410001,
+          "name": "范 澤旭",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2410003,
+          "name": "高 興",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": false
+        },
+        {
+          "id": 2410006,
+          "name": "徐 張帥",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2501002,
+          "name": "NWAY KHET KHET PAN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
         }
       ]
     },
     {
       "name": "日本経済大学",
-      "count": 39,
+      "count": 43,
       "years": {
         "2017": 4,
         "2018": 10,
         "2019": 5,
         "2020": 7,
         "2022": 8,
-        "2023": 5
+        "2023": 5,
+        "2025": 4
       },
       "students": [
         {
@@ -2638,16 +3246,45 @@
           "name": "MD AHSAN HABIB RAJU",
           "year": 2023,
           "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404138,
+          "name": "THAPA MAGAR RAJ",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407059,
+          "name": "MIA MD RAHIM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407065,
+          "name": "MAGAR SANDESH SAMAL",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2410005,
+          "name": "張 春輝",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "関西国際旅行・ホテル専門学校",
-      "count": 29,
+      "count": 43,
       "years": {
         "2019": 4,
         "2022": 2,
-        "2023": 23
+        "2023": 23,
+        "2025": 14
       },
       "students": [
         {
@@ -2823,18 +3460,117 @@
           "name": "BAW MYAR",
           "year": 2023,
           "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404033,
+          "name": "AUNG SATT PAING",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404035,
+          "name": "MI AYE SOE MOE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404070,
+          "name": "HAQUE MD NAJMUL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404082,
+          "name": "SHAHIN AHOMMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404100,
+          "name": "HOSSAIN MD RAHIM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404136,
+          "name": "PYAKUREL ANKIT",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404139,
+          "name": "DURGA BAHADUR DARAI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404153,
+          "name": "KHADKA ROSHMA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404157,
+          "name": "BOHARA NISHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404164,
+          "name": "RAI ARATI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404180,
+          "name": "SITA PUDASAINI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": false
+        },
+        {
+          "id": 2407012,
+          "name": "KYAL SIN NYEIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407020,
+          "name": "MAY KHIN OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407040,
+          "name": "AKTER MST SAMIA",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "ICT専門学校",
-      "count": 27,
+      "count": 32,
       "years": {
         "2017": 7,
         "2018": 5,
         "2020": 1,
         "2022": 4,
-        "2023": 10
+        "2023": 10,
+        "2025": 5
       },
       "students": [
         {
@@ -2998,175 +3734,53 @@
           "name": "TANVIR AHAMMED ABIR",
           "year": 2023,
           "nationality": "バングラデシュ"
-        }
-      ]
-    },
-    {
-      "name": "流通科学大学",
-      "count": 24,
-      "years": {
-        "2017": 4,
-        "2018": 1,
-        "2019": 4,
-        "2020": 3,
-        "2022": 2,
-        "2023": 10
-      },
-      "students": [
-        {
-          "id": 2904103,
-          "name": "NGUYEN THI UT LINH",
-          "year": 2017,
-          "nationality": "ベトナム"
         },
         {
-          "id": 2907002,
-          "name": "黄 林芳",
-          "year": 2017,
-          "nationality": "中国"
+          "id": 2404088,
+          "name": "MD.EMTEAZ HOSEN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
         },
         {
-          "id": 2907004,
-          "name": "于 歌",
-          "year": 2017,
-          "nationality": "中国"
+          "id": 2404090,
+          "name": "EMON MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         },
         {
-          "id": 2904004,
-          "name": "徐 煜尚",
-          "year": 2017,
-          "nationality": "中国"
+          "id": 2404116,
+          "name": "MD. ARIFUL ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         },
         {
-          "id": 3004031,
-          "name": "LAI THI HONG THUY",
-          "year": 2018,
-          "nationality": "Unknown"
+          "id": 2404128,
+          "name": "RAHMAN MD ANISOR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         },
         {
-          "id": 1904001,
-          "name": "張 哲",
-          "year": 2019,
-          "nationality": "中国"
-        },
-        {
-          "id": 1904011,
-          "name": "PHAM NGOC SON",
-          "year": 2019,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 1904038,
-          "name": "NGUYEN THI HUONG GIANG",
-          "year": 2019,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 1910018,
-          "name": "周 澤灝",
-          "year": 2019,
-          "nationality": "中国"
-        },
-        {
-          "id": 2004062,
-          "name": "NGUYEN THI HUYEN TRANG",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2004070,
-          "name": "NGUYEN THAO NGUYEN",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2004041,
-          "name": "NGUYEN THI SONG THUONG",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2204026,
-          "name": "肖 頴",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2210009,
-          "name": "DO THI KIEU MAI",
-          "year": 2022,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2307010,
-          "name": "MARKARIO",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2307018,
-          "name": "HNIN YU YU HLAING",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2304133,
-          "name": "MD KAIUMUN HASAN OMI",
-          "year": 2023,
-          "nationality": "バングラデシュ"
-        },
-        {
-          "id": 2304015,
-          "name": "矯 欣茹",
-          "year": 2023,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304019,
-          "name": "OUEDRAOGO SAHOUDATOU",
-          "year": 2023,
-          "nationality": "ブルキナファソ"
-        },
-        {
-          "id": 2310008,
-          "name": "PHOO EAIN SI",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2310012,
-          "name": "THA ZIN PHYU",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2310018,
-          "name": "NYAN LIN HTET",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2310024,
-          "name": "WINE",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2310028,
-          "name": "THU ZAR WIN",
-          "year": 2023,
-          "nationality": "ミャンマー"
+          "id": 2407042,
+          "name": "ABDULLAH K M",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "神戸電子専門学校",
-      "count": 17,
+      "count": 27,
       "years": {
         "2018": 1,
         "2020": 1,
         "2022": 3,
-        "2023": 12
+        "2023": 12,
+        "2025": 10
       },
       "students": [
         {
@@ -3270,15 +3884,247 @@
           "name": "CHUU WATHONE ",
           "year": 2023,
           "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404016,
+          "name": "THAW ZIN HTUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404053,
+          "name": "HAN HAN HTWE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404098,
+          "name": "LIMON MD SAKIBUL HAQ",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404141,
+          "name": "BISHAL TAMANG",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404144,
+          "name": "GURUNG MANISH",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407008,
+          "name": "MYA MYA THIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407010,
+          "name": "YEE MON OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407018,
+          "name": "KHIN SANDI ZAW",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407025,
+          "name": "KHIN PYAE SONE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407060,
+          "name": "RAHAMAN ABDUR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "神戸親和大学",
+      "count": 23,
+      "years": {
+        "2022": 4,
+        "2023": 7,
+        "2025": 12
+      },
+      "students": [
+        {
+          "id": 2204061,
+          "name": "AASHISH JIMBA",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2301002,
+          "name": "柳 幸延",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2104029,
+          "name": "祝 振宇",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2110054,
+          "name": "HEWAVITHARANA RAJAPAKSHAGE LASITHA NAVINDU RANASINGHE",
+          "year": 2022,
+          "nationality": "スリランカ"
+        },
+        {
+          "id": 2304001,
+          "name": "任 一蕊",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304050,
+          "name": "BHARAT GHARTI MAGAR",
+          "year": 2023,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2304003,
+          "name": "隋 金玉",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304005,
+          "name": "呉 妍",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304014,
+          "name": "孫 小冉",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2307074,
+          "name": "KABYO MD. HASIN LABIB REZA",
+          "year": 2023,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2310029,
+          "name": "YATI KO KO ",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404007,
+          "name": "于 国坤",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2404075,
+          "name": "MD. RAKEBUL ISLAM RONY",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404127,
+          "name": "UDOY MD.",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404140,
+          "name": "SUSMA TAMANG",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404146,
+          "name": "RUPESH LAMICHHANE",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407009,
+          "name": "NAING LIN KHANT",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407015,
+          "name": "SHANE ARKAR",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407021,
+          "name": "MYA MYA MOE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407023,
+          "name": "HNIN YU HLAING",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407036,
+          "name": "MD ASIKUZZAMAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407039,
+          "name": "PARVEZ AHMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407072,
+          "name": "GURUNG YUG",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "中央美術学園",
-      "count": 13,
+      "count": 16,
       "years": {
         "2022": 4,
-        "2023": 9
+        "2023": 9,
+        "2025": 3
       },
       "students": [
         {
@@ -3358,15 +4204,271 @@
           "name": "AMIN AL",
           "year": 2023,
           "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404078,
+          "name": "MD. HASIBUL HASAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404135,
+          "name": "ROSHAN GAUTAM",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404167,
+          "name": "ANUSHA PURI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "神戸国際大学",
+      "count": 16,
+      "years": {
+        "2018": 1,
+        "2019": 1,
+        "2020": 1,
+        "2022": 3,
+        "2023": 3,
+        "2025": 7
+      },
+      "students": [
+        {
+          "id": 3004001,
+          "name": "孫 祥羽",
+          "year": 2018,
+          "nationality": "中国"
+        },
+        {
+          "id": 1904014,
+          "name": "NGUYEN THI LUYEN",
+          "year": 2019,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2004043,
+          "name": "NGUYEN HOANG THUY DIEU",
+          "year": 2020,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2107008,
+          "name": "張 志澎",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2204038,
+          "name": "安 泉",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2210008,
+          "name": "DANG PHAN MY NGOC",
+          "year": 2022,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2304070,
+          "name": "YOON LAE LAE TUN",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2304114,
+          "name": "MEHARAB HOSSAIN",
+          "year": 2023,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2307003,
+          "name": "郭 銘敖",
+          "year": 2023,
+          "nationality": "中国"
+        },
+        {
+          "id": 2404017,
+          "name": "HNIN HNIN WAI",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404026,
+          "name": "YE MIN HTET",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2404039,
+          "name": "THURA PHYO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404043,
+          "name": "RITA HLA MOE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407001,
+          "name": "陳 佳楽",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2407047,
+          "name": "SAHA SARAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2410003,
+          "name": "高 興",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "ECC国際外語専門学校",
+      "count": 16,
+      "years": {
+        "2018": 1,
+        "2019": 1,
+        "2023": 5,
+        "2025": 9
+      },
+      "students": [
+        {
+          "id": 1901003,
+          "name": "王 海名",
+          "year": 2018,
+          "nationality": "中国"
+        },
+        {
+          "id": 1907002,
+          "name": "孟 汝樺",
+          "year": 2019,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304074,
+          "name": "MAY THINZAR KYAW",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2304075,
+          "name": "EI THAE PHYU",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2304068,
+          "name": "EI MYAT NOE",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2307021,
+          "name": "KYAW NYEIN HLAING",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2307038,
+          "name": "TAMANG BIPIN BAHADUR",
+          "year": 2023,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404020,
+          "name": "SAI KWAN PHA",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404029,
+          "name": "KAY ZIN OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404042,
+          "name": "PHU PHU MYAT THU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404044,
+          "name": "THURA LINN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404046,
+          "name": "KYAL SIN LIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407016,
+          "name": "KYAW ZIN MYINT",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2407030,
+          "name": "KAY KHING LIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407032,
+          "name": "HEIN HTET ZAW",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407050,
+          "name": "MIA ROMAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "CAD製図専門学校",
-      "count": 12,
+      "count": 15,
       "years": {
         "2022": 2,
-        "2023": 10
+        "2023": 10,
+        "2025": 3
       },
       "students": [
         {
@@ -3440,149 +4542,181 @@
           "name": "ASADUZZAMAN NUR",
           "year": 2023,
           "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404080,
+          "name": "HASAN MD MEHEDI",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404102,
+          "name": "SHAMIM HOSSAIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404113,
+          "name": "MD RASEDUL ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
     {
-      "name": "神戸親和大学",
-      "count": 11,
-      "years": {
-        "2022": 4,
-        "2023": 7
-      },
-      "students": [
-        {
-          "id": 2204061,
-          "name": "AASHISH JIMBA",
-          "year": 2022,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2301002,
-          "name": "柳 幸延",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2104029,
-          "name": "祝 振宇",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2110054,
-          "name": "HEWAVITHARANA RAJAPAKSHAGE LASITHA NAVINDU RANASINGHE",
-          "year": 2022,
-          "nationality": "スリランカ"
-        },
-        {
-          "id": 2304001,
-          "name": "任 一蕊",
-          "year": 2023,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304050,
-          "name": "BHARAT GHARTI MAGAR",
-          "year": 2023,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2304003,
-          "name": "隋 金玉",
-          "year": 2023,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304005,
-          "name": "呉 妍",
-          "year": 2023,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304014,
-          "name": "孫 小冉",
-          "year": 2023,
-          "nationality": "中国"
-        },
-        {
-          "id": 2307074,
-          "name": "KABYO MD. HASIN LABIB REZA",
-          "year": 2023,
-          "nationality": "バングラデシュ"
-        },
-        {
-          "id": 2310029,
-          "name": "YATI KO KO ",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        }
-      ]
-    },
-    {
-      "name": "神戸国際大学",
-      "count": 9,
+      "name": "トヨタ自動車大学校神戸校",
+      "count": 10,
       "years": {
         "2018": 1,
-        "2019": 1,
-        "2020": 1,
+        "2020": 2,
         "2022": 3,
-        "2023": 3
+        "2025": 4
       },
       "students": [
         {
-          "id": 3004001,
-          "name": "孫 祥羽",
+          "id": 3004056,
+          "name": "NGUYEN XUAN KHAI",
           "year": 2018,
-          "nationality": "中国"
-        },
-        {
-          "id": 1904014,
-          "name": "NGUYEN THI LUYEN",
-          "year": 2019,
           "nationality": "ベトナム"
         },
         {
-          "id": 2004043,
-          "name": "NGUYEN HOANG THUY DIEU",
+          "id": 2004048,
+          "name": "NGUYEN VAN TUAN",
           "year": 2020,
           "nationality": "ベトナム"
         },
         {
-          "id": 2107008,
-          "name": "張 志澎",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2204038,
-          "name": "安 泉",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2210008,
-          "name": "DANG PHAN MY NGOC",
-          "year": 2022,
+          "id": 2004072,
+          "name": "NGUYEN SY DAT",
+          "year": 2020,
           "nationality": "ベトナム"
         },
         {
-          "id": 2304070,
-          "name": "YOON LAE LAE TUN",
-          "year": 2023,
-          "nationality": "ミャンマー"
+          "id": 2110068,
+          "name": "RAJESH GURUNG",
+          "year": 2022,
+          "nationality": "ネパール"
         },
         {
-          "id": 2304114,
-          "name": "MEHARAB HOSSAIN",
-          "year": 2023,
+          "id": 2110073,
+          "name": "SHAMIM MIAH",
+          "year": 2022,
           "nationality": "バングラデシュ"
         },
         {
-          "id": 2307003,
-          "name": "郭 銘敖",
-          "year": 2023,
+          "id": 2107029,
+          "name": "SURENDRA SHRESTHA",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404056,
+          "name": "MIN KYAW",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404123,
+          "name": "KHAN MD EMON",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404132,
+          "name": "SHOVA MD ARAFAT HOSSAIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407017,
+          "name": "THAN TOE AUNG",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "兵庫大学",
+      "count": 10,
+      "years": {
+        "2019": 2,
+        "2022": 1,
+        "2023": 1,
+        "2025": 6
+      },
+      "students": [
+        {
+          "id": 1904005,
+          "name": "王 睿褀",
+          "year": 2019,
           "nationality": "中国"
+        },
+        {
+          "id": 1910007,
+          "name": "桑 斯爾",
+          "year": 2019,
+          "nationality": "中国"
+        },
+        {
+          "id": 2204028,
+          "name": "修 鵬飛",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304021,
+          "name": "NGUYEN THI YEN",
+          "year": 2023,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2404064,
+          "name": "CHOWDHURY MD SABER AL BASAR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404071,
+          "name": "RAIHAN INTISHAR BIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404105,
+          "name": "TAREK MD DAUDE IBRAHIM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404137,
+          "name": "KHANAL SUSAN",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2407044,
+          "name": "SUTA DHAR SHABAK",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        },
+        {
+          "id": 2407049,
+          "name": "AHMAD SABBIR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
         }
       ]
     },
@@ -3764,6 +4898,69 @@
       ]
     },
     {
+      "name": "関西国際大学",
+      "count": 8,
+      "years": {
+        "2018": 3,
+        "2020": 1,
+        "2023": 1,
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 3004015,
+          "name": "NGUYEN THI NGOC ANH",
+          "year": 2018,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 3004037,
+          "name": "TRAN DUY DUC",
+          "year": 2018,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 3004069,
+          "name": "BUI HAI DANG",
+          "year": 2018,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2004063,
+          "name": "VU THU HA",
+          "year": 2020,
+          "nationality": "ベトナム"
+        },
+        {
+          "id": 2307069,
+          "name": "SAMIUL ISLAM",
+          "year": 2023,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404032,
+          "name": "THU THU NYEIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404081,
+          "name": "AL-AMIN-AL-SADI",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404174,
+          "name": "SANJOG SHAH",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
       "name": "奈良介護福祉中央学院",
       "count": 7,
       "years": {
@@ -3811,59 +5008,6 @@
           "name": "邹 超",
           "year": 2018,
           "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "ECC国際外語専門学校",
-      "count": 7,
-      "years": {
-        "2018": 1,
-        "2019": 1,
-        "2023": 5
-      },
-      "students": [
-        {
-          "id": 1901003,
-          "name": "王 海名",
-          "year": 2018,
-          "nationality": "中国"
-        },
-        {
-          "id": 1907002,
-          "name": "孟 汝樺",
-          "year": 2019,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304074,
-          "name": "MAY THINZAR KYAW",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2304075,
-          "name": "EI THAE PHYU",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2304068,
-          "name": "EI MYAT NOE",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2307021,
-          "name": "KYAW NYEIN HLAING",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2307038,
-          "name": "TAMANG BIPIN BAHADUR",
-          "year": 2023,
-          "nationality": "ネパール"
         }
       ]
     },
@@ -4023,6 +5167,63 @@
       ]
     },
     {
+      "name": "大阪観光大学",
+      "count": 7,
+      "years": {
+        "2020": 1,
+        "2022": 2,
+        "2023": 1,
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 2004037,
+          "name": "陳 浩然",
+          "year": 2020,
+          "nationality": "中国"
+        },
+        {
+          "id": 2010004,
+          "name": "劉 育徳",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2007012,
+          "name": "宮 汶汶",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2307081,
+          "name": "MALIK AYESHA SAJID",
+          "year": 2023,
+          "nationality": "パキスタン"
+        },
+        {
+          "id": 2404166,
+          "name": "SHERPA AAYUSHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2410004,
+          "name": "于 騰傑",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": false
+        },
+        {
+          "id": 2501002,
+          "name": "NWAY KHET KHET PAN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        }
+      ]
+    },
+    {
       "name": "大原簿記専門学校三宮校",
       "count": 6,
       "years": {
@@ -4065,53 +5266,6 @@
           "name": "ARFAN CHOWDHURY",
           "year": 2022,
           "nationality": "バングラデシュ"
-        }
-      ]
-    },
-    {
-      "name": "トヨタ自動車大学校神戸校",
-      "count": 6,
-      "years": {
-        "2018": 1,
-        "2020": 2,
-        "2022": 3
-      },
-      "students": [
-        {
-          "id": 3004056,
-          "name": "NGUYEN XUAN KHAI",
-          "year": 2018,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2004048,
-          "name": "NGUYEN VAN TUAN",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2004072,
-          "name": "NGUYEN SY DAT",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2110068,
-          "name": "RAJESH GURUNG",
-          "year": 2022,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2110073,
-          "name": "SHAMIM MIAH",
-          "year": 2022,
-          "nationality": "バングラデシュ"
-        },
-        {
-          "id": 2107029,
-          "name": "SURENDRA SHRESTHA",
-          "year": 2022,
-          "nationality": "ネパール"
         }
       ]
     },
@@ -4210,11 +5364,12 @@
     },
     {
       "name": "日本工科大学校",
-      "count": 5,
+      "count": 6,
       "years": {
         "2018": 2,
         "2022": 2,
-        "2023": 1
+        "2023": 1,
+        "2025": 1
       },
       "students": [
         {
@@ -4246,56 +5401,23 @@
           "name": "付 佳順",
           "year": 2023,
           "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "関西国際大学",
-      "count": 5,
-      "years": {
-        "2018": 3,
-        "2020": 1,
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 3004015,
-          "name": "NGUYEN THI NGOC ANH",
-          "year": 2018,
-          "nationality": "ベトナム"
         },
         {
-          "id": 3004037,
-          "name": "TRAN DUY DUC",
-          "year": 2018,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 3004069,
-          "name": "BUI HAI DANG",
-          "year": 2018,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2004063,
-          "name": "VU THU HA",
-          "year": 2020,
-          "nationality": "ベトナム"
-        },
-        {
-          "id": 2307069,
-          "name": "SAMIUL ISLAM",
-          "year": 2023,
-          "nationality": "バングラデシュ"
+          "id": 2404162,
+          "name": "DHENGA DEB BAHADUR",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
         }
       ]
     },
     {
       "name": "大阪観光ビジネス学院",
-      "count": 5,
+      "count": 6,
       "years": {
         "2022": 2,
-        "2023": 3
+        "2023": 3,
+        "2025": 1
       },
       "students": [
         {
@@ -4327,6 +5449,63 @@
           "name": "LAMA SHANTI",
           "year": 2023,
           "nationality": "ネパール"
+        },
+        {
+          "id": 2407067,
+          "name": "BALAMI RACHINA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "九州ビジネス専門学校",
+      "count": 6,
+      "years": {
+        "2022": 2,
+        "2025": 4
+      },
+      "students": [
+        {
+          "id": 2107014,
+          "name": "CHHETRI SITA",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2204018,
+          "name": "RAM DHAMI",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404062,
+          "name": "HOSSAIN MD YEASIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        },
+        {
+          "id": 2404074,
+          "name": "MD. OMAR BHUIYAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407052,
+          "name": "HAQUE MD ISMAIL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407053,
+          "name": "ALI MD ABBAS",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
@@ -4367,6 +5546,224 @@
           "name": "YE MHAN OO",
           "year": 2023,
           "nationality": "ミャンマー"
+        }
+      ]
+    },
+    {
+      "name": "大阪女学院大学",
+      "count": 5,
+      "years": {
+        "2022": 2,
+        "2023": 2,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2207045,
+          "name": "ISHIKA SUNUWAR",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2207022,
+          "name": "PRABISHA RAUT",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2307022,
+          "name": "CHIT SU SU THEINT ZUN",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2307008,
+          "name": "THET HTET MOE OO",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2407014,
+          "name": "ZIN LAY NWE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "エール学園",
+      "count": 5,
+      "years": {
+        "2018": 1,
+        "2023": 1,
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 3007001,
+          "name": "仇 豪",
+          "year": 2018,
+          "nationality": "中国"
+        },
+        {
+          "id": 2304085,
+          "name": "MOE PYAE SAN",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404047,
+          "name": "KHIN YADANAR OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404165,
+          "name": "GIRI TAPENDRA RAJ",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": false
+        },
+        {
+          "id": 2407034,
+          "name": "MD JAHID PRODHANIA",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "神戸松蔭大学",
+      "count": 5,
+      "years": {
+        "2023": 1,
+        "2025": 4
+      },
+      "students": [
+        {
+          "id": 2307040,
+          "name": "TILAK PANDIT",
+          "year": 2023,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404015,
+          "name": "NAY LIN OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404022,
+          "name": "THIRI MAY",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404026,
+          "name": "YE MIN HTET",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407037,
+          "name": "SARKAR TUHIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪モード学園",
+      "count": 5,
+      "years": {
+        "2025": 5
+      },
+      "students": [
+        {
+          "id": 2404018,
+          "name": "MAY PHOO THIT",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404021,
+          "name": "NANG PHWAY WADI OO",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404025,
+          "name": "MIN THIHA",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2404040,
+          "name": "AYE PWINT NAING",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404049,
+          "name": "SAI KHANT SITHU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "国際アニメーション専門学校",
+      "count": 5,
+      "years": {
+        "2025": 5
+      },
+      "students": [
+        {
+          "id": 2404095,
+          "name": "TANZIM AHMED AKASH",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404108,
+          "name": "SHEIKH MD SABBIR HOSEN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404111,
+          "name": "HAYDER JAHIDUL ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404115,
+          "name": "MD. IFTEKHAR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404119,
+          "name": "PAUL JOY",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
@@ -4438,76 +5835,6 @@
       ]
     },
     {
-      "name": "兵庫大学",
-      "count": 4,
-      "years": {
-        "2019": 2,
-        "2022": 1,
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 1904005,
-          "name": "王 睿褀",
-          "year": 2019,
-          "nationality": "中国"
-        },
-        {
-          "id": 1910007,
-          "name": "桑 斯爾",
-          "year": 2019,
-          "nationality": "中国"
-        },
-        {
-          "id": 2204028,
-          "name": "修 鵬飛",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304021,
-          "name": "NGUYEN THI YEN",
-          "year": 2023,
-          "nationality": "ベトナム"
-        }
-      ]
-    },
-    {
-      "name": "大阪観光大学",
-      "count": 4,
-      "years": {
-        "2020": 1,
-        "2022": 2,
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2004037,
-          "name": "陳 浩然",
-          "year": 2020,
-          "nationality": "中国"
-        },
-        {
-          "id": 2010004,
-          "name": "劉 育徳",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2007012,
-          "name": "宮 汶汶",
-          "year": 2022,
-          "nationality": "中国"
-        },
-        {
-          "id": 2307081,
-          "name": "MALIK AYESHA SAJID",
-          "year": 2023,
-          "nationality": "パキスタン"
-        }
-      ]
-    },
-    {
       "name": "神戸医療未来大学",
       "count": 4,
       "years": {
@@ -4537,40 +5864,6 @@
           "name": "紀 宜宏",
           "year": 2022,
           "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "大阪女学院大学",
-      "count": 4,
-      "years": {
-        "2022": 2,
-        "2023": 2
-      },
-      "students": [
-        {
-          "id": 2207045,
-          "name": "ISHIKA SUNUWAR",
-          "year": 2022,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2207022,
-          "name": "PRABISHA RAUT",
-          "year": 2022,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2307022,
-          "name": "CHIT SU SU THEINT ZUN",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        },
-        {
-          "id": 2307008,
-          "name": "THET HTET MOE OO",
-          "year": 2023,
-          "nationality": "ミャンマー"
         }
       ]
     },
@@ -4637,6 +5930,80 @@
           "name": "NIRMALA BOHARA",
           "year": 2023,
           "nationality": "ネパール"
+        }
+      ]
+    },
+    {
+      "name": "国際外語・観光・エアライン専門学校",
+      "count": 4,
+      "years": {
+        "2025": 4
+      },
+      "students": [
+        {
+          "id": 2404013,
+          "name": "CHIT MAUNG MAUNG",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2404041,
+          "name": "SAI KAUNG KHANT AUNG",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2410004,
+          "name": "于 騰傑",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": false
+        },
+        {
+          "id": 2501002,
+          "name": "NWAY KHET KHET PAN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "新潟国際自動車大学校",
+      "count": 4,
+      "years": {
+        "2025": 4
+      },
+      "students": [
+        {
+          "id": 2404072,
+          "name": "FAHAD TAZNUR AHAMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404077,
+          "name": "MD. ATIKUL ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404096,
+          "name": "MD MASHAYEL KHAN ANID",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404101,
+          "name": "SAEM MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
         }
       ]
     },
@@ -4863,6 +6230,246 @@
       ]
     },
     {
+      "name": "京都コンピュータ学院",
+      "count": 3,
+      "years": {
+        "2022": 1,
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2301004,
+          "name": "馬 睿哲",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2404099,
+          "name": "HOSAIN ARIF",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404177,
+          "name": "KHADKA SARASWOTI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "東京工科自動車大学校",
+      "count": 3,
+      "years": {
+        "2022": 1,
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2110032,
+          "name": "BIREN TAMANG",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2407035,
+          "name": "MD OBAYED BIN ANWAR ZIHAD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407041,
+          "name": "MIA MD SABUZ",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "中央情報専門学校",
+      "count": 3,
+      "years": {
+        "2022": 1,
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2204043,
+          "name": "SOLTANUL ALOM",
+          "year": 2022,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404079,
+          "name": "JESMIN AKTER",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404110,
+          "name": "MD. JONAYET",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "プロスペラ学院ビジネス専門学校",
+      "count": 3,
+      "years": {
+        "2023": 1,
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2304086,
+          "name": "MAY THAZIN PHOO",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404061,
+          "name": "KABIR MD HOSSAIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404152,
+          "name": "NIRAJ POKHAREL",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪産業大学",
+      "count": 3,
+      "years": {
+        "2023": 1,
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2310020,
+          "name": "PHYO THIHA KYAW ",
+          "year": 2023,
+          "nationality": "ミャンマー"
+        },
+        {
+          "id": 2404005,
+          "name": "林 衛健",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        },
+        {
+          "id": 2404025,
+          "name": "MIN THIHA",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "岩谷学園よこはまITビジネス専門学校",
+      "count": 3,
+      "years": {
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 2404019,
+          "name": "MIN THIHA",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404159,
+          "name": "RABIN THAPALIYA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404160,
+          "name": "AAKRITI THAPA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京テクニカルカレッジ",
+      "count": 3,
+      "years": {
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 2404027,
+          "name": "PHYO SI THU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404031,
+          "name": "NWAY NWAY TUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407070,
+          "name": "TAMANG ALISHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京工科自動車大学校世田谷校",
+      "count": 3,
+      "years": {
+        "2025": 3
+      },
+      "students": [
+        {
+          "id": 2407033,
+          "name": "SABBIR SAJID AHMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407057,
+          "name": "MIZAN MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407058,
+          "name": "ISLAM SAIFUL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
       "name": "神戸芸術工科大学",
       "count": 2,
       "years": {
@@ -4945,28 +6552,6 @@
           "name": "NGUYEN THI THU HIEN",
           "year": 2018,
           "nationality": "ベトナム"
-        }
-      ]
-    },
-    {
-      "name": "エール学園",
-      "count": 2,
-      "years": {
-        "2018": 1,
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 3007001,
-          "name": "仇 豪",
-          "year": 2018,
-          "nationality": "中国"
-        },
-        {
-          "id": 2304085,
-          "name": "MOE PYAE SAN",
-          "year": 2023,
-          "nationality": "ミャンマー"
         }
       ]
     },
@@ -5096,27 +6681,6 @@
           "name": "LE THANH MAI",
           "year": 2022,
           "nationality": "ベトナム"
-        }
-      ]
-    },
-    {
-      "name": "九州ビジネス専門学校",
-      "count": 2,
-      "years": {
-        "2022": 2
-      },
-      "students": [
-        {
-          "id": 2107014,
-          "name": "CHHETRI SITA",
-          "year": 2022,
-          "nationality": "ネパール"
-        },
-        {
-          "id": 2204018,
-          "name": "RAM DHAMI",
-          "year": 2022,
-          "nationality": "ネパール"
         }
       ]
     },
@@ -5371,6 +6935,443 @@
           "name": "MOH MOH THU",
           "year": 2023,
           "nationality": "ミャンマー"
+        }
+      ]
+    },
+    {
+      "name": "柏木実業専門学校",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2007024,
+          "name": "KABITA ACHARYA",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404165,
+          "name": "GIRI TAPENDRA RAJ",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京国際学園外語専門学校",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2110087,
+          "name": "UDDIN MD JASHIM",
+          "year": 2022,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404124,
+          "name": "MIRAZ MD SAIKAT ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "福岡外語専門学校",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2210023,
+          "name": "TANUJA BHATT ",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404180,
+          "name": "SITA PUDASAINI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "早稲田文理専門学校",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2110041,
+          "name": "SAGAR BOHARA",
+          "year": 2022,
+          "nationality": "ネパール"
+        },
+        {
+          "id": 2404110,
+          "name": "MD. JONAYET",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "岡山情報ビジネス学院",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2110071,
+          "name": "MD. AKRAMUL HAQ TUSHAR",
+          "year": 2022,
+          "nationality": "バングラデシュ"
+        },
+        {
+          "id": 2404097,
+          "name": "DEWAN SAIF",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪総合福祉専門学校",
+      "count": 2,
+      "years": {
+        "2022": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2110005,
+          "name": "韓 露露",
+          "year": 2022,
+          "nationality": "中国"
+        },
+        {
+          "id": 2404109,
+          "name": "MAHIBUR RAHMAN SANNY",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "日本国際工科専門学校",
+      "count": 2,
+      "years": {
+        "2023": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2304135,
+          "name": "DEDDUWA PATHIRANAGE PETHUM CHANUKA",
+          "year": 2023,
+          "nationality": "スリランカ"
+        },
+        {
+          "id": 2404176,
+          "name": "SHRESTHA GYANU",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "専門学校日本デジタルカレッジ",
+      "count": 2,
+      "years": {
+        "2023": 1,
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2307089,
+          "name": "BEMINA HENNEDIGE DASHANA PRABATH PEIRIS",
+          "year": 2023,
+          "nationality": "スリランカ"
+        },
+        {
+          "id": 2404009,
+          "name": "NGUYEN DINH HUYNH",
+          "year": 2025,
+          "nationality": "ベトナム",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "修成建設専門学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404023,
+          "name": "LAE YI HTUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2407027,
+          "name": "MI MI ZIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "中央工学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404030,
+          "name": "MYAT PWINT WAI",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404051,
+          "name": "KAUNG ZIN NYI",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪バイオメディカル専門学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404034,
+          "name": "SOE LIN TUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        },
+        {
+          "id": 2404037,
+          "name": "MAUNG PHYU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "専門学校広島国際ビジネスカレッジ",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404034,
+          "name": "SOE LIN TUN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2404037,
+          "name": "MAUNG PHYU",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大手前大学",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404058,
+          "name": "HAN THU SAN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        },
+        {
+          "id": 2410002,
+          "name": "孔 維晨",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "ICT専門学校高砂校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404065,
+          "name": "SHUVO MD",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404150,
+          "name": "LOKENDRA SAUD",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "四国大学短期大学部",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404092,
+          "name": "ZISAN MD. RAIHAN SARIF",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2404131,
+          "name": "SAGAR NUR UDDIN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪キリスト教短期大学",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404099,
+          "name": "HOSAIN ARIF",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        },
+        {
+          "id": 2404112,
+          "name": "HOSSEN JABER",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "中部国際自動車大学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404124,
+          "name": "MIRAZ MD SAIKAT ISLAM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        },
+        {
+          "id": 2404129,
+          "name": "AHMED MD JUBAYER",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "専門学校花壇自動車大学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2404148,
+          "name": "BISHNU PRASAD BHANDARI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        },
+        {
+          "id": 2404154,
+          "name": "AADITYA KUMAR CHAUDHARY",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "関東自動車大学校",
+      "count": 2,
+      "years": {
+        "2025": 2
+      },
+      "students": [
+        {
+          "id": 2407038,
+          "name": "HOSSEN KAMAL",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        },
+        {
+          "id": 2407053,
+          "name": "ALI MD ABBAS",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
         }
       ]
     },
@@ -5885,36 +7886,6 @@
       ]
     },
     {
-      "name": "柏木実業専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2007024,
-          "name": "KABITA ACHARYA",
-          "year": 2022,
-          "nationality": "ネパール"
-        }
-      ]
-    },
-    {
-      "name": "東京国際学園外語専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2110087,
-          "name": "UDDIN MD JASHIM",
-          "year": 2022,
-          "nationality": "バングラデシュ"
-        }
-      ]
-    },
-    {
       "name": "大阪経済大学大学院研究生",
       "count": 1,
       "years": {
@@ -5990,21 +7961,6 @@
       ]
     },
     {
-      "name": "福岡外語専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2210023,
-          "name": "TANUJA BHATT ",
-          "year": 2022,
-          "nationality": "ネパール"
-        }
-      ]
-    },
-    {
       "name": "岩谷テクノビジネス専門学校",
       "count": 1,
       "years": {
@@ -6031,21 +7987,6 @@
           "name": "SANGHITA GHIMIRE ",
           "year": 2022,
           "nationality": "ネパール"
-        }
-      ]
-    },
-    {
-      "name": "京都コンピュータ学院",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2301004,
-          "name": "馬 睿哲",
-          "year": 2022,
-          "nationality": "中国"
         }
       ]
     },
@@ -6080,21 +8021,6 @@
       ]
     },
     {
-      "name": "東京工科自動車大学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2110032,
-          "name": "BIREN TAMANG",
-          "year": 2022,
-          "nationality": "ネパール"
-        }
-      ]
-    },
-    {
       "name": "OCA大阪デザイン＆テクノロジー専門学校",
       "count": 1,
       "years": {
@@ -6106,21 +8032,6 @@
           "name": "叶 瀚林",
           "year": 2022,
           "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "中央情報専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2204043,
-          "name": "SOLTANUL ALOM",
-          "year": 2022,
-          "nationality": "バングラデシュ"
         }
       ]
     },
@@ -6151,21 +8062,6 @@
           "name": "林 強",
           "year": 2022,
           "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "早稲田文理専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2110041,
-          "name": "SAGAR BOHARA",
-          "year": 2022,
-          "nationality": "ネパール"
         }
       ]
     },
@@ -6275,21 +8171,6 @@
       ]
     },
     {
-      "name": "岡山情報ビジネス学院",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2110071,
-          "name": "MD. AKRAMUL HAQ TUSHAR",
-          "year": 2022,
-          "nationality": "バングラデシュ"
-        }
-      ]
-    },
-    {
       "name": "大村グローバルビジネス専門学校",
       "count": 1,
       "years": {
@@ -6374,21 +8255,6 @@
         {
           "id": 2301001,
           "name": "陰 博文",
-          "year": 2022,
-          "nationality": "中国"
-        }
-      ]
-    },
-    {
-      "name": "大阪総合福祉専門学校",
-      "count": 1,
-      "years": {
-        "2022": 1
-      },
-      "students": [
-        {
-          "id": 2110005,
-          "name": "韓 露露",
           "year": 2022,
           "nationality": "中国"
         }
@@ -6515,21 +8381,6 @@
       ]
     },
     {
-      "name": "プロスペラ学院ビジネス専門学校",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2304086,
-          "name": "MAY THAZIN PHOO",
-          "year": 2023,
-          "nationality": "ミャンマー"
-        }
-      ]
-    },
-    {
       "name": "東京自動車大学校",
       "count": 1,
       "years": {
@@ -6556,21 +8407,6 @@
           "name": "PRADHAN ANMOLISHA",
           "year": 2023,
           "nationality": "ネパール"
-        }
-      ]
-    },
-    {
-      "name": "大阪産業大学",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2310020,
-          "name": "PHYO THIHA KYAW ",
-          "year": 2023,
-          "nationality": "ミャンマー"
         }
       ]
     },
@@ -6644,36 +8480,6 @@
         {
           "id": 2304030,
           "name": "RAM CHANDRA DHAKAL ",
-          "year": 2023,
-          "nationality": "ネパール"
-        }
-      ]
-    },
-    {
-      "name": "日本国際工科専門学校",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2304135,
-          "name": "DEDDUWA PATHIRANAGE PETHUM CHANUKA",
-          "year": 2023,
-          "nationality": "スリランカ"
-        }
-      ]
-    },
-    {
-      "name": "神戸松蔭大学",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2307040,
-          "name": "TILAK PANDIT",
           "year": 2023,
           "nationality": "ネパール"
         }
@@ -6785,21 +8591,6 @@
       ]
     },
     {
-      "name": "専門学校日本デジタルカレッジ",
-      "count": 1,
-      "years": {
-        "2023": 1
-      },
-      "students": [
-        {
-          "id": 2307089,
-          "name": "BEMINA HENNEDIGE DASHANA PRABATH PEIRIS",
-          "year": 2023,
-          "nationality": "スリランカ"
-        }
-      ]
-    },
-    {
       "name": "GIA 専門学校 新潟国際自動車大学校",
       "count": 1,
       "years": {
@@ -6841,6 +8632,406 @@
           "name": "楊 楚驍",
           "year": 2023,
           "nationality": "中国"
+        }
+      ]
+    },
+    {
+      "name": "九州中央リハビリテーション学院",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404045,
+          "name": "THEIN NAING WIN",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "東京みらいIT&AI専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404050,
+          "name": "THUTA ZAW",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "日商簿記三鷹福祉専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404087,
+          "name": "ABDUL KAIUM NAEEM",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京日建工科専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404089,
+          "name": "MAHIM AHAD BHUIYAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪電子専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404091,
+          "name": "SHIHAB MOTIUR RAHMAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東大阪短期大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404117,
+          "name": "BULBUL AHMED",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "育英館大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404119,
+          "name": "PAUL JOY",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "関東工業自動車大学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404122,
+          "name": "SHANTO MD MEHEDI HASAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "イーストウエスト外国語専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404155,
+          "name": "BUDDHI BAHADUR BUDHATHOKI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "岡山服飾ビジネス専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2404169,
+          "name": "MAHATO SALINA KUMARI",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "福岡医健・スポーツ専門学校専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407003,
+          "name": "劉 暁聡",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京大学大学院",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407004,
+          "name": "KAMURAN ADILI",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "千葉大学研究生",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407005,
+          "name": "AILIFEILA AIKEBAIER",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "山形大学大学院",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407006,
+          "name": "李 唯正",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大阪学院大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407013,
+          "name": "SOE NYI HTUT",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大原学園東京校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407019,
+          "name": "KHIN MYAT NOE AYE",
+          "year": 2025,
+          "nationality": "ミャンマー",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京テクニカルカレッジ中野校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407045,
+          "name": "RATUL TANVIR HASAN",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "名古屋経済大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407046,
+          "name": "DEBNATH EMON",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京工科自動車大学校中野校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407056,
+          "name": "MIYAJI JABED HOSEN SHISHIR",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "大和大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407061,
+          "name": "HASAN MEHEDI",
+          "year": 2025,
+          "nationality": "バングラデシュ",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "日本ウェルネスAIIT保育専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407066,
+          "name": "RAWAL RADHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "流通経済大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407068,
+          "name": "TAMANG NIKITA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "東京豊島IT医療福祉専門学校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407069,
+          "name": "OLI REKHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": true
+        }
+      ]
+    },
+    {
+      "name": "日本経済大学渋谷校",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2407070,
+          "name": "TAMANG ALISHA",
+          "year": 2025,
+          "nationality": "ネパール",
+          "enrolled": false
+        }
+      ]
+    },
+    {
+      "name": "愛知工科大学",
+      "count": 1,
+      "years": {
+        "2025": 1
+      },
+      "students": [
+        {
+          "id": 2410004,
+          "name": "于 騰傑",
+          "year": 2025,
+          "nationality": "中国",
+          "enrolled": true
         }
       ]
     }
