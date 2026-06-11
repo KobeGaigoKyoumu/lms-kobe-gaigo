@@ -52,6 +52,7 @@ export default function CareerManagementClient({
     const [activeTab, setActiveTab] = useState('career') // 初期表示は「進路」タブ
     const [selectedClass, setSelectedClass] = useState(initialClass)
     const [students, setStudents] = useState(initialStudents)
+    const [downloading, setDownloading] = useState(false)
     const [careerPage, setCareerPage] = useState(1)
     const [examPage, setExamPage] = useState(1)
     const [surveyPage, setSurveyPage] = useState(1)
@@ -116,6 +117,35 @@ export default function CareerManagementClient({
         other_exam_content: '',
         other_exam_time: '',
         advice: ''
+    }
+
+    // Excelダウンロードハンドラー
+    const handleDownloadExcel = async () => {
+        if (!selectedClass || selectedClass === 'all') return
+        setDownloading(true)
+        try {
+            const res = await fetch(`/api/career/download-survey?class=${encodeURIComponent(selectedClass)}`)
+            if (!res.ok) {
+                const errText = await res.text()
+                alert(`ダウンロードに失敗しました: ${errText || res.statusText}`)
+                return
+            }
+            
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `全学生進路希望調査票2025_${selectedClass}.xlsx`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            window.URL.revokeObjectURL(url)
+        } catch (err) {
+            console.error('Download error:', err)
+            alert('ダウンロード中にエラーが発生しました。')
+        } finally {
+            setDownloading(false)
+        }
     }
 
     // クラス切り替えハンドラー
@@ -785,6 +815,16 @@ export default function CareerManagementClient({
                                     </option>
                                 ))}
                             </select>
+                            
+                            {selectedClass !== 'all' && (
+                                <button
+                                    onClick={handleDownloadExcel}
+                                    className={styles.downloadButton}
+                                    disabled={downloading}
+                                >
+                                    {downloading ? 'ダウンロード中...' : 'Excelダウンロード'}
+                                </button>
+                            )}
                         </div>
 
                         <div className={styles.searchGroup}>

@@ -1138,3 +1138,32 @@
         text-align: center;
     }
 }
+
+.downloadButton {
+    background-color: var(--success-600);
+    color: white;
+    border: 1px solid var(--success-600);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.downloadButton:hover {
+    background-color: var(--success-700);
+    border-color: var(--success-700);
+}
+
+.downloadButton:disabled {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
