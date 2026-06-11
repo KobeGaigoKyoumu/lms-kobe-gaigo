@@ -432,7 +432,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         }
     }, [careerStats, selectedYear, availableYears])
 
-    // 年度別卒業率の推移のグラフ用データ
+    // 年度別進学率の推移のグラフ用データ
     const trendsSorted = useMemo(() => {
         if (!careerStats?.yearlyTrends) return [];
         return [...careerStats.yearlyTrends].sort((a, b) => a.year - b.year);
@@ -442,8 +442,15 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         return {
             labels: trendsSorted.map(t => `${t.year}年度卒業`),
             datasets: [{
-                label: '卒業率',
-                data: trendsSorted.map(t => t.graduationRate ?? 100),
+                label: '進学率',
+                data: trendsSorted.map(t => {
+                    const uni = t.categories?.['大学'] || 0;
+                    const grad = t.categories?.['大学院'] || 0;
+                    const voc = t.categories?.['専門学校'] || 0;
+                    const jr = t.categories?.['短期大学'] || 0;
+                    const total = t.total || 1;
+                    return parseFloat(((uni + grad + voc + jr) / total * 100).toFixed(1));
+                }),
                 borderColor: '#10b981', // エメラルドグリーン
                 backgroundColor: 'rgba(16, 185, 129, 0.05)',
                 borderWidth: 2.5,
@@ -455,54 +462,88 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         };
     }, [trendsSorted]);
 
-    const avgGraduationRate = useMemo(() => {
+    const avgAdvancementRate = useMemo(() => {
         if (trendsSorted.length === 0) return '0.0';
-        const totalGraduates = trendsSorted.reduce((sum, t) => sum + (t.graduated || 0), 0);
-        const totalRecords = trendsSorted.reduce((sum, t) => sum + (t.total || 0), 0);
-        return totalRecords > 0 ? ((totalGraduates / totalRecords) * 100).toFixed(1) : '0.0';
+        let totalEnrolled = 0;
+        let totalRecords = 0;
+        trendsSorted.forEach(t => {
+            const uni = t.categories?.['大学'] || 0;
+            const grad = t.categories?.['大学院'] || 0;
+            const voc = t.categories?.['専門学校'] || 0;
+            const jr = t.categories?.['短期大学'] || 0;
+            totalEnrolled += (uni + grad + voc + jr);
+            totalRecords += (t.total || 0);
+        });
+        return totalRecords > 0 ? ((totalEnrolled / totalRecords) * 100).toFixed(1) : '0.0';
     }, [trendsSorted]);
 
-    // 進学先別 JLPT合格しやすさランキング用データ
+    // JLPT結果から計る進学先別入りやすさランキング用データ
     const schoolJlptRankings = useMemo(() => {
         if (!stats?.topDestinations || !studentDb || studentDb.length === 0) return [];
 
+        const levelWeights = {
+            'N5': 0,
+            'N4': 36,
+            'N3': 72,
+            'N2': 108,
+            'N1': 144
+        };
+
         const rankings = stats.topDestinations.map(school => {
-            const jlptStats = getStudentJlptStats(school.students);
-            if (!jlptStats || jlptStats.length === 0) return null;
+            let scoreSum = 0;
+            let scoreCount = 0;
+            const levelScores = {};
 
-            let totalPassed = 0;
-            let totalFailed = 0;
-            const levelsPresent = [];
+            school.students.forEach(s => {
+                const dbStudent = studentDb.find(dbStudent => 
+                    String(dbStudent.studentId) === String(s.id) ||
+                    dbStudent.name === s.name
+                );
 
-            jlptStats.forEach(stat => {
-                const passedCount = stat.passed?.count || 0;
-                const failedCount = stat.failed?.count || 0;
-                totalPassed += passedCount;
-                totalFailed += failedCount;
+                if (dbStudent && dbStudent.levels) {
+                    Object.entries(dbStudent.levels).forEach(([lvl, lvlData]) => {
+                        if (lvlData && (lvlData.status === '合格' || lvlData.status === '不合格')) {
+                            let score = parseFloat(lvlData.score);
+                            if (isNaN(score) || score === 0) {
+                                const matches = String(lvlData.score).match(/\d+/);
+                                if (matches) {
+                                    score = parseFloat(matches[0]);
+                                } else {
+                                    score = NaN;
+                                }
+                            }
 
-                const totalForLevel = passedCount + failedCount;
-                if (totalForLevel > 0) {
-                    const rate = passedCount / totalForLevel;
-                    levelsPresent.push(`${stat.level} (${(rate * 100).toFixed(0)}%)`);
+                            const base = levelWeights[lvl];
+                            if (base !== undefined && !isNaN(score) && score >= 0 && score <= 180) {
+                                const integratedScore = base + (score / 5);
+                                scoreSum += integratedScore;
+                                scoreCount++;
+                                levelScores[lvl] = (levelScores[lvl] || 0) + 1;
+                            }
+                        }
+                    });
                 }
             });
 
-            const totalSampleCount = totalPassed + totalFailed;
-            if (totalSampleCount === 0) return null;
+            if (scoreCount === 0) return null;
 
-            const averagePassRate = (totalPassed / totalSampleCount) * 100;
+            const averageScore = scoreSum / scoreCount;
+
+            const levelsText = Object.entries(levelScores)
+                .map(([lvl, count]) => `${lvl}: ${count}件`)
+                .join(', ');
 
             return {
                 name: school.name,
-                passRate: averagePassRate,
-                sampleCount: totalSampleCount,
-                levels: levelsPresent.join(', '),
-                rawStats: jlptStats
+                averageScore: averageScore,
+                sampleCount: scoreCount,
+                levelsText: levelsText
             };
         }).filter(Boolean);
 
-        return rankings.sort((a, b) => b.passRate - a.passRate);
-    }, [stats, studentDb, getStudentJlptStats]);
+        // 平均点（入りやすさ難易度）の降順（高い順）でソート
+        return rankings.sort((a, b) => b.averageScore - a.averageScore);
+    }, [stats, studentDb]);
 
     // 学校別詳細のフィルタリング
     const filteredSchools = useMemo(() => {
@@ -618,7 +659,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
 
                         <div className={styles.chartCard}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別進学率の推移</h3>
                                 <span style={{
                                     backgroundColor: '#e6f4ea',
                                     color: '#137333',
@@ -627,7 +668,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     fontSize: '0.75rem',
                                     fontWeight: 'bold'
                                 }}>
-                                    全年度平均: {avgGraduationRate}%
+                                    全年度平均: {avgAdvancementRate}%
                                 </span>
                             </div>
                             <div className={styles.chartContainer}>
@@ -653,13 +694,13 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                         </div>
                     </div>
 
-                    {/* JLPT 合格しやすさランキングテーブル */}
+                    {/* JLPT結果から計る進学先別入りやすさランキングテーブル */}
                     <div style={{ marginTop: '2.5rem' }}>
                         <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem' }}>
-                            進学先別 JLPT合格しやすさランキング (データあり: {schoolJlptRankings.length}校)
+                            JLPT結果から計る進学先別入りやすさランキング (データあり: {schoolJlptRankings.length}校)
                         </h3>
                         <p style={{ fontSize: '0.825rem', color: '#6b7280', marginBottom: '1.25rem', lineHeight: '1.4' }}>
-                            ※ 各進学先に進学・合格した学生のJLPT受験データより、レベルごとの合格率を算出し、全レベルにわたって平均した「合格しやすさ（平均合格率 %）」のランキングです。
+                            ※ 各進学先に進学・合格した学生のJLPT受験データより、全レベルをひとつの尺度（N5の0点〜N1の180点）に統合し、その平均値から算出した難易度指標です（数値が高いほど難関）。
                         </p>
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
@@ -667,20 +708,13 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     <tr>
                                         <th style={{ width: '80px', textAlign: 'center' }}>順位</th>
                                         <th>学校名</th>
-                                        <th style={{ textAlign: 'right' }}>合格しやすさ (平均合格率)</th>
-                                        <th style={{ textAlign: 'right' }}>データ数 (合格 / 不合格)</th>
-                                        <th>対象レベル内訳 (合格率)</th>
+                                        <th style={{ textAlign: 'right' }}>入りやすさ指標 (平均点: 0〜180)</th>
+                                        <th style={{ textAlign: 'right' }}>受験データサンプル数</th>
+                                        <th>対象レベル内訳 (受験件数)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {schoolJlptRankings.map((school, index) => {
-                                        let passedTotal = 0;
-                                        let failedTotal = 0;
-                                        school.rawStats.forEach(s => {
-                                            passedTotal += s.passed?.count || 0;
-                                            failedTotal += s.failed?.count || 0;
-                                        });
-
                                         return (
                                             <tr key={school.name}>
                                                 <td style={{ textAlign: 'center', fontWeight: 'bold', color: index < 3 ? '#eab308' : '#4b5563' }}>
@@ -688,13 +722,13 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                 </td>
                                                 <td style={{ fontWeight: 600 }}>{school.name}</td>
                                                 <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>
-                                                    {school.passRate.toFixed(1)}%
+                                                    {school.averageScore.toFixed(1)}
                                                 </td>
-                                                <td style={{ textAlign: 'right' }}>
-                                                    {renderStatValue(passedTotal, failedTotal)}
+                                                <td style={{ textAlign: 'right', fontWeight: 600, color: '#10b981' }}>
+                                                    {school.sampleCount} 件
                                                 </td>
                                                 <td style={{ fontSize: '0.85rem', color: '#4b5563' }}>
-                                                    {school.levels}
+                                                    {school.levelsText}
                                                 </td>
                                             </tr>
                                         );
