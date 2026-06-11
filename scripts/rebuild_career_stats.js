@@ -30,7 +30,12 @@ const files = [
 // Mapping rules for name normalization
 const normalizeDestination = (d) => {
     if (!d) return '';
-    const name = String(d).replace(/\s+/g, '').trim();
+    
+    // Remove date patterns like (11/16) or （11/1） or （12月17) etc.
+    let name = String(d).trim();
+    name = name.replace(/[\(（]\s*\d+\s*[\/\-]\s*\d+\s*[\)）]/g, '');
+    name = name.replace(/[\(（]\s*\d+\s*月\s*\d+\s*日\s*[\)）]/g, '');
+    name = name.replace(/\s+/g, '').trim();
 
     const mapping = {
         '東亜経理': '東亜経理専門学校',
