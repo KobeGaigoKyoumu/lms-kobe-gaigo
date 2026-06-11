@@ -432,6 +432,78 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         }
     }, [careerStats, selectedYear, availableYears])
 
+    // 年度別卒業率の推移のグラフ用データ
+    const trendsSorted = useMemo(() => {
+        if (!careerStats?.yearlyTrends) return [];
+        return [...careerStats.yearlyTrends].sort((a, b) => a.year - b.year);
+    }, [careerStats]);
+
+    const lineChartData = useMemo(() => {
+        return {
+            labels: trendsSorted.map(t => `${t.year}年度卒業`),
+            datasets: [{
+                label: '卒業率',
+                data: trendsSorted.map(t => t.graduationRate ?? 100),
+                borderColor: '#10b981', // エメラルドグリーン
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                borderWidth: 2.5,
+                tension: 0.3,
+                pointBackgroundColor: '#10b981',
+                pointHoverRadius: 6,
+                fill: false
+            }]
+        };
+    }, [trendsSorted]);
+
+    const avgGraduationRate = useMemo(() => {
+        if (trendsSorted.length === 0) return '0.0';
+        const totalGraduates = trendsSorted.reduce((sum, t) => sum + (t.graduated || 0), 0);
+        const totalRecords = trendsSorted.reduce((sum, t) => sum + (t.total || 0), 0);
+        return totalRecords > 0 ? ((totalGraduates / totalRecords) * 100).toFixed(1) : '0.0';
+    }, [trendsSorted]);
+
+    // 進学先別 JLPT合格しやすさランキング用データ
+    const schoolJlptRankings = useMemo(() => {
+        if (!stats?.topDestinations || !studentDb || studentDb.length === 0) return [];
+
+        const rankings = stats.topDestinations.map(school => {
+            const jlptStats = getStudentJlptStats(school.students);
+            if (!jlptStats || jlptStats.length === 0) return null;
+
+            let totalPassed = 0;
+            let totalFailed = 0;
+            const levelsPresent = [];
+
+            jlptStats.forEach(stat => {
+                const passedCount = stat.passed?.count || 0;
+                const failedCount = stat.failed?.count || 0;
+                totalPassed += passedCount;
+                totalFailed += failedCount;
+
+                const totalForLevel = passedCount + failedCount;
+                if (totalForLevel > 0) {
+                    const rate = passedCount / totalForLevel;
+                    levelsPresent.push(`${stat.level} (${(rate * 100).toFixed(0)}%)`);
+                }
+            });
+
+            const totalSampleCount = totalPassed + totalFailed;
+            if (totalSampleCount === 0) return null;
+
+            const averagePassRate = (totalPassed / totalSampleCount) * 100;
+
+            return {
+                name: school.name,
+                passRate: averagePassRate,
+                sampleCount: totalSampleCount,
+                levels: levelsPresent.join(', '),
+                rawStats: jlptStats
+            };
+        }).filter(Boolean);
+
+        return rankings.sort((a, b) => b.passRate - a.passRate);
+    }, [stats, studentDb, getStudentJlptStats]);
+
     // 学校別詳細のフィルタリング
     const filteredSchools = useMemo(() => {
         if (!stats?.topDestinations) return []
@@ -514,8 +586,17 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
 
                     <div className={styles.statsGrid}>
                         <div className={styles.statCard}><span className={styles.statLabel}>総卒業生数</span><div className={styles.statValueRow}><span className={styles.statValue}>{stats.summary.totalGraduates}</span>名</div></div>
-                        <div className={styles.statCard}><span className={styles.statLabel}>進学率</span><div className={styles.statValueRow}><span className={styles.statValue}>{(((stats.categoryStats['大学'] || 0) + (stats.categoryStats['大学院'] || 0) + (stats.categoryStats['専門学校'] || 0)) / (stats.summary.totalRecords || 1) * 100).toFixed(1)}%</span></div></div>
+                        <div className={styles.statCard}><span className={styles.statLabel}>進学率</span><div className={styles.statValueRow}><span className={styles.statValue}>{(((stats.categoryStats['大学'] || 0) + (stats.categoryStats['大学院'] || 0) + (stats.categoryStats['専門学校'] || 0) + (stats.categoryStats['短期大学'] || 0)) / (stats.summary.totalRecords || 1) * 100).toFixed(1)}%</span></div></div>
                         <div className={styles.statCard}><span className={styles.statLabel}>就職率</span><div className={styles.statValueRow}><span className={styles.statValue}>{((stats.categoryStats['就職'] || 0) / (stats.summary.totalRecords || 1) * 100).toFixed(1)}%</span></div></div>
+                        <div className={styles.statCard}>
+                            <span className={styles.statLabel}>対象年度</span>
+                            <div className={styles.statValueRow}>
+                                <span className={styles.statValue}>
+                                    {selectedYear === 'all' ? availableYears.length : selectedYear}
+                                </span>
+                                {selectedYear === 'all' ? ' 年度' : '年度'}
+                            </div>
+                        </div>
                     </div>
 
                     <div className={styles.chartsRow}>
@@ -533,6 +614,100 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                     options={{ ...chartOptions, indexAxis: 'y' }}
                                 />
                             </div>
+                        </div>
+
+                        <div className={styles.chartCard}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 className={styles.chartTitle} style={{ margin: 0 }}>年度別卒業率の推移</h3>
+                                <span style={{
+                                    backgroundColor: '#e6f4ea',
+                                    color: '#137333',
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '9999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold'
+                                }}>
+                                    全年度平均: {avgGraduationRate}%
+                                </span>
+                            </div>
+                            <div className={styles.chartContainer}>
+                                <Line
+                                    data={lineChartData}
+                                    options={{
+                                        ...chartOptions,
+                                        scales: {
+                                            ...chartOptions.scales,
+                                            y: {
+                                                ...chartOptions.scales.y,
+                                                min: 0,
+                                                max: 100,
+                                                ticks: {
+                                                    ...chartOptions.scales.y.ticks,
+                                                    callback: (value) => `${value}%`
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* JLPT 合格しやすさランキングテーブル */}
+                    <div style={{ marginTop: '2.5rem' }}>
+                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem' }}>
+                            進学先別 JLPT合格しやすさランキング (データあり: {schoolJlptRankings.length}校)
+                        </h3>
+                        <p style={{ fontSize: '0.825rem', color: '#6b7280', marginBottom: '1.25rem', lineHeight: '1.4' }}>
+                            ※ 各進学先に進学・合格した学生のJLPT受験データより、レベルごとの合格率を算出し、全レベルにわたって平均した「合格しやすさ（平均合格率 %）」のランキングです。
+                        </p>
+                        <div className={styles.tableContainer}>
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '80px', textAlign: 'center' }}>順位</th>
+                                        <th>学校名</th>
+                                        <th style={{ textAlign: 'right' }}>合格しやすさ (平均合格率)</th>
+                                        <th style={{ textAlign: 'right' }}>データ数 (合格 / 不合格)</th>
+                                        <th>対象レベル内訳 (合格率)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {schoolJlptRankings.map((school, index) => {
+                                        let passedTotal = 0;
+                                        let failedTotal = 0;
+                                        school.rawStats.forEach(s => {
+                                            passedTotal += s.passed?.count || 0;
+                                            failedTotal += s.failed?.count || 0;
+                                        });
+
+                                        return (
+                                            <tr key={school.name}>
+                                                <td style={{ textAlign: 'center', fontWeight: 'bold', color: index < 3 ? '#eab308' : '#4b5563' }}>
+                                                    #{index + 1}
+                                                </td>
+                                                <td style={{ fontWeight: 600 }}>{school.name}</td>
+                                                <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>
+                                                    {school.passRate.toFixed(1)}%
+                                                </td>
+                                                <td style={{ textAlign: 'right' }}>
+                                                    {renderStatValue(passedTotal, failedTotal)}
+                                                </td>
+                                                <td style={{ fontSize: '0.85rem', color: '#4b5563' }}>
+                                                    {school.levels}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    {schoolJlptRankings.length === 0 && (
+                                        <tr>
+                                            <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                                                ランキング対象となるJLPT受験データがありません。
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
