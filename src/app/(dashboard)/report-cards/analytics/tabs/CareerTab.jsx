@@ -250,7 +250,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
         };
     }, [studentDb]);
 
-    // 各年度ごとのJLPT平均点を集計する
+    // 各年度ごとのJLPT保有率を集計する
     const getYearlyJlptStats = useMemo(() => {
         return (schoolStudents) => {
             if (!schoolStudents || schoolStudents.length === 0 || !studentDb || studentDb.length === 0) {
@@ -278,44 +278,42 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                 if (!year) return;
 
                 if (!yearlyData[year]) {
-                    yearlyData[year] = { passed: [], failed: [] };
+                    yearlyData[year] = {
+                        totalStudents: 0,
+                        hasN1: 0,
+                        hasN2: 0,
+                        hasN3: 0
+                    };
                 }
 
-                const levels = ['N1', 'N2', 'N3', 'N4', 'N5'];
-                levels.forEach(lvl => {
-                    const levelData = dbStudent.levels?.[lvl];
-                    if (levelData && levelData.status && (levelData.status === '合格' || levelData.status === '不合格')) {
-                        const status = levelData.status;
-                        let score = parseFloat(levelData.score);
-                        if (isNaN(score) || score === 0) {
-                            const matches = String(levelData.score).match(/\d+/);
-                            if (matches) {
-                                score = parseFloat(matches[0]);
-                            } else {
-                                score = NaN;
-                            }
-                        }
-                        
-                        if (!isNaN(score) && score > 0) {
-                            if (status === '合格') {
-                                yearlyData[year].passed.push(score);
-                            } else {
-                                yearlyData[year].failed.push(score);
-                            }
-                        }
-                    }
-                });
+                yearlyData[year].totalStudents += 1;
+
+                const isN1 = dbStudent.levels?.['N1']?.status === '合格';
+                const isN2 = dbStudent.levels?.['N2']?.status === '合格';
+                const isN3 = dbStudent.levels?.['N3']?.status === '合格';
+
+                if (isN1) {
+                    yearlyData[year].hasN1 += 1;
+                }
+                if (isN1 || isN2) {
+                    yearlyData[year].hasN2 += 1;
+                }
+                if (isN1 || isN2 || isN3) {
+                    yearlyData[year].hasN3 += 1;
+                }
             });
 
             const result = {};
             Object.keys(yearlyData).forEach(year => {
-                const p = yearlyData[year].passed;
-                const f = yearlyData[year].failed;
+                const total = yearlyData[year].totalStudents;
                 result[year] = {
-                    passedAverage: p.length > 0 ? parseFloat((p.reduce((a, b) => a + b, 0) / p.length).toFixed(1)) : null,
-                    failedAverage: f.length > 0 ? parseFloat((f.reduce((a, b) => a + b, 0) / f.length).toFixed(1)) : null,
-                    passedCount: p.length,
-                    failedCount: f.length
+                    n1Rate: total > 0 ? parseFloat((yearlyData[year].hasN1 / total * 100).toFixed(1)) : 0,
+                    n2Rate: total > 0 ? parseFloat((yearlyData[year].hasN2 / total * 100).toFixed(1)) : 0,
+                    n3Rate: total > 0 ? parseFloat((yearlyData[year].hasN3 / total * 100).toFixed(1)) : 0,
+                    n1Count: yearlyData[year].hasN1,
+                    n2Count: yearlyData[year].hasN2,
+                    n3Count: yearlyData[year].hasN3,
+                    totalCount: total
                 };
             });
 
@@ -1065,10 +1063,10 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                     </div>
                                                                 </div>
 
-                                                                {/* グラフ2: JLPT平均点 (年度別折れ線グラフ) */}
+                                                                {/* グラフ2: JLPT保有率の推移 */}
                                                                 <div style={{ flex: '1 1 400px', minWidth: '280px', backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
                                                                     <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', textAlign: 'center' }}>
-                                                                        年度別 JLPT平均点 (合格/不合格)
+                                                                        合格・進学者のJLPT保有率の推移 (N3以上/N2以上/N1)
                                                                     </h4>
                                                                     <div style={{ height: '180px', position: 'relative' }}>
                                                                         {Object.keys(yearlyJlptStats).length > 0 ? (
@@ -1077,23 +1075,33 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                                     labels: trendYears.map(y => `${y}年度`),
                                                                                     datasets: [
                                                                                         {
-                                                                                            label: '合格平均',
-                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.passedAverage ?? null),
-                                                                                            borderColor: '#22c55e',
-                                                                                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                                                            label: 'N3以上保有率',
+                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.n3Rate ?? null),
+                                                                                            borderColor: '#10b981',
+                                                                                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
                                                                                             borderWidth: 2,
                                                                                             tension: 0.3,
-                                                                                            pointBackgroundColor: '#22c55e',
+                                                                                            pointBackgroundColor: '#10b981',
                                                                                             spanGaps: true
                                                                                         },
                                                                                         {
-                                                                                            label: '不合格平均',
-                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.failedAverage ?? null),
-                                                                                            borderColor: '#ef4444',
-                                                                                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                                                            label: 'N2以上保有率',
+                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.n2Rate ?? null),
+                                                                                            borderColor: '#3b82f6',
+                                                                                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                                                                             borderWidth: 2,
                                                                                             tension: 0.3,
-                                                                                            pointBackgroundColor: '#ef4444',
+                                                                                            pointBackgroundColor: '#3b82f6',
+                                                                                            spanGaps: true
+                                                                                        },
+                                                                                        {
+                                                                                            label: 'N1保有率',
+                                                                                            data: trendYears.map(y => yearlyJlptStats[y]?.n1Rate ?? null),
+                                                                                            borderColor: '#8b5cf6',
+                                                                                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                                                                            borderWidth: 2,
+                                                                                            tension: 0.3,
+                                                                                            pointBackgroundColor: '#8b5cf6',
                                                                                             spanGaps: true
                                                                                         }
                                                                                     ]
@@ -1108,15 +1116,34 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                                                                                         },
                                                                                         tooltip: {
                                                                                             callbacks: {
-                                                                                                label: (context) => `${context.dataset.label}: ${context.raw}点`
+                                                                                                label: (context) => {
+                                                                                                    const year = trendYears[context.dataIndex];
+                                                                                                    const stats = yearlyJlptStats[year];
+                                                                                                    if (!stats) return '';
+                                                                                                    const label = context.dataset.label;
+                                                                                                    const value = context.raw;
+                                                                                                    let count = 0;
+                                                                                                    if (context.datasetIndex === 0) {
+                                                                                                        count = stats.n3Count;
+                                                                                                    } else if (context.datasetIndex === 1) {
+                                                                                                        count = stats.n2Count;
+                                                                                                    } else if (context.datasetIndex === 2) {
+                                                                                                        count = stats.n1Count;
+                                                                                                    }
+                                                                                                    return `${label}: ${value}% (${count}/${stats.totalCount}名)`;
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                     },
                                                                                     scales: {
                                                                                         y: {
                                                                                             beginAtZero: true,
-                                                                                            max: 180,
-                                                                                            ticks: { font: { size: 10 } },
+                                                                                            min: 0,
+                                                                                            max: 100,
+                                                                                            ticks: { 
+                                                                                                font: { size: 10 },
+                                                                                                callback: (value) => `${value}%`
+                                                                                            },
                                                                                             grid: { color: 'rgba(0, 0, 0, 0.05)' }
                                                                                         },
                                                                                         x: {
