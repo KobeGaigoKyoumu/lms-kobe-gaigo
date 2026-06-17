@@ -24,6 +24,38 @@ export async function GET(request) {
         return NextResponse.json({ schools: [], totalCount: 0 });
     }
 
+    // Build normalized search terms (handling spaces and full-width/half-width conversions)
+    let searchOrConditions = '';
+    if (q.trim()) {
+        const originalQ = q.trim();
+        const cleanQ = q.replace(/[\s\u3000]/g, '');
+        
+        const toFullWidth = (str) => {
+            return str.replace(/[A-Za-z0-9]/g, (s) => {
+                return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
+            });
+        };
+        const toHalfWidth = (str) => {
+            return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+        };
+
+        const searchTerms = new Set();
+        [originalQ, cleanQ].forEach(term => {
+            searchTerms.add(term);
+            searchTerms.add(toFullWidth(term));
+            searchTerms.add(toHalfWidth(term));
+        });
+
+        const uniqueTerms = Array.from(searchTerms).filter(Boolean);
+        const orParts = [];
+        uniqueTerms.forEach(term => {
+            orParts.push(`name.ilike.%${term}%,kana.ilike.%${term}%,katakana.ilike.%${term}%,romaji.ilike.%${term}%,departments.ilike.%${term}%`);
+        });
+        searchOrConditions = orParts.join(',');
+    }
+
     try {
         const authClient = await createServerClient();
         
@@ -72,8 +104,8 @@ export async function GET(request) {
                         .select('code, name, school_type, prefecture, website, departments')
                         .in('name', chunk);
 
-                    if (q.trim()) {
-                        chunkQuery = chunkQuery.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
+                    if (searchOrConditions) {
+                        chunkQuery = chunkQuery.or(searchOrConditions);
                     }
                     if (type.trim()) {
                         chunkQuery = chunkQuery.eq('school_type', type.trim());
@@ -112,8 +144,8 @@ export async function GET(request) {
                 .from('master_schools')
                 .select('code, name, school_type, prefecture, website, departments');
 
-            if (q.trim()) {
-                baseQuery = baseQuery.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
+            if (searchOrConditions) {
+                baseQuery = baseQuery.or(searchOrConditions);
             }
             if (type.trim()) {
                 baseQuery = baseQuery.eq('school_type', type.trim());
