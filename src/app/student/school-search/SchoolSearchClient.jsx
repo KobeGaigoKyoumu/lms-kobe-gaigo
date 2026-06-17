@@ -50,11 +50,17 @@ function getPrefectureName(code) {
     return found ? found.name : ''
 }
 
+const ENROLLMENT_OPTIONS = [
+    { value: '', label: 'すべて' },
+    { value: 'true', label: '当校からの進学者あり' }
+]
+
 export default function SchoolSearchClient({ session }) {
     const [keyword, setKeyword] = useState('')
     const [selectedType, setSelectedType] = useState('')
     const [selectedPref, setSelectedPref] = useState('')
     const [selectedEstablishment, setSelectedEstablishment] = useState('')
+    const [selectedEnrollment, setSelectedEnrollment] = useState('')
     const [schools, setSchools] = useState([])
     const [loading, setLoading] = useState(false)
     const [searched, setSearched] = useState(false)
@@ -65,12 +71,12 @@ export default function SchoolSearchClient({ session }) {
     // 検索条件が変更されたらページを1に戻す
     useEffect(() => {
         setPage(1)
-    }, [keyword, selectedType, selectedPref, selectedEstablishment])
+    }, [keyword, selectedType, selectedPref, selectedEstablishment, selectedEnrollment])
 
     // デバウンス用のタイマーとフェッチロジック
     useEffect(() => {
         // 初期状態（条件がすべて空）の時は余分なリクエストを避ける
-        if (!keyword.trim() && !selectedType && !selectedPref && !selectedEstablishment) {
+        if (!keyword.trim() && !selectedType && !selectedPref && !selectedEstablishment && !selectedEnrollment) {
             setSchools([])
             setTotalCount(0)
             setSearched(false)
@@ -86,6 +92,7 @@ export default function SchoolSearchClient({ session }) {
                 if (selectedType) query.set('type', selectedType)
                 if (selectedPref) query.set('pref', selectedPref)
                 if (selectedEstablishment) query.set('establishment', selectedEstablishment)
+                if (selectedEnrollment) query.set('hasEnrollment', selectedEnrollment)
                 query.set('page', page.toString())
 
                 const res = await fetch(`/api/schools/search?${query.toString()}`)
@@ -105,13 +112,14 @@ export default function SchoolSearchClient({ session }) {
         }, 400) // 400ms デバウンス
 
         return () => clearTimeout(delayDebounce)
-    }, [keyword, selectedType, selectedPref, selectedEstablishment, page])
+    }, [keyword, selectedType, selectedPref, selectedEstablishment, selectedEnrollment, page])
 
     const handleClear = () => {
         setKeyword('')
         setSelectedType('')
         setSelectedPref('')
         setSelectedEstablishment('')
+        setSelectedEnrollment('')
         setSchools([])
         setTotalCount(0)
         setPage(1)
@@ -327,8 +335,24 @@ export default function SchoolSearchClient({ session }) {
                     </div>
                 </div>
 
+                {/* 進路実績フィルタータブ */}
+                <div className={styles.filterGroup}>
+                    <label className={styles.label}>進路実績</label>
+                    <div className={styles.tabs}>
+                        {ENROLLMENT_OPTIONS.map((opt) => (
+                            <button
+                                key={opt.value}
+                                className={`${styles.tab} ${selectedEnrollment === opt.value ? styles.tabActive : ''}`}
+                                onClick={() => setSelectedEnrollment(opt.value)}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* リセットボタン */}
-                {(keyword || selectedType || selectedPref || selectedEstablishment) && (
+                {(keyword || selectedType || selectedPref || selectedEstablishment || selectedEnrollment) && (
                     <div className={styles.resetArea}>
                         <button className={styles.resetBtn} onClick={handleClear}>
                             条件をすべてクリア
@@ -391,14 +415,16 @@ export default function SchoolSearchClient({ session }) {
                             {schools.map((school) => (
                                 <div key={school.code} className={styles.card}>
                                     <div className={styles.cardHeader}>
-                                        <span className={`${styles.badge} ${styles[`badge_${school.school_type}`]}`}>
-                                            {getSchoolTypeLabel(school.school_type)}
-                                        </span>
-                                        {school.establishment_type && (
-                                            <span className={`${styles.badge} ${styles[`badge_${school.establishment_type === '国立' ? 'national' : school.establishment_type === '公立' ? 'public' : 'private'}`]}`}>
-                                                {school.establishment_type}
+                                        <div className={styles.badgeGroup}>
+                                            <span className={`${styles.badge} ${styles[`badge_${school.school_type}`]}`}>
+                                                {getSchoolTypeLabel(school.school_type)}
                                             </span>
-                                        )}
+                                            {school.establishment_type && (
+                                                <span className={`${styles.badge} ${styles[`badge_${school.establishment_type === '国立' ? 'national' : school.establishment_type === '公立' ? 'public' : 'private'}`]}`}>
+                                                    {school.establishment_type}
+                                                </span>
+                                            )}
+                                        </div>
                                         {school.prefecture && (
                                             <span className={styles.prefTag}>
                                                 {getPrefectureName(school.prefecture)}

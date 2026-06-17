@@ -256,6 +256,13 @@
     align-items: center;
 }
 
+.badgeGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 /* バッジの配色 */
 .badge {
     font-size: 11px;
@@ -660,4 +667,86 @@
     border-top: 1px dashed #f1f5f9;
     padding-top: 4px;
     margin-top: 2px;
+}
+
+.accordionToggle {
+    width: 100%;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.accordionToggle:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.accordionContent {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordionContentOpen {
+    max-height: 600px;
+    opacity: 1;
+    margin-top: 8px;
+}
+
+/* トレンド分析スタイル */
+.trendBox {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.trendHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trendBadge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #166534;
+    background: #dcfce7;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.trendLabelActive {
+    font-size: 10px;
+    font-weight: 700;
+    color: #15803d;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.trendText {
+    font-size: 11px;
+    color: #14532d;
+    line-height: 1.4;
+    margin: 0;
+    font-weight: 500;
 }

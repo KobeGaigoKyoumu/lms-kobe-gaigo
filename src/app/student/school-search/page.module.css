@@ -261,6 +261,13 @@
     align-items: center;
 }
 
+.badgeGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 /* バッジの配色 */
 .badge {
     font-size: 11px;

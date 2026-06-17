@@ -14,11 +14,12 @@ export async function GET(request) {
     const type = searchParams.get('type') || '';
     const pref = searchParams.get('pref') || '';
     const establishment = searchParams.get('establishment') || ''; // 'national' | 'public' | 'private'
+    const hasEnrollment = searchParams.get('hasEnrollment') === 'true';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = 20;
     const from = (page - 1) * limit;
 
-    if (!q.trim() && !type.trim() && !pref.trim()) {
+    if (!q.trim() && !type.trim() && !pref.trim() && !hasEnrollment) {
         return NextResponse.json({ schools: [], totalCount: 0 });
     }
 
@@ -48,6 +49,21 @@ export async function GET(request) {
         let query = authClient
             .from('master_schools')
             .select('code, name, school_type, prefecture, website, departments');
+
+        if (hasEnrollment) {
+            // studentsテーブルから進学先(destination)のリストを取得
+            const { data: enrollDests, error: destError } = await serviceClient
+                .from('students')
+                .select('destination');
+            if (!destError && enrollDests) {
+                const uniqueDests = Array.from(new Set(enrollDests.map(d => d.destination).filter(Boolean)));
+                if (uniqueDests.length > 0) {
+                    query = query.in('name', uniqueDests);
+                } else {
+                    query = query.eq('name', 'NON_EXISTENT_SCHOOL_NAME');
+                }
+            }
+        }
 
         if (q.trim()) {
             query = query.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
@@ -124,10 +140,13 @@ export async function GET(request) {
             ]));
 
             let jlptMap = {};
+            let studentJlptHistory = {};
+            let maxYearTermStr = '';
+
             if (studentIds.length > 0) {
                 const { data: jlptData, error: jlptError } = await serviceClient
                     .from('grade_records')
-                    .select('student_id_text, final_exam_data')
+                    .select('student_id_text, final_exam_data, year_term')
                     .in('student_id_text', studentIds)
                     .like('year_term', 'JLPT%');
 
@@ -136,6 +155,69 @@ export async function GET(request) {
                 const safeJlptData = jlptData || [];
                 const levelWeights = { 'N1': 3, 'N2': 2, 'N3': 1 };
 
+                // 2.5. 最新のJLPTの期を特定する
+                let maxYear = 0;
+                let maxTerm = 0;
+
+                const parsedJlptRecords = safeJlptData.map(r => {
+                    const sId = r.student_id_text;
+                    const yt = r.year_term || '';
+                    const match = yt.match(/JLPT\s*(\d{4})-(\d+)/i);
+                    let year = 0;
+                    let term = 0;
+                    if (match) {
+                        year = parseInt(match[1], 10);
+                        term = parseInt(match[2], 10);
+                        if (year > maxYear || (year === maxYear && term > maxTerm)) {
+                            maxYear = year;
+                            maxTerm = term;
+                            maxYearTermStr = yt;
+                        }
+                    }
+                    
+                    let examData = r.final_exam_data;
+                    if (typeof examData === 'string') {
+                        try { examData = JSON.parse(examData); } catch (e) { examData = null; }
+                    }
+                    
+                    return {
+                        studentId: sId,
+                        year,
+                        term,
+                        yearTermStr: yt,
+                        examData
+                    };
+                }).filter(r => r.year > 0);
+
+                // 各生徒の最新の期での合格レベルと、過去の最高合格レベルを分類
+                parsedJlptRecords.forEach(r => {
+                    const sId = r.studentId;
+                    if (!studentJlptHistory[sId]) {
+                        studentJlptHistory[sId] = {
+                            recent: null,
+                            historicalMax: null
+                        };
+                    }
+                    
+                    const isRecent = (r.year === maxYear && r.term === maxTerm);
+                    
+                    if (r.examData && r.examData.result === '合格') {
+                        const lv = r.examData.level;
+                        if (levelWeights[lv]) {
+                            if (isRecent) {
+                                if (!studentJlptHistory[sId].recent || levelWeights[lv] > levelWeights[studentJlptHistory[sId].recent]) {
+                                    studentJlptHistory[sId].recent = lv;
+                                }
+                            } else {
+                                if (!studentJlptHistory[sId].historicalMax || levelWeights[lv] > levelWeights[studentJlptHistory[sId].historicalMax]) {
+                                    studentJlptHistory[sId].historicalMax = lv;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 従来の jlptMap 構築 (最高レベル判定用)
                 safeJlptData.forEach(r => {
                     const sId = r.student_id_text;
                     let examData = r.final_exam_data;
@@ -149,7 +231,7 @@ export async function GET(request) {
                     }
 
                     if (examData && examData.result === '合格') {
-                        const lv = examData.level; // 'N1', 'N2', 'N3' など
+                        const lv = examData.level;
                         if (levelWeights[lv]) {
                             if (!jlptMap[sId] || levelWeights[lv] > levelWeights[jlptMap[sId]]) {
                                 jlptMap[sId] = lv;
@@ -194,6 +276,32 @@ export async function GET(request) {
                     const totalWithJlpt = n1Count + n2Count + n3Count;
                     const totalStudents = uniqueStudents.length;
 
+                    // 直近合格トレンドの集計
+                    let recentCount = 0;
+                    let recentN1 = 0;
+                    let recentN2 = 0;
+                    let recentN3 = 0;
+
+                    uniqueStudents.forEach(sId => {
+                        const history = studentJlptHistory[sId];
+                        if (history && history.recent) {
+                            recentCount++;
+                            if (history.recent === 'N1') recentN1++;
+                            else if (history.recent === 'N2') recentN2++;
+                            else if (history.recent === 'N3') recentN3++;
+                        }
+                    });
+
+                    const displaySession = maxYearTermStr ? maxYearTermStr.replace('JLPT', '').trim() : '';
+                    let trendText = `直近の試験期 (${displaySession}) の新たな合格者はありません。`;
+                    if (recentCount > 0) {
+                        const details = [];
+                        if (recentN1 > 0) details.push(`N1: ${recentN1}人`);
+                        if (recentN2 > 0) details.push(`N2: ${recentN2}人`);
+                        if (recentN3 > 0) details.push(`N3: ${recentN3}人`);
+                        trendText = `直近の試験期 (${displaySession}) で新たに ${recentCount}人が合格 (${details.join(', ')}) 📈`;
+                    }
+
                     school.stats = {
                         passCount: passOnlyStudents.length, // 合格者（進学者を除く）
                         enrollCount: uniqueEnrollStudents.length, // 進学者
@@ -205,7 +313,13 @@ export async function GET(request) {
                             N1_rate: parseFloat((n1Count / totalStudents * 100).toFixed(1)),
                             N2_rate: parseFloat((n2Count / totalStudents * 100).toFixed(1)),
                             N3_rate: parseFloat((n3Count / totalStudents * 100).toFixed(1)),
-                            overN3_rate: parseFloat((totalWithJlpt / totalStudents * 100).toFixed(1))
+                            overN3_rate: parseFloat((totalWithJlpt / totalStudents * 100).toFixed(1)),
+                            trend: {
+                                recentSession: displaySession,
+                                recentCount,
+                                recentBreakdown: { N1: recentN1, N2: recentN2, N3: recentN3 },
+                                text: trendText
+                            }
                         }
                     };
                 } else {
