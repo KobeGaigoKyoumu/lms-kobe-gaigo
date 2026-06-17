@@ -294,6 +294,24 @@
     color: #7e22ce;
 }
 
+.badge_national {
+    background: #ecfeff;
+    color: #0891b2;
+    border: 1.5px solid #c5f6fa;
+}
+
+.badge_public {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1.5px solid #dcfce7;
+}
+
+.badge_private {
+    background: #faf5ff;
+    color: #7c3aed;
+    border: 1.5px solid #f3e8ff;
+}
+
 .prefTag {
     font-size: 11px;
     color: #64748b;

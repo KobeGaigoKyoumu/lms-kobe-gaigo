@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminMemberSession } from '@/app/actions/adminAuth';
+import { getEstablishmentType } from '@/lib/establishment';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
@@ -12,10 +13,10 @@ export async function GET(request) {
     const q = searchParams.get('q') || '';
     const type = searchParams.get('type') || '';
     const pref = searchParams.get('pref') || '';
+    const establishment = searchParams.get('establishment') || ''; // 'national' | 'public' | 'private'
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = 20;
     const from = (page - 1) * limit;
-    const to = from + limit - 1;
 
     if (!q.trim() && !type.trim() && !pref.trim()) {
         return NextResponse.json({ schools: [], totalCount: 0 });
@@ -43,10 +44,10 @@ export async function GET(request) {
             isTeacherOrAdmin = true;
         }
 
-        // 学校情報の取得
+        // 学校情報の取得 (条件合致するものを全件取得)
         let query = authClient
             .from('master_schools')
-            .select('code, name, school_type, prefecture, website, departments', { count: 'exact' });
+            .select('code, name, school_type, prefecture, website, departments');
 
         if (q.trim()) {
             query = query.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
@@ -58,16 +59,40 @@ export async function GET(request) {
             query = query.eq('prefecture', pref.trim());
         }
 
-        const { data: schoolsData, error: schoolsError, count } = await query
-            .order('name', { ascending: true })
-            .range(from, to);
+        const { data: schoolsData, error: schoolsError } = await query
+            .order('name', { ascending: true });
 
         if (schoolsError) {
             console.error('Database error in school search:', schoolsError);
             return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
         }
 
-        const schools = schoolsData || [];
+        let filteredSchools = schoolsData || [];
+
+        // 設置区分の判定を付与
+        filteredSchools = filteredSchools.map(school => {
+            const estType = getEstablishmentType(school.name, school.school_type);
+            return {
+                ...school,
+                establishment_type: estType
+            };
+        });
+
+        // 設置区分でフィルタリング
+        if (establishment) {
+            const estMap = {
+                national: '国立',
+                public: '公立',
+                private: '私立'
+            };
+            const targetEst = estMap[establishment];
+            if (targetEst) {
+                filteredSchools = filteredSchools.filter(s => s.establishment_type === targetEst);
+            }
+        }
+
+        const totalCount = filteredSchools.length;
+        const schools = filteredSchools.slice(from, from + limit);
 
         // 教師・管理者の場合、統計情報を一括取得してマージ
         if (isTeacherOrAdmin && schools.length > 0) {
@@ -191,7 +216,7 @@ export async function GET(request) {
 
         return NextResponse.json({
             schools,
-            totalCount: count || 0
+            totalCount: totalCount || 0
         });
     } catch (err) {
         console.error('Server error in school search:', err);

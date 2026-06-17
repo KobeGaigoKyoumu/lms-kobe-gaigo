@@ -33,6 +33,13 @@ const SCHOOL_TYPES = [
     { value: 'graduate_school', label: '大学院' }
 ]
 
+const ESTABLISHMENTS = [
+    { value: '', label: 'すべて' },
+    { value: 'national', label: '国立' },
+    { value: 'public', label: '公立' },
+    { value: 'private', label: '私立' }
+]
+
 function getSchoolTypeLabel(type) {
     const found = SCHOOL_TYPES.find(t => t.value === type)
     return found ? found.label : 'その他'
@@ -47,6 +54,7 @@ export default function AdminSchoolSearchClient() {
     const [keyword, setKeyword] = useState('')
     const [selectedType, setSelectedType] = useState('')
     const [selectedPref, setSelectedPref] = useState('')
+    const [selectedEstablishment, setSelectedEstablishment] = useState('')
     const [schools, setSchools] = useState([])
     const [loading, setLoading] = useState(false)
     const [searched, setSearched] = useState(false)
@@ -57,11 +65,11 @@ export default function AdminSchoolSearchClient() {
     // 検索条件が変更されたらページを1に戻す
     useEffect(() => {
         setPage(1)
-    }, [keyword, selectedType, selectedPref])
+    }, [keyword, selectedType, selectedPref, selectedEstablishment])
 
     // デバウンス用のタイマーとフェッチロジック
     useEffect(() => {
-        if (!keyword.trim() && !selectedType && !selectedPref) {
+        if (!keyword.trim() && !selectedType && !selectedPref && !selectedEstablishment) {
             setSchools([])
             setTotalCount(0)
             setSearched(false)
@@ -76,6 +84,7 @@ export default function AdminSchoolSearchClient() {
                 if (keyword.trim()) query.set('q', keyword.trim())
                 if (selectedType) query.set('type', selectedType)
                 if (selectedPref) query.set('pref', selectedPref)
+                if (selectedEstablishment) query.set('establishment', selectedEstablishment)
                 query.set('page', page.toString())
 
                 const res = await fetch(`/api/schools/search?${query.toString()}`)
@@ -95,12 +104,13 @@ export default function AdminSchoolSearchClient() {
         }, 400) // 400ms デバウンス
 
         return () => clearTimeout(delayDebounce)
-    }, [keyword, selectedType, selectedPref, page])
+    }, [keyword, selectedType, selectedPref, selectedEstablishment, page])
 
     const handleClear = () => {
         setKeyword('')
         setSelectedType('')
         setSelectedPref('')
+        setSelectedEstablishment('')
         setSchools([])
         setTotalCount(0)
         setPage(1)
@@ -338,8 +348,24 @@ export default function AdminSchoolSearchClient() {
                     </div>
                 </div>
 
+                {/* 設置区分フィルタータブ */}
+                <div className={styles.filterGroup}>
+                    <label className={styles.label}>設置区分</label>
+                    <div className={styles.tabs}>
+                        {ESTABLISHMENTS.map((est) => (
+                            <button
+                                key={est.value}
+                                className={`${styles.tab} ${selectedEstablishment === est.value ? styles.tabActive : ''}`}
+                                onClick={() => setSelectedEstablishment(est.value)}
+                            >
+                                {est.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* リセットボタン */}
-                {(keyword || selectedType || selectedPref) && (
+                {(keyword || selectedType || selectedPref || selectedEstablishment) && (
                     <div className={styles.resetArea}>
                         <button className={styles.resetBtn} onClick={handleClear}>
                             条件をすべてクリア
@@ -405,6 +431,11 @@ export default function AdminSchoolSearchClient() {
                                         <span className={`${styles.badge} ${styles[`badge_${school.school_type}`]}`}>
                                             {getSchoolTypeLabel(school.school_type)}
                                         </span>
+                                        {school.establishment_type && (
+                                            <span className={`${styles.badge} ${styles[`badge_${school.establishment_type === '国立' ? 'national' : school.establishment_type === '公立' ? 'public' : 'private'}`]}`}>
+                                                {school.establishment_type}
+                                            </span>
+                                        )}
                                         {school.prefecture && (
                                             <span className={styles.prefTag}>
                                                 {getPrefectureName(school.prefecture)}
