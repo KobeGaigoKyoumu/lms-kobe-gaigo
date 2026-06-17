@@ -190,6 +190,8 @@ export async function GET(request) {
             let jlptMap = {};
             let studentJlptHistory = {};
             let maxYearTermStr = '';
+            let idToNameMap = {};
+            let idToYearMap = {};
 
             if (studentIds.length > 0) {
                 // Get student names and academic years for those IDs in batches of 100 to avoid URL too long error (500)
@@ -206,8 +208,6 @@ export async function GET(request) {
                 }
 
                 const studentNames = [];
-                const idToNameMap = {};
-                const idToYearMap = {};
                 if (dbStudents) {
                     dbStudents.forEach(s => {
                         if (s.full_name) {
