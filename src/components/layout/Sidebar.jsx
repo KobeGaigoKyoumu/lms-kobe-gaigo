@@ -11,13 +11,13 @@ import { useStudentStatus } from '@/context/StudentStatusContext'
 import { toCDNUrl } from '@/lib/utils'
 import styles from './Sidebar.module.css'
 
-export default function Sidebar({ role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false, userName, userEmail, userAvatar, className: studentClassName }) {
+export default function Sidebar({ role: userRole, dashboardHref: propDashboardHref, hideOnMobile = false, userName, userEmail, userAvatar, className: studentClassName, userId }) {
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
 
     const statuses = useStudentStatus()
-    const menuItems = getMenuItems(userRole)
+    const menuItems = getMenuItems(userRole, userId)
 
     useEffect(() => {
         document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '260px')

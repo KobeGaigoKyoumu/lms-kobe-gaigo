@@ -1,6 +1,7 @@
 import React from 'react'
+import { parseStudentId } from '@/lib/utils/studentId'
 
-export const getMenuItems = (role) => {
+export const getMenuItems = (role, studentId = null) => {
     const isStudent = role === 'student'
 
     // Base items
@@ -21,7 +22,11 @@ export const getMenuItems = (role) => {
 
     // Student specific items
     if (isStudent) {
-        return [
+        // 学籍番号から学年を取得
+        const studentInfo = parseStudentId(studentId)
+        const grade = studentInfo ? studentInfo.grade : null
+
+        const items = [
             ...baseItems.map(i => ({ ...i, color: '#3b82f6' })), // Dashboard Blue
             {
                 href: '/student/homework',
@@ -60,8 +65,12 @@ export const getMenuItems = (role) => {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg>
                 )
-            },
-            {
+            }
+        ]
+
+        // 2年生のみ学校検索を表示
+        if (grade === 2) {
+            items.push({
                 href: '/student/school-search',
                 label: '学校検索',
                 color: '#06b6d4', // Cyan
@@ -72,7 +81,10 @@ export const getMenuItems = (role) => {
                         <path d="M10 8h4M10 12h4M10 16h4" />
                     </svg>
                 )
-            },
+            })
+        }
+
+        items.push(
             {
                 href: '/student/calendar',
                 label: 'カレンダー',
@@ -138,7 +150,8 @@ export const getMenuItems = (role) => {
                     </svg>
                 )
             }
-        ]
+        )
+        return items
     }
 
     // Teacher / Admin items

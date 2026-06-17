@@ -12,7 +12,7 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
     const pathname = usePathname()
     const router = useRouter()
     const supabase = createClient()
-    const menuItems = getMenuItems(role)
+    const menuItems = getMenuItems(role, userId)
 
     const statuses = useStudentStatus()
 
