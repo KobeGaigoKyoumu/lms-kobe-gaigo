@@ -45,45 +45,93 @@ export async function GET(request) {
             isTeacherOrAdmin = true;
         }
 
-        // 学校情報の取得 (条件合致するものを全件取得)
-        let query = authClient
-            .from('master_schools')
-            .select('code, name, school_type, prefecture, website, departments');
+        // 学校情報の取得
+        let schoolsData = [];
+        let schoolsError = null;
 
         if (hasEnrollment) {
             // studentsテーブルから進学先(destination)のリストを取得
             const { data: enrollDests, error: destError } = await serviceClient
                 .from('students')
                 .select('destination');
-            if (!destError && enrollDests) {
-                const uniqueDests = Array.from(new Set(enrollDests.map(d => d.destination).filter(Boolean)));
-                if (uniqueDests.length > 0) {
-                    query = query.in('name', uniqueDests);
-                } else {
-                    query = query.eq('name', 'NON_EXISTENT_SCHOOL_NAME');
-                }
+            
+            if (destError) {
+                console.error('Database error in fetching enroll destinations:', destError);
+                return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
             }
-        }
 
-        if (q.trim()) {
-            query = query.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
-        }
-        if (type.trim()) {
-            query = query.eq('school_type', type.trim());
-        }
-        if (pref.trim()) {
-            query = query.eq('prefecture', pref.trim());
-        }
+            const uniqueDests = Array.from(new Set(enrollDests?.map(d => d.destination).filter(Boolean) || []));
+            if (uniqueDests.length > 0) {
+                const chunkSize = 30; // URL長制限を防ぐため30件ずつ
+                const promises = [];
+                for (let i = 0; i < uniqueDests.length; i += chunkSize) {
+                    const chunk = uniqueDests.slice(i, i + chunkSize);
+                    let chunkQuery = authClient
+                        .from('master_schools')
+                        .select('code, name, school_type, prefecture, website, departments')
+                        .in('name', chunk);
 
-        const { data: schoolsData, error: schoolsError } = await query
-            .order('name', { ascending: true });
+                    if (q.trim()) {
+                        chunkQuery = chunkQuery.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
+                    }
+                    if (type.trim()) {
+                        chunkQuery = chunkQuery.eq('school_type', type.trim());
+                    }
+                    if (pref.trim()) {
+                        chunkQuery = chunkQuery.eq('prefecture', pref.trim());
+                    }
+                    promises.push(chunkQuery);
+                }
+
+                const results = await Promise.all(promises);
+                for (const res of results) {
+                    if (res.error) {
+                        schoolsError = res.error;
+                        break;
+                    }
+                    if (res.data) {
+                        schoolsData.push(...res.data);
+                    }
+                }
+                if (!schoolsError) {
+                    // 重複排除とソート
+                    const seen = new Set();
+                    schoolsData = schoolsData.filter(s => {
+                        if (seen.has(s.name)) return false;
+                        seen.add(s.name);
+                        return true;
+                    });
+                    schoolsData.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+                }
+            } else {
+                schoolsData = [];
+            }
+        } else {
+            let baseQuery = authClient
+                .from('master_schools')
+                .select('code, name, school_type, prefecture, website, departments');
+
+            if (q.trim()) {
+                baseQuery = baseQuery.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
+            }
+            if (type.trim()) {
+                baseQuery = baseQuery.eq('school_type', type.trim());
+            }
+            if (pref.trim()) {
+                baseQuery = baseQuery.eq('prefecture', pref.trim());
+            }
+
+            const { data, error } = await baseQuery.order('name', { ascending: true });
+            schoolsData = data || [];
+            schoolsError = error;
+        }
 
         if (schoolsError) {
             console.error('Database error in school search:', schoolsError);
             return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
         }
 
-        let filteredSchools = schoolsData || [];
+        let filteredSchools = schoolsData;
 
         // 設置区分の判定を付与
         filteredSchools = filteredSchools.map(school => {
@@ -144,11 +192,18 @@ export async function GET(request) {
             let maxYearTermStr = '';
 
             if (studentIds.length > 0) {
-                // Get student names and academic years for those IDs
-                const { data: dbStudents } = await serviceClient
-                    .from('students')
-                    .select('student_id_text, full_name, academic_year')
-                    .in('student_id_text', studentIds);
+                // Get student names and academic years for those IDs in batches of 100 to avoid URL too long error (500)
+                let dbStudents = [];
+                const batchSize = 100;
+                for (let i = 0; i < studentIds.length; i += batchSize) {
+                    const chunk = studentIds.slice(i, i + batchSize);
+                    const { data: chunkStudents, error: chunkErr } = await serviceClient
+                        .from('students')
+                        .select('student_id_text, full_name, academic_year')
+                        .in('student_id_text', chunk);
+                    if (chunkErr) console.error('dbStudents batch error:', chunkErr);
+                    if (chunkStudents) dbStudents.push(...chunkStudents);
+                }
 
                 const studentNames = [];
                 const idToNameMap = {};
@@ -165,34 +220,39 @@ export async function GET(request) {
                     });
                 }
 
-                // Query by ID and Name to catch mismatch examinee IDs
+                // Query by ID and Name in batches of 100 to catch mismatch examinee IDs
                 let jlptData = [];
-                const { data: jlptById, error: jlptError1 } = await serviceClient
-                    .from('grade_records')
-                    .select('student_id_text, student_name, final_exam_data, year_term')
-                    .in('student_id_text', studentIds)
-                    .like('year_term', 'JLPT%');
-
-                if (jlptError1) console.error('JLPT by ID query error:', jlptError1);
-                if (jlptById) jlptData.push(...jlptById);
-
-                if (studentNames.length > 0) {
-                    const { data: jlptByName, error: jlptError2 } = await serviceClient
+                for (let i = 0; i < studentIds.length; i += batchSize) {
+                    const chunk = studentIds.slice(i, i + batchSize);
+                    const { data: chunkJlpt, error: chunkErr } = await serviceClient
                         .from('grade_records')
                         .select('student_id_text, student_name, final_exam_data, year_term')
-                        .in('student_name', studentNames)
+                        .in('student_id_text', chunk)
                         .like('year_term', 'JLPT%');
+                    if (chunkErr) console.error('jlptById batch error:', chunkErr);
+                    if (chunkJlpt) jlptData.push(...chunkJlpt);
+                }
 
-                    if (jlptError2) console.error('JLPT by Name query error:', jlptError2);
-                    if (jlptByName) {
-                        const existingKeys = new Set(jlptData.map(r => `${r.student_id_text}|${r.year_term}`));
-                        jlptByName.forEach(r => {
-                            const key = `${r.student_id_text}|${r.year_term}`;
-                            if (!existingKeys.has(key)) {
-                                jlptData.push(r);
-                            }
-                        });
+                if (studentNames.length > 0) {
+                    let jlptByName = [];
+                    for (let i = 0; i < studentNames.length; i += batchSize) {
+                        const chunk = studentNames.slice(i, i + batchSize);
+                        const { data: chunkJlpt, error: chunkErr } = await serviceClient
+                            .from('grade_records')
+                            .select('student_id_text, student_name, final_exam_data, year_term')
+                            .in('student_name', chunk)
+                            .like('year_term', 'JLPT%');
+                        if (chunkErr) console.error('jlptByName batch error:', chunkErr);
+                        if (chunkJlpt) jlptByName.push(...chunkJlpt);
                     }
+
+                    const existingKeys = new Set(jlptData.map(r => `${r.student_id_text}|${r.year_term}`));
+                    jlptByName.forEach(r => {
+                        const key = `${r.student_id_text}|${r.year_term}`;
+                        if (!existingKeys.has(key)) {
+                            jlptData.push(r);
+                        }
+                    });
                 }
 
                 // Map name to student ID to resolve examinee number mismatches
