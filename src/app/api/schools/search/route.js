@@ -164,9 +164,17 @@ export async function GET(request) {
             const schoolNames = schools.map(s => s.name);
 
             // 1. 進学者（career_stats_v2.json）の取得
+            const toHalfWidth = (str) => {
+                if (!str) return '';
+                return str.replace(/[Ａ-Ｚａ-ｚ０-９！-～]/g, (s) => {
+                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                }).replace(/[\s\u3000]/g, '');
+            };
+            const normSchoolName = (n) => toHalfWidth(n.toLowerCase());
+
             const enrollmentData = [];
             schoolNames.forEach(name => {
-                const dest = careerStatsData.topDestinations?.find(d => d.name === name);
+                const dest = careerStatsData.topDestinations?.find(d => normSchoolName(d.name) === normSchoolName(name));
                 if (dest && dest.students) {
                     dest.students.forEach(s => {
                         enrollmentData.push({
