@@ -28,6 +28,7 @@ const SCHOOL_TYPES = [
     { value: '', label: 'すべて' },
     { value: 'university', label: '大学' },
     { value: 'junior_college', label: '短期大学' },
+    { value: 'technical_college', label: '高等専門学校' },
     { value: 'vocational_school', label: '専門学校' },
     { value: 'graduate_school', label: '大学院' }
 ]
@@ -286,6 +287,36 @@ export default function SchoolSearchClient({ session }) {
                                     </div>
                                     <h3 className={styles.schoolName}>{school.name}</h3>
                                     {renderMatchingDepartments(school.departments)}
+                                    <div className={styles.websiteArea}>
+                                        {school.website ? (
+                                            <a 
+                                                href={school.website} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className={`${styles.webLink} ${styles.webLinkOfficial}`}
+                                            >
+                                                <svg className={styles.linkIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                                    <polyline points="15 3 21 3 21 9" />
+                                                    <line x1="10" y1="14" x2="21" y2="3" />
+                                                </svg>
+                                                公式ホームページ
+                                            </a>
+                                        ) : (
+                                            <a 
+                                                href={`https://www.google.com/search?q=${encodeURIComponent(school.name + ' ホームページ')}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className={`${styles.webLink} ${styles.webLinkSearch}`}
+                                            >
+                                                <svg className={styles.linkIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <circle cx="11" cy="11" r="8" />
+                                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                                </svg>
+                                                ホームページを検索
+                                            </a>
+                                        )}
+                                    </div>
                                     <div className={styles.cardFooter}>
                                         <span className={styles.schoolCode}>
                                             コード: {school.code}

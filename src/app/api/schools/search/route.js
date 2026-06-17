@@ -16,8 +16,7 @@ export async function GET(request) {
 
         let query = supabase
             .from('master_schools')
-            .select('code, name, school_type, prefecture, departments')
-            .neq('school_type', 'technical_college');
+            .select('code, name, school_type, prefecture, website, departments');
 
         if (q.trim()) {
             query = query.or(`name.ilike.%${q}%,kana.ilike.%${q}%,katakana.ilike.%${q}%,romaji.ilike.%${q}%,departments.ilike.%${q}%`);
