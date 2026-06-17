@@ -230,6 +230,16 @@
     gap: 16px;
 }
 
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .schoolName {
+        font-size: 18px;
+    }
+}
+
 .card {
     background: #ffffff;
     border: 1px solid #e2e8f0;

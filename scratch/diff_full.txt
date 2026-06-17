@@ -1,0 +1,397 @@
+﻿diff --git a/src/app/(dashboard)/career/CareerManagementClient.jsx b/src/app/(dashboard)/career/CareerManagementClient.jsx
+index 02b14f7..7a69b2e 100644
+--- a/src/app/(dashboard)/career/CareerManagementClient.jsx
++++ b/src/app/(dashboard)/career/CareerManagementClient.jsx
+@@ -246,6 +246,11 @@ export default function CareerManagementClient({
+             return
+         }
+ 
++        if (surveyForm.japanese_exists === '縺ゅｊ' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
++            setSurveyError('譌･譛ｬ隱槭・隧ｦ鬨薙・蜀・ｮｹ繧貞ｰ代↑縺上→繧・縺､驕ｸ謚槭＠縺ｦ縺上□縺輔＞縲・)
++            return
++        }
++
+         setSavingSurvey(true)
+         setSurveyError(null)
+         try {
+@@ -2315,30 +2320,33 @@ export default function CareerManagementClient({
+                                             </div>
+ 
+                                             <div className={styles.inputGroup}>
+-                                                <label>蟄ｦ驛ｨ縲∝ｭｦ遘代√さ繝ｼ繧ｹ</label>
++                                                <label>蟄ｦ驛ｨ縲∝ｭｦ遘代√さ繝ｼ繧ｹ <span style={{ color: 'red' }}>*</span></label>
+                                                 <input 
+                                                     type="text" 
+                                                     value={surveyForm.department_name}
+                                                     onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
+                                                     placeholder="萓・ 蝗ｽ髫帙ン繧ｸ繝阪せ蟄ｦ遘・
++                                                    required
+                                                 />
+                                             </div>
+ 
+                                             <div className={styles.inputGroup}>
+-                                                <label>隧ｦ鬨薙ｒ蜿励￠縺滓律</label>
++                                                <label>隧ｦ鬨薙ｒ蜿励￠縺滓律 <span style={{ color: 'red' }}>*</span></label>
+                                                 <input 
+                                                     type="date" 
+                                                     value={surveyForm.exam_date}
+                                                     onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
++                                                    required
+                                                 />
+                                             </div>
+ 
+                                             <div className={styles.inputGroup}>
+-                                                <label>隧ｦ鬨薙・遞ｮ鬘・/label>
++                                                <label>隧ｦ鬨薙・遞ｮ鬘・<span style={{ color: 'red' }}>*</span></label>
+                                                 <select
+                                                     value={surveyForm.exam_type}
+                                                     onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
+                                                     className={styles.selectInput}
++                                                    required
+                                                 >
+                                                     <option value="謖・ｮ壽｡謗ｨ阮ｦ蜈･隧ｦ">謖・ｮ壽｡謗ｨ阮ｦ蜈･隧ｦ</option>
+                                                     <option value="蜈ｬ蜍滓耳阮ｦ蜈･隧ｦ">蜈ｬ蜍滓耳阮ｦ蜈･隧ｦ</option>
+@@ -2375,22 +2383,24 @@ export default function CareerManagementClient({
+                                             {surveyForm.essay_exists === '縺ゅｊ' && (
+                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>隧ｦ鬨捺凾髢・(蛻・</label>
++                                                        <label>隧ｦ鬨捺凾髢・(蛻・ <span style={{ color: 'red' }}>*</span></label>
+                                                         <input 
+                                                             type="number" 
+                                                             value={surveyForm.essay_time}
+                                                             onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
+                                                             placeholder="萓・ 60"
+                                                             style={{ width: '150px' }}
++                                                            required
+                                                         />
+                                                     </div>
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>蜃ｺ鬘後＆繧後◆菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ繝・・繝槭ｒ險伜・縺励※縺上□縺輔＞縲・/label>
++                                                        <label>蜃ｺ鬘後＆繧後◆菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ繝・・繝槭ｒ險伜・縺励※縺上□縺輔＞縲・<span style={{ color: 'red' }}>*</span></label>
+                                                         <textarea 
+                                                             value={surveyForm.essay_theme}
+                                                             onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
+                                                             placeholder="蜃ｺ鬘後＆繧後◆菴懈枚縺ｮ繝・・繝槭ｄ繧ｭ繝ｼ繝ｯ繝ｼ繝峨ｒ險伜・縺励※縺上□縺輔＞縲・
+                                                             rows={4}
++                                                            required
+                                                         />
+                                                     </div>
+                                                 </div>
+@@ -2422,23 +2432,25 @@ export default function CareerManagementClient({
+                                             {surveyForm.japanese_exists === '縺ゅｊ' && (
+                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>隧ｦ鬨捺凾髢・(蛻・</label>
++                                                        <label>隧ｦ鬨捺凾髢・(蛻・ <span style={{ color: 'red' }}>*</span></label>
+                                                         <input 
+                                                             type="number" 
+                                                             value={surveyForm.japanese_time}
+                                                             onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
+                                                             placeholder="萓・ 45"
+                                                             style={{ width: '150px' }}
++                                                            required
+                                                         />
+                                                     </div>
+                                                     
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>譌･譛ｬ隱槭・隧ｦ鬨薙・繝ｬ繝吶Ν</label>
++                                                        <label>譌･譛ｬ隱槭・隧ｦ鬨薙・繝ｬ繝吶Ν <span style={{ color: 'red' }}>*</span></label>
+                                                         <select
+                                                             value={surveyForm.japanese_level}
+                                                             onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
+                                                             className={styles.selectInput}
+                                                             style={{ width: '200px' }}
++                                                            required
+                                                         >
+                                                             <option value="N1">N1遞句ｺｦ</option>
+                                                             <option value="N2">N2遞句ｺｦ</option>
+@@ -2450,7 +2462,7 @@ export default function CareerManagementClient({
+                                                     </div>
+ 
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>譌･譛ｬ隱・of 隧ｦ鬨薙・蜀・ｮｹ (隧ｲ蠖薙☆繧九ｂ縺ｮ繧偵☆縺ｹ縺ｦ驕ｸ謚・</label>
++                                                        <label>譌･譛ｬ隱槭・隧ｦ鬨薙・蜀・ｮｹ (隧ｲ蠖薙☆繧九ｂ縺ｮ繧偵☆縺ｹ縺ｦ驕ｸ謚・</label>
+                                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
+                                                             {['貍｢蟄・, '隱槫ｽ・, '譁・ｳ・, '隱ｭ隗｣', '閨ｴ隗｣', '險倩ｿｰ', '縺昴・莉・].map(item => {
+                                                                 const isChecked = (surveyForm.japanese_content || []).includes(item)
+@@ -2497,30 +2509,33 @@ export default function CareerManagementClient({
+                                                 <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                     <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--spacing-3)' }}>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label>髱｢謗･譎る俣 (蛻・</label>
++                                                            <label>髱｢謗･譎る俣 (蛻・ <span style={{ color: 'red' }}>*</span></label>
+                                                             <input 
+                                                                 type="number" 
+                                                                 value={surveyForm.interview_time}
+                                                                 onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
+                                                                 placeholder="萓・ 15"
++                                                                required
+                                                             />
+                                                         </div>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label>髱｢謗･螳倥・蜈育函縺ｮ莠ｺ謨ｰ</label>
++                                                            <label>髱｢謗･螳倥・蜈育函縺ｮ莠ｺ謨ｰ <span style={{ color: 'red' }}>*</span></label>
+                                                             <input 
+                                                                 type="number" 
+                                                                 value={surveyForm.interview_teachers}
+                                                                 onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
+                                                                 placeholder="萓・ 2"
++                                                                required
+                                                             />
+                                                         </div>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label>蜷悟ｮ､縺ｮ蟄ｦ逕滉ｺｺ謨ｰ (閾ｪ霄ｫ蜷ｫ繧)</label>
++                                                            <label>蜷悟ｮ､縺ｮ蟄ｦ逕滉ｺｺ謨ｰ (閾ｪ霄ｫ蜷ｫ繧) <span style={{ color: 'red' }}>*</span></label>
+                                                             <input 
+                                                                 type="number" 
+                                                                 value={surveyForm.interview_students}
+                                                                 onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
+                                                                 placeholder="萓・ 1"
++                                                                required
+                                                             />
+                                                         </div>
+                                                     </div>
+@@ -2528,11 +2543,12 @@ export default function CareerManagementClient({
+                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                                                         <label style={{ fontWeight: '600' }}>縺ｩ繧薙↑雉ｪ蝠上ｒ縺輔ｌ縺ｾ縺励◆縺具ｼ・/label>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label style={{ fontSize: 'var(--font-size-xs)' }}>雉ｪ蝠鞘蔵</label>
++                                                            <label style={{ fontSize: 'var(--font-size-xs)' }}>雉ｪ蝠鞘蔵 <span style={{ color: 'red' }}>*</span></label>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={surveyForm.interview_question_1}
+                                                                 onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
++                                                                required
+                                                             />
+                                                         </div>
+                                                         <div className={styles.inputGroup}>
+diff --git a/src/app/student/career/CareerCounselingClient.jsx b/src/app/student/career/CareerCounselingClient.jsx
+index 6f58f61..d38a208 100644
+--- a/src/app/student/career/CareerCounselingClient.jsx
++++ b/src/app/student/career/CareerCounselingClient.jsx
+@@ -369,6 +369,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+             return
+         }
+ 
++        if (surveyForm.japanese_exists === '縺ゅｊ' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
++            setSurveyError('譌･譛ｬ隱槭・隧ｦ鬨薙・蜀・ｮｹ繧貞ｰ代↑縺上→繧・縺､驕ｸ謚槭＠縺ｦ縺上□縺輔＞縲・)
++            setSavingSurvey(false)
++            return
++        }
++
+         const payload = {
+             ...surveyForm,
+             japanese_content: JSON.stringify(surveyForm.japanese_content || [])
+@@ -679,12 +685,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                     />
+                                                 </div>
+                                                 <div className={styles.inputGroup}>
+-                                                    <label>譌･譛ｬ隱槫ｭｦ譬｡蜊呈･ｭ蠕後・莠亥ｮ・/label>
++                                                    <label>譌･譛ｬ隱槫ｭｦ譬｡蜊呈･ｭ蠕後・莠亥ｮ・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <select 
+                                                         value={form.path_type}
+                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
++                                                        <option value="">驕ｸ謚槭＠縺ｦ縺上□縺輔＞</option>
+                                                         <option value="騾ｲ蟄ｦ">騾ｲ蟄ｦ</option>
+                                                         <option value="蟆ｱ閨ｷ">蟆ｱ閨ｷ</option>
+                                                         <option value="蟶ｰ蝗ｽ">蟶ｰ蝗ｽ</option>
+@@ -1227,11 +1235,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                     />
+                                                 </div>
+                                                 <div className={styles.inputGroup}>
+-                                                    <label>蜷域ｼ/荳榊粋譬ｼ縺ｮ迥ｶ豕・/label>
++                                                    <label>蜷域ｼ/荳榊粋譬ｼ縺ｮ迥ｶ豕・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <select
+                                                         value={item.status}
+                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
+                                                         <option value="邨先棡蠕・■">邨先棡蠕・■</option>
+                                                         <option value="蜷域ｼ">蜷域ｼ</option>
+@@ -1575,6 +1584,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={surveyForm.school_type}
+                                                         onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
+                                                         <option value="螟ｧ蟄ｦ">螟ｧ蟄ｦ</option>
+                                                         <option value="螟ｧ蟄ｦ髯｢">螟ｧ蟄ｦ髯｢</option>
+@@ -1590,37 +1600,41 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={surveyForm.school_name}
+                                                         onChange={(val) => handleSurveyFieldChange('school_name', val)}
+                                                         placeholder="蟄ｦ譬｡蜷阪ｒ蜈･蜉帙∪縺溘・驕ｸ謚・
++                                                        required
+                                                     />
+                                                 </div>
+ 
+                                                 <div className={styles.formRow2Col}>
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>蟄ｦ驛ｨ繝ｻ蟄ｦ遘代・繧ｳ繝ｼ繧ｹ</label>
++                                                        <label>蟄ｦ驛ｨ繝ｻ蟄ｦ遘代・繧ｳ繝ｼ繧ｹ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                         <input 
+                                                             type="text" 
+                                                             value={surveyForm.department_name}
+                                                             onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
+                                                             placeholder="萓・ 繧ｰ繝ｭ繝ｼ繝舌Ν繝薙ず繝阪せ繧ｳ繝ｼ繧ｹ"
++                                                            required
+                                                         />
+                                                     </div>
+                                                     <div className={styles.inputGroup}>
+-                                                        <label>隧ｦ鬨薙・遞ｮ鬘・/label>
++                                                        <label>隧ｦ鬨薙・遞ｮ鬘・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                         <input 
+                                                             type="text" 
+                                                             value={surveyForm.exam_type}
+                                                             onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
+                                                             placeholder="萓・ AO蜈･隧ｦ縲∵欠螳壽｡謗ｨ阮ｦ縲∽ｸ闊ｬ"
++                                                            required
+                                                         />
+                                                     </div>
+                                                 </div>
+ 
+                                                 <div className={styles.inputGroup}>
+-                                                    <label>隧ｦ鬨捺律</label>
++                                                    <label>隧ｦ鬨捺律 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <input 
+                                                         type="text" 
+                                                         value={surveyForm.exam_date}
+                                                         onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
+                                                         placeholder="萓・ 2026/10/10"
++                                                        required
+                                                     />
+                                                 </div>
+                                             </div>
+@@ -1632,7 +1646,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                 <h3>2. 菴懈枚繝ｻ蟆剰ｫ匁枚隧ｦ鬨・/h3>
+                                                 
+                                                 <div className={styles.radioGroup}>
+-                                                    <label>菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ隧ｦ鬨薙′縺ゅｊ縺ｾ縺励◆縺・/label>
++                                                    <label>菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ隧ｦ鬨薙′縺ゅｊ縺ｾ縺励◆縺・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <div className={styles.radioOptions}>
+                                                         <button 
+                                                             type="button" 
+@@ -1650,21 +1664,23 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                 {surveyForm.essay_exists === '縺ゅｊ' && (
+                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label>隧ｦ鬨捺凾髢・(蛻・</label>
++                                                            <label>隧ｦ鬨捺凾髢・(蛻・ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                             <input 
+                                                                 type="number" 
+                                                                 value={surveyForm.essay_time}
+                                                                 onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
+                                                                 placeholder="萓・ 60"
++                                                                required
+                                                             />
+                                                         </div>
+                                                         <div className={styles.inputGroup}>
+-                                                            <label>繝・・繝・/label>
++                                                            <label>繝・・繝・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                             <textarea 
+                                                                 value={surveyForm.essay_theme}
+                                                                 onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
+                                                                 placeholder="菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ繝・・繝槭ｒ譖ｸ縺・※縺上□縺輔＞縲・
+                                                                 rows={4}
++                                                                required
+                                                             />
+                                                         </div>
+                                                     </div>
+@@ -1678,7 +1694,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                 <h3>3. 譌･譛ｬ隱槭・遲・ｨ倩ｩｦ鬨・/h3>
+                                                 
+                                                 <div className={styles.radioGroup}>
+-                                                    <label>譌･譛ｬ隱槭・隧ｦ鬨薙′縺ゅｊ縺ｾ縺励◆縺・/label>
++                                                    <label>譌･譛ｬ隱槭・隧ｦ鬨薙′縺ゅｊ縺ｾ縺励◆縺・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <div className={styles.radioOptions}>
+                                                         <button 
+                                                             type="button" 
+@@ -1697,20 +1713,22 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                         <div className={styles.formRow2Col}>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label>隧ｦ鬨捺凾髢・(蛻・</label>
++                                                                <label>隧ｦ鬨捺凾髢・(蛻・ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <input 
+                                                                     type="number" 
+                                                                     value={surveyForm.japanese_time}
+                                                                     onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
+                                                                     placeholder="萓・ 45"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label>髮｣縺励＆縺ｮ繝ｬ繝吶Ν (逶ｮ螳・</label>
++                                                                <label>髮｣縺励＆縺ｮ繝ｬ繝吶Ν (逶ｮ螳・ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <select
+                                                                     value={surveyForm.japanese_level}
+                                                                     onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
+                                                                     className={styles.selectInput}
++                                                                    required
+                                                                 >
+                                                                     <option value="N1">JLPT N1繝ｬ繝吶Ν</option>
+                                                                     <option value="N2">JLPT N2繝ｬ繝吶Ν</option>
+@@ -1751,7 +1769,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                 <h3>4. 髱｢謗･隧ｦ鬨・/h3>
+                                                 
+                                                 <div className={styles.radioGroup}>
+-                                                    <label>髱｢謗･縺後≠繧翫∪縺励◆縺・/label>
++                                                    <label>髱｢謗･縺後≠繧翫∪縺励◆縺・<span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                     <div className={styles.radioOptions}>
+                                                         <button 
+                                                             type="button" 
+@@ -1770,30 +1788,33 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                     <div style={{ marginTop: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                                         <div className={styles.formRow3Col}>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label>髱｢謗･譎る俣 (蛻・</label>
++                                                                <label>髱｢謗･譎る俣 (蛻・ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <input 
+                                                                     type="number" 
+                                                                     value={surveyForm.interview_time}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
+                                                                     placeholder="萓・ 15"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label>髱｢謗･縺ｮ蜈育函縺ｮ莠ｺ謨ｰ</label>
++                                                                <label>髱｢謗･縺ｮ蜈育函縺ｮ莠ｺ謨ｰ <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <input 
+                                                                     type="number" 
+                                                                     value={surveyForm.interview_teachers}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
+                                                                     placeholder="萓・ 2"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label>荳邱偵↓髱｢謗･繧貞女縺代◆蟄ｦ逕溘・莠ｺ謨ｰ (閾ｪ蛻・ｂ蜈･繧後ｋ)</label>
++                                                                <label>荳邱偵↓髱｢謗･繧貞女縺代◆蟄ｦ逕溘・莠ｺ謨ｰ (閾ｪ蛻・ｂ蜈･繧後ｋ) <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <input 
+                                                                     type="number" 
+                                                                     value={surveyForm.interview_students}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
+                                                                     placeholder="萓・ 1"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                         </div>
+@@ -1801,11 +1822,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                                                             <label style={{ fontWeight: '600' }}>縺ｩ繧薙↑雉ｪ蝠上ｒ縺輔ｌ縺ｾ縺励◆縺具ｼ・/label>
+                                                             <div className={styles.inputGroup}>
+-                                                                <label style={{ fontSize: 'var(--font-size-xs)' }}>雉ｪ蝠鞘蔵</label>
++                                                                <label style={{ fontSize: 'var(--font-size-xs)' }}>雉ｪ蝠鞘蔵 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                                                 <input 
+                                                                     type="text" 
+                                                                     value={surveyForm.interview_question_1}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>

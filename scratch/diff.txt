@@ -1,0 +1,139 @@
+﻿diff --git a/src/app/student/career/CareerCounselingClient.jsx b/src/app/student/career/CareerCounselingClient.jsx
+index 6f58f61..befd221 100644
+--- a/src/app/student/career/CareerCounselingClient.jsx
++++ b/src/app/student/career/CareerCounselingClient.jsx
+@@ -369,6 +369,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+             return
+         }
+ 
++        if (surveyForm.japanese_exists === '縺ゅｊ' && (!surveyForm.japanese_content || surveyForm.japanese_content.length === 0)) {
++            setSurveyError('譌･譛ｬ隱槭・隧ｦ鬨薙・蜀・ｮｹ繧貞ｰ代↑縺上→繧・縺､驕ｸ謚槭＠縺ｦ縺上□縺輔＞縲・)
++            setSavingSurvey(false)
++            return
++        }
++
+         const payload = {
+             ...surveyForm,
+             japanese_content: JSON.stringify(surveyForm.japanese_content || [])
+@@ -684,7 +690,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={form.path_type}
+                                                         onChange={(e) => handleFieldChange('path_type', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
++                                                        <option value="">驕ｸ謚槭＠縺ｦ縺上□縺輔＞</option>
+                                                         <option value="騾ｲ蟄ｦ">騾ｲ蟄ｦ</option>
+                                                         <option value="蟆ｱ閨ｷ">蟆ｱ閨ｷ</option>
+                                                         <option value="蟶ｰ蝗ｽ">蟶ｰ蝗ｽ</option>
+@@ -1232,6 +1240,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={item.status}
+                                                         onChange={(e) => handleExamFieldChange(index, 'status', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
+                                                         <option value="邨先棡蠕・■">邨先棡蠕・■</option>
+                                                         <option value="蜷域ｼ">蜷域ｼ</option>
+@@ -1575,6 +1584,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={surveyForm.school_type}
+                                                         onChange={(e) => handleSurveyFieldChange('school_type', e.target.value)}
+                                                         className={styles.selectInput}
++                                                        required
+                                                     >
+                                                         <option value="螟ｧ蟄ｦ">螟ｧ蟄ｦ</option>
+                                                         <option value="螟ｧ蟄ｦ髯｢">螟ｧ蟄ｦ髯｢</option>
+@@ -1590,6 +1600,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={surveyForm.school_name}
+                                                         onChange={(val) => handleSurveyFieldChange('school_name', val)}
+                                                         placeholder="蟄ｦ譬｡蜷阪ｒ蜈･蜉帙∪縺溘・驕ｸ謚・
++                                                        required
+                                                     />
+                                                 </div>
+ 
+@@ -1601,6 +1612,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                             value={surveyForm.department_name}
+                                                             onChange={(e) => handleSurveyFieldChange('department_name', e.target.value)}
+                                                             placeholder="萓・ 繧ｰ繝ｭ繝ｼ繝舌Ν繝薙ず繝阪せ繧ｳ繝ｼ繧ｹ"
++                                                            required
+                                                         />
+                                                     </div>
+                                                     <div className={styles.inputGroup}>
+@@ -1610,6 +1622,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                             value={surveyForm.exam_type}
+                                                             onChange={(e) => handleSurveyFieldChange('exam_type', e.target.value)}
+                                                             placeholder="萓・ AO蜈･隧ｦ縲∵欠螳壽｡謗ｨ阮ｦ縲∽ｸ闊ｬ"
++                                                            required
+                                                         />
+                                                     </div>
+                                                 </div>
+@@ -1621,6 +1634,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                         value={surveyForm.exam_date}
+                                                         onChange={(e) => handleSurveyFieldChange('exam_date', e.target.value)}
+                                                         placeholder="萓・ 2026/10/10"
++                                                        required
+                                                     />
+                                                 </div>
+                                             </div>
+@@ -1656,6 +1670,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                 value={surveyForm.essay_time}
+                                                                 onChange={(e) => handleSurveyFieldChange('essay_time', e.target.value)}
+                                                                 placeholder="萓・ 60"
++                                                                required
+                                                             />
+                                                         </div>
+                                                         <div className={styles.inputGroup}>
+@@ -1665,6 +1680,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                 onChange={(e) => handleSurveyFieldChange('essay_theme', e.target.value)}
+                                                                 placeholder="菴懈枚繝ｻ蟆剰ｫ匁枚縺ｮ繝・・繝槭ｒ譖ｸ縺・※縺上□縺輔＞縲・
+                                                                 rows={4}
++                                                                required
+                                                             />
+                                                         </div>
+                                                     </div>
+@@ -1703,6 +1719,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     value={surveyForm.japanese_time}
+                                                                     onChange={(e) => handleSurveyFieldChange('japanese_time', e.target.value)}
+                                                                     placeholder="萓・ 45"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+@@ -1711,6 +1728,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     value={surveyForm.japanese_level}
+                                                                     onChange={(e) => handleSurveyFieldChange('japanese_level', e.target.value)}
+                                                                     className={styles.selectInput}
++                                                                    required
+                                                                 >
+                                                                     <option value="N1">JLPT N1繝ｬ繝吶Ν</option>
+                                                                     <option value="N2">JLPT N2繝ｬ繝吶Ν</option>
+@@ -1776,6 +1794,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     value={surveyForm.interview_time}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_time', e.target.value)}
+                                                                     placeholder="萓・ 15"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+@@ -1785,6 +1804,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     value={surveyForm.interview_teachers}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_teachers', e.target.value)}
+                                                                     placeholder="萓・ 2"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>
+@@ -1794,6 +1814,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     value={surveyForm.interview_students}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_students', e.target.value)}
+                                                                     placeholder="萓・ 1"
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                         </div>
+@@ -1806,6 +1827,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
+                                                                     type="text" 
+                                                                     value={surveyForm.interview_question_1}
+                                                                     onChange={(e) => handleSurveyFieldChange('interview_question_1', e.target.value)}
++                                                                    required
+                                                                 />
+                                                             </div>
+                                                             <div className={styles.inputGroup}>

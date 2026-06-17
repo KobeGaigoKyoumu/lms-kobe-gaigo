@@ -1,23 +1,80 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
 
-const supabaseUrl = 'https://mwtlfyhkzkfagvmdwgii.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseServiceKey) {
+    console.error('Missing Service Role Key');
+    process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function main() {
-    console.log('Testing connection to Supabase...');
-    try {
-        // exec_sql RPC があるか、または適当なテーブルからselectしてみる
-        const { data, error } = await supabase.from('master_schools').select('*').limit(1);
-        if (error) {
-            console.error('Select error:', error.message);
-        } else {
-            console.log('Connection successful! master_schools data sample:', data);
-        }
-    } catch (e) {
-        console.error('Unexpected error:', e.message);
+    console.log('Fetching a single student...');
+    const { data: before, error: getErr } = await supabase
+        .from('students')
+        .select('*')
+        .limit(1)
+        .single();
+
+    if (getErr) {
+        console.error('Error fetching student:', getErr.message);
+        return;
     }
+
+    console.log('Student before update:', {
+        student_id_text: before.student_id_text,
+        full_name: before.full_name,
+        class_name: before.class_name,
+        destination: before.destination
+    });
+
+    const testId = before.student_id_text;
+    const originalDest = before.destination;
+    const testDest = `Test Destination ${Date.now()}`;
+
+    console.log(`Updating student ${testId} with destination: ${testDest}`);
+    const { error: updateErr } = await supabase
+        .from('students')
+        .update({
+            destination: testDest
+        })
+        .eq('student_id_text', testId);
+
+    if (updateErr) {
+        console.error('Update error:', updateErr.message);
+        return;
+    }
+
+    const { data: after, error: getErr2 } = await supabase
+        .from('students')
+        .select('*')
+        .eq('student_id_text', testId)
+        .single();
+
+    if (getErr2) {
+        console.error('Error fetching student after:', getErr2.message);
+        return;
+    }
+
+    console.log('Student after update:', {
+        student_id_text: after.student_id_text,
+        full_name: after.full_name,
+        class_name: after.class_name,
+        destination: after.destination
+    });
+
+    // Restore original destination
+    console.log('Restoring original destination...');
+    await supabase
+        .from('students')
+        .update({
+            destination: originalDest
+        })
+        .eq('student_id_text', testId);
 }
 
 main();
+
