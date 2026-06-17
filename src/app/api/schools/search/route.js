@@ -162,12 +162,20 @@ export async function GET(request) {
                 const parsedJlptRecords = safeJlptData.map(r => {
                     const sId = r.student_id_text;
                     const yt = r.year_term || '';
-                    const match = yt.match(/JLPT\s*(\d{4})-(\d+)/i);
                     let year = 0;
                     let term = 0;
+                    let match = yt.match(/JLPT\s*(\d{4})年第(\d+)回/i);
                     if (match) {
                         year = parseInt(match[1], 10);
                         term = parseInt(match[2], 10);
+                    } else {
+                        const matchHyphen = yt.match(/JLPT\s*(\d{4})-(\d+)/i);
+                        if (matchHyphen) {
+                            year = parseInt(matchHyphen[1], 10);
+                            term = parseInt(matchHyphen[2], 10);
+                        }
+                    }
+                    if (year > 0) {
                         if (year > maxYear || (year === maxYear && term > maxTerm)) {
                             maxYear = year;
                             maxTerm = term;
