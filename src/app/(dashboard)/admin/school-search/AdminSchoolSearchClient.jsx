@@ -61,7 +61,7 @@ export default function AdminSchoolSearchClient() {
     const [selectedPref, setSelectedPref] = useState('')
     const [selectedEstablishment, setSelectedEstablishment] = useState('')
     const [selectedEnrollment, setSelectedEnrollment] = useState('')
-    const [expandedSchools, setExpandedSchools] = useState(new Set())
+    const [expandedSchoolCode, setExpandedSchoolCode] = useState(null)
     const [schools, setSchools] = useState([])
     const [loading, setLoading] = useState(false)
     const [searched, setSearched] = useState(false)
@@ -104,7 +104,7 @@ export default function AdminSchoolSearchClient() {
                 setTotalCount(data.totalCount || 0)
                 setSearched(true)
                 // 検索結果が更新されたら、展開状態をリセットする
-                setExpandedSchools(new Set())
+                setExpandedSchoolCode(null)
             } catch (err) {
                 console.error(err)
                 setError('学校データの検索中にエラーが発生しました。時間を置いて再度お試しください。')
@@ -117,15 +117,7 @@ export default function AdminSchoolSearchClient() {
     }, [keyword, selectedType, selectedPref, selectedEstablishment, selectedEnrollment, page])
 
     const toggleExpand = (code) => {
-        setExpandedSchools(prev => {
-            const next = new Set(prev)
-            if (next.has(code)) {
-                next.delete(code)
-            } else {
-                next.add(code)
-            }
-            return next
-        })
+        setExpandedSchoolCode(prev => prev === code ? null : code)
     }
 
     const handleClear = () => {
@@ -139,7 +131,7 @@ export default function AdminSchoolSearchClient() {
         setPage(1)
         setSearched(false)
         setError(null)
-        setExpandedSchools(new Set())
+        setExpandedSchoolCode(null)
     }
 
     const renderMatchingDepartments = (departments) => {
@@ -253,8 +245,8 @@ export default function AdminSchoolSearchClient() {
                             <div className={styles.trendBox}>
                                 <div className={styles.trendHeader}>
                                     <span className={styles.trendBadge}>トレンド分析</span>
-                                    {jlpt.trend.recentCount > 0 && (
-                                        <span className={styles.trendLabelActive}>上昇傾向</span>
+                                    {jlpt.trend.label && (
+                                        <span className={styles.trendLabelActive}>{jlpt.trend.label}</span>
                                     )}
                                 </div>
                                 <p className={styles.trendText}>{jlpt.trend.text}</p>
@@ -503,15 +495,15 @@ export default function AdminSchoolSearchClient() {
                                         <button 
                                             className={styles.accordionToggle} 
                                             onClick={() => toggleExpand(school.code)}
-                                            aria-expanded={expandedSchools.has(school.code)}
+                                            aria-expanded={expandedSchoolCode === school.code}
                                         >
-                                            {expandedSchools.has(school.code) ? '▲ 実績・JLPT統計を閉じる' : '▼ 実績・JLPT統計を表示'}
+                                            {expandedSchoolCode === school.code ? '▲ 実績・JLPT統計を閉じる' : '▼ 実績・JLPT統計を表示'}
                                         </button>
                                     )}
 
                                     {/* 過去統計情報（アコーディオン） */}
                                     {school.stats && (
-                                        <div className={`${styles.accordionContent} ${expandedSchools.has(school.code) ? styles.accordionContentOpen : ''}`}>
+                                        <div className={`${styles.accordionContent} ${expandedSchoolCode === school.code ? styles.accordionContentOpen : ''}`}>
                                             {renderSchoolStats(school.stats)}
                                         </div>
                                     )}

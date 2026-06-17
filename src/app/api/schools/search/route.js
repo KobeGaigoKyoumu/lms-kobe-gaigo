@@ -117,7 +117,7 @@ export async function GET(request) {
             // 1. 進学者（students テーブル）の取得
             const { data: enrollmentData, error: enrollError } = await serviceClient
                 .from('students')
-                .select('student_id_text, full_name, destination')
+                .select('student_id_text, full_name, destination, academic_year')
                 .in('destination', schoolNames);
 
             // 2. 合格者（student_exam_schedules テーブル）の取得
@@ -144,19 +144,23 @@ export async function GET(request) {
             let maxYearTermStr = '';
 
             if (studentIds.length > 0) {
-                // Get student names for those IDs
+                // Get student names and academic years for those IDs
                 const { data: dbStudents } = await serviceClient
                     .from('students')
-                    .select('student_id_text, full_name')
+                    .select('student_id_text, full_name, academic_year')
                     .in('student_id_text', studentIds);
 
                 const studentNames = [];
                 const idToNameMap = {};
+                const idToYearMap = {};
                 if (dbStudents) {
                     dbStudents.forEach(s => {
                         if (s.full_name) {
                             studentNames.push(s.full_name);
                             idToNameMap[s.student_id_text] = s.full_name;
+                        }
+                        if (s.academic_year) {
+                            idToYearMap[s.student_id_text] = s.academic_year;
                         }
                     });
                 }
@@ -358,15 +362,66 @@ export async function GET(request) {
                         }
                     });
 
-                    const displaySession = maxYearTermStr ? maxYearTermStr.replace('JLPT', '').trim() : '';
-                    let trendText = `直近の試験期 (${displaySession}) の新たな合格者はありません。`;
-                    if (recentCount > 0) {
-                        const details = [];
-                        if (recentN1 > 0) details.push(`N1: ${recentN1}人`);
-                        if (recentN2 > 0) details.push(`N2: ${recentN2}人`);
-                        if (recentN3 > 0) details.push(`N3: ${recentN3}人`);
-                        trendText = `直近の試験期 (${displaySession}) で新たに ${recentCount}人が合格 (${details.join(', ')}) 📈`;
+                    // 直近3か年の進学者のN3以上保有率の集計と難化・易化傾向の分析
+                    const enrollYears = uniqueEnrollStudents.map(sId => idToYearMap[sId]).filter(Boolean);
+                    const maxYear = enrollYears.length > 0 ? Math.max(...enrollYears) : 2024;
+                    const targetYears = [maxYear - 2, maxYear - 1, maxYear];
+
+                    const yearStats = {};
+                    targetYears.forEach(y => {
+                        yearStats[y] = { total: 0, passed: 0 };
+                    });
+
+                    uniqueEnrollStudents.forEach(sId => {
+                        const yr = idToYearMap[sId];
+                        if (yr && targetYears.includes(yr)) {
+                            yearStats[yr].total++;
+                            const maxLevel = jlptMap[sId];
+                            if (maxLevel === 'N1' || maxLevel === 'N2' || maxLevel === 'N3') {
+                                yearStats[yr].passed++;
+                            }
+                        }
+                    });
+
+                    const rates = targetYears.map(y => {
+                        const stats = yearStats[y];
+                        const rate = stats.total > 0 ? parseFloat(((stats.passed / stats.total) * 100).toFixed(1)) : null;
+                        return { year: y, rate, total: stats.total, passed: stats.passed };
+                    });
+
+                    const validRates = rates.filter(r => r.total > 0);
+                    let trendText = '直近の進学者データが不足しているため、進学の難化・易化の傾向を判定できません。';
+                    let trendLabel = '判定不可';
+
+                    if (validRates.length >= 2) {
+                        const rateDetails = rates.map(r => {
+                            if (r.total > 0) {
+                                return `${r.year}年度: ${r.rate}% (${r.passed}/${r.total}人)`;
+                            }
+                            return `${r.year}年度: データなし`;
+                        }).join(' ➡️ ');
+
+                        const first = validRates[0];
+                        const last = validRates[validRates.length - 1];
+                        const diff = last.rate - first.rate;
+
+                        if (diff > 5) {
+                            trendLabel = '難化傾向';
+                            trendText = `直近3か年のN3以上保有率 (${rateDetails})。進学者に占めるN3以上保有率が上昇しており、進学基準の難化（学生レベルの向上）傾向が見られます。📊`;
+                        } else if (diff < -5) {
+                            trendLabel = '易化傾向';
+                            trendText = `直近3か年のN3以上保有率 (${rateDetails})。進学者に占めるN3以上保有率が低下しており、進学難易度の易化（入りやすくなっている）傾向が見られます。📊`;
+                        } else {
+                            trendLabel = '安定傾向';
+                            trendText = `直近3か年のN3以上保有率 (${rateDetails})。進学者に占めるN3以上保有率は横ばいで、進学難易度は安定しています。📊`;
+                        }
+                    } else if (validRates.length === 1) {
+                        const r = validRates[0];
+                        trendText = `直近3か年のうち${r.year}年度のみ進学者実績あり (${r.rate}% [${r.passed}/${r.total}人])。複数年のデータがないため、難易度の傾向は判定できません。`;
+                        trendLabel = '安定（単年データ）';
                     }
+
+                    const displaySession = maxYearTermStr ? maxYearTermStr.replace('JLPT', '').trim() : '';
 
                     school.stats = {
                         passCount: uniqueStudents.length, // 合格者（進学者を含む総数）
@@ -381,10 +436,11 @@ export async function GET(request) {
                             N3_rate: parseFloat((n3Count / totalStudents * 100).toFixed(1)),
                             overN3_rate: parseFloat((totalWithJlpt / totalStudents * 100).toFixed(1)),
                             trend: {
+                                label: trendLabel,
+                                text: trendText,
                                 recentSession: displaySession,
                                 recentCount,
-                                recentBreakdown: { N1: recentN1, N2: recentN2, N3: recentN3 },
-                                text: trendText
+                                recentBreakdown: { N1: recentN1, N2: recentN2, N3: recentN3 }
                             }
                         }
                     };
