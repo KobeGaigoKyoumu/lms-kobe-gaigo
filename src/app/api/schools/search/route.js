@@ -3,6 +3,7 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminMemberSession } from '@/app/actions/adminAuth';
 import { getEstablishmentType } from '@/lib/establishment';
+import careerStatsData from '@/data/career_stats_v2.json';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
@@ -162,11 +163,21 @@ export async function GET(request) {
         if (isTeacherOrAdmin && schools.length > 0) {
             const schoolNames = schools.map(s => s.name);
 
-            // 1. 進学者（students テーブル）の取得
-            const { data: enrollmentData, error: enrollError } = await serviceClient
-                .from('students')
-                .select('student_id_text, full_name, destination, academic_year')
-                .in('destination', schoolNames);
+            // 1. 進学者（career_stats_v2.json）の取得
+            const enrollmentData = [];
+            schoolNames.forEach(name => {
+                const dest = careerStatsData.topDestinations?.find(d => d.name === name);
+                if (dest && dest.students) {
+                    dest.students.forEach(s => {
+                        enrollmentData.push({
+                            student_id_text: s.id ? String(s.id).trim() : null,
+                            full_name: s.name,
+                            destination: name,
+                            academic_year: s.year ? parseInt(s.year, 10) : null
+                        });
+                    });
+                }
+            });
 
             // 2. 合格者（student_exam_schedules テーブル）の取得
             const { data: passData, error: passError } = await serviceClient
@@ -175,7 +186,6 @@ export async function GET(request) {
                 .in('school_name', schoolNames)
                 .eq('status', '合格');
 
-            if (enrollError) console.error('Enrollment query error:', enrollError);
             if (passError) console.error('Exam pass query error:', passError);
 
             const safeEnrollData = enrollmentData || [];
@@ -219,6 +229,20 @@ export async function GET(request) {
                         }
                     });
                 }
+
+                // Fallback for students not in DB but present in static JSON
+                safeEnrollData.forEach(d => {
+                    const sId = d.student_id_text;
+                    if (sId) {
+                        if (!idToNameMap[sId] && d.full_name) {
+                            idToNameMap[sId] = d.full_name;
+                            studentNames.push(d.full_name);
+                        }
+                        if (!idToYearMap[sId] && d.academic_year) {
+                            idToYearMap[sId] = d.academic_year;
+                        }
+                    }
+                });
 
                 // Query by ID and Name in batches of 100 to catch mismatch examinee IDs
                 let jlptData = [];
