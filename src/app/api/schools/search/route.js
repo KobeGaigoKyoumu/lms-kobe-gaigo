@@ -369,7 +369,7 @@ export async function GET(request) {
                     }
 
                     school.stats = {
-                        passCount: passOnlyStudents.length, // 合格者（進学者を除く）
+                        passCount: uniqueStudents.length, // 合格者（進学者を含む総数）
                         enrollCount: uniqueEnrollStudents.length, // 進学者
                         jlpt: {
                             total: totalStudents,
