@@ -117,7 +117,7 @@ export async function GET(request) {
             // 1. 進学者（students テーブル）の取得
             const { data: enrollmentData, error: enrollError } = await serviceClient
                 .from('students')
-                .select('student_id_text, destination')
+                .select('student_id_text, full_name, destination')
                 .in('destination', schoolNames);
 
             // 2. 合格者（student_exam_schedules テーブル）の取得
@@ -144,15 +144,73 @@ export async function GET(request) {
             let maxYearTermStr = '';
 
             if (studentIds.length > 0) {
-                const { data: jlptData, error: jlptError } = await serviceClient
+                // Get student names for those IDs
+                const { data: dbStudents } = await serviceClient
+                    .from('students')
+                    .select('student_id_text, full_name')
+                    .in('student_id_text', studentIds);
+
+                const studentNames = [];
+                const idToNameMap = {};
+                if (dbStudents) {
+                    dbStudents.forEach(s => {
+                        if (s.full_name) {
+                            studentNames.push(s.full_name);
+                            idToNameMap[s.student_id_text] = s.full_name;
+                        }
+                    });
+                }
+
+                // Query by ID and Name to catch mismatch examinee IDs
+                let jlptData = [];
+                const { data: jlptById, error: jlptError1 } = await serviceClient
                     .from('grade_records')
-                    .select('student_id_text, final_exam_data, year_term')
+                    .select('student_id_text, student_name, final_exam_data, year_term')
                     .in('student_id_text', studentIds)
                     .like('year_term', 'JLPT%');
 
-                if (jlptError) console.error('JLPT query error:', jlptError);
+                if (jlptError1) console.error('JLPT by ID query error:', jlptError1);
+                if (jlptById) jlptData.push(...jlptById);
 
-                const safeJlptData = jlptData || [];
+                if (studentNames.length > 0) {
+                    const { data: jlptByName, error: jlptError2 } = await serviceClient
+                        .from('grade_records')
+                        .select('student_id_text, student_name, final_exam_data, year_term')
+                        .in('student_name', studentNames)
+                        .like('year_term', 'JLPT%');
+
+                    if (jlptError2) console.error('JLPT by Name query error:', jlptError2);
+                    if (jlptByName) {
+                        const existingKeys = new Set(jlptData.map(r => `${r.student_id_text}|${r.year_term}`));
+                        jlptByName.forEach(r => {
+                            const key = `${r.student_id_text}|${r.year_term}`;
+                            if (!existingKeys.has(key)) {
+                                jlptData.push(r);
+                            }
+                        });
+                    }
+                }
+
+                // Map name to student ID to resolve examinee number mismatches
+                const nameToId = {};
+                for (const [id, name] of Object.entries(idToNameMap)) {
+                    const norm = name.toLowerCase().replace(/[\s\u3000]/g, '');
+                    nameToId[norm] = id;
+                }
+
+                const safeJlptData = jlptData.map(r => {
+                    let sId = r.student_id_text;
+                    if (!idToNameMap[sId] && r.student_name) {
+                        const norm = r.student_name.toLowerCase().replace(/[\s\u3000]/g, '');
+                        if (nameToId[norm]) {
+                            sId = nameToId[norm];
+                        }
+                    }
+                    return {
+                        ...r,
+                        student_id_text: sId
+                    };
+                });
                 const levelWeights = { 'N1': 3, 'N2': 2, 'N3': 1 };
 
                 // 2.5. 最新のJLPTの期を特定する
