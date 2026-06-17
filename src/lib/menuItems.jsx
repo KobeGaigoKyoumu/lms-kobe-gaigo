@@ -62,6 +62,18 @@ export const getMenuItems = (role) => {
                 )
             },
             {
+                href: '/student/school-search',
+                label: '学校検索',
+                color: '#06b6d4', // Cyan
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M22 10v11H2V10h20z" />
+                        <path d="M6 22V4h12v18" />
+                        <path d="M10 8h4M10 12h4M10 16h4" />
+                    </svg>
+                )
+            },
+            {
                 href: '/student/calendar',
                 label: 'カレンダー',
                 color: '#8b5cf6', // Purple
