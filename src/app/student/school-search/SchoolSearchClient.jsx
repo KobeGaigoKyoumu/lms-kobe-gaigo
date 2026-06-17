@@ -51,12 +51,20 @@ export default function SchoolSearchClient({ session }) {
     const [loading, setLoading] = useState(false)
     const [searched, setSearched] = useState(false)
     const [error, setError] = useState(null)
+    const [page, setPage] = useState(1)
+    const [totalCount, setTotalCount] = useState(0)
+
+    // 検索条件が変更されたらページを1に戻す
+    useEffect(() => {
+        setPage(1)
+    }, [keyword, selectedType, selectedPref])
 
     // デバウンス用のタイマーとフェッチロジック
     useEffect(() => {
         // 初期状態（条件がすべて空）の時は余分なリクエストを避ける
         if (!keyword.trim() && !selectedType && !selectedPref) {
             setSchools([])
+            setTotalCount(0)
             setSearched(false)
             return
         }
@@ -69,13 +77,15 @@ export default function SchoolSearchClient({ session }) {
                 if (keyword.trim()) query.set('q', keyword.trim())
                 if (selectedType) query.set('type', selectedType)
                 if (selectedPref) query.set('pref', selectedPref)
+                query.set('page', page.toString())
 
                 const res = await fetch(`/api/schools/search?${query.toString()}`)
                 if (!res.ok) {
                     throw new Error('データの取得に失敗しました。')
                 }
                 const data = await res.json()
-                setSchools(data)
+                setSchools(data.schools || [])
+                setTotalCount(data.totalCount || 0)
                 setSearched(true)
             } catch (err) {
                 console.error(err)
@@ -86,13 +96,15 @@ export default function SchoolSearchClient({ session }) {
         }, 400) // 400ms デバウンス
 
         return () => clearTimeout(delayDebounce)
-    }, [keyword, selectedType, selectedPref])
+    }, [keyword, selectedType, selectedPref, page])
 
     const handleClear = () => {
         setKeyword('')
         setSelectedType('')
         setSelectedPref('')
         setSchools([])
+        setTotalCount(0)
+        setPage(1)
         setSearched(false)
         setError(null)
     }
@@ -100,28 +112,45 @@ export default function SchoolSearchClient({ session }) {
     const renderMatchingDepartments = (departments) => {
         if (!departments) return null;
         
-        const list = departments.split(', ');
-        const q = keyword.trim().toLowerCase();
-        
-        if (!q) {
+        // パターン1: 分野のみ
+        if (departments.startsWith('【学習分野】')) {
+            const field = departments.replace('【学習分野】', '');
             return (
                 <div className={styles.departmentsArea}>
-                    <span className={styles.deptLabel}>設置学部・学科等:</span>
-                    <span className={styles.deptList}>
-                        {list.slice(0, 3).join(', ')}
-                        {list.length > 3 ? ' ...' : ''}
-                    </span>
+                    <div>
+                        <span className={styles.deptLabel}>学習分野:</span>
+                        <span className={styles.deptList}>{field}</span>
+                    </div>
                 </div>
             );
         }
         
-        const matches = list.filter(d => d.toLowerCase().includes(q));
-        const nonMatches = list.filter(d => !d.toLowerCase().includes(q));
-        const combined = [...matches, ...nonMatches].slice(0, 3);
+        // パターン2: 学科・コースと分野の併記
+        const mergeMatch = departments.match(/(.*)\s*【分野：(.*)】/);
+        let displayDepts = departments;
+        let inferredField = null;
         
-        return (
-            <div className={styles.departmentsArea}>
-                <span className={styles.deptLabel}>学部・学科等:</span>
+        if (mergeMatch) {
+            displayDepts = mergeMatch[1].trim();
+            inferredField = mergeMatch[2].trim();
+        }
+        
+        const list = displayDepts.split(', ');
+        const q = keyword.trim().toLowerCase();
+        
+        const renderDeptsList = () => {
+            if (!q) {
+                return (
+                    <span className={styles.deptList}>
+                        {list.slice(0, 3).join(', ')}
+                        {list.length > 3 ? ' ...' : ''}
+                    </span>
+                );
+            }
+            const matches = list.filter(d => d.toLowerCase().includes(q));
+            const nonMatches = list.filter(d => !d.toLowerCase().includes(q));
+            const combined = [...matches, ...nonMatches].slice(0, 3);
+            return (
                 <span className={styles.deptList}>
                     {combined.map((dept, idx) => {
                         const isMatch = dept.toLowerCase().includes(q);
@@ -134,8 +163,68 @@ export default function SchoolSearchClient({ session }) {
                         );
                     })}
                 </span>
+            );
+        };
+        
+        return (
+            <div className={styles.departmentsArea}>
+                {inferredField && (
+                    <div style={{ marginBottom: '6px' }}>
+                        <span className={styles.deptLabel}>学習分野:</span>
+                        <span className={styles.deptList} style={{ color: '#1a73e8', fontWeight: '600' }}>
+                            {inferredField}
+                        </span>
+                    </div>
+                )}
+                <div>
+                    <span className={styles.deptLabel}>{q ? '学部・学科等:' : '設置学部・学科等:'}</span>
+                    {renderDeptsList()}
+                </div>
             </div>
         );
+    };
+
+    const limit = 20;
+    const totalPages = Math.ceil(totalCount / limit);
+    const fromIdx = (page - 1) * limit;
+    const toIdx = Math.min(fromIdx + limit, totalCount);
+
+    const renderPageNumbers = () => {
+        const pages = [];
+        const start = Math.max(1, page - 2);
+        const end = Math.min(totalPages, page + 2);
+
+        if (start > 1) {
+            pages.push(
+                <button key={1} className={`${styles.pageBtn} ${page === 1 ? styles.pageBtnActive : ''}`} onClick={() => setPage(1)}>
+                    1
+                </button>
+            );
+            if (start > 2) {
+                pages.push(<span key="ellipsis-start" className={styles.pageEllipsis}>...</span>);
+            }
+        }
+
+        for (let i = start; i <= end; i++) {
+            pages.push(
+                <button key={i} className={`${styles.pageBtn} ${page === i ? styles.pageBtnActive : ''}`} onClick={() => setPage(i)}>
+                    {i}
+                </button>
+            );
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                pages.push(<span key="ellipsis-end" className={styles.pageEllipsis}>...</span>);
+            }
+            pages.push(
+                <button key={totalPages} className={`${styles.pageBtn} ${page === totalPages ? styles.pageBtnActive : ''}`} onClick={() => setPage(totalPages)}>
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return pages;
     };
 
     return (
@@ -168,7 +257,7 @@ export default function SchoolSearchClient({ session }) {
                                 onChange={(e) => setKeyword(e.target.value)}
                             />
                             {keyword && (
-                                <button className={styles.clearBtn} onClick={() => setKeyword('')} title="クリア">
+                                <button className={styles.clearBtn} onClick={handleClear} title="クリア">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <line x1="18" y1="6" x2="6" y2="18" />
                                         <line x1="6" y1="6" x2="18" y2="18" />
@@ -269,7 +358,7 @@ export default function SchoolSearchClient({ session }) {
                     <>
                         <div className={styles.resultHeader}>
                             <p className={styles.resultCount}>
-                                検索結果: <strong>{schools.length}</strong> 件 {schools.length >= 100 && <span className={styles.limitWarning}>（上位100件を表示しています）</span>}
+                                検索結果: <strong>{totalCount}</strong> 件（{totalCount > 0 ? `${fromIdx + 1}〜${toIdx}` : '0'} 件を表示）
                             </p>
                         </div>
                         <div className={styles.grid}>
@@ -325,6 +414,35 @@ export default function SchoolSearchClient({ session }) {
                                 </div>
                             ))}
                         </div>
+
+                        {/* ページネーション */}
+                        {totalPages > 1 && (
+                            <div className={styles.pagination}>
+                                <button 
+                                    className={styles.pageBtn} 
+                                    onClick={() => {
+                                        setPage(prev => Math.max(1, prev - 1));
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    disabled={page === 1}
+                                    title="前のページへ"
+                                >
+                                    &lt; 前へ
+                                </button>
+                                {renderPageNumbers()}
+                                <button 
+                                    className={styles.pageBtn} 
+                                    onClick={() => {
+                                        setPage(prev => Math.min(totalPages, prev + 1));
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    disabled={page === totalPages}
+                                    title="次のページへ"
+                                >
+                                    次へ &gt;
+                                </button>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
