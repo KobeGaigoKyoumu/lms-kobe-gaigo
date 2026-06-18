@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getStudentsCareerList, getStudentsExamSchedulesList, getStudentsExamSurveysList, saveStudentCareerInfoByAdmin, saveStudentExamSchedules, saveStudentExamSurvey, deleteStudentExamSurvey } from '@/app/actions/career'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
@@ -88,6 +88,9 @@ export default function CareerManagementClient({
     const [savingSurvey, setSavingSurvey] = useState(false)
     const [surveyError, setSurveyError] = useState(null)
     const [surveySuccessMsg, setSurveySuccessMsg] = useState(null)
+    const [surveyViewMode, setSurveyViewMode] = useState('student') // 'student' or 'school'
+    const [surveySchoolPage, setSurveySchoolPage] = useState(1)
+    const [selectedSchoolForSurveyDetails, setSelectedSchoolForSurveyDetails] = useState(null)
 
     const initialSurveyForm = {
         class_name: '',
@@ -202,6 +205,55 @@ export default function CareerManagementClient({
     const surveyStartIndex = (surveyPage - 1) * ITEMS_PER_PAGE
     const paginatedSurveyStudents = filteredSurveyStudents.slice(surveyStartIndex, surveyStartIndex + ITEMS_PER_PAGE)
     const surveyTotalPages = Math.ceil(filteredSurveyStudents.length / ITEMS_PER_PAGE)
+
+    // 学校別表示用のグループ化データ
+    const schoolsGroupedSurveys = useMemo(() => {
+        const grouped = {}
+        
+        studentsExamSurveys.forEach(student => {
+            // クラスフィルターの適用
+            if (selectedClass && selectedClass !== 'all' && student.class_name !== selectedClass) {
+                return
+            }
+
+            (student.exam_surveys || []).forEach(survey => {
+                const schoolName = survey.school_name || '未指定の学校'
+                const schoolType = survey.school_type || ''
+                
+                // 検索ワード (searchTerm) によるフィルタリング
+                const term = searchTerm.toLowerCase().trim()
+                if (term) {
+                    const isMatch = 
+                        schoolName.toLowerCase().includes(term) ||
+                        student.full_name?.toLowerCase().includes(term) ||
+                        student.student_id_text?.toLowerCase().includes(term) ||
+                        survey.department_name?.toLowerCase().includes(term)
+                    if (!isMatch) return
+                }
+
+                if (!grouped[schoolName]) {
+                    grouped[schoolName] = {
+                        school_name: schoolName,
+                        school_type: schoolType,
+                        surveys: []
+                    }
+                }
+                grouped[schoolName].surveys.push({
+                    ...survey,
+                    student_name: student.full_name,
+                    class_name: student.class_name,
+                    student_id_text: student.student_id_text
+                })
+            })
+        })
+
+        return Object.values(grouped).sort((a, b) => a.school_name.localeCompare(b.school_name, 'ja'))
+    }, [studentsExamSurveys, selectedClass, searchTerm])
+
+    // 学校別表示のページネーション
+    const surveySchoolStartIndex = (surveySchoolPage - 1) * ITEMS_PER_PAGE
+    const paginatedSchoolSurveys = schoolsGroupedSurveys.slice(surveySchoolStartIndex, surveySchoolStartIndex + ITEMS_PER_PAGE)
+    const surveySchoolTotalPages = Math.ceil(schoolsGroupedSurveys.length / ITEMS_PER_PAGE)
 
     const openSurveyModal = (student) => {
         setSelectedStudentForSurvey(student)
@@ -2005,6 +2057,30 @@ export default function CareerManagementClient({
                         </div>
                     )}
 
+                    {/* 表示形式切り替えトグル */}
+                    <div style={{ marginBottom: 'var(--spacing-3)', display: 'flex', gap: 'var(--spacing-2)' }}>
+                        <button
+                            onClick={() => {
+                                setSurveyViewMode('student')
+                                setSurveyPage(1)
+                            }}
+                            className={`${styles.tabButton} ${surveyViewMode === 'student' ? styles.tabButtonActive : ''}`}
+                            style={{ padding: '8px 16px', fontSize: 'var(--font-size-sm)' }}
+                        >
+                            学生別に表示
+                        </button>
+                        <button
+                            onClick={() => {
+                                setSurveyViewMode('school')
+                                setSurveySchoolPage(1)
+                            }}
+                            className={`${styles.tabButton} ${surveyViewMode === 'school' ? styles.tabButtonActive : ''}`}
+                            style={{ padding: '8px 16px', fontSize: 'var(--font-size-sm)' }}
+                        >
+                            学校別に表示
+                        </button>
+                    </div>
+
                     {/* コントロールエリア (クラス選択 & 検索) */}
                     <div className={styles.controls}>
                         <div className={styles.filterGroup}>
@@ -2028,13 +2104,14 @@ export default function CareerManagementClient({
                                 <Search size={16} className={styles.searchIcon} />
                                 <input
                                     type="text"
-                                    placeholder="名前または学籍番号で検索..."
+                                    placeholder={surveyViewMode === 'student' ? "名前または学籍番号で検索..." : "学校名、学生名等で検索..."}
                                     value={searchTerm}
                                     onChange={(e) => {
                                         setSearchTerm(e.target.value)
                                         setCareerPage(1)
                                         setExamPage(1)
                                         setSurveyPage(1)
+                                        setSurveySchoolPage(1)
                                     }}
                                     className={styles.searchInput}
                                 />
@@ -2042,96 +2119,236 @@ export default function CareerManagementClient({
                         </div>
                     </div>
 
-                    {/* 学生一覧テーブル */}
+                    {/* データ表示エリア */}
                     <div className={styles.tableCard}>
                         {loading ? (
                             <div className={styles.loadingSpinner}>
                                 <div className={styles.spinner}></div>
                                 <p>データを読み込んでいます...</p>
                             </div>
-                        ) : filteredSurveyStudents.length === 0 ? (
-                            <div className={styles.emptyState}>
-                                <FileText size={48} color="var(--text-tertiary)" />
-                                <p>該当する学生が見つかりません。</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className={styles.tableWrapper}>
-                                    <table className={styles.table}>
-                                        <thead>
-                                            <tr>
-                                                <th>クラス</th>
-                                                <th>学籍番号</th>
-                                                <th>氏名</th>
-                                                <th>回答アンケート校一覧 (種別)</th>
-                                                <th className={styles.textCenter}>回答数</th>
-                                                <th className={styles.textCenter}>操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paginatedSurveyStudents.map(student => {
-                                                const list = student.exam_surveys || []
-                                                const totalSurveys = list.length
+                        ) : surveyViewMode === 'student' ? (
+                            // 学生別表示
+                            filteredSurveyStudents.length === 0 ? (
+                                <div className={styles.emptyState}>
+                                    <FileText size={48} color="var(--text-tertiary)" />
+                                    <p>該当する学生が見つかりません。</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className={styles.tableWrapper}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>クラス</th>
+                                                    <th>学籍番号</th>
+                                                    <th>氏名</th>
+                                                    <th>回答アンケート校一覧 (種別)</th>
+                                                    <th className={styles.textCenter}>回答数</th>
+                                                    <th className={styles.textCenter}>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedSurveyStudents.map(student => {
+                                                    const list = student.exam_surveys || []
+                                                    const totalSurveys = list.length
 
-                                                return (
-                                                    <tr key={student.student_id_text}>
-                                                        <td data-label="クラス">{student.class_name || '-'}</td>
-                                                        <td data-label="学籍番号">{student.student_id_text}</td>
-                                                        <td data-label="氏名" className={styles.fontWeightMedium}>{student.full_name}</td>
-                                                        <td data-label="回答アンケート校一覧 (種別)">
-                                                            <span className={styles.truncateText} style={{ maxWidth: '400px' }}>
-                                                                {list.length > 0 ? (
-                                                                    list.map((s, idx) => (
-                                                                        `${s.school_name}${s.school_type ? ` (${s.school_type})` : ''}`
-                                                                    )).join(', ')
-                                                                ) : (
-                                                                    <span style={{ color: 'var(--text-tertiary)' }}>未回答</span>
-                                                                )}
+                                                    return (
+                                                        <tr key={student.student_id_text}>
+                                                            <td data-label="クラス">{student.class_name || '-'}</td>
+                                                            <td data-label="学籍番号">{student.student_id_text}</td>
+                                                            <td data-label="氏名" className={styles.fontWeightMedium}>{student.full_name}</td>
+                                                            <td data-label="回答アンケート校一覧 (種別)">
+                                                                <span className={styles.truncateText} style={{ maxWidth: '400px' }}>
+                                                                    {list.length > 0 ? (
+                                                                        list.map((s, idx) => (
+                                                                            `${s.school_name}${s.school_type ? ` (${s.school_type})` : ''}`
+                                                                        )).join(', ')
+                                                                    ) : (
+                                                                        <span style={{ color: 'var(--text-tertiary)' }}>未回答</span>
+                                                                    )}
+                                                                </span>
+                                                            </td>
+                                                            <td data-label="回答数" className={styles.textCenter}>{totalSurveys}</td>
+                                                            <td data-label="操作" className={styles.textCenter}>
+                                                                <button
+                                                                    onClick={() => openSurveyModal(student)}
+                                                                    className={styles.actionButton}
+                                                                >
+                                                                    確認・修正
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {surveyTotalPages > 1 && (
+                                        <div className={styles.paginationSection}>
+                                            <div className={styles.paginationInfo}>
+                                                全 {filteredSurveyStudents.length} 人中 {surveyStartIndex + 1}〜{Math.min(surveyStartIndex + ITEMS_PER_PAGE, filteredSurveyStudents.length)} 人を表示
+                                            </div>
+                                            <div className={styles.paginationControls}>
+                                                <button 
+                                                    onClick={() => setSurveyPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={surveyPage === 1}
+                                                    className={styles.pageBtn}
+                                                >
+                                                    前へ
+                                                </button>
+                                                <span className={styles.pageIndicator}>
+                                                    {surveyPage} / {surveyTotalPages}
+                                                </span>
+                                                <button 
+                                                    onClick={() => setSurveyPage(prev => Math.min(prev + 1, surveyTotalPages))}
+                                                    disabled={surveyPage === surveyTotalPages}
+                                                    className={styles.pageBtn}
+                                                >
+                                                    次へ
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )
+                        ) : (
+                            // 新規：学校別表示
+                            schoolsGroupedSurveys.length === 0 ? (
+                                <div className={styles.emptyState}>
+                                    <FileText size={48} color="var(--text-tertiary)" />
+                                    <p>該当する学校が見つかりません。</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className={styles.tableWrapper}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>学校名</th>
+                                                    <th>学校の種別</th>
+                                                    <th className={styles.textCenter}>回答アンケート総数</th>
+                                                    <th className={styles.textCenter}>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedSchoolSurveys.map(item => (
+                                                    <tr key={item.school_name}>
+                                                        <td data-label="学校名" className={styles.fontWeightMedium}>{item.school_name}</td>
+                                                        <td data-label="学校の種別">
+                                                            <span className={`${styles.badge} ${
+                                                                item.school_type === '大学' ? styles.badgeUniversity :
+                                                                item.school_type === '短期大学' ? styles.badgeJuniorCollege :
+                                                                item.school_type === '専門学校' ? styles.badgeVocationalSchool :
+                                                                item.school_type === '大学院' ? styles.badgeGraduateSchool :
+                                                                styles.badgeSecondary
+                                                            }`}>
+                                                                {item.school_type || 'その他'}
                                                             </span>
                                                         </td>
-                                                        <td data-label="回答数" className={styles.textCenter}>{totalSurveys}</td>
+                                                        <td data-label="回答アンケート総数" className={styles.textCenter}>{item.surveys.length} 件</td>
                                                         <td data-label="操作" className={styles.textCenter}>
                                                             <button
-                                                                onClick={() => openSurveyModal(student)}
+                                                                onClick={() => setSelectedSchoolForSurveyDetails(item)}
                                                                 className={styles.actionButton}
                                                             >
-                                                                確認・修正
+                                                                回答一覧を確認
                                                             </button>
                                                         </td>
                                                     </tr>
-                                                )
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {surveyTotalPages > 1 && (
-                                    <div className={styles.paginationSection}>
-                                        <div className={styles.paginationInfo}>
-                                            全 {filteredSurveyStudents.length} 人中 {surveyStartIndex + 1}〜{Math.min(surveyStartIndex + ITEMS_PER_PAGE, filteredSurveyStudents.length)} 人を表示
-                                        </div>
-                                        <div className={styles.paginationControls}>
-                                            <button 
-                                                onClick={() => setSurveyPage(prev => Math.max(prev - 1, 1))}
-                                                disabled={surveyPage === 1}
-                                                className={styles.pageBtn}
-                                            >
-                                                前へ
-                                            </button>
-                                            <span className={styles.pageIndicator}>
-                                                {surveyPage} / {surveyTotalPages}
-                                            </span>
-                                            <button 
-                                                onClick={() => setSurveyPage(prev => Math.min(prev + 1, surveyTotalPages))}
-                                                disabled={surveyPage === surveyTotalPages}
-                                                className={styles.pageBtn}
-                                            >
-                                                次へ
-                                            </button>
-                                        </div>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                )}
-                            </>
+                                    {surveySchoolTotalPages > 1 && (
+                                        <div className={styles.paginationSection}>
+                                            <div className={styles.paginationInfo}>
+                                                全 {schoolsGroupedSurveys.length} 校中 {surveySchoolStartIndex + 1}〜{Math.min(surveySchoolStartIndex + ITEMS_PER_PAGE, schoolsGroupedSurveys.length)} 校を表示
+                                            </div>
+                                            <div className={styles.paginationControls}>
+                                                <button 
+                                                    onClick={() => setSurveySchoolPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={surveySchoolPage === 1}
+                                                    className={styles.pageBtn}
+                                                >
+                                                    前へ
+                                                </button>
+                                                <span className={styles.pageIndicator}>
+                                                    {surveySchoolPage} / {surveySchoolTotalPages}
+                                                </span>
+                                                <button 
+                                                    onClick={() => setSurveySchoolPage(prev => Math.min(prev + 1, surveySchoolTotalPages))}
+                                                    disabled={surveySchoolPage === surveySchoolTotalPages}
+                                                    className={styles.pageBtn}
+                                                >
+                                                    次へ
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ====================================================
+                学校別回答一覧ポップアップ (教員用・新規)
+               ==================================================== */}
+            {selectedSchoolForSurveyDetails && (
+                <div className={styles.modalOverlay} onClick={() => setSelectedSchoolForSurveyDetails(null)}>
+                    <div className={styles.modalContent} style={{ maxWidth: '800px', width: '90%' }} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>{selectedSchoolForSurveyDetails.school_name} の入試アンケート回答一覧</h2>
+                            <button 
+                                onClick={() => setSelectedSchoolForSurveyDetails(null)} 
+                                className={styles.closeModalBtn}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className={styles.modalBody} style={{ maxHeight: '70vh', overflowY: 'auto', padding: 'var(--spacing-4)' }}>
+                            <div className={styles.tableWrapper}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>クラス</th>
+                                            <th>氏名</th>
+                                            <th>学部・学科・コース</th>
+                                            <th>試験の種類</th>
+                                            <th>試験日</th>
+                                            <th className={styles.textCenter}>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {selectedSchoolForSurveyDetails.surveys.map((survey) => (
+                                            <tr key={survey.id}>
+                                                <td>{survey.class_name || '-'}</td>
+                                                <td className={styles.fontWeightMedium}>{survey.student_name}</td>
+                                                <td>{survey.department_name || '-'}</td>
+                                                <td>{survey.exam_type || '-'}</td>
+                                                <td>{survey.exam_date || '-'}</td>
+                                                <td className={styles.textCenter}>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedStudentForSurvey({
+                                                                full_name: survey.student_name,
+                                                                student_id_text: survey.student_id_text
+                                                            })
+                                                            startViewingStudentSurvey(survey)
+                                                        }}
+                                                        className={styles.actionButton}
+                                                        style={{ padding: '4px 8px', fontSize: 'var(--font-size-xs)' }}
+                                                    >
+                                                        詳細確認
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
