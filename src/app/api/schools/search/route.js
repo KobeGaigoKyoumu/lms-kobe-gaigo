@@ -239,21 +239,89 @@ export async function GET(request) {
                 });
             });
 
+            const RAW_ALIAS_MAP = {
+                'トヨタ自動車大学校神戸校': '専門学校トヨタ神戸自動車大学校',
+                'トヨタ神戸自動車大学校': '専門学校トヨタ神戸自動車大学校',
+                '東大阪短期大学': '東大阪大学短期大学部',
+                'nikko外語専門学校': 'ｎｉｋｋｏ外語観光専門学校',
+                'nikko外語観光専門学校': 'ｎｉｋｋｏ外語観光専門学校',
+                '神戸外国語大学': '神戸市外国語大学',
+                '神戸外国語大学研究生': '神戸市外国語大学',
+                '姫路保育福祉専門学校': '姫路福祉保育専門学校',
+                'ビジョンクエスト情報デザイン専門学校': 'ヴィジョンネクスト情報デザイン専門学校',
+                '東京みらいit&ai専門学校': '東京みらいａｉ＆ｉｔ専門学校',
+                '三鷹日商簿記専門学校': '日商簿記三鷹福祉専門学校',
+                '西日本アカデミー航空専門学校': '西日本アカデミー専門学校',
+                '日本モータースポーツ専門学校': '日本モータースポーツ専門学校大阪校',
+                '京都コンピュータ学院': '京都コンピュータ学院京都駅前校',
+                '駿台観光＆外語ビジネス専門学校': '駿台観光＆外語ビジネスカレッジ大阪',
+                '栃木グローバルビジネスカレッジ': '専門学校Ｔｏｃｈｉｇｉ　Ｇｌｏｂａｌ　Ｆａｓｈｉｏｎ　Ｂｕｓｉｎｅｓｓ　Ｃｏｌｌｅｇｅ',
+                '岩谷テクノビジネス専門学校': '岩谷学園よこはまＩＴビジネス専門学校',
+                '麻生専門学校': '麻生情報ビジネス専門学校',
+                '阪神自動車航空専門学校': '阪神自動車航空鉄道専門学校',
+                'oca大阪デザイン＆it専門学校': 'ＯＣＡ大阪デザイン＆テクノロジー専門学校',
+            };
+
+            const hiraganaToKatakana = (str) => {
+                if (!str) return '';
+                return str.replace(/[\u3041-\u3096]/g, (match) => {
+                    return String.fromCharCode(match.charCodeAt(0) + 0x60);
+                });
+            };
+
             const toHalfWidth = (str) => {
                 if (!str) return '';
                 return str.replace(/[Ａ-Ｚａ-ｚ０-９！-～]/g, (s) => {
                     return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
                 }).replace(/[\s\u3000]/g, '');
             };
-            const normSchoolName = (n) => toHalfWidth(n.toLowerCase());
+
+            const normSchoolName = (n) => {
+                if (!n) return '';
+                let val = toHalfWidth(n.toLowerCase());
+                val = val.replace(/[\s\u3000・\-－\(\)（）\&＆\.\/\,\\＊\*＿_]/g, '');
+                val = hiraganaToKatakana(val);
+                val = val.replace(/^(学校法人|専門学校|公立大学法人|国立大学法人)/, '');
+                val = val.replace(/(研究生|研究科|専攻|（研究生）|\(研究生\)|研究員|別科)$/, '');
+                val = val.replace(/ヴィ/g, 'ビ').replace(/ヴェ/g, 'ベ').replace(/ヴォ/g, 'ボ').replace(/ヴァ/g, 'バ').replace(/ヴ/g, 'ブ');
+                val = val.replace(/ー/g, '');
+                return val;
+            };
+
+            const ALIAS_MAP = {};
+            Object.entries(RAW_ALIAS_MAP).forEach(([key, val]) => {
+                ALIAS_MAP[normSchoolName(key)] = normSchoolName(val);
+            });
 
             schools.forEach(school => {
-                const dest = careerStatsData.topDestinations?.find(d => normSchoolName(d.name) === normSchoolName(school.name));
+                const sNorm = normSchoolName(school.name);
+                const targetS = ALIAS_MAP[sNorm] || sNorm;
+
+                // 1. エイリアスマップと正規化による完全一致検索
+                let dest = careerStatsData.topDestinations?.find(d => {
+                    const dNorm = normSchoolName(d.name);
+                    const targetD = ALIAS_MAP[dNorm] || dNorm;
+                    return targetD === targetS;
+                });
+
+                // 2. 部分一致による検索（キャンパス名や支校の差などを許容）
+                if (!dest) {
+                    dest = careerStatsData.topDestinations?.find(d => {
+                        const dNorm = normSchoolName(d.name);
+                        const targetD = ALIAS_MAP[dNorm] || dNorm;
+                        return targetD.startsWith(targetS) || targetS.startsWith(targetD);
+                    });
+                }
+
                 const destStudents = dest?.students || [];
 
                 // 合格者の抽出と計算 (DB上の合格者 + 進学者データ内のID)
                 const schoolPassStudents = safePassData
-                    .filter(p => normSchoolName(p.school_name) === normSchoolName(school.name))
+                    .filter(p => {
+                        const pNorm = normSchoolName(p.school_name);
+                        const targetP = ALIAS_MAP[pNorm] || pNorm;
+                        return targetP === targetS || targetP.startsWith(targetS) || targetS.startsWith(targetP);
+                    })
                     .map(p => String(p.student_id).trim())
                     .filter(Boolean);
                 
