@@ -199,7 +199,16 @@ export async function GET(request) {
             const students = await getCachedStudentList();
             const studentSummaries = await getStudentsJlptSummary(students || []);
 
-            // 最新のJLPTの期を特定する
+            // 合格実績テーブルから合格者データを取得
+            const { data: passData, error: passError } = await serviceClient
+                .from('student_exam_schedules')
+                .select('student_id, school_name')
+                .in('school_name', schools.map(s => s.name))
+                .eq('status', '合格');
+            if (passError) console.error('Exam pass query error:', passError);
+            const safePassData = passData || [];
+
+            // 最新 of JLPTの期を特定する
             let maxYear = 0;
             let maxTerm = 0;
             let maxYearTermStr = '';
@@ -242,6 +251,22 @@ export async function GET(request) {
                 const dest = careerStatsData.topDestinations?.find(d => normSchoolName(d.name) === normSchoolName(school.name));
                 const destStudents = dest?.students || [];
 
+                // 合格者の抽出と計算 (DB上の合格者 + 進学者データ内のID)
+                const schoolPassStudents = safePassData
+                    .filter(p => normSchoolName(p.school_name) === normSchoolName(school.name))
+                    .map(p => String(p.student_id).trim())
+                    .filter(Boolean);
+                
+                const uniquePassStudents = new Set(schoolPassStudents);
+                destStudents.forEach(s => {
+                    if (s.id) {
+                        uniquePassStudents.add(String(s.id).trim());
+                    }
+                });
+
+                const passCount = uniquePassStudents.size;
+                const enrollCount = destStudents.length;
+
                 // 各進学者についてstudentSummariesとIDまたは名前で名寄せマッチング
                 const matchedInfo = [];
                 destStudents.forEach(s => {
@@ -257,7 +282,7 @@ export async function GET(request) {
                     }
                 });
 
-                if (destStudents.length > 0) {
+                if (destStudents.length > 0 || passCount > 0) {
                     let n1Count = 0;
                     let n2Count = 0;
                     let n3Count = 0;
@@ -367,8 +392,8 @@ export async function GET(request) {
                     const displaySession = maxYearTermStr ? maxYearTermStr.replace('JLPT', '').trim() : '';
 
                     school.stats = {
-                        passCount: destStudents.length, // ダッシュボードの合格者（進学者数）表示と同期
-                        enrollCount: destStudents.length, // 進学者数
+                        passCount: passCount, // 合格データと進学者データから算出した本来の合格数
+                        enrollCount: enrollCount, // career_stats_v2.jsonから算出した進学者数 (ダッシュボードと同期)
                         jlpt: {
                             total: totalStudents,
                             N1: n1Count,

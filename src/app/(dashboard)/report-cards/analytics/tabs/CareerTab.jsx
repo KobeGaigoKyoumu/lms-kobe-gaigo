@@ -843,7 +843,7 @@ export default function CareerTab({ careerStats, chartFontSize, studentDb = [] }
                             <thead>
                                 <tr>
                                     <th>学校名</th>
-                                    <th>合格者数</th>
+                                    <th>進学者数</th>
                                     <th>JLPTデータ</th>
                                     <th>詳細</th>
                                 </tr>
