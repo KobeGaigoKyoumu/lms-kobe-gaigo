@@ -29,7 +29,7 @@ export async function GET(request) {
     if (q.trim()) {
         const originalQ = q.trim();
         const cleanQ = q.replace(/[\s\u3000]/g, '');
-        
+
         const toFullWidth = (str) => {
             return str.replace(/[A-Za-z0-9]/g, (s) => {
                 return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
@@ -58,12 +58,12 @@ export async function GET(request) {
 
     try {
         const authClient = await createServerClient();
-        
+
         // 認証・権限チェック
         const { data: { user } } = await authClient.auth.getUser();
         const adminMember = await getAdminMemberSession();
         let isTeacherOrAdmin = false;
-        
+
         if (user) {
             const { data: profile } = await authClient
                 .from('profiles')
@@ -87,7 +87,7 @@ export async function GET(request) {
             const { data: enrollDests, error: destError } = await serviceClient
                 .from('students')
                 .select('destination');
-            
+
             if (destError) {
                 console.error('Database error in fetching enroll destinations:', destError);
                 return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
@@ -324,7 +324,7 @@ export async function GET(request) {
                     })
                     .map(p => String(p.student_id).trim())
                     .filter(Boolean);
-                
+
                 const uniquePassStudents = new Set(schoolPassStudents);
                 destStudents.forEach(s => {
                     if (s.id) {
@@ -338,7 +338,7 @@ export async function GET(request) {
                 // 各進学者についてstudentSummariesとIDまたは名前で名寄せマッチング
                 const matchedInfo = [];
                 destStudents.forEach(s => {
-                    const dbStudent = studentSummaries.find(dbStudent => 
+                    const dbStudent = studentSummaries.find(dbStudent =>
                         (dbStudent.studentId && s.id && String(dbStudent.studentId) === String(s.id)) ||
                         (dbStudent.name && s.name && dbStudent.name === s.name)
                     );
