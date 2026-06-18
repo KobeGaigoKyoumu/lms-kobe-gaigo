@@ -28,7 +28,6 @@ const SCHOOL_TYPES = [
     { value: '', label: 'すべて' },
     { value: 'university', label: '大学' },
     { value: 'junior_college', label: '短期大学' },
-    { value: 'technical_college', label: '高等専門学校' },
     { value: 'vocational_school', label: '専門学校' },
     { value: 'graduate_school', label: '大学院' }
 ]
