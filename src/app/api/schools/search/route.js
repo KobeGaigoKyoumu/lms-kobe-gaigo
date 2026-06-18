@@ -9,6 +9,116 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzk
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGxmeWhremtmYWd2bWR3Z2lpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzYyMTk0MywiZXhwIjoyMDgzMTk3OTQzfQ.rWkYoR9W4KZddI-QJMD8MreUEg4eA8vbLWGbh6xgBbE';
 const serviceClient = createClient(SUPABASE_URL, SERVICE_KEY);
 
+const RAW_ALIAS_MAP = {
+    'トヨタ自動車大学校神戸校': '専門学校トヨタ神戸自動車大学校',
+    'トヨタ神戸自動車大学校': '専門学校トヨタ神戸自動車大学校',
+    '東大阪短期大学': '東大阪大学短期大学部',
+    'nikko外語専門学校': 'ｎｉｋｋｏ外語観光専門学校',
+    'nikko外語観光専門学校': 'ｎｉｋｋｏ外語観光専門学校',
+    '神戸外国語大学': '神戸市外国語大学',
+    '神戸外国語大学研究生': '神戸市外国語大学',
+    '姫路保育福祉専門学校': '姫路福祉保育専門学校',
+    'ビジョンクエスト情報デザイン専門学校': 'ヴィジョンネクスト情報デザイン専門学校',
+    '東京みらいit&ai専門学校': '東京みらいａｉ＆ｉｔ専門学校',
+    '三鷹日商簿記専門学校': '日商簿記三鷹福祉専門学校',
+    '西日本アカデミー航空専門学校': '西日本アカデミー専門学校',
+    '日本モータースポーツ専門学校': '日本モータースポーツ専門学校大阪校',
+    '京都コンピュータ学院': '京都コンピュータ学院京都駅前校',
+    '駿台観光＆外語ビジネス専門学校': '駿台観光＆外語ビジネスカレッジ大阪',
+    '栃木グローバルビジネスカレッジ': '専門学校Ｔｏｃｈｉｇｉ　Ｇｌｏｂａｌ　Ｆａｓｈｉｏｎ　Ｂｕｓｉｎｅｓｓ　Ｃｏｌｌｅｇｅ',
+    '岩谷テクノビジネス専門学校': '岩谷学園よこはまＩＴビジネス専門学校',
+    '麻生専門学校': '麻生情報ビジネス専門学校',
+    '阪神自動車航空専門学校': '阪神自動車航空鉄道専門学校',
+    'oca大阪デザイン＆it専門学校': 'ＯＣＡ大阪デザイン＆テクノロジー専門学校',
+};
+
+const hiraganaToKatakana = (str) => {
+    if (!str) return '';
+    return str.replace(/[\u3041-\u3096]/g, (match) => {
+        return String.fromCharCode(match.charCodeAt(0) + 0x60);
+    });
+};
+
+const toHalfWidth = (str) => {
+    if (!str) return '';
+    return str.replace(/[Ａ-Ｚａ-ｚ０-９！-～]/g, (s) => {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+    }).replace(/[\s\u3000]/g, '');
+};
+
+const toFullWidth = (str) => {
+    if (!str) return '';
+    return str.replace(/[A-Za-z0-9]/g, (s) => {
+        return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
+    });
+};
+
+const kanaHalfToFull = (str) => {
+    if (!str) return '';
+    const map = {
+        'ｱ':'ア','ｲ':'イ','ｳ':'ウ','ｴ':'エ','ｵ':'オ',
+        'ｶ':'カ','ｷ':'キ','ｸ':'ク','ｹ':'ケ','ｺ':'コ',
+        'ｻ':'サ','ｼ':'シ','ｽ':'ス','ｾ':'セ','ｿ':'ソ',
+        'ﾀ':'タ','ﾁ':'チ','ﾂ':'ツ','ﾃ':'テ','ﾄ':'ト',
+        'ﾅ':'ナ','ﾆ':'ニ','ﾇ':'ヌ','ﾈ':'ネ','ﾉ':'ノ',
+        'ﾊ':'ハ','ﾋ':'ヒ','ﾌ':'フ','ﾍ':'ヘ','ﾎ':'ホ',
+        'ﾏ':'マ','ﾐ':'ミ','ﾑ':'ム','ﾒ':'メ','ﾓ':'モ',
+        'ﾔ':'ヤ','ﾕ':'ユ','ﾖ':'ヨ',
+        'ﾗ':'ラ','ﾘ':'リ','ﾙ':'ル','ﾚ':'レ','ﾛ':'ロ',
+        'ﾜ':'ワ','ｦ':'ヲ','ﾝ':'ン',
+        'ｧ':'ァ','ｨ':'ィ','ｩ':'ゥ','ｪ':'ェ','ｫ':'ォ',
+        'ｬ':'ャ','ｭ':'ュ','ｮ':'ョ','ｯ':'ッ',
+        'ﾞ':'゛','ﾟ':'゜','ｰ':'ー'
+    };
+    let res = '';
+    for (let i = 0; i < str.length; i++) {
+        let c = str[i];
+        let next = str[i+1];
+        if (next === 'ﾞ') {
+            const combine = {
+                'ｶ':'ガ','ｷ':'ギ','ｸ':'グ','ｹ':'ゲ','ｺ':'ゴ',
+                'ｻ':'ザ','ｼ':'ジ','ｽ':'ズ','ｾ':'ゼ','ｿ':'ゾ',
+                'ﾀ':'ダ','ﾁ':'ヂ','ﾂ':'ヅ','ﾃ':'デ','ﾄ':'ド',
+                'ﾊ':'バ','ﾋ':'ビ','ﾌ':'ブ','ﾍ':'ベ','ﾎ':'ボ',
+                'ｳ':'ヴ'
+            };
+            if (combine[c]) {
+                res += combine[c];
+                i++;
+                continue;
+            }
+        } else if (next === 'ﾟ') {
+            const combine = {
+                'ﾊ':'パ','ﾋ':'ピ','ﾌ':'プ','ﾍ':'ペ','ﾎ':'ポ'
+            };
+            if (combine[c]) {
+                res += combine[c];
+                i++;
+                continue;
+            }
+        }
+        res += map[c] || c;
+    }
+    return res;
+};
+
+const normSchoolName = (n) => {
+    if (!n) return '';
+    let val = toHalfWidth(n.toLowerCase());
+    val = val.replace(/[\s\u3000・\-－\(\)（）\&＆\.\/\,\\＊\*＿_]/g, '');
+    val = hiraganaToKatakana(val);
+    val = val.replace(/^(学校法人|専門学校|公立大学法人|国立大学法人)/, '');
+    val = val.replace(/(研究生|研究科|専攻|（研究生）|\(研究生\)|研究員|別科)$/, '');
+    val = val.replace(/ヴィ/g, 'ビ').replace(/ヴェ/g, 'ベ').replace(/ヴォ/g, 'ボ').replace(/ヴァ/g, 'バ').replace(/ヴ/g, 'ブ');
+    val = val.replace(/ー/g, '');
+    return val;
+};
+
+const ALIAS_MAP = {};
+Object.entries(RAW_ALIAS_MAP).forEach(([key, val]) => {
+    ALIAS_MAP[normSchoolName(key)] = normSchoolName(val);
+});
+
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q') || '';
@@ -30,22 +140,12 @@ export async function GET(request) {
         const originalQ = q.trim();
         const cleanQ = q.replace(/[\s\u3000]/g, '');
 
-        const toFullWidth = (str) => {
-            return str.replace(/[A-Za-z0-9]/g, (s) => {
-                return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
-            });
-        };
-        const toHalfWidth = (str) => {
-            return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => {
-                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-            });
-        };
-
         const searchTerms = new Set();
         [originalQ, cleanQ].forEach(term => {
             searchTerms.add(term);
-            searchTerms.add(toFullWidth(term));
             searchTerms.add(toHalfWidth(term));
+            searchTerms.add(toFullWidth(term));
+            searchTerms.add(kanaHalfToFull(term));
         });
 
         const uniqueTerms = Array.from(searchTerms).filter(Boolean);
@@ -82,8 +182,33 @@ export async function GET(request) {
         let schoolsData = [];
         let schoolsError = null;
 
+        let baseQuery = authClient
+            .from('master_schools')
+            .select('code, name, school_type, prefecture, website, departments');
+
+        if (searchOrConditions) {
+            baseQuery = baseQuery.or(searchOrConditions);
+        }
+        if (type.trim()) {
+            baseQuery = baseQuery.eq('school_type', type.trim());
+        }
+        if (pref.trim()) {
+            baseQuery = baseQuery.eq('prefecture', pref.trim());
+        }
+
+        const { data, error } = await baseQuery.order('name', { ascending: true });
+        schoolsData = data || [];
+        schoolsError = error;
+
+        if (schoolsError) {
+            console.error('Database error in school search:', schoolsError);
+            return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
+        }
+
+        let filteredSchools = schoolsData;
+
+        // hasEnrollment が true の場合、学生の進学実績データ（students.destination）と名寄せマッチングしてフィルタリング
         if (hasEnrollment) {
-            // studentsテーブルから進学先(destination)のリストを取得
             const { data: enrollDests, error: destError } = await serviceClient
                 .from('students')
                 .select('destination');
@@ -94,80 +219,21 @@ export async function GET(request) {
             }
 
             const uniqueDests = Array.from(new Set(enrollDests?.map(d => d.destination).filter(Boolean) || []));
-            if (uniqueDests.length > 0) {
-                const chunkSize = 30; // URL長制限を防ぐため30件ずつ
-                const promises = [];
-                for (let i = 0; i < uniqueDests.length; i += chunkSize) {
-                    const chunk = uniqueDests.slice(i, i + chunkSize);
-                    let chunkQuery = authClient
-                        .from('master_schools')
-                        .select('code, name, school_type, prefecture, website, departments')
-                        .in('name', chunk);
+            const destNorms = uniqueDests.map(d => {
+                const dn = normSchoolName(d);
+                return ALIAS_MAP[dn] || dn;
+            });
 
-                    if (searchOrConditions) {
-                        chunkQuery = chunkQuery.or(searchOrConditions);
-                    }
-                    if (type.trim()) {
-                        chunkQuery = chunkQuery.eq('school_type', type.trim());
-                    }
-                    if (pref.trim()) {
-                        chunkQuery = chunkQuery.eq('prefecture', pref.trim());
-                    }
-                    promises.push(chunkQuery);
-                }
-
-                const results = await Promise.all(promises);
-                for (const res of results) {
-                    if (res.error) {
-                        schoolsError = res.error;
-                        break;
-                    }
-                    if (res.data) {
-                        schoolsData.push(...res.data);
-                    }
-                }
-                if (!schoolsError) {
-                    // 重複排除とソート
-                    const seen = new Set();
-                    schoolsData = schoolsData.filter(s => {
-                        if (seen.has(s.name)) return false;
-                        seen.add(s.name);
-                        return true;
-                    });
-                    schoolsData.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
-                }
-            } else {
-                schoolsData = [];
-            }
-        } else {
-            let baseQuery = authClient
-                .from('master_schools')
-                .select('code, name, school_type, prefecture, website, departments');
-
-            if (searchOrConditions) {
-                baseQuery = baseQuery.or(searchOrConditions);
-            }
-            if (type.trim()) {
-                baseQuery = baseQuery.eq('school_type', type.trim());
-            }
-            if (pref.trim()) {
-                baseQuery = baseQuery.eq('prefecture', pref.trim());
-            }
-
-            const { data, error } = await baseQuery.order('name', { ascending: true });
-            schoolsData = data || [];
-            schoolsError = error;
+            filteredSchools = filteredSchools.filter(school => {
+                const sNorm = normSchoolName(school.name);
+                const targetS = ALIAS_MAP[sNorm] || sNorm;
+                
+                // 完全一致または部分一致（キャンパス名、支校等の差を許容）
+                return destNorms.some(dn => dn === targetS || dn.startsWith(targetS) || targetS.startsWith(dn));
+            });
         }
 
-        if (schoolsError) {
-            console.error('Database error in school search:', schoolsError);
-            return NextResponse.json({ error: '検索中にエラーが発生しました。' }, { status: 500 });
-        }
-
-        let filteredSchools = schoolsData;
-
-        // 設置区分の判定を付与
-        filteredSchools = filteredSchools.map(school => {
+        let filteredSchoolsWithEst = filteredSchools.map(school => {
             const estType = getEstablishmentType(school.name, school.school_type);
             return {
                 ...school,
@@ -184,12 +250,12 @@ export async function GET(request) {
             };
             const targetEst = estMap[establishment];
             if (targetEst) {
-                filteredSchools = filteredSchools.filter(s => s.establishment_type === targetEst);
+                filteredSchoolsWithEst = filteredSchoolsWithEst.filter(s => s.establishment_type === targetEst);
             }
         }
 
-        const totalCount = filteredSchools.length;
-        const schools = filteredSchools.slice(from, from + limit);
+        const totalCount = filteredSchoolsWithEst.length;
+        const schools = filteredSchoolsWithEst.slice(from, from + limit);
 
         // 教師・管理者の場合、統計情報を一括取得してマージ
         if (isTeacherOrAdmin && schools.length > 0) {
@@ -237,60 +303,6 @@ export async function GET(request) {
                         }
                     }
                 });
-            });
-
-            const RAW_ALIAS_MAP = {
-                'トヨタ自動車大学校神戸校': '専門学校トヨタ神戸自動車大学校',
-                'トヨタ神戸自動車大学校': '専門学校トヨタ神戸自動車大学校',
-                '東大阪短期大学': '東大阪大学短期大学部',
-                'nikko外語専門学校': 'ｎｉｋｋｏ外語観光専門学校',
-                'nikko外語観光専門学校': 'ｎｉｋｋｏ外語観光専門学校',
-                '神戸外国語大学': '神戸市外国語大学',
-                '神戸外国語大学研究生': '神戸市外国語大学',
-                '姫路保育福祉専門学校': '姫路福祉保育専門学校',
-                'ビジョンクエスト情報デザイン専門学校': 'ヴィジョンネクスト情報デザイン専門学校',
-                '東京みらいit&ai専門学校': '東京みらいａｉ＆ｉｔ専門学校',
-                '三鷹日商簿記専門学校': '日商簿記三鷹福祉専門学校',
-                '西日本アカデミー航空専門学校': '西日本アカデミー専門学校',
-                '日本モータースポーツ専門学校': '日本モータースポーツ専門学校大阪校',
-                '京都コンピュータ学院': '京都コンピュータ学院京都駅前校',
-                '駿台観光＆外語ビジネス専門学校': '駿台観光＆外語ビジネスカレッジ大阪',
-                '栃木グローバルビジネスカレッジ': '専門学校Ｔｏｃｈｉｇｉ　Ｇｌｏｂａｌ　Ｆａｓｈｉｏｎ　Ｂｕｓｉｎｅｓｓ　Ｃｏｌｌｅｇｅ',
-                '岩谷テクノビジネス専門学校': '岩谷学園よこはまＩＴビジネス専門学校',
-                '麻生専門学校': '麻生情報ビジネス専門学校',
-                '阪神自動車航空専門学校': '阪神自動車航空鉄道専門学校',
-                'oca大阪デザイン＆it専門学校': 'ＯＣＡ大阪デザイン＆テクノロジー専門学校',
-            };
-
-            const hiraganaToKatakana = (str) => {
-                if (!str) return '';
-                return str.replace(/[\u3041-\u3096]/g, (match) => {
-                    return String.fromCharCode(match.charCodeAt(0) + 0x60);
-                });
-            };
-
-            const toHalfWidth = (str) => {
-                if (!str) return '';
-                return str.replace(/[Ａ-Ｚａ-ｚ０-９！-～]/g, (s) => {
-                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-                }).replace(/[\s\u3000]/g, '');
-            };
-
-            const normSchoolName = (n) => {
-                if (!n) return '';
-                let val = toHalfWidth(n.toLowerCase());
-                val = val.replace(/[\s\u3000・\-－\(\)（）\&＆\.\/\,\\＊\*＿_]/g, '');
-                val = hiraganaToKatakana(val);
-                val = val.replace(/^(学校法人|専門学校|公立大学法人|国立大学法人)/, '');
-                val = val.replace(/(研究生|研究科|専攻|（研究生）|\(研究生\)|研究員|別科)$/, '');
-                val = val.replace(/ヴィ/g, 'ビ').replace(/ヴェ/g, 'ベ').replace(/ヴォ/g, 'ボ').replace(/ヴァ/g, 'バ').replace(/ヴ/g, 'ブ');
-                val = val.replace(/ー/g, '');
-                return val;
-            };
-
-            const ALIAS_MAP = {};
-            Object.entries(RAW_ALIAS_MAP).forEach(([key, val]) => {
-                ALIAS_MAP[normSchoolName(key)] = normSchoolName(val);
             });
 
             schools.forEach(school => {
@@ -460,8 +472,8 @@ export async function GET(request) {
                     const displaySession = maxYearTermStr ? maxYearTermStr.replace('JLPT', '').trim() : '';
 
                     school.stats = {
-                        passCount: passCount, // 合格データと進学者データから算出した本来の合格数
-                        enrollCount: enrollCount, // career_stats_v2.jsonから算出した進学者数 (ダッシュボードと同期)
+                        passCount: passCount,
+                        enrollCount: enrollCount,
                         jlpt: {
                             total: totalStudents,
                             N1: n1Count,
