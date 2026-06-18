@@ -60,7 +60,7 @@ export default function SchoolAutocomplete({
                 const res = await fetch(`/api/schools/search?q=${encodeURIComponent(query)}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setSuggestions(data);
+                    setSuggestions(data.schools || []);
                 } else {
                     setSuggestions([]);
                 }
