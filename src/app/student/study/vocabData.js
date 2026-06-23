@@ -1237,6 +1237,91 @@ const customDailyLifeExamples = {
   "準備": { sentence: "旅行の____をします。", example: "旅行の準備をします。", exampleEn: "I prepare for the trip." }
 };
 
+const customFeelingsExamples = {
+  "困ります": { sentence: "どうすればいいか____。", example: "どうすればいいか困ります。", exampleEn: "I'm troubled about what to do." },
+  "泣きます": { sentence: "悲しい映画を見て____。", example: "悲しい映画を見て泣きました。", exampleEn: "I cried watching a sad movie." },
+  "笑います": { sentence: "面白いテレビを見て____。", example: "面白いテレビを見て笑います。", exampleEn: "I laugh watching funny TV." },
+  "怒ります": { sentence: "約束を破ると、友達が____。", example: "約束を破ると、友達が怒ります。", exampleEn: "If you break a promise, your friend will get angry." },
+  "驚きます": { sentence: "大きな音に____。", example: "大きな音に驚きました。", exampleEn: "I was surprised by a loud noise." },
+  "心配します": { sentence: "テストの結果を____。", example: "テストの結果を心配します。", exampleEn: "I worry about the test results." },
+  "安心します": { sentence: "家族の顔を見て____。", example: "家族の顔を見て安心しました。", exampleEn: "I felt relieved to see my family's faces." },
+  "悲しい": { sentence: "友達が帰って____です。", example: "友達が帰って悲しいです。", exampleEn: "I am sad that my friend is leaving." },
+  "嬉しい": { sentence: "プレゼントをもらって____です。", example: "プレゼントをもらって嬉しいです。", exampleEn: "I am happy to receive a present." },
+  "怖い": { sentence: "暗い部屋が____です。", example: "暗い部屋が怖いです。", exampleEn: "I am afraid of dark rooms." },
+  "心配": { sentence: "テストが____です。", example: "テストが心配です。", exampleEn: "I am worried about the test." },
+  "安全": { sentence: "この町は____です。", example: "この町は安全です。", exampleEn: "This town is safe." }
+};
+
+const customFoodExamples = {
+  "食べ物": { sentence: "美味しい____を買いました。", example: "美味しい食べ物を買いました。", exampleEn: "I bought delicious food." },
+  "飲み物": { sentence: "冷たい____が欲しいです。", example: "冷たい飲み物が欲しいです。", exampleEn: "I want a cold drink." },
+  "ご飯": { sentence: "一緒に____を食べましょう。", example: "一緒にご飯を食べましょう。", exampleEn: "Let's eat a meal together." },
+  "朝ご飯": { sentence: "____はいつもパンです。", example: "朝ご飯はいつもパンです。", exampleEn: "Breakfast is always bread." },
+  "昼ご飯": { sentence: "____は食堂で食べます。", example: "昼ご飯は食堂で食べます。", exampleEn: "I eat lunch at the cafeteria." },
+  "晩ご飯": { sentence: "今日の____はカレーです。", example: "今日の晩ご飯はカレーです。", exampleEn: "Today's dinner is curry." },
+  "パン": { sentence: "朝ご飯に____を食べます。", example: "朝ご飯にパンを食べます。", exampleEn: "I eat bread for breakfast." },
+  "卵": { sentence: "____を三つ買いました。", example: "卵を三つ買いました。", exampleEn: "I bought three eggs." },
+  "牛肉": { sentence: "____と豚肉を買いました。", example: "牛肉と豚肉を買いました。", exampleEn: "I bought beef and pork." },
+  "豚肉": { sentence: "____の料理を作ります。", example: "豚肉の料理を作ります。", exampleEn: "I cook pork dishes." },
+  "鶏肉": { sentence: "____が一番好きです。", example: "鶏肉が一番好きです。", exampleEn: "I like chicken the best." },
+  "野菜": { sentence: "____をたくさん食べます。", example: "野菜をたくさん食べます。", exampleEn: "I eat a lot of vegetables." },
+  "果物": { sentence: "甘い____が好きです。", example: "甘い果物が好きです。", exampleEn: "I like sweet fruits." },
+  "牛乳": { sentence: "毎日、____を飲みます。", example: "毎日、牛乳を飲みます。", exampleEn: "I drink milk every day." },
+  "お茶": { sentence: "温かい____をどうぞ。", example: "温かいお茶をどうぞ。", exampleEn: "Warm tea, please." },
+  "紅茶": { sentence: "レモンを入れて____を飲みます。", example: "レモンを入れて紅茶を飲みます。", exampleEn: "I drink black tea with lemon." },
+  "コーヒー": { sentence: "朝、____を飲みます。", example: "朝、コーヒーを飲みます。", exampleEn: "I drink coffee in the morning." },
+  "ジュース": { sentence: "オレンジの____を飲みました。", example: "オレンジのジュースを飲みました。", exampleEn: "I drank orange juice." },
+  "酒": { sentence: "お____はあまり飲みません。", example: "お酒はあまり飲みません。", exampleEn: "I don't drink alcohol very much." },
+  "塩": { sentence: "____を少し入れてください。", example: "塩を少し入れてください。", exampleEn: "Please put in a little salt." },
+  "砂糖": { sentence: "コーヒーに____を入れます。", example: "コーヒーに砂糖を入れます。", exampleEn: "I put sugar in coffee." },
+  "醤油": { sentence: "魚に____をかけます。", example: "魚に醤油をかけます。", exampleEn: "I pour soy sauce on fish." }
+};
+
+const customGreetingsExamples = {
+  "どうぞ": { sentence: "お茶を____。", example: "お茶をどうぞ。", exampleEn: "Here is some tea." },
+  "どうも": { sentence: "手伝ってくれて、____。", example: "手伝ってくれて、どうも。", exampleEn: "Thanks a lot for helping me." },
+  "ありがとう": { sentence: "プレゼント、____。", example: "プレゼント、ありがとう。", exampleEn: "Thank you for the present." },
+  "ありがとうございます": { sentence: "先生、____。", example: "先生、ありがとうございます。", exampleEn: "Thank you very much, teacher." },
+  "すみません": { sentence: "____、駅はどこですか。", example: "すみません、駅はどこですか。", exampleEn: "Excuse me, where is the station?" },
+  "ごめんなさい": { sentence: "遅れて____。", example: "遅れてごめんなさい。", exampleEn: "I am sorry for being late." },
+  "おはようございます": { sentence: "朝、先生に「____」と言います。", example: "朝、先生に「おはようございます」と言います。", exampleEn: "In the morning, I say 'Good morning' to the teacher." },
+  "こんにちは": { sentence: "昼、友達に「____」と言います。", example: "昼、友達に「こんにちは」と言います。", exampleEn: "At noon, I say 'Hello' to my friend." },
+  "こんばんは": { sentence: "夜、隣の人に「____」と言います。", example: "夜、隣の人に「こんばんは」と言います。", exampleEn: "At night, I say 'Good evening' to the neighbor." },
+  "さようなら": { sentence: "帰る時、「____」と言います。", example: "帰る時、「さようなら」と言います。", exampleEn: "When leaving, I say 'Goodbye'." },
+  "おやすみなさい": { sentence: "寝る前、「____」と言います。", example: "寝る前、「おやすみなさい」と言います。", exampleEn: "Before going to sleep, I say 'Good night'." },
+  "いただきます": { sentence: "ご飯を食べる前に「____」と言います。", example: "ご飯を食べる前に「いただきます」と言います。", exampleEn: "I say 'Itadakimasu' before eating." },
+  "ごちそうさまでした": { sentence: "ご飯を食べた後に「____」と言います。", example: "ご飯を食べた後に「ごちそうさまでした」と言います。", exampleEn: "I say 'Gochisousama-deshita' after eating." },
+  "いらっしゃいませ": { sentence: "店に入ると、店員が「____」と言います。", example: "店に入ると、店員が「いらっしゃいませ」と言います。", exampleEn: "When entering a shop, the clerk says 'Welcome'." },
+  "お願いします": { sentence: "お水を____。", example: "お水をお願いします。", exampleEn: "Water, please." },
+  "分かりました": { sentence: "先生の説明が____。", example: "先生の説明が分かりました。", exampleEn: "I understood the teacher's explanation." },
+  "結構です": { sentence: "「コーヒーはいかがですか」「いいえ、____」", example: "「コーヒーはいかがですか」「いいえ、結構です」", exampleEn: "'Would you like coffee?' 'No, thank you.'" },
+  "もしもし": { sentence: "電話で「____、田中さんですか」", example: "電話で「もしもし、田中さんですか」", exampleEn: "On the phone, 'Hello, is this Mr. Tanaka?'" }
+};
+
+const customHealthExamples = {
+  "風邪": { sentence: "____をひきました。", example: "風邪をひきました。", exampleEn: "I caught a cold." },
+  "熱": { sentence: "体に____があります。", example: "体に熱があります。", exampleEn: "I have a fever." },
+  "薬": { sentence: "ご飯の後で、____を飲みます。", example: "ご飯の後で、薬を飲みます。", exampleEn: "I take medicine after meals." },
+  "痛い": { sentence: "お腹が____です。", example: "お腹が痛いです。", exampleEn: "My stomach hurts." },
+  "眠い": { sentence: "夜遅いので、とても____です。", example: "夜遅いので、とても眠いです。", exampleEn: "Because it's late at night, I'm very sleepy." },
+  "危ない": { sentence: "車が多いので、この道は____です。", example: "車が多いので、この道は危ないです。", exampleEn: "This road is dangerous because there are many cars." },
+  "疲れます": { sentence: "たくさん歩いたので、____。", example: "たくさん歩いたので、疲れました。", exampleEn: "I am tired because I walked a lot." },
+  "疲れました": { sentence: "たくさん歩いたので、____。", example: "たくさん歩いたので、疲れました。", exampleEn: "I am tired because I walked a lot." }
+};
+
+const customHobbiesExamples = {
+  "趣味": { sentence: "私の____は絵を描くことです。", example: "私の趣味は絵を描くことです。", exampleEn: "My hobby is drawing pictures." },
+  "スポーツ": { sentence: "何か____をしていますか。", example: "何かスポーツをしていますか。", exampleEn: "Are you playing any sports?" },
+  "サッカー": { sentence: "友達と____の練習をします。", example: "友達とサッカーの練習をします。", exampleEn: "I practice soccer with my friends." },
+  "テニス": { sentence: "土曜日に____をします。", example: "土曜日にテニスをします。", exampleEn: "I play tennis on Saturday." },
+  "野球": { sentence: "テレビで____の試合を見ます。", example: "テレビで野球の試合を見ます。", exampleEn: "I watch a baseball game on TV." },
+  "水泳": { sentence: "____は体にいいです。", example: "水泳は体にいいです。", exampleEn: "Swimming is good for your health." },
+  "散歩": { sentence: "朝、犬と____します。", example: "朝、犬と散歩します。", exampleEn: "I take a walk with my dog in the morning." },
+  "旅行": { sentence: "夏休みに____へ行きます。", example: "夏休みに旅行へ行きます。", exampleEn: "I will go on a trip during summer vacation." },
+  "カラオケ": { sentence: "____で歌を歌います。", example: "カラオケで歌を歌います。", exampleEn: "I sing songs at karaoke." },
+  "ギター": { sentence: "毎日、____を練習します。", example: "毎日、ギターを練習します。", exampleEn: "I practice guitar every day." }
+};
+
 function generatedExample(item) {
   const term = item.term;
   
@@ -1263,6 +1348,21 @@ function generatedExample(item) {
   }
   if (customDailyLifeExamples[term]) {
     return customDailyLifeExamples[term];
+  }
+  if (customFeelingsExamples[term]) {
+    return customFeelingsExamples[term];
+  }
+  if (customFoodExamples[term]) {
+    return customFoodExamples[term];
+  }
+  if (customGreetingsExamples[term]) {
+    return customGreetingsExamples[term];
+  }
+  if (customHealthExamples[term]) {
+    return customHealthExamples[term];
+  }
+  if (customHobbiesExamples[term]) {
+    return customHobbiesExamples[term];
   }
   if (item.category === "Animals") {
     return {
