@@ -40,6 +40,17 @@ export const getMenuItems = (role, studentId = null) => {
                 )
             },
             {
+                href: '/student/study',
+                label: '学習',
+                color: '#eab308', // Yellow-gold
+                icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                )
+            },
+            {
                 href: '/student/attendance',
                 label: '出席率・成績',
                 color: '#22c55e', // Green
