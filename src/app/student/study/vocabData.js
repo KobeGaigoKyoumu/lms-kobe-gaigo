@@ -1322,6 +1322,53 @@ const customHobbiesExamples = {
   "ギター": { sentence: "毎日、____を練習します。", example: "毎日、ギターを練習します。", exampleEn: "I practice guitar every day." }
 };
 
+const customHomeExamples = {
+  "台所": { sentence: "____で料理を作ります。", example: "台所で料理を作ります。", exampleEn: "I cook in the kitchen." },
+  "風呂": { sentence: "____に入ります。", example: "お風呂に入ります。", exampleEn: "I take a bath." },
+  "お風呂": { sentence: "____に入ります。", example: "お風呂に入ります。", exampleEn: "I take a bath." },
+  "トイレ": { sentence: "____はどこですか。", example: "トイレはどこですか。", exampleEn: "Where is the toilet?" },
+  "玄関": { sentence: "____で靴を脱ぎます。", example: "玄関で靴を脱ぎます。", exampleEn: "I take off my shoes at the entryway." },
+  "廊下": { sentence: "____を歩きます。", example: "廊下を歩きます。", exampleEn: "I walk in the hallway." },
+  "階段": { sentence: "____を上ります。", example: "階段を上ります。", exampleEn: "I go up the stairs." },
+  "庭": { sentence: "____に花が咲いています。", example: "庭に花が咲いています。", exampleEn: "Flowers are blooming in the garden." }
+};
+
+const customShoppingExamples = {
+  "カード": { sentence: "____で払います。", example: "カードで払います。", exampleEn: "I pay by card." },
+  "現金": { sentence: "____で払います。", example: "現金で払います。", exampleEn: "I pay in cash." },
+  "値段": { sentence: "この服の____はいくらですか。", example: "この服の値段はいくらですか。", exampleEn: "How much is the price of this clothing?" },
+  "半額": { sentence: "このパンは____です。", example: "このパンは半額です。", exampleEn: "This bread is half price." },
+  "無料": { sentence: "この水は____です。", example: "この水は無料です。", exampleEn: "This water is free." },
+  "レジ": { sentence: "____で並びます。", example: "レジで並びます。", exampleEn: "I line up at the cash register." },
+  "領収書": { sentence: "____をください。", example: "領収書をください。", exampleEn: "Receipt, please." },
+  "お釣り": { sentence: "____をもらいました。", example: "お釣りをもらいました。", exampleEn: "I received the change." },
+  "売り場": { sentence: "靴の____はどこですか。", example: "靴の売り場はどこですか。", exampleEn: "Where is the shoe department?" },
+  "眼鏡屋": { sentence: "____で眼鏡を買いました。", example: "眼鏡屋で眼鏡を買いました。", exampleEn: "I bought glasses at the glasses shop." },
+  "本屋": { sentence: "____で辞書を買います。", example: "本屋で辞書を買います。", exampleEn: "I buy a dictionary at the bookstore." },
+  "花屋": { sentence: "____で赤いバラを買いました。", example: "花屋で赤いバラを買いました。", exampleEn: "I bought red roses at the flower shop." },
+  "肉屋": { sentence: "____で牛肉を買います。", example: "肉屋で牛肉を買います。", exampleEn: "I buy beef at the butcher shop." },
+  "魚屋": { sentence: "____で魚を買いました。", example: "魚屋で魚を買いました。", exampleEn: "I bought fish at the fish shop." },
+  "八百屋": { sentence: "____でリンゴを買います。", example: "八百屋でリンゴを買います。", exampleEn: "I buy apples at the vegetable shop." },
+  "薬屋": { sentence: "____で風邪薬を買いました。", example: "薬屋で風邪薬を買いました。", exampleEn: "I bought cold medicine at the pharmacy." },
+  "スーパー": { sentence: "____で野菜を買います。", example: "スーパーで野菜を買います。", exampleEn: "I buy vegetables at the supermarket." },
+  "デパート": { sentence: "____で買い物をします。", example: "デパートで買い物をします。", exampleEn: "I shop at the department store." },
+  "コンビニ": { sentence: "____でおにぎりを買いました。", example: "コンビニでおにぎりを買いました。", exampleEn: "I bought a rice ball at the convenience store." }
+};
+
+const customWorkExamples = {
+  "店長": { sentence: "____に挨拶をします。", example: "店長に挨拶をします。", exampleEn: "I greet the store manager." },
+  "社長": { sentence: "____に書類を渡します。", example: "社長に書類を渡します。", exampleEn: "I hand the documents to the president." },
+  "社員": { sentence: "彼はこの会社の____です。", example: "彼はこの会社の社員です。", exampleEn: "He is an employee of this company." },
+  "会議": { sentence: "三時から____があります。", example: "三時から会議があります。", exampleEn: "There is a meeting from three o'clock." },
+  "資料": { sentence: "会議の____を作ります。", example: "会議の資料を作ります。", exampleEn: "I make documents for the meeting." },
+  "受付": { sentence: "____で名前を書いてください。", example: "受付で名前を書いてください。", exampleEn: "Please write your name at the reception." },
+  "事務所": { sentence: "____で仕事をします。", example: "事務所で仕事をします。", exampleEn: "I work in the office." },
+  "工場": { sentence: "____で車を作っています。", example: "工場で車を作っています。", exampleEn: "They make cars in the factory." },
+  "仕事中": { sentence: "父は今、____です。", example: "父は今、仕事中です。", exampleEn: "My father is at work now." },
+  "休憩": { sentence: "少し____しましょう。", example: "少し休憩しましょう。", exampleEn: "Let's take a short break." },
+  "給料": { sentence: "毎月、____をもらいます。", example: "毎月、給料をもらいます。", exampleEn: "I receive a salary every month." }
+};
+
 function generatedExample(item) {
   const term = item.term;
   
@@ -1363,6 +1410,15 @@ function generatedExample(item) {
   }
   if (customHobbiesExamples[term]) {
     return customHobbiesExamples[term];
+  }
+  if (customHomeExamples[term]) {
+    return customHomeExamples[term];
+  }
+  if (customShoppingExamples[term]) {
+    return customShoppingExamples[term];
+  }
+  if (customWorkExamples[term]) {
+    return customWorkExamples[term];
   }
   if (item.category === "Animals") {
     return {
