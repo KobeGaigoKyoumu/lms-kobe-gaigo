@@ -1178,6 +1178,65 @@ const customDirectionExamples = {
   "北": { sentence: "____から風が吹いています。", example: "北から風が吹いています。", exampleEn: "The wind is blowing from the north." }
 };
 
+const customBodyExamples = {
+  "背": { sentence: "____が高いです。", example: "背が高いです。", exampleEn: "He/She is tall." },
+  "頭": { sentence: "____が痛いです。", example: "頭が痛いです。", exampleEn: "My head hurts." },
+  "顔": { sentence: "朝、____を洗います。", example: "朝、顔を洗います。", exampleEn: "I wash my face in the morning." },
+  "目": { sentence: "____が大きいです。", example: "目が大きいです。", exampleEn: "Eyes are big." },
+  "耳": { sentence: "____が痛いです。", example: "耳が痛いです。", exampleEn: "My ears hurt." },
+  "鼻": { sentence: "____が高いです。", example: "鼻が高いです。", exampleEn: "My nose is high." },
+  "口": { sentence: "____を開けてください。", example: "口を開けてください。", exampleEn: "Please open your mouth." },
+  "歯": { sentence: "毎朝、____を磨きます。", example: "毎朝、歯を磨きます。", exampleEn: "I brush my teeth every morning." },
+  "手": { sentence: "____を洗います。", example: "手を洗います。", exampleEn: "I wash my hands." },
+  "足": { sentence: "____が痛いです。", example: "足が痛いです。", exampleEn: "My leg hurts." },
+  "体": { sentence: "____に気をつけてください。", example: "体に気をつけてください。", exampleEn: "Please take care of your health." },
+  "お腹": { sentence: "____が空きました。", example: "お腹が空きました。", exampleEn: "I am hungry." },
+  "喉": { sentence: "____が渇きました。", example: "喉が渇きました。", exampleEn: "I am thirsty." },
+  "髪": { sentence: "____が長いです。", example: "髪が長いです。", exampleEn: "His/Her hair is long." }
+};
+
+const customBuildingsExamples = {
+  "アパート": { sentence: "____に住んでいます。", example: "アパートに住んでいます。", exampleEn: "I live in an apartment." },
+  "マンション": { sentence: "新しい____を買いました。", example: "新しいマンションを買いました。", exampleEn: "I bought a new apartment building." },
+  "エレベーター": { sentence: "____に乗ります。", example: "エレベーターに乗ります。", exampleEn: "I ride the elevator." }
+};
+
+const customClothesExamples = {
+  "制服": { sentence: "学校の____を着ます。", example: "学校の制服を着ます。", exampleEn: "I wear the school uniform." },
+  "背広": { sentence: "仕事で____を着ます。", example: "仕事で背広を着ます。", exampleEn: "I wear a business suit for work." },
+  "スーツ": { sentence: "黒い____を着ます。", example: "黒いスーツを着ます。", exampleEn: "I wear a black suit." },
+  "セーター": { sentence: "赤い____を着ます。", example: "赤いセーターを着ます。", exampleEn: "I wear a red sweater." },
+  "シャツ": { sentence: "白い____を着ます。", example: "白いシャツを着ます。", exampleEn: "I wear a white shirt." },
+  "ズボン": { sentence: "青い____をはきます。", example: "青いズボンをはきます。", exampleEn: "I wear blue pants." },
+  "スカート": { sentence: "長い____をはきます。", example: "長いスカートをはきます。", exampleEn: "I wear a long skirt." },
+  "靴下": { sentence: "温かい____をはきます。", example: "温かい靴下をはきます。", exampleEn: "I wear warm socks." },
+  "ネクタイ": { sentence: "____をしめます。", example: "ネクタイをしめます。", exampleEn: "I tie a necktie." },
+  "コート": { sentence: "冬は____を着ます。", example: "冬はコートを着ます。", exampleEn: "I wear a coat in winter." },
+  "ジャケット": { sentence: "____を着て出かけます。", example: "ジャケットを着て出かけます。", exampleEn: "I wear a jacket and go out." },
+  "ポケット": { sentence: "____に鍵を入れます。", example: "ポケットに鍵を入れます。", exampleEn: "I put the key in the pocket." }
+};
+
+const customCultureExamples = {
+  "映画": { sentence: "映画館で____を見ます。", example: "映画館で映画を見ます。", exampleEn: "I watch a movie at the cinema." },
+  "音楽": { sentence: "部屋で____を聞きます。", example: "部屋で音楽を聞きます。", exampleEn: "I listen to music in my room." },
+  "歌": { sentence: "みんなで____を歌います。", example: "みんなで歌を歌います。", exampleEn: "We all sing a song." },
+  "絵": { sentence: "ノートに____を描きます。", example: "ノートに絵を描きます。", exampleEn: "I draw a picture in the notebook." },
+  "漫画": { sentence: "面白い____を読みます。", example: "面白い漫画を読みます。", exampleEn: "I read an interesting comic book." },
+  "アニメ": { sentence: "日本の____が好きです。", example: "日本のアニメが好きです。", exampleEn: "I like Japanese anime." }
+};
+
+const customDailyLifeExamples = {
+  "石鹸": { sentence: "____で手を洗います。", example: "石鹸で手を洗います。", exampleEn: "I wash my hands with soap." },
+  "タオル": { sentence: "____で顔を拭きます。", example: "タオルで顔を拭きます。", exampleEn: "I wipe my face with a towel." },
+  "歯ブラシ": { sentence: "新しい____を買いました。", example: "新しい歯ブラシを買いました。", exampleEn: "I bought a new toothbrush." },
+  "洗濯機": { sentence: "____で服を洗います。", example: "洗濯機で服を洗います。", exampleEn: "I wash clothes in the washing machine." },
+  "掃除機": { sentence: "____で部屋を掃除します。", example: "掃除機で部屋を掃除します。", exampleEn: "I clean the room with a vacuum cleaner." },
+  "用事": { sentence: "今日は____があります。", example: "今日は用事があります。", exampleEn: "I have errands to run today." },
+  "約束": { sentence: "友達と____があります。", example: "友達と約束があります。", exampleEn: "I have an appointment with a friend." },
+  "予定": { sentence: "明日の____を教えてください。", example: "明日の予定を教えてください。", exampleEn: "Please tell me tomorrow's schedule." },
+  "準備": { sentence: "旅行の____をします。", example: "旅行の準備をします。", exampleEn: "I prepare for the trip." }
+};
+
 function generatedExample(item) {
   const term = item.term;
   
@@ -1189,6 +1248,21 @@ function generatedExample(item) {
   }
   if (customDirectionExamples[term]) {
     return customDirectionExamples[term];
+  }
+  if (customBodyExamples[term]) {
+    return customBodyExamples[term];
+  }
+  if (customBuildingsExamples[term]) {
+    return customBuildingsExamples[term];
+  }
+  if (customClothesExamples[term]) {
+    return customClothesExamples[term];
+  }
+  if (customCultureExamples[term]) {
+    return customCultureExamples[term];
+  }
+  if (customDailyLifeExamples[term]) {
+    return customDailyLifeExamples[term];
   }
   if (item.category === "Animals") {
     return {
