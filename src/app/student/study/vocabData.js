@@ -1142,8 +1142,61 @@ const customAdverbExamples = {
   "あまり": { sentence: "お酒は____飲みません。", example: "お酒はあまり飲みません。", exampleEn: "I don't drink alcohol very much." }
 };
 
+const customBasicsExamples = {
+  "これ": { sentence: "____は私のペンです。", example: "これは私のペンです。", exampleEn: "This is my pen." },
+  "それ": { sentence: "____は何ですか。", example: "それは何ですか。", exampleEn: "What is that?" },
+  "あれ": { sentence: "____は交番です。", example: "あれは交番です。", exampleEn: "That over there is a police box." },
+  "ここ": { sentence: "____は教室です。", example: "ここは教室です。", exampleEn: "This is a classroom." },
+  "そこ": { sentence: "____に座ってください。", example: "そこに座ってください。", exampleEn: "Please sit there." },
+  "あそこ": { sentence: "____に犬がいます。", example: "あそこに犬がいます。", exampleEn: "There is a dog over there." },
+  "どこ": { sentence: "トイレは____ですか。", example: "トイレはどこですか。", exampleEn: "Where is the restroom?" },
+  "何": { sentence: "____を食べますか。", example: "何を食べますか。", exampleEn: "What will you eat?" },
+  "どれ": { sentence: "あなたの傘は____ですか。", example: "あなたの傘はどれですか。", exampleEn: "Which one is your umbrella?" },
+  "どの": { sentence: "____本を読みますか。", example: "どの本を読みますか。", exampleEn: "Which book will you read?" },
+  "いくら": { sentence: "このリンゴは____ですか。", example: "このリンゴはいくらですか。", exampleEn: "How much is this apple?" },
+  "から": { sentence: "東京____大阪まで行きます。", example: "東京から大阪まで行きます。", exampleEn: "I go from Tokyo to Osaka." },
+  "まで": { sentence: "駅____歩きます。", example: "駅まで歩きます。", exampleEn: "I walk to the station." }
+};
+
+const customPositionExamples = {
+  "上": { sentence: "机の____に本があります。", example: "机の上に本があります。", exampleEn: "There is a book on the desk." },
+  "下": { sentence: "机の____に猫がいます。", example: "机の下に猫がいます。", exampleEn: "There is a cat under the desk." },
+  "前": { sentence: "駅の____で友達に会います。", example: "駅の前で友達に会います。", exampleEn: "I meet my friend in front of the station." },
+  "後ろ": { sentence: "私の____に誰かがいます。", example: "私の後ろに誰かがいます。", exampleEn: "There is someone behind me." },
+  "右": { sentence: "交番は____にあります。", example: "交番は右にあります。", exampleEn: "The police box is on the right." },
+  "左": { sentence: "____に曲がってください。", example: "左に曲がってください。", exampleEn: "Please turn left." },
+  "中": { sentence: "箱の____に何がありますか。", example: "箱の中に何がありますか。", exampleEn: "What is inside the box?" },
+  "外": { sentence: "____は雨が降っています。", example: "外は雨が降っています。", exampleEn: "It is raining outside." },
+  "隣": { sentence: "私の____の人は留学生です。", example: "私の隣の人は留学生です。", exampleEn: "The person next to me is an international student." },
+  "間": { sentence: "銀行と本屋の____に郵便局があります。", example: "銀行と本屋の間に郵便局があります。", exampleEn: "There is a post office between the bank and the bookstore." }
+};
+
+const customDirectionExamples = {
+  "東": { sentence: "駅の____に川があります。", example: "駅の東に川があります。", exampleEn: "There is a river to the east of the station." },
+  "西": { sentence: "太陽は____に沈みます。", example: "太陽は西に沈みます。", exampleEn: "The sun sets in the west." },
+  "南": { sentence: "____の国へ旅行します。", example: "南の国へ旅行します。", exampleEn: "I will travel to a southern country." },
+  "北": { sentence: "____から風が吹いています。", example: "北から風が吹いています。", exampleEn: "The wind is blowing from the north." }
+};
+
 function generatedExample(item) {
   const term = item.term;
+  
+  if (customBasicsExamples[term]) {
+    return customBasicsExamples[term];
+  }
+  if (customPositionExamples[term]) {
+    return customPositionExamples[term];
+  }
+  if (customDirectionExamples[term]) {
+    return customDirectionExamples[term];
+  }
+  if (item.category === "Animals") {
+    return {
+      sentence: `あそこに____がいます。`,
+      example: `あそこに${term}がいます。`,
+      exampleEn: `There is a ${item.meaning} over there.`
+    };
+  }
   
   if (item.pos === "verb" && customVerbExamples[term]) {
     return customVerbExamples[term];
