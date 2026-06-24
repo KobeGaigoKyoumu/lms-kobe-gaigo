@@ -1000,11 +1000,11 @@ const miniExamSets = [
   {
     title: "Mini Mock 2",
     parts: [
-      { label: "Part 1. Kanji Reading", ids: [2, 7, 12, 17, 22] },
-      { label: "Part 2. Orthography", ids: [43, 48, 53, 58, 63] },
-      { label: "Part 3. Context Vocabulary", ids: [92, 93, 94, 95, 96] },
-      { label: "Part 4. Paraphrase & Meaning", ids: [143, 144, 145, 146, 147] },
-      { label: "Part 5. Usage", ids: [179, 180, 181, 182, 183] }
+      { label: "Part 1. Kanji Reading", ids: [3, 33, 200, 204, 207] },
+      { label: "Part 2. Orthography", ids: [41, 55, 221, 226, 234] },
+      { label: "Part 3. Context Vocabulary", ids: [81, 101, 239, 240, 256] },
+      { label: "Part 4. Paraphrase & Meaning", ids: [121, 135, 260, 265, 269] },
+      { label: "Part 5. Usage", ids: [184, 186, 286, 293, 297] }
     ]
   },
   {
