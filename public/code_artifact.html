@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Master - Flashcards & Quiz for English Speakers</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 読みやすいフォントのインポート -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&family=Kiwi+Maru:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Kiwi Maru', sans-serif;
+        }
+        .perspective-1000 { perspective: 1000px; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transform-style-3d { transform-style: preserve-3d; }
+        
+        /* ぷっくり立体感のある3Dボタン効果 */
+        .btn-pop-indigo {
+            box-shadow: 0 6px 0 #4f46e5;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-indigo:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4f46e5;
+        }
+        .btn-pop-blue {
+            box-shadow: 0 6px 0 #1d4ed8;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-blue:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1d4ed8;
+        }
+        .btn-pop-sky {
+            box-shadow: 0 6px 0 #0284c7;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-sky:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0284c7;
+        }
+        .btn-pop-pink {
+            box-shadow: 0 6px 0 #db2777;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-pink:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #db2777;
+        }
+        .btn-pop-orange {
+            box-shadow: 0 6px 0 #c2410c;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-orange:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #c2410c;
+        }
+        .btn-pop-emerald {
+            box-shadow: 0 6px 0 #059669;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-emerald:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #059669;
+        }
+        .btn-pop-yellow {
+            box-shadow: 0 6px 0 #d97706;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-yellow:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d97706;
+        }
+        .btn-pop-rose {
+            box-shadow: 0 6px 0 #e11d48;
+            transition: all 0.1s ease;
+        }
+        .btn-pop-rose:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #e11d48;
+        }
+    </style>
+</head>
+<body class="bg-[#FFFDF4] min-h-screen text-[#3C3231] relative overflow-x-hidden selection:bg-pink-200">
+    <!-- ポップな背景装飾 -->
+    <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-indigo-50 opacity-70 pointer-events-none"></div>
+    <div class="absolute top-1/4 -right-16 w-36 h-36 rounded-full bg-pink-50 opacity-70 pointer-events-none"></div>
+    <div class="absolute -bottom-10 left-1/4 w-40 h-40 rounded-full bg-emerald-50 opacity-60 pointer-events-none"></div>
+
+    <div class="max-w-4xl mx-auto p-4 min-h-screen flex flex-col justify-between relative z-10">
+        
+        <!-- ==================== HEADER ==================== -->
+        <header id="main-header" class="text-center py-6">
+            <div class="inline-block animate-bounce duration-1000 mb-2">
+                <span class="text-xs font-black bg-[#4F46E5] text-white px-4 py-1.5 rounded-full shadow-md tracking-wider">🇺🇸 For English Speakers</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black text-[#1D3557] tracking-wide flex items-center justify-center gap-1">
+                <span>🌸</span>Japanese Master
+            </h1>
+            <p class="text-slate-500 font-extrabold text-xs md:text-sm mt-1">Learn Hiragana, Katakana & 100 Essential Words!</p>
+        </header>
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <main class="flex-grow flex items-center justify-center my-4">
+            
+            <!-- 1. MENU VIEW (HOME SCREEN) -->
+            <div id="view-menu" class="w-full max-w-3xl">
+                <!-- クイズ問題数の選択設定 -->
+                <div class="bg-white border-4 border-yellow-300 rounded-[28px] p-5 shadow-lg mb-8 relative">
+                    <div class="absolute -top-5 left-6 bg-yellow-300 text-[#3C3231] font-black px-4 py-1 rounded-full shadow-sm text-xs md:text-sm">
+                        ⚙️ Quiz Settings
+                    </div>
+                    <div class="flex flex-wrap items-center justify-around gap-3 pt-3">
+                        <span class="text-sm font-black text-slate-500">How many questions for the test?</span>
+                        <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-2 w-full sm:w-auto">
+                            <button onclick="setQuizCount(10)" id="q-btn-10" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm">10 Qs</button>
+                            <button onclick="setQuizCount(20)" id="q-btn-20" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">20 Qs</button>
+                            <button onclick="setQuizCount(30)" id="q-btn-30" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">30 Qs</button>
+                            <button onclick="setQuizCount(999)" id="q-btn-all" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">All Cards</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 各学習デッキの選択グリッド -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Hiragana (ひらがな) -->
+                    <div class="bg-white border-4 border-indigo-400 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-60 transition-transform hover:scale-[1.01] duration-200">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Basic Alphabet</span>
+                                <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-md">46 Cards</span>
+                            </div>
+                            <h3 class="text-2xl font-black text-indigo-600">ひらがな (Hiragana)</h3>
+                            <p class="text-slate-500 text-xs mt-2 leading-relaxed">The primary writing system. Start here to learn the rounded phonetic characters of Japanese.</p>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="startMode('study', 'hiragana')" class="flex-1 btn-pop-indigo bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-2xl text-xs">📖 Learn</button>
+                            <button onclick="startMode('quiz', 'hiragana')" class="flex-1 btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-2xl text-xs">✨ Test</button>
+                        </div>
+                    </div>
+
+                    <!-- Katakana (カタカナ) -->
+                    <div class="bg-white border-4 border-sky-400 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-60 transition-transform hover:scale-[1.01] duration-200">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-sky-50 text-sky-700">Foreign Loanwords</span>
+                                <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-md">46 Cards</span>
+                            </div>
+                            <h3 class="text-2xl font-black text-sky-600">カタカナ (Katakana)</h3>
+                            <p class="text-slate-500 text-xs mt-2 leading-relaxed">Sharp characters mainly used for spelling foreign names, loanwords, and sound effects.</p>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="startMode('study', 'katakana')" class="flex-1 btn-pop-sky bg-sky-500 hover:bg-sky-600 text-white font-black py-2.5 rounded-2xl text-xs">📖 Learn</button>
+                            <button onclick="startMode('quiz', 'katakana')" class="flex-1 btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-2xl text-xs">✨ Test</button>
+                        </div>
+                    </div>
+
+                    <!-- Extra (濁音/半濁音/拗音) -->
+                    <div class="bg-white border-4 border-rose-400 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-60 transition-transform hover:scale-[1.01] duration-200">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-rose-50 text-rose-700">Modified Sounds</span>
+                                <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-md">76 Cards</span>
+                            </div>
+                            <h3 class="text-2xl font-black text-rose-500">濁音・拗音 (Dakuon/Youon)</h3>
+                            <p class="text-slate-500 text-xs mt-2 leading-relaxed">Modified sounds like "が" (ga) or "ぱ" (pa), and contracted double-vowel characters like "きゃ" (kya).</p>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="startMode('study', 'extra')" class="flex-1 btn-pop-rose bg-rose-500 hover:bg-rose-600 text-white font-black py-2.5 rounded-2xl text-xs">📖 Learn</button>
+                            <button onclick="startMode('quiz', 'extra')" class="flex-1 btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-2xl text-xs">✨ Test</button>
+                        </div>
+                    </div>
+
+                    <!-- 100 Words (基本単語) -->
+                    <div class="bg-white border-4 border-emerald-400 rounded-3xl p-5 shadow-sm flex flex-col justify-between h-60 transition-transform hover:scale-[1.01] duration-200">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">Practical Vocabulary</span>
+                                <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-md">100 Words</span>
+                            </div>
+                            <h3 class="text-2xl font-black text-emerald-600">100 Core Words (基本単語)</h3>
+                            <p class="text-slate-500 text-xs mt-2 leading-relaxed">Everyday vocabulary including greetings, food, animals, directions, and numbers with English translation.</p>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="startMode('study', 'words')" class="flex-1 btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-2xl text-xs">📖 Learn</button>
+                            <button onclick="startMode('quiz', 'words')" class="flex-1 btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-2xl text-xs">✨ Test</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 2. STUDY VIEW (みるモード) -->
+            <div id="view-study" class="hidden w-full max-w-md mx-auto">
+                <div class="w-full flex justify-between items-center mb-6">
+                    <button onclick="exitToMenu()" class="text-slate-600 font-black hover:text-[#4F46E5] transition flex items-center gap-1.5 py-1.5 px-3 rounded-2xl bg-white border-2 border-slate-200 shadow-sm text-xs active:scale-95">
+                        <span>🏠</span> Home
+                    </button>
+                    <div id="study-progress" class="bg-indigo-100 px-4 py-1 text-indigo-700 font-black rounded-full text-xs">
+                        1 / 46
+                    </div>
+                    <div id="study-deck-badge" class="text-xs font-black text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-xl border-2 border-indigo-200 uppercase">
+                        HIRAGANA
+                    </div>
+                </div>
+
+                <!-- 3D フラッシュカード -->
+                <div id="study-flashcard" onclick="toggleFlip()" class="w-full h-80 perspective-1000 cursor-pointer mb-8">
+                    <div id="flashcard-inner" class="relative w-full h-full transform-style-3d transition-transform duration-500">
+                        <!-- カード 表面 -->
+                        <div id="study-card-front" class="absolute inset-0 w-full h-full backface-hidden bg-white border-[6px] border-indigo-500 rounded-[32px] shadow-lg flex flex-col items-center justify-center">
+                            <div id="study-front-text" class="text-9xl font-black text-slate-800 leading-none">あ</div>
+                            <div class="mt-8 text-indigo-500 font-black text-xs flex items-center gap-1 bg-indigo-50 px-4 py-2 rounded-full animate-pulse">
+                                <span>🔄</span> Tap to flip card
+                            </div>
+                        </div>
+                        <!-- カード 裏面 -->
+                        <div id="study-card-back" class="absolute inset-0 w-full h-full backface-hidden bg-indigo-50 border-[6px] border-indigo-500 rounded-[32px] shadow-lg flex flex-col items-center justify-center rotate-y-180 p-6">
+                            <div id="study-back-text" class="text-7xl font-extrabold text-indigo-600">a</div>
+                            <div id="study-meaning-text" class="mt-6 text-xl font-bold text-slate-700 text-center max-w-xs leading-snug">Meaning</div>
+                            <div class="mt-8 text-slate-400 font-bold text-xs">Tap to view character</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 前後の操作ボタン -->
+                <div class="flex gap-4 w-full">
+                    <button id="study-prev-btn" onclick="handlePrev()" class="flex-1 btn-pop-yellow bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-3.5 rounded-2xl border-b-4 border-amber-700 transition text-sm">
+                        👈 Prev
+                    </button>
+                    <button id="study-next-btn" onclick="handleNext()" class="flex-1 btn-pop-blue bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 rounded-2xl border-b-4 border-indigo-800 transition text-sm">
+                        Next 👉
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. QUIZ VIEW (テストモード：発音＆自己申告判定) -->
+            <div id="view-quiz" class="hidden w-full max-w-md mx-auto">
+                <div class="w-full flex justify-between items-center mb-6">
+                    <button onclick="exitToMenu()" class="text-slate-600 font-black hover:text-[#4F46E5] transition flex items-center gap-1.5 py-1.5 px-3 rounded-2xl bg-white border-2 border-slate-200 shadow-sm text-xs active:scale-95">
+                        <span>🏠</span> Home
+                    </button>
+                    <div id="quiz-progress" class="bg-emerald-100 px-4 py-1 text-emerald-700 font-black rounded-full text-xs">
+                        1 / 10
+                    </div>
+                    <div id="quiz-deck-badge" class="text-xs font-black text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border-2 border-emerald-200 uppercase">
+                        HIRAGANA
+                    </div>
+                </div>
+
+                <!-- 質問提示エリア -->
+                <div id="quiz-card-display" class="w-full h-72 bg-white border-[6px] border-emerald-400 rounded-[32px] shadow-lg flex flex-col items-center justify-center p-6 mb-6">
+                    <div class="text-xs font-black bg-rose-100 text-[#E11D48] px-4 py-1.5 rounded-full mb-4 animate-bounce">
+                        🗣️ Read Out Loud!
+                    </div>
+                    <div id="quiz-front-text" class="text-9xl font-black text-slate-800 leading-none">あ</div>
+                </div>
+
+                <!-- 自己判定コントロール -->
+                <div class="w-full space-y-4">
+                    <!-- 「こたえをみる」初期ボタン -->
+                    <button id="quiz-show-ans-btn" onclick="revealQuizAnswer()" class="w-full btn-pop-orange bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-black border-b-4 border-orange-700 transition">
+                        👀 Show Answer
+                    </button>
+
+                    <!-- こたえ表示（初期は非表示） -->
+                    <div id="quiz-answer-box" class="hidden space-y-4">
+                        <div class="bg-white border-4 border-yellow-300 rounded-[24px] p-5 text-center shadow-sm animate-fade-in">
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Pronunciation & Meaning</p>
+                            <p id="quiz-correct-romaji" class="text-5xl font-extrabold text-indigo-600 mt-1">a</p>
+                            <p id="quiz-correct-meaning" class="text-lg font-black text-slate-600 mt-3"></p>
+                        </div>
+
+                        <!-- ⭕ / ❌ の自己評価ボタン -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="reportQuizResult(false)" class="btn-pop-rose bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-2xl font-black border-b-4 border-red-750 transition text-xs flex flex-col items-center justify-center">
+                                <span class="text-xl">❌ Wrong</span>
+                                <span class="text-[10px] opacity-80 mt-1">Could not say it</span>
+                            </button>
+                            <button onclick="reportQuizResult(true)" class="btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-black border-b-4 border-emerald-700 transition text-xs flex flex-col items-center justify-center">
+                                <span class="text-xl">⭕ Correct</span>
+                                <span class="text-[10px] opacity-80 mt-1">I got it right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SUMMARY VIEW (テスト終了、スコア判定) -->
+            <div id="view-summary" class="hidden w-full max-w-md mx-auto">
+                <div class="bg-white p-8 rounded-[32px] shadow-xl border-4 border-yellow-300 text-center relative overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-24 h-24 bg-red-100 rounded-full opacity-50"></div>
+                    <div class="absolute -bottom-12 -left-12 w-24 h-24 bg-blue-100 rounded-full opacity-50"></div>
+
+                    <div id="summary-score-container" class="space-y-4 relative z-10">
+                        <!-- 結果スコアはJavaScriptで動的に生成されます -->
+                    </div>
+                    <div class="mt-8 flex flex-col gap-3 relative z-10">
+                        <button onclick="retryCurrentDeck()" class="btn-pop-emerald bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl border-b-4 border-emerald-750 transition w-full text-base">
+                            🔄 Retry Again
+                        </button>
+                        <button onclick="exitToMenu()" class="btn-pop-blue bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 rounded-2xl border-b-4 border-indigo-800 transition w-full text-xs">
+                            🏠 Return to Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- ==================== FOOTER ==================== -->
+        <footer class="text-center py-4 text-xs text-slate-400 font-bold">
+            Japanese Master ★ Pop English Edition • <span class="text-[#E63946]">Good Luck!</span>
+        </footer>
+    </div>
+
+    <!-- BUSINESS LOGIC -->
+    <script>
+        // 英語圏学習者向けデータ（発音と対訳を分かりやすい英語仕様に統一）
+        const DATA = {
+            hiragana: [
+                { f: 'あ', b: 'a' }, { f: 'い', b: 'i' }, { f: 'う', b: 'u' }, { f: 'え', b: 'e' }, { f: 'お', b: 'o' },
+                { f: 'か', b: 'ka' }, { f: 'き', b: 'ki' }, { f: 'く', b: 'ku' }, { f: 'け', b: 'ke' }, { f: 'こ', b: 'ko' },
+                { f: 'さ', b: 'sa' }, { f: 'し', b: 'shi' }, { f: 'す', b: 'su' }, { f: 'せ', b: 'se' }, { f: 'そ', b: 'so' },
+                { f: 'た', b: 'ta' }, { f: 'ち', b: 'chi' }, { f: 'つ', b: 'tsu' }, { f: 'て', b: 'te' }, { f: 'と', b: 'to' },
+                { f: 'な', b: 'na' }, { f: 'に', b: 'ni' }, { f: 'ぬ', b: 'nu' }, { f: 'ね', b: 'ne' }, { f: 'の', b: 'no' },
+                { f: 'は', b: 'ha' }, { f: 'ひ', b: 'hi' }, { f: 'ふ', b: 'fu' }, { f: 'へ', b: 'he' }, { f: 'ほ', b: 'ho' },
+                { f: 'ま', b: 'ma' }, { f: 'み', b: 'mi' }, { f: 'む', b: 'mu' }, { f: 'め', b: 'me' }, { f: 'も', b: 'mo' },
+                { f: 'や', b: 'ya' }, { f: 'ゆ', b: 'yu' }, { f: 'よ', b: 'yo' },
+                { f: 'ら', b: 'ra' }, { f: 'り', b: 'ri' }, { f: 'る', b: 'ru' }, { f: 'れ', b: 're' }, { f: 'ろ', b: 'ro' },
+                { f: 'わ', b: 'wa' }, { f: 'を', b: 'wo' }, { f: 'ん', b: 'n' }
+            ],
+            katakana: [
+                { f: 'ア', b: 'a' }, { f: 'イ', b: 'i' }, { f: 'ウ', b: 'u' }, { f: 'エ', b: 'e' }, { f: 'オ', b: 'o' },
+                { f: 'カ', b: 'ka' }, { f: 'キ', b: 'ki' }, { f: 'ク', b: 'ku' }, { f: 'ケ', b: 'ke' }, { f: 'コ', b: 'ko' },
+                { f: 'サ', b: 'sa' }, { f: 'シ', b: 'shi' }, { f: 'ス', b: 'su' }, { f: 'セ', b: 'se' }, { f: 'ソ', b: 'so' },
+                { f: 'タ', b: 'ta' }, { f: 'チ', b: 'chi' }, { f: 'ツ', b: 'tsu' }, { f: 'テ', b: 'te' }, { f: 'ト', b: 'to' },
+                { f: 'ナ', b: 'na' }, { f: 'ニ', b: 'ni' }, { f: 'ヌ', b: 'nu' }, { f: 'ネ', b: 'ne' }, { f: 'ノ', b: 'no' },
+                { f: 'ハ', b: 'ha' }, { f: 'ヒ', b: 'hi' }, { f: 'フ', b: 'fu' }, { f: 'ヘ', b: 'he' }, { f: 'ホ', b: 'ho' },
+                { f: 'マ', b: 'ma' }, { f: 'ミ', b: 'mi' }, { f: 'ム', b: 'mu' }, { f: 'メ', b: 'me' }, { f: 'モ', b: 'mo' },
+                { f: 'ヤ', b: 'ya' }, { f: 'ユ', b: 'yu' }, { f: 'ヨ', b: 'yo' },
+                { f: 'ラ', b: 'ra' }, { f: 'リ', b: 'ri' }, { f: 'ル', b: 'ru' }, { f: 'レ', b: 're' }, { f: 'ロ', b: 'ro' },
+                { f: 'ワ', b: 'wa' }, { f: 'ヲ', b: 'wo' }, { f: 'ン', b: 'n' }
+            ],
+            extra: [
+                { f: 'が', b: 'ga' }, { f: 'ぎ', b: 'gi' }, { f: 'ぐ', b: 'gu' }, { f: 'げ', b: 'ge' }, { f: 'ご', b: 'go' },
+                { f: 'ざ', b: 'za' }, { f: 'じ', b: 'ji' }, { f: 'ず', b: 'zu' }, { f: 'ぜ', b: 'ze' }, { f: 'ぞ', b: 'zo' },
+                { f: 'だ', b: 'da' }, { f: 'ぢ', b: 'ji' }, { f: 'づ', b: 'zu' }, { f: 'で', b: 'de' }, { f: 'ど', b: 'do' },
+                { f: 'ば', b: 'ba' }, { f: 'び', b: 'bi' }, { f: 'ぶ', b: 'bu' }, { f: 'べ', b: 'be' }, { f: 'ぼ', b: 'bo' },
+                { f: 'ぱ', b: 'pa' }, { f: 'ぴ', b: 'pi' }, { f: 'ぷ', b: 'pu' }, { f: 'ぺ', b: 'pe' }, { f: 'ぽ', b: 'po' },
+                { f: 'きゃ', b: 'kya' }, { f: 'きゅ', b: 'kyu' }, { f: 'きょ', b: 'kyo' },
+                { f: 'しゃ', b: 'sha' }, { f: 'しゅ', b: 'shu' }, { f: 'しょ', b: 'sho' },
+                { f: 'ちゃ', b: 'cha' }, { f: 'ちゅ', b: 'chu' }, { f: 'ちょ', b: 'cho' },
+                { f: 'にゃ', b: 'nya' }, { f: 'にゅ', b: 'nyu' }, { f: 'にょ', b: 'nyo' },
+                { f: 'ひゃ', b: 'hya' }, { f: 'ひゅ', b: 'hyu' }, { f: 'ひょ', b: 'hyo' },
+                { f: 'みゃ', b: 'mya' }, { f: 'みゅ', b: 'myu' }, { f: 'みょ', b: 'myo' },
+                { f: 'りゃ', b: 'rya' }, { f: 'りゅ', b: 'ryu' }, { f: 'りょ', b: 'ryo' },
+                { f: 'ガ', b: 'ga' }, { f: 'ギ', b: 'gi' }, { f: 'グ', b: 'gu' }, { f: 'ゲ', b: 'ge' }, { f: 'ゴ', b: 'go' },
+                { f: 'ザ', b: 'za' }, { f: 'ジ', b: 'ji' }, { f: 'ズ', b: 'zu' }, { f: 'ゼ', b: 'ze' }, { f: 'ゾ', b: 'zo' },
+                { f: 'ダ', b: 'da' }, { f: 'ヂ', b: 'ji' }, { f: 'ヅ', b: 'zu' }, { f: 'デ', b: 'de' }, { f: 'ド', b: 'do' },
+                { f: 'バ', b: 'ba' }, { f: 'ビ', b: 'bi' }, { f: 'ブ', b: 'bu' }, { f: 'ベ', b: 'be' }, { f: 'ボ', b: 'bo' },
+                { f: 'パ', b: 'pa' }, { f: 'ピ', b: 'pi' }, { f: 'プ', b: 'pu' }, { f: 'ペ', b: 'pe' }, { f: 'ポ', b: 'po' },
+                { f: 'キャ', b: 'kya' }, { f: 'キュ', b: 'kyu' }, { f: 'キョ', b: 'kyo' },
+                { f: 'シャ', b: 'sha' }, { f: 'シュ', b: 'shu' }, { f: 'ショ', b: 'sho' },
+                { f: 'チャ', b: 'cha' }, { f: 'チュ', b: 'chu' }, { f: 'チョ', b: 'cho' }
+            ],
+            words: [
+                { f: 'いぬ', b: 'inu', m: 'Dog (犬)' }, { f: 'ねこ', b: 'neko', m: 'Cat (猫)' }, { f: 'さかな', b: 'sakana', m: 'Fish (魚)' },
+                { f: 'とり', b: 'tori', m: 'Bird (鳥)' }, { f: 'みず', b: 'mizu', m: 'Water (水)' }, { f: 'おちゃ', b: 'ocha', m: 'Green Tea (お茶)' },
+                { f: 'ごはん', b: 'gohan', m: 'Meal / Rice (ご飯)' }, { f: 'すし', b: 'sushi', m: 'Sushi (寿司)' }, { f: 'てんぷら', b: 'tenpura', m: 'Tempura (天ぷら)' },
+                { f: 'さくら', b: 'sakura', m: 'Cherry Blossom (桜)' }, { f: 'やま', b: 'yama', m: 'Mountain (山)' }, { f: 'うみ', b: 'umi', m: 'Sea (海)' },
+                { f: 'そら', b: 'sora', m: 'Sky (空)' }, { f: 'はな', b: 'hana', m: 'Flower (花)' }, { f: 'あめ', b: 'ame', m: 'Rain (雨)' },
+                { f: 'ゆき', b: 'yuki', m: 'Snow (雪)' }, { f: 'つき', b: 'tsuki', m: 'Moon (月)' }, { f: 'たいよう', b: 'taiyou', m: 'Sun (太陽)' },
+                { f: 'ひと', b: 'hito', m: 'Person (人)' }, { f: 'ともだち', b: 'tomodachi', m: 'Friend (友達)' }, { f: 'こども', b: 'kodomo', m: 'Child (子供)' },
+                { f: 'せんせい', b: 'sensei', m: 'Teacher (先生)' }, { f: 'がくせい', b: 'gakusei', m: 'Student (学生)' }, { f: 'がっこう', b: 'gakkou', m: 'School (学校)' },
+                { f: 'ほん', b: 'hon', m: 'Book (本)' }, { f: 'くるま', b: 'kuruma', m: 'Car (車)' }, { f: 'でんしゃ', b: 'densha', m: 'Train (電車)' },
+                { f: 'ひこうき', b: 'hikouki', m: 'Airplane (飛行機)' }, { f: 'じてんしゃ', b: 'jitensha', m: 'Bicycle (自転車)' }, { f: 'いえ', b: 'ie', m: 'House (家)' },
+                { f: 'まど', b: 'mado', m: 'Window (窓)' }, { f: 'つくえ', b: 'tsukue', m: 'Desk (机)' }, { f: 'いす', b: 'isu', m: 'Chair (椅子)' },
+                { f: 'かばん', b: 'kaban', m: 'Bag (鞄)' }, { f: 'くつ', b: 'kutsu', m: 'Shoes (靴)' }, { f: 'ふく', b: 'fuku', m: 'Clothes (服)' },
+                { f: 'あたま', b: 'atama', m: 'Head (頭)' }, { f: 'め', b: 'me', m: 'Eye (目)' }, { f: 'みみ', b: 'mimi', m: 'Ear (耳)' },
+                { f: 'くち', b: 'kuchi', m: 'Mouth (口)' }, { f: 'て', b: 'te', m: 'Hand (手)' }, { f: 'あし', b: 'ashi', m: 'Foot / Leg (足)' },
+                { f: 'きょう', b: 'kyou', m: 'Today (今日)' }, { f: 'あした', b: 'ashita', m: 'Tomorrow (明日)' }, { f: 'きのう', b: 'kinou', m: 'Yesterday (昨日)' },
+                { f: 'いま', b: 'ima', m: 'Now (今)' }, { f: 'じかん', b: 'jikan', m: 'Time (時間)' }, { f: 'にほん', b: 'nihon', m: 'Japan (日本)' },
+                { f: 'なまえ', b: 'namae', m: 'Name (名前)' }, { f: 'おはよう', b: 'ohayou', m: 'Good Morning (おはよう)' }, { f: 'こんにちは', b: 'konnichiwa', m: 'Hello (こんにちは)' },
+                { f: 'ありがとう', b: 'arigatou', m: 'Thank You (ありがとう)' }, { f: 'はい', b: 'hai', m: 'Yes' }, { f: 'いいえ', b: 'iie', m: 'No' },
+                { f: 'いち', b: 'ichi', m: 'One (1)' }, { f: 'に', b: 'ni', m: 'Two (2)' }, { f: 'さん', b: 'san', m: 'Three (3)' },
+                { f: 'よん', b: 'yon', m: 'Four (4)' }, { f: 'ご', b: 'go', m: 'Five (5)' }, { f: 'ろく', b: 'roku', m: 'Six (6)' },
+                { f: 'なな', b: 'nana', m: 'Seven (7)' }, { f: 'はち', b: 'hachi', m: 'Eight (8)' }, { f: 'きゅう', b: 'kyuu', m: 'Nine (9)' },
+                { f: 'じゅう', b: 'juu', m: 'Ten (10)' }, { f: 'パン', b: 'pan', m: 'Bread' }, { f: 'ミルク', b: 'miruku', m: 'Milk' },
+                { f: 'カメラ', b: 'kamera', m: 'Camera' }, { f: 'テレビ', b: 'terebi', m: 'TV' }, { f: 'ラジオ', b: 'rajio', m: 'Radio' },
+                { f: 'パソコン', b: 'pasokon', m: 'PC' }, { f: 'トイレ', b: 'toire', m: 'Toilet' }, { f: 'バス', b: 'basu', m: 'Bus' },
+                { f: 'タクシー', b: 'takushii', m: 'Taxi' }, { f: 'ホテル', b: 'hoteru', m: 'Hotel' }, { f: 'レストラン', b: 'resutoran', m: 'Restaurant' },
+                { f: 'コーヒー', b: 'koohii', m: 'Coffee' }, { f: 'ケーキ', b: 'keeki', m: 'Cake' }, { f: 'バナナ', b: 'banana', m: 'Banana' },
+                { f: 'リンゴ', b: 'ringo', m: 'Apple' }, { f: 'オレンジ', b: 'orenji', m: 'Orange' }, { f: 'ペン', b: 'pen', m: 'Pen' },
+                { f: 'ノート', b: 'nooto', m: 'Notebook' }, { f: 'テスト', b: 'tesuto', m: 'Test / Exam' }, { f: 'ゲーム', b: 'geemu', m: 'Game' },
+                { f: 'サッカー', b: 'sakkaa', m: 'Soccer' }, { f: 'テニス', b: 'tenisu', m: 'Tennis' }, { f: 'ピアノ', b: 'piano', m: 'Piano' },
+                { f: 'ギター', b: 'gitaa', m: 'Guitar' }, { f: 'ニュース', b: 'nyuusu', m: 'News' }, { f: 'ドア', b: 'doa', m: 'Door' },
+                { f: 'ビル', b: 'biru', m: 'Building' }, { f: 'デパート', b: 'depaato', m: 'Department Store' }, { f: 'スーパー', b: 'suupaa', m: 'Supermarket' },
+                { f: 'シャツ', b: 'shatsu', m: 'Shirt' }, { f: 'パンツ', b: 'pantsu', m: 'Pants' }, { f: 'ネクタイ', b: 'nekutai', m: 'Necktie' },
+                { f: 'メガネ', b: 'megane', m: 'Glasses' }, { f: 'カレンダー', b: 'karendaa', m: 'Calendar' }, { f: 'プレゼント', b: 'purezento', m: 'Present' }
+            ]
+        };
+
+        // デッキ別のカラー配色設計
+        const THEMES = {
+            hiragana: {
+                border: 'border-indigo-400',
+                text: 'text-indigo-600',
+                bg: 'bg-indigo-600',
+                hover: 'hover:bg-indigo-700',
+                accentBg: 'bg-indigo-50',
+                accentText: 'text-indigo-700'
+            },
+            katakana: {
+                border: 'border-sky-400',
+                text: 'text-sky-600',
+                bg: 'bg-sky-600',
+                hover: 'hover:bg-sky-700',
+                accentBg: 'bg-sky-50',
+                accentText: 'text-sky-700'
+            },
+            extra: {
+                border: 'border-rose-400',
+                text: 'text-rose-600',
+                bg: 'bg-rose-600',
+                hover: 'hover:bg-rose-700',
+                accentBg: 'bg-rose-50',
+                accentText: 'text-rose-700'
+            },
+            words: {
+                border: 'border-emerald-400',
+                text: 'text-emerald-600',
+                bg: 'bg-emerald-600',
+                hover: 'hover:bg-emerald-700',
+                accentBg: 'bg-emerald-50',
+                accentText: 'text-emerald-700'
+            }
+        };
+
+        // アプリの状態管理変数
+        let state = {
+            mode: 'menu',
+            deckType: 'hiragana',
+            currentIndex: 0,
+            isFlipped: false,
+            score: 0,
+            cards: [],
+            quizLimit: 10
+        };
+
+        // 問題数の設定ハンドラ
+        function setQuizCount(count) {
+            state.quizLimit = count;
+            
+            const btnIds = {
+                10: 'q-btn-10',
+                20: 'q-btn-20',
+                30: 'q-btn-30',
+                999: 'q-btn-all'
+            };
+            
+            Object.keys(btnIds).forEach(key => {
+                const btn = document.getElementById(btnIds[key]);
+                if (parseInt(key) === count) {
+                    btn.className = "flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm";
+                } else {
+                    btn.className = "flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200";
+                }
+            });
+        }
+
+        // デッキ名の多言語ラベル
+        function getDeckLabel(type) {
+            switch(type) {
+                case 'hiragana': return 'Hiragana (ひらがな)';
+                case 'katakana': return 'Katakana (カタカナ)';
+                case 'extra': return 'Modified Sounds (濁音/拗音)';
+                case 'words': return '100 Core Words (基本単語)';
+                default: return type;
+            }
+        }
+
+        // UIテーマ適用
+        function applyTheme(type) {
+            const theme = THEMES[type] || THEMES.hiragana;
+            
+            document.getElementById('study-back-text').className = `text-6xl md:text-7xl font-extrabold text-center ${theme.text}`;
+
+            document.getElementById('study-card-front').className = `absolute inset-0 w-full h-full backface-hidden bg-white border-[6px] ${theme.border} rounded-[32px] shadow-lg flex flex-col items-center justify-center`;
+            document.getElementById('study-card-back').className = `absolute inset-0 w-full h-full backface-hidden ${theme.accentBg} border-[6px] ${theme.border} rounded-[32px] shadow-lg flex flex-col items-center justify-center rotate-y-180`;
+            document.getElementById('quiz-card-display').className = `w-full h-72 bg-white border-[6px] ${theme.border} rounded-[32px] shadow-lg flex flex-col items-center justify-center p-6 mb-6`;
+
+            document.getElementById('study-progress').className = `${theme.accentBg} ${theme.accentText} px-4 py-1 rounded-full text-xs font-black`;
+            document.getElementById('study-deck-badge').className = `text-xs font-black capitalize ${theme.accentBg} ${theme.accentText} px-3 py-1.5 rounded-xl border-2 ${theme.border}`;
+            document.getElementById('quiz-progress').className = `${theme.accentBg} ${theme.accentText} px-4 py-1 rounded-full text-xs font-black`;
+            document.getElementById('quiz-deck-badge').className = `text-xs font-black capitalize ${theme.accentBg} ${theme.accentText} px-3 py-1.5 rounded-xl border-2 ${theme.border}`;
+
+            document.getElementById('study-next-btn').className = `flex-1 btn-pop-blue ${theme.bg} ${theme.hover} text-white font-extrabold py-3.5 rounded-2xl border-b-4 border-blue-800 transition text-sm`;
+        }
+
+        // 復習モード：カード更新
+        function initStudyCard() {
+            const card = state.cards[state.currentIndex];
+            state.isFlipped = false;
+            
+            document.getElementById('study-front-text').textContent = card.f;
+            document.getElementById('study-back-text').textContent = card.b;
+            
+            const meaningEl = document.getElementById('study-meaning-text');
+            if (card.m) {
+                meaningEl.innerHTML = `<span class="text-xs text-slate-400 font-bold block mb-1">Meaning:</span> ${card.m}`;
+                meaningEl.classList.remove('hidden');
+            } else {
+                meaningEl.classList.add('hidden');
+            }
+
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+
+            document.getElementById('study-progress').textContent = `${state.currentIndex + 1} / ${state.cards.length}`;
+            document.getElementById('study-deck-badge').textContent = getDeckLabel(state.deckType);
+            
+            const prevBtn = document.getElementById('study-prev-btn');
+            if (state.currentIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // クイズモード：カード更新
+        function initQuizCard() {
+            const card = state.cards[state.currentIndex];
+
+            document.getElementById('quiz-front-text').textContent = card.f;
+
+            // 初期化：こたえをみるボタンを表示し、答えのエリアは隠す
+            document.getElementById('quiz-show-ans-btn').classList.remove('hidden');
+            document.getElementById('quiz-answer-box').classList.add('hidden');
+
+            document.getElementById('quiz-correct-romaji').textContent = card.b;
+            const meaningEl = document.getElementById('quiz-correct-meaning');
+            if (card.m) {
+                meaningEl.innerHTML = `<span class="text-xs text-slate-400 font-bold block mb-1">Meaning:</span> ${card.m}`;
+                meaningEl.classList.remove('hidden');
+            } else {
+                meaningEl.classList.add('hidden');
+            }
+
+            document.getElementById('quiz-progress').textContent = `${state.currentIndex + 1} / ${state.cards.length}`;
+            document.getElementById('quiz-deck-badge').textContent = getDeckLabel(state.deckType);
+        }
+
+        // 答えを表示する
+        function revealQuizAnswer() {
+            document.getElementById('quiz-show-ans-btn').classList.add('hidden');
+            document.getElementById('quiz-answer-box').classList.remove('hidden');
+        }
+
+        // スコアカウントと次のカードへの切り替え
+        function reportQuizResult(isCorrect) {
+            if (isCorrect) {
+                state.score++;
+            }
+            handleNext();
+        }
+
+        // デッキ選択後のセッション開始
+        function startMode(mode, deckType) {
+            state.mode = mode;
+            state.deckType = deckType;
+            state.currentIndex = 0;
+            state.isFlipped = false;
+            state.score = 0;
+
+            // ランダムに並び替える
+            let deck = [...DATA[deckType]];
+            deck = deck.sort(() => Math.random() - 0.5);
+
+            if (mode === 'quiz') {
+                const limit = Math.min(state.quizLimit, deck.length);
+                deck = deck.slice(0, limit);
+            }
+
+            state.cards = deck;
+
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            applyTheme(deckType);
+
+            if (mode === 'study') {
+                document.getElementById('view-study').classList.remove('hidden');
+                initStudyCard();
+            } else if (mode === 'quiz') {
+                document.getElementById('view-quiz').classList.remove('hidden');
+                initQuizCard();
+            }
+        }
+
+        // メニューに戻る
+        function exitToMenu() {
+            document.getElementById('view-study').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-summary').classList.add('hidden');
+            
+            document.getElementById('view-menu').classList.remove('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            state.mode = 'menu';
+        }
+
+        // 3Dフリップトグル
+        function toggleFlip() {
+            state.isFlipped = !state.isFlipped;
+            const inner = document.getElementById('flashcard-inner');
+            if (state.isFlipped) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        // 戻る操作
+        function handlePrev() {
+            if (state.currentIndex > 0) {
+                state.currentIndex--;
+                initStudyCard();
+            }
+        }
+
+        // 進む操作
+        function handleNext() {
+            if (state.currentIndex < state.cards.length - 1) {
+                state.currentIndex++;
+                if (state.mode === 'study') {
+                    initStudyCard();
+                } else if (state.mode === 'quiz') {
+                    initQuizCard();
+                }
+            } else {
+                showSummary();
+            }
+        }
+
+        // 結果発表
+        function showSummary() {
+            document.getElementById('view-study').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-summary').classList.remove('hidden');
+
+            const scoreContainer = document.getElementById('summary-score-container');
+            
+            if (state.mode === 'quiz') {
+                const percent = Math.round((state.score / state.cards.length) * 100);
+                let badgeEmoji = "🌸";
+                let msg = "Great effort! Keep practicing and build up your skills! 💪";
+                
+                if (percent === 100) {
+                    badgeEmoji = "💮";
+                    msg = "Splendid! You are a genuine Japanese Master! 👑✨";
+                    setTimeout(launchConfetti, 300);
+                } else if (percent >= 80) {
+                    badgeEmoji = "🌸";
+                    msg = "Excellent work! You have almost completely memorized this set! 🎉";
+                    setTimeout(launchConfetti, 300);
+                } else if (percent >= 50) {
+                    badgeEmoji = "👍";
+                    msg = "Nice job! Keep speaking out loud to solidify your memory! 😊";
+                }
+
+                scoreContainer.innerHTML = `
+                    <div class="text-8xl mb-3 animate-bounce">${badgeEmoji}</div>
+                    <h2 class="text-3xl font-black text-[#1D3557]">Quiz Finished!</h2>
+                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">${getDeckLabel(state.deckType)}</p>
+                    <div class="py-5 my-4 bg-yellow-50 rounded-2xl border-4 border-dashed border-yellow-300">
+                        <p class="text-5xl font-black text-[#E63946]">${state.score} <span class="text-2xl text-slate-500">/ ${state.cards.length} Qs</span></p>
+                        <p class="text-slate-500 text-xs font-bold mt-2">Accuracy Rate: ${percent}%</p>
+                    </div>
+                    <p class="text-sm text-slate-600 font-bold px-4 leading-relaxed">${msg}</p>
+                `;
+            } else {
+                scoreContainer.innerHTML = `
+                    <div class="text-8xl mb-3">📖</div>
+                    <h2 class="text-3xl font-black text-[#1D3557]">Study Completed!</h2>
+                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">${getDeckLabel(state.deckType)}</p>
+                    <div class="py-6 my-4 bg-blue-50 rounded-2xl border-4 border-dashed border-blue-200 px-4">
+                        <p class="text-lg font-bold text-slate-700">Congratulations! 👏👏</p>
+                        <p class="text-slate-500 text-sm mt-2">You reviewed all <span class="font-extrabold text-slate-700">${state.cards.length} cards</span> in this set.</p>
+                    </div>
+                    <p class="text-sm text-slate-500 font-bold">Now, choose the "Test" mode to check if you can pronounce them correctly! ⭐</p>
+                `;
+            }
+        }
+
+        // 紙吹雪アニメーション
+        function launchConfetti() {
+            const container = document.getElementById('view-summary');
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute w-3 h-3 rounded-full pointer-events-none transition-all duration-1000 ease-out z-50';
+                particle.style.backgroundColor = ['#E63946', '#4D96FF', '#6BCB77', '#FFD93D', '#FF8AAE'][Math.floor(Math.random() * 5)];
+                particle.style.left = `${50 + (Math.random() - 0.5) * 60}%`;
+                particle.style.top = `${30 + (Math.random() - 0.5) * 20}%`;
+                container.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.style.transform = `translate(${(Math.random() - 0.5) * 300}px, ${100 + Math.random() * 200}px) rotate(${Math.random() * 360}deg)`;
+                    particle.style.opacity = '0';
+                }, 50);
+                
+                setTimeout(() => particle.remove(), 1100);
+            }
+        }
+
+        // もう一度同じ設定でやり直す
+        function retryCurrentDeck() {
+            startMode(state.mode, state.deckType);
+        }
+
+        // キーボード操作対応
+        document.addEventListener('keydown', (e) => {
+            if (state.mode === 'study') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    toggleFlip();
+                } else if (e.code === 'ArrowRight') {
+                    handleNext();
+                } else if (e.code === 'ArrowLeft') {
+                    handlePrev();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
