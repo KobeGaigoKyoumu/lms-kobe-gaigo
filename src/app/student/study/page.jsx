@@ -27,7 +27,17 @@ import {
 import styles from './study.module.css'
 
 export default function StudentStudyPage() {
+  const [activeApp, setActiveApp] = useState('hub') // 'hub' | 'master'
   const [activeTab, setActiveTab] = useState('study')
+
+  // Handle App Change
+  const handleAppChange = (app) => {
+    setActiveApp(app)
+    if (app === 'master') {
+      if (timerRef.current) clearInterval(timerRef.current)
+      setExamState('setup')
+    }
+  }
 
   // Load all vocab/quiz data
   const vocabList = useRef(getVocabData())
@@ -363,66 +373,68 @@ export default function StudentStudyPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header Area */}
-      <header className={styles.header}>
-        <div className={styles.titleArea}>
-          <h1>N5 Kanji & Vocabulary Study Hub</h1>
-          <p className={styles.lead}>JLPT N5 vocabulary flashcards, practice quizzes, and 10-minute mock exams.</p>
+      {/* App Switcher Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+        <div className={styles.tabs} style={{ padding: '0.375rem', borderRadius: '9999px' }}>
+          <button
+            className={`${styles.tab} ${activeApp === 'hub' ? styles.tabActive : ''}`}
+            onClick={() => handleAppChange('hub')}
+            style={{ borderRadius: '9999px', padding: '0.625rem 1.5rem' }}
+          >
+            📚 N5 Study Hub
+          </button>
+          <button
+            className={`${styles.tab} ${activeApp === 'master' ? styles.tabActive : ''}`}
+            onClick={() => handleAppChange('master')}
+            style={{ borderRadius: '9999px', padding: '0.625rem 1.5rem' }}
+          >
+            🌸 Japanese Master
+          </button>
         </div>
-        <nav className={styles.tabs} aria-label="Learning Mode">
-          <button
-            className={`${styles.tab} ${activeTab === 'study' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('study')}
-          >
-            <BookOpen size={18} />
-            Flashcards
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'quiz' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('quiz')}
-          >
-            <Award size={18} />
-            Practice Quiz
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'exam' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('exam')}
-          >
-            <FileText size={18} />
-            Mock Exam
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'progress' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('progress')}
-          >
-            <BarChart2 size={18} />
-            Progress & Stats
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'master' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('master')}
-          >
-            <Star size={18} style={{ color: activeTab === 'master' ? '#e11d48' : '#94a3b8' }} />
-            Japanese Master (🇺🇸)
-          </button>
-        </nav>
-      </header>
+      </div>
 
-      {/* 0. Japanese Master Mode */}
-      {activeTab === 'master' && (
-        <section className={styles.panel} style={{ padding: '0', background: '#ffffff', minHeight: '600px' }}>
-          <div style={{ width: '100%', height: 'calc(100vh - 240px)', minHeight: '600px', border: 'none', overflow: 'hidden' }}>
-            <iframe
-              src="/code_artifact.html"
-              title="Japanese Master - For English Speakers"
-              style={{ width: '100%', height: '100%', border: 'none' }}
-            />
-          </div>
-        </section>
-      )}
+      {activeApp === 'hub' ? (
+        <>
+          {/* Header Area */}
+          <header className={styles.header}>
+            <div className={styles.titleArea}>
+              <h1>N5 Kanji & Vocabulary Study Hub</h1>
+              <p className={styles.lead}>JLPT N5 vocabulary flashcards, practice quizzes, and 10-minute mock exams.</p>
+            </div>
+            <nav className={styles.tabs} aria-label="Learning Mode">
+              <button
+                className={`${styles.tab} ${activeTab === 'study' ? styles.tabActive : ''}`}
+                onClick={() => handleTabChange('study')}
+              >
+                <BookOpen size={18} />
+                Flashcards
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 'quiz' ? styles.tabActive : ''}`}
+                onClick={() => handleTabChange('quiz')}
+              >
+                <Award size={18} />
+                Practice Quiz
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 'exam' ? styles.tabActive : ''}`}
+                onClick={() => handleTabChange('exam')}
+              >
+                <FileText size={18} />
+                Mock Exam
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 'progress' ? styles.tabActive : ''}`}
+                onClick={() => handleTabChange('progress')}
+              >
+                <BarChart2 size={18} />
+                Progress & Stats
+              </button>
+            </nav>
+          </header>
 
-      {/* 1. Flashcards Mode */}
-      {activeTab === 'study' && (
+          {/* 1. Flashcards Mode */}
+          {activeTab === 'study' && (
         <section className={styles.panel}>
           <div className={styles.toolbar}>
             <div className={styles.controls}>
@@ -1225,6 +1237,19 @@ export default function StudentStudyPage() {
                 </div>
               )}
             </div>
+          </div>
+        </section>
+      )}
+        </>
+      ) : (
+        /* 0. Japanese Master Mode */
+        <section className={styles.panel} style={{ padding: '0', background: '#ffffff', minHeight: '600px' }}>
+          <div style={{ width: '100%', height: 'calc(100vh - 240px)', minHeight: '600px', border: 'none', overflow: 'hidden' }}>
+            <iframe
+              src="/code_artifact.html"
+              title="Japanese Master - For English Speakers"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
           </div>
         </section>
       )}
