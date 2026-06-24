@@ -991,8 +991,8 @@ const miniExamSets = [
     title: "Mini Mock 1",
     parts: [
       { label: "Part 1. Kanji Reading", ids: [1, 6, 11, 16, 21] },
-      { label: "Part 2. Orthography", ids: [42, 47, 52, 57, 62] },
-      { label: "Part 3. Context Vocabulary", ids: [84, 85, 86, 87, 89] },
+      { label: "Part 2. Orthography", ids: [44, 46, 52, 57, 62] },
+      { label: "Part 3. Context Vocabulary", ids: [92, 85, 86, 87, 89] },
       { label: "Part 4. Paraphrase & Meaning", ids: [123, 131, 133, 134, 141] },
       { label: "Part 5. Usage", ids: [174, 175, 176, 177, 178] }
     ]
