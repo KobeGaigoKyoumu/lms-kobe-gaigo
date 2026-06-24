@@ -1010,31 +1010,31 @@ const miniExamSets = [
   {
     title: "Mini Mock 3",
     parts: [
-      { label: "Part 1. Kanji Reading", ids: [4, 34, 201, 208, 214] },
-      { label: "Part 2. Orthography", ids: [43, 54, 219, 228, 235] },
-      { label: "Part 3. Context Vocabulary", ids: [94, 110, 241, 248, 257] },
-      { label: "Part 4. Paraphrase & Meaning", ids: [132, 142, 261, 267, 270] },
-      { label: "Part 5. Usage", ids: [180, 181, 290, 294, 298] }
+      { label: "Part 1. Kanji Reading", ids: [5, 8, 9, 199, 202] },
+      { label: "Part 2. Orthography", ids: [42, 43, 45, 219, 220] },
+      { label: "Part 3. Context Vocabulary", ids: [82, 83, 84, 241, 242] },
+      { label: "Part 4. Paraphrase & Meaning", ids: [136, 137, 138, 266, 276] },
+      { label: "Part 5. Usage", ids: [179, 180, 181, 289, 296] }
     ]
   },
   {
     title: "Mini Mock 4",
     parts: [
-      { label: "Part 1. Kanji Reading", ids: [5, 32, 202, 209, 215] },
-      { label: "Part 2. Orthography", ids: [50, 58, 222, 229, 236] },
-      { label: "Part 3. Context Vocabulary", ids: [83, 105, 244, 249, 251] },
-      { label: "Part 4. Paraphrase & Meaning", ids: [138, 143, 259, 268, 271] },
-      { label: "Part 5. Usage", ids: [182, 183, 193, 292, 295] }
+      { label: "Part 1. Kanji Reading", ids: [14, 15, 203, 205, 206] },
+      { label: "Part 2. Orthography", ids: [47, 48, 221, 223, 224] },
+      { label: "Part 3. Context Vocabulary", ids: [93, 94, 243, 244, 245] },
+      { label: "Part 4. Paraphrase & Meaning", ids: [139, 143, 278, 262, 269] },
+      { label: "Part 5. Usage", ids: [182, 183, 280, 283, 291] }
     ]
   },
   {
     title: "Mini Mock 5",
     parts: [
-      { label: "Part 1. Kanji Reading", ids: [2, 35, 203, 210, 216] },
-      { label: "Part 2. Orthography", ids: [53, 56, 223, 230, 237] },
-      { label: "Part 3. Context Vocabulary", ids: [91, 111, 242, 245, 258] },
-      { label: "Part 4. Paraphrase & Meaning", ids: [139, 149, 262, 266, 272] },
-      { label: "Part 5. Usage", ids: [179, 185, 192, 282, 291] }
+      { label: "Part 1. Kanji Reading", ids: [17, 18, 19, 208, 209] },
+      { label: "Part 2. Orthography", ids: [49, 50, 53, 225, 226] },
+      { label: "Part 3. Context Vocabulary", ids: [95, 96, 97, 246, 247] },
+      { label: "Part 4. Paraphrase & Meaning", ids: [144, 145, 146, 270, 277] },
+      { label: "Part 5. Usage", ids: [185, 187, 188, 295, 279] }
     ]
   }
 ];
