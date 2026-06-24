@@ -1408,7 +1408,19 @@ const customNumbersExamples = {
   "九": { sentence: "____時に寝ます。", example: "九時に寝ます。", exampleEn: "I go to bed at nine o'clock." },
   "十": { sentence: "____月に旅行します。", example: "十月に旅行します。", exampleEn: "I will travel in October." },
   "百": { sentence: "このペンは____円です。", example: "このペンは百円です。", exampleEn: "This pen is one hundred yen." },
-  "千": { sentence: "____円札を一枚出しました。", example: "千円札を一枚出しました。", exampleEn: "I took out a one thousand yen bill." }
+  "千": { sentence: "____円札を一枚出しました。", example: "千円札を一枚出しました。", exampleEn: "I took out a one thousand yen bill." },
+  "円": { sentence: "この本は千____です。", example: "この本は千円です。", exampleEn: "This book is one thousand yen." },
+  "一人": { sentence: "昨日は____で映画を見ました。", example: "昨日は一人で映画を見ました。", exampleEn: "I watched a movie by myself yesterday." },
+  "二人": { sentence: "私の家族は父と母の____です。", example: "私の家族は父と母の二人です。", exampleEn: "My family consists of two people, my father and my mother." },
+  "一つ": { sentence: "みかんを____ください。", example: "みかんを一つください。", exampleEn: "Please give me one mandarin orange." },
+  "二つ": { sentence: "パンを____買いました。", example: "パンを二つ買いました。", exampleEn: "I bought two pieces of bread." },
+  "三つ": { sentence: "卵が____あります。", example: "卵が三つあります。", exampleEn: "There are three eggs." },
+  "四つ": { sentence: "椅子が____並んでいます。", example: "椅子が四つ並んでいます。", exampleEn: "Four chairs are lined up." },
+  "五つ": { sentence: "りんごを____買いました。", example: "りんごを五つ買いました。", exampleEn: "I bought five apples." },
+  "六つ": { sentence: "箱の中にみかんが____あります。", example: "箱の中にみかんが六つあります。", exampleEn: "There are six mandarin oranges in the box." },
+  "七つ": { sentence: "お皿の上にクッキーが____あります。", example: "お皿の上にクッキーが七つあります。", exampleEn: "There are seven cookies on the plate." },
+  "八つ": { sentence: "引き出しに鉛筆が____あります。", example: "引き出しに鉛筆が八つあります。", exampleEn: "There are eight pencils in the drawer." },
+  "九つ": { sentence: "テーブルの上にコップが____あります。", example: "テーブルの上にコップが九つあります。", exampleEn: "There are nine glasses on the table." }
 };
 
 const customPeopleExamples = {
@@ -1528,9 +1540,48 @@ const customTransportExamples = {
   "船": { sentence: "____に乗って海を渡りました。", example: "船に乗って海を渡りました。", exampleEn: "I crossed the sea by ship." }
 };
 
+const customObjectsExamples = {
+  "財布": { sentence: "お札を____に入れます。", example: "お札を財布に入れます。", exampleEn: "I put bills in my wallet." },
+  "鍵": { sentence: "出かける前に部屋の____を閉めます。", example: "出かける前に部屋の鍵を閉めます。", exampleEn: "I lock the room key before going out." },
+  "机": { sentence: "____の上で勉強をします。", example: "机の上で勉強をします。", exampleEn: "I study at the desk." },
+  "椅子": { sentence: "疲れたので____に座ります。", example: "疲れたので椅子に座ります。", exampleEn: "I sit on a chair because I'm tired." },
+  "鉛筆": { sentence: "____でノートに文字を書きます。", example: "鉛筆でノートに文字を書きます。", exampleEn: "I write characters in a notebook with a pencil." },
+  "ボールペン": { sentence: "黒い____でサインをしてください。", example: "黒いボールペンでサインをしてください。", exampleEn: "Please sign with a black ballpoint pen." },
+  "紙": { sentence: "白い____に絵を描きます。", example: "白い紙に絵を描きます。", exampleEn: "I draw a picture on white paper." },
+  "写真": { sentence: "旅行でたくさんの____を撮りました。", example: "旅行でたくさんの写真を撮りました。", exampleEn: "I took many photos during the trip." },
+  "時計": { sentence: "壁に丸い____があります。", example: "壁に丸い時計があります。", exampleEn: "There is a round clock on the wall." },
+  "傘": { sentence: "雨が降っているので____をさします。", example: "雨が降っているので傘をさします。", exampleEn: "It is raining, so I open an umbrella." },
+  "鞄": { sentence: "教科書を____に入れます。", example: "教科書を鞄に入れます。", exampleEn: "I put the textbook in my bag." },
+  "電話": { sentence: "実家の両親に____をかけます。", example: "実家の両親に電話をかけます。", exampleEn: "I will make a phone call to my parents at home." },
+  "携帯電話": { sentence: "新しい____を買いました。", example: "新しい携帯電話を買いました。", exampleEn: "I bought a new mobile phone." },
+  "窓": { sentence: "暑いので____を開けてください。", example: "暑いので窓を開けてください。", exampleEn: "Please open the window because it's hot." },
+  "ドア": { sentence: "部屋を出るとき____を閉めます。", example: "部屋を出るときドアを閉めます。", exampleEn: "I close the door when I leave the room." },
+  "電気": { sentence: "暗くなったので、____をつけました。", example: "暗くなったので、電気をつけました。", exampleEn: "It got dark, so I turned on the light." },
+  "冷蔵庫": { sentence: "飲み物を____に入れます。", example: "飲み物を冷蔵庫に入れます。", exampleEn: "I put the drink in the refrigerator." },
+  "テレビ": { sentence: "夜、____でニュースを見ます。", example: "夜、テレビでニュースを見ます。", exampleEn: "I watch the news on TV at night." },
+  "ラジオ": { sentence: "朝、____で音楽を聞きます。", example: "朝、ラジオで音楽を聞きます。", exampleEn: "I listen to music on the radio in the morning." },
+  "パソコン": { sentence: "____を使ってメールを送ります。", example: "パソコンを使ってメールを送ります。", exampleEn: "I send emails using a computer." },
+  "雑誌": { sentence: "暇なときに____を読みます。", example: "暇なときに雑誌を読みます。", exampleEn: "I read magazines in my free time." },
+  "辞書": { sentence: "日本語の____を買いに行きます。", example: "日本語の辞書を買いに行きます。", exampleEn: "I will go to buy a Japanese dictionary." },
+  "封筒": { sentence: "手紙を____に入れて郵送します。", example: "手紙を封筒に入れて郵送します。", exampleEn: "I put the letter in an envelope and mail it." },
+  "葉書": { sentence: "旅行先から友達に____を書きました。", example: "旅行先から友達に葉書を書きました。", exampleEn: "I wrote a postcard to my friend from my trip." },
+  "箱": { sentence: "大きな____の中にプレゼントが入っています。", example: "大きな箱の中にプレゼントが入っています。", exampleEn: "A present is in the big box." },
+  "皿": { sentence: "綺麗なお____にケーキをのせます。", example: "綺麗なお皿にケーキをのせます。", exampleEn: "I put the cake on a beautiful plate." },
+  "お皿": { sentence: "綺麗なお____にケーキをのせます。", example: "綺麗なお皿にケーキをのせます。", exampleEn: "I put the cake on a beautiful plate." },
+  "箸": { sentence: "____を使ってご飯を食べます。", example: "箸を使ってご飯を食べます。", exampleEn: "I eat a meal using chopsticks." },
+  "スプーン": { sentence: "____でカレーを食べます。", example: "スプーンでカレーを食べます。", exampleEn: "I eat curry with a spoon." },
+  "フォーク": { sentence: "____でパスタを食べます。", example: "フォークでパスタを食べます。", exampleEn: "I eat pasta with a fork." },
+  "ナイフ": { sentence: "____を使って肉を切ります。", example: "ナイフを使って肉を切ります。", exampleEn: "I cut meat using a knife." },
+  "コップ": { sentence: "____に水を注いでください。", example: "コップに水を注いでください。", exampleEn: "Please pour water into the glass." },
+  "切手": { sentence: "手紙に____を貼って出します。", example: "手紙に切手を貼って出します。", exampleEn: "I put a stamp on the letter and send it." }
+};
+
 function generatedExample(item) {
   const term = item.term;
   
+  if (customObjectsExamples[term]) {
+    return customObjectsExamples[term];
+  }
   if (customPlacesExamples[term]) {
     return customPlacesExamples[term];
   }
