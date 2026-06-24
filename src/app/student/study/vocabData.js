@@ -1202,7 +1202,13 @@ const customBuildingsExamples = {
 };
 
 const customClothesExamples = {
-  "制服": { sentence: "学校の____を着ます。", example: "学校の制服を着ます。", exampleEn: "I wear the school uniform." },
+  "服": { sentence: "デパートで新しい____を買いました。", example: "デパートで新しい服を買いました。", exampleEn: "I bought new clothes at the department store." },
+  "上着": { sentence: "寒いので____を着てください。", example: "寒いので上着を着てください。", exampleEn: "Please put on a jacket because it's cold." },
+  "下着": { sentence: "旅行の準備で____をカバンに入れました。", example: "旅行の準備で下着をカバンに入れました。", exampleEn: "I put underwear in the bag in preparation for the trip." },
+  "靴": { sentence: "玄関で____を脱いでください。", example: "玄関で靴を脱いでください。", exampleEn: "Please take off your shoes at the entryway." },
+  "帽子": { sentence: "天気がいいので、____をかぶって出かけます。", example: "天気がいいので、帽子をかぶって出かけます。", exampleEn: "It is nice weather, so I will wear a hat and go out." },
+  "眼鏡": { sentence: "本を読むとき、____をかけます。", example: "本を読むとき、眼鏡をかけます。", exampleEn: "I wear glasses when I read books." },
+  "制服": { sentence: "学校 of ____を着ます。", example: "学校の制服を着ます。", exampleEn: "I wear the school uniform." },
   "背広": { sentence: "仕事で____を着ます。", example: "仕事で背広を着ます。", exampleEn: "I wear a business suit for work." },
   "スーツ": { sentence: "黒い____を着ます。", example: "黒いスーツを着ます。", exampleEn: "I wear a black suit." },
   "セーター": { sentence: "赤い____を着ます。", example: "赤いセーターを着ます。", exampleEn: "I wear a red sweater." },
@@ -1369,9 +1375,189 @@ const customWorkExamples = {
   "給料": { sentence: "毎月、____をもらいます。", example: "毎月、給料をもらいます。", exampleEn: "I receive a salary every month." }
 };
 
+const customLanguageExamples = {
+  "英語": { sentence: "学校で____を勉強します。", example: "学校で英語を勉強します。", exampleEn: "I study English at school." },
+  "日本語": { sentence: "____で話してください。", example: "日本語で話してください。", exampleEn: "Please speak in Japanese." },
+  "漢字": { sentence: "____のテストがあります。", example: "漢字のテストがあります。", exampleEn: "There is a kanji test." },
+  "平仮名": { sentence: "名前を____で書きます。", example: "名前を平仮名で書きます。", exampleEn: "I write my name in hiragana." },
+  "片仮名": { sentence: "外国人の名前は____で書きます。", example: "外国人の名前は片仮名で書きます。", exampleEn: "Foreigners' names are written in katakana." },
+  "言葉": { sentence: "辞書で____の意味を調べます。", example: "辞書で言葉の意味を調べます。", exampleEn: "I look up the meaning of a word in a dictionary." },
+  "英会話": { sentence: "毎週、____の教室に通っています。", example: "毎週、英会話の教室に通っています。", exampleEn: "I go to an English conversation school every week." },
+  "会話": { sentence: "友達と日本語で____をします。", example: "友達と日本語で会話をします。", exampleEn: "I have a conversation in Japanese with my friend." },
+  "文法": { sentence: "日本語の____は難しいです。", example: "日本語の文法は難しいです。", exampleEn: "Japanese grammar is difficult." }
+};
+
+const customNatureExamples = {
+  "天気": { sentence: "今日はいい____ですね。", example: "今日はいい天気ですね。", exampleEn: "It is nice weather today, isn't it?" },
+  "雪": { sentence: "冬に____が降ります。", example: "冬に雪が降ります。", exampleEn: "It snows in winter." },
+  "風": { sentence: "強い____が吹いています。", example: "強い風が吹いています。", exampleEn: "A strong wind is blowing." },
+  "海": { sentence: "夏休みに____で泳ぎました。", example: "夏休みに海で泳ぎました。", exampleEn: "I swam in the sea during summer vacation." },
+  "木": { sentence: "公園に大きな____があります。", example: "公園に大きな木があります。", exampleEn: "There is a big tree in the park." },
+  "花": { sentence: "庭に綺麗な____が咲いています。", example: "庭に綺麗な花が咲いています。", exampleEn: "Beautiful flowers are blooming in the garden." }
+};
+
+const customNumbersExamples = {
+  "一": { sentence: "____時間待ちました。", example: "一時間待ちました。", exampleEn: "I waited for one hour." },
+  "二": { sentence: "____階に食堂があります。", example: "二階に食堂があります。", exampleEn: "There is a cafeteria on the second floor." },
+  "三": { sentence: "____時に友達と会います。", example: "三時に友達と会います。", exampleEn: "I will meet my friend at three o'clock." },
+  "四": { sentence: "____月に学校が始まります。", example: "四月に学校が始まります。", exampleEn: "School starts in April." },
+  "五": { sentence: "あと____分で電車が来ます。", example: "あと五分で電車が来ます。", exampleEn: "The train will come in five minutes." },
+  "六": { sentence: "毎朝、____時に起きます。", example: "毎朝、六時に起きます。", exampleEn: "I wake up at six every morning." },
+  "七": { sentence: "一週間は____日あります。", example: "一週間は七日あります。", exampleEn: "A week has seven days." },
+  "八": { sentence: "____月は夏休みです。", example: "八月は夏休みです。", exampleEn: "August is summer vacation." },
+  "九": { sentence: "____時に寝ます。", example: "九時に寝ます。", exampleEn: "I go to bed at nine o'clock." },
+  "十": { sentence: "____月に旅行します。", example: "十月に旅行します。", exampleEn: "I will travel in October." },
+  "百": { sentence: "このペンは____円です。", example: "このペンは百円です。", exampleEn: "This pen is one hundred yen." },
+  "千": { sentence: "____円札を一枚出しました。", example: "千円札を一枚出しました。", exampleEn: "I took out a one thousand yen bill." }
+};
+
+const customPeopleExamples = {
+  "会社員": { sentence: "父は____です。", example: "父は会社員です。", exampleEn: "My father is a company employee." },
+  "医者": { sentence: "病気になったので、____に見てもらいます。", example: "病気になったので、医者に見てもらいます。", exampleEn: "Since I got sick, I will see a doctor." },
+  "店員": { sentence: "____に商品の場所を聞きました。", example: "店員に商品の場所を聞きました。", exampleEn: "I asked the shop clerk where the product was." },
+  "駅員": { sentence: "切符をなくしたので、____に聞きました。", example: "切符をなくしたので、駅員に聞きました。", exampleEn: "I lost my ticket, so I asked the station staff." },
+  "留学生": { sentence: "クラスには多くの____がいます。", example: "クラスには多くの留学生がいます。", exampleEn: "There are many international students in my class." },
+  "日本人": { sentence: "彼女は____ですが、英語が上手です。", example: "彼女は日本人ですが、英語が上手です。", exampleEn: "She is Japanese, but she is good at English." },
+  "外国人": { sentence: "観光地でたくさんの____を見かけます。", example: "観光地でたくさんの外国人を見かけます。", exampleEn: "I see many foreigners at sightseeing spots." },
+  "大人": { sentence: "この映画館は、____が千八百円です。", example: "この映画館は、大人が千八百円です。", exampleEn: "In this movie theater, adults pay 1,800 yen." },
+  "男の子": { sentence: "公園で____がサッカーをしています。", example: "公園で男の子がサッカーをしています。", exampleEn: "A boy is playing soccer in the park." },
+  "女の子": { sentence: "赤いスカートをはいた____が走っています。", example: "赤いスカートをはいた女の子が走っています。", exampleEn: "A girl wearing a red skirt is running." },
+  "男の人": { sentence: "あの背の高い____は誰ですか。", example: "あの背の高い男の人は誰ですか。", exampleEn: "Who is that tall man over there?" },
+  "女の人": { sentence: "教室に綺麗な____がいます。", example: "教室に綺麗な女の人がいます。", exampleEn: "There is a beautiful woman in the classroom." },
+  "この人": { sentence: "____は私の親友です。", example: "この人は私の親友です。", exampleEn: "This person is my best friend." },
+  "その人": { sentence: "____が誰だか知っていますか。", example: "その人が誰だか知っていますか。", exampleEn: "Do you know who that person is?" },
+  "あの人": { sentence: "____はいつも親切です。", example: "あの人はいつも親切です。", exampleEn: "That person is always kind." },
+  "皆さん": { sentence: "____、静かに聞いてください。", example: "皆さん、静かに聞いてください。", exampleEn: "Everyone, please listen quietly." },
+  "皆": { sentence: "友達が____集まりました。", example: "友達が皆集まりました。", exampleEn: "All of my friends gathered." }
+};
+
+const customPlacesExamples = {
+  "入口": { sentence: "ビルの____はあちらです。", example: "ビルの入口はあちらです。", exampleEn: "The entrance to the building is over there." },
+  "出口": { sentence: "駅の____で待ち合わせします。", example: "駅の出口で待ち合わせします。", exampleEn: "We will meet at the station exit." },
+  "教室": { sentence: "授業が始まるので、____に入ります。", example: "授業が始まるので、教室に入ります。", exampleEn: "Class is starting, so I enter the classroom." },
+  "図書館": { sentence: "____で静かに勉強します。", example: "図書館で静かに勉強します。", exampleEn: "I study quietly in the library." },
+  "病院": { sentence: "風邪をひいたので、____へ行きます。", example: "風邪をひいたので、病院へ行きます。", exampleEn: "I go to the hospital because I caught a cold." },
+  "銀行": { sentence: "____でお金を下ろします。", example: "銀行でお金を下ろします。", exampleEn: "I withdraw money from the bank." },
+  "郵便局": { sentence: "____で手紙を出します。", example: "郵便局で手紙を出します。", exampleEn: "I mail a letter at the post office." },
+  "公園": { sentence: "____で子供たちが遊んでいます。", example: "公園で子供たちが遊んでいます。", exampleEn: "Children are playing in the park." },
+  "会社": { sentence: "毎朝、八時に____へ行きます。", example: "毎朝、八時に会社へ行きます。", exampleEn: "I go to the office every morning at eight o'clock." },
+  "大学": { sentence: "高校を卒業して、____に入学します。", example: "高校を卒業して、大学に入学します。", exampleEn: "I graduate from high school and enter university." },
+  "高校": { sentence: "私の弟は、____の二年生です。", example: "私の弟は、高校の二年生です。", exampleEn: "My younger brother is a high school sophomore." },
+  "中学校": { sentence: "小学校の次は____です。", example: "小学校の次は中学校です。", exampleEn: "Junior high school comes after elementary school." },
+  "小学校": { sentence: "近くの____から子供たちの声が聞こえます。", example: "近くの小学校から子供たちの声が聞こえます。", exampleEn: "I can hear children's voices from the nearby elementary school." },
+  "町": { sentence: "この____は静かで住みやすいです。", example: "この町は静かで住みやすいです。", exampleEn: "This town is quiet and easy to live in." },
+  "国": { sentence: "あなたの____はどちらですか。", example: "あなたの国はどちらですか。", exampleEn: "Where is your country." },
+  "外国": { sentence: "いつか____で暮らしてみたいです。", example: "いつか外国で暮らしてみたいです。", exampleEn: "I want to live in a foreign country someday." },
+  "近く": { sentence: "駅の____に美味しいレストランがあります。", example: "駅の近くに美味しいレストランがあります。", exampleEn: "There is a delicious restaurant near the station." },
+  "部屋": { sentence: "私の____は二階にあります。", example: "私の部屋は二階にあります。", exampleEn: "My room is on the second floor." },
+  "大使館": { sentence: "ビザをもらうために____へ行きます。", example: "ビザをもらうために大使館へ行きます。", exampleEn: "I go to the embassy to get a visa." },
+  "交番": { sentence: "道を尋ねるために、____に行きました。", example: "道を尋ねるために、交番に行きました。", exampleEn: "I went to the police box to ask for directions." },
+  "市役所": { sentence: "住民票を取りに____へ行きます。", example: "住民票を取りに市役所へ行きます。", exampleEn: "I go to the city hall to get a certificate of residence." },
+  "役所": { sentence: "手続きのために____へ行きます。", example: "手続きのために役所へ行きます。", exampleEn: "I go to the government office for procedures." },
+  "空港": { sentence: "飛行機に乗るために____へ行きます。", example: "飛行機に乗るために空港へ行きます。", exampleEn: "I go to the airport to catch a plane." },
+  "港": { sentence: "____から大きな船が出発します。", example: "港から大きな船が出発します。", exampleEn: "A big ship departs from the port." }
+};
+
+const customSchoolExamples = {
+  "試験": { sentence: "明日、日本語の____があります。", example: "明日、日本語の試験があります。", exampleEn: "There is a Japanese exam tomorrow." },
+  "宿題": { sentence: "学校の____が終わりました。", example: "学校の宿題が終わりました。", exampleEn: "My school homework is finished." },
+  "授業": { sentence: "九時から日本語の____が始まります。", example: "九時から日本語の授業が始まります。", exampleEn: "The Japanese class starts at nine o'clock." },
+  "問題": { sentence: "このテストの____はとても難しいです。", example: "このテストの問題はとても難しいです。", exampleEn: "The questions on this test are very difficult." },
+  "答え": { sentence: "質問の____が分かりません。", example: "質問の答えが分かりません。", exampleEn: "I don't know the answer to the question." },
+  "練習": { sentence: "毎日、ピアノの____をします。", example: "毎日、ピアノの練習をします。", exampleEn: "I practice the piano every day." },
+  "質問": { sentence: "先生、一つ____があります。", example: "先生、一つ質問があります。", exampleEn: "Teacher, I have a question." },
+  "作文": { sentence: "日本語で将来の夢について____を書きます。", example: "日本語で将来の夢について作文を書きます。", exampleEn: "I will write a composition in Japanese about my future dream." },
+  "漢字テスト": { sentence: "明日の朝、____があります。", example: "明日の朝、漢字テストがあります。", exampleEn: "There is a kanji test tomorrow morning." },
+  "教科書": { sentence: "カバンから日本語の____を出してください。", example: "カバンから日本語の教科書を出してください。", exampleEn: "Please take the Japanese textbook out of your bag." },
+  "ノート": { sentence: "黒板の文字を____に書きます。", example: "黒板の文字をノートに書きます。", exampleEn: "I write the characters from the blackboard in my notebook." },
+  "消しゴム": { sentence: "間違えた文字を____で消します。", example: "間違えた文字を消しゴムで消します。", exampleEn: "I erase the wrong letters with an eraser." },
+  "定規": { sentence: "____を使ってまっすぐな線を引きます。", example: "定規を使ってまっすぐな線を引きます。", exampleEn: "I draw a straight line using a ruler." }
+};
+
+const customTimeExamples = {
+  "休み": { sentence: "毎週、日曜日は学校の____です。", example: "毎週、日曜日は学校の休みです。", exampleEn: "Every Sunday is a school holiday." },
+  "毎日": { sentence: "____、日本語の単語を覚えます。", example: "毎日、日本語の単語を覚えます。", exampleEn: "I memorize Japanese words every day." },
+  "毎朝": { sentence: "____、六時にジョギングをします。", example: "毎朝、六時にジョギングをします。", exampleEn: "I go jogging at six every morning." },
+  "毎晩": { sentence: "____、寝る前に本を読みます。", example: "毎晩、寝る前に本を読みます。", exampleEn: "I read a book before going to bed every night." },
+  "昨日": { sentence: "____は雨が降っていました。", example: "昨日は雨が降っていました。", exampleEn: "It was raining yesterday." },
+  "一昨日": { sentence: "____、友達と映画を見ました。", example: "一昨日、友達と映画を見ました。", exampleEn: "I watched a movie with my friend the day before yesterday." },
+  "明後日": { sentence: "____から旅行に行きます。", example: "明後日から旅行に行きます。", exampleEn: "I will go on a trip from the day after tomorrow." },
+  "今朝": { sentence: "____、朝ご飯を食べませんでした。", example: "今朝、朝ご飯を食べませんでした。", exampleEn: "I didn't eat breakfast this morning." },
+  "今晩": { sentence: "____、レストランで食事をします。", example: "今晩、レストランで食事をします。", exampleEn: "We will dine at a restaurant this evening." },
+  "今週": { sentence: "____はとても忙しいです。", example: "今週はとても忙しいです。", exampleEn: "I am very busy this week." },
+  "先週": { sentence: "____、京都へ行きました。", example: "先週、京都へ行きました。", exampleEn: "I went to Kyoto last week." },
+  "来週": { sentence: "____、テストがあります。", example: "来週、テストがあります。", exampleEn: "There is a test next week." },
+  "今月": { sentence: "____は旅行の予定がありません。", example: "今月は旅行の予定がありません。", exampleEn: "I have no travel plans this month." },
+  "先月": { sentence: "____、新しい車を買いました。", example: "先月、新しい車を買いました。", exampleEn: "I bought a new car last month." },
+  "来月": { sentence: "____、国へ帰ります。", example: "来月、国へ帰ります。", exampleEn: "I will return to my country next month." },
+  "今年": { sentence: "____、大学を卒業します。", example: "今年、大学を卒業します。", exampleEn: "I graduate from university this year." },
+  "去年": { sentence: "____、日本に来ました。", example: "去年、日本に来ました。", exampleEn: "I came to Japan last year." },
+  "来年": { sentence: "____、日本へ留学します。", example: "来年、日本へ留学します。", exampleEn: "I will study abroad in Japan next year." },
+  "誕生日": { sentence: "私の____は五月五日です。", example: "私の誕生日は五月五日です。", exampleEn: "My birthday is May 5th." },
+  "午前": { sentence: "____は八時から十二時まで授業です。", example: "午前は八時から十二時まで授業です。", exampleEn: "Class runs from 8 a.m. to 12 p.m." },
+  "午後": { sentence: "____、デパートへ買い物に行きます。", example: "午後、デパートへ買い物に行きます。", exampleEn: "I will go shopping at the department store in the afternoon." },
+  "半": { sentence: "今、三時____です。", example: "今、三時半です。", exampleEn: "It is half past three now." },
+  "月": { sentence: "空に綺麗な____が出ています。", example: "空に綺麗な月が出ています。", exampleEn: "A beautiful moon is out in the sky." },
+  "年": { sentence: "一____の終わりに旅行します。", example: "一年の終わりに旅行します。", exampleEn: "I travel at the end of the year." },
+  "日曜日": { sentence: "____に家族とデパートへ行きます。", example: "日曜日に家族とデパートへ行きます。", exampleEn: "I go to the department store with my family on Sunday." },
+  "水曜日": { sentence: "____はアルバイトがありません。", example: "水曜日はアルバイトがありません。", exampleEn: "I have no part-time job on Wednesday." },
+  "木曜日": { sentence: "____の午後は空いています。", example: "木曜日の午後は空いています。", exampleEn: "I am free on Thursday afternoon." },
+  "金曜日": { sentence: "____の夜に友達と食事します。", example: "金曜日の夜に友達と食事します。", exampleEn: "I will dine with my friend on Friday night." },
+  "土曜日": { sentence: "____は一日中寝ています。", example: "土曜日は一日中寝ています。", exampleEn: "I sleep all day on Saturday." },
+  "春": { sentence: "____になると桜が咲きます。", example: "春になると桜が咲きます。", exampleEn: "Cherry blossoms bloom when spring comes." },
+  "夏": { sentence: "____はとても暑いです。", example: "夏はとても暑いです。", exampleEn: "Summer is very hot." },
+  "秋": { sentence: "____は紅葉が綺麗です。", example: "秋は紅葉が綺麗です。", exampleEn: "Autumn leaves are beautiful in autumn." },
+  "冬": { sentence: "____は雪が降ります。", example: "冬は雪が降ります。", exampleEn: "It snows in winter." }
+};
+
+const customTownExamples = {
+  "道": { sentence: "この____をまっすぐ歩きます。", example: "この道をまっすぐ歩きます。", exampleEn: "I walk straight along this road." },
+  "道路": { sentence: "____を渡るときは気をつけてください。", example: "道路を渡るときは気をつけてください。", exampleEn: "Please be careful when crossing the road." },
+  "角": { sentence: "次の____を右に曲がります。", example: "次の角を右に曲がります。", exampleEn: "Turn right at the next corner." },
+  "橋": { sentence: "大きな川に木でできた____がかかっています。", example: "大きな川に木でできた橋がかかっています。", exampleEn: "A wooden bridge spans the big river." },
+  "信号": { sentence: "____が青になったら渡りましょう。", example: "信号が青になったら渡りましょう。", exampleEn: "Let's cross when the traffic light turns green." },
+  "横断歩道": { sentence: "____を渡って学校へ行きます。", example: "横断歩道を渡って学校へ行きます。", exampleEn: "I cross the pedestrian crossing to go to school." },
+  "建物": { sentence: "駅の前に大きな____があります。", example: "駅の前に大きな建物があります。", exampleEn: "There is a big building in front of the station." }
+};
+
+const customTransportExamples = {
+  "バス停": { sentence: "近くの____でバスを待ちます。", example: "近くのバス停でバスを待ちます。", exampleEn: "I wait for the bus at the nearby bus stop." },
+  "地下鉄": { sentence: "____に乗って東京駅へ行きました。", example: "地下鉄に乗って東京駅へ行きました。", exampleEn: "I rode the subway to Tokyo Station." },
+  "新幹線": { sentence: "____で大阪から東京まで行きます。", example: "新幹線で大阪から東京まで行きます。", exampleEn: "I go from Osaka to Tokyo by Shinkansen." },
+  "飛行機": { sentence: "____に乗ってアメリカへ行きます。", example: "飛行機に乗ってアメリカへ行きます。", exampleEn: "I will go to America by airplane." },
+  "船": { sentence: "____に乗って海を渡りました。", example: "船に乗って海を渡りました。", exampleEn: "I crossed the sea by ship." }
+};
+
 function generatedExample(item) {
   const term = item.term;
   
+  if (customPlacesExamples[term]) {
+    return customPlacesExamples[term];
+  }
+  if (customSchoolExamples[term]) {
+    return customSchoolExamples[term];
+  }
+  if (customTimeExamples[term]) {
+    return customTimeExamples[term];
+  }
+  if (customTownExamples[term]) {
+    return customTownExamples[term];
+  }
+  if (customTransportExamples[term]) {
+    return customTransportExamples[term];
+  }
+  if (customLanguageExamples[term]) {
+    return customLanguageExamples[term];
+  }
+  if (customNatureExamples[term]) {
+    return customNatureExamples[term];
+  }
+  if (customNumbersExamples[term]) {
+    return customNumbersExamples[term];
+  }
+  if (customPeopleExamples[term]) {
+    return customPeopleExamples[term];
+  }
   if (customBasicsExamples[term]) {
     return customBasicsExamples[term];
   }
