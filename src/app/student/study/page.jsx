@@ -28,7 +28,6 @@ import styles from './study.module.css'
 
 export default function StudentStudyPage() {
   const [activeTab, setActiveTab] = useState('study')
-  const [appModule, setAppModule] = useState('hub') // 'hub' | 'master'
 
   // Load all vocab/quiz data
   const vocabList = useRef(getVocabData())
@@ -364,61 +363,13 @@ export default function StudentStudyPage() {
 
   return (
     <div className={styles.container}>
-      {/* App Module Selector Tab */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '0.75rem', gap: '0.25rem', border: '1px solid #cbd5e1' }}>
-          <button
-            onClick={() => setAppModule('hub')}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              border: 'none',
-              transition: 'all 0.2s',
-              background: appModule === 'hub' ? '#3b82f6' : 'transparent',
-              color: appModule === 'hub' ? '#ffffff' : '#64748b'
-            }}
-          >
-            📚 N5 Study Hub
-          </button>
-          <button
-            onClick={() => setAppModule('master')}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              border: 'none',
-              transition: 'all 0.2s',
-              background: appModule === 'master' ? '#3b82f6' : 'transparent',
-              color: appModule === 'master' ? '#ffffff' : '#64748b'
-            }}
-          >
-            🌸 Japanese Master
-          </button>
+      {/* Header Area */}
+      <header className={styles.header}>
+        <div className={styles.titleArea}>
+          <h1>N5 Kanji & Vocabulary Study Hub</h1>
+          <p className={styles.lead}>JLPT N5 vocabulary flashcards, practice quizzes, and 10-minute mock exams.</p>
         </div>
-      </div>
-
-      {appModule === 'master' ? (
-        <div style={{ width: '100%', height: 'calc(100vh - 120px)', border: 'none', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', background: '#ffffff' }}>
-          <iframe
-            src="/code_artifact.html"
-            title="Japanese Master - For English Speakers"
-            style={{ width: '100%', height: '100%', border: 'none' }}
-          />
-        </div>
-      ) : (
-        <>
-          {/* Header Area */}
-          <header className={styles.header}>
-            <div className={styles.titleArea}>
-              <h1>N5 Kanji & Vocabulary Study Hub</h1>
-              <p className={styles.lead}>JLPT N5 vocabulary flashcards, practice quizzes, and 10-minute mock exams.</p>
-            </div>
-            <nav className={styles.tabs} aria-label="Learning Mode">
+        <nav className={styles.tabs} aria-label="Learning Mode">
           <button
             className={`${styles.tab} ${activeTab === 'study' ? styles.tabActive : ''}`}
             onClick={() => handleTabChange('study')}
@@ -447,8 +398,28 @@ export default function StudentStudyPage() {
             <BarChart2 size={18} />
             Progress & Stats
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'master' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('master')}
+          >
+            <Star size={18} style={{ color: activeTab === 'master' ? '#e11d48' : '#94a3b8' }} />
+            Japanese Master (🇺🇸)
+          </button>
         </nav>
       </header>
+
+      {/* 0. Japanese Master Mode */}
+      {activeTab === 'master' && (
+        <section className={styles.panel} style={{ padding: '0', background: '#ffffff', minHeight: '600px' }}>
+          <div style={{ width: '100%', height: 'calc(100vh - 240px)', minHeight: '600px', border: 'none', overflow: 'hidden' }}>
+            <iframe
+              src="/code_artifact.html"
+              title="Japanese Master - For English Speakers"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* 1. Flashcards Mode */}
       {activeTab === 'study' && (
@@ -1256,8 +1227,6 @@ export default function StudentStudyPage() {
             </div>
           </div>
         </section>
-      )}
-        </>
       )}
     </div>
   )
