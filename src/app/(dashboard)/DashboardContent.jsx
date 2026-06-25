@@ -101,35 +101,6 @@ export default function DashboardContent({ adminMember, initialData }) {
                 <section className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>
-                            <BookOpen size={20} />
-                            最近作成した課題
-                        </h2>
-                        <Link href="/assignments" className={styles.viewMore}>すべて見る</Link>
-                    </div>
-                    <div className={styles.assignmentList}>
-                        {stats.recentAssignments && stats.recentAssignments.length > 0 ? (
-                            stats.recentAssignments.map(a => (
-                                <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
-                                    <div className={styles.assignmentInfo}>
-                                        <h4>{a.title}</h4>
-                                        <p>{a.class_name}</p>
-                                    </div>
-                                    <ChevronRight size={16} className={styles.itemArrow} />
-                                </Link>
-                            ))
-                        ) : (
-                            <div className={styles.emptyState}>
-                                <div className={styles.emptyIcon}>
-                                    <LayoutDashboard size={40} />
-                                </div>
-                                <p>最近作成した課題はありません</p>
-                            </div>
-                        )}
-                    </div>
-                </section>
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>
                             <CalendarIcon size={20} />
                             今後の予定
                         </h2>
@@ -182,6 +153,35 @@ export default function DashboardContent({ adminMember, initialData }) {
                                     <CalendarIcon size={40} />
                                 </div>
                                 <p>今後の予定はありません</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <BookOpen size={20} />
+                            最近作成した課題
+                        </h2>
+                        <Link href="/assignments" className={styles.viewMore}>すべて見る</Link>
+                    </div>
+                    <div className={styles.assignmentList}>
+                        {stats.recentAssignments && stats.recentAssignments.length > 0 ? (
+                            stats.recentAssignments.map(a => (
+                                <Link href={`/assignments/${a.id}`} key={a.id} className={styles.assignmentItem}>
+                                    <div className={styles.assignmentInfo}>
+                                        <h4>{a.title}</h4>
+                                        <p>{a.class_name}</p>
+                                    </div>
+                                    <ChevronRight size={16} className={styles.itemArrow} />
+                                </Link>
+                            ))
+                        ) : (
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyIcon}>
+                                    <LayoutDashboard size={40} />
+                                </div>
+                                <p>最近作成した課題はありません</p>
                             </div>
                         )}
                     </div>
