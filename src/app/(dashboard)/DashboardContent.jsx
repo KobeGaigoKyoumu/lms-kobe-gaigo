@@ -52,6 +52,16 @@ export default function DashboardContent({ adminMember, initialData }) {
     const dd = String(jstToday.getDate()).padStart(2, '0')
     const todayStr = `${yyyy}-${mm}-${dd}`
 
+    // Group upcoming plans by date
+    const groupedPlans = upcomingPlans.reduce((groups, plan) => {
+        const date = plan.date;
+        if (!groups[date]) {
+            groups[date] = [];
+        }
+        groups[date].push(plan);
+        return groups;
+    }, {});
+
     return (
         <>
             <div className={styles.statsGrid}>
@@ -127,36 +137,43 @@ export default function DashboardContent({ adminMember, initialData }) {
                     </div>
                     <div className={styles.announcementList}>
                         {upcomingPlans && upcomingPlans.length > 0 ? (
-                            upcomingPlans.map(plan => {
-                                const isToday = plan.date === todayStr
+                            Object.entries(groupedPlans).map(([dateStr, plansForDate]) => {
+                                const isToday = dateStr === todayStr
                                 return (
-                                    <Link href="/kanban" key={plan.id} className={`${styles.announcementItem} ${isToday ? styles.todayPlan : ''}`}>
-                                        <div className={styles.announcementHeader}>
-                                            <span className={styles.announcementDate}>
-                                                <CalendarIcon size={12} />
-                                                {formatDateWithWeekday(plan.date)}
-                                            </span>
-                                            <span className={styles.announcementAuthor}>
-                                                {plan.admin_members?.name || '不明'}
-                                            </span>
+                                    <div key={dateStr} className={styles.dateGroup}>
+                                        <div className={`${styles.dateGroupHeader} ${isToday ? styles.todayGroupHeader : ''}`}>
+                                            <CalendarIcon size={14} />
+                                            <span>{formatDateWithWeekday(dateStr)}</span>
+                                            {isToday && <span className={styles.todayBadge}>本日</span>}
                                         </div>
-                                        <h4 className={styles.announcementTitle}>{plan.title}</h4>
-                                        {plan.description && (
-                                            <div className={styles.planDescSection}>
-                                                <button 
-                                                    className={styles.planExpandBtn} 
-                                                    onClick={(e) => toggleExpandPlan(e, plan.id)}
-                                                >
-                                                    {expandedPlans.has(plan.id) ? '▲ 説明を閉じる' : '▼ 説明を見る'}
-                                                </button>
-                                                {expandedPlans.has(plan.id) && (
-                                                    <div className={styles.planDescription}>
-                                                        {plan.description}
+                                        <div className={styles.dateGroupPlans}>
+                                            {plansForDate.map(plan => (
+                                                <Link href="/kanban" key={plan.id} className={`${styles.announcementItem} ${isToday ? styles.todayPlan : ''}`}>
+                                                    <div className={styles.planHeader}>
+                                                        <span className={styles.announcementAuthor}>
+                                                            {plan.admin_members?.name || '不明'}
+                                                        </span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </Link>
+                                                    <h4 className={styles.announcementTitle}>{plan.title}</h4>
+                                                    {plan.description && (
+                                                        <div className={styles.planDescSection}>
+                                                            <button 
+                                                                className={styles.planExpandBtn} 
+                                                                onClick={(e) => toggleExpandPlan(e, plan.id)}
+                                                            >
+                                                                {expandedPlans.has(plan.id) ? '▲ 説明を閉じる' : '▼ 説明を見る'}
+                                                            </button>
+                                                            {expandedPlans.has(plan.id) && (
+                                                                <div className={styles.planDescription}>
+                                                                    {plan.description}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )
                             })
                         ) : (

@@ -222,6 +222,52 @@
     border: 1px solid var(--border-color);
 }
 
+.dateGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-6);
+}
+
+.dateGroupHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    padding: var(--spacing-2) 0;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: var(--spacing-2);
+}
+
+.todayGroupHeader {
+    color: var(--warning-700, #b45309);
+    border-bottom-color: var(--warning-300, #fcd34d);
+}
+
+.todayBadge {
+    font-size: 10px;
+    font-weight: 800;
+    background: #f59e0b;
+    color: white;
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+    margin-left: var(--spacing-2);
+}
+
+.dateGroupPlans {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.planHeader {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-2);
+}
+
 .assignmentItem {
     display: flex;
     justify-content: space-between;
