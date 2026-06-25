@@ -12,15 +12,29 @@ import {
     LayoutDashboard
 } from 'lucide-react'
 
+const formatDateWithWeekday = (dateStr) => {
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    const days = ['日', '月', '火', '水', '木', '金', '土']
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}(${days[d.getDay()]})`
+}
+
 export default function DashboardContent({ adminMember, initialData }) {
     // Use initialData provided by Server Component
-    const [announcements] = useState(initialData?.announcements || [])
+    const [upcomingPlans] = useState(initialData?.upcomingPlans || [])
     const [stats] = useState(initialData?.stats || {
         teacherClasses: [],
         enrolledClassesCount: 0,
         pendingAssignmentsCount: 0,
         recentAssignments: []
     })
+
+    const jstToday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const yyyy = jstToday.getFullYear()
+    const mm = String(jstToday.getMonth() + 1).padStart(2, '0')
+    const dd = String(jstToday.getDate()).padStart(2, '0')
+    const todayStr = `${yyyy}-${mm}-${dd}`
 
     return (
         <>
@@ -90,33 +104,36 @@ export default function DashboardContent({ adminMember, initialData }) {
                 <section className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>
-                            <Bell size={20} />
-                            お知らせ
+                            <CalendarIcon size={20} />
+                            今後の予定
                         </h2>
-                        <Link href="/announcements" className={styles.viewMore}>すべて見る</Link>
+                        <Link href="/kanban" className={styles.viewMore}>すべて見る</Link>
                     </div>
                     <div className={styles.announcementList}>
-                        {announcements && announcements.length > 0 ? (
-                            announcements.map(ann => (
-                                <Link href="/announcements" key={ann.id} className={styles.announcementItem}>
-                                    <div className={styles.announcementHeader}>
-                                        <span className={styles.announcementDate}>
-                                            <CalendarIcon size={12} />
-                                            {new Date(ann.created_at).toLocaleDateString('ja-JP')}
-                                        </span>
-                                        <span className={styles.announcementAuthor}>
-                                            {ann.author?.full_name || ann.sender_name || '配信元'}
-                                        </span>
-                                    </div>
-                                    <h4 className={styles.announcementTitle}>{ann.title}</h4>
-                                </Link>
-                            ))
+                        {upcomingPlans && upcomingPlans.length > 0 ? (
+                            upcomingPlans.map(plan => {
+                                const isToday = plan.date === todayStr
+                                return (
+                                    <Link href="/kanban" key={plan.id} className={`${styles.announcementItem} ${isToday ? styles.todayPlan : ''}`}>
+                                        <div className={styles.announcementHeader}>
+                                            <span className={styles.announcementDate}>
+                                                <CalendarIcon size={12} />
+                                                {formatDateWithWeekday(plan.date)}
+                                            </span>
+                                            <span className={styles.announcementAuthor}>
+                                                {plan.admin_members?.name || '不明'}
+                                            </span>
+                                        </div>
+                                        <h4 className={styles.announcementTitle}>{plan.title}</h4>
+                                    </Link>
+                                )
+                            })
                         ) : (
                             <div className={styles.emptyState}>
                                 <div className={styles.emptyIcon}>
-                                    <Bell size={40} />
+                                    <CalendarIcon size={40} />
                                 </div>
-                                <p>現在、新しいお知らせはありません</p>
+                                <p>今後の予定はありません</p>
                             </div>
                         )}
                     </div>

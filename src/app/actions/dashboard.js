@@ -260,6 +260,11 @@ export async function getAdminDashboardDataCached() {
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
         if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase configuration missing')
         const supabase = createAdminClient(supabaseUrl, supabaseServiceKey)
+        const jstToday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+        const yyyy = jstToday.getFullYear()
+        const mm = String(jstToday.getMonth() + 1).padStart(2, '0')
+        const dd = String(jstToday.getDate()).padStart(2, '0')
+        const todayStr = `${yyyy}-${mm}-${dd}`
         const now = new Date().toISOString()
 
         // 1. Fetch Teacher Classes
@@ -273,16 +278,17 @@ export async function getAdminDashboardDataCached() {
 
         // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
         const [annResult, pendingResult, assignmentsResult] = await Promise.all([
-            // Announcements
+            // Upcoming schedules from kanban_cards
             supabase
-                .from('announcements')
+                .from('kanban_cards')
                 .select(`
-                    id, title, content, is_pinned, created_at, sender_name,
-                    author:profiles!author_id (full_name)
+                    id, title, date, user_id,
+                    admin_members:user_id(name)
                 `)
-                .order('is_pinned', { ascending: false })
-                .order('created_at', { ascending: false })
-                .limit(5),
+                .not('date', 'is', null)
+                .gte('date', todayStr)
+                .order('date', { ascending: true })
+                .limit(10),
             
             // Pending Submission Count
             enrolledClassesCount > 0 ? supabase
@@ -305,7 +311,7 @@ export async function getAdminDashboardDataCached() {
         ])
 
         return {
-            announcements: annResult.data || [],
+            upcomingPlans: annResult.data || [],
             stats: {
                 enrolledClasses: (teacherClasses || []).map(c => c.name),
                 enrolledClassesCount,
@@ -320,7 +326,7 @@ export async function getAdminDashboardDataCached() {
         async () => fetcher(adminMember.memberId, adminMember.name),
         [`admin-dashboard-${adminMember.memberId}`],
         {
-            tags: ['homework-assignments', 'announcements', 'classes', 'homework-submissions'],
+            tags: ['homework-assignments', 'announcements', 'classes', 'homework-submissions', 'kanban'],
             revalidate: 3600
         }
     )()

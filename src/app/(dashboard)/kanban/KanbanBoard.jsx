@@ -27,6 +27,17 @@ const CARD_COLORS = [
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
+const formatDatePrefix = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const month = d.getMonth() + 1;
+    const date = d.getDate();
+    const dayIdx = d.getDay();
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    return `${month}月${date}日（${days[dayIdx]}） `;
+};
+
 export default function KanbanBoard({ initialColumns = [], initialCards = [], initialLabels = [], initialReminders = [], userId, userName }) {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
@@ -66,7 +77,7 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
         date: ''
     })
     const [editingReminderId, setEditingReminderId] = useState(null)
-    const [editForm, setEditForm] = useState({ title: '', description: '', color: null })
+    const [editForm, setEditForm] = useState({ title: '', description: '', color: null, date: '' })
 
     // Drag state for cards
     const dragCard = useRef(null)
@@ -156,7 +167,8 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
         const updates = {
             title: editForm.title.trim(),
             description: editForm.description || null,
-            color: editForm.color
+            color: editForm.color,
+            date: editForm.date || null
         }
         const { success, error } = await updateKanbanCard(editingCard.id, updates)
         if (success) {
@@ -398,7 +410,8 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
         setEditForm({
             title: card.title,
             description: card.description || '',
-            color: card.color || null
+            color: card.color || null,
+            date: card.date || ''
         })
         setEditingReminderId(null)
         setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
@@ -616,7 +629,10 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
                                         {card.color && (
                                             <div className={styles.cardColorBar} style={{ background: card.color }} />
                                         )}
-                                        <div className={styles.cardTitle}>{card.title}</div>
+                                        <div className={styles.cardTitle}>
+                                            {card.date && <span className={styles.cardDatePrefix}>{formatDatePrefix(card.date)}</span>}
+                                            {card.title}
+                                        </div>
                                         {card.description && (
                                             <div className={styles.cardDescWrapper}>
                                                 <div className={`${styles.cardDescription} ${expandedCards.has(card.id) ? styles.cardDescriptionExpanded : styles.cardDescriptionCollapsed}`}>
@@ -739,6 +755,14 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
                                     rows={3}
                                     value={editForm.description}
                                     onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>日付</label>
+                                <input
+                                    type="date"
+                                    value={editForm.date || ''}
+                                    onChange={e => setEditForm(prev => ({ ...prev, date: e.target.value || '' }))}
                                 />
                             </div>
                             <div className={styles.formGroup}>
