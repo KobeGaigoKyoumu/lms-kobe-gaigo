@@ -120,11 +120,6 @@ export default function DashboardContent({ adminMember, initialData }) {
                                         <div className={styles.dateGroupPlans}>
                                             {plansForDate.map(plan => (
                                                 <Link href="/kanban" key={plan.id} className={`${styles.announcementItem} ${isToday ? styles.todayPlan : ''}`}>
-                                                    <div className={styles.planHeader}>
-                                                        <span className={styles.announcementAuthor}>
-                                                            {plan.admin_members?.name || '不明'}
-                                                        </span>
-                                                    </div>
                                                     <h4 className={styles.announcementTitle}>{plan.title}</h4>
                                                     {plan.description && (
                                                         <div className={styles.planDescSection}>
