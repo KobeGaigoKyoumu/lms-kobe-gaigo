@@ -186,6 +186,11 @@
     border-color: #ffe082 !important;
 }
 
+.ongoingPlan {
+    background-color: #e0f2fe !important;
+    border-color: #bae6fd !important;
+}
+
 .planDescSection {
     margin-top: var(--spacing-3);
     border-top: 1px dashed var(--border-color);

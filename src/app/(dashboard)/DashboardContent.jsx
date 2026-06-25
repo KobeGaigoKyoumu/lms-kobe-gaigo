@@ -164,7 +164,7 @@ export default function DashboardContent({ adminMember, initialData }) {
                     <div className={styles.announcementList}>
                         {ongoingTasks && ongoingTasks.length > 0 ? (
                             ongoingTasks.map(task => (
-                                <Link href="/kanban" key={task.id} className={styles.announcementItem}>
+                                <Link href="/kanban" key={task.id} className={`${styles.announcementItem} ${styles.ongoingPlan}`}>
                                     {task.date && (
                                         <div className={styles.announcementHeader} style={{ marginBottom: '8px' }}>
                                             <span className={styles.announcementDate}>
