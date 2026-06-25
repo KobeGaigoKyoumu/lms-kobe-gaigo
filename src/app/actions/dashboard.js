@@ -324,10 +324,10 @@ export async function getAdminDashboardDataCached() {
     // Cache based on administrative member ID
     const cachedData = await next_unstable_cache(
         async () => fetcher(adminMember.memberId, adminMember.name),
-        [`admin-dashboard-${adminMember.memberId}`],
+        [`admin-dashboard-v3-${adminMember.memberId}`],
         {
             tags: ['homework-assignments', 'announcements', 'classes', 'homework-submissions', 'kanban'],
-            revalidate: 3600
+            revalidate: 10
         }
     )()
 
