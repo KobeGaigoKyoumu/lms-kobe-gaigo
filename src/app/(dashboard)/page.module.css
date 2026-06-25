@@ -186,6 +186,42 @@
     border-color: #ffe082 !important;
 }
 
+.planDescSection {
+    margin-top: var(--spacing-3);
+    border-top: 1px dashed var(--border-color);
+    padding-top: var(--spacing-2);
+}
+
+.planExpandBtn {
+    background: none;
+    border: none;
+    color: var(--primary-600);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.planExpandBtn:hover {
+    color: var(--primary-700);
+    text-decoration: underline;
+}
+
+.planDescription {
+    margin-top: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    background: var(--bg-primary);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
 .assignmentItem {
     display: flex;
     justify-content: space-between;

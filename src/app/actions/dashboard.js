@@ -282,7 +282,7 @@ export async function getAdminDashboardDataCached() {
             supabase
                 .from('kanban_cards')
                 .select(`
-                    id, title, date, user_id,
+                    id, title, description, date, user_id,
                     admin_members:user_id(name)
                 `)
                 .not('date', 'is', null)

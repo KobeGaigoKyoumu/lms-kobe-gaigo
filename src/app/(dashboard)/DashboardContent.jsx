@@ -30,6 +30,22 @@ export default function DashboardContent({ adminMember, initialData }) {
         recentAssignments: []
     })
 
+    const [expandedPlans, setExpandedPlans] = useState(new Set())
+
+    const toggleExpandPlan = (e, planId) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setExpandedPlans(prev => {
+            const next = new Set(prev)
+            if (next.has(planId)) {
+                next.delete(planId)
+            } else {
+                next.add(planId)
+            }
+            return next
+        })
+    }
+
     const jstToday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
     const yyyy = jstToday.getFullYear()
     const mm = String(jstToday.getMonth() + 1).padStart(2, '0')
@@ -125,6 +141,21 @@ export default function DashboardContent({ adminMember, initialData }) {
                                             </span>
                                         </div>
                                         <h4 className={styles.announcementTitle}>{plan.title}</h4>
+                                        {plan.description && (
+                                            <div className={styles.planDescSection}>
+                                                <button 
+                                                    className={styles.planExpandBtn} 
+                                                    onClick={(e) => toggleExpandPlan(e, plan.id)}
+                                                >
+                                                    {expandedPlans.has(plan.id) ? '▲ 説明を閉じる' : '▼ 説明を見る'}
+                                                </button>
+                                                {expandedPlans.has(plan.id) && (
+                                                    <div className={styles.planDescription}>
+                                                        {plan.description}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </Link>
                                 )
                             })
