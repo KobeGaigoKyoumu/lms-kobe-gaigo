@@ -23,6 +23,7 @@ const formatDateWithWeekday = (dateStr) => {
 export default function DashboardContent({ adminMember, initialData }) {
     // Use initialData provided by Server Component
     const [upcomingPlans] = useState(initialData?.upcomingPlans || [])
+    const [ongoingTasks] = useState(initialData?.ongoingTasks || [])
     const [stats] = useState(initialData?.stats || {
         teacherClasses: [],
         enrolledClassesCount: 0,
@@ -148,6 +149,54 @@ export default function DashboardContent({ adminMember, initialData }) {
                                     <CalendarIcon size={40} />
                                 </div>
                                 <p>今後の予定はありません</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <ClipboardCheck size={20} />
+                            進行中の業務
+                        </h2>
+                        <Link href="/kanban" className={styles.viewMore}>すべて見る</Link>
+                    </div>
+                    <div className={styles.announcementList}>
+                        {ongoingTasks && ongoingTasks.length > 0 ? (
+                            ongoingTasks.map(task => (
+                                <Link href="/kanban" key={task.id} className={styles.announcementItem}>
+                                    {task.date && (
+                                        <div className={styles.announcementHeader} style={{ marginBottom: '8px' }}>
+                                            <span className={styles.announcementDate}>
+                                                <CalendarIcon size={12} />
+                                                {formatDateWithWeekday(task.date)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <h4 className={styles.announcementTitle}>{task.title}</h4>
+                                    {task.description && (
+                                        <div className={styles.planDescSection}>
+                                            <button 
+                                                className={styles.planExpandBtn} 
+                                                onClick={(e) => toggleExpandPlan(e, task.id)}
+                                            >
+                                                {expandedPlans.has(task.id) ? '▲ 説明を閉じる' : '▼ 説明を見る'}
+                                            </button>
+                                            {expandedPlans.has(task.id) && (
+                                                <div className={styles.planDescription}>
+                                                    {task.description}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </Link>
+                            ))
+                        ) : (
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyIcon}>
+                                    <ClipboardCheck size={40} />
+                                </div>
+                                <p>進行中の業務はありません</p>
                             </div>
                         )}
                     </div>

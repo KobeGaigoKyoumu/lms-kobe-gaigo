@@ -77,7 +77,7 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
         date: ''
     })
     const [editingReminderId, setEditingReminderId] = useState(null)
-    const [editForm, setEditForm] = useState({ title: '', description: '', color: null, date: '' })
+    const [editForm, setEditForm] = useState({ title: '', description: '', color: null, date: '', is_ongoing: false })
 
     // Drag state for cards
     const dragCard = useRef(null)
@@ -168,7 +168,8 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
             title: editForm.title.trim(),
             description: editForm.description || null,
             color: editForm.color,
-            date: editForm.date || null
+            date: editForm.date || null,
+            is_ongoing: editForm.is_ongoing || false
         }
         const { success, error } = await updateKanbanCard(editingCard.id, updates)
         if (success) {
@@ -411,7 +412,8 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
             title: card.title,
             description: card.description || '',
             color: card.color || null,
-            date: card.date || ''
+            date: card.date || '',
+            is_ongoing: card.is_ongoing || false
         })
         setEditingReminderId(null)
         setReminderForm({ type: 'daily', time: '09:00', days: [], date: '' })
@@ -764,6 +766,15 @@ export default function KanbanBoard({ initialColumns = [], initialCards = [], in
                                     value={editForm.date || ''}
                                     onChange={e => setEditForm(prev => ({ ...prev, date: e.target.value || '' }))}
                                 />
+                            </div>
+                            <div className={styles.formGroupRow}>
+                                <input
+                                    type="checkbox"
+                                    id="is_ongoing"
+                                    checked={editForm.is_ongoing || false}
+                                    onChange={e => setEditForm(prev => ({ ...prev, is_ongoing: e.target.checked }))}
+                                />
+                                <label htmlFor="is_ongoing" style={{ cursor: 'pointer', userSelect: 'none' }}>進行中の業務として表示する</label>
                             </div>
                             <div className={styles.formGroup}>
                                 <label>色</label>

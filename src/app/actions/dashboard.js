@@ -277,7 +277,7 @@ export async function getAdminDashboardDataCached() {
         const enrolledClassesCount = teacherClassNames.length
 
         // 2. Parallel Fetch: Announcements, Pending Count, Recent Assignments
-        const [annResult, pendingResult, assignmentsResult] = await Promise.all([
+        const [annResult, pendingResult, assignmentsResult, ongoingResult] = await Promise.all([
             // Upcoming schedules from kanban_cards
             supabase
                 .from('kanban_cards')
@@ -307,11 +307,22 @@ export async function getAdminDashboardDataCached() {
                 .or('is_archived.is.null,is_archived.is.false')
                 .or(`released_at.is.null,released_at.lte."${now}"`)
                 .order('created_at', { ascending: false })
-                .limit(5) : { data: [] }
+                .limit(5) : { data: [] },
+
+            // Ongoing tasks from kanban_cards
+            supabase
+                .from('kanban_cards')
+                .select(`
+                    id, title, description, date, user_id,
+                    admin_members:user_id(name)
+                `)
+                .eq('is_ongoing', true)
+                .order('position', { ascending: true })
         ])
 
         return {
             upcomingPlans: annResult.data || [],
+            ongoingTasks: ongoingResult.data || [],
             stats: {
                 enrolledClasses: (teacherClasses || []).map(c => c.name),
                 enrolledClassesCount,

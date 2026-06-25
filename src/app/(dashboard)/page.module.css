@@ -132,8 +132,8 @@
 /* Main Grid */
 .mainGrid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: var(--spacing-8);
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: var(--spacing-6);
 }
 
 .section {
