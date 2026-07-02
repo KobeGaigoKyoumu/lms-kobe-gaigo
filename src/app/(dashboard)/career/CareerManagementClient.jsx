@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import styles from './page.module.css'
 import SchoolAutocomplete from '@/components/SchoolAutocomplete'
+import { parseStudentId } from '@/lib/utils/studentId'
 
 // 日本語表記（例: 2月10日、2026/02/10、2026-02-10）を YYYY-MM-DD にパースする
 const parseToDateInput = (str) => {
@@ -104,6 +105,19 @@ export default function CareerManagementClient({
     const [selectedTemplateName, setSelectedTemplateName] = useState('デフォルト')
     const [newTemplateNameInput, setNewTemplateNameInput] = useState('')
     const [myClassStudents, setMyClassStudents] = useState([])
+    
+    // クラス担任が複数の場合にクラスごとに学生をグループ化
+    const groupedMyClassStudents = useMemo(() => {
+        const groups = {}
+        myClassStudents.forEach(st => {
+            const className = st.class_name || 'クラス指定なし'
+            if (!groups[className]) {
+                groups[className] = []
+            }
+            groups[className].push(st)
+        })
+        return groups
+    }, [myClassStudents])
     
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -886,7 +900,12 @@ export default function CareerManagementClient({
             Promise.all(myClasses.map(c => getStudentsCareerList(c.name))).then(results => {
                 const allSts = results.flat()
                 const uniqueSts = Array.from(new Map(allSts.map(s => [s.student_id_text, s])).values())
-                setMyClassStudents(uniqueSts)
+                // 2年生の学生のみに絞り込む
+                const secondYearSts = uniqueSts.filter(s => {
+                    const info = parseStudentId(s.student_id_text)
+                    return info.grade === 2
+                })
+                setMyClassStudents(secondYearSts)
             })
         }
     }, [myClasses])
@@ -3687,10 +3706,14 @@ export default function CareerManagementClient({
                                     style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
                                 >
                                     <option value="">-- 未予約 (枠のみ) --</option>
-                                    {myClassStudents.map(st => (
-                                        <option key={st.student_id_text} value={st.student_id_text}>
-                                            {st.full_name} ({st.student_id_text})
-                                        </option>
+                                    {Object.entries(groupedMyClassStudents).map(([className, sts]) => (
+                                        <optgroup key={className} label={className}>
+                                            {sts.map(st => (
+                                                <option key={st.student_id_text} value={st.student_id_text}>
+                                                    {st.full_name} ({st.student_id_text})
+                                                </option>
+                                            ))}
+                                        </optgroup>
                                     ))}
                                 </select>
                             </div>
