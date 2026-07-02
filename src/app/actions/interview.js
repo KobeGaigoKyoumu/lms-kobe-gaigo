@@ -18,7 +18,7 @@ const createAdminClient = () => {
 // ----------------------------------------------------
 
 // 1. テンプレートの取得
-export async function getTeacherTemplates() {
+export async function getTeacherTemplates(templateName = 'デフォルト') {
   try {
     const session = await getAdminMemberSession()
     if (!session) throw new Error('Unauthorized')
@@ -28,6 +28,7 @@ export async function getTeacherTemplates() {
       .from('interview_templates')
       .select('*')
       .eq('teacher_id', session.memberId)
+      .eq('template_name', templateName)
       .order('day_of_week', { ascending: true })
 
     if (error) throw error
@@ -39,7 +40,7 @@ export async function getTeacherTemplates() {
 }
 
 // 2. テンプレートの保存 (配列で一括登録/更新)
-export async function saveTeacherTemplates(templates) {
+export async function saveTeacherTemplates(templates, templateName = 'デフォルト') {
   try {
     const session = await getAdminMemberSession()
     if (!session) throw new Error('Unauthorized')
@@ -51,6 +52,7 @@ export async function saveTeacherTemplates(templates) {
       .from('interview_templates')
       .delete()
       .eq('teacher_id', session.memberId)
+      .eq('template_name', templateName)
 
     if (deleteError) throw deleteError
 
@@ -59,7 +61,8 @@ export async function saveTeacherTemplates(templates) {
         teacher_id: session.memberId,
         day_of_week: parseInt(t.day_of_week, 10),
         start_time: t.start_time,
-        end_time: t.end_time
+        end_time: t.end_time,
+        template_name: templateName
       }))
 
       const { error: insertError } = await supabase
@@ -105,22 +108,23 @@ export async function getTeacherSlots(startDateStr, endDateStr) {
 }
 
 // 4. 曜日テンプレートに基づいた 15分刻みスロットの自動生成
-export async function generateSlots(startDateStr, endDateStr) {
+export async function generateSlots(startDateStr, endDateStr, templateName = 'デフォルト') {
   try {
     const session = await getAdminMemberSession()
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
 
-    // 1. 教師の全テンプレートを取得
+    // 1. 指定したテンプレート名の週間テンプレートを取得
     const { data: templates, error: tempError } = await supabase
       .from('interview_templates')
       .select('*')
       .eq('teacher_id', session.memberId)
+      .eq('template_name', templateName)
 
     if (tempError) throw tempError
     if (!templates || templates.length === 0) {
-      throw new Error('テンプレートが設定されていません。先にテンプレートを保存してください。')
+      throw new Error(`テンプレート「${templateName}」が設定されていません。先にテンプレートを保存してください。`)
     }
 
     // テンプレートを曜日(1-5)でマッピング
@@ -593,6 +597,32 @@ export async function getTeacherBookingsFiltered(filterType = 'weekly') {
     return { success: true, slots: data || [] }
   } catch (e) {
     console.error('getTeacherBookingsFiltered error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 17. 教師用：登録されているユニークなテンプレート名の一覧を取得する
+export async function getTeacherTemplateNames() {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('interview_templates')
+      .select('template_name')
+      .eq('teacher_id', session.memberId)
+
+    if (error) throw error
+
+    // ユニークな名前のリストを生成（デフォルトは必ず含める）
+    const names = Array.from(new Set((data || []).map(d => d.template_name)))
+    if (!names.includes('デフォルト')) {
+      names.unshift('デフォルト')
+    }
+    return { success: true, templateNames: names }
+  } catch (e) {
+    console.error('getTeacherTemplateNames error:', e)
     return { success: false, error: e.message }
   }
 }

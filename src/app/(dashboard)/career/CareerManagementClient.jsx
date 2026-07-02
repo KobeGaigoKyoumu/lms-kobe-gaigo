@@ -9,7 +9,8 @@ import {
     generateSlots, 
     updateSlot, 
     deleteSlot,
-    getTeacherBookingsFiltered
+    getTeacherBookingsFiltered,
+    getTeacherTemplateNames
 } from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
@@ -99,6 +100,9 @@ export default function CareerManagementClient({
     const [interviewError, setInterviewError] = useState(null)
     const [weeklyBookings, setWeeklyBookings] = useState([])
     const [interviewPeriodFilter, setInterviewPeriodFilter] = useState('weekly') // 'today' | 'weekly' | 'all'
+    const [availableTemplates, setAvailableTemplates] = useState(['デフォルト'])
+    const [selectedTemplateName, setSelectedTemplateName] = useState('デフォルト')
+    const [newTemplateNameInput, setNewTemplateNameInput] = useState('')
     
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -709,10 +713,25 @@ export default function CareerManagementClient({
     // ----------------------------------------------------
     // 面談（INTERVIEW）ロジック
     // ----------------------------------------------------
-    const loadInterviewTemplates = async () => {
+    const loadTemplateNamesList = async () => {
+        const res = await getTeacherTemplateNames()
+        if (res.success) {
+            setAvailableTemplates(res.templateNames)
+        }
+    }
+
+    const loadInterviewTemplates = async (templateName = selectedTemplateName) => {
         setInterviewLoading(true)
-        const res = await getTeacherTemplates()
+        const res = await getTeacherTemplates(templateName)
         setInterviewLoading(false)
+        
+        const defaultTemplates = [1, 2, 3, 4, 5].map(day => ({
+            day_of_week: day,
+            start_time: '09:00',
+            end_time: '18:00',
+            enabled: false
+        }))
+
         if (res.success && res.templates.length > 0) {
             const formatted = [1, 2, 3, 4, 5].map(day => {
                 const found = res.templates.find(t => t.day_of_week === day)
@@ -724,6 +743,8 @@ export default function CareerManagementClient({
                 }
             })
             setInterviewTemplates(formatted)
+        } else {
+            setInterviewTemplates(defaultTemplates)
         }
     }
 
@@ -739,10 +760,11 @@ export default function CareerManagementClient({
                 end_time: `${t.end_time}:00`
             }))
 
-        const res = await saveTeacherTemplates(activeTemplates)
+        const res = await saveTeacherTemplates(activeTemplates, selectedTemplateName)
         setInterviewSaving(false)
         if (res.success) {
-            setInterviewSuccessMsg('テンプレート設定を保存しました。')
+            setInterviewSuccessMsg(`テンプレート設定「${selectedTemplateName}」を保存しました。`)
+            loadTemplateNamesList()
         } else {
             setInterviewError(`保存に失敗しました: ${res.error}`)
         }
@@ -771,10 +793,10 @@ export default function CareerManagementClient({
         setInterviewGenerating(true)
         setInterviewSuccessMsg(null)
         setInterviewError(null)
-        const res = await generateSlots(interviewGenRange.start, interviewGenRange.end)
+        const res = await generateSlots(interviewGenRange.start, interviewGenRange.end, selectedTemplateName)
         setInterviewGenerating(false)
         if (res.success) {
-            setInterviewSuccessMsg(`面談予約可能枠を自動生成しました！ (生成数: ${res.count})`)
+            setInterviewSuccessMsg(`面談予約可能枠を自動生成しました！ (ベーステンプレート: ${selectedTemplateName}, 生成数: ${res.count})`)
             loadInterviewSlots()
         } else {
             setInterviewError(`生成に失敗しました: ${res.error}`)
@@ -838,11 +860,12 @@ export default function CareerManagementClient({
 
     useEffect(() => {
         if (activeTab === 'interview') {
-            loadInterviewTemplates()
+            loadTemplateNamesList()
+            loadInterviewTemplates(selectedTemplateName)
             loadInterviewSlots()
             loadFilteredBookings(interviewPeriodFilter)
         }
-    }, [activeTab, interviewPeriodFilter])
+    }, [activeTab, interviewPeriodFilter, selectedTemplateName])
 
     useEffect(() => {
         if (activeTab === 'interview') {
@@ -1261,6 +1284,51 @@ export default function CareerManagementClient({
                                 </p>
                             </div>
 
+                            {/* テンプレート切り替え・新規追加UI */}
+                            <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'flex-end', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: 'var(--spacing-4) var(--spacing-5)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: 'var(--spacing-2)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: '1', minWidth: '200px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>適用するテンプレートを選択：</label>
+                                    <select 
+                                        value={selectedTemplateName}
+                                        onChange={(e) => setSelectedTemplateName(e.target.value)}
+                                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)', width: '100%' }}
+                                    >
+                                        {availableTemplates.map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: '1', minWidth: '240px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>新規テンプレートを追加：</label>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input 
+                                            type="text"
+                                            placeholder="例: 試験期間用シフト"
+                                            value={newTemplateNameInput}
+                                            onChange={(e) => setNewTemplateNameInput(e.target.value)}
+                                            style={{ flex: '1', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)' }}
+                                        />
+                                        <button 
+                                            onClick={() => {
+                                                const val = newTemplateNameInput.trim();
+                                                if (!val) return;
+                                                if (availableTemplates.includes(val)) {
+                                                    alert('すでに同名のテンプレートが存在します。');
+                                                    return;
+                                                }
+                                                // リストに追加して選択
+                                                setAvailableTemplates([...availableTemplates, val]);
+                                                setSelectedTemplateName(val);
+                                                setNewTemplateNameInput('');
+                                            }}
+                                            style={{ padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: '0 2px 6px rgba(59, 130, 246, 0.15)', whiteSpace: 'nowrap' }}
+                                        >
+                                            ＋ 追加
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--spacing-4)', margin: 'var(--spacing-4) 0' }}>
                                 {interviewTemplates.map((temp, idx) => {
                                     const isEnabled = temp.enabled;
@@ -1340,6 +1408,18 @@ export default function CareerManagementClient({
                             </div>
 
                             <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '280px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>ベースにするテンプレート</label>
+                                    <select 
+                                        value={selectedTemplateName}
+                                        onChange={(e) => setSelectedTemplateName(e.target.value)}
+                                        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
+                                    >
+                                        {availableTemplates.map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '280px' }}>
                                     <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>自動生成の開始日</label>
                                     <input 
