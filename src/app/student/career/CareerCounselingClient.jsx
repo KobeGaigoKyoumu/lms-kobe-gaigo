@@ -8,7 +8,7 @@ import {
     deleteStudentExamSurveySelf
 } from '@/app/actions/career'
 import {
-    getTeachersList,
+    getStudentHomeroomTeacher,
     getAvailableSlots,
     bookSlot,
     cancelBooking,
@@ -59,8 +59,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [error, setError] = useState(null)
 
     // 面談（Interview）関連の状態
-    const [teachersList, setTeachersList] = useState([])
-    const [selectedTeacher, setSelectedTeacher] = useState('')
+    const [homeroomTeacher, setHomeroomTeacher] = useState(null) // 担任教師情報: { id, name }
     const [interviewDate, setInterviewDate] = useState(new Date().toISOString().split('T')[0])
     const [availableSlots, setAvailableSlots] = useState([])
     const [selectedSlotId, setSelectedSlotId] = useState('')
@@ -755,22 +754,21 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     // ----------------------------------------------------
     // 面談（INTERVIEW）ロジック
     // ----------------------------------------------------
-    const loadTeachers = async () => {
+    const loadHomeroomTeacher = async () => {
         setInterviewLoading(true)
-        const res = await getTeachersList()
+        const res = await getStudentHomeroomTeacher()
         setInterviewLoading(false)
         if (res.success) {
-            setTeachersList(res.teachers)
-            if (res.teachers.length > 0 && !selectedTeacher) {
-                setSelectedTeacher(res.teachers[0].id)
-            }
+            setHomeroomTeacher(res.teacher)
+        } else {
+            setInterviewError(res.error || '担任教師の取得に失敗しました。')
         }
     }
 
     const loadAvailableSlots = async () => {
-        if (!selectedTeacher) return
+        if (!homeroomTeacher?.id) return
         setInterviewLoading(true)
-        const res = await getAvailableSlots(selectedTeacher, interviewDate)
+        const res = await getAvailableSlots(homeroomTeacher.id, interviewDate)
         setInterviewLoading(false)
         if (res.success) {
             setAvailableSlots(res.slots)
@@ -829,16 +827,18 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
     useEffect(() => {
         if (activeTab === 'interview') {
-            loadTeachers()
+            loadHomeroomTeacher()
             loadStudentBookings()
         }
     }, [activeTab])
 
     useEffect(() => {
-        if (activeTab === 'interview' && selectedTeacher) {
+        if (activeTab === 'interview' && homeroomTeacher?.id) {
             loadAvailableSlots()
         }
-    }, [activeTab, selectedTeacher, interviewDate])
+    }, [activeTab, homeroomTeacher, interviewDate])
+
+
 
 
     return (
@@ -877,50 +877,61 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                 INTERVIEW TAB (面談予約)
                ==================================================== */}
             {activeTab === 'interview' && (
-                <div className={styles.tabContent}>
+                <div className={styles.tabContent} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
                     {interviewSuccessMsg && (
-                        <div className={styles.successAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
-                            <CheckCircle size={16} />
-                            <span>{interviewSuccessMsg}</span>
+                        <div className={styles.successAlert} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--success-500)', boxShadow: 'var(--shadow-sm)' }}>
+                            <CheckCircle size={18} />
+                            <span style={{ fontWeight: '600' }}>{interviewSuccessMsg}</span>
                         </div>
                     )}
                     {interviewError && (
-                        <div className={styles.errorAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
-                            <AlertCircle size={16} />
-                            <span>{interviewError}</span>
+                        <div className={styles.errorAlert} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--error-500)', boxShadow: 'var(--shadow-sm)' }}>
+                            <AlertCircle size={18} />
+                            <span style={{ fontWeight: '600' }}>{interviewError}</span>
                         </div>
                     )}
 
                     {/* アクティブな面談予約の表示 */}
-                    <div className={styles.detailContainer} style={{ marginBottom: 'var(--spacing-6)' }}>
-                        <h3>📅 あなたの面談予約一覧</h3>
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)' }}>
+                            <span style={{ fontSize: '1.4rem' }}>📅</span>
+                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>現在の面談予約状況</h3>
+                        </div>
+                        
                         {studentBookings.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
-                                現在、予約済みの面談はありません。
-                            </p>
+                            <div style={{ textAlign: 'center', padding: 'var(--spacing-6) 0', color: 'var(--text-tertiary)' }}>
+                                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>現在、予定されている面談はありません。</p>
+                            </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
                                 {studentBookings.map(booking => (
-                                    <div key={booking.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-3)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', borderLeft: '4px solid var(--primary-500)' }}>
+                                    <div key={booking.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', borderLeft: '5px solid var(--primary-500)', boxShadow: 'var(--shadow-sm)' }}>
                                         <div>
-                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-md)' }}>
-                                                {booking.slot_date} &nbsp; {booking.start_time.substring(0, 5)} - {booking.end_time.substring(0, 5)}
-                                            </strong>
-                                            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-                                                面談の先生: {booking.teacher?.full_name || '不明'} 先生
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: '4px' }}>
+                                                <span style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700', color: 'var(--text-primary)' }}>
+                                                    {booking.slot_date.replace(/-/g, '/')}
+                                                </span>
+                                                <span style={{ background: 'var(--primary-50)', color: 'var(--primary-700)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', fontWeight: '600' }}>
+                                                    {booking.start_time.substring(0, 5)} - {booking.end_time.substring(0, 5)}
+                                                </span>
+                                            </div>
+                                            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', display: 'block' }}>
+                                                👤 面談相手: <strong>{booking.teacher?.name || '担任'} 先生</strong> (個別面談)
                                             </span>
                                             {booking.notes && (
-                                                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-tertiary)', marginTop: '4px', fontStyle: 'italic' }}>
-                                                    相談内容: "{booking.notes}"
-                                                </p>
+                                                <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-2) var(--spacing-3)', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', borderLeft: '2px solid var(--border-color)' }}>
+                                                    相談メモ: "{booking.notes}"
+                                                </div>
                                             )}
                                         </div>
                                         <button 
                                             onClick={() => handleCancelBooking(booking.id)}
                                             className={styles.cancelBtn}
-                                            style={{ margin: 0, padding: '4px 12px', fontSize: 'var(--font-size-xs)', borderColor: 'var(--error-200)', color: 'var(--error-600)' }}
+                                            style={{ margin: 0, padding: '6px 14px', fontSize: 'var(--font-size-xs)', fontWeight: '600', borderRadius: 'var(--radius-md)', border: '1px solid var(--error-200)', color: 'var(--error-600)', background: '#fff', transition: 'all 0.2s', cursor: 'pointer' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--error-50)'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
                                         >
-                                            キャンセル
+                                            予約キャンセル
                                         </button>
                                     </div>
                                 ))}
@@ -929,85 +940,119 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                     </div>
 
                     {/* 新規面談予約フォーム */}
-                    <div className={styles.detailContainer}>
-                        <h3>⚡ 新しく面談を予約する</h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-4)' }}>
-                            先生と面談を行いたい日時を選択し、予約を入れてください。(15分枠)
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
+                            <span style={{ fontSize: '1.4rem' }}>✨</span>
+                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>新しく担任との面談を予約する</h3>
+                        </div>
+                        <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-6)' }}>
+                            担任教師が設定した平日シフトから、希望する時間枠（15分）を選んで面談の予約を完了させてください。
                         </p>
 
-                        <form onSubmit={handleBookSlot} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
-                            <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
-                                <div className={styles.inputGroup}>
-                                    <label>面談する先生 <span style={{ color: 'red' }}>*</span></label>
-                                    <select
-                                        value={selectedTeacher}
-                                        onChange={(e) => setSelectedTeacher(e.target.value)}
-                                        className={styles.selectInput}
-                                        style={{ width: '100%' }}
-                                    >
-                                        <option value="">先生を選択してください</option>
-                                        {teachersList.map(t => (
-                                            <option key={t.id} value={t.id}>
-                                                {t.full_name} 先生
-                                            </option>
-                                        ))}
-                                    </select>
+                        <form onSubmit={handleBookSlot} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
+                            
+                            {/* 担任教師 固定バッジ表示 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', padding: 'var(--spacing-4)', background: 'linear-gradient(135deg, var(--primary-50), var(--primary-100))', borderRadius: 'var(--radius-lg)', border: '1px solid var(--primary-200)' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--font-size-lg)', fontWeight: '700', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.3)' }}>
+                                    {homeroomTeacher?.name ? homeroomTeacher.name[0] : '師'}
                                 </div>
+                                <div>
+                                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--primary-700)', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
+                                        👥 面談相手 (クラス担任固定)
+                                    </span>
+                                    <strong style={{ fontSize: 'var(--font-size-md)', color: 'var(--primary-900)' }}>
+                                        {homeroomTeacher?.name ? `${homeroomTeacher.name} 先生` : '取得中...'}
+                                    </strong>
+                                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--primary-700)', marginLeft: 'var(--spacing-2)' }}>
+                                        ({session?.className || 'クラス'} 担任)
+                                    </span>
+                                </div>
+                            </div>
 
+                            <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-4)' }}>
                                 <div className={styles.inputGroup}>
-                                    <label>希望日付 <span style={{ color: 'red' }}>*</span></label>
+                                    <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>希望日付 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                     <input 
                                         type="date" 
                                         value={interviewDate}
                                         onChange={(e) => setInterviewDate(e.target.value)}
                                         className={styles.searchInput}
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none', transition: 'border 0.2s' }}
+                                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-500)'}
+                                        onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
                                     />
                                 </div>
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label>空いている時間枠 <span style={{ color: 'red' }}>*</span></label>
+                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>空いている時間枠 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                
                                 {interviewLoading ? (
-                                    <p style={{ fontSize: 'var(--font-size-sm)' }}>読み込み中...</p>
+                                    <div style={{ padding: 'var(--spacing-4)', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>枠を読み込み中...</div>
                                 ) : availableSlots.length === 0 ? (
-                                    <p style={{ color: 'var(--error-600)', fontSize: 'var(--font-size-sm)' }}>
-                                        選択された日付には予約可能な空き枠がありません。別の日付か別の先生を選択してください。
-                                    </p>
+                                    <div style={{ padding: 'var(--spacing-4)', background: 'var(--error-50)', color: 'var(--error-700)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--error-100)', fontSize: 'var(--font-size-xs)' }}>
+                                        ⚠️ 選択された日付には予約可能な空き枠がありません。別の日付を選択してください。
+                                    </div>
                                 ) : (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
-                                        {availableSlots.map(slot => (
-                                            <button
-                                                key={slot.id}
-                                                type="button"
-                                                onClick={() => setSelectedSlotId(slot.id)}
-                                                className={styles.radioBtn}
-                                                style={{
-                                                    margin: 0,
-                                                    padding: '8px 12px',
-                                                    fontSize: 'var(--font-size-sm)',
-                                                    borderColor: selectedSlotId === slot.id ? 'var(--primary-500)' : 'var(--border-color)',
-                                                    background: selectedSlotId === slot.id ? 'var(--primary-50)' : 'transparent',
-                                                    color: selectedSlotId === slot.id ? 'var(--primary-700)' : 'var(--text-secondary)',
-                                                    fontWeight: selectedSlotId === slot.id ? '600' : 'normal'
-                                                }}
-                                            >
-                                                {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
-                                            </button>
-                                        ))}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
+                                        {availableSlots.map(slot => {
+                                            const isSelected = selectedSlotId === slot.id;
+                                            return (
+                                                <button
+                                                    key={slot.id}
+                                                    type="button"
+                                                    onClick={() => setSelectedSlotId(slot.id)}
+                                                    style={{
+                                                        padding: '10px 14px',
+                                                        borderRadius: 'var(--radius-md)',
+                                                        fontSize: 'var(--font-size-sm)',
+                                                        border: isSelected ? '1px solid var(--primary-500)' : '1px solid var(--border-color)',
+                                                        background: isSelected ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : '#fff',
+                                                        color: isSelected ? '#fff' : 'var(--text-secondary)',
+                                                        fontWeight: isSelected ? '600' : 'normal',
+                                                        boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.2)' : 'none',
+                                                        transition: 'all 0.15s ease-in-out',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '6px'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isSelected) {
+                                                            e.currentTarget.style.borderColor = 'var(--primary-400)';
+                                                            e.currentTarget.style.background = 'var(--primary-50)';
+                                                            e.currentTarget.style.color = 'var(--primary-700)';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (!isSelected) {
+                                                            e.currentTarget.style.borderColor = 'var(--border-color)';
+                                                            e.currentTarget.style.background = '#fff';
+                                                            e.currentTarget.style.color = 'var(--text-secondary)';
+                                                        }
+                                                    }}
+                                                >
+                                                    {isSelected && <span>✓</span>}
+                                                    {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
+                                                </button>
+                                            )
+                                        })}
                                     </div>
                                 )}
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label>相談内容 (先生に伝えたいこと / 自由記述)</label>
+                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>相談内容 (先生に事前に伝えたいこと)</label>
                                 <textarea 
                                     value={consultNotes}
                                     onChange={(e) => setConsultNotes(e.target.value)}
-                                    placeholder="例: 進路について相談したいです。奨学金の申請方法について聞きたいです、など"
-                                    rows={3}
+                                    placeholder="例: 志望理由書の確認、進学費用についての相談、その他質問事項など..."
+                                    rows={4}
                                     className={styles.searchInput}
-                                    style={{ width: '100%', resize: 'none' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none', transition: 'border 0.2s', resize: 'none' }}
+                                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-500)'}
+                                    onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
                                 />
                             </div>
 
@@ -1015,9 +1060,22 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                 type="submit"
                                 disabled={interviewLoading || !selectedSlotId}
                                 className={styles.submitBtn}
-                                style={{ margin: 0, alignSelf: 'flex-start' }}
+                                style={{ 
+                                    margin: 0, 
+                                    alignSelf: 'flex-start',
+                                    padding: '12px 28px',
+                                    borderRadius: 'var(--radius-lg)',
+                                    background: (interviewLoading || !selectedSlotId) ? 'var(--text-tertiary)' : 'linear-gradient(135deg, var(--primary-500), var(--primary-600))',
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    fontSize: 'var(--font-size-sm)',
+                                    border: 'none',
+                                    cursor: (interviewLoading || !selectedSlotId) ? 'not-allowed' : 'pointer',
+                                    boxShadow: (interviewLoading || !selectedSlotId) ? 'none' : '0 4px 14px rgba(59, 130, 246, 0.3)',
+                                    transition: 'all 0.2s'
+                                }}
                             >
-                                {interviewLoading ? '送信中...' : '📅 面談を予約する'}
+                                {interviewLoading ? '処理中...' : '📅 面談予約を確定する'}
                             </button>
                         </form>
                     </div>

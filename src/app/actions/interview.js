@@ -379,7 +379,7 @@ export async function getStudentBookings() {
       .from('interview_slots')
       .select(`
         *,
-        teacher:profiles(id, full_name)
+        teacher:admin_members(id, name)
       `)
       .eq('student_id_text', session.studentId)
       .eq('status', 'booked')
@@ -390,6 +390,50 @@ export async function getStudentBookings() {
     return { success: true, bookings: bookings || [] }
   } catch (e) {
     console.error('getStudentBookings error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 12. 学生用：自分のクラスの担任教師を取得する
+export async function getStudentHomeroomTeacher() {
+  try {
+    const session = await getStudentSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    // 1. 所属クラスの担任教師IDを取得
+    const { data: classData, error: classError } = await supabase
+      .from('classes')
+      .select('homeroom_teacher_id')
+      .eq('name', session.className)
+      .single()
+
+    if (classError || !classData || !classData.homeroom_teacher_id) {
+      console.warn('Homeroom teacher not found for class:', session.className)
+      return { success: false, error: 'クラスの担任教師が設定されていません。' }
+    }
+
+    // 2. 担任教師の名前を取得
+    const { data: teacher, error: teacherError } = await supabase
+      .from('admin_members')
+      .select('id, name')
+      .eq('id', classData.homeroom_teacher_id)
+      .single()
+
+    if (teacherError || !teacher) {
+      return { success: false, error: '担任教師の情報の取得に失敗しました。' }
+    }
+
+    return { 
+      success: true, 
+      teacher: {
+        id: teacher.id,
+        name: teacher.name
+      }
+    }
+  } catch (e) {
+    console.error('getStudentHomeroomTeacher error:', e)
     return { success: false, error: e.message }
   }
 }

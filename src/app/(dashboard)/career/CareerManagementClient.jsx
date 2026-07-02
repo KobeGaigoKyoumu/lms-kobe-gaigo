@@ -992,41 +992,41 @@ export default function CareerManagementClient({
                 面談タブ (個別予約枠管理・スケジュール)
                ==================================================== */}
             {activeTab === 'interview' && (
-                <div className={styles.tabContent}>
+                <div className={styles.tabContent} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
                     {/* 面談用アラート表示 */}
                     {interviewSuccessMsg && (
-                        <div className={styles.successAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                        <div className={styles.successAlert} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--success-500)', boxShadow: 'var(--shadow-sm)' }}>
                             <CheckCircle size={16} />
-                            <span>{interviewSuccessMsg}</span>
+                            <span style={{ fontWeight: '600' }}>{interviewSuccessMsg}</span>
                         </div>
                     )}
                     {interviewError && (
-                        <div className={styles.errorAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                        <div className={styles.errorAlert} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--error-500)', boxShadow: 'var(--shadow-sm)' }}>
                             <AlertCircle size={16} />
-                            <span>{interviewError}</span>
+                            <span style={{ fontWeight: '600' }}>{interviewError}</span>
                         </div>
                     )}
 
-                    {/* 面談用サブタブ */}
-                    <div className={styles.controls} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: 'var(--spacing-2)', borderRadius: 'var(--radius-md)' }}>
+                    {/* 面談用サブタブ (セグメントコントロール調) */}
+                    <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-secondary)', padding: '6px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', alignSelf: 'flex-start' }}>
                         <button 
-                            className={`${styles.actionButton} ${interviewActiveSubTab === 'schedule' ? styles.submitBtn : styles.cancelBtn}`}
+                            className={styles.actionButton}
                             onClick={() => setInterviewActiveSubTab('schedule')}
-                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'schedule' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'schedule' ? '#fff' : 'var(--text-secondary)' }}
+                            style={{ margin: 0, border: 'none', borderRadius: 'var(--radius-lg)', padding: '10px 20px', background: interviewActiveSubTab === 'schedule' ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : 'transparent', color: interviewActiveSubTab === 'schedule' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: interviewActiveSubTab === 'schedule' ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         >
-                            📅 予約状況・スケジュール管理
+                            📅 予約状況・スケジュール
                         </button>
                         <button 
-                            className={`${styles.actionButton} ${interviewActiveSubTab === 'template' ? styles.submitBtn : styles.cancelBtn}`}
+                            className={styles.actionButton}
                             onClick={() => { setInterviewActiveSubTab('template'); loadInterviewTemplates(); }}
-                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'template' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'template' ? '#fff' : 'var(--text-secondary)' }}
+                            style={{ margin: 0, border: 'none', borderRadius: 'var(--radius-lg)', padding: '10px 20px', background: interviewActiveSubTab === 'template' ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : 'transparent', color: interviewActiveSubTab === 'template' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: interviewActiveSubTab === 'template' ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         >
-                            ⚙️ テンプレート設定 (平日用)
+                            ⚙️ シフトテンプレート設定
                         </button>
                         <button 
-                            className={`${styles.actionButton} ${interviewActiveSubTab === 'generate' ? styles.submitBtn : styles.cancelBtn}`}
+                            className={styles.actionButton}
                             onClick={() => setInterviewActiveSubTab('generate')}
-                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'generate' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'generate' ? '#fff' : 'var(--text-secondary)' }}
+                            style={{ margin: 0, border: 'none', borderRadius: 'var(--radius-lg)', padding: '10px 20px', background: interviewActiveSubTab === 'generate' ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : 'transparent', color: interviewActiveSubTab === 'generate' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: interviewActiveSubTab === 'generate' ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         >
                             ⚡ 枠の自動生成
                         </button>
@@ -1034,94 +1034,102 @@ export default function CareerManagementClient({
 
                     {/* サブタブ1: スケジュール管理 */}
                     {interviewActiveSubTab === 'schedule' && (
-                        <div className={styles.counselingView}>
-                            <div className={styles.controls} style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
-                                <div className={styles.filterGroup}>
-                                    <label className={styles.controlLabel}>日付選択:</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-4) var(--spacing-6)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>表示日付:</label>
                                     <input 
                                         type="date" 
                                         value={interviewSelectedDate} 
                                         onChange={(e) => setInterviewSelectedDate(e.target.value)} 
                                         className={styles.searchInput}
-                                        style={{ width: 'auto' }}
+                                        style={{ width: 'auto', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
                                     />
                                 </div>
                                 <button 
                                     onClick={() => setInterviewSelectedDate(new Date().toISOString().split('T')[0])}
                                     className={styles.actionButton}
+                                    style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
                                 >
-                                    今日
+                                    今日に戻る
                                 </button>
                             </div>
 
-                            <div className={styles.tableCard}>
+                            <div className={styles.tableCard} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
                                 <div className={styles.tableWrapper}>
                                     {interviewLoading ? (
-                                        <div style={{ padding: 'var(--spacing-8)', textAlign: 'center' }}>読み込み中...</div>
+                                        <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>スロットを読み込み中...</div>
                                     ) : interviewSlots.filter(s => s.slot_date === interviewSelectedDate).length === 0 ? (
                                         <div className={styles.emptyState} style={{ padding: 'var(--spacing-8)', textAlign: 'center' }}>
-                                            <p>この日の予約可能枠はまだありません。</p>
-                                            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-tertiary)' }}>
-                                                「枠の自動生成」タブから枠を作成してください。
+                                            <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: 'var(--text-secondary)' }}>この日付の面談枠はまだ登録されていません。</p>
+                                            <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', margin: 0 }}>
+                                                「枠の自動生成」タブから、テンプレートを元に予約枠を作成してください。
                                             </p>
                                         </div>
                                     ) : (
-                                        <table className={styles.table}>
+                                        <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
-                                                <tr>
-                                                    <th>時間帯</th>
-                                                    <th>ステータス</th>
-                                                    <th>予約学生</th>
-                                                    <th>面談内容 / メモ</th>
-                                                    <th className={styles.textCenter}>操作</th>
+                                                <tr style={{ background: 'var(--bg-secondary)' }}>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>時間帯 (15分枠)</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>ステータス</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>予約学生</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>面談メモ / 相談内容</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontWeight: '700' }}>操作</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {interviewSlots
                                                     .filter(s => s.slot_date === interviewSelectedDate)
                                                     .map(slot => (
-                                                        <tr key={slot.id}>
-                                                            <td>
+                                                        <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                                            <td style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                                                 {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                                                             </td>
-                                                            <td>
-                                                                <span className={`${styles.badge} ${
-                                                                    slot.status === 'booked' ? styles.successBadge : 
-                                                                    slot.status === 'blocked' ? styles.errorBadge : ''
-                                                                }`} style={{
+                                                            <td style={{ padding: '16px' }}>
+                                                                <span style={{
                                                                     background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'blocked' ? 'var(--error-50)' : 'var(--success-50)',
                                                                     color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'blocked' ? 'var(--error-700)' : 'var(--success-700)',
-                                                                    padding: '2px 8px',
-                                                                    borderRadius: '4px'
+                                                                    padding: '4px 10px',
+                                                                    borderRadius: 'var(--radius-md)',
+                                                                    fontSize: 'var(--font-size-xs)',
+                                                                    fontWeight: '700',
+                                                                    display: 'inline-block'
                                                                 }}>
                                                                     {slot.status === 'booked' ? '🔵 予約済み' : 
                                                                      slot.status === 'blocked' ? '🔴 受付停止' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
-                                                            <td>
+                                                            <td style={{ padding: '16px' }}>
                                                                 {slot.status === 'booked' && slot.student ? (
-                                                                    <strong>{slot.student.full_name} ({slot.student.class_name})</strong>
-                                                                ) : '-'}
+                                                                    <strong style={{ color: 'var(--text-primary)' }}>
+                                                                        {slot.student.full_name} <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', fontWeight: 'normal' }}>({slot.student.class_name})</span>
+                                                                    </strong>
+                                                                ) : <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                             </td>
-                                                            <td>
+                                                            <td style={{ padding: '16px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                                 <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-                                                                    {slot.notes || '-'}
+                                                                    {slot.notes || <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                                 </span>
                                                             </td>
-                                                            <td className={styles.textCenter} style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center' }}>
-                                                                <button
-                                                                    onClick={() => handleOpenEditInterview(slot)}
-                                                                    className={styles.actionButton}
-                                                                >
-                                                                    ✏️ 編集
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDeleteInterviewSlot(slot.id)}
-                                                                    className={styles.actionButton}
-                                                                    style={{ color: 'var(--error-600)', borderColor: 'var(--error-200)' }}
-                                                                >
-                                                                    🗑️ 削除
-                                                                </button>
+                                                            <td style={{ padding: '16px', textAlign: 'center' }}>
+                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => handleOpenEditInterview(slot)}
+                                                                        className={styles.actionButton}
+                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600' }}
+                                                                    >
+                                                                        ✏️ 編集
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteInterviewSlot(slot.id)}
+                                                                        className={styles.actionButton}
+                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-600)', borderColor: 'var(--error-200)', background: '#fff' }}
+                                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-50)'}
+                                                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                                    >
+                                                                        🗑️ 削除
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -1135,70 +1143,76 @@ export default function CareerManagementClient({
 
                     {/* サブタブ2: テンプレート設定 */}
                     {interviewActiveSubTab === 'template' && (
-                        <div className={styles.counselingView} style={{ padding: 'var(--spacing-6)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-                            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>週間テンプレート (平日 9:00 〜 18:00 の範囲)</h3>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-sm)' }}>
-                                各曜日の標準的な面談可能シフト時間帯を設定します。枠自動生成のベースとして使用されます。
-                            </p>
+                        <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 6px 0', fontWeight: '700', color: 'var(--text-primary)' }}>週間テンプレート (平日 9:00 〜 18:00)</h3>
+                                <p style={{ color: 'var(--text-tertiary)', margin: 0, fontSize: 'var(--font-size-xs)' }}>
+                                    各曜日の標準的な面談受付時間帯を決定します。枠を自動生成する際のデフォルト設定になります。
+                                </p>
+                            </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginBottom: 'var(--spacing-4)' }}>
-                                {interviewTemplates.map((temp, idx) => (
-                                    <div key={temp.day_of_week} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', padding: 'var(--spacing-2)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', minWidth: '100px', cursor: 'pointer' }}>
-                                            <input 
-                                                type="checkbox"
-                                                checked={temp.enabled}
-                                                onChange={(e) => {
-                                                    const updated = [...interviewTemplates]
-                                                    updated[idx].enabled = e.target.checked
-                                                    setInterviewTemplates(updated)
-                                                }}
-                                            />
-                                            <span style={{ fontWeight: '500' }}>
-                                                {['日', '月', '火', '水', '木', '金', '土'][temp.day_of_week]}曜日
-                                            </span>
-                                        </label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--spacing-4)', margin: 'var(--spacing-4) 0' }}>
+                                {interviewTemplates.map((temp, idx) => {
+                                    const isEnabled = temp.enabled;
+                                    return (
+                                        <div key={temp.day_of_week} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', padding: 'var(--spacing-4)', background: isEnabled ? 'linear-gradient(135deg, var(--bg-card), var(--bg-secondary))' : 'var(--bg-secondary)', border: isEnabled ? '1px solid var(--primary-200)' : '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', opacity: isEnabled ? 1 : 0.65, transition: 'all 0.2s', boxShadow: isEnabled ? '0 4px 12px rgba(0,0,0,0.02)' : 'none' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', cursor: 'pointer' }}>
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={temp.enabled}
+                                                    onChange={(e) => {
+                                                        const updated = [...interviewTemplates]
+                                                        updated[idx].enabled = e.target.checked
+                                                        setInterviewTemplates(updated)
+                                                    }}
+                                                    style={{ width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer' }}
+                                                />
+                                                <span style={{ fontWeight: '700', fontSize: 'var(--font-size-md)', color: isEnabled ? 'var(--primary-700)' : 'var(--text-secondary)' }}>
+                                                    {['日', '月', '火', '水', '木', '金', '土'][temp.day_of_week]}曜日
+                                                </span>
+                                            </label>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-                                            <input 
-                                                type="time" 
-                                                value={temp.start_time}
-                                                min="09:00"
-                                                max="18:00"
-                                                disabled={!temp.enabled}
-                                                onChange={(e) => {
-                                                    const updated = [...interviewTemplates]
-                                                    updated[idx].start_time = e.target.value
-                                                    setInterviewTemplates(updated)
-                                                }}
-                                                className={styles.searchInput}
-                                                style={{ width: 'auto', padding: 'var(--spacing-1)' }}
-                                            />
-                                            <span>〜</span>
-                                            <input 
-                                                type="time" 
-                                                value={temp.end_time}
-                                                min="09:00"
-                                                max="18:00"
-                                                disabled={!temp.enabled}
-                                                onChange={(e) => {
-                                                    const updated = [...interviewTemplates]
-                                                    updated[idx].end_time = e.target.value
-                                                    setInterviewTemplates(updated)
-                                                }}
-                                                className={styles.searchInput}
-                                                style={{ width: 'auto', padding: 'var(--spacing-1)' }}
-                                            />
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: '4px' }}>
+                                                <input 
+                                                    type="time" 
+                                                    value={temp.start_time}
+                                                    min="09:00"
+                                                    max="18:00"
+                                                    disabled={!temp.enabled}
+                                                    onChange={(e) => {
+                                                        const updated = [...interviewTemplates]
+                                                        updated[idx].start_time = e.target.value
+                                                        setInterviewTemplates(updated)
+                                                    }}
+                                                    className={styles.searchInput}
+                                                    style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
+                                                />
+                                                <span style={{ color: 'var(--text-tertiary)' }}>〜</span>
+                                                <input 
+                                                    type="time" 
+                                                    value={temp.end_time}
+                                                    min="09:00"
+                                                    max="18:00"
+                                                    disabled={!temp.enabled}
+                                                    onChange={(e) => {
+                                                        const updated = [...interviewTemplates]
+                                                        updated[idx].end_time = e.target.value
+                                                        setInterviewTemplates(updated)
+                                                    }}
+                                                    className={styles.searchInput}
+                                                    style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
 
                             <button 
                                 onClick={handleSaveInterviewTemplates}
                                 disabled={interviewLoading}
                                 className={styles.actionButton}
-                                style={{ background: 'var(--primary-600)', color: '#fff', border: 'none' }}
+                                style={{ background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)', fontWeight: '700', fontSize: 'var(--font-size-sm)', cursor: 'pointer', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)', alignSelf: 'flex-start' }}
                             >
                                 {interviewLoading ? '保存中...' : '💾 テンプレート設定を保存'}
                             </button>
@@ -1207,31 +1221,33 @@ export default function CareerManagementClient({
 
                     {/* サブタブ3: 枠の自動生成 */}
                     {interviewActiveSubTab === 'generate' && (
-                        <div className={styles.counselingView} style={{ padding: 'var(--spacing-6)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-                            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>15分間隔 予約可能枠の自動生成</h3>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-sm)' }}>
-                                テンプレート設定に基づいて、指定期間内のすべての平日（土日を除く）に15分刻みの面談受付スロットを一括生成します。
-                            </p>
+                        <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-5)' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 6px 0', fontWeight: '700', color: 'var(--text-primary)' }}>15分間隔 予約可能枠の自動生成</h3>
+                                <p style={{ color: 'var(--text-tertiary)', margin: 0, fontSize: 'var(--font-size-xs)' }}>
+                                    設定済みの週間テンプレートをベースに、指定された開始日から終了日までの平日の予約可能スロット（15分刻み）を一括で自動生成します。
+                                </p>
+                            </div>
 
-                            <div className={styles.controls} style={{ display: 'flex', gap: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', background: 'transparent', padding: 0 }}>
-                                <div className={styles.filterGroup}>
-                                    <label className={styles.controlLabel}>開始日:</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-4)', background: 'var(--bg-secondary)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                <div className={styles.filterGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>自動生成の開始日:</label>
                                     <input 
                                         type="date" 
                                         value={interviewGenRange.start}
                                         onChange={(e) => setInterviewGenRange({...interviewGenRange, start: e.target.value})}
                                         className={styles.searchInput}
-                                        style={{ width: 'auto' }}
+                                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
                                     />
                                 </div>
-                                <div className={styles.filterGroup}>
-                                    <label className={styles.controlLabel}>終了日:</label>
+                                <div className={styles.filterGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>自動生成の終了日:</label>
                                     <input 
                                         type="date" 
                                         value={interviewGenRange.end}
                                         onChange={(e) => setInterviewGenRange({...interviewGenRange, end: e.target.value})}
                                         className={styles.searchInput}
-                                        style={{ width: 'auto' }}
+                                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
                                     />
                                 </div>
                             </div>
@@ -1240,7 +1256,7 @@ export default function CareerManagementClient({
                                 onClick={handleGenerateInterviewSlots}
                                 disabled={interviewLoading}
                                 className={styles.actionButton}
-                                style={{ background: 'var(--primary-600)', color: '#fff', border: 'none' }}
+                                style={{ background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)', fontWeight: '700', fontSize: 'var(--font-size-sm)', cursor: 'pointer', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)', alignSelf: 'flex-start' }}
                             >
                                 {interviewLoading ? '生成中...' : '⚡ 予約可能枠を自動生成'}
                             </button>
