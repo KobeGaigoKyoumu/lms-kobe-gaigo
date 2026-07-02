@@ -59,6 +59,38 @@ export default function StudentStudyPage() {
   const [learnedCategoryFilter, setLearnedCategoryFilter] = useState('all')
   const [incorrectPage, setIncorrectPage] = useState(1)
 
+  // APIへのプレイ記録保存関数
+  const saveStudyRecord = async ({ app_type, activity_type, category, score, total, detail }) => {
+    try {
+      await fetch('/api/student/study-record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app_type, activity_type, category, score, total, detail })
+      })
+    } catch (e) {
+      console.error('Failed to sync study record to DB:', e)
+    }
+  }
+
+  // Japanese Master からの postMessage 受信監視
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data && event.data.type === 'JM_QUIZ_COMPLETED') {
+        const { deckType, quizFormat, score, total } = event.data.data;
+        saveStudyRecord({
+          app_type: 'japanese_master',
+          activity_type: 'quiz',
+          category: `${deckType} (${quizFormat})`,
+          score,
+          total,
+          detail: {}
+        });
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   // Load progress from LocalStorage on mount
   useEffect(() => {
     try {
@@ -88,6 +120,17 @@ export default function StudentStudyPage() {
         next.add(term)
       }
       localStorage.setItem('n5_learned_vocab', JSON.stringify([...next]))
+
+      // DBに単語学習状況を同期
+      saveStudyRecord({
+        app_type: 'n5_study_hub',
+        activity_type: 'flashcard',
+        category: 'vocab',
+        score: next.size,
+        total: vocabList.current.length,
+        detail: { learnedList: [...next] }
+      });
+
       return next
     })
   }
@@ -232,6 +275,17 @@ export default function StudentStudyPage() {
           
           localStorage.setItem('n5_quiz_correct_ids', JSON.stringify([...nextCorrect]))
           localStorage.setItem('n5_quiz_incorrect_ids', JSON.stringify([...nextIncorrect]))
+
+          // DBにクイズ結果を同期
+          saveStudyRecord({
+            app_type: 'n5_study_hub',
+            activity_type: 'quiz',
+            category: 'vocab',
+            score: quizScore,
+            total: quizQuestions.length,
+            detail: { correctCount: nextCorrect.size, incorrectCount: nextIncorrect.size }
+          });
+
           return nextIncorrect
         })
         return nextCorrect
@@ -334,6 +388,17 @@ export default function StudentStudyPage() {
     setExamHistory((prev) => {
       const next = [newEntry, ...prev]
       localStorage.setItem('n5_exam_history', JSON.stringify(next))
+
+      // DBに模擬試験の結果を同期
+      saveStudyRecord({
+        app_type: 'n5_study_hub',
+        activity_type: 'exam',
+        category: examTitle,
+        score: score,
+        total: examQuestions.length,
+        detail: { percent: newEntry.percent }
+      });
+
       return next
     })
   }

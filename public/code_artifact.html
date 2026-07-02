@@ -998,6 +998,18 @@
                     
                     historyArray.unshift(newRecord); // 先頭に追加
                     localStorage.setItem('jm_quiz_history', JSON.stringify(historyArray));
+
+                    // 親ウィンドウへのメッセージ送信
+                    window.parent.postMessage({
+                        type: 'JM_QUIZ_COMPLETED',
+                        data: {
+                            deckType: state.deckType,
+                            quizFormat: state.quizFormat,
+                            score: state.score,
+                            total: state.cards.length,
+                            percent: percent
+                        }
+                    }, '*');
                 } catch (e) {
                     console.error('Error saving quiz result:', e);
                 }
