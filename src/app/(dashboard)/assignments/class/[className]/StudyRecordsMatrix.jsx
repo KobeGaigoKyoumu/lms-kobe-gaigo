@@ -14,12 +14,18 @@ export default function StudyRecordsMatrix({ className }) {
         setError(null)
         try {
             const res = await fetch(`/api/teacher/class-study-records/${encodeURIComponent(className)}`)
-            if (!res.ok) throw new Error('Failed to fetch study records')
-            const json = await res.json()
+            const json = await res.json().catch(() => null)
+            
+            if (!res.ok) {
+                const errMsg = json?.message || json?.error || `HTTP ${res.status}`
+                throw new Error(errMsg)
+            }
+            
+            if (!json) throw new Error('Invalid JSON response')
             setData(json)
         } catch (err) {
             console.error(err)
-            setError('学習記録の読み込みに失敗しました')
+            setError(`学習記録の読み込みに失敗しました: ${err.message}`)
         } finally {
             setLoading(false)
         }

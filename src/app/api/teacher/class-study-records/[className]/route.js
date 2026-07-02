@@ -1,8 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+
+// Service Role 用の Admin クライアント作成ヘルパー
+const createAdminClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey)
+}
 
 export async function GET(req, { params }) {
   try {
+    // ログインユーザーの検証 (標準クライアントを使用)
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
@@ -10,7 +19,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 教師・管理者ロールか検証 (どのクラスのプレイ記録も閲覧可能)
+    // 教師・管理者ロールか検証 (標準クライアントを使用)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
@@ -24,8 +33,11 @@ export async function GET(req, { params }) {
     const resolvedParams = await params
     const className = decodeURIComponent(resolvedParams.className)
 
+    // これ以降のクエリは RLS をバイパスするため Admin クライアントを使用する
+    const adminSupabase = createAdminClient()
+
     // 1. そのクラスのアクティブな学生を取得
-    const { data: students, error: studentsError } = await supabase
+    const { data: students, error: studentsError } = await adminSupabase
       .from('students')
       .select('student_id_text, full_name')
       .eq('class_name', className)
@@ -43,7 +55,7 @@ export async function GET(req, { params }) {
     const studentIdTexts = students.map(s => s.student_id_text)
 
     // 2. profiles から学生の UUID (id) と学籍番号 (student_id_text) のマッピングを取得
-    const { data: studentProfiles, error: profilesError } = await supabase
+    const { data: studentProfiles, error: profilesError } = await adminSupabase
       .from('profiles')
       .select('id, student_id_text')
       .in('student_id_text', studentIdTexts)
@@ -65,7 +77,7 @@ export async function GET(req, { params }) {
     // 3. student_play_records から学生たちのプレイ履歴を取得
     let playRecords = []
     if (studentUuids.length > 0) {
-      const { data: records, error: recordsError } = await supabase
+      const { data: records, error: recordsError } = await adminSupabase
         .from('student_play_records')
         .select('*')
         .in('student_id', studentUuids)
@@ -91,6 +103,10 @@ export async function GET(req, { params }) {
     })
   } catch (err) {
     console.error('Class study records API error:', err)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal Server Error',
+      message: err.message,
+      stack: err.stack 
+    }, { status: 500 })
   }
 }
