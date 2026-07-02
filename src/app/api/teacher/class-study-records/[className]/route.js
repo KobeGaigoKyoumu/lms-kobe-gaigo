@@ -2,7 +2,7 @@ import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Service Role 用 of Admin クライアント作成ヘルパー
+// Service Role 用の Admin クライアント作成ヘルパー
 const createAdminClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -26,7 +26,7 @@ export async function GET(req, { params }) {
     const resolvedParams = await params
     const className = decodeURIComponent(resolvedParams.className)
 
-    // これ以降のクエリは RLS をバイパスするため Admin クライアントを使用する
+    // これ以降ের クエリは RLS をバイパスするため Admin クライアントを使用する
     const adminSupabase = createAdminClient()
 
     // 1. そのクラスのアクティブな学生を取得
@@ -47,52 +47,25 @@ export async function GET(req, { params }) {
 
     const studentIdTexts = students.map(s => s.student_id_text)
 
-    // 2. profiles から学生の UUID (id) と学籍番号 (student_id_text) のマッピングを取得
-    const { data: studentProfiles, error: profilesError } = await adminSupabase
-      .from('profiles')
-      .select('id, student_id_text')
-      .in('student_id_text', studentIdTexts)
-
-    if (profilesError) {
-      return NextResponse.json({ error: profilesError.message }, { status: 500 })
-    }
-
-    // profiles.id から student_id_text への逆引きマップを作成
-    const uuidToIdText = {}
-    const studentUuids = []
-    if (studentProfiles) {
-      studentProfiles.forEach(p => {
-        uuidToIdText[p.id] = p.student_id_text
-        studentUuids.push(p.id)
-      })
-    }
-
-    // 3. student_play_records から学生たちのプレイ履歴を取得
+    // 2. student_play_records から学生たちのプレイ履歴を学籍番号で直接取得 (profilesを介さない)
     let playRecords = []
-    if (studentUuids.length > 0) {
+    if (studentIdTexts.length > 0) {
       const { data: records, error: recordsError } = await adminSupabase
         .from('student_play_records')
         .select('*')
-        .in('student_id', studentUuids)
+        .in('student_id_text', studentIdTexts)
         .order('created_at', { ascending: false })
 
       if (recordsError) {
-        // テーブルがまだ作られていないなどのエラーを避けるために優しく空配列を返す
         console.warn('student_play_records table query failed:', recordsError.message)
       } else {
         playRecords = records || []
       }
     }
 
-    // student_id_text でマッピングされたレコード一覧に変換
-    const recordsByIdText = playRecords.map(r => ({
-      ...r,
-      student_id_text: uuidToIdText[r.student_id]
-    })).filter(r => r.student_id_text)
-
     return NextResponse.json({
       students,
-      records: recordsByIdText
+      records: playRecords
     })
   } catch (err) {
     console.error('Class study records API error:', err)
