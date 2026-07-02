@@ -402,36 +402,59 @@ export async function getStudentHomeroomTeacher() {
 
     const supabase = createAdminClient()
 
-    // 1. 所属クラスの担任教師IDを取得
+    // 1. 所属クラスの担任教師IDと名前を取得
     const { data: classData, error: classError } = await supabase
       .from('classes')
-      .select('homeroom_teacher_id')
+      .select('teacher_id, homeroom_teacher_name')
       .eq('name', session.className)
       .single()
 
-    if (classError || !classData || !classData.homeroom_teacher_id) {
-      console.warn('Homeroom teacher not found for class:', session.className)
-      return { success: false, error: 'クラスの担任教師が設定されていません。' }
+    if (classError || !classData) {
+      console.warn('Homeroom teacher info not found for class:', session.className)
+      return { success: false, error: 'クラスの担任情報が見つかりません。' }
     }
 
-    // 2. 担任教師の名前を取得
-    const { data: teacher, error: teacherError } = await supabase
-      .from('admin_members')
-      .select('id, name')
-      .eq('id', classData.homeroom_teacher_id)
-      .single()
+    // 2. もし teacher_id があれば、そちらを優先して admin_members から取得
+    if (classData.teacher_id) {
+      const { data: teacher, error: teacherError } = await supabase
+        .from('admin_members')
+        .select('id, name')
+        .eq('id', classData.teacher_id)
+        .single()
 
-    if (teacherError || !teacher) {
-      return { success: false, error: '担任教師の情報の取得に失敗しました。' }
-    }
-
-    return { 
-      success: true, 
-      teacher: {
-        id: teacher.id,
-        name: teacher.name
+      if (!teacherError && teacher) {
+        return { 
+          success: true, 
+          teacher: {
+            id: teacher.id,
+            name: teacher.name
+          }
+        }
       }
     }
+
+    // 3. teacher_id が無い、または取得できない場合で homeroom_teacher_name があれば、名前で検索
+    if (classData.homeroom_teacher_name) {
+      const { data: teacherByName, error: nameError } = await supabase
+        .from('admin_members')
+        .select('id, name')
+        .eq('name', classData.homeroom_teacher_name)
+        .limit(1)
+      
+      const foundTeacher = teacherByName && teacherByName.length > 0 ? teacherByName[0] : null
+
+      if (!nameError && foundTeacher) {
+        return { 
+          success: true, 
+          teacher: {
+            id: foundTeacher.id,
+            name: foundTeacher.name
+          }
+        }
+      }
+    }
+
+    return { success: false, error: '担任教師が設定されていないか、教員データベースに存在しません。' }
   } catch (e) {
     console.error('getStudentHomeroomTeacher error:', e)
     return { success: false, error: e.message }
