@@ -541,7 +541,7 @@ export async function getStudentUpcomingBookings() {
     const { data, error } = await supabase
       .from('interview_slots')
       .select(`*, teacher:admin_members(id, name)`)
-      .eq('booked_student_id', session.id)
+      .eq('student_id_text', session.studentId)
       .eq('status', 'booked')
       .gte('slot_date', todayStr)
       .lte('slot_date', nextMonthStr)
