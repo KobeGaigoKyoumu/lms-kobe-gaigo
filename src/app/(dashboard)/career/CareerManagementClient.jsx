@@ -883,7 +883,7 @@ export default function CareerManagementClient({
     // ログイン教員の担任（担当）クラスの学生リストを一度だけ取得して保持する
     useEffect(() => {
         if (myClasses && myClasses.length > 0) {
-            Promise.all(myClasses.map(c => getStudentsCareerList(c))).then(results => {
+            Promise.all(myClasses.map(c => getStudentsCareerList(c.name))).then(results => {
                 const allSts = results.flat()
                 const uniqueSts = Array.from(new Map(allSts.map(s => [s.student_id_text, s])).values())
                 setMyClassStudents(uniqueSts)
