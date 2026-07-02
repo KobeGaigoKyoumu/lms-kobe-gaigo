@@ -15,17 +15,25 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
     const menuItems = getMenuItems(role, userId)
 
     const statuses = useStudentStatus()
+    const [isLoggingOut, setIsLoggingOut] = React.useState(false)
 
     const handleLogout = async () => {
-        if (role === 'student') {
-            const { logoutStudent } = await import('@/app/actions/studentAuth')
-            await logoutStudent()
-        } else if (userEmail?.endsWith('@member')) {
-            const { logoutAdminMember } = await import('@/app/actions/adminAuth')
-            await logoutAdminMember()
-        } else {
-            await supabase.auth.signOut()
-            window.location.href = '/login'
+        if (isLoggingOut) return
+        setIsLoggingOut(true)
+        try {
+            if (role === 'student') {
+                const { logoutStudent } = await import('@/app/actions/studentAuth')
+                await logoutStudent()
+            } else if (userEmail?.endsWith('@member')) {
+                const { logoutAdminMember } = await import('@/app/actions/adminAuth')
+                await logoutAdminMember()
+            } else {
+                await supabase.auth.signOut()
+                window.location.href = '/login'
+            }
+        } catch (e) {
+            console.error('Logout error:', e)
+            setIsLoggingOut(false)
         }
     }
 
@@ -77,18 +85,24 @@ export default function MobileMenu({ role, userId, userName, userEmail }) {
                 onClick={handleLogout}
                 className={styles.menuItem}
                 type="button"
+                disabled={isLoggingOut}
+                style={{ opacity: isLoggingOut ? 0.6 : 1, cursor: isLoggingOut ? 'not-allowed' : 'pointer' }}
             >
                 <div
                     className={styles.iconWrapper}
                     style={{ color: '#475569' }}
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
+                    {isLoggingOut ? (
+                        <div className={styles.spinner}></div>
+                    ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    )}
                 </div>
-                <span className={styles.label}>ログアウト</span>
+                <span className={styles.label}>{isLoggingOut ? '処理中...' : 'ログアウト'}</span>
             </button>
         </nav>
     )

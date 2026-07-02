@@ -15,6 +15,7 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
     const pathname = usePathname()
     const supabase = createClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
 
     const statuses = useStudentStatus()
     const menuItems = getMenuItems(userRole, userId)
@@ -24,14 +25,21 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
     }, [isCollapsed])
 
     const handleLogout = async () => {
-        if (userRole === 'student') {
-            await logoutStudent()
-        } else if (userEmail?.endsWith('@member')) {
-            // Admin member logout (cookie-based)
-            await logoutAdminMember()
-        } else {
-            await supabase.auth.signOut()
-            window.location.href = '/login'
+        if (isLoggingOut) return
+        setIsLoggingOut(true)
+        try {
+            if (userRole === 'student') {
+                await logoutStudent()
+            } else if (userEmail?.endsWith('@member')) {
+                // Admin member logout (cookie-based)
+                await logoutAdminMember()
+            } else {
+                await supabase.auth.signOut()
+                window.location.href = '/login'
+            }
+        } catch (e) {
+            console.error('Logout error:', e)
+            setIsLoggingOut(false)
         }
     }
 
@@ -134,12 +142,22 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
                         <p className={styles.userEmail}>{displayDetail}</p>
                     </div>
                 </div>
-                <button onClick={handleLogout} className={styles.logoutBtn} title="ログアウト">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M6 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" />
-                        <path d="M12 12l3-3-3-3" />
-                        <path d="M15 9H7" />
-                    </svg>
+                <button 
+                    onClick={handleLogout} 
+                    className={styles.logoutBtn} 
+                    title="ログアウト"
+                    disabled={isLoggingOut}
+                    style={{ opacity: isLoggingOut ? 0.6 : 1, cursor: isLoggingOut ? 'not-allowed' : 'pointer' }}
+                >
+                    {isLoggingOut ? (
+                        <div className={styles.spinner}></div>
+                    ) : (
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M6 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" />
+                            <path d="M12 12l3-3-3-3" />
+                            <path d="M15 9H7" />
+                        </svg>
+                    )}
                 </button>
             </div>
         </aside>
