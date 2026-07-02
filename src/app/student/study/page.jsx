@@ -91,6 +91,91 @@ export default function StudentStudyPage() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  // 過去の LocalStorage 履歴を DB に自動同期するエフェクト
+  useEffect(() => {
+    const syncLocalHistoryToDB = async () => {
+      // 1. Japanese Master の履歴同期
+      const jmSynced = localStorage.getItem('jm_quiz_history_db_synced')
+      if (!jmSynced) {
+        const jmHistory = localStorage.getItem('jm_quiz_history')
+        if (jmHistory) {
+          try {
+            const historyArray = JSON.parse(jmHistory)
+            if (Array.isArray(historyArray) && historyArray.length > 0) {
+              console.log(`Syncing ${historyArray.length} Japanese Master history records to DB...`)
+              for (const record of historyArray) {
+                await saveStudyRecord({
+                  app_type: 'japanese_master',
+                  activity_type: 'quiz',
+                  category: `${record.deck} (${record.format})`,
+                  score: record.score,
+                  total: record.total,
+                  detail: { syncedFromLocal: true, date: record.date }
+                })
+              }
+              localStorage.setItem('jm_quiz_history_db_synced', 'true')
+            }
+          } catch (e) {
+            console.error('Failed to sync Japanese Master local history:', e)
+          }
+        }
+      }
+
+      // 2. N5 Study Hub の単語学習進捗の同期
+      const savedVocab = localStorage.getItem('n5_learned_vocab')
+      if (savedVocab) {
+        try {
+          const list = JSON.parse(savedVocab)
+          if (Array.isArray(list) && list.length > 0) {
+            await saveStudyRecord({
+              app_type: 'n5_study_hub',
+              activity_type: 'flashcard',
+              category: 'vocab',
+              score: list.length,
+              total: vocabList.current.length,
+              detail: { learnedList: list, syncedFromLocal: true }
+            })
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      }
+
+      // 3. N5 Study Hub の模擬試験履歴の同期
+      const examSynced = localStorage.getItem('n5_exam_history_db_synced')
+      if (!examSynced) {
+        const examHistory = localStorage.getItem('n5_exam_history')
+        if (examHistory) {
+          try {
+            const historyArray = JSON.parse(examHistory)
+            if (Array.isArray(historyArray) && historyArray.length > 0) {
+              console.log(`Syncing ${historyArray.length} Mock Exam history records to DB...`)
+              for (const record of historyArray) {
+                await saveStudyRecord({
+                  app_type: 'n5_study_hub',
+                  activity_type: 'exam',
+                  category: record.examTitle,
+                  score: record.score,
+                  total: record.total,
+                  detail: { syncedFromLocal: true, date: record.date }
+                })
+              }
+              localStorage.setItem('n5_exam_history_db_synced', 'true')
+            }
+          } catch (e) {
+            console.error('Failed to sync N5 Mock Exam local history:', e)
+          }
+        }
+      }
+    }
+
+    const timer = setTimeout(() => {
+      syncLocalHistoryToDB()
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
   // Load progress from LocalStorage on mount
   useEffect(() => {
     try {
