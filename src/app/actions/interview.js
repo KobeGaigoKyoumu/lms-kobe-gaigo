@@ -556,3 +556,43 @@ export async function getStudentUpcomingBookings() {
     return { success: false, error: e.message }
   }
 }
+
+// 16. 教師用：フィルタ条件に応じた予約済み面談を取得
+export async function getTeacherBookingsFiltered(filterType = 'weekly') {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const todayStr = now.toISOString().split('T')[0]
+
+    let query = supabase
+      .from('interview_slots')
+      .select(`*, student:students(student_id_text, full_name, class_name)`)
+      .eq('teacher_id', session.memberId)
+      .eq('status', 'booked')
+
+    if (filterType === 'today') {
+      query = query.eq('slot_date', todayStr)
+    } else if (filterType === 'weekly') {
+      const nextWeek = new Date(now)
+      nextWeek.setDate(nextWeek.getDate() + 7)
+      const nextWeekStr = nextWeek.toISOString().split('T')[0]
+      query = query.gte('slot_date', todayStr).lte('slot_date', nextWeekStr)
+    } else {
+      // 'all' (本日以降の全予約を取得)
+      query = query.gte('slot_date', todayStr)
+    }
+
+    const { data, error } = await query
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+    return { success: true, slots: data || [] }
+  } catch (e) {
+    console.error('getTeacherBookingsFiltered error:', e)
+    return { success: false, error: e.message }
+  }
+}

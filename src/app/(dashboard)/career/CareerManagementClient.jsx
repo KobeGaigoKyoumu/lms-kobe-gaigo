@@ -9,7 +9,7 @@ import {
     generateSlots, 
     updateSlot, 
     deleteSlot,
-    getTeacherWeeklyBookings
+    getTeacherBookingsFiltered
 } from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
@@ -96,6 +96,7 @@ export default function CareerManagementClient({
     const [interviewSuccessMsg, setInterviewSuccessMsg] = useState(null)
     const [interviewError, setInterviewError] = useState(null)
     const [weeklyBookings, setWeeklyBookings] = useState([])
+    const [interviewPeriodFilter, setInterviewPeriodFilter] = useState('weekly') // 'today' | 'weekly' | 'all'
     
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -811,6 +812,12 @@ export default function CareerManagementClient({
         }
     }
 
+    const loadFilteredBookings = (filterType) => {
+        getTeacherBookingsFiltered(filterType).then(res => {
+            if (res.success) setWeeklyBookings(res.slots)
+        })
+    }
+
     const handleDeleteInterviewSlot = async (slotId) => {
         if (!confirm('この予約枠を完全に削除してよろしいですか？')) return
         setInterviewLoading(true)
@@ -821,6 +828,7 @@ export default function CareerManagementClient({
         if (res.success) {
             setInterviewSuccessMsg('予約枠を削除しました。')
             loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
         } else {
             setInterviewError(`削除に失敗しました: ${res.error}`)
         }
@@ -830,12 +838,9 @@ export default function CareerManagementClient({
         if (activeTab === 'interview') {
             loadInterviewTemplates()
             loadInterviewSlots()
-            // 直近1週間の予約済み面談を取得
-            getTeacherWeeklyBookings().then(res => {
-                if (res.success) setWeeklyBookings(res.slots)
-            })
+            loadFilteredBookings(interviewPeriodFilter)
         }
-    }, [activeTab])
+    }, [activeTab, interviewPeriodFilter])
 
     useEffect(() => {
         if (activeTab === 'interview') {
@@ -1042,17 +1047,45 @@ export default function CareerManagementClient({
                     {interviewActiveSubTab === 'schedule' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
 
-                            {/* 直近1週間の予約済み面談サマリー */}
+                            {/* 面談予定サマリー (今日・直近1週間・すべて切り替え) */}
                             <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-5)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 'var(--spacing-4)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 'var(--spacing-4)', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '18px' }}>📋</span>
-                                    <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>直近1週間の面談予定</h3>
-                                    <span style={{ marginLeft: 'auto', background: weeklyBookings.length > 0 ? 'var(--primary-50)' : 'var(--bg-secondary)', color: weeklyBookings.length > 0 ? 'var(--primary-700)' : 'var(--text-tertiary)', padding: '2px 10px', borderRadius: '999px', fontSize: 'var(--font-size-xs)', fontWeight: '700' }}>
+                                    <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>
+                                        {interviewPeriodFilter === 'today' ? '本日の面談予定' : 
+                                         interviewPeriodFilter === 'weekly' ? '直近1週間の面談予定' : 'すべての面談予定（本日以降）'}
+                                    </h3>
+                                    <span style={{ background: weeklyBookings.length > 0 ? 'var(--primary-50)' : 'var(--bg-secondary)', color: weeklyBookings.length > 0 ? 'var(--primary-700)' : 'var(--text-tertiary)', padding: '2px 10px', borderRadius: '999px', fontSize: 'var(--font-size-xs)', fontWeight: '700' }}>
                                         {weeklyBookings.length}件
                                     </span>
+
+                                    {/* 期間切り替えスイッチ (セグメントコントロール調) */}
+                                    <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-secondary)', padding: '3px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginLeft: 'auto' }}>
+                                        <button 
+                                            onClick={() => setInterviewPeriodFilter('today')}
+                                            style={{ border: 'none', borderRadius: 'var(--radius-md)', padding: '6px 12px', background: interviewPeriodFilter === 'today' ? '#fff' : 'transparent', color: interviewPeriodFilter === 'today' ? 'var(--primary-600)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '11px', boxShadow: interviewPeriodFilter === 'today' ? '0 2px 6px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.15s' }}
+                                        >
+                                            今日
+                                        </button>
+                                        <button 
+                                            onClick={() => setInterviewPeriodFilter('weekly')}
+                                            style={{ border: 'none', borderRadius: 'var(--radius-md)', padding: '6px 12px', background: interviewPeriodFilter === 'weekly' ? '#fff' : 'transparent', color: interviewPeriodFilter === 'weekly' ? 'var(--primary-600)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '11px', boxShadow: interviewPeriodFilter === 'weekly' ? '0 2px 6px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.15s' }}
+                                        >
+                                            直近1週間
+                                        </button>
+                                        <button 
+                                            onClick={() => setInterviewPeriodFilter('all')}
+                                            style={{ border: 'none', borderRadius: 'var(--radius-md)', padding: '6px 12px', background: interviewPeriodFilter === 'all' ? '#fff' : 'transparent', color: interviewPeriodFilter === 'all' ? 'var(--primary-600)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '11px', boxShadow: interviewPeriodFilter === 'all' ? '0 2px 6px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.15s' }}
+                                        >
+                                            すべて
+                                        </button>
+                                    </div>
                                 </div>
                                 {weeklyBookings.length === 0 ? (
-                                    <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--spacing-4) 0' }}>直近1週間の予約済み面談はありません。</p>
+                                    <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--spacing-4) 0' }}>
+                                        {interviewPeriodFilter === 'today' ? '本日の予約済み面談はありません。' : 
+                                         interviewPeriodFilter === 'weekly' ? '直近1週間の予約済み面談はありません。' : '予約済み面談はありません。'}
+                                    </p>
                                 ) : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'var(--spacing-2)' }}>
                                         {weeklyBookings.map(slot => {
