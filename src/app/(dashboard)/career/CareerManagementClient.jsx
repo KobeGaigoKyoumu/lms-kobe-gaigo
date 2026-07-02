@@ -1054,14 +1054,14 @@ export default function CareerManagementClient({
                                 {weeklyBookings.length === 0 ? (
                                     <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--spacing-4) 0' }}>直近1週間の予約済み面談はありません。</p>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
                                         {weeklyBookings.map(slot => {
                                             const d = new Date(slot.slot_date + 'T00:00:00')
                                             const days = ['日', '月', '火', '水', '木', '金', '土']
                                             const dayLabel = `${d.getMonth()+1}/${d.getDate()}(${days[d.getDay()]})`
                                             const isToday = slot.slot_date === new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'})).toISOString().split('T')[0]
                                             return (
-                                                <div key={slot.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: isToday ? 'linear-gradient(135deg, var(--primary-50), #f0f4ff)' : 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: isToday ? '1px solid var(--primary-200)' : '1px solid transparent' }}>
+                                                <div key={slot.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: isToday ? 'linear-gradient(135deg, var(--primary-50), #f0f4ff)' : 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: isToday ? '1px solid var(--primary-300)' : '1px solid var(--border-color)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                                                     <div style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)', minWidth: '90px' }}>
                                                         {dayLabel}
                                                         {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'var(--primary-500)', color: '#fff', padding: '1px 6px', borderRadius: '4px' }}>本日</span>}
@@ -1073,7 +1073,7 @@ export default function CareerManagementClient({
                                                         {slot.student?.full_name || '学生情報なし'}
                                                     </div>
                                                     {slot.student?.class_name && (
-                                                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '4px' }}>
+                                                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '4px' }}>
                                                             {slot.student.class_name}
                                                         </span>
                                                     )}
