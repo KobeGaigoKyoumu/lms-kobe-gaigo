@@ -103,6 +103,7 @@ export default function CareerManagementClient({
     const [availableTemplates, setAvailableTemplates] = useState(['デフォルト'])
     const [selectedTemplateName, setSelectedTemplateName] = useState('デフォルト')
     const [newTemplateNameInput, setNewTemplateNameInput] = useState('')
+    const [myClassStudents, setMyClassStudents] = useState([])
     
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -878,6 +879,17 @@ export default function CareerManagementClient({
         setInterviewSuccessMsg(null)
         setInterviewError(null)
     }, [interviewActiveSubTab])
+
+    // ログイン教員の担任（担当）クラスの学生リストを一度だけ取得して保持する
+    useEffect(() => {
+        if (myClasses && myClasses.length > 0) {
+            Promise.all(myClasses.map(c => getStudentsCareerList(c))).then(results => {
+                const allSts = results.flat()
+                const uniqueSts = Array.from(new Map(allSts.map(s => [s.student_id_text, s])).values())
+                setMyClassStudents(uniqueSts)
+            })
+        }
+    }, [myClasses])
 
     // 回答詳細モーダルを開く (Viewモード)
     const openViewModal = (student) => {
@@ -3640,7 +3652,15 @@ export default function CareerManagementClient({
                                 <label>ステータス:</label>
                                 <select 
                                     value={interviewEditForm.status}
-                                    onChange={(e) => setInterviewEditForm({...interviewEditForm, status: e.target.value})}
+                                    onChange={(e) => {
+                                        const nextStatus = e.target.value;
+                                        setInterviewEditForm(prev => ({
+                                            ...prev, 
+                                            status: nextStatus,
+                                            // ステータスを「予約済み」以外に変更したときは、選択されていた学生を自動クリア
+                                            student_id_text: nextStatus !== 'booked' ? '' : prev.student_id_text
+                                        }));
+                                    }}
                                     className={styles.selectInput}
                                     style={{ width: '100%' }}
                                 >
@@ -3650,24 +3670,30 @@ export default function CareerManagementClient({
                                 </select>
                             </div>
 
-                            {interviewEditForm.status === 'booked' && (
-                                <div className={styles.inputGroup}>
-                                    <label>面談を行う学生を選択:</label>
-                                    <select 
-                                        value={interviewEditForm.student_id_text}
-                                        onChange={(e) => setInterviewEditForm({...interviewEditForm, student_id_text: e.target.value})}
-                                        className={styles.selectInput}
-                                        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
-                                    >
-                                        <option value="">-- 学生を選択してください --</option>
-                                        {students && students.map(st => (
-                                            <option key={st.student_id_text} value={st.student_id_text}>
-                                                {st.full_name} ({st.student_id_text})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+                            <div className={styles.inputGroup}>
+                                <label>面談を行う学生 (未選択で予約なし):</label>
+                                <select 
+                                    value={interviewEditForm.student_id_text}
+                                    onChange={(e) => {
+                                        const nextStudentId = e.target.value;
+                                        setInterviewEditForm(prev => ({
+                                            ...prev, 
+                                            student_id_text: nextStudentId,
+                                            // 学生を選択した場合はステータスを自動的に「予約済み」にする。外した場合は自動的に「予約受付中」にする。
+                                            status: nextStudentId ? 'booked' : (prev.status === 'booked' ? 'available' : prev.status)
+                                        }));
+                                    }}
+                                    className={styles.selectInput}
+                                    style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                >
+                                    <option value="">-- 未予約 (枠のみ) --</option>
+                                    {myClassStudents.map(st => (
+                                        <option key={st.student_id_text} value={st.student_id_text}>
+                                            {st.full_name} ({st.student_id_text})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
                             <div className={styles.inputGroup}>
                                 <label>面談内容 / メモ:</label>
