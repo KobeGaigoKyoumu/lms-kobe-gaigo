@@ -3652,15 +3652,20 @@ export default function CareerManagementClient({
 
                             {interviewEditForm.status === 'booked' && (
                                 <div className={styles.inputGroup}>
-                                    <label>学籍番号:</label>
-                                    <input 
-                                        type="text" 
+                                    <label>面談を行う学生を選択:</label>
+                                    <select 
                                         value={interviewEditForm.student_id_text}
                                         onChange={(e) => setInterviewEditForm({...interviewEditForm, student_id_text: e.target.value})}
-                                        placeholder="例: 2504062"
-                                        className={styles.searchInput}
-                                        style={{ width: '100%' }}
-                                    />
+                                        className={styles.selectInput}
+                                        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                    >
+                                        <option value="">-- 学生を選択してください --</option>
+                                        {students && students.map(st => (
+                                            <option key={st.student_id_text} value={st.student_id_text}>
+                                                {st.full_name} ({st.student_id_text})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             )}
 
