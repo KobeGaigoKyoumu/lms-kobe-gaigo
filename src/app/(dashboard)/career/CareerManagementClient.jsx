@@ -1331,25 +1331,23 @@ export default function CareerManagementClient({
                                 </p>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-4)', background: 'var(--bg-secondary)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
-                                <div className={styles.filterGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>自動生成の開始日:</label>
+                            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '280px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>自動生成の開始日</label>
                                     <input 
                                         type="date" 
                                         value={interviewGenRange.start}
                                         onChange={(e) => setInterviewGenRange({...interviewGenRange, start: e.target.value})}
-                                        className={styles.searchInput}
-                                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
+                                        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}
                                     />
                                 </div>
-                                <div className={styles.filterGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>自動生成の終了日:</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '280px' }}>
+                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>自動生成の終了日</label>
                                     <input 
                                         type="date" 
                                         value={interviewGenRange.end}
                                         onChange={(e) => setInterviewGenRange({...interviewGenRange, end: e.target.value})}
-                                        className={styles.searchInput}
-                                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
+                                        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}
                                     />
                                 </div>
                             </div>
