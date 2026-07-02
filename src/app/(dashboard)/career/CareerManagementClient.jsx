@@ -848,6 +848,12 @@ export default function CareerManagementClient({
         }
     }, [interviewSelectedDate])
 
+    // サブタブが切り替わった時に成功・失敗メッセージをリセットする
+    useEffect(() => {
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+    }, [interviewActiveSubTab])
+
     // 回答詳細モーダルを開く (Viewモード)
     const openViewModal = (student) => {
         setSelectedStudent(student)
