@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { getAdminMemberSession } from '@/app/actions/adminAuth'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Service Role 用の Admin クライアント作成ヘルパー
+// Service Role 用 of Admin クライアント作成ヘルパー
 const createAdminClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mwtlfyhkzkfagvmdwgii.supabase.co'
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -11,22 +11,15 @@ const createAdminClient = () => {
 
 export async function GET(req, { params }) {
   try {
-    // ログインユーザーの検証 (標準クライアントを使用)
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // ログイン職員セッションの検証
+    const session = await getAdminMemberSession()
     
-    if (authError || !user) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 教師・管理者ロールか検証 (標準クライアントを使用)
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile || !['teacher', 'admin'].includes(profile.role)) {
+    // 教師・管理者ロールか検証 (どのクラスのプレイ記録も閲覧可能)
+    if (!['teacher', 'admin'].includes(session.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
