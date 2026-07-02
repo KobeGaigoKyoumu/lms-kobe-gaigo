@@ -113,13 +113,25 @@
                     <div class="absolute -top-5 left-6 bg-yellow-300 text-[#3C3231] font-black px-4 py-1 rounded-full shadow-sm text-xs md:text-sm">
                         ⚙️ Quiz Settings
                     </div>
-                    <div class="flex flex-wrap items-center justify-around gap-3 pt-3">
-                        <span class="text-sm font-black text-slate-500">How many questions for the test?</span>
-                        <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-2 w-full sm:w-auto">
-                            <button onclick="setQuizCount(10)" id="q-btn-10" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm">10 Qs</button>
-                            <button onclick="setQuizCount(20)" id="q-btn-20" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">20 Qs</button>
-                            <button onclick="setQuizCount(30)" id="q-btn-30" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">30 Qs</button>
-                            <button onclick="setQuizCount(999)" id="q-btn-all" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">All Cards</button>
+                    <div class="flex flex-col gap-4">
+                        <!-- Questions Limit -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                            <span class="text-sm font-black text-slate-500">How many questions for the test?</span>
+                            <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-2 w-full sm:w-auto">
+                                <button onclick="setQuizCount(10)" id="q-btn-10" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm">10 Qs</button>
+                                <button onclick="setQuizCount(20)" id="q-btn-20" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">20 Qs</button>
+                                <button onclick="setQuizCount(30)" id="q-btn-30" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">30 Qs</button>
+                                <button onclick="setQuizCount(999)" id="q-btn-all" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">All Cards</button>
+                            </div>
+                        </div>
+                        <!-- Quiz Format -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                            <span class="text-sm font-black text-slate-500">Quiz Format:</span>
+                            <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-2 w-full sm:w-auto">
+                                <button onclick="setQuizFormat('self')" id="format-btn-self" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm">🗣️ Self-Check</button>
+                                <button onclick="setQuizFormat('ja-to-romaji')" id="format-btn-ja-romaji" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">📝 JP ➔ Romaji</button>
+                                <button onclick="setQuizFormat('romaji-to-ja')" id="format-btn-romaji-ja" class="flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200">📝 Romaji ➔ JP</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -199,6 +211,38 @@
                     </div>
 
                 </div>
+
+                <!-- Test History (テスト結果の記録) -->
+                <div class="bg-white border-4 border-emerald-400 rounded-[28px] p-5 shadow-lg mt-8 relative">
+                    <div class="absolute -top-5 left-6 bg-emerald-400 text-white font-black px-4 py-1 rounded-full shadow-sm text-xs md:text-sm flex items-center gap-1.5">
+                        <span>📊</span> Quiz History & Test Results
+                    </div>
+                    <div class="flex justify-between items-center pt-2 mb-4">
+                        <span class="text-xs font-bold text-slate-400">Past performance records for quiz modes.</span>
+                        <button onclick="clearQuizHistory()" id="clear-history-btn" class="hidden text-xs font-bold text-rose-500 hover:text-rose-700 transition flex items-center gap-1">
+                            🗑️ Clear History
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 font-bold">
+                                    <th class="py-2.5 px-2">Date & Time</th>
+                                    <th class="py-2.5 px-2">Deck</th>
+                                    <th class="py-2.5 px-2">Format</th>
+                                    <th class="py-2.5 px-2">Score</th>
+                                    <th class="py-2.5 px-2 text-right">Accuracy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quiz-history-tbody">
+                                <!-- JSで動的生成される行 -->
+                            </tbody>
+                        </table>
+                        <div id="quiz-history-empty" class="text-center py-6 text-slate-400 font-bold">
+                            No quiz records found. Take a test to start recording! 🚀
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 2. STUDY VIEW (みるモード) -->
@@ -245,7 +289,7 @@
                 </div>
             </div>
 
-            <!-- 3. QUIZ VIEW (テストモード：発音＆自己申告判定) -->
+            <!-- 3. QUIZ VIEW (テストモード：発音＆自己申告判定 / 4択クイズ) -->
             <div id="view-quiz" class="hidden w-full max-w-md mx-auto">
                 <div class="w-full flex justify-between items-center mb-6">
                     <button onclick="exitToMenu()" class="text-slate-600 font-black hover:text-[#4F46E5] transition flex items-center gap-1.5 py-1.5 px-3 rounded-2xl bg-white border-2 border-slate-200 shadow-sm text-xs active:scale-95">
@@ -261,14 +305,14 @@
 
                 <!-- 質問提示エリア -->
                 <div id="quiz-card-display" class="w-full h-72 bg-white border-[6px] border-emerald-400 rounded-[32px] shadow-lg flex flex-col items-center justify-center p-6 mb-6">
-                    <div class="text-xs font-black bg-rose-100 text-[#E11D48] px-4 py-1.5 rounded-full mb-4 animate-bounce">
+                    <div id="quiz-read-out-badge" class="text-xs font-black bg-rose-100 text-[#E11D48] px-4 py-1.5 rounded-full mb-4 animate-bounce">
                         🗣️ Read Out Loud!
                     </div>
                     <div id="quiz-front-text" class="text-9xl font-black text-slate-800 leading-none">あ</div>
                 </div>
 
                 <!-- 自己判定コントロール -->
-                <div class="w-full space-y-4">
+                <div id="quiz-self-controls" class="w-full space-y-4">
                     <!-- 「こたえをみる」初期ボタン -->
                     <button id="quiz-show-ans-btn" onclick="revealQuizAnswer()" class="w-full btn-pop-orange bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-black border-b-4 border-orange-700 transition">
                         👀 Show Answer
@@ -293,6 +337,25 @@
                                 <span class="text-[10px] opacity-80 mt-1">I got it right</span>
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 4択コントロール -->
+                <div id="quiz-mc-controls" class="hidden w-full space-y-4">
+                    <div id="quiz-mc-options" class="grid grid-cols-2 gap-4">
+                        <!-- 4つの選択肢ボタンが動的に挿入される -->
+                    </div>
+                    
+                    <!-- 選択後のフィードバック＆Nextボタン -->
+                    <div id="quiz-mc-feedback" class="hidden space-y-4 animate-fade-in">
+                        <div class="bg-white border-4 border-yellow-300 rounded-[24px] p-5 text-center shadow-sm">
+                            <p id="quiz-mc-feedback-status" class="text-2xl font-black mb-2"></p>
+                            <p id="quiz-mc-feedback-correct" class="text-lg font-bold text-slate-600"></p>
+                            <p id="quiz-mc-feedback-meaning" class="text-sm text-slate-500 mt-2"></p>
+                        </div>
+                        <button id="quiz-mc-next-btn" onclick="handleMcNext()" class="w-full btn-pop-blue bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl text-lg font-black border-b-4 border-indigo-800 transition">
+                            Next 👉
+                        </button>
                     </div>
                 </div>
             </div>
@@ -512,8 +575,32 @@
             isFlipped: false,
             score: 0,
             cards: [],
-            quizLimit: 10
+            quizLimit: 10,
+            quizFormat: 'self', // 'self' | 'ja-to-romaji' | 'romaji-to-ja'
+            mcAnswered: false
         };
+
+        // クイズ形式の設定ハンドラ
+        function setQuizFormat(format) {
+            state.quizFormat = format;
+            
+            const btnIds = {
+                'self': 'format-btn-self',
+                'ja-to-romaji': 'format-btn-ja-romaji',
+                'romaji-to-ja': 'format-btn-romaji-ja'
+            };
+            
+            Object.keys(btnIds).forEach(key => {
+                const btn = document.getElementById(btnIds[key]);
+                if (btn) {
+                    if (key === format) {
+                        btn.className = "flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition bg-[#4F46E5] text-white shadow-sm";
+                    } else {
+                        btn.className = "flex-1 sm:flex-none px-4 py-2 font-black rounded-xl text-xs transition text-slate-600 hover:bg-slate-200";
+                    }
+                }
+            });
+        }
 
         // 問題数の設定ハンドラ
         function setQuizCount(count) {
@@ -563,6 +650,17 @@
             document.getElementById('quiz-deck-badge').className = `text-xs font-black capitalize ${theme.accentBg} ${theme.accentText} px-3 py-1.5 rounded-xl border-2 ${theme.border}`;
 
             document.getElementById('study-next-btn').className = `flex-1 btn-pop-blue ${theme.bg} ${theme.hover} text-white font-extrabold py-3.5 rounded-2xl border-b-4 border-blue-800 transition text-sm`;
+            
+            const mcNextBtn = document.getElementById('quiz-mc-next-btn');
+            if (mcNextBtn) {
+                // テーマのカラーに応じた3Dボタンクラスを割り当てる
+                let popBorder = 'border-blue-850';
+                if (type === 'katakana') popBorder = 'border-sky-800';
+                else if (type === 'extra') popBorder = 'border-rose-800';
+                else if (type === 'words') popBorder = 'border-emerald-800';
+                
+                mcNextBtn.className = `w-full btn-pop-blue ${theme.bg} ${theme.hover} text-white py-4 rounded-2xl text-lg font-black border-b-4 ${popBorder} transition`;
+            }
         }
 
         // 復習モード：カード更新
@@ -596,27 +694,184 @@
             }
         }
 
+        // 4択問題用の選択肢生成ユーティリティ
+        function generateMcOptions(correctVal, fieldName) {
+            // 同じデッキのカードから正解以外の値を取得
+            const otherVals = state.cards
+                .map(c => c[fieldName])
+                .filter(val => val !== correctVal);
+            
+            // 重複を排除
+            const uniqueOthers = [...new Set(otherVals)];
+            
+            // ランダムに3つ選ぶ
+            const selectedOthers = [];
+            while (selectedOthers.length < 3 && uniqueOthers.length > 0) {
+                const randIdx = Math.floor(Math.random() * uniqueOthers.length);
+                selectedOthers.push(uniqueOthers.splice(randIdx, 1)[0]);
+            }
+            
+            // 万が一候補が足りない場合のフォールバック
+            while (selectedOthers.length < 3) {
+                selectedOthers.push("?");
+            }
+            
+            // 正解と合わせてシャッフル
+            const options = [correctVal, ...selectedOthers];
+            return options.sort(() => Math.random() - 0.5);
+        }
+
         // クイズモード：カード更新
         function initQuizCard() {
             const card = state.cards[state.currentIndex];
+            const format = state.quizFormat || 'self';
+            const theme = THEMES[state.deckType] || THEMES.hiragana;
+            
+            const badgeEl = document.getElementById('quiz-read-out-badge');
+            const textEl = document.getElementById('quiz-front-text');
+            const selfControls = document.getElementById('quiz-self-controls');
+            const mcControls = document.getElementById('quiz-mc-controls');
+            const mcFeedback = document.getElementById('quiz-mc-feedback');
 
-            document.getElementById('quiz-front-text').textContent = card.f;
+            // 共通進捗の更新
+            document.getElementById('quiz-progress').textContent = `${state.currentIndex + 1} / ${state.cards.length}`;
+            document.getElementById('quiz-deck-badge').textContent = getDeckLabel(state.deckType);
 
-            // 初期化：こたえをみるボタンを表示し、答えのエリアは隠す
-            document.getElementById('quiz-show-ans-btn').classList.remove('hidden');
-            document.getElementById('quiz-answer-box').classList.add('hidden');
+            if (format === 'self') {
+                // 自己判定テストモード
+                badgeEl.textContent = "🗣️ Read Out Loud!";
+                badgeEl.className = "text-xs font-black bg-rose-100 text-[#E11D48] px-4 py-1.5 rounded-full mb-4 animate-bounce";
+                
+                textEl.textContent = card.f;
+                
+                // 文字数によるフォントサイズ調整
+                adjustFontSize(textEl, card.f);
 
-            document.getElementById('quiz-correct-romaji').textContent = card.b;
-            const meaningEl = document.getElementById('quiz-correct-meaning');
+                selfControls.classList.remove('hidden');
+                mcControls.classList.add('hidden');
+
+                // 自己判定の表示初期化
+                document.getElementById('quiz-show-ans-btn').classList.remove('hidden');
+                document.getElementById('quiz-answer-box').classList.add('hidden');
+
+                document.getElementById('quiz-correct-romaji').textContent = card.b;
+                const meaningEl = document.getElementById('quiz-correct-meaning');
+                if (card.m) {
+                    meaningEl.innerHTML = `<span class="text-xs text-slate-400 font-bold block mb-1">Meaning:</span> ${card.m}`;
+                    meaningEl.classList.remove('hidden');
+                } else {
+                    meaningEl.classList.add('hidden');
+                }
+            } else {
+                // 4択クイズモード
+                state.mcAnswered = false;
+                selfControls.classList.add('hidden');
+                mcControls.classList.remove('hidden');
+                mcFeedback.classList.add('hidden');
+
+                let correctVal = '';
+                let fieldName = '';
+
+                if (format === 'ja-to-romaji') {
+                    badgeEl.textContent = "📝 Choose the correct Romaji!";
+                    badgeEl.className = "text-xs font-black bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full mb-4 animate-pulse";
+                    textEl.textContent = card.f;
+                    adjustFontSize(textEl, card.f);
+                    
+                    correctVal = card.b;
+                    fieldName = 'b';
+                } else {
+                    badgeEl.textContent = "📝 Choose the correct Japanese!";
+                    badgeEl.className = "text-xs font-black bg-sky-100 text-sky-700 px-4 py-1.5 rounded-full mb-4 animate-pulse";
+                    textEl.textContent = card.b;
+                    adjustFontSize(textEl, card.b);
+
+                    correctVal = card.f;
+                    fieldName = 'f';
+                }
+
+                // 選択肢の生成
+                const options = generateMcOptions(correctVal, fieldName);
+
+                // 4択ボタンの生成と配置
+                const optionsContainer = document.getElementById('quiz-mc-options');
+                optionsContainer.innerHTML = options.map((option, idx) => {
+                    // 3Dボタンデザインの構築
+                    const btnClass = `w-full py-4 px-3 bg-white border-4 ${theme.border} hover:${theme.accentBg} text-slate-700 font-black rounded-2xl shadow-sm transition active:scale-95 text-center text-sm md:text-base truncate`;
+                    return `<button onclick="handleMcSelect('${option.replace(/'/g, "\\'")}', '${correctVal.replace(/'/g, "\\'")}')" data-val="${option.replace(/'/g, "&apos;")}" class="${btnClass}">${idx + 1}. ${option}</button>`;
+                }).join('');
+            }
+        }
+
+        // フォントサイズ自動調整
+        function adjustFontSize(el, text) {
+            const len = text.length;
+            if (len >= 10) {
+                el.className = "text-3xl md:text-4xl font-black text-slate-800 leading-none text-center px-4";
+            } else if (len >= 6) {
+                el.className = "text-5xl md:text-6xl font-black text-slate-800 leading-none text-center px-4";
+            } else if (len >= 4) {
+                el.className = "text-6xl md:text-7xl font-black text-slate-800 leading-none text-center px-2";
+            } else {
+                el.className = "text-8xl md:text-9xl font-black text-slate-800 leading-none text-center";
+            }
+        }
+
+        // 4択ボタン選択時の処理
+        function handleMcSelect(selectedVal, correctVal) {
+            if (state.mcAnswered) return;
+            state.mcAnswered = true;
+
+            const isCorrect = (selectedVal === correctVal);
+            if (isCorrect) {
+                state.score++;
+            }
+
+            // 選択肢ボタンのビジュアル更新（正解＝緑、選んだ不正解＝赤、他＝グレーアウト）
+            const buttons = document.querySelectorAll('#quiz-mc-options button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('active:scale-95');
+                const btnVal = btn.getAttribute('data-val');
+                if (btnVal === correctVal) {
+                    btn.className = "w-full py-4 px-3 rounded-2xl font-black text-sm md:text-base text-white bg-emerald-500 border-4 border-emerald-700 transition cursor-default text-center truncate";
+                } else if (btnVal === selectedVal && !isCorrect) {
+                    btn.className = "w-full py-4 px-3 rounded-2xl font-black text-sm md:text-base text-white bg-rose-500 border-4 border-rose-700 transition cursor-default text-center truncate";
+                } else {
+                    btn.className = "w-full py-4 px-3 rounded-2xl font-black text-sm md:text-base text-slate-400 bg-slate-100 border-4 border-slate-300 transition cursor-default text-center truncate opacity-60";
+                }
+            });
+
+            // フィードバック表示
+            const card = state.cards[state.currentIndex];
+            const feedbackBox = document.getElementById('quiz-mc-feedback');
+            const statusEl = document.getElementById('quiz-mc-feedback-status');
+            const correctEl = document.getElementById('quiz-mc-feedback-correct');
+            const meaningEl = document.getElementById('quiz-mc-feedback-meaning');
+
+            feedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                statusEl.className = "text-2xl font-black text-emerald-600 mb-2";
+                statusEl.textContent = "⭕ Correct!";
+            } else {
+                statusEl.className = "text-2xl font-black text-rose-600 mb-2";
+                statusEl.textContent = "❌ Incorrect...";
+            }
+
+            correctEl.innerHTML = `Correct: <span class="text-indigo-600 font-extrabold text-xl">${card.f}</span> ➔ <span class="text-indigo-600 font-extrabold text-xl">${card.b}</span>`;
+
             if (card.m) {
                 meaningEl.innerHTML = `<span class="text-xs text-slate-400 font-bold block mb-1">Meaning:</span> ${card.m}`;
                 meaningEl.classList.remove('hidden');
             } else {
                 meaningEl.classList.add('hidden');
             }
+        }
 
-            document.getElementById('quiz-progress').textContent = `${state.currentIndex + 1} / ${state.cards.length}`;
-            document.getElementById('quiz-deck-badge').textContent = getDeckLabel(state.deckType);
+        // 4択でNextを押した時の処理
+        function handleMcNext() {
+            document.getElementById('quiz-mc-feedback').classList.add('hidden');
+            handleNext();
         }
 
         // 答えを表示する
@@ -675,6 +930,8 @@
             document.getElementById('view-menu').classList.remove('hidden');
             document.getElementById('main-header').classList.remove('hidden');
             state.mode = 'menu';
+
+            renderQuizHistory(); // 履歴の再描画
         }
 
         // 3Dフリップトグル
@@ -720,6 +977,31 @@
             
             if (state.mode === 'quiz') {
                 const percent = Math.round((state.score / state.cards.length) * 100);
+                
+                // テスト結果履歴をLocalStorageに保存
+                try {
+                    const currentHistory = localStorage.getItem('jm_quiz_history');
+                    const historyArray = currentHistory ? JSON.parse(currentHistory) : [];
+                    
+                    const formatLabel = state.quizFormat === 'self' ? 'Self-Check' : 
+                                      (state.quizFormat === 'ja-to-romaji' ? 'JP ➔ Romaji' : 'Romaji ➔ JP');
+                    
+                    const newRecord = {
+                        id: Date.now(),
+                        date: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false }),
+                        deckName: getDeckLabel(state.deckType),
+                        format: formatLabel,
+                        score: state.score,
+                        total: state.cards.length,
+                        percent: percent
+                    };
+                    
+                    historyArray.unshift(newRecord); // 先頭に追加
+                    localStorage.setItem('jm_quiz_history', JSON.stringify(historyArray));
+                } catch (e) {
+                    console.error('Error saving quiz result:', e);
+                }
+
                 let badgeEmoji = "🌸";
                 let msg = "Great effort! Keep practicing and build up your skills! 💪";
                 
@@ -952,6 +1234,64 @@
                 }
             }
         });
+
+        // クイズ履歴（テスト結果の記録）の描画
+        function renderQuizHistory() {
+            const tbody = document.getElementById('quiz-history-tbody');
+            const emptyEl = document.getElementById('quiz-history-empty');
+            const clearBtn = document.getElementById('clear-history-btn');
+            
+            if (!tbody) return;
+            
+            try {
+                const history = localStorage.getItem('jm_quiz_history');
+                const historyArray = history ? JSON.parse(history) : [];
+                
+                if (historyArray.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyEl.classList.remove('hidden');
+                    clearBtn.classList.add('hidden');
+                    return;
+                }
+                
+                emptyEl.classList.add('hidden');
+                clearBtn.classList.remove('hidden');
+                
+                tbody.innerHTML = historyArray.map(record => {
+                    let percentColor = 'text-[#E63946]'; // 50%未満
+                    if (record.percent === 100) {
+                        percentColor = 'text-indigo-600 font-extrabold';
+                    } else if (record.percent >= 80) {
+                        percentColor = 'text-emerald-600';
+                    } else if (record.percent >= 50) {
+                        percentColor = 'text-amber-600';
+                    }
+                    
+                    return `
+                        <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                            <td class="py-2.5 px-2 text-slate-500 font-medium">${record.date}</td>
+                            <td class="py-2.5 px-2 text-slate-800 font-black">${record.deckName}</td>
+                            <td class="py-2.5 px-2 text-slate-500 font-semibold">${record.format}</td>
+                            <td class="py-2.5 px-2 text-slate-600 font-bold">${record.score} / ${record.total}</td>
+                            <td class="py-2.5 px-2 text-right font-black ${percentColor}">${record.percent}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Error rendering quiz history:', e);
+            }
+        }
+
+        // クイズ履歴のクリア
+        function clearQuizHistory() {
+            if (confirm('Are you sure you want to delete all quiz records? This cannot be undone.')) {
+                localStorage.removeItem('jm_quiz_history');
+                renderQuizHistory();
+            }
+        }
+
+        // 初期ロード時の実行
+        renderQuizHistory();
     </script>
 </body>
 </html>
