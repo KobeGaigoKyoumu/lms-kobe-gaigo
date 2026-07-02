@@ -51,7 +51,7 @@ const formatToSave = (dateVal) => {
 }
 
 export default function CareerCounselingClient({ initialData, examSchedules, examSurveys, isSecondYear, session }) {
-    const [activeTab, setActiveTab] = useState(isSecondYear ? 'career' : 'interview') // 2nd year default is career, 1st year default is interview
+    const [activeTab, setActiveTab] = useState('interview') // 初期表示は「面談」タブ
     const [data, setData] = useState(initialData || null)
     const [isEditing, setIsEditing] = useState(false)
     const [step, setStep] = useState(1)

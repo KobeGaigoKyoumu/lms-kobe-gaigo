@@ -57,7 +57,7 @@ export default function CareerManagementClient({
     initialStudentsExamSchedules,
     initialStudentsExamSurveys
 }) {
-    const [activeTab, setActiveTab] = useState('career') // 初期表示は「進路」タブ
+    const [activeTab, setActiveTab] = useState('interview') // 初期表示は「面談」タブ
     const [selectedClass, setSelectedClass] = useState(initialClass)
     const [students, setStudents] = useState(initialStudents)
     const [downloading, setDownloading] = useState(false)
