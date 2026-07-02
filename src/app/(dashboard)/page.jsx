@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import styles from './page.module.css'
 import { getStudentSessionLight } from '@/app/actions/studentAuth'
 import { getAdminDashboardDataCached } from '@/app/actions/dashboard'
+import { getTeacherTodayTomorrowBookings } from '@/app/actions/interview'
 import DashboardContent from './DashboardContent'
 // Triggering deployment...
 
@@ -23,6 +24,11 @@ export default async function DashboardPage() {
     if (!dashboardResult) {
         redirect('/login')
     }
+
+    // 当日・翌日の面談予約を取得
+    const interviewResult = await getTeacherTodayTomorrowBookings().catch(() => ({ success: false, slots: [] }))
+    const interviews = interviewResult.success ? interviewResult.slots : []
+    const interviewDates = interviewResult.success ? { today: interviewResult.todayStr, tomorrow: interviewResult.tomorrowStr } : {}
 
     const { adminMember, content } = dashboardResult
     const firstName = adminMember.name || 'ユーザー'
@@ -48,6 +54,8 @@ export default async function DashboardPage() {
             <DashboardContent 
                 adminMember={adminMember} 
                 initialData={content}
+                interviews={interviews}
+                interviewDates={interviewDates}
             />
         </div>
     )

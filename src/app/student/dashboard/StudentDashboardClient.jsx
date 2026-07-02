@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home, Loader2 } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ChevronRight, AlertCircle, Megaphone, Home, Loader2, MessageSquare } from 'lucide-react'
 import styles from './page.module.css'
 import DashboardStats from './components/DashboardStats'
 
@@ -44,7 +44,7 @@ export default function StudentDashboardClient({ initialData }) {
         )
     }
 
-    const { session, assignments, announcements: filteredAnnouncements } = data
+    const { session, assignments, announcements: filteredAnnouncements, upcomingInterviews = [] } = data
     const firstName = session?.name?.split(' ')[0] || '学生'
 
     const now = new Date()
@@ -149,6 +149,42 @@ export default function StudentDashboardClient({ initialData }) {
                                     )}
                                 </Link>
                             ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Interview Bookings */}
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>
+                            <MessageSquare size={20} strokeWidth={1.5} />
+                            面談予定
+                        </h2>
+                        <Link href="/student/career" className={styles.viewAll}>面談を予約する <ChevronRight size={16} /></Link>
+                    </div>
+                    {upcomingInterviews.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <MessageSquare size={48} strokeWidth={1.5} opacity={0.3} />
+                            <p>予定されている面談はありません</p>
+                        </div>
+                    ) : (
+                        <div className={styles.assignmentList}>
+                            {upcomingInterviews.map(slot => {
+                                const d = new Date(slot.slot_date + 'T00:00:00')
+                                const days = ['日', '月', '火', '水', '木', '金', '土']
+                                const dayLabel = `${d.getMonth()+1}月${d.getDate()}日(${days[d.getDay()]})`
+                                return (
+                                    <Link href="/student/career" key={slot.id} className={styles.assignmentItem}>
+                                        <div className={styles.assignmentInfo}>
+                                            <h4 style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{dayLabel} {slot.start_time?.substring(0,5)}</h4>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+                                                担任との面談{slot.notes ? ` — ${slot.notes.slice(0,30)}` : ''}
+                                            </p>
+                                        </div>
+                                        <ChevronRight size={16} />
+                                    </Link>
+                                )
+                            })}
                         </div>
                     )}
                 </section>

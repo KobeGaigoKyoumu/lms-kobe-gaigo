@@ -460,3 +460,99 @@ export async function getStudentHomeroomTeacher() {
     return { success: false, error: e.message }
   }
 }
+
+// 13. 教師用：直近1週間の予約済み面談スロットを取得
+export async function getTeacherWeeklyBookings() {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const todayStr = now.toISOString().split('T')[0]
+    const nextWeek = new Date(now)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+    const nextWeekStr = nextWeek.toISOString().split('T')[0]
+
+    const { data, error } = await supabase
+      .from('interview_slots')
+      .select(`*, student:students(student_id_text, full_name, class_name)`)
+      .eq('teacher_id', session.memberId)
+      .eq('status', 'booked')
+      .gte('slot_date', todayStr)
+      .lte('slot_date', nextWeekStr)
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+    return { success: true, slots: data || [] }
+  } catch (e) {
+    console.error('getTeacherWeeklyBookings error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 14. 教師用ダッシュボード：当日と翌日の面談予定を取得
+export async function getTeacherTodayTomorrowBookings() {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const todayStr = now.toISOString().split('T')[0]
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+
+    const { data, error } = await supabase
+      .from('interview_slots')
+      .select(`*, student:students(student_id_text, full_name, class_name)`)
+      .eq('teacher_id', session.memberId)
+      .eq('status', 'booked')
+      .in('slot_date', [todayStr, tomorrowStr])
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+    return { success: true, slots: data || [], todayStr, tomorrowStr }
+  } catch (e) {
+    console.error('getTeacherTodayTomorrowBookings error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 15. 学生用ダッシュボード：自分の今後の面談予定を取得
+export async function getStudentUpcomingBookings() {
+  try {
+    const session = await getStudentSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const todayStr = now.toISOString().split('T')[0]
+    const nextMonth = new Date(now)
+    nextMonth.setDate(nextMonth.getDate() + 30)
+    const nextMonthStr = nextMonth.toISOString().split('T')[0]
+
+    const { data, error } = await supabase
+      .from('interview_slots')
+      .select(`*, teacher:admin_members(id, name)`)
+      .eq('booked_student_id', session.id)
+      .eq('status', 'booked')
+      .gte('slot_date', todayStr)
+      .lte('slot_date', nextMonthStr)
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+      .limit(5)
+
+    if (error) throw error
+    return { success: true, slots: data || [] }
+  } catch (e) {
+    console.error('getStudentUpcomingBookings error:', e)
+    return { success: false, error: e.message }
+  }
+}
