@@ -250,6 +250,35 @@ export async function deleteSlot(slotId) {
   }
 }
 
+// 予約枠の個別新規作成
+export async function createSlot(data) {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { data: newSlot, error } = await supabase
+      .from('interview_slots')
+      .insert({
+        teacher_id: session.memberId,
+        slot_date: data.slot_date,
+        start_time: data.start_time,
+        end_time: data.end_time,
+        status: data.status || 'available',
+        notes: data.notes || '',
+        student_id_text: data.student_id_text || null
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return { success: true, slot: newSlot }
+  } catch (e) {
+    console.error('createSlot error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
 
 // ----------------------------------------------------
 // 学生側アクション (認証チェック: getStudentSession)

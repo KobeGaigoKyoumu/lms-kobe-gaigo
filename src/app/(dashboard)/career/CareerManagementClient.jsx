@@ -9,6 +9,7 @@ import {
     generateSlots, 
     updateSlot, 
     deleteSlot,
+    createSlot,
     getTeacherBookingsFiltered,
     getTeacherTemplateNames
 } from '@/app/actions/interview'
@@ -119,6 +120,16 @@ export default function CareerManagementClient({
         return groups
     }, [myClassStudents])
     
+    // 新規面談スロット手動作成用の状態
+    const [isCreatingInterviewSlot, setIsCreatingInterviewSlot] = useState(false)
+    const [interviewCreateForm, setInterviewCreateForm] = useState({
+        start_time: '10:00',
+        end_time: '10:15',
+        status: 'available',
+        notes: '',
+        student_id_text: ''
+    })
+
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
     const [modalMode, setModalMode] = useState('view') // 'view' or 'edit'
@@ -851,6 +862,28 @@ export default function CareerManagementClient({
         }
     }
 
+    const handleCreateInterviewSlot = async () => {
+        setInterviewSaving(true)
+        setInterviewError(null)
+
+        const res = await createSlot({
+            slot_date: interviewSelectedDate,
+            start_time: `${interviewCreateForm.start_time}:00`,
+            end_time: `${interviewCreateForm.end_time}:00`,
+            status: interviewCreateForm.status,
+            notes: interviewCreateForm.notes,
+            student_id_text: interviewCreateForm.student_id_text || null
+        })
+
+        setInterviewSaving(false)
+        if (res.success) {
+            setIsCreatingInterviewSlot(false)
+            loadInterviewSlots()
+        } else {
+            setInterviewError(`作成に失敗しました: ${res.error}`)
+        }
+    }
+
     const loadFilteredBookings = (filterType) => {
         getTeacherBookingsFiltered(filterType).then(res => {
             if (res.success) setWeeklyBookings(res.slots)
@@ -1216,6 +1249,24 @@ export default function CareerManagementClient({
                                     style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
                                 >
                                     今日に戻る
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setIsCreatingInterviewSlot(true)
+                                        setInterviewCreateForm({
+                                            start_time: '10:00',
+                                            end_time: '10:15',
+                                            status: 'available',
+                                            notes: '',
+                                            student_id_text: ''
+                                        })
+                                    }}
+                                    className={styles.actionButton}
+                                    style={{ margin: '0 0 0 auto', padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-700)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
+                                >
+                                    ➕ 新規予約枠を作成
                                 </button>
                             </div>
 
@@ -3622,6 +3673,135 @@ export default function CareerManagementClient({
                                     </div>
                                 </form>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* ====================================================
+                面談スロット新規作成モーダル
+               ==================================================== */}
+            {isCreatingInterviewSlot && (
+                <div className={styles.modalOverlay} onClick={() => setIsCreatingInterviewSlot(false)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <div className={styles.modalHeader}>
+                            <h2>手動で面談枠を作成</h2>
+                            <button onClick={() => setIsCreatingInterviewSlot(false)} className={styles.closeModalBtn}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className={styles.modalBody} style={{ padding: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                                {interviewSelectedDate} に新しく時間枠を手動作成します。テンプレートの時間外でも設定可能です。
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
+                                <div className={styles.inputGroup}>
+                                    <label>開始時刻:</label>
+                                    <input 
+                                        type="time" 
+                                        value={interviewCreateForm.start_time}
+                                        onChange={(e) => setInterviewCreateForm({...interviewCreateForm, start_time: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                                <div className={styles.inputGroup}>
+                                    <label>終了時刻:</label>
+                                    <input 
+                                        type="time" 
+                                        value={interviewCreateForm.end_time}
+                                        onChange={(e) => setInterviewCreateForm({...interviewCreateForm, end_time: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>ステータス:</label>
+                                <select 
+                                    value={interviewCreateForm.status}
+                                    onChange={(e) => {
+                                        const nextStatus = e.target.value;
+                                        setInterviewCreateForm(prev => ({
+                                            ...prev, 
+                                            status: nextStatus,
+                                            student_id_text: nextStatus !== 'booked' ? '' : prev.student_id_text
+                                        }));
+                                    }}
+                                    className={styles.selectInput}
+                                    style={{ width: '100%' }}
+                                >
+                                    <option value="available">🟢 予約受付中 (Available)</option>
+                                    <option value="blocked">🔴 予約停止 (Blocked)</option>
+                                    <option value="booked">🔵 予約済み (Booked)</option>
+                                </select>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>面談を行う学生 (未選択で予約なし):</label>
+                                <select 
+                                    value={interviewCreateForm.student_id_text}
+                                    onChange={(e) => {
+                                        const nextStudentId = e.target.value;
+                                        setInterviewCreateForm(prev => ({
+                                            ...prev, 
+                                            student_id_text: nextStudentId,
+                                            status: nextStudentId ? 'booked' : (prev.status === 'booked' ? 'available' : prev.status)
+                                        }));
+                                    }}
+                                    className={styles.selectInput}
+                                    style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                >
+                                    <option value="">-- 未予約 (枠のみ) --</option>
+                                    {Object.entries(groupedMyClassStudents).map(([className, sts]) => (
+                                        <optgroup key={className} label={className}>
+                                            {sts.map(st => (
+                                                <option key={st.student_id_text} value={st.student_id_text}>
+                                                    {st.full_name} ({st.student_id_text})
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>面談内容 / メモ:</label>
+                                <textarea 
+                                    value={interviewCreateForm.notes}
+                                    onChange={(e) => setInterviewCreateForm({...interviewCreateForm, notes: e.target.value})}
+                                    placeholder="相談内容、面談メモなど"
+                                    rows={3}
+                                    className={styles.searchInput}
+                                    style={{ width: '100%', resize: 'none' }}
+                                />
+                            </div>
+
+                            {interviewError && (
+                                <div style={{ color: 'var(--error-600)', background: 'var(--error-50)', padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}>
+                                    ⚠️ {interviewError}
+                                </div>
+                            )}
+
+                            <div className={styles.modalFooter} style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
+                                <button 
+                                    onClick={() => setIsCreatingInterviewSlot(false)} 
+                                    className={styles.actionButton}
+                                    style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
+                                >
+                                    キャンセル
+                                </button>
+                                <button 
+                                    onClick={handleCreateInterviewSlot} 
+                                    disabled={interviewSaving}
+                                    className={styles.actionButton}
+                                    style={{ margin: 0, padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none' }}
+                                >
+                                    {interviewSaving ? '保存中...' : '作成して保存'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
