@@ -1,5 +1,4 @@
 import { getStudentSession } from '@/app/actions/studentAuth'
-import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
@@ -12,36 +11,14 @@ const createAdminClient = () => {
 
 export async function POST(req) {
   try {
-    let studentIdText = null
-
-    // 1. まずカスタムクッキーセッション (学籍番号ログイン) を検証
+    // 1. 学籍番号ログインセッション (カスタムクッキー) を検証
     const studentSession = await getStudentSession()
-    if (studentSession && studentSession.studentId) {
-      studentIdText = studentSession.studentId
-    } else {
-      // 2. なければ Supabase Auth セッション (Googleログイン) を検証
-      const supabase = await createClient()
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-      
-      if (user && !authError) {
-        // profiles から student_id_text を引く
-        const adminSupabase = createAdminClient()
-        const { data: profile } = await adminSupabase
-          .from('profiles')
-          .select('student_id_text')
-          .eq('id', user.id)
-          .single()
-        
-        if (profile && profile.student_id_text) {
-          studentIdText = profile.student_id_text
-        }
-      }
-    }
-
-    if (!studentIdText) {
+    
+    if (!studentSession || !studentSession.studentId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const studentIdText = studentSession.studentId
     const body = await req.json()
     const { app_type, activity_type, category, score, total, detail } = body
 
