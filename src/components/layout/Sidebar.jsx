@@ -38,6 +38,10 @@ export default function Sidebar({ role: userRole, dashboardHref: propDashboardHr
                 window.location.href = '/login'
             }
         } catch (e) {
+            // Rethrow Next.js redirect exceptions so the router can navigate
+            if (e.message === 'NEXT_REDIRECT' || (e.digest && e.digest.startsWith('NEXT_REDIRECT'))) {
+                throw e
+            }
             console.error('Logout error:', e)
             setIsLoggingOut(false)
         }
