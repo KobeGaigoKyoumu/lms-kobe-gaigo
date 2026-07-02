@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getStudentsCareerList, getStudentsExamSchedulesList, getStudentsExamSurveysList, saveStudentCareerInfoByAdmin, saveStudentExamSchedules, saveStudentExamSurvey, deleteStudentExamSurvey } from '@/app/actions/career'
+import { 
+    getTeacherTemplates, 
+    saveTeacherTemplates, 
+    getTeacherSlots, 
+    generateSlots, 
+    updateSlot, 
+    deleteSlot 
+} from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
     Save, Edit3, Lock, X, Search, FileText, CheckCircle, AlertCircle, Trash2, Plus
@@ -59,6 +67,33 @@ export default function CareerManagementClient({
     const ITEMS_PER_PAGE = 50
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+
+    // 面談（Interview）関連の状態
+    const [interviewTemplates, setInterviewTemplates] = useState([
+        { day_of_week: 1, start_time: '09:00', end_time: '18:00', enabled: true },
+        { day_of_week: 2, start_time: '09:00', end_time: '18:00', enabled: true },
+        { day_of_week: 3, start_time: '09:00', end_time: '18:00', enabled: true },
+        { day_of_week: 4, start_time: '09:00', end_time: '18:00', enabled: true },
+        { day_of_week: 5, start_time: '09:00', end_time: '18:00', enabled: true }
+    ])
+    const [interviewSlots, setInterviewSlots] = useState([])
+    const [interviewSelectedDate, setInterviewSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const [interviewGenRange, setInterviewGenRange] = useState({
+        start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        end: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    })
+    const [editingInterviewSlot, setEditingInterviewSlot] = useState(null)
+    const [interviewEditForm, setInterviewEditForm] = useState({
+        start_time: '',
+        end_time: '',
+        status: '',
+        notes: '',
+        student_id_text: ''
+    })
+    const [interviewActiveSubTab, setInterviewActiveSubTab] = useState('schedule') // 'schedule' | 'template' | 'generate'
+    const [interviewLoading, setInterviewLoading] = useState(false)
+    const [interviewSuccessMsg, setInterviewSuccessMsg] = useState(null)
+    const [interviewError, setInterviewError] = useState(null)
     
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -666,6 +701,142 @@ export default function CareerManagementClient({
         return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
     }
 
+    // ----------------------------------------------------
+    // 面談（INTERVIEW）ロジック
+    // ----------------------------------------------------
+    const loadInterviewTemplates = async () => {
+        setInterviewLoading(true)
+        const res = await getTeacherTemplates()
+        setInterviewLoading(false)
+        if (res.success && res.templates.length > 0) {
+            const formatted = [1, 2, 3, 4, 5].map(day => {
+                const found = res.templates.find(t => t.day_of_week === day)
+                return {
+                    day_of_week: day,
+                    start_time: found ? found.start_time.substring(0, 5) : '09:00',
+                    end_time: found ? found.end_time.substring(0, 5) : '18:00',
+                    enabled: !!found
+                }
+            })
+            setInterviewTemplates(formatted)
+        }
+    }
+
+    const handleSaveInterviewTemplates = async () => {
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const activeTemplates = interviewTemplates
+            .filter(t => t.enabled)
+            .map(t => ({
+                day_of_week: t.day_of_week,
+                start_time: `${t.start_time}:00`,
+                end_time: `${t.end_time}:00`
+            }))
+
+        const res = await saveTeacherTemplates(activeTemplates)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('テンプレート設定を保存しました。')
+        } else {
+            setInterviewError(`保存に失敗しました: ${res.error}`)
+        }
+    }
+
+    const loadInterviewSlots = async () => {
+        setInterviewLoading(true)
+        const startObj = new Date(interviewSelectedDate)
+        startObj.setDate(startObj.getDate() - 3)
+        const endObj = new Date(interviewSelectedDate)
+        endObj.setDate(endObj.getDate() + 3)
+
+        const res = await getTeacherSlots(
+            startObj.toISOString().split('T')[0],
+            endObj.toISOString().split('T')[0]
+        )
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSlots(res.slots)
+        } else {
+            setInterviewError(`予約枠の取得に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleGenerateInterviewSlots = async () => {
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const res = await generateSlots(interviewGenRange.start, interviewGenRange.end)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg(`面談予約可能枠を自動生成しました！ (生成数: ${res.count})`)
+            loadInterviewSlots()
+        } else {
+            setInterviewError(`生成に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleOpenEditInterview = (slot) => {
+        setEditingInterviewSlot(slot)
+        setInterviewEditForm({
+            start_time: slot.start_time.substring(0, 5),
+            end_time: slot.end_time.substring(0, 5),
+            status: slot.status,
+            notes: slot.notes || '',
+            student_id_text: slot.student_id_text || ''
+        })
+    }
+
+    const handleSaveEditInterview = async () => {
+        if (!editingInterviewSlot) return
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const res = await updateSlot(editingInterviewSlot.id, {
+            start_time: `${interviewEditForm.start_time}:00`,
+            end_time: `${interviewEditForm.end_time}:00`,
+            status: interviewEditForm.status,
+            notes: interviewEditForm.notes,
+            student_id_text: interviewEditForm.student_id_text || null
+        })
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('予約枠を更新しました。')
+            setEditingInterviewSlot(null)
+            loadInterviewSlots()
+        } else {
+            setInterviewError(`更新に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleDeleteInterviewSlot = async (slotId) => {
+        if (!confirm('この予約枠を完全に削除してよろしいですか？')) return
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const res = await deleteSlot(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('予約枠を削除しました。')
+            loadInterviewSlots()
+        } else {
+            setInterviewError(`削除に失敗しました: ${res.error}`)
+        }
+    }
+
+    useEffect(() => {
+        if (activeTab === 'interview') {
+            loadInterviewTemplates()
+            loadInterviewSlots()
+        }
+    }, [activeTab])
+
+    useEffect(() => {
+        if (activeTab === 'interview') {
+            loadInterviewSlots()
+        }
+    }, [interviewSelectedDate])
+
     // 回答詳細モーダルを開く (Viewモード)
     const openViewModal = (student) => {
         setSelectedStudent(student)
@@ -818,22 +989,263 @@ export default function CareerManagementClient({
             </div>
 
             {/* ====================================================
-                面談タブ (準備中)
+                面談タブ (個別予約枠管理・スケジュール)
                ==================================================== */}
             {activeTab === 'interview' && (
                 <div className={styles.tabContent}>
-                    <div className={styles.noticeCard}>
-                        <div className={styles.noticeIcon}>
-                            <Calendar size={48} color="var(--primary-600)" />
+                    {/* 面談用アラート表示 */}
+                    {interviewSuccessMsg && (
+                        <div className={styles.successAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                            <CheckCircle size={16} />
+                            <span>{interviewSuccessMsg}</span>
                         </div>
-                        <h2>面談管理機能について</h2>
-                        <p className={styles.noticeText}>
-                            現在、個別面談の調整および面談履歴の記録機能は準備中です。
-                        </p>
-                        <p className={styles.noticeSubText}>
-                            今後のシステムアップデートをお待ちください。
-                        </p>
+                    )}
+                    {interviewError && (
+                        <div className={styles.errorAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                            <AlertCircle size={16} />
+                            <span>{interviewError}</span>
+                        </div>
+                    )}
+
+                    {/* 面談用サブタブ */}
+                    <div className={styles.controls} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: 'var(--spacing-2)', borderRadius: 'var(--radius-md)' }}>
+                        <button 
+                            className={`${styles.actionButton} ${interviewActiveSubTab === 'schedule' ? styles.submitBtn : styles.cancelBtn}`}
+                            onClick={() => setInterviewActiveSubTab('schedule')}
+                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'schedule' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'schedule' ? '#fff' : 'var(--text-secondary)' }}
+                        >
+                            📅 予約状況・スケジュール管理
+                        </button>
+                        <button 
+                            className={`${styles.actionButton} ${interviewActiveSubTab === 'template' ? styles.submitBtn : styles.cancelBtn}`}
+                            onClick={() => { setInterviewActiveSubTab('template'); loadInterviewTemplates(); }}
+                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'template' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'template' ? '#fff' : 'var(--text-secondary)' }}
+                        >
+                            ⚙️ テンプレート設定 (平日用)
+                        </button>
+                        <button 
+                            className={`${styles.actionButton} ${interviewActiveSubTab === 'generate' ? styles.submitBtn : styles.cancelBtn}`}
+                            onClick={() => setInterviewActiveSubTab('generate')}
+                            style={{ margin: 0, padding: 'var(--spacing-2) var(--spacing-4)', background: interviewActiveSubTab === 'generate' ? 'var(--primary-600)' : 'transparent', color: interviewActiveSubTab === 'generate' ? '#fff' : 'var(--text-secondary)' }}
+                        >
+                            ⚡ 枠の自動生成
+                        </button>
                     </div>
+
+                    {/* サブタブ1: スケジュール管理 */}
+                    {interviewActiveSubTab === 'schedule' && (
+                        <div className={styles.counselingView}>
+                            <div className={styles.controls} style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
+                                <div className={styles.filterGroup}>
+                                    <label className={styles.controlLabel}>日付選択:</label>
+                                    <input 
+                                        type="date" 
+                                        value={interviewSelectedDate} 
+                                        onChange={(e) => setInterviewSelectedDate(e.target.value)} 
+                                        className={styles.searchInput}
+                                        style={{ width: 'auto' }}
+                                    />
+                                </div>
+                                <button 
+                                    onClick={() => setInterviewSelectedDate(new Date().toISOString().split('T')[0])}
+                                    className={styles.actionButton}
+                                >
+                                    今日
+                                </button>
+                            </div>
+
+                            <div className={styles.tableCard}>
+                                <div className={styles.tableWrapper}>
+                                    {interviewLoading ? (
+                                        <div style={{ padding: 'var(--spacing-8)', textAlign: 'center' }}>読み込み中...</div>
+                                    ) : interviewSlots.filter(s => s.slot_date === interviewSelectedDate).length === 0 ? (
+                                        <div className={styles.emptyState} style={{ padding: 'var(--spacing-8)', textAlign: 'center' }}>
+                                            <p>この日の予約可能枠はまだありません。</p>
+                                            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-tertiary)' }}>
+                                                「枠の自動生成」タブから枠を作成してください。
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>時間帯</th>
+                                                    <th>ステータス</th>
+                                                    <th>予約学生</th>
+                                                    <th>面談内容 / メモ</th>
+                                                    <th className={styles.textCenter}>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {interviewSlots
+                                                    .filter(s => s.slot_date === interviewSelectedDate)
+                                                    .map(slot => (
+                                                        <tr key={slot.id}>
+                                                            <td>
+                                                                {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
+                                                            </td>
+                                                            <td>
+                                                                <span className={`${styles.badge} ${
+                                                                    slot.status === 'booked' ? styles.successBadge : 
+                                                                    slot.status === 'blocked' ? styles.errorBadge : ''
+                                                                }`} style={{
+                                                                    background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'blocked' ? 'var(--error-50)' : 'var(--success-50)',
+                                                                    color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'blocked' ? 'var(--error-700)' : 'var(--success-700)',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '4px'
+                                                                }}>
+                                                                    {slot.status === 'booked' ? '🔵 予約済み' : 
+                                                                     slot.status === 'blocked' ? '🔴 受付停止' : '🟢 受付中'}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                {slot.status === 'booked' && slot.student ? (
+                                                                    <strong>{slot.student.full_name} ({slot.student.class_name})</strong>
+                                                                ) : '-'}
+                                                            </td>
+                                                            <td>
+                                                                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                                                                    {slot.notes || '-'}
+                                                                </span>
+                                                            </td>
+                                                            <td className={styles.textCenter} style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center' }}>
+                                                                <button
+                                                                    onClick={() => handleOpenEditInterview(slot)}
+                                                                    className={styles.actionButton}
+                                                                >
+                                                                    ✏️ 編集
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteInterviewSlot(slot.id)}
+                                                                    className={styles.actionButton}
+                                                                    style={{ color: 'var(--error-600)', borderColor: 'var(--error-200)' }}
+                                                                >
+                                                                    🗑️ 削除
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* サブタブ2: テンプレート設定 */}
+                    {interviewActiveSubTab === 'template' && (
+                        <div className={styles.counselingView} style={{ padding: 'var(--spacing-6)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+                            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>週間テンプレート (平日 9:00 〜 18:00 の範囲)</h3>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-sm)' }}>
+                                各曜日の標準的な面談可能シフト時間帯を設定します。枠自動生成のベースとして使用されます。
+                            </p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginBottom: 'var(--spacing-4)' }}>
+                                {interviewTemplates.map((temp, idx) => (
+                                    <div key={temp.day_of_week} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', padding: 'var(--spacing-2)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', minWidth: '100px', cursor: 'pointer' }}>
+                                            <input 
+                                                type="checkbox"
+                                                checked={temp.enabled}
+                                                onChange={(e) => {
+                                                    const updated = [...interviewTemplates]
+                                                    updated[idx].enabled = e.target.checked
+                                                    setInterviewTemplates(updated)
+                                                }}
+                                            />
+                                            <span style={{ fontWeight: '500' }}>
+                                                {['日', '月', '火', '水', '木', '金', '土'][temp.day_of_week]}曜日
+                                            </span>
+                                        </label>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                                            <input 
+                                                type="time" 
+                                                value={temp.start_time}
+                                                min="09:00"
+                                                max="18:00"
+                                                disabled={!temp.enabled}
+                                                onChange={(e) => {
+                                                    const updated = [...interviewTemplates]
+                                                    updated[idx].start_time = e.target.value
+                                                    setInterviewTemplates(updated)
+                                                }}
+                                                className={styles.searchInput}
+                                                style={{ width: 'auto', padding: 'var(--spacing-1)' }}
+                                            />
+                                            <span>〜</span>
+                                            <input 
+                                                type="time" 
+                                                value={temp.end_time}
+                                                min="09:00"
+                                                max="18:00"
+                                                disabled={!temp.enabled}
+                                                onChange={(e) => {
+                                                    const updated = [...interviewTemplates]
+                                                    updated[idx].end_time = e.target.value
+                                                    setInterviewTemplates(updated)
+                                                }}
+                                                className={styles.searchInput}
+                                                style={{ width: 'auto', padding: 'var(--spacing-1)' }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button 
+                                onClick={handleSaveInterviewTemplates}
+                                disabled={interviewLoading}
+                                className={styles.actionButton}
+                                style={{ background: 'var(--primary-600)', color: '#fff', border: 'none' }}
+                            >
+                                {interviewLoading ? '保存中...' : '💾 テンプレート設定を保存'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* サブタブ3: 枠の自動生成 */}
+                    {interviewActiveSubTab === 'generate' && (
+                        <div className={styles.counselingView} style={{ padding: 'var(--spacing-6)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+                            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>15分間隔 予約可能枠の自動生成</h3>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-sm)' }}>
+                                テンプレート設定に基づいて、指定期間内のすべての平日（土日を除く）に15分刻みの面談受付スロットを一括生成します。
+                            </p>
+
+                            <div className={styles.controls} style={{ display: 'flex', gap: 'var(--spacing-4)', marginBottom: 'var(--spacing-4)', background: 'transparent', padding: 0 }}>
+                                <div className={styles.filterGroup}>
+                                    <label className={styles.controlLabel}>開始日:</label>
+                                    <input 
+                                        type="date" 
+                                        value={interviewGenRange.start}
+                                        onChange={(e) => setInterviewGenRange({...interviewGenRange, start: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: 'auto' }}
+                                    />
+                                </div>
+                                <div className={styles.filterGroup}>
+                                    <label className={styles.controlLabel}>終了日:</label>
+                                    <input 
+                                        type="date" 
+                                        value={interviewGenRange.end}
+                                        onChange={(e) => setInterviewGenRange({...interviewGenRange, end: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: 'auto' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={handleGenerateInterviewSlots}
+                                disabled={interviewLoading}
+                                className={styles.actionButton}
+                                style={{ background: 'var(--primary-600)', color: '#fff', border: 'none' }}
+                            >
+                                {interviewLoading ? '生成中...' : '⚡ 予約可能枠を自動生成'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -2975,6 +3387,108 @@ export default function CareerManagementClient({
                                     </div>
                                 </form>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* ====================================================
+                面談スロット編集モーダル
+               ==================================================== */}
+            {editingInterviewSlot && (
+                <div className={styles.modalOverlay} onClick={() => setEditingInterviewSlot(null)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <div className={styles.modalHeader}>
+                            <h2>面談枠の編集・修正</h2>
+                            <button onClick={() => setEditingInterviewSlot(null)} className={styles.closeModalBtn}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className={styles.modalBody} style={{ padding: 'var(--spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                                {editingInterviewSlot.slot_date} の時間枠を変更します
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
+                                <div className={styles.inputGroup}>
+                                    <label>開始時刻:</label>
+                                    <input 
+                                        type="time" 
+                                        value={interviewEditForm.start_time}
+                                        onChange={(e) => setInterviewEditForm({...interviewEditForm, start_time: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                                <div className={styles.inputGroup}>
+                                    <label>終了時刻:</label>
+                                    <input 
+                                        type="time" 
+                                        value={interviewEditForm.end_time}
+                                        onChange={(e) => setInterviewEditForm({...interviewEditForm, end_time: e.target.value})}
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>ステータス:</label>
+                                <select 
+                                    value={interviewEditForm.status}
+                                    onChange={(e) => setInterviewEditForm({...interviewEditForm, status: e.target.value})}
+                                    className={styles.selectInput}
+                                    style={{ width: '100%' }}
+                                >
+                                    <option value="available">🟢 予約受付中 (Available)</option>
+                                    <option value="blocked">🔴 予約停止 (Blocked)</option>
+                                    <option value="booked">🔵 予約済み (Booked)</option>
+                                </select>
+                            </div>
+
+                            {interviewEditForm.status === 'booked' && (
+                                <div className={styles.inputGroup}>
+                                    <label>学籍番号:</label>
+                                    <input 
+                                        type="text" 
+                                        value={interviewEditForm.student_id_text}
+                                        onChange={(e) => setInterviewEditForm({...interviewEditForm, student_id_text: e.target.value})}
+                                        placeholder="例: 2504062"
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                            )}
+
+                            <div className={styles.inputGroup}>
+                                <label>面談内容 / メモ:</label>
+                                <textarea 
+                                    value={interviewEditForm.notes}
+                                    onChange={(e) => setInterviewEditForm({...interviewEditForm, notes: e.target.value})}
+                                    placeholder="相談内容、面談メモなど"
+                                    rows={3}
+                                    className={styles.searchInput}
+                                    style={{ width: '100%', resize: 'none' }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.modalFooter} style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end', padding: 'var(--spacing-4)', borderTop: '1px solid var(--border-color)' }}>
+                            <button 
+                                onClick={() => setEditingInterviewSlot(null)}
+                                className={styles.cancelBtn}
+                                style={{ margin: 0 }}
+                            >
+                                キャンセル
+                            </button>
+                            <button 
+                                onClick={handleSaveEditInterview}
+                                disabled={interviewLoading}
+                                className={styles.submitBtn}
+                                style={{ margin: 0 }}
+                            >
+                                {interviewLoading ? '保存中...' : '変更を保存'}
+                            </button>
                         </div>
                     </div>
                 </div>

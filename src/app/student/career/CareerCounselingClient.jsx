@@ -1,12 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
     saveStudentCareerInfo,
     saveStudentExamSchedulesSelf,
     saveStudentExamSurveySelf,
     deleteStudentExamSurveySelf
 } from '@/app/actions/career'
+import {
+    getTeachersList,
+    getAvailableSlots,
+    bookSlot,
+    cancelBooking,
+    getStudentBookings
+} from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, Save, Edit3, Lock,
     Plus, Trash2, X, CheckCircle, AlertCircle, FileText
@@ -50,6 +57,18 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [step, setStep] = useState(1)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState(null)
+
+    // 面談（Interview）関連の状態
+    const [teachersList, setTeachersList] = useState([])
+    const [selectedTeacher, setSelectedTeacher] = useState('')
+    const [interviewDate, setInterviewDate] = useState(new Date().toISOString().split('T')[0])
+    const [availableSlots, setAvailableSlots] = useState([])
+    const [selectedSlotId, setSelectedSlotId] = useState('')
+    const [consultNotes, setConsultNotes] = useState('')
+    const [studentBookings, setStudentBookings] = useState([])
+    const [interviewLoading, setInterviewLoading] = useState(false)
+    const [interviewSuccessMsg, setInterviewSuccessMsg] = useState(null)
+    const [interviewError, setInterviewError] = useState(null)
 
     // 入試予定関連の状態
     const [examSchedulesList, setExamSchedulesList] = useState(examSchedules || [])
@@ -733,6 +752,95 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     }
 
 
+    // ----------------------------------------------------
+    // 面談（INTERVIEW）ロジック
+    // ----------------------------------------------------
+    const loadTeachers = async () => {
+        setInterviewLoading(true)
+        const res = await getTeachersList()
+        setInterviewLoading(false)
+        if (res.success) {
+            setTeachersList(res.teachers)
+            if (res.teachers.length > 0 && !selectedTeacher) {
+                setSelectedTeacher(res.teachers[0].id)
+            }
+        }
+    }
+
+    const loadAvailableSlots = async () => {
+        if (!selectedTeacher) return
+        setInterviewLoading(true)
+        const res = await getAvailableSlots(selectedTeacher, interviewDate)
+        setInterviewLoading(false)
+        if (res.success) {
+            setAvailableSlots(res.slots)
+            setSelectedSlotId('')
+        }
+    }
+
+    const loadStudentBookings = async () => {
+        setInterviewLoading(true)
+        const res = await getStudentBookings()
+        setInterviewLoading(false)
+        if (res.success) {
+            setStudentBookings(res.bookings)
+        }
+    }
+
+    const handleBookSlot = async (e) => {
+        e.preventDefault()
+        if (!selectedSlotId) {
+            setInterviewError('予約する時間枠を選択してください。')
+            return
+        }
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+
+        const res = await bookSlot(selectedSlotId, consultNotes)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('面談の予約が完了しました！')
+            setConsultNotes('')
+            setSelectedSlotId('')
+            loadAvailableSlots()
+            loadStudentBookings()
+        } else {
+            setInterviewError(`予約に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleCancelBooking = async (slotId) => {
+        if (!confirm('この面談予約をキャンセルしてよろしいですか？')) return
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+
+        const res = await cancelBooking(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('予約をキャンセルしました。')
+            loadAvailableSlots()
+            loadStudentBookings()
+        } else {
+            setInterviewError(`キャンセルに失敗しました: ${res.error}`)
+        }
+    }
+
+    useEffect(() => {
+        if (activeTab === 'interview') {
+            loadTeachers()
+            loadStudentBookings()
+        }
+    }, [activeTab])
+
+    useEffect(() => {
+        if (activeTab === 'interview' && selectedTeacher) {
+            loadAvailableSlots()
+        }
+    }, [activeTab, selectedTeacher, interviewDate])
+
+
     return (
         <div className={styles.page}>
             <h1 className={styles.title}>進路・面談</h1>
@@ -766,21 +874,152 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             </div>
 
             {/* ====================================================
-                INTERVIEW TAB (面談)
+                INTERVIEW TAB (面談予約)
                ==================================================== */}
             {activeTab === 'interview' && (
                 <div className={styles.tabContent}>
-                    <div className={styles.noticeCard}>
-                        <div className={styles.noticeIcon}>
-                            <Calendar size={48} color="var(--primary-600)" />
+                    {interviewSuccessMsg && (
+                        <div className={styles.successAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--success-50)', color: 'var(--success-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                            <CheckCircle size={16} />
+                            <span>{interviewSuccessMsg}</span>
                         </div>
-                        <h2>面談機能について</h2>
-                        <p className={styles.noticeText}>
-                            現在、面談の予約調整や面談履歴の確認機能は準備中です。
+                    )}
+                    {interviewError && (
+                        <div className={styles.errorAlert} style={{ marginBottom: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', background: 'var(--error-50)', color: 'var(--error-700)', padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)' }}>
+                            <AlertCircle size={16} />
+                            <span>{interviewError}</span>
+                        </div>
+                    )}
+
+                    {/* アクティブな面談予約の表示 */}
+                    <div className={styles.detailContainer} style={{ marginBottom: 'var(--spacing-6)' }}>
+                        <h3>📅 あなたの面談予約一覧</h3>
+                        {studentBookings.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-2)' }}>
+                                現在、予約済みの面談はありません。
+                            </p>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)' }}>
+                                {studentBookings.map(booking => (
+                                    <div key={booking.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-3)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', borderLeft: '4px solid var(--primary-500)' }}>
+                                        <div>
+                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-md)' }}>
+                                                {booking.slot_date} &nbsp; {booking.start_time.substring(0, 5)} - {booking.end_time.substring(0, 5)}
+                                            </strong>
+                                            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                                                面談の先生: {booking.teacher?.full_name || '不明'} 先生
+                                            </span>
+                                            {booking.notes && (
+                                                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-tertiary)', marginTop: '4px', fontStyle: 'italic' }}>
+                                                    相談内容: "{booking.notes}"
+                                                </p>
+                                            )}
+                                        </div>
+                                        <button 
+                                            onClick={() => handleCancelBooking(booking.id)}
+                                            className={styles.cancelBtn}
+                                            style={{ margin: 0, padding: '4px 12px', fontSize: 'var(--font-size-xs)', borderColor: 'var(--error-200)', color: 'var(--error-600)' }}
+                                        >
+                                            キャンセル
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 新規面談予約フォーム */}
+                    <div className={styles.detailContainer}>
+                        <h3>⚡ 新しく面談を予約する</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-4)' }}>
+                            先生と面談を行いたい日時を選択し、予約を入れてください。(15分枠)
                         </p>
-                        <p className={styles.noticeSubText}>
-                            面談の日程や詳細については、担任教員からの個別連絡または掲示板のお知らせをお待ちください。
-                        </p>
+
+                        <form onSubmit={handleBookSlot} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
+                                <div className={styles.inputGroup}>
+                                    <label>面談する先生 <span style={{ color: 'red' }}>*</span></label>
+                                    <select
+                                        value={selectedTeacher}
+                                        onChange={(e) => setSelectedTeacher(e.target.value)}
+                                        className={styles.selectInput}
+                                        style={{ width: '100%' }}
+                                    >
+                                        <option value="">先生を選択してください</option>
+                                        {teachersList.map(t => (
+                                            <option key={t.id} value={t.id}>
+                                                {t.full_name} 先生
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className={styles.inputGroup}>
+                                    <label>希望日付 <span style={{ color: 'red' }}>*</span></label>
+                                    <input 
+                                        type="date" 
+                                        value={interviewDate}
+                                        onChange={(e) => setInterviewDate(e.target.value)}
+                                        className={styles.searchInput}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>空いている時間枠 <span style={{ color: 'red' }}>*</span></label>
+                                {interviewLoading ? (
+                                    <p style={{ fontSize: 'var(--font-size-sm)' }}>読み込み中...</p>
+                                ) : availableSlots.length === 0 ? (
+                                    <p style={{ color: 'var(--error-600)', fontSize: 'var(--font-size-sm)' }}>
+                                        選択された日付には予約可能な空き枠がありません。別の日付か別の先生を選択してください。
+                                    </p>
+                                ) : (
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
+                                        {availableSlots.map(slot => (
+                                            <button
+                                                key={slot.id}
+                                                type="button"
+                                                onClick={() => setSelectedSlotId(slot.id)}
+                                                className={styles.radioBtn}
+                                                style={{
+                                                    margin: 0,
+                                                    padding: '8px 12px',
+                                                    fontSize: 'var(--font-size-sm)',
+                                                    borderColor: selectedSlotId === slot.id ? 'var(--primary-500)' : 'var(--border-color)',
+                                                    background: selectedSlotId === slot.id ? 'var(--primary-50)' : 'transparent',
+                                                    color: selectedSlotId === slot.id ? 'var(--primary-700)' : 'var(--text-secondary)',
+                                                    fontWeight: selectedSlotId === slot.id ? '600' : 'normal'
+                                                }}
+                                            >
+                                                {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label>相談内容 (先生に伝えたいこと / 自由記述)</label>
+                                <textarea 
+                                    value={consultNotes}
+                                    onChange={(e) => setConsultNotes(e.target.value)}
+                                    placeholder="例: 進路について相談したいです。奨学金の申請方法について聞きたいです、など"
+                                    rows={3}
+                                    className={styles.searchInput}
+                                    style={{ width: '100%', resize: 'none' }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={interviewLoading || !selectedSlotId}
+                                className={styles.submitBtn}
+                                style={{ margin: 0, alignSelf: 'flex-start' }}
+                            >
+                                {interviewLoading ? '送信中...' : '📅 面談を予約する'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
