@@ -93,6 +93,8 @@ export default function CareerManagementClient({
     })
     const [interviewActiveSubTab, setInterviewActiveSubTab] = useState('schedule') // 'schedule' | 'template' | 'generate'
     const [interviewLoading, setInterviewLoading] = useState(false)
+    const [interviewSaving, setInterviewSaving] = useState(false)
+    const [interviewGenerating, setInterviewGenerating] = useState(false)
     const [interviewSuccessMsg, setInterviewSuccessMsg] = useState(null)
     const [interviewError, setInterviewError] = useState(null)
     const [weeklyBookings, setWeeklyBookings] = useState([])
@@ -726,7 +728,7 @@ export default function CareerManagementClient({
     }
 
     const handleSaveInterviewTemplates = async () => {
-        setInterviewLoading(true)
+        setInterviewSaving(true)
         setInterviewSuccessMsg(null)
         setInterviewError(null)
         const activeTemplates = interviewTemplates
@@ -738,7 +740,7 @@ export default function CareerManagementClient({
             }))
 
         const res = await saveTeacherTemplates(activeTemplates)
-        setInterviewLoading(false)
+        setInterviewSaving(false)
         if (res.success) {
             setInterviewSuccessMsg('テンプレート設定を保存しました。')
         } else {
@@ -766,11 +768,11 @@ export default function CareerManagementClient({
     }
 
     const handleGenerateInterviewSlots = async () => {
-        setInterviewLoading(true)
+        setInterviewGenerating(true)
         setInterviewSuccessMsg(null)
         setInterviewError(null)
         const res = await generateSlots(interviewGenRange.start, interviewGenRange.end)
-        setInterviewLoading(false)
+        setInterviewGenerating(false)
         if (res.success) {
             setInterviewSuccessMsg(`面談予約可能枠を自動生成しました！ (生成数: ${res.count})`)
             loadInterviewSlots()
@@ -1318,11 +1320,11 @@ export default function CareerManagementClient({
 
                             <button 
                                 onClick={handleSaveInterviewTemplates}
-                                disabled={interviewLoading}
+                                disabled={interviewSaving || interviewLoading}
                                 className={styles.actionButton}
                                 style={{ background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)', fontWeight: '700', fontSize: 'var(--font-size-sm)', cursor: 'pointer', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)', alignSelf: 'flex-start' }}
                             >
-                                {interviewLoading ? '保存中...' : '💾 テンプレート設定を保存'}
+                                {interviewSaving ? '保存中...' : '💾 テンプレート設定を保存'}
                             </button>
                         </div>
                     )}
@@ -1360,11 +1362,11 @@ export default function CareerManagementClient({
 
                             <button 
                                 onClick={handleGenerateInterviewSlots}
-                                disabled={interviewLoading}
+                                disabled={interviewGenerating || interviewLoading}
                                 className={styles.actionButton}
                                 style={{ background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)', fontWeight: '700', fontSize: 'var(--font-size-sm)', cursor: 'pointer', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)', alignSelf: 'flex-start' }}
                             >
-                                {interviewLoading ? '生成中...' : '⚡ 予約可能枠を自動生成'}
+                                {interviewGenerating ? '生成中...' : '⚡ 予約可能枠を自動生成'}
                             </button>
                         </div>
                     )}
