@@ -1205,14 +1205,11 @@ export default function CareerManagementClient({
                                                         display: 'flex', 
                                                         alignItems: 'center', 
                                                         gap: '16px', 
-                                                        padding: '14px 20px', 
-                                                        background: 'var(--bg-card)', 
-                                                        borderRadius: 'var(--radius-lg)', 
-                                                        borderLeft: isToday ? '5px solid var(--primary-500)' : '5px solid var(--primary-200)',
-                                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-                                                        borderTop: '1px solid rgba(0,0,0,0.02)',
-                                                        borderRight: '1px solid rgba(0,0,0,0.02)',
-                                                        borderBottom: '1px solid rgba(0,0,0,0.02)'
+                                                        padding: '16px 20px', 
+                                                        background: '#ffffff', 
+                                                        border: '1px solid var(--border-color)', 
+                                                        borderRadius: 'var(--radius-xl)', 
+                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                                                     }}
                                                 >
                                                     <div style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)', minWidth: '95px' }}>
