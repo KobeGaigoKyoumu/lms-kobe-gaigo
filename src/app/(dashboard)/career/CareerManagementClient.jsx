@@ -130,6 +130,9 @@ export default function CareerManagementClient({
         student_id_text: ''
     })
 
+    // 面談スロットで選択された複数学生のIDを保持する状態
+    const [selectedStudentIds, setSelectedStudentIds] = useState([])
+
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
     const [modalMode, setModalMode] = useState('view') // 'view' or 'edit'
@@ -838,6 +841,8 @@ export default function CareerManagementClient({
             notes: slot.notes || '',
             student_id_text: slot.student_id_text || ''
         })
+        const ids = slot.slot_students ? slot.slot_students.map(ss => ss.student_id_text).filter(Boolean) : []
+        setSelectedStudentIds(ids)
     }
 
     const handleSaveEditInterview = async () => {
@@ -845,12 +850,15 @@ export default function CareerManagementClient({
         setInterviewLoading(true)
         setInterviewSuccessMsg(null)
         setInterviewError(null)
+
+        const finalStatus = selectedStudentIds.length > 0 ? 'booked' : (interviewEditForm.status === 'booked' ? 'available' : interviewEditForm.status)
+
         const res = await updateSlot(editingInterviewSlot.id, {
             start_time: `${interviewEditForm.start_time}:00`,
             end_time: `${interviewEditForm.end_time}:00`,
-            status: interviewEditForm.status,
+            status: finalStatus,
             notes: interviewEditForm.notes,
-            student_id_text: interviewEditForm.student_id_text || null
+            student_id_texts: selectedStudentIds
         })
         setInterviewLoading(false)
         if (res.success) {
@@ -866,13 +874,15 @@ export default function CareerManagementClient({
         setInterviewSaving(true)
         setInterviewError(null)
 
+        const finalStatus = selectedStudentIds.length > 0 ? 'booked' : interviewCreateForm.status
+
         const res = await createSlot({
             slot_date: interviewSelectedDate,
             start_time: `${interviewCreateForm.start_time}:00`,
             end_time: `${interviewCreateForm.end_time}:00`,
-            status: interviewCreateForm.status,
+            status: finalStatus,
             notes: interviewCreateForm.notes,
-            student_id_text: interviewCreateForm.student_id_text || null
+            student_id_texts: selectedStudentIds
         })
 
         setInterviewSaving(false)
@@ -1212,14 +1222,22 @@ export default function CareerManagementClient({
                                                     <div style={{ fontWeight: '700', color: 'var(--text-secondary)', minWidth: '100px', fontSize: 'var(--font-size-sm)' }}>
                                                         {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
                                                     </div>
-                                                    <div style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
-                                                        {slot.student?.full_name || '学生情報なし'}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                        {slot.slot_students && slot.slot_students.length > 0 ? (
+                                                            slot.slot_students.map(ss => ss.student && (
+                                                                <div key={ss.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                    <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
+                                                                        {ss.student.full_name}
+                                                                    </span>
+                                                                    <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
+                                                                        {ss.student.class_name}
+                                                                    </span>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>学生情報なし</span>
+                                                        )}
                                                     </div>
-                                                    {slot.student?.class_name && (
-                                                        <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 10px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
-                                                            {slot.student.class_name}
-                                                        </span>
-                                                    )}
                                                     {slot.notes && (
                                                         <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginLeft: 'auto', background: 'var(--bg-secondary)', padding: '4px 10px', borderRadius: 'var(--radius-sm)' }}>
                                                             💬 {slot.notes}
@@ -1315,10 +1333,14 @@ export default function CareerManagementClient({
                                                                 </span>
                                                             </td>
                                                             <td style={{ padding: '16px' }}>
-                                                                {slot.status === 'booked' && slot.student ? (
-                                                                    <strong style={{ color: 'var(--text-primary)' }}>
-                                                                        {slot.student.full_name} <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', fontWeight: 'normal' }}>({slot.student.class_name})</span>
-                                                                    </strong>
+                                                                {slot.status === 'booked' && slot.slot_students && slot.slot_students.length > 0 ? (
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                        {slot.slot_students.map(ss => ss.student && (
+                                                                            <strong key={ss.student_id_text} style={{ color: 'var(--text-primary)', display: 'block' }}>
+                                                                                {ss.student.full_name} <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', fontWeight: 'normal' }}>({ss.student.class_name})</span>
+                                                                            </strong>
+                                                                        ))}
+                                                                    </div>
                                                                 ) : <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                             </td>
                                                             <td style={{ padding: '16px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -3740,31 +3762,45 @@ export default function CareerManagementClient({
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label>面談を行う学生 (未選択で予約なし):</label>
-                                <select 
-                                    value={interviewCreateForm.student_id_text}
-                                    onChange={(e) => {
-                                        const nextStudentId = e.target.value;
-                                        setInterviewCreateForm(prev => ({
-                                            ...prev, 
-                                            student_id_text: nextStudentId,
-                                            status: nextStudentId ? 'booked' : (prev.status === 'booked' ? 'available' : prev.status)
-                                        }));
-                                    }}
-                                    className={styles.selectInput}
-                                    style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
-                                >
-                                    <option value="">-- 未予約 (枠のみ) --</option>
+                                <label>面談を行う学生 (複数選択可):</label>
+                                <div style={{ 
+                                    maxHeight: '200px', 
+                                    overflowY: 'auto', 
+                                    border: '1px solid var(--border-color)', 
+                                    borderRadius: 'var(--radius-md)', 
+                                    padding: '10px',
+                                    background: '#fff'
+                                }}>
                                     {Object.entries(groupedMyClassStudents).map(([className, sts]) => (
-                                        <optgroup key={className} label={className}>
-                                            {sts.map(st => (
-                                                <option key={st.student_id_text} value={st.student_id_text}>
-                                                    {st.full_name} ({st.student_id_text})
-                                                </option>
-                                            ))}
-                                        </optgroup>
+                                        <div key={className} style={{ marginBottom: '10px' }}>
+                                            <div style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '4px', borderBottom: '1px solid var(--border-color)', paddingBottom: '2px' }}>
+                                                {className}
+                                            </div>
+                                            {sts.map(st => {
+                                                const isSelected = selectedStudentIds.includes(st.student_id_text);
+                                                return (
+                                                    <label key={st.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: 'var(--font-size-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedStudentIds([...selectedStudentIds, st.student_id_text])
+                                                                } else {
+                                                                    setSelectedStudentIds(selectedStudentIds.filter(id => id !== st.student_id_text))
+                                                                }
+                                                            }}
+                                                        />
+                                                        {st.full_name} ({st.student_id_text})
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
                                     ))}
-                                </select>
+                                    {Object.keys(groupedMyClassStudents).length === 0 && (
+                                        <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>対象の学生がいません</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className={styles.inputGroup}>
@@ -3870,32 +3906,45 @@ export default function CareerManagementClient({
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label>面談を行う学生 (未選択で予約なし):</label>
-                                <select 
-                                    value={interviewEditForm.student_id_text}
-                                    onChange={(e) => {
-                                        const nextStudentId = e.target.value;
-                                        setInterviewEditForm(prev => ({
-                                            ...prev, 
-                                            student_id_text: nextStudentId,
-                                            // 学生を選択した場合はステータスを自動的に「予約済み」にする。外した場合は自動的に「予約受付中」にする。
-                                            status: nextStudentId ? 'booked' : (prev.status === 'booked' ? 'available' : prev.status)
-                                        }));
-                                    }}
-                                    className={styles.selectInput}
-                                    style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
-                                >
-                                    <option value="">-- 未予約 (枠のみ) --</option>
+                                <label>面談を行う学生 (複数選択可):</label>
+                                <div style={{ 
+                                    maxHeight: '200px', 
+                                    overflowY: 'auto', 
+                                    border: '1px solid var(--border-color)', 
+                                    borderRadius: 'var(--radius-md)', 
+                                    padding: '10px',
+                                    background: '#fff'
+                                }}>
                                     {Object.entries(groupedMyClassStudents).map(([className, sts]) => (
-                                        <optgroup key={className} label={className}>
-                                            {sts.map(st => (
-                                                <option key={st.student_id_text} value={st.student_id_text}>
-                                                    {st.full_name} ({st.student_id_text})
-                                                </option>
-                                            ))}
-                                        </optgroup>
+                                        <div key={className} style={{ marginBottom: '10px' }}>
+                                            <div style={{ fontWeight: '700', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '4px', borderBottom: '1px solid var(--border-color)', paddingBottom: '2px' }}>
+                                                {className}
+                                            </div>
+                                            {sts.map(st => {
+                                                const isSelected = selectedStudentIds.includes(st.student_id_text);
+                                                return (
+                                                    <label key={st.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: 'var(--font-size-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedStudentIds([...selectedStudentIds, st.student_id_text])
+                                                                } else {
+                                                                    setSelectedStudentIds(selectedStudentIds.filter(id => id !== st.student_id_text))
+                                                                }
+                                                            }}
+                                                        />
+                                                        {st.full_name} ({st.student_id_text})
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
                                     ))}
-                                </select>
+                                    {Object.keys(groupedMyClassStudents).length === 0 && (
+                                        <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>対象の学生がいません</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className={styles.inputGroup}>

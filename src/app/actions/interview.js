@@ -90,7 +90,10 @@ export async function getTeacherSlots(startDateStr, endDateStr) {
       .from('interview_slots')
       .select(`
         *,
-        student:students(student_id_text, full_name, class_name)
+        slot_students:interview_slot_students(
+          student_id_text,
+          student:students(student_id_text, full_name, class_name)
+        )
       `)
       .eq('teacher_id', session.memberId)
       .gte('slot_date', startDateStr)
@@ -208,20 +211,46 @@ export async function updateSlot(slotId, data) {
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
-    const { error } = await supabase
+    const studentIdTexts = data.student_id_texts || 
+      (data.student_id_text ? [data.student_id_text] : [])
+
+    // 1. スロット本体の更新
+    const { error: slotError } = await supabase
       .from('interview_slots')
       .update({
         start_time: data.start_time,
         end_time: data.end_time,
         status: data.status,
         notes: data.notes,
-        student_id_text: data.student_id_text || null,
+        // 互換性のため、1人目の学生IDをカラムに設定
+        student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null,
         updated_at: new Date().toISOString()
       })
       .eq('id', slotId)
       .eq('teacher_id', session.memberId)
 
-    if (error) throw error
+    if (slotError) throw slotError
+
+    // 2. 中間テーブルの更新 (全削除後に一括インサート)
+    const { error: deleteError } = await supabase
+      .from('interview_slot_students')
+      .delete()
+      .eq('slot_id', slotId)
+
+    if (deleteError) throw deleteError
+
+    if (studentIdTexts.length > 0) {
+      const records = studentIdTexts.map(stId => ({
+        slot_id: slotId,
+        student_id_text: stId
+      }))
+      const { error: insertError } = await supabase
+        .from('interview_slot_students')
+        .insert(records)
+
+      if (insertError) throw insertError
+    }
+
     return { success: true }
   } catch (e) {
     console.error('updateSlot error:', e)
@@ -257,7 +286,11 @@ export async function createSlot(data) {
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
-    const { data: newSlot, error } = await supabase
+    const studentIdTexts = data.student_id_texts || 
+      (data.student_id_text ? [data.student_id_text] : [])
+
+    // 1. スロット作成
+    const { data: newSlot, error: slotError } = await supabase
       .from('interview_slots')
       .insert({
         teacher_id: session.memberId,
@@ -266,12 +299,26 @@ export async function createSlot(data) {
         end_time: data.end_time,
         status: data.status || 'available',
         notes: data.notes || '',
-        student_id_text: data.student_id_text || null
+        student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (slotError) throw slotError
+
+    // 2. 学生の紐付け
+    if (studentIdTexts.length > 0) {
+      const records = studentIdTexts.map(stId => ({
+        slot_id: newSlot.id,
+        student_id_text: stId
+      }))
+      const { error: insertError } = await supabase
+        .from('interview_slot_students')
+        .insert(records)
+
+      if (insertError) throw insertError
+    }
+
     return { success: true, slot: newSlot }
   } catch (e) {
     console.error('createSlot error:', e)
@@ -343,7 +390,7 @@ export async function bookSlot(slotId, notes) {
     if (fetchError || !slot) throw new Error('指定された枠が見つかりませんでした。')
     if (slot.status !== 'available') throw new Error('この時間枠はすでに別の予約が入ったか、予約不可になっています。')
 
-    // 予約を更新
+    // 1. 予約を更新
     const { error: updateError } = await supabase
       .from('interview_slots')
       .update({
@@ -355,6 +402,16 @@ export async function bookSlot(slotId, notes) {
       .eq('id', slotId)
 
     if (updateError) throw updateError
+
+    // 2. 中間テーブルに学生を紐付け
+    const { error: linkError } = await supabase
+      .from('interview_slot_students')
+      .insert({
+        slot_id: slotId,
+        student_id_text: session.studentId
+      })
+
+    if (linkError) throw linkError
     return { success: true }
   } catch (e) {
     console.error('bookSlot error:', e)
@@ -370,30 +427,59 @@ export async function cancelBooking(slotId) {
 
     const supabase = createAdminClient()
 
-    // 所有者か確認
-    const { data: slot, error: fetchError } = await supabase
-      .from('interview_slots')
-      .select('student_id_text')
-      .eq('id', slotId)
-      .single()
+    // 所有者か確認 (中間テーブルにデータがあるかチェック)
+    const { data: link, error: fetchError } = await supabase
+      .from('interview_slot_students')
+      .select('id')
+      .eq('slot_id', slotId)
+      .eq('student_id_text', session.studentId)
+      .maybeSingle()
 
-    if (fetchError || !slot) throw new Error('予約が見つかりませんでした。')
-    if (slot.student_id_text !== session.studentId) {
-      throw new Error('他人の予約をキャンセルすることはできません。')
+    if (fetchError || !link) throw new Error('予約が見つかりませんでした。')
+
+    // 1. 中間テーブルから自分を削除
+    const { error: deleteError } = await supabase
+      .from('interview_slot_students')
+      .delete()
+      .eq('slot_id', slotId)
+      .eq('student_id_text', session.studentId)
+
+    if (deleteError) throw deleteError
+
+    // 2. 他に同じ枠に予約している学生がいるかチェック
+    const { data: otherLinks, error: checkError } = await supabase
+      .from('interview_slot_students')
+      .select('student_id_text')
+      .eq('slot_id', slotId)
+
+    if (checkError) throw checkError
+
+    if (!otherLinks || otherLinks.length === 0) {
+      // 他に学生がいない場合は available に戻す
+      const { error: updateError } = await supabase
+        .from('interview_slots')
+        .update({
+          status: 'available',
+          student_id_text: null,
+          notes: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', slotId)
+
+      if (updateError) throw updateError
+    } else {
+      // 他に学生が残っている場合は代表の student_id_text カラムを更新する
+      const { error: updateError } = await supabase
+        .from('interview_slots')
+        .update({
+          student_id_text: otherLinks[0].student_id_text,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', slotId)
+
+      if (updateError) throw updateError
     }
 
-    // 枠を available に戻す
-    const { error: updateError } = await supabase
-      .from('interview_slots')
-      .update({
-        status: 'available',
-        student_id_text: null,
-        notes: null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', slotId)
-
-    if (updateError) throw updateError
     return { success: true }
   } catch (e) {
     console.error('cancelBooking error:', e)
@@ -408,13 +494,27 @@ export async function getStudentBookings() {
     if (!session || !session.studentId) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
+
+    // 中間テーブルから自分のスロットIDを取得
+    const { data: links, error: linkError } = await supabase
+      .from('interview_slot_students')
+      .select('slot_id')
+      .eq('student_id_text', session.studentId)
+
+    if (linkError) throw linkError
+    const slotIds = (links || []).map(l => l.slot_id)
+
+    if (slotIds.length === 0) {
+      return { success: true, bookings: [] }
+    }
+
     const { data: bookings, error } = await supabase
       .from('interview_slots')
       .select(`
         *,
         teacher:admin_members(id, name)
       `)
-      .eq('student_id_text', session.studentId)
+      .in('id', slotIds)
       .eq('status', 'booked')
       .order('slot_date', { ascending: true })
       .order('start_time', { ascending: true })
@@ -602,7 +702,13 @@ export async function getTeacherBookingsFiltered(filterType = 'weekly') {
 
     let query = supabase
       .from('interview_slots')
-      .select(`*, student:students(student_id_text, full_name, class_name)`)
+      .select(`
+        *,
+        slot_students:interview_slot_students(
+          student_id_text,
+          student:students(student_id_text, full_name, class_name)
+        )
+      `)
       .eq('teacher_id', session.memberId)
       .eq('status', 'booked')
 
