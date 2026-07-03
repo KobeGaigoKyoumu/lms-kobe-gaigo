@@ -11,7 +11,10 @@ import {
     deleteSlot,
     createSlot,
     getTeacherBookingsFiltered,
-    getTeacherTemplateNames
+    getTeacherTemplateNames,
+    getTeacherPendingSlots,
+    approveSlot,
+    rejectSlot
 } from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
@@ -132,6 +135,8 @@ export default function CareerManagementClient({
 
     // 面談スロットで選択された複数学生のIDを保持する状態
     const [selectedStudentIds, setSelectedStudentIds] = useState([])
+    // 承認待ち（pending）のスロット一覧
+    const [pendingSlots, setPendingSlots] = useState([])
 
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -806,15 +811,23 @@ export default function CareerManagementClient({
         const endObj = new Date(interviewSelectedDate)
         endObj.setDate(endObj.getDate() + 3)
 
-        const res = await getTeacherSlots(
-            startObj.toISOString().split('T')[0],
-            endObj.toISOString().split('T')[0]
-        )
+        const [slotsRes, pendingRes] = await Promise.all([
+            getTeacherSlots(
+                startObj.toISOString().split('T')[0],
+                endObj.toISOString().split('T')[0]
+            ),
+            getTeacherPendingSlots()
+        ])
+
         setInterviewLoading(false)
-        if (res.success) {
-            setInterviewSlots(res.slots)
+        if (slotsRes.success) {
+            setInterviewSlots(slotsRes.slots)
         } else {
-            setInterviewError(`予約枠の取得に失敗しました: ${res.error}`)
+            setInterviewError(`予約枠の取得に失敗しました: ${slotsRes.error}`)
+        }
+
+        if (pendingRes.success) {
+            setPendingSlots(pendingRes.slots)
         }
     }
 
@@ -913,6 +926,37 @@ export default function CareerManagementClient({
             loadFilteredBookings(interviewPeriodFilter)
         } else {
             setInterviewError(`削除に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleApproveInterview = async (slotId) => {
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const res = await approveSlot(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('予約申請を承認しました。')
+            loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
+        } else {
+            setInterviewError(`承認に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleRejectInterview = async (slotId) => {
+        if (!confirm('この予約申請を却下し、空き枠に戻してよろしいですか？')) return
+        setInterviewLoading(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+        const res = await rejectSlot(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            setInterviewSuccessMsg('予約申請を却下しました。')
+            loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
+        } else {
+            setInterviewError(`却下に失敗しました: ${res.error}`)
         }
     }
 
@@ -1152,6 +1196,90 @@ export default function CareerManagementClient({
                     {interviewActiveSubTab === 'schedule' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
 
+                            {/* 予約申請一覧 (承認待ち) */}
+                            {pendingSlots && pendingSlots.length > 0 && (
+                                <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-5)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 'var(--spacing-4)' }}>
+                                        <span style={{ fontSize: '18px' }}>📥</span>
+                                        <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>
+                                            予約申請一覧（承認待ち）
+                                        </h3>
+                                        <span style={{ background: 'var(--warning-100)', color: 'var(--warning-700)', padding: '2px 10px', borderRadius: '999px', fontSize: 'var(--font-size-xs)', fontWeight: '700' }}>
+                                            {pendingSlots.length}件
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {pendingSlots.map(slot => {
+                                            const d = new Date(slot.slot_date + 'T00:00:00')
+                                            const days = ['日', '月', '火', '水', '木', '金', '土']
+                                            const dayLabel = `${d.getMonth()+1}/${d.getDate()}(${days[d.getDay()]})`
+                                            return (
+                                                <div 
+                                                    key={slot.id} 
+                                                    style={{ 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column', 
+                                                        gap: '12px', 
+                                                        padding: '16px 20px', 
+                                                        background: '#ffffff', 
+                                                        border: '1px solid var(--border-color)', 
+                                                        borderRadius: 'var(--radius-xl)', 
+                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                                            <div style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--warning-700)', background: 'var(--warning-50)', padding: '4px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--warning-200)' }}>
+                                                                {dayLabel} {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                                {slot.slot_students && slot.slot_students.length > 0 ? (
+                                                                    slot.slot_students.map(ss => ss.student && (
+                                                                        <div key={ss.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                            <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
+                                                                                {ss.student.full_name}
+                                                                            </span>
+                                                                            <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
+                                                                                {ss.student.class_name}
+                                                                            </span>
+                                                                        </div>
+                                                                    ))
+                                                                ) : (
+                                                                    <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>学生情報なし</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button
+                                                                onClick={() => handleApproveInterview(slot.id)}
+                                                                className={styles.actionButton}
+                                                                style={{ margin: 0, padding: '8px 16px', fontSize: 'var(--font-size-sm)', fontWeight: '700', color: '#fff', background: 'linear-gradient(135deg, var(--success-500), var(--success-600))', border: 'none', borderRadius: 'var(--radius-md)', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)', cursor: 'pointer' }}
+                                                            >
+                                                                ✔️ 承認する
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectInterview(slot.id)}
+                                                                className={styles.actionButton}
+                                                                style={{ margin: 0, padding: '8px 16px', fontSize: 'var(--font-size-sm)', fontWeight: '700', color: 'var(--error-600)', borderColor: 'var(--error-200)', background: '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
+                                                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-50)'}
+                                                                onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                            >
+                                                                ❌ 却下する
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {slot.notes && (
+                                                        <div style={{ fontSize: '13px', color: 'var(--text-primary)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '8px 12px', borderRadius: '8px', lineHeight: '1.5', wordBreak: 'break-all' }}>
+                                                            <span style={{ marginRight: '6px', color: 'var(--primary-500)' }}>💬</span>{slot.notes}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* 面談予定サマリー (今日・直近1週間・すべて切り替え) */}
                             <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-5)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 'var(--spacing-4)', flexWrap: 'wrap' }}>
@@ -1216,8 +1344,8 @@ export default function CareerManagementClient({
                                                         {dayLabel}
                                                         {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
                                                     </div>
-                                                    <div style={{ fontWeight: '700', color: 'var(--text-secondary)', minWidth: '100px', fontSize: 'var(--font-size-sm)' }}>
-                                                        {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                                                    <div style={{ fontWeight: '700', color: 'var(--text-secondary)', minWidth: '130px', fontSize: 'var(--font-size-sm)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                                        <>{slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}{slot.status === 'pending' && <span style={{ fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>申請中</span>}</>
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                         {slot.slot_students && slot.slot_students.length > 0 ? (
@@ -1317,8 +1445,8 @@ export default function CareerManagementClient({
                                                             </td>
                                                             <td style={{ padding: '16px' }}>
                                                                 <span style={{
-                                                                    background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'blocked' ? 'var(--error-50)' : 'var(--success-50)',
-                                                                    color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'blocked' ? 'var(--error-700)' : 'var(--success-700)',
+                                                                    background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : 'var(--success-50)',
+                                                                    color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : 'var(--success-700)',
                                                                     padding: '4px 10px',
                                                                     borderRadius: 'var(--radius-md)',
                                                                     fontSize: 'var(--font-size-xs)',
@@ -1326,6 +1454,7 @@ export default function CareerManagementClient({
                                                                     display: 'inline-block'
                                                                 }}>
                                                                     {slot.status === 'booked' ? '🔵 予約済み' : 
+                                                                     slot.status === 'pending' ? '🟡 承認待ち' :
                                                                      slot.status === 'blocked' ? '🔴 受付停止' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
@@ -1346,7 +1475,29 @@ export default function CareerManagementClient({
                                                                 </span>
                                                             </td>
                                                             <td style={{ padding: '16px', textAlign: 'center' }}>
-                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center' }}>
+                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                                                    {slot.status === 'pending' && (
+                                                                        <>
+                                                                            <button
+                                                                                onClick={() => handleApproveInterview(slot.id)}
+                                                                                className={styles.actionButton}
+                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--success-700)', borderColor: 'var(--success-200)', background: 'var(--success-50)' }}
+                                                                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-100)'}
+                                                                                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--success-50)'}
+                                                                            >
+                                                                                ✔️ 承認
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => handleRejectInterview(slot.id)}
+                                                                                className={styles.actionButton}
+                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-700)', borderColor: 'var(--error-200)', background: 'var(--error-50)' }}
+                                                                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-100)'}
+                                                                                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--error-50)'}
+                                                                            >
+                                                                                ❌ 却下
+                                                                            </button>
+                                                                        </>
+                                                                    )}
                                                                     <button
                                                                         onClick={() => handleOpenEditInterview(slot)}
                                                                         className={styles.actionButton}

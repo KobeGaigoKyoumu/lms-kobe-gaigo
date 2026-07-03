@@ -394,7 +394,7 @@ export async function bookSlot(slotId, notes) {
     const { error: updateError } = await supabase
       .from('interview_slots')
       .update({
-        status: 'booked',
+        status: 'pending',
         student_id_text: session.studentId,
         notes: notes || '',
         updated_at: new Date().toISOString()
@@ -515,7 +515,7 @@ export async function getStudentBookings() {
         teacher:admin_members(id, name)
       `)
       .in('id', slotIds)
-      .eq('status', 'booked')
+      .in('status', ['booked', 'pending'])
       .order('slot_date', { ascending: true })
       .order('start_time', { ascending: true })
 
@@ -650,7 +650,7 @@ export async function getTeacherTodayTomorrowBookings() {
         )
       `)
       .eq('teacher_id', session.memberId)
-      .eq('status', 'booked')
+      .in('status', ['booked', 'pending'])
       .in('slot_date', [todayStr, tomorrowStr])
       .order('slot_date', { ascending: true })
       .order('start_time', { ascending: true })
@@ -681,7 +681,7 @@ export async function getStudentUpcomingBookings() {
       .from('interview_slots')
       .select(`*, teacher:admin_members(id, name)`)
       .eq('student_id_text', session.studentId)
-      .eq('status', 'booked')
+      .in('status', ['booked', 'pending'])
       .gte('slot_date', todayStr)
       .lte('slot_date', nextMonthStr)
       .order('slot_date', { ascending: true })
@@ -716,7 +716,7 @@ export async function getTeacherBookingsFiltered(filterType = 'weekly') {
         )
       `)
       .eq('teacher_id', session.memberId)
-      .eq('status', 'booked')
+      .in('status', ['booked', 'pending'])
 
     if (filterType === 'today') {
       query = query.eq('slot_date', todayStr)
@@ -764,6 +764,95 @@ export async function getTeacherTemplateNames() {
     return { success: true, templateNames: names }
   } catch (e) {
     console.error('getTeacherTemplateNames error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 18. 教師用：自分の承認待ち（pending）スロット一覧の取得
+export async function getTeacherPendingSlots() {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('interview_slots')
+      .select(`
+        *,
+        slot_students:interview_slot_students(
+          student_id_text,
+          student:students(student_id_text, full_name, class_name)
+        )
+      `)
+      .eq('teacher_id', session.memberId)
+      .eq('status', 'pending')
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+    return { success: true, slots: data || [] }
+  } catch (e) {
+    console.error('getTeacherPendingSlots error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 19. 教師用：申請された面談予約スロットを承認する
+export async function approveSlot(slotId) {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { error } = await supabase
+      .from('interview_slots')
+      .update({
+        status: 'booked',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', slotId)
+      .eq('teacher_id', session.memberId)
+
+    if (error) throw error
+    return { success: true }
+  } catch (e) {
+    console.error('approveSlot error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 20. 教師用：申請された面談予約スロットを却下する
+export async function rejectSlot(slotId) {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    // 1. スロットを空き状態に戻す
+    const { error: slotError } = await supabase
+      .from('interview_slots')
+      .update({
+        status: 'available',
+        student_id_text: null,
+        notes: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', slotId)
+      .eq('teacher_id', session.memberId)
+
+    if (slotError) throw slotError
+
+    // 2. 中間テーブルから紐付けを削除
+    const { error: linkError } = await supabase
+      .from('interview_slot_students')
+      .delete()
+      .eq('slot_id', slotId)
+
+    if (linkError) throw linkError
+    return { success: true }
+  } catch (e) {
+    console.error('rejectSlot error:', e)
     return { success: false, error: e.message }
   }
 }

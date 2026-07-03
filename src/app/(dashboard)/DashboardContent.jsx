@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { approveSlot, rejectSlot } from '@/app/actions/interview'
 import styles from './page.module.css'
 import { 
     BookOpen, 
@@ -22,6 +24,40 @@ const formatDateWithWeekday = (dateStr) => {
 }
 
 export default function DashboardContent({ adminMember, initialData, interviews = [], interviewDates = {} }) {
+    const router = useRouter()
+    const [interviewLoading, setInterviewLoading] = useState(false)
+
+    const handleApprove = async (e, slotId) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (interviewLoading) return
+        setInterviewLoading(true)
+        const res = await approveSlot(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            alert('予約申請を承認しました。')
+            router.refresh()
+        } else {
+            alert(`承認に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleReject = async (e, slotId) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (interviewLoading) return
+        if (!confirm('この予約申請を却下し、空き枠に戻してよろしいですか？')) return
+        setInterviewLoading(true)
+        const res = await rejectSlot(slotId)
+        setInterviewLoading(false)
+        if (res.success) {
+            alert('予約申請を却下しました。')
+            router.refresh()
+        } else {
+            alert(`却下に失敗しました: ${res.error}`)
+        }
+    }
+
     const [upcomingPlans] = useState(initialData?.upcomingPlans || [])
     const [ongoingTasks] = useState(initialData?.ongoingTasks || [])
     const [stats] = useState(initialData?.stats || {
@@ -62,31 +98,49 @@ export default function DashboardContent({ adminMember, initialData, interviews 
 
     // 面談予定を当日・翌日でグループ
     const todayInterviews = interviews.filter(s => s.slot_date === interviewDates.today)
-    const tomorrowInterviews = interviews.filter(s => s.slot_date === interviewDates.tomorrow)
-    const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
-
-    const renderInterviewRow = (slot) => (
+      const renderInterviewRow = (slot) => (
         <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#ffffff', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary-600)', minWidth: '95px' }}>
-                    {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {slot.slot_students && slot.slot_students.length > 0 ? (
-                        slot.slot_students.map(ss => ss.student && (
-                            <div key={ss.student_id_text} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
-                                    {ss.student.full_name}
-                                </span>
-                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '6px' }}>
-                                    {ss.student.class_name}
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>学生情報なし</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary-600)', minWidth: '95px' }}>
+                        {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                    </span>
+                    {slot.status === 'pending' && (
+                        <span style={{ fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>承認待ち</span>
                     )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {slot.slot_students && slot.slot_students.length > 0 ? (
+                            slot.slot_students.map(ss => ss.student && (
+                                <div key={ss.student_id_text} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
+                                        {ss.student.full_name}
+                                    </span>
+                                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '6px' }}>
+                                        {ss.student.class_name}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>学生情報なし</span>
+                        )}
+                    </div>
                 </div>
+                {slot.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                            onClick={(e) => handleApprove(e, slot.id)}
+                            style={{ border: 'none', background: 'var(--success-500)', color: '#fff', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                        >
+                            承認
+                        </button>
+                        <button
+                            onClick={(e) => handleReject(e, slot.id)}
+                            style={{ border: '1px solid var(--error-200)', background: '#fff', color: 'var(--error-600)', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                            却下
+                        </button>
+                    </div>
+                )}
             </div>
             {slot.notes && (
                 <div style={{ fontSize: '13px', color: 'var(--text-primary)', background: '#fff', border: '1px solid var(--border-color)', padding: '8px 12px', borderRadius: '8px', marginTop: '4px', lineHeight: '1.5', wordBreak: 'break-all' }}>
