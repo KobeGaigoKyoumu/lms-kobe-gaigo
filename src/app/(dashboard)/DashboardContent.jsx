@@ -146,7 +146,7 @@ export default function DashboardContent({ adminMember, initialData, interviews 
                 )}
             </div>
             {slot.notes && (
-                <div style={{ fontSize: '13px', color: 'var(--text-primary)', background: 'var(--bg-secondary)', padding: '8px 12px', borderRadius: '8px', marginTop: '4px', lineHeight: '1.5', wordBreak: 'break-all' }}>
+                <div style={{ fontSize: '13px', color: 'var(--text-primary)', background: 'transparent', padding: '4px 0 0 0', marginTop: '4px', lineHeight: '1.5', wordBreak: 'break-all' }}>
                     <span style={{ marginRight: '6px', color: 'var(--primary-500)' }}>💬</span>{slot.notes}
                 </div>
             )}
