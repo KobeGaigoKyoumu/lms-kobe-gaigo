@@ -189,8 +189,8 @@ export default function DashboardContent({ adminMember, initialData, interviews 
             </div>
 
             {/* 面談予定セクション */}
-            <div style={{ marginBottom: 'var(--spacing-6)', background: 'linear-gradient(135deg, var(--primary-50), #f5f3ff)', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 24px', borderBottom: hasInterviews ? '1px solid var(--border-color)' : 'none', background: 'transparent' }}>
+            <div style={{ marginBottom: 'var(--spacing-6)', background: '#f0f9ff', borderRadius: '16px', border: '1px solid #bae6fd', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 24px', borderBottom: hasInterviews ? '1px solid #bae6fd' : 'none', background: 'transparent' }}>
                     <MessageSquare size={18} color="var(--primary-600)" />
                     <h2 style={{ margin: 0, fontWeight: '700', fontSize: '15px', color: 'var(--primary-700)' }}>本日・翌日の面談予定</h2>
                     <Link href="/career" style={{ marginLeft: 'auto', fontSize: '12px', color: 'var(--primary-500)', fontWeight: '600', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '2px' }}>
