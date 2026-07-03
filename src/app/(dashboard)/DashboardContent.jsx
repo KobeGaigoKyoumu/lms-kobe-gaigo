@@ -102,7 +102,7 @@ export default function DashboardContent({ adminMember, initialData, interviews 
     const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
 
     const renderInterviewRow = (slot) => (
-        <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#ffffff', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 'var(--radius-xl)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary-600)', minWidth: '95px' }}>
@@ -118,7 +118,7 @@ export default function DashboardContent({ adminMember, initialData, interviews 
                                     <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
                                         {ss.student.full_name}
                                     </span>
-                                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '6px' }}>
+                                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: '#ffffff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '6px' }}>
                                         {ss.student.class_name}
                                     </span>
                                 </div>
