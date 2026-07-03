@@ -66,30 +66,32 @@ export default function DashboardContent({ adminMember, initialData, interviews 
     const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
 
     const renderInterviewRow = (slot) => (
-        <div key={slot.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: '10px', borderLeft: '3px solid var(--primary-400)', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: '700', fontSize: '13px', color: 'var(--primary-600)', minWidth: '95px' }}>
-                {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                {slot.slot_students && slot.slot_students.length > 0 ? (
-                    slot.slot_students.map(ss => ss.student && (
-                        <div key={ss.student_id_text} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
-                                {ss.student.full_name}
-                            </span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '1px 7px', borderRadius: '4px' }}>
-                                {ss.student.class_name}
-                            </span>
-                        </div>
-                    ))
-                ) : (
-                    <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>学生情報なし</span>
-                )}
+        <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: '12px', borderLeft: '4px solid var(--primary-500)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary-600)', minWidth: '95px' }}>
+                    {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {slot.slot_students && slot.slot_students.length > 0 ? (
+                        slot.slot_students.map(ss => ss.student && (
+                            <div key={ss.student_id_text} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
+                                    {ss.student.full_name}
+                                </span>
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '6px' }}>
+                                    {ss.student.class_name}
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>学生情報なし</span>
+                    )}
+                </div>
             </div>
             {slot.notes && (
-                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: 'auto', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {slot.notes}
-                </span>
+                <div style={{ fontSize: '13px', color: 'var(--text-primary)', background: '#fff', border: '1px solid var(--border-color)', padding: '8px 12px', borderRadius: '8px', marginTop: '4px', lineHeight: '1.5', wordBreak: 'break-all' }}>
+                    <span style={{ marginRight: '6px', color: 'var(--primary-500)' }}>💬</span>{slot.notes}
+                </div>
             )}
         </div>
     )

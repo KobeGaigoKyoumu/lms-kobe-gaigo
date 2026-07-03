@@ -1239,7 +1239,7 @@ export default function CareerManagementClient({
                                                         )}
                                                     </div>
                                                     {slot.notes && (
-                                                        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginLeft: 'auto', background: 'var(--bg-secondary)', padding: '4px 10px', borderRadius: 'var(--radius-sm)' }}>
+                                                        <span style={{ fontSize: '13px', color: 'var(--text-primary)', marginLeft: 'auto', background: '#fff', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontWeight: '500', maxWidth: '350px', wordBreak: 'break-all' }}>
                                                             💬 {slot.notes}
                                                         </span>
                                                     )}
@@ -1343,8 +1343,8 @@ export default function CareerManagementClient({
                                                                     </div>
                                                                 ) : <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                             </td>
-                                                            <td style={{ padding: '16px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                                                            <td style={{ padding: '16px', maxWidth: '300px', wordBreak: 'break-all' }}>
+                                                                <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: '500', lineHeight: '1.4' }}>
                                                                     {slot.notes || <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                                 </span>
                                                             </td>
