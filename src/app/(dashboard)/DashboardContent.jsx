@@ -98,7 +98,10 @@ export default function DashboardContent({ adminMember, initialData, interviews 
 
     // 面談予定を当日・翌日でグループ
     const todayInterviews = interviews.filter(s => s.slot_date === interviewDates.today)
-      const renderInterviewRow = (slot) => (
+    const tomorrowInterviews = interviews.filter(s => s.slot_date === interviewDates.tomorrow)
+    const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
+
+    const renderInterviewRow = (slot) => (
         <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#ffffff', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
