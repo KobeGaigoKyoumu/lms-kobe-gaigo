@@ -895,12 +895,12 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                     <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)' }}>
                             <span style={{ fontSize: '1.4rem' }}>📅</span>
-                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>現在の面談予約状況</h3>
+                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>いまの予約（よやく）リスト</h3>
                         </div>
                         
                         {studentBookings.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: 'var(--spacing-6) 0', color: 'var(--text-tertiary)' }}>
-                                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>現在、予定されている面談はありません。</p>
+                                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>いま、予定（よてい）している面談（めんだん）はありません。</p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
@@ -914,13 +914,22 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                                 <span style={{ background: 'var(--primary-50)', color: 'var(--primary-700)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', fontWeight: '600' }}>
                                                     {booking.start_time.substring(0, 5)} - {booking.end_time.substring(0, 5)}
                                                 </span>
+                                                {booking.status === 'pending' ? (
+                                                    <span style={{ background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', fontWeight: '700', border: '1px solid var(--warning-200)', marginLeft: '8px' }}>
+                                                        先生がチェックしています（承認待ち）
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ background: 'var(--success-50)', color: 'var(--success-700)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', fontWeight: '700', border: '1px solid var(--success-200)', marginLeft: '8px' }}>
+                                                        予約（よやく）できています
+                                                    </span>
+                                                )}
                                             </div>
                                             <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', display: 'block' }}>
-                                                👤 面談相手: <strong>{booking.teacher?.name || '担任'} 先生</strong> (個別面談)
+                                                👤 話す先生: <strong>{booking.teacher?.name || '担任'} 先生</strong>
                                             </span>
                                             {booking.notes && (
                                                 <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-2) var(--spacing-3)', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', borderLeft: '2px solid var(--border-color)' }}>
-                                                    相談メモ: "{booking.notes}"
+                                                    そうだんしたいこと: 「{booking.notes}」
                                                 </div>
                                             )}
                                         </div>
@@ -931,7 +940,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--error-50)'; }}
                                             onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
                                         >
-                                            予約キャンセル
+                                            キャンセルする（やめる）
                                         </button>
                                     </div>
                                 ))}
@@ -943,10 +952,10 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                     <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
                             <span style={{ fontSize: '1.4rem' }}>✨</span>
-                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>新しく担任との面談を予約する</h3>
+                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>新しくそうだんのよやくをする</h3>
                         </div>
                         <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-6)' }}>
-                            担任教師が設定した平日シフトから、希望する時間枠（15分）を選んで面談の予約を完了させてください。
+                            担任（たんにん）の先生がつくったスケジュールから、あなたが話したい時間（15分間）をえらんで、よやくをおくってください。
                         </p>
 
                         <form onSubmit={handleBookSlot} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
@@ -958,7 +967,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                 </div>
                                 <div>
                                     <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--primary-700)', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
-                                        👥 面談相手 (クラス担任固定)
+                                        👥 話す先生（あなたのクラスの担任）
                                     </span>
                                     <strong style={{ fontSize: 'var(--font-size-md)', color: 'var(--primary-900)' }}>
                                         {homeroomTeacher?.name ? `${homeroomTeacher.name} 先生` : '取得中...'}
@@ -971,7 +980,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
 
                             <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-4)' }}>
                                 <div className={styles.inputGroup}>
-                                    <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>希望日付 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                    <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>話したい日 <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                     <input 
                                         type="date" 
                                         value={interviewDate}
@@ -985,13 +994,13 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>空いている時間枠 <span style={{ color: 'var(--error-500)' }}>*</span></label>
+                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>空いている時間（じかん） <span style={{ color: 'var(--error-500)' }}>*</span></label>
                                 
                                 {interviewLoading ? (
-                                    <div style={{ padding: 'var(--spacing-4)', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>枠を読み込み中...</div>
+                                    <div style={{ padding: 'var(--spacing-4)', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>よやくできる時間を調べています...</div>
                                 ) : availableSlots.length === 0 ? (
                                     <div style={{ padding: 'var(--spacing-4)', background: 'var(--error-50)', color: 'var(--error-700)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--error-100)', fontSize: 'var(--font-size-xs)' }}>
-                                        ⚠️ 選択された日付には予約可能な空き枠がありません。別の日付を選択してください。
+                                        ⚠️ えらんだ日には空いている時間がありません。ほかの日をえらんでください。
                                     </div>
                                 ) : (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
@@ -1043,11 +1052,11 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>相談内容 (先生に事前に伝えたいこと)</label>
+                                <label style={{ fontWeight: '700', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)', display: 'block' }}>そうだんしたいこと（先生に言いたいこと）</label>
                                 <textarea 
                                     value={consultNotes}
                                     onChange={(e) => setConsultNotes(e.target.value)}
-                                    placeholder="例: 志望理由書の確認、進学費用についての相談、その他質問事項など..."
+                                    placeholder="れい：志望理由書のチェック、お金のそうだん、ききたいことなど…"
                                     rows={4}
                                     className={styles.searchInput}
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none', transition: 'border 0.2s', resize: 'none' }}
@@ -1075,7 +1084,7 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                     transition: 'all 0.2s'
                                 }}
                             >
-                                {interviewLoading ? '処理中...' : '📅 面談予約を確定する'}
+                                {interviewLoading ? '処理中...' : '📅 よやくを送信する'}
                             </button>
                         </form>
                     </div>
