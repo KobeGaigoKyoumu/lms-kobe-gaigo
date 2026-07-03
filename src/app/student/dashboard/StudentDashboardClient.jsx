@@ -133,7 +133,7 @@ export default function StudentDashboardClient({ initialData }) {
                                     <Link href="/student/career" key={slot.id} className={styles.assignmentItem} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'stretch' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                                <h4 style={{ fontWeight: '700', color: 'var(--text-primary)', margin: 0, fontSize: '15px' }}>
+                                                <h4 style={{ fontWeight: '700', color: 'var(--text-primary)', margin: 0, fontSize: '13px' }}>
                                                     {dayLabel} {slot.start_time?.substring(0,5)}〜{slot.end_time?.substring(0,5)}
                                                 </h4>
                                                 {slot.status === 'pending' ? (
