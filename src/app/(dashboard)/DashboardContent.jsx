@@ -102,7 +102,7 @@ export default function DashboardContent({ adminMember, initialData, interviews 
     const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
 
     const renderInterviewRow = (slot) => (
-        <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 'var(--radius-xl)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        <div key={slot.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', background: '#ffffff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 'var(--radius-xl)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary-600)', minWidth: '95px' }}>
@@ -189,8 +189,8 @@ export default function DashboardContent({ adminMember, initialData, interviews 
             </div>
 
             {/* 面談予定セクション */}
-            <div style={{ marginBottom: 'var(--spacing-6)', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 24px', borderBottom: hasInterviews ? '1px solid var(--border-color)' : 'none', background: 'linear-gradient(135deg, var(--primary-50), #f5f3ff)' }}>
+            <div style={{ marginBottom: 'var(--spacing-6)', background: 'linear-gradient(135deg, var(--primary-50), #f5f3ff)', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 24px', borderBottom: hasInterviews ? '1px solid var(--border-color)' : 'none', background: 'transparent' }}>
                     <MessageSquare size={18} color="var(--primary-600)" />
                     <h2 style={{ margin: 0, fontWeight: '700', fontSize: '15px', color: 'var(--primary-700)' }}>本日・翌日の面談予定</h2>
                     <Link href="/career" style={{ marginLeft: 'auto', fontSize: '12px', color: 'var(--primary-500)', fontWeight: '600', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '2px' }}>
