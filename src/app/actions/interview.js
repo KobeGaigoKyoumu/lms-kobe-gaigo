@@ -642,7 +642,13 @@ export async function getTeacherTodayTomorrowBookings() {
 
     const { data, error } = await supabase
       .from('interview_slots')
-      .select(`*, student:students(student_id_text, full_name, class_name)`)
+      .select(`
+        *,
+        slot_students:interview_slot_students(
+          student_id_text,
+          student:students(student_id_text, full_name, class_name)
+        )
+      `)
       .eq('teacher_id', session.memberId)
       .eq('status', 'booked')
       .in('slot_date', [todayStr, tomorrowStr])

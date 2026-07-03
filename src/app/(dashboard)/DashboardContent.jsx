@@ -66,20 +66,28 @@ export default function DashboardContent({ adminMember, initialData, interviews 
     const hasInterviews = todayInterviews.length > 0 || tomorrowInterviews.length > 0
 
     const renderInterviewRow = (slot) => (
-        <div key={slot.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: '10px', borderLeft: '3px solid var(--primary-400)' }}>
+        <div key={slot.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: '10px', borderLeft: '3px solid var(--primary-400)', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: '700', fontSize: '13px', color: 'var(--primary-600)', minWidth: '95px' }}>
                 {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
             </span>
-            <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
-                {slot.student?.full_name || '学生情報なし'}
-            </span>
-            {slot.student?.class_name && (
-                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '1px 7px', borderRadius: '4px' }}>
-                    {slot.student.class_name}
-                </span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {slot.slot_students && slot.slot_students.length > 0 ? (
+                    slot.slot_students.map(ss => ss.student && (
+                        <div key={ss.student_id_text} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
+                                {ss.student.full_name}
+                            </span>
+                            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '1px 7px', borderRadius: '4px' }}>
+                                {ss.student.class_name}
+                            </span>
+                        </div>
+                    ))
+                ) : (
+                    <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>学生情報なし</span>
+                )}
+            </div>
             {slot.notes && (
-                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: 'auto', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: 'auto', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {slot.notes}
                 </span>
             )}
