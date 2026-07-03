@@ -14,6 +14,7 @@ export default function StudentDashboardClient({ initialData }) {
     const [error, setError] = useState(null)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true)
     }, [])
 
@@ -129,16 +130,28 @@ export default function StudentDashboardClient({ initialData }) {
                                 const dayLabel = `${d.getMonth()+1}月${d.getDate()}日(${days[d.getDay()]})`
                                 const teacherNameLabel = slot.teacher?.name ? `${slot.teacher.name}先生` : '担任の先生'
                                 return (
-                                    <Link href="/student/career" key={slot.id} className={styles.assignmentItem}>
-                                        <div className={styles.assignmentInfo}>
-                                            <h4 style={{ fontWeight: '700', color: 'var(--text-primary)' }}>
-                                                {dayLabel} {slot.start_time?.substring(0,5)}〜{slot.end_time?.substring(0,5)}
-                                            </h4>
-                                            <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
-                                                {teacherNameLabel}との面談{slot.notes ? ` — ${slot.notes.slice(0,30)}` : ''}
-                                            </p>
+                                    <Link href="/student/career" key={slot.id} className={styles.assignmentItem} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'stretch' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                                <h4 style={{ fontWeight: '700', color: 'var(--text-primary)', margin: 0, fontSize: '15px' }}>
+                                                    {dayLabel} {slot.start_time?.substring(0,5)}〜{slot.end_time?.substring(0,5)}
+                                                </h4>
+                                                {slot.status === 'pending' ? (
+                                                    <span style={{ fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>承認待ち</span>
+                                                ) : (
+                                                    <span style={{ fontSize: '10px', background: 'var(--primary-50)', color: 'var(--primary-700)', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--primary-200)', whiteSpace: 'nowrap' }}>予約確定</span>
+                                                )}
+                                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                                                    {teacherNameLabel}との面談
+                                                </span>
+                                            </div>
+                                            <ChevronRight size={16} style={{ color: 'var(--text-tertiary)' }} />
                                         </div>
-                                        <ChevronRight size={16} />
+                                        {slot.notes && (
+                                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', padding: '6px 0 0 0', borderTop: '1px dashed var(--border-color)', lineHeight: '1.4', wordBreak: 'break-all' }}>
+                                                <span style={{ marginRight: '6px' }}>💬 相談内容:</span>{slot.notes}
+                                            </div>
+                                        )}
                                     </Link>
                                 )
                             })}
