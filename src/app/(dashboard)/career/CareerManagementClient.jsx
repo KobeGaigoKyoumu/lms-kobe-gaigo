@@ -1452,8 +1452,8 @@ export default function CareerManagementClient({
                                                             </td>
                                                             <td style={{ padding: '16px' }}>
                                                                 <span style={{
-                                                                    background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : 'var(--success-50)',
-                                                                    color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : 'var(--success-700)',
+                                                                    background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : slot.status === 'completed' ? '#f3e8ff' : 'var(--success-50)',
+                                                                    color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : slot.status === 'completed' ? '#6b21a8' : 'var(--success-700)',
                                                                     padding: '4px 10px',
                                                                     borderRadius: 'var(--radius-md)',
                                                                     fontSize: 'var(--font-size-xs)',
@@ -1462,11 +1462,12 @@ export default function CareerManagementClient({
                                                                 }}>
                                                                     {slot.status === 'booked' ? '🔵 予約済み' : 
                                                                      slot.status === 'pending' ? '🟡 承認待ち' :
-                                                                     slot.status === 'blocked' ? '🔴 受付停止' : '🟢 受付中'}
+                                                                     slot.status === 'blocked' ? '🔴 受付停止' : 
+                                                                     slot.status === 'completed' ? '🟣 実施完了' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
                                                             <td style={{ padding: '16px' }}>
-                                                                {slot.status === 'booked' && slot.slot_students && slot.slot_students.length > 0 ? (
+                                                                {(slot.status === 'booked' || slot.status === 'completed') && slot.slot_students && slot.slot_students.length > 0 ? (
                                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                         {slot.slot_students.map(ss => ss.student && (
                                                                             <strong key={ss.student_id_text} style={{ color: 'var(--text-primary)', display: 'block' }}>
