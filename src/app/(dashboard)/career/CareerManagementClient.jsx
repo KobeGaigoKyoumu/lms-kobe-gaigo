@@ -110,11 +110,10 @@ export default function CareerManagementClient({
     const [selectedTemplateName, setSelectedTemplateName] = useState('デフォルト')
     const [newTemplateNameInput, setNewTemplateNameInput] = useState('')
     const [myClassStudents, setMyClassStudents] = useState([])
-    const [historySelectedClass, setHistorySelectedClass] = useState('')
     const [historySelectedStudentId, setHistorySelectedStudentId] = useState('')
-    const [historyClassStudents, setHistoryClassStudents] = useState([])
     const [studentHistoryInterviews, setStudentHistoryInterviews] = useState([])
     const [historyLoading, setHistoryLoading] = useState(false)
+    const [historySearchTerm, setHistorySearchTerm] = useState('')
     
     // クラス担任が複数の場合にクラスごとに学生をグループ化
     const groupedMyClassStudents = useMemo(() => {
@@ -743,6 +742,19 @@ export default function CareerManagementClient({
     // 選択可能なクラスのリスト
     const availableClassesForSelect = isAdmin || !hasHomeroom ? sortedClasses : sortedMyClasses
 
+    // 面談履歴用：担任している2年生のクラスの学生一覧（ソート・検索用）
+    const filteredHistoryStudents = useMemo(() => {
+        return myClassStudents.filter(student => {
+            const matchesSearch = (student.full_name || '').toLowerCase().includes(historySearchTerm.toLowerCase()) ||
+                                  (student.student_id_text || '').toLowerCase().includes(historySearchTerm.toLowerCase());
+            return matchesSearch;
+        }).sort((a, b) => {
+            const classComp = (a.class_name || '').localeCompare(b.class_name || '');
+            if (classComp !== 0) return classComp;
+            return (a.full_name || '').localeCompare(b.full_name || '');
+        });
+    }, [myClassStudents, historySearchTerm])
+
     // 日付フォーマット
     const formatDate = (isoString) => {
         if (!isoString) return '-'
@@ -1032,20 +1044,7 @@ export default function CareerManagementClient({
         }
     }
 
-    useEffect(() => {
-        if (historySelectedClass) {
-            getStudentsCareerList(historySelectedClass).then(res => {
-                const sorted = (res || []).sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
-                setHistoryClassStudents(sorted)
-                setHistorySelectedStudentId('')
-                setStudentHistoryInterviews([])
-            })
-        } else {
-            setHistoryClassStudents([])
-            setHistorySelectedStudentId('')
-            setStudentHistoryInterviews([])
-        }
-    }, [historySelectedClass])
+
 
     useEffect(() => {
         if (historySelectedStudentId) {
@@ -1774,91 +1773,150 @@ export default function CareerManagementClient({
                             <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
                                 <h3 style={{ margin: '0 0 16px 0', fontWeight: '700', color: 'var(--text-primary)' }}>クラス・学生別 過去の面談履歴</h3>
                                 
-                                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                                    {/* クラス選択 */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '300px' }}>
-                                        <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>クラス選択</label>
-                                        <select 
-                                            value={historySelectedClass}
-                                            onChange={(e) => setHistorySelectedClass(e.target.value)}
-                                            style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
-                                        >
-                                            <option value="">-- クラスを選択してください --</option>
-                                            {(availableClassesForSelect || []).map(c => (
-                                                <option key={c.name} value={c.name}>{c.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* 学生選択 */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '300px' }}>
-                                        <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>学生選択</label>
-                                        <select 
-                                            value={historySelectedStudentId}
-                                            onChange={(e) => setHistorySelectedStudentId(e.target.value)}
-                                            disabled={!historySelectedClass}
-                                            style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)', cursor: historySelectedClass ? 'pointer' : 'not-allowed' }}
-                                        >
-                                            <option value="">-- 学生を選択してください --</option>
-                                            {historyClassStudents.map(student => (
-                                                <option key={student.student_id_text} value={student.student_id_text}>
-                                                    {student.full_name} ({student.student_id_text})
-                                                </option>
-                                            ))}
-                                        </select>
+                                {/* 検索バー & 説明 */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                                    <p style={{ color: 'var(--text-tertiary)', margin: 0, fontSize: 'var(--font-size-xs)' }}>
+                                        担任している2年生のクラスの学生一覧です。行をクリックするか「履歴を表示」を押して、過去の面談記録を確認してください。
+                                    </p>
+                                    <div style={{ position: 'relative', width: '260px' }}>
+                                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+                                        <input 
+                                            type="text" 
+                                            placeholder="名前または学籍番号で検索..." 
+                                            value={historySearchTerm}
+                                            onChange={(e) => setHistorySearchTerm(e.target.value)}
+                                            className={styles.searchInput}
+                                            style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
+                                        />
                                     </div>
                                 </div>
 
-                                {historyLoading ? (
-                                    <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>履歴を読み込み中...</div>
-                                ) : !historySelectedStudentId ? (
-                                    <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
-                                        <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>クラスと学生を選択すると、これまでに完了した面談履歴が表示されます。</p>
-                                    </div>
-                                ) : studentHistoryInterviews.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
-                                        <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>この学生の完了した面談履歴はありません。</p>
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        {studentHistoryInterviews.map((interview) => (
-                                            <div key={interview.id} style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', borderLeft: '5px solid var(--purple-500)' }}>
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
-                                                    <span style={{ fontSize: 'var(--font-size-md)', fontWeight: '700', color: 'var(--text-primary)' }}>
-                                                        📅 {interview.slot_date.replace(/-/g, '/')}
-                                                    </span>
-                                                    <span style={{ background: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: '700', border: '1px solid #e9d5ff' }}>
-                                                        {interview.start_time.substring(0, 5)} - {interview.end_time.substring(0, 5)}
-                                                    </span>
-                                                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-                                                        👤 担当教員: <strong>{interview.teacher?.name || '不明'} 先生</strong>
-                                                    </span>
-                                                </div>
+                                {/* 学生一覧の表 */}
+                                <div className={styles.tableCard} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: '24px', maxHeight: '300px', overflowY: 'auto' }}>
+                                    <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ background: 'var(--bg-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
+                                                <th style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', fontSize: 'var(--font-size-xs)' }}>クラス</th>
+                                                <th style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', fontSize: 'var(--font-size-xs)' }}>学籍番号</th>
+                                                <th style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', fontSize: 'var(--font-size-xs)' }}>学生名</th>
+                                                <th style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontWeight: '700', fontSize: 'var(--font-size-xs)' }}>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredHistoryStudents.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>
+                                                        該当する学生がいません。
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                filteredHistoryStudents.map(student => {
+                                                    const isSelected = historySelectedStudentId === student.student_id_text;
+                                                    return (
+                                                        <tr 
+                                                            key={student.student_id_text} 
+                                                            onClick={() => setHistorySelectedStudentId(student.student_id_text)}
+                                                            style={{ 
+                                                                cursor: 'pointer', 
+                                                                background: isSelected ? 'var(--primary-50)' : 'transparent',
+                                                                transition: 'background 0.15s'
+                                                            }}
+                                                            onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+                                                            onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                                                        >
+                                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}>{student.class_name}</td>
+                                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)' }}>{student.student_id_text}</td>
+                                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}>{student.full_name}</td>
+                                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center' }}>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setHistorySelectedStudentId(student.student_id_text);
+                                                                    }}
+                                                                    className={styles.actionButton}
+                                                                    style={{ 
+                                                                        margin: 0, 
+                                                                        padding: '6px 12px', 
+                                                                        fontSize: 'var(--font-size-xs)', 
+                                                                        background: isSelected ? 'var(--primary-600)' : 'var(--bg-card)', 
+                                                                        color: isSelected ? '#fff' : 'var(--primary-600)',
+                                                                        border: isSelected ? 'none' : '1px solid var(--primary-200)',
+                                                                        borderRadius: 'var(--radius-md)',
+                                                                        fontWeight: '600',
+                                                                        cursor: 'pointer'
+                                                                    }}
+                                                                >
+                                                                    {isSelected ? '選択中' : '履歴を表示'}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                    {interview.notes && (
-                                                        <div style={{ background: '#fff', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
-                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '4px' }}>💬 相談内容 / 面談メモ:</strong>
-                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.notes}</p>
+                                {/* 選択された学生の履歴表示 */}
+                                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+                                    {historyLoading ? (
+                                        <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>履歴を読み込み中...</div>
+                                    ) : !historySelectedStudentId ? (
+                                        <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+                                            <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>上の表から学生を選択すると、これまでに完了した面談履歴が表示されます。</p>
+                                        </div>
+                                    ) : studentHistoryInterviews.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+                                            <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>
+                                                <strong>{myClassStudents.find(s => s.student_id_text === historySelectedStudentId)?.full_name}</strong> さんの完了した面談履歴はありません。
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <h4 style={{ margin: '0 0 16px 0', fontWeight: '700', color: 'var(--text-primary)' }}>
+                                                👤 {myClassStudents.find(s => s.student_id_text === historySelectedStudentId)?.full_name} さんの面談履歴 ({studentHistoryInterviews.length}件)
+                                            </h4>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                {studentHistoryInterviews.map((interview) => (
+                                                    <div key={interview.id} style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', borderLeft: '5px solid var(--purple-500)' }}>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                                                            <span style={{ fontSize: 'var(--font-size-md)', fontWeight: '700', color: 'var(--text-primary)' }}>
+                                                                📅 {interview.slot_date.replace(/-/g, '/')}
+                                                            </span>
+                                                            <span style={{ background: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: '700', border: '1px solid #e9d5ff' }}>
+                                                                {interview.start_time.substring(0, 5)} - {interview.end_time.substring(0, 5)}
+                                                            </span>
+                                                            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                                                                👤 担当教員: <strong>{interview.teacher?.name || '不明'} 先生</strong>
+                                                            </span>
                                                         </div>
-                                                    )}
-                                                    {interview.discussion_content && (
-                                                        <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #e2e8f0' }}>
-                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#475569', marginBottom: '4px' }}>📝 話し合った内容:</strong>
-                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.discussion_content}</p>
+
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                            {interview.notes && (
+                                                                <div style={{ background: '#fff', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                                                    <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '4px' }}>💬 相談内容 / 面談メモ:</strong>
+                                                                    <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.notes}</p>
+                                                                </div>
+                                                            )}
+                                                            {interview.discussion_content && (
+                                                                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #e2e8f0' }}>
+                                                                    <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#475569', marginBottom: '4px' }}>📝 話し合った内容:</strong>
+                                                                    <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.discussion_content}</p>
+                                                                </div>
+                                                            )}
+                                                            {interview.instructions && (
+                                                                <div style={{ background: '#fffbeb', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #fef3c7' }}>
+                                                                    <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#b45309', marginBottom: '4px' }}>📌 学生への指示 / 次回へのアドバイス:</strong>
+                                                                    <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#78350f', fontSize: 'var(--font-size-sm)' }}>{interview.instructions}</p>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                    {interview.instructions && (
-                                                        <div style={{ background: '#fffbeb', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #fef3c7' }}>
-                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#b45309', marginBottom: '4px' }}>📌 学生への指示 / 次回へのアドバイス:</strong>
-                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#78350f', fontSize: 'var(--font-size-sm)' }}>{interview.instructions}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
