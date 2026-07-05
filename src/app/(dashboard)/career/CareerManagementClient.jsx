@@ -1382,45 +1382,44 @@ export default function CareerManagementClient({
                                 )}
                             </div>
 
-                            <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-4) var(--spacing-6)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-                                    <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>表示日付:</label>
-                                    <input 
-                                        type="date" 
-                                        value={interviewSelectedDate} 
-                                        onChange={(e) => setInterviewSelectedDate(e.target.value)} 
-                                        className={styles.searchInput}
-                                        style={{ width: 'auto', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
-                                    />
+                            <div className={styles.tableCard} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', background: 'var(--bg-card)' }}>
+                                <div style={{ padding: 'var(--spacing-4) var(--spacing-6)', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', flexWrap: 'wrap', background: 'var(--bg-card)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                                        <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>表示日付:</label>
+                                        <input 
+                                            type="date" 
+                                            value={interviewSelectedDate} 
+                                            onChange={(e) => setInterviewSelectedDate(e.target.value)} 
+                                            className={styles.searchInput}
+                                            style={{ width: 'auto', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={() => setInterviewSelectedDate(new Date().toISOString().split('T')[0])}
+                                        className={styles.actionButton}
+                                        style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
+                                    >
+                                        今日に戻る
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setIsCreatingInterviewSlot(true)
+                                            setInterviewCreateForm({
+                                                start_time: '10:00',
+                                                end_time: '10:15',
+                                                status: 'available',
+                                                notes: '',
+                                                student_id_text: ''
+                                            })
+                                        }}
+                                        className={styles.actionButton}
+                                        style={{ margin: '0 0 0 auto', padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-700)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
+                                    >
+                                        ➕ 新規予約枠を作成
+                                    </button>
                                 </div>
-                                <button 
-                                    onClick={() => setInterviewSelectedDate(new Date().toISOString().split('T')[0])}
-                                    className={styles.actionButton}
-                                    style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
-                                >
-                                    今日に戻る
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        setIsCreatingInterviewSlot(true)
-                                        setInterviewCreateForm({
-                                            start_time: '10:00',
-                                            end_time: '10:15',
-                                            status: 'available',
-                                            notes: '',
-                                            student_id_text: ''
-                                        })
-                                    }}
-                                    className={styles.actionButton}
-                                    style={{ margin: '0 0 0 auto', padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-700)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
-                                >
-                                    ➕ 新規予約枠を作成
-                                </button>
-                            </div>
-
-                            <div className={styles.tableCard} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
                                 <div className={styles.tableWrapper}>
                                     {interviewLoading ? (
                                         <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>スロットを読み込み中...</div>
