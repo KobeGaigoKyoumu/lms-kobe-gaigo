@@ -852,6 +852,7 @@ export default function CareerManagementClient({
             end_time: slot.end_time.substring(0, 5),
             status: slot.status,
             notes: slot.notes || '',
+            discussion_content: slot.discussion_content || '',
             instructions: slot.instructions || '',
             student_id_text: slot.student_id_text || ''
         })
@@ -874,6 +875,7 @@ export default function CareerManagementClient({
             end_time: `${interviewEditForm.end_time}:00`,
             status: finalStatus,
             notes: interviewEditForm.notes,
+            discussion_content: interviewEditForm.discussion_content,
             instructions: interviewEditForm.instructions,
             student_id_texts: selectedStudentIds
         })
@@ -4103,11 +4105,11 @@ export default function CareerManagementClient({
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label>面談メモ / 相談内容 / 話し合った内容:</label>
+                                <label>面談内容 / メモ:</label>
                                 <textarea 
                                     value={interviewEditForm.notes}
                                     onChange={(e) => setInterviewEditForm({...interviewEditForm, notes: e.target.value})}
-                                    placeholder="相談内容、面談で話し合ったことなど"
+                                    placeholder="相談内容、面談メモなど"
                                     rows={3}
                                     className={styles.searchInput}
                                     style={{ width: '100%', resize: 'none' }}
@@ -4116,6 +4118,17 @@ export default function CareerManagementClient({
 
                             {(interviewEditForm.status === 'completed' || interviewEditForm.status === 'booked') && (
                                 <>
+                                    <div className={styles.inputGroup}>
+                                        <label>話し合った内容:</label>
+                                        <textarea 
+                                            value={interviewEditForm.discussion_content}
+                                            onChange={(e) => setInterviewEditForm({...interviewEditForm, discussion_content: e.target.value})}
+                                            placeholder="面談で話し合った内容や学生の状況など"
+                                            rows={3}
+                                            className={styles.searchInput}
+                                            style={{ width: '100%', resize: 'none' }}
+                                        />
+                                    </div>
                                     <div className={styles.inputGroup}>
                                         <label>指示 / 次回へのアドバイス:</label>
                                         <textarea 

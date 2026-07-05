@@ -981,9 +981,14 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                             👤 話した先生: <strong>{booking.teacher?.name || '担任'} 先生</strong>
                                         </span>
                                         {booking.notes && (
+                                            <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-2) var(--spacing-3)', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', borderLeft: '2px solid var(--border-color)' }}>
+                                                相談したこと: 「{booking.notes}」
+                                            </div>
+                                        )}
+                                        {booking.discussion_content && (
                                             <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-3)', background: '#f8fafc', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', border: '1px solid #e2e8f0' }}>
-                                                <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '4px' }}>💬 話し合った内容・メモ:</strong>
-                                                <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{booking.notes}</p>
+                                                <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '4px' }}>💬 話し合った内容:</strong>
+                                                <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{booking.discussion_content}</p>
                                             </div>
                                         )}
                                         {booking.instructions && (
