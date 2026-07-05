@@ -222,7 +222,6 @@ export async function updateSlot(slotId, data) {
         end_time: data.end_time,
         status: data.status,
         notes: data.notes,
-        discussion_content: data.discussion_content,
         instructions: data.instructions,
         // 互換性のため、1人目の学生IDをカラムに設定
         student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null,
@@ -301,7 +300,6 @@ export async function createSlot(data) {
         end_time: data.end_time,
         status: data.status || 'available',
         notes: data.notes || '',
-        discussion_content: data.discussion_content || '',
         instructions: data.instructions || '',
         student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null
       })
