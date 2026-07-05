@@ -13,6 +13,44 @@ const createAdminClient = () => {
   return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
+let migrationApplied = false;
+async function ensureMigrationApplied() {
+  if (migrationApplied) return;
+  try {
+    const connectionString = 
+      process.env.DATABASE_URL || 
+      process.env.POSTGRES_URL || 
+      process.env.POSTGRES_URL_NON_POOLING || 
+      process.env.SUPABASE_DB_URL;
+      
+    if (!connectionString) {
+      console.log('No connection string for auto migration');
+      migrationApplied = true;
+      return;
+    }
+    
+    const { Client } = require('pg');
+    const client = new Client({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
+    
+    await client.connect();
+    await client.query(`
+      ALTER TABLE public.interview_slots DROP CONSTRAINT IF EXISTS interview_slots_status_check;
+      ALTER TABLE public.interview_slots ADD CONSTRAINT interview_slots_status_check CHECK (status IN ('available', 'booked', 'blocked', 'pending', 'completed'));
+      ALTER TABLE public.interview_slots ADD COLUMN IF NOT EXISTS discussion_content TEXT;
+      ALTER TABLE public.interview_slots ADD COLUMN IF NOT EXISTS instructions TEXT;
+    `);
+    await client.end();
+    migrationApplied = true;
+    console.log('Migration automatically applied successfully via Server Action!');
+  } catch (e) {
+    console.error('Auto migration failed or already applied:', e.message);
+    migrationApplied = true; 
+  }
+}
+
 // ----------------------------------------------------
 // 教師側アクション (認証チェック: getAdminMemberSession)
 // ----------------------------------------------------
@@ -82,6 +120,7 @@ export async function saveTeacherTemplates(templates, templateName = 'デフォ�
 // 3. 教師用：指定期間内の全予約枠 (予約済み・空き・ブロックすべて) の取得
 export async function getTeacherSlots(startDateStr, endDateStr) {
   try {
+    await ensureMigrationApplied()
     const session = await getAdminMemberSession()
     if (!session) throw new Error('Unauthorized')
 
@@ -494,6 +533,7 @@ export async function cancelBooking(slotId) {
 // 11. 学生用：自分のアクティブな面談予約一覧の取得
 export async function getStudentBookings() {
   try {
+    await ensureMigrationApplied()
     const session = await getStudentSession()
     if (!session || !session.studentId) throw new Error('Unauthorized')
 
