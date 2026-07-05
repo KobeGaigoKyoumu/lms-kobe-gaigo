@@ -14,7 +14,8 @@ import {
     getTeacherTemplateNames,
     getTeacherPendingSlots,
     approveSlot,
-    rejectSlot
+    rejectSlot,
+    getStudentCompletedInterviews
 } from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, 
@@ -97,7 +98,7 @@ export default function CareerManagementClient({
         notes: '',
         student_id_text: ''
     })
-    const [interviewActiveSubTab, setInterviewActiveSubTab] = useState('schedule') // 'schedule' | 'template' | 'generate'
+    const [interviewActiveSubTab, setInterviewActiveSubTab] = useState('schedule') // 'schedule' | 'template' | 'generate' | 'history'
     const [interviewLoading, setInterviewLoading] = useState(false)
     const [interviewSaving, setInterviewSaving] = useState(false)
     const [interviewGenerating, setInterviewGenerating] = useState(false)
@@ -109,6 +110,11 @@ export default function CareerManagementClient({
     const [selectedTemplateName, setSelectedTemplateName] = useState('デフォルト')
     const [newTemplateNameInput, setNewTemplateNameInput] = useState('')
     const [myClassStudents, setMyClassStudents] = useState([])
+    const [historySelectedClass, setHistorySelectedClass] = useState('')
+    const [historySelectedStudentId, setHistorySelectedStudentId] = useState('')
+    const [historyClassStudents, setHistoryClassStudents] = useState([])
+    const [studentHistoryInterviews, setStudentHistoryInterviews] = useState([])
+    const [historyLoading, setHistoryLoading] = useState(false)
     
     // クラス担任が複数の場合にクラスごとに学生をグループ化
     const groupedMyClassStudents = useMemo(() => {
@@ -1004,6 +1010,51 @@ export default function CareerManagementClient({
         }
     }, [myClasses])
 
+    const loadStudentHistory = async (studentId) => {
+        if (!studentId) {
+            setStudentHistoryInterviews([])
+            return
+        }
+        setHistoryLoading(true)
+        setInterviewError(null)
+        try {
+            const res = await getStudentCompletedInterviews(studentId)
+            if (res.success) {
+                setStudentHistoryInterviews(res.interviews)
+            } else {
+                setInterviewError(`履歴の取得に失敗しました: ${res.error}`)
+            }
+        } catch (err) {
+            console.error('loadStudentHistory error:', err)
+            setInterviewError('履歴の取得中にエラーが発生しました。')
+        } finally {
+            setHistoryLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (historySelectedClass) {
+            getStudentsCareerList(historySelectedClass).then(res => {
+                const sorted = (res || []).sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
+                setHistoryClassStudents(sorted)
+                setHistorySelectedStudentId('')
+                setStudentHistoryInterviews([])
+            })
+        } else {
+            setHistoryClassStudents([])
+            setHistorySelectedStudentId('')
+            setStudentHistoryInterviews([])
+        }
+    }, [historySelectedClass])
+
+    useEffect(() => {
+        if (historySelectedStudentId) {
+            loadStudentHistory(historySelectedStudentId)
+        } else {
+            setStudentHistoryInterviews([])
+        }
+    }, [historySelectedStudentId])
+
     // 回答詳細モーダルを開く (Viewモード)
     const openViewModal = (student) => {
         setSelectedStudent(student)
@@ -1196,6 +1247,13 @@ export default function CareerManagementClient({
                             style={{ margin: 0, border: 'none', borderRadius: 'var(--radius-lg)', padding: '10px 20px', background: interviewActiveSubTab === 'generate' ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : 'transparent', color: interviewActiveSubTab === 'generate' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: interviewActiveSubTab === 'generate' ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         >
                             ⚡ 枠の自動生成
+                        </button>
+                        <button 
+                            className={styles.actionButton}
+                            onClick={() => setInterviewActiveSubTab('history')}
+                            style={{ margin: 0, border: 'none', borderRadius: 'var(--radius-lg)', padding: '10px 20px', background: interviewActiveSubTab === 'history' ? 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' : 'transparent', color: interviewActiveSubTab === 'history' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: 'var(--font-size-sm)', boxShadow: interviewActiveSubTab === 'history' ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none', transition: 'all 0.2s', cursor: 'pointer' }}
+                        >
+                            📝 面談履歴（クラス・学生別）
                         </button>
                     </div>
 
@@ -1707,6 +1765,101 @@ export default function CareerManagementClient({
                             >
                                 {interviewGenerating ? '生成中...' : '⚡ 予約可能枠を自動生成'}
                             </button>
+                        </div>
+                    )}
+
+                    {/* サブタブ4: 面談履歴（クラス・学生別） */}
+                    {interviewActiveSubTab === 'history' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-5)' }}>
+                            <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
+                                <h3 style={{ margin: '0 0 16px 0', fontWeight: '700', color: 'var(--text-primary)' }}>クラス・学生別 過去の面談履歴</h3>
+                                
+                                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                                    {/* クラス選択 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '300px' }}>
+                                        <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>クラス選択</label>
+                                        <select 
+                                            value={historySelectedClass}
+                                            onChange={(e) => setHistorySelectedClass(e.target.value)}
+                                            style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)' }}
+                                        >
+                                            <option value="">-- クラスを選択してください --</option>
+                                            {(availableClassesForSelect || []).map(c => (
+                                                <option key={c.name} value={c.name}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* 学生選択 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px', maxWidth: '300px' }}>
+                                        <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>学生選択</label>
+                                        <select 
+                                            value={historySelectedStudentId}
+                                            onChange={(e) => setHistorySelectedStudentId(e.target.value)}
+                                            disabled={!historySelectedClass}
+                                            style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: '#fff', fontSize: 'var(--font-size-sm)', fontWeight: '600', color: 'var(--text-primary)', cursor: historySelectedClass ? 'pointer' : 'not-allowed' }}
+                                        >
+                                            <option value="">-- 学生を選択してください --</option>
+                                            {historyClassStudents.map(student => (
+                                                <option key={student.student_id_text} value={student.student_id_text}>
+                                                    {student.full_name} ({student.student_id_text})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {historyLoading ? (
+                                    <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>履歴を読み込み中...</div>
+                                ) : !historySelectedStudentId ? (
+                                    <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+                                        <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>クラスと学生を選択すると、これまでに完了した面談履歴が表示されます。</p>
+                                    </div>
+                                ) : studentHistoryInterviews.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: 'var(--spacing-8) 0', color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+                                        <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>この学生の完了した面談履歴はありません。</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                        {studentHistoryInterviews.map((interview) => (
+                                            <div key={interview.id} style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', borderLeft: '5px solid var(--purple-500)' }}>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                                                    <span style={{ fontSize: 'var(--font-size-md)', fontWeight: '700', color: 'var(--text-primary)' }}>
+                                                        📅 {interview.slot_date.replace(/-/g, '/')}
+                                                    </span>
+                                                    <span style={{ background: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: '700', border: '1px solid #e9d5ff' }}>
+                                                        {interview.start_time.substring(0, 5)} - {interview.end_time.substring(0, 5)}
+                                                    </span>
+                                                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                                                        👤 担当教員: <strong>{interview.teacher?.name || '不明'} 先生</strong>
+                                                    </span>
+                                                </div>
+
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                    {interview.notes && (
+                                                        <div style={{ background: '#fff', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '4px' }}>💬 相談内容 / 面談メモ:</strong>
+                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.notes}</p>
+                                                        </div>
+                                                    )}
+                                                    {interview.discussion_content && (
+                                                        <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #e2e8f0' }}>
+                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#475569', marginBottom: '4px' }}>📝 話し合った内容:</strong>
+                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)' }}>{interview.discussion_content}</p>
+                                                        </div>
+                                                    )}
+                                                    {interview.instructions && (
+                                                        <div style={{ background: '#fffbeb', padding: '12px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid #fef3c7' }}>
+                                                            <strong style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: '#b45309', marginBottom: '4px' }}>📌 学生への指示 / 次回へのアドバイス:</strong>
+                                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#78350f', fontSize: 'var(--font-size-sm)' }}>{interview.instructions}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

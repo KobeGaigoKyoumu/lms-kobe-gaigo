@@ -13,6 +13,28 @@ const createAdminClient = () => {
   return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
 
+// 予定時間を過ぎたスロットの自動完了処理
+async function autoCompleteExpiredSlots(supabase) {
+  try {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
+    const todayStr = now.toISOString().split('T')[0]
+    const timeStr = now.toTimeString().split(' ')[0] // 'HH:MM:SS'
+
+    const { error } = await supabase
+      .from('interview_slots')
+      .update({ 
+        status: 'completed',
+        updated_at: new Date().toISOString()
+      })
+      .in('status', ['booked', 'pending'])
+      .or(`slot_date.lt.${todayStr},and(slot_date.eq.${todayStr},end_time.lt.${timeStr})`)
+
+    if (error) throw error
+  } catch (e) {
+    console.error('autoCompleteExpiredSlots error:', e)
+  }
+}
+
 // ----------------------------------------------------
 // 教師側アクション (認証チェック: getAdminMemberSession)
 // ----------------------------------------------------
@@ -86,6 +108,8 @@ export async function getTeacherSlots(startDateStr, endDateStr) {
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
+    await autoCompleteExpiredSlots(supabase)
+    
     const { data: slots, error: slotError } = await supabase
       .from('interview_slots')
       .select(`
@@ -637,6 +661,7 @@ export async function getTeacherTodayTomorrowBookings() {
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
+    await autoCompleteExpiredSlots(supabase)
 
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
     const todayStr = now.toISOString().split('T')[0]
@@ -707,6 +732,8 @@ export async function getTeacherBookingsFiltered(filterType = 'weekly') {
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
+    await autoCompleteExpiredSlots(supabase)
+    
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }))
     const todayStr = now.toISOString().split('T')[0]
 
@@ -857,6 +884,51 @@ export async function rejectSlot(slotId) {
     return { success: true }
   } catch (e) {
     console.error('rejectSlot error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 19. 特定の学生の完了した面談履歴を取得する
+export async function getStudentCompletedInterviews(studentIdText) {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    
+    // まず、その学生が紐付いている完了済みのスロットIDを取得
+    const { data: links, error: linkError } = await supabase
+      .from('interview_slot_students')
+      .select('slot_id')
+      .eq('student_id_text', studentIdText)
+    
+    if (linkError) throw linkError
+    const slotIds = (links || []).map(l => l.slot_id)
+    
+    if (slotIds.length === 0) {
+      return { success: true, interviews: [] }
+    }
+    
+    // スロット情報を取得
+    const { data: interviews, error } = await supabase
+      .from('interview_slots')
+      .select(`
+        *,
+        teacher:admin_members(id, name),
+        slot_students:interview_slot_students(
+          student_id_text,
+          student:students(student_id_text, full_name, class_name)
+        )
+      `)
+      .in('id', slotIds)
+      .eq('status', 'completed')
+      .order('slot_date', { ascending: false })
+      .order('start_time', { ascending: false })
+      
+    if (error) throw error
+    return { success: true, interviews: interviews || [] }
+  } catch (e) {
+    console.error('getStudentCompletedInterviews error:', e)
     return { success: false, error: e.message }
   }
 }
