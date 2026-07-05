@@ -222,6 +222,8 @@ export async function updateSlot(slotId, data) {
         end_time: data.end_time,
         status: data.status,
         notes: data.notes,
+        discussion_content: data.discussion_content,
+        instructions: data.instructions,
         // 互換性のため、1人目の学生IDをカラムに設定
         student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null,
         updated_at: new Date().toISOString()
@@ -299,6 +301,8 @@ export async function createSlot(data) {
         end_time: data.end_time,
         status: data.status || 'available',
         notes: data.notes || '',
+        discussion_content: data.discussion_content || '',
+        instructions: data.instructions || '',
         student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null
       })
       .select()
@@ -515,7 +519,7 @@ export async function getStudentBookings() {
         teacher:admin_members(id, name)
       `)
       .in('id', slotIds)
-      .in('status', ['booked', 'pending'])
+      .in('status', ['booked', 'pending', 'completed'])
       .order('slot_date', { ascending: true })
       .order('start_time', { ascending: true })
 
@@ -716,7 +720,7 @@ export async function getTeacherBookingsFiltered(filterType = 'weekly') {
         )
       `)
       .eq('teacher_id', session.memberId)
-      .in('status', ['booked', 'pending'])
+      .in('status', ['booked', 'pending', 'completed'])
 
     if (filterType === 'today') {
       query = query.eq('slot_date', todayStr)

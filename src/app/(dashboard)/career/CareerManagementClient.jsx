@@ -852,6 +852,8 @@ export default function CareerManagementClient({
             end_time: slot.end_time.substring(0, 5),
             status: slot.status,
             notes: slot.notes || '',
+            discussion_content: slot.discussion_content || '',
+            instructions: slot.instructions || '',
             student_id_text: slot.student_id_text || ''
         })
         const ids = slot.slot_students ? slot.slot_students.map(ss => ss.student_id_text).filter(Boolean) : []
@@ -864,13 +866,17 @@ export default function CareerManagementClient({
         setInterviewSuccessMsg(null)
         setInterviewError(null)
 
-        const finalStatus = selectedStudentIds.length > 0 ? 'booked' : (interviewEditForm.status === 'booked' ? 'available' : interviewEditForm.status)
+        const finalStatus = interviewEditForm.status === 'completed'
+            ? 'completed'
+            : (selectedStudentIds.length > 0 ? 'booked' : (interviewEditForm.status === 'booked' ? 'available' : interviewEditForm.status))
 
         const res = await updateSlot(editingInterviewSlot.id, {
             start_time: `${interviewEditForm.start_time}:00`,
             end_time: `${interviewEditForm.end_time}:00`,
             status: finalStatus,
             notes: interviewEditForm.notes,
+            discussion_content: interviewEditForm.discussion_content,
+            instructions: interviewEditForm.instructions,
             student_id_texts: selectedStudentIds
         })
         setInterviewLoading(false)
@@ -878,6 +884,7 @@ export default function CareerManagementClient({
             setInterviewSuccessMsg('予約枠を更新しました。')
             setEditingInterviewSlot(null)
             loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
         } else {
             setInterviewError(`更新に失敗しました: ${res.error}`)
         }
@@ -4040,8 +4047,8 @@ export default function CareerManagementClient({
                                         setInterviewEditForm(prev => ({
                                             ...prev, 
                                             status: nextStatus,
-                                            // ステータスを「予約済み」以外に変更したときは、選択されていた学生を自動クリア
-                                            student_id_text: nextStatus !== 'booked' ? '' : prev.student_id_text
+                                            // ステータスを「予約済み」または「実施完了」以外に変更したときは、選択されていた学生を自動クリア
+                                            student_id_text: (nextStatus !== 'booked' && nextStatus !== 'completed') ? '' : prev.student_id_text
                                         }));
                                     }}
                                     className={styles.selectInput}
@@ -4050,6 +4057,7 @@ export default function CareerManagementClient({
                                     <option value="available">🟢 予約受付中 (Available)</option>
                                     <option value="blocked">🔴 予約停止 (Blocked)</option>
                                     <option value="booked">🔵 予約済み (Booked)</option>
+                                    <option value="completed">🟣 実施完了 (Completed)</option>
                                 </select>
                             </div>
 
@@ -4106,6 +4114,33 @@ export default function CareerManagementClient({
                                     style={{ width: '100%', resize: 'none' }}
                                 />
                             </div>
+
+                            {(interviewEditForm.status === 'completed' || interviewEditForm.status === 'booked') && (
+                                <>
+                                    <div className={styles.inputGroup}>
+                                        <label>話し合った内容:</label>
+                                        <textarea 
+                                            value={interviewEditForm.discussion_content}
+                                            onChange={(e) => setInterviewEditForm({...interviewEditForm, discussion_content: e.target.value})}
+                                            placeholder="面談で話し合った内容や学生の状況など"
+                                            rows={3}
+                                            className={styles.searchInput}
+                                            style={{ width: '100%', resize: 'none' }}
+                                        />
+                                    </div>
+                                    <div className={styles.inputGroup}>
+                                        <label>指示 / 次回へのアドバイス:</label>
+                                        <textarea 
+                                            value={interviewEditForm.instructions}
+                                            onChange={(e) => setInterviewEditForm({...interviewEditForm, instructions: e.target.value})}
+                                            placeholder="学生への指示事項や今後のアクションアイテムなど"
+                                            rows={3}
+                                            className={styles.searchInput}
+                                            style={{ width: '100%', resize: 'none' }}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className={styles.modalFooter} style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end', padding: 'var(--spacing-4)', borderTop: '1px solid var(--border-color)' }}>

@@ -91,6 +91,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [examErrors, setExamErrors] = useState([]) // indices of invalid exams
     const [surveyErrors, setSurveyErrors] = useState([])
 
+    const upcomingBookings = studentBookings.filter(b => b.status === 'booked' || b.status === 'pending')
+    const completedBookings = studentBookings.filter(b => b.status === 'completed')
+
     const [surveyForm, setSurveyForm] = useState({
         school_type: '',
         school_name: '',
@@ -898,13 +901,13 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                             <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>いまの予約リスト</h3>
                         </div>
                         
-                        {studentBookings.length === 0 ? (
+                        {upcomingBookings.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: 'var(--spacing-6) 0', color: 'var(--text-tertiary)' }}>
                                 <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>いま、話す予定はありません。</p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
-                                {studentBookings.map(booking => (
+                                {upcomingBookings.map(booking => (
                                     <div key={booking.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', borderLeft: '5px solid var(--primary-500)', boxShadow: 'var(--shadow-sm)' }}>
                                         <div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: '4px' }}>
@@ -942,6 +945,58 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         >
                                             キャンセルする
                                         </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* これまでの面談記録の表示 */}
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-6)', borderRadius: 'var(--radius-xl)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)' }}>
+                            <span style={{ fontSize: '1.4rem' }}>📝</span>
+                            <h3 style={{ margin: 0, fontWeight: '700', color: 'var(--text-primary)' }}>これまでの面談記録</h3>
+                        </div>
+                        
+                        {completedBookings.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: 'var(--spacing-6) 0', color: 'var(--text-tertiary)' }}>
+                                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>これまでに完了した面談はありません。</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                                {completedBookings.map(booking => (
+                                    <div key={booking.id} style={{ padding: 'var(--spacing-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', borderLeft: '5px solid var(--text-tertiary)', boxShadow: 'var(--shadow-sm)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
+                                            <span style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700', color: 'var(--text-primary)' }}>
+                                                {booking.slot_date.replace(/-/g, '/')}
+                                            </span>
+                                            <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: '700', border: '1px solid #cbd5e1' }}>
+                                                {booking.start_time.substring(0, 5)} - {booking.end_time.substring(0, 5)}
+                                            </span>
+                                            <span style={{ background: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', fontWeight: '700', border: '1px solid #e9d5ff', marginLeft: '8px' }}>
+                                                実施完了
+                                            </span>
+                                        </div>
+                                        <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>
+                                            👤 話した先生: <strong>{booking.teacher?.name || '担任'} 先生</strong>
+                                        </span>
+                                        {booking.notes && (
+                                            <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-2) var(--spacing-3)', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', borderLeft: '2px solid var(--border-color)' }}>
+                                                相談したこと: 「{booking.notes}」
+                                            </div>
+                                        )}
+                                        {booking.discussion_content && (
+                                            <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-3)', background: '#f8fafc', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', border: '1px solid #e2e8f0' }}>
+                                                <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '4px' }}>💬 話し合った内容:</strong>
+                                                <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{booking.discussion_content}</p>
+                                            </div>
+                                        )}
+                                        {booking.instructions && (
+                                            <div style={{ marginTop: 'var(--spacing-2)', padding: 'var(--spacing-3)', background: '#fffbeb', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', border: '1px solid #fef3c7' }}>
+                                                <strong style={{ display: 'block', color: '#b45309', marginBottom: '4px' }}>📌 指示・アドバイス:</strong>
+                                                <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#78350f' }}>{booking.instructions}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
