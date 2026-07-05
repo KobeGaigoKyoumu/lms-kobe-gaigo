@@ -15,6 +15,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "@xmldom/xmldom": "^0.9.8",
+    "pg": "^8.11.0",
     "adm-zip": "^0.5.16",
     "chart.js": "^4.5.1",
     "cloudinary": "^2.10.0",
