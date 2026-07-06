@@ -772,10 +772,10 @@ export default function CareerManagementClient({
         }
     }
 
-    const loadInterviewTemplates = async (templateName = selectedTemplateName) => {
-        setInterviewLoading(true)
+    const loadInterviewTemplates = async (templateName = selectedTemplateName, skipLoading = false) => {
+        if (!skipLoading) setInterviewLoading(true)
         const res = await getTeacherTemplates(templateName)
-        setInterviewLoading(false)
+        if (!skipLoading) setInterviewLoading(false)
         
         const defaultTemplates = [1, 2, 3, 4, 5].map(day => ({
             day_of_week: day,
@@ -822,8 +822,8 @@ export default function CareerManagementClient({
         }
     }
 
-    const loadInterviewSlots = async () => {
-        setInterviewLoading(true)
+    const loadInterviewSlots = async (skipLoading = false) => {
+        if (!skipLoading) setInterviewLoading(true)
         const startObj = new Date(interviewSelectedDate)
         startObj.setDate(startObj.getDate() - 3)
         const endObj = new Date(interviewSelectedDate)
@@ -837,7 +837,7 @@ export default function CareerManagementClient({
             getTeacherPendingSlots()
         ])
 
-        setInterviewLoading(false)
+        if (!skipLoading) setInterviewLoading(false)
         if (slotsRes.success) {
             setInterviewSlots(slotsRes.slots)
         } else {
@@ -987,10 +987,24 @@ export default function CareerManagementClient({
 
     useEffect(() => {
         if (activeTab === 'interview') {
-            loadTemplateNamesList()
-            loadInterviewTemplates(selectedTemplateName)
-            loadInterviewSlots()
-            loadFilteredBookings(interviewPeriodFilter)
+            const loadAll = async () => {
+                setInterviewLoading(true)
+                try {
+                    await Promise.all([
+                        loadTemplateNamesList(),
+                        loadInterviewTemplates(selectedTemplateName, true),
+                        loadInterviewSlots(true),
+                        getTeacherBookingsFiltered(interviewPeriodFilter).then(res => {
+                            if (res.success) setWeeklyBookings(res.slots)
+                        })
+                    ])
+                } catch (err) {
+                    console.error('Error loading interview data:', err)
+                } finally {
+                    setInterviewLoading(false)
+                }
+            }
+            loadAll()
         }
     }, [activeTab, interviewPeriodFilter, selectedTemplateName])
 
@@ -1378,7 +1392,12 @@ export default function CareerManagementClient({
                                         </button>
                                     </div>
                                 </div>
-                                {weeklyBookings.length === 0 ? (
+                                {interviewLoading ? (
+                                    <div className={styles.loadingSpinner}>
+                                        <div className={styles.spinner}></div>
+                                        <p>面談予定を読み込み中...</p>
+                                    </div>
+                                ) : weeklyBookings.length === 0 ? (
                                     <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--spacing-4) 0' }}>
                                         {interviewPeriodFilter === 'today' ? '本日の予約済み面談はありません。' : 
                                          interviewPeriodFilter === 'weekly' ? '直近1週間の予約済み面談はありません。' : '予約済み面談はありません。'}
@@ -1479,7 +1498,10 @@ export default function CareerManagementClient({
                                 </div>
                                 <div className={styles.tableWrapper}>
                                     {interviewLoading ? (
-                                        <div style={{ padding: 'var(--spacing-8)', textAlign: 'center', color: 'var(--text-tertiary)' }}>スロットを読み込み中...</div>
+                                        <div className={styles.loadingSpinner}>
+                                            <div className={styles.spinner}></div>
+                                            <p>スロットを読み込み中...</p>
+                                        </div>
                                     ) : interviewSlots.filter(s => s.slot_date === interviewSelectedDate).length === 0 ? (
                                         <div className={styles.emptyState} style={{ padding: 'var(--spacing-8)', textAlign: 'center' }}>
                                             <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: 'var(--text-secondary)' }}>この日付の面談枠はまだ登録されていません。</p>
