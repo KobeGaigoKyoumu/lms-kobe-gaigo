@@ -1666,7 +1666,7 @@ export default function CareerManagementClient({
                                         ➕ 新規予約枠を作成
                                     </button>
                                 </div>
-                                <div className={styles.tableWrapper}>
+                                <div className={styles.tableWrapper} style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                                     {interviewLoading ? (
                                         <div className={styles.loadingSpinner}>
                                             <div className={styles.spinner}></div>
@@ -1680,14 +1680,14 @@ export default function CareerManagementClient({
                                             </p>
                                         </div>
                                     ) : (
-                                        <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
                                             <thead>
                                                 <tr style={{ background: 'var(--bg-secondary)' }}>
-                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>時間帯 (15分枠)</th>
-                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>ステータス</th>
-                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>予約学生</th>
-                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700' }}>面談メモ / 相談内容</th>
-                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontWeight: '700' }}>操作</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>時間帯 (15分枠)</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>ステータス</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>予約学生</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>面談メモ / 相談内容</th>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontWeight: '700', whiteSpace: 'nowrap' }}>操作</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1695,10 +1695,10 @@ export default function CareerManagementClient({
                                                     .filter(s => s.slot_date === interviewSelectedDate)
                                                     .map(slot => (
                                                         <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                                            <td style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                            <td style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                                                                 {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                                                             </td>
-                                                            <td style={{ padding: '16px' }}>
+                                                            <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
                                                                 <span style={{
                                                                     background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : slot.status === 'completed' ? '#f3e8ff' : 'var(--success-50)',
                                                                     color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : slot.status === 'completed' ? '#6b21a8' : 'var(--success-700)',
@@ -1714,7 +1714,7 @@ export default function CareerManagementClient({
                                                                      slot.status === 'completed' ? '🟣 実施完了' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
-                                                            <td style={{ padding: '16px' }}>
+                                                            <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
                                                                 {(slot.status === 'booked' || slot.status === 'completed') && slot.slot_students && slot.slot_students.length > 0 ? (
                                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                         {slot.slot_students.map(ss => ss.student && (
@@ -1725,19 +1725,19 @@ export default function CareerManagementClient({
                                                                     </div>
                                                                 ) : <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                             </td>
-                                                            <td style={{ padding: '16px', maxWidth: '300px', wordBreak: 'break-all' }}>
+                                                            <td style={{ padding: '16px', minWidth: '200px', maxWidth: '300px', wordBreak: 'break-all', whiteSpace: 'normal' }}>
                                                                 <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: '500', lineHeight: '1.4' }}>
                                                                     {slot.notes || <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                                 </span>
                                                             </td>
                                                             <td style={{ padding: '16px', textAlign: 'center' }}>
-                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center', flexWrap: 'nowrap' }}>
                                                                     {slot.status === 'pending' && (
                                                                         <>
                                                                             <button
                                                                                 onClick={() => handleApproveInterview(slot.id)}
                                                                                 className={styles.actionButton}
-                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--success-700)', borderColor: 'var(--success-200)', background: 'var(--success-50)' }}
+                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--success-700)', borderColor: 'var(--success-200)', background: 'var(--success-50)', whiteSpace: 'nowrap' }}
                                                                                 onMouseEnter={(e) => e.currentTarget.style.background = 'var(--success-100)'}
                                                                                 onMouseLeave={(e) => e.currentTarget.style.background = 'var(--success-50)'}
                                                                             >
@@ -1746,7 +1746,7 @@ export default function CareerManagementClient({
                                                                             <button
                                                                                 onClick={() => handleRejectInterview(slot.id)}
                                                                                 className={styles.actionButton}
-                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-700)', borderColor: 'var(--error-200)', background: 'var(--error-50)' }}
+                                                                                style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-700)', borderColor: 'var(--error-200)', background: 'var(--error-50)', whiteSpace: 'nowrap' }}
                                                                                 onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-100)'}
                                                                                 onMouseLeave={(e) => e.currentTarget.style.background = 'var(--error-50)'}
                                                                             >
@@ -1757,14 +1757,14 @@ export default function CareerManagementClient({
                                                                     <button
                                                                         onClick={() => handleOpenEditInterview(slot)}
                                                                         className={styles.actionButton}
-                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600' }}
+                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', whiteSpace: 'nowrap' }}
                                                                     >
                                                                         ✏️ 編集
                                                                     </button>
                                                                     <button
                                                                         onClick={() => handleDeleteInterviewSlot(slot.id)}
                                                                         className={styles.actionButton}
-                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-600)', borderColor: 'var(--error-200)', background: '#fff' }}
+                                                                        style={{ margin: 0, padding: '6px 12px', fontSize: 'var(--font-size-xs)', fontWeight: '600', color: 'var(--error-600)', borderColor: 'var(--error-200)', background: '#fff', whiteSpace: 'nowrap' }}
                                                                         onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-50)'}
                                                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                                                     >
