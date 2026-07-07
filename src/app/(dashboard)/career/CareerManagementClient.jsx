@@ -1476,40 +1476,53 @@ export default function CareerManagementClient({
                                                         display: 'flex', 
                                                         alignItems: 'center', 
                                                         gap: '16px', 
-                                                        padding: '16px 20px', 
+                                                        padding: '10px 16px', 
                                                         background: '#ffffff', 
                                                         border: '1px solid var(--border-color)', 
                                                         borderRadius: 'var(--radius-xl)', 
-                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                                                        justifyContent: 'space-between'
                                                     }}
                                                 >
-                                                    <div style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)', minWidth: '95px' }}>
-                                                        {dayLabel}
-                                                        {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
+                                                    {/* 左側：学生情報と日時（2行表示） */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, maxWidth: slot.notes ? '50%' : '100%' }}>
+                                                        {/* 上の行：クラス、名前 */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                            {slot.slot_students && slot.slot_students.length > 0 ? (
+                                                                slot.slot_students.map(ss => ss.student && (
+                                                                    <div key={ss.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
+                                                                            {ss.student.class_name}
+                                                                        </span>
+                                                                        <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
+                                                                            {ss.student.full_name}
+                                                                        </span>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>学生情報なし</span>
+                                                            )}
+                                                        </div>
+                                                        {/* 下の行：日付、時間 */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+                                                            <span style={{ fontWeight: '700', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)' }}>
+                                                                {dayLabel}
+                                                                {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
+                                                            </span>
+                                                            <span style={{ fontWeight: '600' }}>
+                                                                {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                                                                {slot.status === 'pending' && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>申請中</span>}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div style={{ fontWeight: '700', color: 'var(--text-secondary)', minWidth: '130px', fontSize: 'var(--font-size-sm)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                                        <>{slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}{slot.status === 'pending' && <span style={{ fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>申請中</span>}</>
-                                                    </div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                        {slot.slot_students && slot.slot_students.length > 0 ? (
-                                                            slot.slot_students.map(ss => ss.student && (
-                                                                <div key={ss.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                    <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
-                                                                        {ss.student.full_name}
-                                                                    </span>
-                                                                    <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
-                                                                        {ss.student.class_name}
-                                                                    </span>
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>学生情報なし</span>
-                                                        )}
-                                                    </div>
+
+                                                    {/* 右側：コメント（最大幅50%に設定して配置） */}
                                                     {slot.notes && (
-                                                        <span style={{ fontSize: '13px', color: 'var(--text-primary)', marginLeft: 'auto', background: '#fff', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontWeight: '500', maxWidth: '350px', wordBreak: 'break-all' }}>
-                                                            💬 {slot.notes}
-                                                        </span>
+                                                        <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)', background: '#fff', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontWeight: '500', width: '100%', wordBreak: 'break-all', textAlign: 'left' }}>
+                                                                💬 {slot.notes}
+                                                            </span>
+                                                        </div>
                                                     )}
                                                 </div>
                                             )
