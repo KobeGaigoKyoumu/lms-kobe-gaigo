@@ -1484,26 +1484,26 @@ export default function CareerManagementClient({
                                                     }}
                                                 >
                                                     {/* 左側：学生情報と日時（2行表示） */}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
                                                         {/* 上の行：クラス、名前 */}
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                             {slot.slot_students && slot.slot_students.length > 0 ? (
                                                                 slot.slot_students.map(ss => ss.student && (
                                                                     <div key={ss.student_id_text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span style={{ fontSize: '11px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
+                                                                        <span style={{ fontSize: '13px', color: 'var(--primary-700)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 'var(--radius-md)', fontWeight: '600' }}>
                                                                             {ss.student.class_name}
                                                                         </span>
-                                                                        <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: 'var(--font-size-sm)' }}>
+                                                                        <span style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '13px' }}>
                                                                             {ss.student.full_name}
                                                                         </span>
                                                                     </div>
                                                                 ))
                                                             ) : (
-                                                                <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>学生情報なし</span>
+                                                                <span style={{ color: 'var(--text-tertiary)', fontSize: '13px' }}>学生情報なし</span>
                                                             )}
                                                         </div>
                                                         {/* 下の行：日付、時間 */}
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
                                                             <span style={{ fontWeight: '700', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)' }}>
                                                                 {dayLabel}
                                                                 {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
