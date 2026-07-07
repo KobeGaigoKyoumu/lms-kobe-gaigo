@@ -1475,17 +1475,16 @@ export default function CareerManagementClient({
                                                     style={{ 
                                                         display: 'flex', 
                                                         alignItems: 'center', 
-                                                        gap: '16px', 
+                                                        gap: '24px', 
                                                         padding: '10px 16px', 
                                                         background: '#ffffff', 
                                                         border: '1px solid var(--border-color)', 
                                                         borderRadius: 'var(--radius-xl)', 
-                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-                                                        justifyContent: 'space-between'
+                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                                                     }}
                                                 >
                                                     {/* 左側：学生情報と日時（2行表示） */}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, maxWidth: slot.notes ? '50%' : '100%' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
                                                         {/* 上の行：クラス、名前 */}
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                             {slot.slot_students && slot.slot_students.length > 0 ? (
@@ -1516,9 +1515,9 @@ export default function CareerManagementClient({
                                                         </div>
                                                     </div>
 
-                                                    {/* 右側：コメント（最大幅50%に設定して配置） */}
+                                                    {/* 右側：コメント（残りのスペースをすべて埋める） */}
                                                     {slot.notes && (
-                                                        <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                                                        <div style={{ flex: 1, display: 'flex' }}>
                                                             <span style={{ fontSize: '13px', color: 'var(--text-primary)', background: '#fff', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: 'var(--radius-md)', fontWeight: '500', width: '100%', wordBreak: 'break-all', textAlign: 'left' }}>
                                                                 💬 {slot.notes}
                                                             </span>
