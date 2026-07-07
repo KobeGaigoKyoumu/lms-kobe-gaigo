@@ -142,6 +142,8 @@ export default function CareerManagementClient({
     const [selectedStudentIds, setSelectedStudentIds] = useState([])
     // 承認待ち（pending）のスロット一覧
     const [pendingSlots, setPendingSlots] = useState([])
+    const [teacherFutureAvailableSlots, setTeacherFutureAvailableSlots] = useState([])
+    const [teacherScheduleLoading, setTeacherScheduleLoading] = useState(false)
 
     // モーダル関連の状態
     const [selectedStudent, setSelectedStudent] = useState(null) // 現在選択中の学生情報
@@ -772,6 +774,26 @@ export default function CareerManagementClient({
         }
     }
 
+    const loadTeacherFutureAvailableSlots = async () => {
+        setTeacherScheduleLoading(true)
+        try {
+            const todayStr = new Date().toISOString().split('T')[0]
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 30)
+            const futureDateStr = futureDate.toISOString().split('T')[0]
+
+            const res = await getTeacherSlots(todayStr, futureDateStr)
+            if (res.success) {
+                const available = (res.slots || []).filter(s => s.status === 'available')
+                setTeacherFutureAvailableSlots(available)
+            }
+        } catch (err) {
+            console.error('Error loading teacher future available slots:', err)
+        } finally {
+            setTeacherScheduleLoading(false)
+        }
+    }
+
     const loadInterviewTemplates = async (templateName = selectedTemplateName, skipLoading = false) => {
         if (!skipLoading) setInterviewLoading(true)
         const res = await getTeacherTemplates(templateName)
@@ -858,6 +880,7 @@ export default function CareerManagementClient({
         if (res.success) {
             setInterviewSuccessMsg(`面談予約可能枠を自動生成しました！ (ベーステンプレート: ${selectedTemplateName}, 生成数: ${res.count})`)
             loadInterviewSlots()
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`生成に失敗しました: ${res.error}`)
         }
@@ -903,6 +926,7 @@ export default function CareerManagementClient({
             setEditingInterviewSlot(null)
             loadInterviewSlots()
             loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`更新に失敗しました: ${res.error}`)
         }
@@ -927,6 +951,7 @@ export default function CareerManagementClient({
         if (res.success) {
             setIsCreatingInterviewSlot(false)
             loadInterviewSlots()
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`作成に失敗しました: ${res.error}`)
         }
@@ -949,6 +974,7 @@ export default function CareerManagementClient({
             setInterviewSuccessMsg('予約枠を削除しました。')
             loadInterviewSlots()
             loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`削除に失敗しました: ${res.error}`)
         }
@@ -964,6 +990,7 @@ export default function CareerManagementClient({
             setInterviewSuccessMsg('予約申請を承認しました。')
             loadInterviewSlots()
             loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`承認に失敗しました: ${res.error}`)
         }
@@ -980,6 +1007,7 @@ export default function CareerManagementClient({
             setInterviewSuccessMsg('予約申請を却下しました。')
             loadInterviewSlots()
             loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`却下に失敗しました: ${res.error}`)
         }
@@ -994,6 +1022,7 @@ export default function CareerManagementClient({
                         loadTemplateNamesList(),
                         loadInterviewTemplates(selectedTemplateName, true),
                         loadInterviewSlots(true),
+                        loadTeacherFutureAvailableSlots(),
                         getTeacherBookingsFiltered(interviewPeriodFilter).then(res => {
                             if (res.success) setWeeklyBookings(res.slots)
                         })
@@ -1181,6 +1210,37 @@ export default function CareerManagementClient({
             setSaving(false)
         }
     }
+    const DAYS_OF_WEEK = [
+        { num: 1, label: '月曜日', short: '月', color: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe' },
+        { num: 2, label: '火曜日', short: '火', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
+        { num: 3, label: '水曜日', short: '水', color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7' },
+        { num: 4, label: '木曜日', short: '木', color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe' },
+        { num: 5, label: '金曜日', short: '金', color: '#ec4899', bg: '#fdf2f8', border: '#fbcfe8' }
+    ]
+
+    const futureSlotsMap = DAYS_OF_WEEK.reduce((acc, day) => {
+        const slots = teacherFutureAvailableSlots.filter(slot => {
+            const dateObj = new Date(slot.slot_date)
+            const dayOfWeek = dateObj.getDay()
+            return dayOfWeek === day.num
+        })
+
+        const uniqueDates = []
+        const seen = new Set()
+        slots.forEach(s => {
+            if (!seen.has(s.slot_date)) {
+                seen.add(s.slot_date)
+                const [y, m, d] = s.slot_date.split('-')
+                uniqueDates.push({
+                    date: s.slot_date,
+                    label: `${parseInt(m, 10)}/${parseInt(d, 10)}`
+                })
+            }
+        })
+
+        acc[day.num] = uniqueDates
+        return acc
+    }, {})
 
     return (
         <div className={styles.container}>
@@ -1451,6 +1511,104 @@ export default function CareerManagementClient({
                                                             💬 {slot.notes}
                                                         </span>
                                                     )}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 曜日別スケジュール・空き枠一覧 */}
+                            <div style={{ background: 'var(--bg-card)', padding: 'var(--spacing-5)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-3)' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>📅</span>
+                                    <strong style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>曜日別の予約可能スケジュールと空き日程</strong>
+                                </div>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-4)', marginTop: 0 }}>
+                                    曜日ごとの基本対応時間と、現在受付中の予約枠（直近30日間）です。<strong>日付をクリックすると</strong>、下の表示日付が切り替わります。
+                                </p>
+
+                                {teacherScheduleLoading ? (
+                                    <div style={{ padding: 'var(--spacing-4) 0', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-xs)' }}>
+                                        スケジュールを読み込んでいます...
+                                    </div>
+                                ) : (
+                                    <div className={styles.scheduleGrid}>
+                                        {DAYS_OF_WEEK.map(day => {
+                                            const temps = interviewTemplates
+                                                .filter(t => t.day_of_week === day.num && t.enabled)
+                                                .map(t => `${t.start_time} - ${t.end_time}`)
+                                            const slots = futureSlotsMap[day.num] || []
+                                            return (
+                                                <div 
+                                                    key={day.num} 
+                                                    className={styles.scheduleDayCard}
+                                                    style={{ 
+                                                        border: `1px solid ${day.border}`
+                                                    }}
+                                                >
+                                                    {/* 曜日ヘッダー */}
+                                                    <div style={{ background: day.bg, color: day.color, padding: '8px 4px', textAlign: 'center', fontWeight: '800', fontSize: 'var(--font-size-sm)', borderBottom: `1px solid ${day.border}` }}>
+                                                        {day.label}
+                                                    </div>
+
+                                                    {/* 基本対応時間帯 */}
+                                                    <div style={{ padding: '8px 6px', borderBottom: '1px dashed var(--border-color)', minHeight: '52px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+                                                        <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', display: 'block' }}>基本対応時間:</span>
+                                                        {temps.length === 0 ? (
+                                                            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>未設定</span>
+                                                        ) : (
+                                                            temps.map((t, i) => (
+                                                                <span key={i} style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', fontWeight: '600', display: 'block' }}>
+                                                                    {t}
+                                                                </span>
+                                                            ))
+                                                        )}
+                                                    </div>
+
+                                                    {/* 予約可能な具体的な日付 */}
+                                                    <div style={{ padding: '8px 6px', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                        <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', display: 'block' }}>受付中の日程:</span>
+                                                        {slots.length === 0 ? (
+                                                            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic', padding: '4px 0' }}>なし</span>
+                                                        ) : (
+                                                            <div className={styles.slotsContainer}>
+                                                                {slots.map(s => {
+                                                                    const isSelected = interviewSelectedDate === s.date;
+                                                                    return (
+                                                                        <button
+                                                                            key={s.date}
+                                                                            type="button"
+                                                                            onClick={() => setInterviewSelectedDate(s.date)}
+                                                                            className={styles.slotButton}
+                                                                            style={{
+                                                                                border: isSelected ? `1px solid ${day.color}` : '1px solid var(--border-color)',
+                                                                                background: isSelected ? day.color : '#fff',
+                                                                                color: isSelected ? '#fff' : 'var(--text-secondary)',
+                                                                                boxShadow: isSelected ? `0 2px 6px ${day.color}33` : 'none'
+                                                                            }}
+                                                                            onMouseEnter={(e) => {
+                                                                                if (!isSelected) {
+                                                                                    e.currentTarget.style.borderColor = day.color
+                                                                                    e.currentTarget.style.background = day.bg
+                                                                                    e.currentTarget.style.color = day.color
+                                                                                }
+                                                                            }}
+                                                                            onMouseLeave={(e) => {
+                                                                                if (!isSelected) {
+                                                                                    e.currentTarget.style.borderColor = 'var(--border-color)'
+                                                                                    e.currentTarget.style.background = '#fff'
+                                                                                    e.currentTarget.style.color = 'var(--text-secondary)'
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            {s.label}
+                                                                        </button>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )
                                         })}
