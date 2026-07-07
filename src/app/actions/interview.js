@@ -932,3 +932,51 @@ export async function getStudentCompletedInterviews(studentIdText) {
     return { success: false, error: e.message }
   }
 }
+
+// 21. 学生用：担任教師の面談可能曜日テンプレートを取得する
+export async function getStudentHomeroomTeacherTemplates(teacherId) {
+  try {
+    const session = await getStudentSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('interview_templates')
+      .select('*')
+      .eq('teacher_id', teacherId)
+      .eq('template_name', 'デフォルト')
+      .order('day_of_week', { ascending: true })
+
+    if (error) throw error
+    return { success: true, templates: data || [] }
+  } catch (e) {
+    console.error('getStudentHomeroomTeacherTemplates error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
+// 22. 学生用：特定の教師の指定範囲内の空きスロットをすべて取得する
+export async function getAvailableSlotsForRange(teacherId, startDateStr, endDateStr) {
+  try {
+    const session = await getStudentSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('interview_slots')
+      .select('id, slot_date, start_time, end_time, status')
+      .eq('teacher_id', teacherId)
+      .eq('status', 'available')
+      .gte('slot_date', startDateStr)
+      .lte('slot_date', endDateStr)
+      .order('slot_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+    return { success: true, slots: data || [] }
+  } catch (e) {
+    console.error('getAvailableSlotsForRange error:', e)
+    return { success: false, error: e.message }
+  }
+}
+

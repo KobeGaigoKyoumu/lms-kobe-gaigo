@@ -12,7 +12,9 @@ import {
     getAvailableSlots,
     bookSlot,
     cancelBooking,
-    getStudentBookings
+    getStudentBookings,
+    getStudentHomeroomTeacherTemplates,
+    getAvailableSlotsForRange
 } from '@/app/actions/interview'
 import { 
     BookOpen, Clipboard, Calendar, HelpCircle, ChevronRight, ChevronLeft, Save, Edit3, Lock,
@@ -68,6 +70,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     const [interviewLoading, setInterviewLoading] = useState(false)
     const [interviewSuccessMsg, setInterviewSuccessMsg] = useState(null)
     const [interviewError, setInterviewError] = useState(null)
+    const [teacherTemplates, setTeacherTemplates] = useState([])
+    const [futureAvailableSlots, setFutureAvailableSlots] = useState([])
+    const [scheduleLoading, setScheduleLoading] = useState(false)
 
     // 入試予定関連の状態
     const [examSchedulesList, setExamSchedulesList] = useState(examSchedules || [])
@@ -757,12 +762,40 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
     // ----------------------------------------------------
     // 面談（INTERVIEW）ロジック
     // ----------------------------------------------------
+    const loadTeacherScheduleDetails = async (teacherId) => {
+        if (!teacherId) return
+        setScheduleLoading(true)
+        try {
+            const todayStr = new Date().toISOString().split('T')[0]
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 30)
+            const futureDateStr = futureDate.toISOString().split('T')[0]
+
+            const [tempRes, slotsRes] = await Promise.all([
+                getStudentHomeroomTeacherTemplates(teacherId),
+                getAvailableSlotsForRange(teacherId, todayStr, futureDateStr)
+            ])
+
+            if (tempRes.success) {
+                setTeacherTemplates(tempRes.templates || [])
+            }
+            if (slotsRes.success) {
+                setFutureAvailableSlots(slotsRes.slots || [])
+            }
+        } catch (err) {
+            console.error('Error loading teacher schedule details:', err)
+        } finally {
+            setScheduleLoading(false)
+        }
+    }
+
     const loadHomeroomTeacher = async () => {
         setInterviewLoading(true)
         const res = await getStudentHomeroomTeacher()
         setInterviewLoading(false)
         if (res.success) {
             setHomeroomTeacher(res.teacher)
+            loadTeacherScheduleDetails(res.teacher.id)
         } else {
             setInterviewError(res.error || '担任教師の取得に失敗しました。')
         }
@@ -806,6 +839,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             setSelectedSlotId('')
             loadAvailableSlots()
             loadStudentBookings()
+            if (homeroomTeacher?.id) {
+                loadTeacherScheduleDetails(homeroomTeacher.id)
+            }
         } else {
             setInterviewError(`予約に失敗しました: ${res.error}`)
         }
@@ -823,6 +859,9 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             setInterviewSuccessMsg('予約をキャンセルしました。')
             loadAvailableSlots()
             loadStudentBookings()
+            if (homeroomTeacher?.id) {
+                loadTeacherScheduleDetails(homeroomTeacher.id)
+            }
         } else {
             setInterviewError(`キャンセルに失敗しました: ${res.error}`)
         }
@@ -840,9 +879,44 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
             loadAvailableSlots()
         }
     }, [activeTab, homeroomTeacher, interviewDate])
+    const DAYS_OF_WEEK = [
+        { num: 1, label: '月曜日', short: '月', color: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe' },
+        { num: 2, label: '火曜日', short: '火', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
+        { num: 3, label: '水曜日', short: '水', color: '#f59e0b', bg: '#fffbeb', border: '#fef3c7' },
+        { num: 4, label: '木曜日', short: '木', color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe' },
+        { num: 5, label: '金曜日', short: '金', color: '#ec4899', bg: '#fdf2f8', border: '#fbcfe8' }
+    ]
 
+    const templateMap = DAYS_OF_WEEK.reduce((acc, day) => {
+        acc[day.num] = teacherTemplates
+            .filter(t => t.day_of_week === day.num)
+            .map(t => `${t.start_time.substring(0, 5)} - ${t.end_time.substring(0, 5)}`)
+        return acc
+    }, {})
 
+    const futureSlotsMap = DAYS_OF_WEEK.reduce((acc, day) => {
+        const slots = futureAvailableSlots.filter(slot => {
+            const dateObj = new Date(slot.slot_date)
+            const dayOfWeek = dateObj.getDay()
+            return dayOfWeek === day.num
+        })
 
+        const uniqueDates = []
+        const seen = new Set()
+        slots.forEach(s => {
+            if (!seen.has(s.slot_date)) {
+                seen.add(s.slot_date)
+                const [y, m, d] = s.slot_date.split('-')
+                uniqueDates.push({
+                    date: s.slot_date,
+                    label: `${parseInt(m, 10)}/${parseInt(d, 10)}`
+                })
+            }
+        })
+
+        acc[day.num] = uniqueDates
+        return acc
+    }, {})
 
     return (
         <div className={styles.page}>
@@ -1031,6 +1105,102 @@ export default function CareerCounselingClient({ initialData, examSchedules, exa
                                         ({session?.className || 'クラス'} 担任)
                                     </span>
                                 </div>
+                            </div>
+
+                            {/* 曜日別面談可能スケジュール表 */}
+                            <div style={{ background: '#f8fafc', padding: 'var(--spacing-5)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-3)' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>📅</span>
+                                    <strong style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>担任の先生と話せる時間・日にち</strong>
+                                </div>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--spacing-4)', marginTop: 0 }}>
+                                    曜日ごとの話せる時間と、よやくできる日（これから30日のあいだ）です。<strong>日にちをクリックすると</strong>、下の「話したい日」に自動で入力されます。
+                                </p>
+
+                                {scheduleLoading ? (
+                                    <div style={{ padding: 'var(--spacing-4) 0', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--font-size-xs)' }}>
+                                        しらべています...
+                                    </div>
+                                ) : (
+                                    <div className={styles.scheduleGrid}>
+                                        {DAYS_OF_WEEK.map(day => {
+                                            const temps = templateMap[day.num] || []
+                                            const slots = futureSlotsMap[day.num] || []
+                                            return (
+                                                <div 
+                                                    key={day.num} 
+                                                    className={styles.scheduleDayCard}
+                                                    style={{ 
+                                                        border: `1px solid ${day.border}`
+                                                    }}
+                                                >
+                                                    {/* 曜日ヘッダー */}
+                                                    <div style={{ background: day.bg, color: day.color, padding: '8px 4px', textAlign: 'center', fontWeight: '800', fontSize: 'var(--font-size-sm)', borderBottom: `1px solid ${day.border}` }}>
+                                                        {day.label}
+                                                    </div>
+
+                                                    {/* 基本対応時間帯 */}
+                                                    <div style={{ padding: '8px 6px', borderBottom: '1px dashed var(--border-color)', minHeight: '52px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+                                                        <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', display: 'block' }}>いつも話せる時間:</span>
+                                                        {temps.length === 0 ? (
+                                                            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>きまっていません</span>
+                                                        ) : (
+                                                            temps.map((t, i) => (
+                                                                <span key={i} style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', fontWeight: '600', display: 'block' }}>
+                                                                    {t}
+                                                                </span>
+                                                            ))
+                                                        )}
+                                                    </div>
+
+                                                    {/* 予約可能な具体的な日付 */}
+                                                    <div style={{ padding: '8px 6px', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                        <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', display: 'block' }}>よやくできる日:</span>
+                                                        {slots.length === 0 ? (
+                                                            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic', padding: '4px 0' }}>ありません</span>
+                                                        ) : (
+                                                            <div className={styles.slotsContainer}>
+                                                                {slots.map(s => {
+                                                                    const isSelected = interviewDate === s.date;
+                                                                    return (
+                                                                        <button
+                                                                            key={s.date}
+                                                                            type="button"
+                                                                            onClick={() => setInterviewDate(s.date)}
+                                                                            className={styles.slotButton}
+                                                                            style={{
+                                                                                border: isSelected ? `1px solid ${day.color}` : '1px solid var(--border-color)',
+                                                                                background: isSelected ? day.color : '#fff',
+                                                                                color: isSelected ? '#fff' : 'var(--text-secondary)',
+                                                                                boxShadow: isSelected ? `0 2px 6px ${day.color}33` : 'none'
+                                                                            }}
+                                                                            onMouseEnter={(e) => {
+                                                                                if (!isSelected) {
+                                                                                    e.currentTarget.style.borderColor = day.color
+                                                                                    e.currentTarget.style.background = day.bg
+                                                                                    e.currentTarget.style.color = day.color
+                                                                                }
+                                                                            }}
+                                                                            onMouseLeave={(e) => {
+                                                                                if (!isSelected) {
+                                                                                    e.currentTarget.style.borderColor = 'var(--border-color)'
+                                                                                    e.currentTarget.style.background = '#fff'
+                                                                                    e.currentTarget.style.color = 'var(--text-secondary)'
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            {s.label}
+                                                                        </button>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                )}
                             </div>
 
                             <div className={styles.formRow3Col} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-4)' }}>
