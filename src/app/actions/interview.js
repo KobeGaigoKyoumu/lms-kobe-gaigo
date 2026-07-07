@@ -418,7 +418,25 @@ export async function bookSlot(slotId, notes) {
     if (fetchError || !slot) throw new Error('指定された枠が見つかりませんでした。')
     if (slot.status !== 'available') throw new Error('この時間枠はすでに別の予約が入ったか、予約不可になっています。')
 
-    // 1. 予約を更新
+    // 1. 中間テーブルに学生を紐付け（トランザクション不整合を防ぐため先に行う）
+    const { error: linkError } = await supabase
+      .from('interview_slot_students')
+      .insert({
+        slot_id: slotId,
+        student_id_text: session.studentId
+      })
+
+    if (linkError) {
+      if (linkError.code === '23503') { // 外部キー制約違反（例: 学籍番号がマスタに存在しない）
+        throw new Error('学籍番号がデータベースに登録されていないため、予約を送信できません。学校の事務局にお問い合わせください。')
+      }
+      if (linkError.code === '23505') { // 一意制約違反（すでに同じ枠に予約済み）
+        throw new Error('この時間枠はすでにあなたによって予約されています。')
+      }
+      throw new Error(linkError.message || '予約の作成に失敗しました。')
+    }
+
+    // 2. 予約スロット本体の状態を更新
     const { error: updateError } = await supabase
       .from('interview_slots')
       .update({
@@ -429,17 +447,17 @@ export async function bookSlot(slotId, notes) {
       })
       .eq('id', slotId)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      // スロット更新に失敗した場合は、先に作成した中間テーブルの紐付けを削除して擬似的にロールバック
+      await supabase
+        .from('interview_slot_students')
+        .delete()
+        .eq('slot_id', slotId)
+        .eq('student_id_text', session.studentId)
+      
+      throw new Error(updateError.message || '予約ステータスの更新に失敗しました。')
+    }
 
-    // 2. 中間テーブルに学生を紐付け
-    const { error: linkError } = await supabase
-      .from('interview_slot_students')
-      .insert({
-        slot_id: slotId,
-        student_id_text: session.studentId
-      })
-
-    if (linkError) throw linkError
     return { success: true }
   } catch (e) {
     console.error('bookSlot error:', e)
