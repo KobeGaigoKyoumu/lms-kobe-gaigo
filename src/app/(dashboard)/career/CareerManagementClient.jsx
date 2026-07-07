@@ -1695,10 +1695,10 @@ export default function CareerManagementClient({
                                                     .filter(s => s.slot_date === interviewSelectedDate)
                                                     .map(slot => (
                                                         <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                                            <td data-label="時間帯" style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="時間帯" style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                                                 {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                                                             </td>
-                                                            <td data-label="ステータス" style={{ padding: '16px', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="ステータス" style={{ padding: '16px' }}>
                                                                 <span style={{
                                                                     background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : slot.status === 'completed' ? '#f3e8ff' : 'var(--success-50)',
                                                                     color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : slot.status === 'completed' ? '#6b21a8' : 'var(--success-700)',
@@ -1714,7 +1714,7 @@ export default function CareerManagementClient({
                                                                      slot.status === 'completed' ? '🟣 実施完了' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
-                                                            <td data-label="氏名" style={{ padding: '16px', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="氏名" style={{ padding: '16px' }}>
                                                                 {(slot.status === 'booked' || slot.status === 'completed') && slot.slot_students && slot.slot_students.length > 0 ? (
                                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                         {slot.slot_students.map(ss => ss.student && (
