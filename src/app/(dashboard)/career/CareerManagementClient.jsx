@@ -1483,9 +1483,20 @@ export default function CareerManagementClient({
                                                         boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                                                     }}
                                                 >
-                                                    {/* 左側：学生情報と日時（2行表示） */}
+                                                    {/* 左側：日時と学生情報（2行表示） */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
-                                                        {/* 上の行：クラス、名前 */}
+                                                        {/* 上の行：日付、時間 */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+                                                            <span style={{ fontWeight: '700', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)' }}>
+                                                                {dayLabel}
+                                                                {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
+                                                            </span>
+                                                            <span style={{ fontWeight: '600' }}>
+                                                                {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
+                                                                {slot.status === 'pending' && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>申請中</span>}
+                                                            </span>
+                                                        </div>
+                                                        {/* 下の行：クラス、名前 */}
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                             {slot.slot_students && slot.slot_students.length > 0 ? (
                                                                 slot.slot_students.map(ss => ss.student && (
@@ -1501,17 +1512,6 @@ export default function CareerManagementClient({
                                                             ) : (
                                                                 <span style={{ color: 'var(--text-tertiary)', fontSize: '13px' }}>学生情報なし</span>
                                                             )}
-                                                        </div>
-                                                        {/* 下の行：日付、時間 */}
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-                                                            <span style={{ fontWeight: '700', color: isToday ? 'var(--primary-600)' : 'var(--text-primary)' }}>
-                                                                {dayLabel}
-                                                                {isToday && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>本日</span>}
-                                                            </span>
-                                                            <span style={{ fontWeight: '600' }}>
-                                                                {slot.start_time?.substring(0,5)} 〜 {slot.end_time?.substring(0,5)}
-                                                                {slot.status === 'pending' && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'var(--warning-50)', color: 'var(--warning-700)', padding: '1px 6px', borderRadius: '4px', fontWeight: '700', border: '1px solid var(--warning-200)', whiteSpace: 'nowrap' }}>申請中</span>}
-                                                            </span>
                                                         </div>
                                                     </div>
 
