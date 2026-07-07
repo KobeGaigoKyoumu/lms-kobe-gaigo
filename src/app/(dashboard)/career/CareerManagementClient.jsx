@@ -1695,10 +1695,10 @@ export default function CareerManagementClient({
                                                     .filter(s => s.slot_date === interviewSelectedDate)
                                                     .map(slot => (
                                                         <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                                            <td style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="時間帯" style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                                                                 {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                                                             </td>
-                                                            <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="ステータス" style={{ padding: '16px', whiteSpace: 'nowrap' }}>
                                                                 <span style={{
                                                                     background: slot.status === 'booked' ? 'var(--primary-50)' : slot.status === 'pending' ? 'var(--warning-50)' : slot.status === 'blocked' ? 'var(--error-50)' : slot.status === 'completed' ? '#f3e8ff' : 'var(--success-50)',
                                                                     color: slot.status === 'booked' ? 'var(--primary-700)' : slot.status === 'pending' ? 'var(--warning-700)' : slot.status === 'blocked' ? 'var(--error-700)' : slot.status === 'completed' ? '#6b21a8' : 'var(--success-700)',
@@ -1714,7 +1714,7 @@ export default function CareerManagementClient({
                                                                      slot.status === 'completed' ? '🟣 実施完了' : '🟢 受付中'}
                                                                 </span>
                                                             </td>
-                                                            <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
+                                                            <td data-label="氏名" style={{ padding: '16px', whiteSpace: 'nowrap' }}>
                                                                 {(slot.status === 'booked' || slot.status === 'completed') && slot.slot_students && slot.slot_students.length > 0 ? (
                                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                         {slot.slot_students.map(ss => ss.student && (
@@ -1725,13 +1725,13 @@ export default function CareerManagementClient({
                                                                     </div>
                                                                 ) : <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                             </td>
-                                                            <td style={{ padding: '16px', minWidth: '200px', maxWidth: '300px', wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                                                            <td data-label="面談メモ / 相談内容" style={{ padding: '16px', minWidth: '200px', maxWidth: '300px', wordBreak: 'break-all', whiteSpace: 'normal' }}>
                                                                 <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: '500', lineHeight: '1.4' }}>
                                                                     {slot.notes || <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
                                                                 </span>
                                                             </td>
-                                                            <td style={{ padding: '16px', textAlign: 'center' }}>
-                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center', flexWrap: 'nowrap' }}>
+                                                            <td data-label="操作" style={{ padding: '16px', textAlign: 'center' }}>
+                                                                <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
                                                                     {slot.status === 'pending' && (
                                                                         <>
                                                                             <button
