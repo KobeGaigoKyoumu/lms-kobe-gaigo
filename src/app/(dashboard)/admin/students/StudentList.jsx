@@ -521,10 +521,29 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                 return
             }
 
+            // 既存の学生IDを取得
+            const { data: existingStudents, error: fetchError } = await supabase
+                .from('students')
+                .select('student_id_text')
+            
+            if (fetchError) throw fetchError
+            const existingIds = new Set(existingStudents?.map(s => s.student_id_text) || [])
+
+            const studentsToUpsert = uniqueStudents.map(student => {
+                if (existingIds.has(student.student_id_text)) {
+                    // 登録済みの学生は、基本情報（氏名、学年、ステータス）の上書きを避けるため、
+                    // それらのプロパティを除外したオブジェクトを作成する。
+                    const { full_name, academic_year, status, ...rest } = student
+                    return rest
+                }
+                // 未登録の学生は全情報を挿入
+                return student
+            })
+
             // Upsert (学籍番号で重複時は更新)
             const { error, count } = await supabase
                 .from('students')
-                .upsert(uniqueStudents, {
+                .upsert(studentsToUpsert, {
                     onConflict: 'student_id_text',
                     count: 'exact'
                 })
