@@ -154,6 +154,17 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
       throw new Error(`テンプレート「${templateName}」が設定されていません。先にテンプレートを保存してください。`)
     }
 
+    // 既存の空き枠 (status = 'available') を指定期間内で一旦削除して上書き可能にする
+    const { error: deleteError } = await supabase
+      .from('interview_slots')
+      .delete()
+      .eq('teacher_id', session.memberId)
+      .eq('status', 'available')
+      .gte('slot_date', startDateStr)
+      .lte('slot_date', endDateStr)
+
+    if (deleteError) throw deleteError
+
     // テンプレートを曜日(1-5)でマッピング
     const templateMap = {}
     templates.forEach(t => {
