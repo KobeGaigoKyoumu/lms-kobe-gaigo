@@ -157,7 +157,10 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
     // テンプレートを曜日(1-5)でマッピング
     const templateMap = {}
     templates.forEach(t => {
-      templateMap[t.day_of_week] = t
+      if (!templateMap[t.day_of_week]) {
+        templateMap[t.day_of_week] = []
+      }
+      templateMap[t.day_of_week].push(t)
     })
 
     const start = new Date(startDateStr)
@@ -169,38 +172,40 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
       const dayOfWeek = d.getDay()
       if (dayOfWeek === 0 || dayOfWeek === 6) continue // 土日はスキップ
 
-      const template = templateMap[dayOfWeek]
-      if (!template) continue // その曜日にテンプレートがなければスキップ
+      const dayTemplates = templateMap[dayOfWeek]
+      if (!dayTemplates || dayTemplates.length === 0) continue // その曜日にテンプレートがなければスキップ
 
       const dateStr = d.toISOString().split('T')[0]
 
-      // 15分刻みスロット生成処理
-      // 例: '09:00:00' -> 分に変換して計算
-      const [sh, sm] = template.start_time.split(':').map(Number)
-      const [eh, em] = template.end_time.split(':').map(Number)
+      for (const template of dayTemplates) {
+        // 15分刻みスロット生成処理
+        // 例: '09:00:00' -> 分に変換して計算
+        const [sh, sm] = template.start_time.split(':').map(Number)
+        const [eh, em] = template.end_time.split(':').map(Number)
 
-      let startMinutes = sh * 60 + sm
-      const endMinutes = eh * 60 + em
+        let startMinutes = sh * 60 + sm
+        const endMinutes = eh * 60 + em
 
-      while (startMinutes + 15 <= endMinutes) {
-        const currentStartMin = startMinutes
-        const currentEndMin = startMinutes + 15
+        while (startMinutes + 15 <= endMinutes) {
+          const currentStartMin = startMinutes
+          const currentEndMin = startMinutes + 15
 
-        const formatTime = (totalMin) => {
-          const h = Math.floor(totalMin / 60).toString().padStart(2, '0')
-          const m = (totalMin % 60).toString().padStart(2, '0')
-          return `${h}:${m}:00`
+          const formatTime = (totalMin) => {
+            const h = Math.floor(totalMin / 60).toString().padStart(2, '0')
+            const m = (totalMin % 60).toString().padStart(2, '0')
+            return `${h}:${m}:00`
+          }
+
+          newSlots.push({
+            teacher_id: session.memberId,
+            slot_date: dateStr,
+            start_time: formatTime(currentStartMin),
+            end_time: formatTime(currentEndMin),
+            status: 'available'
+          })
+
+          startMinutes += 15
         }
-
-        newSlots.push({
-          teacher_id: session.memberId,
-          slot_date: dateStr,
-          start_time: formatTime(currentStartMin),
-          end_time: formatTime(currentEndMin),
-          status: 'available'
-        })
-
-        startMinutes += 15
       }
     }
 

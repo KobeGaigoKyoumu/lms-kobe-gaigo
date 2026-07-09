@@ -78,11 +78,11 @@ export default function CareerManagementClient({
 
     // 面談（Interview）関連の状態
     const [interviewTemplates, setInterviewTemplates] = useState([
-        { day_of_week: 1, start_time: '09:00', end_time: '18:00', enabled: true },
-        { day_of_week: 2, start_time: '09:00', end_time: '18:00', enabled: true },
-        { day_of_week: 3, start_time: '09:00', end_time: '18:00', enabled: true },
-        { day_of_week: 4, start_time: '09:00', end_time: '18:00', enabled: true },
-        { day_of_week: 5, start_time: '09:00', end_time: '18:00', enabled: true }
+        { day_of_week: 1, timeSlots: [{ start_time: '09:00', end_time: '18:00' }], enabled: true },
+        { day_of_week: 2, timeSlots: [{ start_time: '09:00', end_time: '18:00' }], enabled: true },
+        { day_of_week: 3, timeSlots: [{ start_time: '09:00', end_time: '18:00' }], enabled: true },
+        { day_of_week: 4, timeSlots: [{ start_time: '09:00', end_time: '18:00' }], enabled: true },
+        { day_of_week: 5, timeSlots: [{ start_time: '09:00', end_time: '18:00' }], enabled: true }
     ])
     const [interviewSlots, setInterviewSlots] = useState([])
     const [interviewSelectedDate, setInterviewSelectedDate] = useState(new Date().toISOString().split('T')[0])
@@ -801,19 +801,29 @@ export default function CareerManagementClient({
         
         const defaultTemplates = [1, 2, 3, 4, 5].map(day => ({
             day_of_week: day,
-            start_time: '09:00',
-            end_time: '18:00',
+            timeSlots: [{ start_time: '09:00', end_time: '18:00' }],
             enabled: false
         }))
 
         if (res.success && res.templates.length > 0) {
             const formatted = [1, 2, 3, 4, 5].map(day => {
-                const found = res.templates.find(t => t.day_of_week === day)
-                return {
-                    day_of_week: day,
-                    start_time: found ? found.start_time.substring(0, 5) : '09:00',
-                    end_time: found ? found.end_time.substring(0, 5) : '18:00',
-                    enabled: !!found
+                const matched = res.templates.filter(t => t.day_of_week === day)
+                if (matched.length > 0) {
+                    const sorted = [...matched].sort((a, b) => a.start_time.localeCompare(b.start_time))
+                    return {
+                        day_of_week: day,
+                        timeSlots: sorted.map(t => ({
+                            start_time: t.start_time.substring(0, 5),
+                            end_time: t.end_time.substring(0, 5)
+                        })),
+                        enabled: true
+                    }
+                } else {
+                    return {
+                        day_of_week: day,
+                        timeSlots: [{ start_time: '09:00', end_time: '18:00' }],
+                        enabled: false
+                    }
                 }
             })
             setInterviewTemplates(formatted)
@@ -828,11 +838,11 @@ export default function CareerManagementClient({
         setInterviewError(null)
         const activeTemplates = interviewTemplates
             .filter(t => t.enabled)
-            .map(t => ({
+            .flatMap(t => t.timeSlots.map(slot => ({
                 day_of_week: t.day_of_week,
-                start_time: `${t.start_time}:00`,
-                end_time: `${t.end_time}:00`
-            }))
+                start_time: `${slot.start_time}:00`,
+                end_time: `${slot.end_time}:00`
+            })))
 
         const res = await saveTeacherTemplates(activeTemplates, selectedTemplateName)
         setInterviewSaving(false)
@@ -1842,53 +1852,91 @@ export default function CareerManagementClient({
                                     const isEnabled = temp.enabled;
                                     return (
                                         <div key={temp.day_of_week} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', padding: 'var(--spacing-4)', background: isEnabled ? 'linear-gradient(135deg, var(--bg-card), var(--bg-secondary))' : 'var(--bg-secondary)', border: isEnabled ? '1px solid var(--primary-200)' : '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', opacity: isEnabled ? 1 : 0.65, transition: 'all 0.2s', boxShadow: isEnabled ? '0 4px 12px rgba(0,0,0,0.02)' : 'none' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', cursor: 'pointer' }}>
-                                                <input 
-                                                    type="checkbox"
-                                                    checked={temp.enabled}
-                                                    onChange={(e) => {
-                                                        const updated = [...interviewTemplates]
-                                                        updated[idx].enabled = e.target.checked
-                                                        setInterviewTemplates(updated)
-                                                    }}
-                                                    style={{ width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer' }}
-                                                />
-                                                <span style={{ fontWeight: '700', fontSize: 'var(--font-size-md)', color: isEnabled ? 'var(--primary-700)' : 'var(--text-secondary)' }}>
-                                                    {['日', '月', '火', '水', '木', '金', '土'][temp.day_of_week]}曜日
-                                                </span>
-                                            </label>
-
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: '4px' }}>
-                                                <input 
-                                                    type="time" 
-                                                    value={temp.start_time}
-                                                    min="09:00"
-                                                    max="18:00"
-                                                    disabled={!temp.enabled}
-                                                    onChange={(e) => {
-                                                        const updated = [...interviewTemplates]
-                                                        updated[idx].start_time = e.target.value
-                                                        setInterviewTemplates(updated)
-                                                    }}
-                                                    className={styles.searchInput}
-                                                    style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
-                                                />
-                                                <span style={{ color: 'var(--text-tertiary)' }}>〜</span>
-                                                <input 
-                                                    type="time" 
-                                                    value={temp.end_time}
-                                                    min="09:00"
-                                                    max="18:00"
-                                                    disabled={!temp.enabled}
-                                                    onChange={(e) => {
-                                                        const updated = [...interviewTemplates]
-                                                        updated[idx].end_time = e.target.value
-                                                        setInterviewTemplates(updated)
-                                                    }}
-                                                    className={styles.searchInput}
-                                                    style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
-                                                />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', cursor: 'pointer' }}>
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={temp.enabled}
+                                                        onChange={(e) => {
+                                                            const updated = [...interviewTemplates]
+                                                            updated[idx].enabled = e.target.checked
+                                                            setInterviewTemplates(updated)
+                                                        }}
+                                                        style={{ width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer' }}
+                                                    />
+                                                    <span style={{ fontWeight: '700', fontSize: 'var(--font-size-md)', color: isEnabled ? 'var(--primary-700)' : 'var(--text-secondary)' }}>
+                                                        {['日', '月', '火', '水', '木', '金', '土'][temp.day_of_week]}曜日
+                                                    </span>
+                                                </label>
                                             </div>
+
+                                            {/* 時間枠のリスト */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {temp.timeSlots.map((slot, sIdx) => (
+                                                    <div key={sIdx} style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                                                        <input 
+                                                            type="time" 
+                                                            value={slot.start_time}
+                                                            min="09:00"
+                                                            max="18:00"
+                                                            disabled={!temp.enabled}
+                                                            onChange={(e) => {
+                                                                const updated = [...interviewTemplates]
+                                                                updated[idx].timeSlots[sIdx].start_time = e.target.value
+                                                                setInterviewTemplates(updated)
+                                                            }}
+                                                            className={styles.searchInput}
+                                                            style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
+                                                        />
+                                                        <span style={{ color: 'var(--text-tertiary)' }}>〜</span>
+                                                        <input 
+                                                            type="time" 
+                                                            value={slot.end_time}
+                                                            min="09:00"
+                                                            max="18:00"
+                                                            disabled={!temp.enabled}
+                                                            onChange={(e) => {
+                                                                const updated = [...interviewTemplates]
+                                                                updated[idx].timeSlots[sIdx].end_time = e.target.value
+                                                                setInterviewTemplates(updated)
+                                                            }}
+                                                            className={styles.searchInput}
+                                                            style={{ width: '100%', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', outline: 'none' }}
+                                                        />
+                                                        <button
+                                                            disabled={!temp.enabled}
+                                                            onClick={() => {
+                                                                const updated = [...interviewTemplates]
+                                                                if (updated[idx].timeSlots.length > 1) {
+                                                                    updated[idx].timeSlots.splice(sIdx, 1)
+                                                                } else {
+                                                                    updated[idx].timeSlots = [{ start_time: '09:00', end_time: '18:00' }]
+                                                                    updated[idx].enabled = false
+                                                                }
+                                                                setInterviewTemplates(updated)
+                                                            }}
+                                                            style={{ background: 'none', border: 'none', cursor: temp.enabled ? 'pointer' : 'default', padding: '4px', color: 'var(--error-600)', opacity: temp.enabled ? 1 : 0.5, fontSize: 'var(--font-size-sm)' }}
+                                                            title="時間枠を削除"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* 時間枠を追加ボタン */}
+                                            {temp.enabled && (
+                                                <button
+                                                    onClick={() => {
+                                                        const updated = [...interviewTemplates]
+                                                        updated[idx].timeSlots.push({ start_time: '09:00', end_time: '18:00' })
+                                                        setInterviewTemplates(updated)
+                                                    }}
+                                                    style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--primary-600)', fontSize: 'var(--font-size-xs)', fontWeight: '700', cursor: 'pointer', padding: '4px 8px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                >
+                                                    ➕ 時間枠を追加
+                                                </button>
+                                            )}
                                         </div>
                                     )
                                 })}
