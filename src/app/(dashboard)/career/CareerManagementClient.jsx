@@ -1557,9 +1557,10 @@ export default function CareerManagementClient({
                                 ) : (
                                     <div className={styles.scheduleGrid}>
                                         {DAYS_OF_WEEK.map(day => {
-                                            const temps = interviewTemplates
-                                                .filter(t => t.day_of_week === day.num && t.enabled)
-                                                .map(t => `${t.start_time} - ${t.end_time}`)
+                                            const foundDay = interviewTemplates.find(t => t.day_of_week === day.num)
+                                            const temps = foundDay && foundDay.enabled
+                                                ? foundDay.timeSlots.map(slot => `${slot.start_time} - ${slot.end_time}`)
+                                                : []
                                             const slots = futureSlotsMap[day.num] || []
                                             return (
                                                 <div 
