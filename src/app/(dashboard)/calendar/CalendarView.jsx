@@ -9,7 +9,7 @@ import styles from './page.module.css'
 import EventModal from './EventModal'
 import PackageList from './components/PackageList'
 import PackageModal from './components/PackageModal'
-import { applyPackageToTarget, unapplyPackageFromTarget, copyEventPackage } from '@/app/actions/calendar'
+import { applyPackageToTarget, unapplyPackageFromTarget, copyEventPackage, deleteSingleEvent } from '@/app/actions/calendar'
 
 export default function CalendarView({ events, canCreateEvent, userId }) {
     const router = useRouter()
@@ -165,6 +165,22 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
 
     const handleEventSave = () => {
         handleModalClose()
+        router.refresh()
+    }
+
+    const handleDeleteDirect = async (event, e) => {
+        e.stopPropagation()
+        if (!confirm(`イベント「${event.title}」を削除しますか？`)) return
+
+        const { error } = await deleteSingleEvent(event.id)
+
+        if (error) {
+            alert('削除に失敗しました')
+            console.error(error)
+            return
+        }
+
+        alert('削除しました')
         router.refresh()
     }
 
@@ -439,7 +455,12 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                                 key={event.id}
                                                 className={styles.event}
                                                 style={{ background: getPastelColor(event.color || '#3b82f6'), color: '#374151', padding: '0 2px', borderRadius: '4px' }}
-                                                onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    if (event.isCustomEvent) {
+                                                        handleEventClick(event, e)
+                                                    }
+                                                }}
                                                 title={event.title}
                                             >
                                                 {event.type === 'assignment' ? (
@@ -478,7 +499,11 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                         event.type === 'exam' ? '試験' :
                                             event.type === 'holiday' ? '休日' : 'その他'
                                 return (
-                                    <div key={event.id} className={styles.eventListItem}>
+                                    <div
+                                        key={event.id}
+                                        className={`${styles.eventListItem} ${event.isCustomEvent ? styles.clickable : ''}`}
+                                        onClick={(e) => event.isCustomEvent ? handleEventClick(event, e) : null}
+                                    >
                                         <span className={styles.eventDot} style={{ backgroundColor: event.color || '#3b82f6' }} />
                                         <div className={styles.eventListBody}>
                                             <span className={styles.eventListDate}>
@@ -500,6 +525,20 @@ export default function CalendarView({ events, canCreateEvent, userId }) {
                                             >
                                                 {typeLabel}
                                             </span>
+                                            {canCreateEvent && event.isCustomEvent && (
+                                                <button
+                                                    onClick={(e) => handleDeleteDirect(event, e)}
+                                                    className={styles.deleteBtn}
+                                                    title="イベントを削除"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                    </svg>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 )
