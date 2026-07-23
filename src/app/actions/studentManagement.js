@@ -7,9 +7,9 @@ const getSupabase = async () => {
     const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '')
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!supabaseServiceKey) {
-        // Fallback to client if key is missing (e.g. locally if not set)
-        const { createClient } = await import('@/lib/supabase/client')
-        return createClient()
+        // Fallback: Use server client with current user's session cookies
+        const { createClient } = await import('@/lib/supabase/server')
+        return await createClient()
     }
     return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }
@@ -288,5 +288,150 @@ export const performGradeReset = async (studentsData) => {
         createdCount: newFirstYears.length,
         classesCreated,
         membersRegistered
+    }
+}
+
+/**
+ * 通常の学生Excelアップロード処理（Server Action）
+ * @param {Array} uniqueStudents パース済みの学生データ配列
+ */
+export const processStudentExcelUpload = async (uniqueStudents) => {
+    try {
+        const supabase = await getSupabase()
+
+        // 1. ユニークなクラス名を抽出
+        const uniqueClasses = [...new Set(
+            uniqueStudents
+                .map(row => String(row.class_name || '').trim())
+                .filter(cls => cls && /^\d+-\d+$/.test(cls))
+        )]
+
+        // 2. 既存クラスの確認 & 新規クラス作成
+        let classesCreated = 0
+        if (uniqueClasses.length > 0) {
+            const { data: existingClasses } = await supabase
+                .from('classes')
+                .select('name')
+
+            const existingClassNames = new Set((existingClasses || []).map(c => c.name))
+            const newClasses = uniqueClasses.filter(cls => !existingClassNames.has(cls))
+
+            if (newClasses.length > 0) {
+                const classesToInsert = newClasses.map(className => {
+                    const gradeLevel = className.startsWith('1-') ? '1年' : className.startsWith('2-') ? '2年' : null
+                    return {
+                        name: className,
+                        grade_level: gradeLevel,
+                        academic_year: new Date().getFullYear(),
+                        description: `${className}クラス`
+                    }
+                })
+
+                const { error: classError } = await supabase
+                    .from('classes')
+                    .insert(classesToInsert)
+
+                if (!classError) {
+                    classesCreated = newClasses.length
+                } else {
+                    console.error('Class creation error:', classError)
+                }
+            }
+        }
+
+        // 3. 既存の学生データを取得し、新規と更新用にマージ
+        const { data: existingStudents, error: fetchError } = await supabase
+            .from('students')
+            .select('student_id_text, full_name, academic_year, status')
+
+        if (fetchError) throw fetchError
+        const existingMap = new Map((existingStudents || []).map(s => [s.student_id_text, s]))
+
+        const studentsToUpsert = uniqueStudents.map(student => {
+            const existing = existingMap.get(student.student_id_text)
+            if (existing) {
+                // 既存の学生はDB内の氏名、学年、ステータスを優先して保持し、他の拡張属性を更新する
+                return {
+                    ...student,
+                    full_name: existing.full_name || student.full_name || '名称未設定',
+                    academic_year: existing.academic_year || student.academic_year,
+                    status: existing.status || student.status || 'active'
+                }
+            }
+            // 新規の学生
+            return {
+                ...student,
+                full_name: student.full_name || '名称未設定',
+                status: student.status || 'active'
+            }
+        })
+
+        // 4. Students Upsert
+        const { error: upsertError } = await supabase
+            .from('students')
+            .upsert(studentsToUpsert, {
+                onConflict: 'student_id_text'
+            })
+
+        if (upsertError) throw upsertError
+
+        // 5. クラスメンバー自動登録
+        const { data: allClasses } = await supabase
+            .from('classes')
+            .select('id, name')
+
+        const classMap = new Map((allClasses || []).map(c => [c.name, c.id]))
+
+        const studentIds = uniqueStudents
+            .filter(s => s.class_name && classMap.has(s.class_name))
+            .map(s => s.student_id_text)
+
+        let membersRegistered = 0
+
+        if (studentIds.length > 0) {
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, student_id')
+                .in('student_id', studentIds)
+
+            if (profiles && profiles.length > 0) {
+                const profileMap = new Map(profiles.map(p => [p.student_id, p.id]))
+
+                const membersToInsert = uniqueStudents
+                    .filter(s => s.class_name && profileMap.has(s.student_id_text))
+                    .map(s => ({
+                        class_id: classMap.get(s.class_name),
+                        user_id: profileMap.get(s.student_id_text)
+                    }))
+                    .filter(m => m.class_id && m.user_id)
+
+                if (membersToInsert.length > 0) {
+                    const { error: memberError } = await supabase
+                        .from('class_members')
+                        .upsert(membersToInsert, { onConflict: 'class_id,user_id' })
+
+                    if (!memberError) {
+                        membersRegistered = membersToInsert.length
+                    }
+                }
+            }
+        }
+
+        revalidateTag('students', 'max')
+        revalidateTag('jlpt-analytics', 'max')
+        revalidateTag('classes', 'max')
+
+        return {
+            success: true,
+            count: uniqueStudents.length,
+            classesCreated,
+            membersRegistered
+        }
+    } catch (err) {
+        console.error('processStudentExcelUpload error:', err)
+        return {
+            success: false,
+            error: err.message || 'データ保存中にエラーが発生しました'
+        }
     }
 }

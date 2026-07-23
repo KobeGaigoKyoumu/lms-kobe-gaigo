@@ -13,7 +13,8 @@ import {
     deleteStudent,
     bulkDeleteStudents,
     resetAllGrades,
-    performGradeReset
+    performGradeReset,
+    processStudentExcelUpload
 } from '@/app/actions/studentManagement'
 import { revalidateStudents } from '@/app/actions/studentData'
 
@@ -398,46 +399,6 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                 console.log('First data row:', dataRows[0])
             }
 
-            // ユニークなクラス名を抽出
-            const uniqueClasses = [...new Set(
-                dataRows
-                    .map(row => String(row[colClass] || '').trim())
-                    .filter(cls => cls && /^\d+-\d+$/.test(cls)) // "1-1", "2-11" 形式のみ
-            )]
-
-            // 既存のクラスを取得
-            const { data: existingClasses } = await supabase
-                .from('classes')
-                .select('name')
-
-            const existingClassNames = new Set((existingClasses || []).map(c => c.name))
-
-            // 新規クラスを作成
-            const newClasses = uniqueClasses.filter(cls => !existingClassNames.has(cls))
-            let classesCreated = 0
-
-            if (newClasses.length > 0) {
-                const classesToInsert = newClasses.map(className => {
-                    const gradeLevel = className.startsWith('1-') ? '1年' : className.startsWith('2-') ? '2年' : null
-                    return {
-                        name: className,
-                        grade_level: gradeLevel,
-                        academic_year: new Date().getFullYear(),
-                        description: `${className}クラス`
-                    }
-                })
-
-                const { error: classError, count } = await supabase
-                    .from('classes')
-                    .insert(classesToInsert)
-
-                if (!classError) {
-                    classesCreated = newClasses.length
-                } else {
-                    console.error('Class creation error:', classError)
-                }
-            }
-
             // Excel日付シリアル値をISO日付文字列に変換するヘルパー
             const excelDateToIso = (serial) => {
                 if (!serial || typeof serial !== 'number') return null
@@ -478,11 +439,6 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                 }
 
                 // 拡張カラムのデータを読み込む（在籍者.xlsx形式）
-                // カラム位置（在籍者.xlsx）:
-                // 4:カタカナ, 5:ローマ字, 6:国籍, 7:性別, 8:生年月日
-                // 9:在留資格, 10:入国日, 11:在留期限, 12:パスポート番号
-                // 13:在留カード番号, 14:住所, 15:連絡方法, 16:期
-                // 18:入学年月日, 19:卒業年月, 20:コース
                 if (row[4]) studentData.name_kana = String(row[4]).trim()
                 if (row[5]) studentData.name_romaji = String(row[5]).trim()
                 if (row[6]) studentData.nationality = String(row[6]).trim()
@@ -521,87 +477,23 @@ export default function StudentList({ initialStudents = [], initialStats = [] })
                 return
             }
 
-            // 既存の学生IDを取得
-            const { data: existingStudents, error: fetchError } = await supabase
-                .from('students')
-                .select('student_id_text')
-            
-            if (fetchError) throw fetchError
-            const existingIds = new Set(existingStudents?.map(s => s.student_id_text) || [])
+            // Server Action 経由で安全に一括更新
+            const uploadRes = await processStudentExcelUpload(uniqueStudents)
 
-            const studentsToUpsert = uniqueStudents.map(student => {
-                if (existingIds.has(student.student_id_text)) {
-                    // 登録済みの学生は、基本情報（氏名、学年、ステータス）の上書きを避けるため、
-                    // それらのプロパティを除外したオブジェクトを作成する。
-                    const { full_name, academic_year, status, ...rest } = student
-                    return rest
-                }
-                // 未登録の学生は全情報を挿入
-                return student
-            })
-
-            // Upsert (学籍番号で重複時は更新)
-            const { error, count } = await supabase
-                .from('students')
-                .upsert(studentsToUpsert, {
-                    onConflict: 'student_id_text',
-                    count: 'exact'
+            if (!uploadRes || !uploadRes.success) {
+                setUploadResult({
+                    success: false,
+                    message: `アップロードエラー: ${uploadRes?.error || '不明なエラーが発生しました'}`
                 })
-
-            if (error) throw error
-
-            // ===== クラスメンバー自動登録 =====
-            // 既存のクラス一覧を取得（新規作成分も含む）
-            const { data: allClasses } = await supabase
-                .from('classes')
-                .select('id, name')
-
-            const classMap = new Map((allClasses || []).map(c => [c.name, c.id]))
-
-            // 一括でprofilesを取得（student_idで照合）
-            const studentIds = uniqueStudents
-                .filter(s => s.class_name && classMap.has(s.class_name))
-                .map(s => s.student_id_text)
-
-            let membersRegistered = 0
-
-            if (studentIds.length > 0) {
-                const { data: profiles } = await supabase
-                    .from('profiles')
-                    .select('id, student_id')
-                    .in('student_id', studentIds)
-
-                if (profiles && profiles.length > 0) {
-                    const profileMap = new Map(profiles.map(p => [p.student_id, p.id]))
-
-                    // class_membersに登録するデータを作成
-                    const membersToInsert = uniqueStudents
-                        .filter(s => s.class_name && profileMap.has(s.student_id_text))
-                        .map(s => ({
-                            class_id: classMap.get(s.class_name),
-                            user_id: profileMap.get(s.student_id_text)
-                        }))
-                        .filter(m => m.class_id && m.user_id)
-
-                    if (membersToInsert.length > 0) {
-                        const { error: memberError } = await supabase
-                            .from('class_members')
-                            .upsert(membersToInsert, { onConflict: 'class_id,user_id' })
-
-                        if (!memberError) {
-                            membersRegistered = membersToInsert.length
-                        }
-                    }
-                }
+                return
             }
-            // ===== クラスメンバー自動登録 終了 =====
 
-            let message = `${uniqueStudents.length}件の学生データを登録/更新しました`
-            if (classesCreated > 0) {
-                message += `。${classesCreated}個のクラスを新規作成しました`
+            let message = `${uploadRes.count}件の学生データを登録/更新しました`
+            if (uploadRes.classesCreated > 0) {
+                message += `。${uploadRes.classesCreated}個のクラスを新規作成しました`
             }
-            if (membersRegistered > 0) {
-                message += `。${membersRegistered}名をクラスに登録しました`
+            if (uploadRes.membersRegistered > 0) {
+                message += `。${uploadRes.membersRegistered}名をクラスに登録しました`
             }
 
             setUploadResult({
