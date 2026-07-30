@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, Loader2 } from 'lucide-react'
+import { ChevronLeft, Loader2, Copy } from 'lucide-react'
 import styles from './page.module.css'
 import SubmissionMatrix from './SubmissionMatrix'
 import StudyRecordsMatrix from './StudyRecordsMatrix'
@@ -245,7 +245,7 @@ export default function ClassAssignmentsPage({ params }) {
                                             <h3>{assignment.title}</h3>
                                             <p className="text-sm text-gray-500 mt-1 truncate">{assignment.description}</p>
                                         </div>
-                                        <div className={styles.cardMeta}>
+                                        <div className={styles.cardMeta} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                             {assignment.deadline ? (
                                                 <span className={styles.dueDate}>
                                                     締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP', {
@@ -258,6 +258,29 @@ export default function ClassAssignmentsPage({ params }) {
                                             ) : (
                                                 <span className={styles.noDue}>締切なし</span>
                                             )}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    e.stopPropagation()
+                                                    window.location.href = `/assignments/new?copyFrom=${assignment.id}`
+                                                }}
+                                                title="この課題をコピーして作成"
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.25rem',
+                                                    padding: '0.25rem 0.5rem',
+                                                    fontSize: '0.75rem',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--border-color, #e5e7eb)',
+                                                    background: 'var(--bg-secondary, #f9fafb)',
+                                                    color: 'var(--text-secondary, #374151)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <Copy size={12} />
+                                                コピー
+                                            </button>
                                         </div>
                                     </Link>
                                 ))}
@@ -286,10 +309,33 @@ export default function ClassAssignmentsPage({ params }) {
                                         <div className={styles.cardMain}>
                                             <h3>{assignment.title}</h3>
                                         </div>
-                                        <div className={styles.cardMeta}>
+                                        <div className={styles.cardMeta} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                             <span className={styles.dueDate}>
                                                 締切: {new Date(assignment.deadline).toLocaleDateString('ja-JP')}
                                             </span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    e.stopPropagation()
+                                                    window.location.href = `/assignments/new?copyFrom=${assignment.id}`
+                                                }}
+                                                title="この課題をコピーして作成"
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.25rem',
+                                                    padding: '0.25rem 0.5rem',
+                                                    fontSize: '0.75rem',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--border-color, #e5e7eb)',
+                                                    background: 'var(--bg-secondary, #f9fafb)',
+                                                    color: 'var(--text-secondary, #374151)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <Copy size={12} />
+                                                コピー
+                                            </button>
                                         </div>
                                     </Link>
                                 ))}

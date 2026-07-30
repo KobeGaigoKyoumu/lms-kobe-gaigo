@@ -7,7 +7,7 @@ import { Loader2, Check, Copy, ExternalLink, Plus } from 'lucide-react'
 import Link from 'next/link'
 import styles from '@/app/(dashboard)/assignments/new/page.module.css'
 
-export default function AssignmentForm({ classes = [], subjects = [] }) {
+export default function AssignmentForm({ classes = [], subjects = [], initialData = null }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [createdAssignmentIds, setCreatedAssignmentIds] = useState(null)
@@ -69,6 +69,13 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
         )
     }
 
+    const defaultTitle = initialData ? `${initialData.title || ''} (コピー)` : ''
+    const defaultSubject = initialData?.subject || ''
+    const defaultDescription = initialData?.description || ''
+    const defaultReleasedAt = initialData?.released_at ? initialData.released_at.slice(0, 16) : ''
+    const defaultDeadline = initialData?.deadline ? initialData.deadline.slice(0, 16) : ''
+    const defaultClass = initialData?.class_name || ''
+
     return (
         <form action={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
@@ -79,6 +86,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                     name="title"
                     type="text"
                     required
+                    defaultValue={defaultTitle}
                     className={styles.input}
                     placeholder="例: 第1回 レポート課題"
                 />
@@ -91,6 +99,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                 <select
                     name="subject"
                     required
+                    defaultValue={defaultSubject}
                     className={styles.input}
                 >
                     <option value="">科目を選択</option>
@@ -111,6 +120,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                 <textarea
                     name="description"
                     rows="5"
+                    defaultValue={defaultDescription}
                     className={styles.textarea}
                     placeholder="課題の内容や注意事項を入力してください"
                 />
@@ -133,19 +143,24 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                     overflowY: 'auto'
                 }}>
                     {classes.length > 0 ? (
-                        classes.map(c => (
-                            <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    name="classNames"
-                                    value={c.name || c.class_name}
-                                    style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
-                                />
-                                <span style={{ fontSize: 'var(--font-size-sm)', userSelect: 'none' }}>
-                                    {c.name || c.class_name}
-                                </span>
-                            </label>
-                        ))
+                        classes.map(c => {
+                            const cName = c.name || c.class_name
+                            const isDefaultChecked = defaultClass && defaultClass === cName
+                            return (
+                                <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        name="classNames"
+                                        value={cName}
+                                        defaultChecked={isDefaultChecked}
+                                        style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                                    />
+                                    <span style={{ fontSize: 'var(--font-size-sm)', userSelect: 'none' }}>
+                                        {cName}
+                                    </span>
+                                </label>
+                            )
+                        })
                     ) : (
                         <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>
                             クラスが見つかりません
@@ -162,6 +177,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                     <input
                         name="released_at"
                         type="datetime-local"
+                        defaultValue={defaultReleasedAt}
                         className={styles.input}
                     />
                 </div>
@@ -173,6 +189,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                         name="deadline"
                         type="datetime-local"
                         required
+                        defaultValue={defaultDeadline}
                         className={styles.input}
                     />
                 </div>
@@ -185,7 +202,7 @@ export default function AssignmentForm({ classes = [], subjects = [] }) {
                     className={styles.submitButton}
                 >
                     {loading && <Loader2 className="animate-spin" size={18} />}
-                    {loading ? '作成中...' : '課題を作成する'}
+                    {loading ? '作成中...' : (initialData ? 'コピー課題を作成する' : '課題を作成する')}
                 </button>
             </div>
         </form>

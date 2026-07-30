@@ -466,7 +466,37 @@ export async function updateAssignmentDeadline(assignmentId, newDeadline) {
     return { success: true }
 }
 
-export async function updateAssignment(assignmentId, { title, subject, description, deadline, released_at }) {
+export async function getRelatedAssignmentClasses(assignmentId) {
+    const supabase = createAdminClient()
+    const { data: current } = await supabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', assignmentId)
+        .single()
+        
+    if (!current) return []
+    
+    // 同じタイトル・科目・教師の関連課題を抽出
+    let query = supabase
+        .from('homework_assignments')
+        .select('id, class_name')
+        .eq('title', current.title)
+
+    if (current.subject) {
+        query = query.eq('subject', current.subject)
+    }
+    if (current.teacher_id) {
+        query = query.eq('teacher_id', current.teacher_id)
+    }
+
+    const { data: related } = await query
+
+    if (!related || related.length === 0) return [current.class_name]
+    
+    return Array.from(new Set(related.map(r => r.class_name)))
+}
+
+export async function updateAssignment(assignmentId, { title, subject, description, deadline, released_at, classNames }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const adminMember = await getAdminMemberSession()
@@ -486,6 +516,27 @@ export async function updateAssignment(assignmentId, { title, subject, descripti
     }
 
     const adminSupabase = createAdminClient()
+
+    // 1. 対象の課題情報を取得
+    const { data: currentAssignment, error: fetchErr } = await adminSupabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', assignmentId)
+        .single()
+
+    if (fetchErr || !currentAssignment) {
+        return { error: '対象の課題が見つかりません' }
+    }
+
+    // 2. 元課題の更新（class_name含む）
+    let targetClassName = currentAssignment.class_name
+    if (Array.isArray(classNames) && classNames.length > 0) {
+        const normalizedTargetClasses = classNames.map(c => normalizeClassName(c))
+        if (!normalizedTargetClasses.includes(normalizeClassName(currentAssignment.class_name))) {
+            targetClassName = normalizedTargetClasses[0]
+        }
+    }
+
     let query = adminSupabase
         .from('homework_assignments')
         .update({
@@ -493,7 +544,8 @@ export async function updateAssignment(assignmentId, { title, subject, descripti
             subject: subject || null,
             description,
             deadline: parsedDeadline,
-            released_at: parsedReleasedAt
+            released_at: parsedReleasedAt,
+            class_name: normalizeClassName(targetClassName)
         })
         .eq('id', assignmentId)
 
@@ -508,6 +560,81 @@ export async function updateAssignment(assignmentId, { title, subject, descripti
         return { error: '課題の更新に失敗しました' }
     }
 
+    // 3. 複数クラスへの反映処理
+    if (Array.isArray(classNames) && classNames.length > 0) {
+        const normalizedClassNames = Array.from(new Set(classNames.map(c => normalizeClassName(c))))
+
+        let relatedQuery = adminSupabase
+            .from('homework_assignments')
+            .select('id, class_name')
+            .eq('title', currentAssignment.title)
+
+        if (currentAssignment.subject) {
+            relatedQuery = relatedQuery.eq('subject', currentAssignment.subject)
+        }
+        if (currentAssignment.teacher_id) {
+            relatedQuery = relatedQuery.eq('teacher_id', currentAssignment.teacher_id)
+        }
+
+        const { data: relatedAssignments } = await relatedQuery
+
+        const existingClassMap = new Map()
+        if (relatedAssignments) {
+            relatedAssignments.forEach(a => {
+                existingClassMap.set(normalizeClassName(a.class_name), a.id)
+            })
+        }
+
+        // A. 新たに追加されたクラスへ課題を作成または既存同名課題を更新
+        for (const cls of normalizedClassNames) {
+            const existingId = existingClassMap.get(cls)
+            if (existingId) {
+                if (existingId !== assignmentId) {
+                    await adminSupabase
+                        .from('homework_assignments')
+                        .update({
+                            title,
+                            subject: subject || null,
+                            description,
+                            deadline: parsedDeadline,
+                            released_at: parsedReleasedAt
+                        })
+                        .eq('id', existingId)
+                }
+            } else {
+                await adminSupabase
+                    .from('homework_assignments')
+                    .insert({
+                        title,
+                        description,
+                        class_name: cls,
+                        subject: subject || null,
+                        deadline: parsedDeadline,
+                        released_at: parsedReleasedAt,
+                        teacher_id: currentAssignment.teacher_id || user?.id || null,
+                        is_archived: false
+                    })
+            }
+        }
+
+        // B. 選択から外されたクラスの関連課題の削除（提出物がない場合のみ安全に削除）
+        for (const [cls, relId] of existingClassMap.entries()) {
+            if (!normalizedClassNames.includes(cls) && relId !== assignmentId) {
+                const { count } = await adminSupabase
+                    .from('homework_submissions')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('assignment_id', relId)
+
+                if (!count || count === 0) {
+                    await adminSupabase
+                        .from('homework_assignments')
+                        .delete()
+                        .eq('id', relId)
+                }
+            }
+        }
+    }
+
     // Comprehensive revalidation for immediate reflection
     revalidateTag('homework-assignments', 'max')
     revalidateTag('homework-stats', 'max')
@@ -515,6 +642,85 @@ export async function updateAssignment(assignmentId, { title, subject, descripti
     revalidatePath('/assignments')
     
     return { success: true }
+}
+
+export async function copyAssignment(sourceAssignmentId, targetClassNames, customData = {}) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const adminMember = await getAdminMemberSession()
+
+    if (!user && !adminMember) {
+        return { error: 'Unauthorized' }
+    }
+
+    if (!targetClassNames || targetClassNames.length === 0) {
+        return { error: '少なくとも1つの対象クラスを選択してください' }
+    }
+
+    const adminSupabase = createAdminClient()
+
+    const { data: source, error: fetchErr } = await adminSupabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', sourceAssignmentId)
+        .single()
+
+    if (fetchErr || !source) {
+        return { error: 'コピー元の課題が見つかりません' }
+    }
+
+    const title = customData.title || source.title
+    const description = customData.description !== undefined ? customData.description : source.description
+    const subject = customData.subject !== undefined ? customData.subject : source.subject
+    
+    let deadline = customData.deadline || source.deadline
+    if (deadline && typeof deadline === 'string' && !deadline.includes('Z') && !deadline.includes('+')) {
+        deadline = `${deadline}:00+09:00`
+    }
+
+    let releasedAt = customData.released_at || source.released_at || new Date().toISOString()
+    if (releasedAt && typeof releasedAt === 'string' && !releasedAt.includes('Z') && !releasedAt.includes('+')) {
+        releasedAt = `${releasedAt}:00+09:00`
+    }
+
+    const insertData = targetClassNames.map(className => ({
+        title,
+        description,
+        class_name: normalizeClassName(className),
+        subject: subject || null,
+        deadline,
+        released_at: releasedAt,
+        teacher_id: user?.id || source.teacher_id || null,
+        is_archived: false
+    }))
+
+    const { data: newAssignments, error } = await adminSupabase
+        .from('homework_assignments')
+        .insert(insertData)
+        .select()
+
+    if (error) {
+        console.error('Copy assignment error:', error)
+        return { error: `コピーに失敗しました: ${error.message}` }
+    }
+
+    revalidateTag('homework-assignments', 'max')
+    revalidateTag('homework-stats', 'max')
+    revalidatePath('/assignments')
+
+    return { success: true, ids: newAssignments.map(a => a.id) }
+}
+
+export async function getAssignmentForCopy(id) {
+    const adminSupabase = createAdminClient()
+    const { data, error } = await adminSupabase
+        .from('homework_assignments')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (error) return null
+    return data
 }
 
 
@@ -592,7 +798,7 @@ export async function getAssignmentSubmissions(assignmentId) {
 
     const { data: assignment, error: assignmentError } = await supabase
         .from('homework_assignments')
-        .select('id, title, description, deadline, class_name, created_at')
+        .select('*')
         .eq('id', assignmentId)
         .single()
 

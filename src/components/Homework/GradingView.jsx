@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { gradeSubmission, returnSubmission, updateAssignmentDeadline, deleteAssignment, updateAssignment } from '@/app/actions/homework'
+import { gradeSubmission, returnSubmission, updateAssignmentDeadline, deleteAssignment, updateAssignment, getClassesList, getRelatedAssignmentClasses } from '@/app/actions/homework'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Undo2, Image as ImageIcon, X, Edit2, Check, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { Loader2, Save, Undo2, Image as ImageIcon, X, Edit2, Check, Trash2, Copy } from 'lucide-react'
 import styles from './GradingView.module.css'
 import ImagePreviewModal from './ImagePreviewModal'
 
@@ -176,6 +177,9 @@ export default function AssignmentGradingView({ assignment, submissions, subject
     const [editedDescription, setEditedDescription] = useState('')
     const [editedReleasedAt, setEditedReleasedAt] = useState('')
     const [editedAssignmentDeadline, setEditedAssignmentDeadline] = useState('')
+    const [editedClassNames, setEditedClassNames] = useState([])
+    const [classesList, setClassesList] = useState([])
+    const [loadingClasses, setLoadingClasses] = useState(false)
     const [savingAssignment, setSavingAssignment] = useState(false)
 
     if (!assignment) return <div>課題が見つかりません</div>
@@ -200,6 +204,10 @@ export default function AssignmentGradingView({ assignment, submissions, subject
             alert('必須項目を入力してください')
             return
         }
+        if (editedClassNames.length === 0) {
+            alert('少なくとも1つの対象クラスを選択してください')
+            return
+        }
 
         setSavingAssignment(true)
         const result = await updateAssignment(assignment.id, {
@@ -207,7 +215,8 @@ export default function AssignmentGradingView({ assignment, submissions, subject
             subject: editedSubject,
             description: editedDescription,
             deadline: new Date(editedAssignmentDeadline).toISOString(),
-            released_at: editedReleasedAt ? new Date(editedReleasedAt).toISOString() : null
+            released_at: editedReleasedAt ? new Date(editedReleasedAt).toISOString() : null,
+            classNames: editedClassNames
         })
 
         if (result.error) {
@@ -244,14 +253,35 @@ export default function AssignmentGradingView({ assignment, submissions, subject
                         <h1 className={styles.title}>{assignment.title}</h1>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }} className={styles.headerActions}>
+                        <Link
+                            href={`/assignments/new?copyFrom=${assignment.id}`}
+                            className={styles.editAssignmentButton}
+                            style={{ textDecoration: 'none' }}
+                        >
+                            <Copy size={16} />
+                            <span>課題をコピー</span>
+                        </Link>
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 setEditedTitle(assignment.title || '')
                                 setEditedSubject(assignment.subject || '')
                                 setEditedDescription(assignment.description || '')
                                 setEditedReleasedAt(assignment.released_at ? assignment.released_at.slice(0, 16) : '')
                                 setEditedAssignmentDeadline(assignment.deadline ? assignment.deadline.slice(0, 16) : '')
                                 setIsEditingAssignment(true)
+                                setLoadingClasses(true)
+                                try {
+                                    const [clsList, relClasses] = await Promise.all([
+                                        getClassesList(),
+                                        getRelatedAssignmentClasses(assignment.id)
+                                    ])
+                                    setClassesList(clsList || [])
+                                    setEditedClassNames(relClasses.length > 0 ? relClasses : [assignment.class_name])
+                                } catch (e) {
+                                    console.error(e)
+                                } finally {
+                                    setLoadingClasses(false)
+                                }
                             }}
                             className={styles.editAssignmentButton}
                         >
@@ -391,6 +421,59 @@ export default function AssignmentGradingView({ assignment, submissions, subject
                                     rows={5}
                                     placeholder="課題の内容や注意事項を入力してください"
                                 />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    対象クラス <span className={styles.required}>*</span>
+                                    <span className={styles.hint}>（複数選択可）</span>
+                                </label>
+                                {loadingClasses ? (
+                                    <div style={{ padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Loader2 className="animate-spin" size={16} /> クラス情報を読み込み中...
+                                    </div>
+                                ) : (
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                                        gap: '0.75rem',
+                                        padding: '0.75rem',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: 'var(--radius-md)',
+                                        background: 'var(--bg-primary)',
+                                        maxHeight: '180px',
+                                        overflowY: 'auto'
+                                    }}>
+                                        {classesList.length > 0 ? (
+                                            classesList.map(c => {
+                                                const cName = c.name || c.class_name
+                                                const isChecked = editedClassNames.includes(cName)
+                                                return (
+                                                    <label key={c.id || cName} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isChecked}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setEditedClassNames(prev => [...prev, cName])
+                                                                } else {
+                                                                    setEditedClassNames(prev => prev.filter(name => name !== cName))
+                                                                }
+                                                            }}
+                                                            style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+                                                        />
+                                                        <span style={{ fontSize: 'var(--font-size-sm)', userSelect: 'none' }}>
+                                                            {cName}
+                                                        </span>
+                                                    </label>
+                                                )
+                                            })
+                                        ) : (
+                                            <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--font-size-sm)' }}>
+                                                クラスが見つかりません
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className={styles.formRow}>
                                 <div className={styles.formGroup}>
