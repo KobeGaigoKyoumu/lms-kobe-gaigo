@@ -10,7 +10,7 @@ import ImagePreviewModal from './ImagePreviewModal'
 
 // This component handles the grading logic for a single student row
 function SubmissionRow({ submission, student, onImageClick }) {
-    const [score, setScore] = useState(submission.score ?? '')
+    const [score, setScore] = useState(submission.score ?? 1)
     const [feedback, setFeedback] = useState(submission.feedback ?? '')
     const [saving, setSaving] = useState(false)
     const [hoveredImage, setHoveredImage] = useState(null)
