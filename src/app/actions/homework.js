@@ -294,7 +294,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
     // Check if submission already exists
     const { data: existing } = await supabase
         .from('homework_submissions')
-        .select('id, feedback')
+        .select('id, status, feedback')
         .eq('assignment_id', assignmentId)
         .eq('student_id_text', session.studentId)
         .single()
@@ -303,6 +303,9 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
     const initialFeedback = existing?.feedback || getRandomFeedback()
 
     if (existing) {
+        const isResubmitted = existing.status === 'returned' || existing.status === 'resubmitted'
+        const newStatus = isResubmitted ? 'resubmitted' : 'graded'
+
         // Update
         const { error: updateError } = await supabase
             .from('homework_submissions')
@@ -310,7 +313,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 comment,
                 file_urls: fileUrls,
                 submitted_at: new Date().toISOString(),
-                status: 'graded',
+                status: newStatus,
                 score: 1,
                 feedback: initialFeedback
             })
@@ -1252,7 +1255,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 return { students, assignments, submissions }
             }
         },
-        ['class-submission-matrix-v6', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v7', decodedClassName, String(isArchived)],
         { tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()

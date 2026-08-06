@@ -26,7 +26,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
         let completeCount = 0
         assignments.forEach(assignment => {
             const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
-            if (sub && sub.status === 'graded') {
+            if (sub && (sub.status === 'graded' || sub.status === 'resubmitted')) {
                 total += (sub.score || 0)
                 completeCount++
             }
@@ -39,11 +39,6 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
     // Max possible total (number of assignments, each worth 1 point on submission)
     const maxTotal = assignments.length
 
-    const AUTO_FEEDBACKS = [
-        'いいです！', 'OKです！', 'すばらしいです！', 'とてもいいです！',
-        'よく頑張っています！', 'カンペキ！', 'グレート！', 'パーフェクト！', 'ちゃんとやっていますね！'
-    ]
-
     const isRecentSubmission = (sub) => {
         if (!sub || (!sub.submitted_at && !sub.updated_at)) return false
         const targetTime = new Date(sub.submitted_at || sub.updated_at).getTime()
@@ -54,11 +49,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
 
     const isResubmittedSubmission = (sub) => {
         if (!sub) return false
-        if (sub.is_resubmitted) return true
-        if (sub.status !== 'returned' && sub.feedback && sub.feedback.trim().length > 0 && !AUTO_FEEDBACKS.includes(sub.feedback.trim())) {
-            return true
-        }
-        return false
+        return sub.status === 'resubmitted' || sub.is_resubmitted === true
     }
 
     const getScoreColor = (sub) => {
@@ -73,7 +64,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
         if (isResub) return styles.scoreResubmitted
         if (isRecent) return styles.scoreRecent
 
-        if (sub.score >= 1 || sub.status === 'graded') return styles.scoreSubmitted
+        if (sub.score >= 1 || sub.status === 'graded' || sub.status === 'resubmitted') return styles.scoreSubmitted
         return styles.scoreNone
     }
 
