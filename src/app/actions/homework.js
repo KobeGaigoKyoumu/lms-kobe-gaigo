@@ -841,6 +841,42 @@ export async function getAssignmentSubmissions(assignmentId) {
         return { assignment, submissions: [] }
     }
 
+    // 未採点(submitted)または点数が未決定(null)の提出物に対して、自動で点数1およびランダムフィードバックでDB保存
+    const pendingSubmissions = (submissions || []).filter(
+        s => s.status === 'submitted' || s.score === null || s.score === undefined
+    )
+
+    if (pendingSubmissions.length > 0) {
+        let updatedAny = false
+        for (const s of pendingSubmissions) {
+            const feedbackText = s.feedback || getRandomFeedback()
+            const { error: autoGradeError } = await supabase
+                .from('homework_submissions')
+                .update({
+                    score: 1,
+                    feedback: feedbackText,
+                    status: 'graded',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', s.id)
+
+            if (!autoGradeError) {
+                s.score = 1
+                s.feedback = feedbackText
+                s.status = 'graded'
+                updatedAny = true
+            } else {
+                console.error('Auto grade submission error:', autoGradeError)
+            }
+        }
+        if (updatedAny) {
+            revalidateTag('homework-stats', 'max')
+            revalidateTag('homework-assignments', 'max')
+            revalidatePath('/assignments', 'layout')
+            revalidatePath('/dashboard', 'layout')
+        }
+    }
+
     return {
         assignment,
         submissions: submissions || []
@@ -1216,7 +1252,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 return { students, assignments, submissions }
             }
         },
-        ['class-submission-matrix-v4', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v5', decodedClassName, String(isArchived)],
         { tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()
