@@ -310,7 +310,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 comment,
                 file_urls: fileUrls,
                 submitted_at: new Date().toISOString(),
-                status: 'submitted',
+                status: 'graded',
                 score: 1,
                 feedback: initialFeedback
             })
@@ -325,7 +325,7 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 student_id_text: session.studentId,
                 comment,
                 file_urls: fileUrls,
-                status: 'submitted',
+                status: 'graded',
                 score: 1,
                 feedback: initialFeedback
             })
@@ -839,40 +839,6 @@ export async function getAssignmentSubmissions(assignmentId) {
     if (subError) {
         console.error('Fetch submissions error:', subError)
         return { assignment, submissions: [] }
-    }
-
-    // 未採点(submitted)または点数が未決定(null)の提出物に対して、自動で点数1およびランダムフィードバックで保存
-    const pendingSubmissions = (submissions || []).filter(
-        s => s.status === 'submitted' || s.score === null || s.score === undefined
-    )
-
-    if (pendingSubmissions.length > 0) {
-        let updatedAny = false
-        for (const s of pendingSubmissions) {
-            const feedbackText = s.feedback || getRandomFeedback()
-            const { error: autoGradeError } = await supabase
-                .from('homework_submissions')
-                .update({
-                    score: 1,
-                    feedback: feedbackText,
-                    status: 'graded',
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', s.id)
-
-            if (!autoGradeError) {
-                s.score = 1
-                s.feedback = feedbackText
-                s.status = 'graded'
-                updatedAny = true
-            } else {
-                console.error('Auto grade submission error:', autoGradeError)
-            }
-        }
-        if (updatedAny) {
-            revalidateTag('homework-stats', 'max')
-            revalidateTag('homework-assignments', 'max')
-        }
     }
 
     return {
