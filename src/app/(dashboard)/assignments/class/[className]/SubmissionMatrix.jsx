@@ -148,7 +148,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                 </span>
                 <span className={styles.legendItem}>
                     <span className={`${styles.legendBadge} ${styles.legendRecentAndResubmitted}`}>差戻再</span>
-                    直近1週間＆再提出
+                    直近1週間＆再提出（未処理）
                 </span>
                 <span className={styles.legendItem}>
                     <span className={`${styles.legendBadge} ${styles.legendReturned}`}>差戻</span>
