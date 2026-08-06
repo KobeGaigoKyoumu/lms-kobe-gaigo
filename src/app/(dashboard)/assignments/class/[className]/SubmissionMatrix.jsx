@@ -39,11 +39,41 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
     // Max possible total (number of assignments, each worth 1 point on submission)
     const maxTotal = assignments.length
 
-    const getScoreColor = (score, status) => {
-        if (status === 'returned') return styles.scoreReturned
-        if (score === null || score === undefined) return ''
-        if (status === 'submitted') return styles.scorePending
-        if (score >= 1) return styles.scoreSubmitted
+    const AUTO_FEEDBACKS = [
+        'いいです！', 'OKです！', 'すばらしいです！', 'とてもいいです！',
+        'よく頑張っています！', 'カンペキ！', 'グレート！', 'パーフェクト！', 'ちゃんとやっていますね！'
+    ]
+
+    const isRecentSubmission = (sub) => {
+        if (!sub || (!sub.submitted_at && !sub.updated_at)) return false
+        const targetTime = new Date(sub.submitted_at || sub.updated_at).getTime()
+        const nowTime = Date.now()
+        const diffDays = (nowTime - targetTime) / (1000 * 60 * 60 * 24)
+        return diffDays >= 0 && diffDays <= 7
+    }
+
+    const isResubmittedSubmission = (sub) => {
+        if (!sub) return false
+        if (sub.is_resubmitted) return true
+        if (sub.status !== 'returned' && sub.feedback && sub.feedback.trim().length > 0 && !AUTO_FEEDBACKS.includes(sub.feedback.trim())) {
+            return true
+        }
+        return false
+    }
+
+    const getScoreColor = (sub) => {
+        if (!sub) return styles.scoreNone
+        if (sub.status === 'returned') return styles.scoreReturned
+        if (sub.status === 'submitted') return styles.scorePending
+
+        const isRecent = isRecentSubmission(sub)
+        const isResub = isResubmittedSubmission(sub)
+
+        if (isRecent && isResub) return styles.scoreRecentAndResubmitted
+        if (isResub) return styles.scoreResubmitted
+        if (isRecent) return styles.scoreRecent
+
+        if (sub.score >= 1 || sub.status === 'graded') return styles.scoreSubmitted
         return styles.scoreNone
     }
 
@@ -83,7 +113,6 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
 
         const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
         
-        // ヘッダーを少し太字にするなどの簡単な設定（無料版XLSXでは限られるが列幅調整を実施）
         const wscols = [{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }]
         assignments.forEach(() => wscols.push({ wch: 20 }))
         ws['!cols'] = wscols
@@ -96,7 +125,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
 
     return (
         <div className={styles.wrapper}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <rect x="2" y="2" width="16" height="16" rx="2" />
@@ -110,6 +139,36 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                     Excelエクスポート
                 </button>
             </div>
+
+            {/* カラーラベル（凡例） */}
+            <div className={styles.legendContainer}>
+                <span className={styles.legendTitle}>【提出状態ラベル】</span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendSubmitted}`}>1</span>
+                    通常提出
+                </span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendRecent}`}>1</span>
+                    直近1週間以内の提出
+                </span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendResubmitted}`}>1</span>
+                    差戻し後の再提出
+                </span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendRecentAndResubmitted}`}>1</span>
+                    直近1週間＆再提出
+                </span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendReturned}`}>差戻</span>
+                    差戻し中
+                </span>
+                <span className={styles.legendItem}>
+                    <span className={`${styles.legendBadge} ${styles.legendPending}`}>未</span>
+                    未処理
+                </span>
+            </div>
+
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead>
@@ -145,16 +204,24 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                                     {assignments.map(assignment => {
                                         const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
                                         const hasSubmission = sub && (sub.status === 'submitted' || sub.status === 'graded' || sub.status === 'returned')
+                                        const isRecent = hasSubmission && isRecentSubmission(sub)
+                                        const isResub = hasSubmission && isResubmittedSubmission(sub)
+
                                         return (
                                             <td
                                                 key={assignment.id}
-                                                className={`${styles.td} ${styles.scoreCell} ${hasSubmission ? getScoreColor(sub?.score, sub?.status) : styles.scoreNone}`}
+                                                className={`${styles.td} ${styles.scoreCell} ${hasSubmission ? getScoreColor(sub) : styles.scoreNone}`}
+                                                title={
+                                                    hasSubmission
+                                                        ? `${student.full_name} - ${assignment.title}\nステータス: ${sub.status}\n提出日時: ${sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('ja-JP') : '不明'}${isResub ? '\n(差戻し後の再提出)' : ''}${isRecent ? '\n(直近1週間以内)' : ''}`
+                                                        : undefined
+                                                }
                                             >
                                                 {hasSubmission ? (
                                                     <span className={styles.scoreValue}>
                                                         {sub.status === 'returned' ? '差戻' :
                                                             sub.status === 'submitted' ? '未' :
-                                                                (sub.score ?? '-')}
+                                                                (sub.score ?? 1)}
                                                     </span>
                                                 ) : (
                                                     <span className={styles.noSubmission}>-</span>

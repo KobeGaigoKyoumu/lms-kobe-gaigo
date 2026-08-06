@@ -1183,7 +1183,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 2. Get all submissions for these assignments (クラス制限なしで全取得)
                 const { data: submissions, error: subError } = await supabase
                     .from('homework_submissions')
-                    .select('student_id_text, assignment_id, status, score')
+                    .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
                     .in('assignment_id', assignmentIds)
 
                 if (subError || !submissions || submissions.length === 0) {
@@ -1240,7 +1240,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 // 3. Get all submissions for these students and assignments
                 const { data: submissions, error: subError } = await supabase
                     .from('homework_submissions')
-                    .select('student_id_text, assignment_id, status, score')
+                    .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
                     .in('student_id_text', studentIds)
                     .in('assignment_id', assignmentIds)
 
@@ -1252,7 +1252,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 return { students, assignments, submissions }
             }
         },
-        ['class-submission-matrix-v5', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v6', decodedClassName, String(isArchived)],
         { tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()
