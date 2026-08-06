@@ -304,7 +304,6 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
 
     if (existing) {
         const isResubmitted = existing.status === 'returned' || existing.status === 'resubmitted'
-        const newStatus = isResubmitted ? 'resubmitted' : 'graded'
 
         // Update
         const { error: updateError } = await supabase
@@ -313,9 +312,9 @@ export async function submitHomework(assignmentId, comment, fileUrls) {
                 comment,
                 file_urls: fileUrls,
                 submitted_at: new Date().toISOString(),
-                status: newStatus,
-                score: 1,
-                feedback: initialFeedback
+                status: isResubmitted ? 'resubmitted' : 'graded',
+                score: isResubmitted ? 0 : 1,
+                feedback: isResubmitted ? null : initialFeedback
             })
             .eq('id', existing.id)
         error = updateError
@@ -1255,7 +1254,7 @@ export async function getClassSubmissionMatrix(className, isArchived = false) {
                 return { students, assignments, submissions }
             }
         },
-        ['class-submission-matrix-v7', decodedClassName, String(isArchived)],
+        ['class-submission-matrix-v8', decodedClassName, String(isArchived)],
         { tags: ['homework-stats', 'homework-assignments'] }
     )
     return fetcher()

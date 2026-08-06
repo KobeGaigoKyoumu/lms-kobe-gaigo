@@ -26,7 +26,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
         let completeCount = 0
         assignments.forEach(assignment => {
             const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
-            if (sub && (sub.status === 'graded' || sub.status === 'resubmitted')) {
+            if (sub && sub.status === 'graded') {
                 total += (sub.score || 0)
                 completeCount++
             }
@@ -143,11 +143,11 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                     直近1週間以内の提出
                 </span>
                 <span className={styles.legendItem}>
-                    <span className={`${styles.legendBadge} ${styles.legendResubmitted}`}>1</span>
-                    差戻し後の再提出
+                    <span className={`${styles.legendBadge} ${styles.legendResubmitted}`}>差戻再</span>
+                    差戻し後の再提出（未処理）
                 </span>
                 <span className={styles.legendItem}>
-                    <span className={`${styles.legendBadge} ${styles.legendRecentAndResubmitted}`}>1</span>
+                    <span className={`${styles.legendBadge} ${styles.legendRecentAndResubmitted}`}>差戻再</span>
                     直近1週間＆再提出
                 </span>
                 <span className={styles.legendItem}>
@@ -194,7 +194,7 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                                     </td>
                                     {assignments.map(assignment => {
                                         const sub = subMap.get(`${student.student_id_text}_${assignment.id}`)
-                                        const hasSubmission = sub && (sub.status === 'submitted' || sub.status === 'graded' || sub.status === 'returned')
+                                        const hasSubmission = sub && (sub.status === 'submitted' || sub.status === 'graded' || sub.status === 'returned' || sub.status === 'resubmitted')
                                         const isRecent = hasSubmission && isRecentSubmission(sub)
                                         const isResub = hasSubmission && isResubmittedSubmission(sub)
 
@@ -211,8 +211,9 @@ export default function SubmissionMatrix({ students, assignments, submissions, c
                                                 {hasSubmission ? (
                                                     <span className={styles.scoreValue}>
                                                         {sub.status === 'returned' ? '差戻' :
-                                                            sub.status === 'submitted' ? '未' :
-                                                                (sub.score ?? 1)}
+                                                            (sub.status === 'resubmitted' || isResub) ? '差戻再' :
+                                                                sub.status === 'submitted' ? '未' :
+                                                                    (sub.score ?? 1)}
                                                     </span>
                                                 ) : (
                                                     <span className={styles.noSubmission}>-</span>

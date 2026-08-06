@@ -65,7 +65,7 @@ export async function getTeacherDashboardData() {
             const { count } = await supabase
                 .from('homework_submissions')
                 .select('id', { count: 'exact', head: true })
-                .eq('status', 'submitted')
+                .in('status', ['submitted', 'resubmitted'])
                 .in('assignment_id', activeAssignmentIds)
             
             pendingCount = count || 0
