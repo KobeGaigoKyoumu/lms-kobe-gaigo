@@ -284,7 +284,7 @@ const _getClassAttendanceStats = unstable_cache(
         try {
             if (enrollmentFilter === 'all') {
                 const { pushCloudflareSnapshot } = await import('./cloudflare');
-                const type = `attendance_class_${year}_${month}_${isCumulative}`;
+                const type = `attendance_class_${year}_${month}_${isCumulative}_v9`;
                 await pushCloudflareSnapshot(type, result);
             }
         } catch (e) {

@@ -151,8 +151,8 @@ export default function AttendancePage() {
             if (!forceRefresh && workerUrl && (activeTab === 'school' || activeTab === 'class') && enrollmentFilter === 'all') {
                 let targetUrl = workerUrl.startsWith('http') ? workerUrl : `https://${workerUrl}`;
                 const snapshotType = activeTab === 'school'
-                    ? `attendance_school_${targetYear}_${targetMonth}_${targetIsCumulative}`
-                    : `attendance_class_${targetYear}_${targetMonth}_${targetIsCumulative}`;
+                    ? `attendance_school_${targetYear}_${targetMonth}_${targetIsCumulative}_v9`
+                    : `attendance_class_${targetYear}_${targetMonth}_${targetIsCumulative}_v9`;
 
                 const res = await fetch(`${targetUrl}?action=get-analytics&type=${snapshotType}`);
                 if (res.ok) {
