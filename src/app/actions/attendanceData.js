@@ -228,12 +228,11 @@ const _getClassAttendanceStats = unstable_cache(
 
             // IMPROVED CLASS CLASSIFICATION:
             const masterClassName = info?.className || ''
-            const classSuffix = masterClassName.includes('-') ? masterClassName.split('-')[1] : null
 
             let className = '未設定'
-            if (classSuffix) {
-                // If we found a suffix in the master table (e.g. they are in 2-7, they were 1-7)
-                className = `${recordGrade}-${classSuffix}`
+            if (masterClassName) {
+                // 学生マスタのクラス名を優先
+                className = masterClassName
             } else {
                 // Fallback: Use cleansed record class_code from database
                 const recordClassCodeRaw = s.class_code || ''
@@ -294,7 +293,7 @@ const _getClassAttendanceStats = unstable_cache(
 
         return result;
     },
-    ['attendance-class-stats-v8'],
+    ['attendance-class-stats-v9'],
     { tags: ['attendance-stats'] }
 )
 
@@ -347,11 +346,11 @@ const _getCachedStudentListAttendancePrivate = unstable_cache(
             
             // IMPROVED CLASS CLASSIFICATION:
             const masterClassName = info.className || ''
-            const classSuffix = masterClassName.includes('-') ? masterClassName.split('-')[1] : null
 
             let recordClassName = '未設定'
-            if (classSuffix) {
-                recordClassName = `${recordGrade}-${classSuffix}`
+            if (masterClassName) {
+                // 学生マスタのクラス名を優先
+                recordClassName = masterClassName
             } else {
                 const recordClassCodeRaw = s.class_code || ''
                 const suffixMatch = recordClassCodeRaw.match(/-([^-]+)$/) || [null, recordClassCodeRaw]
@@ -374,7 +373,7 @@ const _getCachedStudentListAttendancePrivate = unstable_cache(
 
         return { students: processedStudents, year, month, isCumulative }
     },
-    ['attendance-student-list-v8'],
+    ['attendance-student-list-v9'],
     { tags: ['attendance-stats'] }
 )
 
