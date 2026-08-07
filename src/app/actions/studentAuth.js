@@ -134,37 +134,31 @@ export async function getStudentSessionLight() {
     }
 }
 
-// Global variable to store the memoized cache function generator
-const _studentMasterCacheFuncs = new Map();
-
-function getStudentMasterDataCached(studentId) {
+// Top-level cached master data fetcher
+const _getStudentMasterDataInternal = async (studentId) => {
     if (!studentId) return null;
-    
-    if (!_studentMasterCacheFuncs.has(studentId)) {
-        const fetcher = next_unstable_cache(
-            async (id) => {
-                try {
-                    const supabase = createAdminClient()
-                    const { data, error } = await supabase
-                        .from('students')
-                        .select('class_name, academic_year, enrollment_period, status')
-                        .eq('student_id_text', id)
-                        .single()
-                    
-                    if (error) throw error
-                    return data
-                } catch (e) {
-                    console.error('Error in _getStudentMasterData:', e)
-                    return null
-                }
-            },
-            [`student-master-v2-${studentId}`],
-            { revalidate: 3600, tags: ['students', `student-${studentId}`] }
-        )
-        _studentMasterCacheFuncs.set(studentId, fetcher);
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('students')
+            .select('class_name, academic_year, enrollment_period, status')
+            .eq('student_id_text', studentId)
+            .single()
+        
+        if (error) throw error
+        return data
+    } catch (e) {
+        console.error('Error in _getStudentMasterData:', e)
+        return null
     }
-    return _studentMasterCacheFuncs.get(studentId)(studentId);
 }
+
+const getStudentMasterDataCached = next_unstable_cache(
+    _getStudentMasterDataInternal,
+    ['student-master-v2-global'],
+    { revalidate: 3600, tags: ['students'] }
+)
+
 
 /**
  * Get the current student session.

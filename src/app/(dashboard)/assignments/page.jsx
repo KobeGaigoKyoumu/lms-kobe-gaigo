@@ -9,13 +9,23 @@ import { Plus } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function AssignmentsPage() {
-    const [assignments, classes] = await Promise.all([
-        getTeacherAssignments(),
-        getClassesList()
-    ])
+    let assignments = []
+    let classes = []
+
+    try {
+        const [assignmentsRes, classesRes] = await Promise.all([
+            getTeacherAssignments().catch(() => []),
+            getClassesList().catch(() => [])
+        ])
+        assignments = Array.isArray(assignmentsRes) ? assignmentsRes : []
+        classes = Array.isArray(classesRes) ? classesRes : []
+    } catch (e) {
+        console.error('Error loading assignments page data:', e)
+    }
 
     // Initialize stats with all classes
     const classStats = classes.reduce((acc, cls) => {
+        if (!cls || !cls.name) return acc
         acc[cls.name] = {
             name: cls.name,
             count: 0,
@@ -26,6 +36,7 @@ export default async function AssignmentsPage() {
 
     // Update stats based on assignments
     assignments.forEach(assignment => {
+        if (!assignment) return
         const className = assignment.class_name || '未分類'
         if (!classStats[className]) {
             classStats[className] = {
@@ -42,6 +53,7 @@ export default async function AssignmentsPage() {
 
     // Sort classes
     const sortedClasses = Object.values(classStats).sort((a, b) => a.name.localeCompare(b.name))
+
 
     return (
         <div className={styles.page}>

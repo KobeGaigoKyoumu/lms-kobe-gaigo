@@ -32,21 +32,12 @@ async function _getClassesListInternal() {
     return classes
 }
 
-let _cachedClassesListFunc = null;
-function getCachedClassesList() {
-    if (!_cachedClassesListFunc) {
-        _cachedClassesListFunc = next_unstable_cache(
-            _getClassesListInternal,
-            ['classes-list-v5'],
-            { tags: ['classes'], revalidate: 3600 }
-        );
-    }
-    return _cachedClassesListFunc();
-}
+export const getClassesList = next_unstable_cache(
+    _getClassesListInternal,
+    ['classes-list-v5'],
+    { tags: ['classes'], revalidate: 3600 }
+)
 
-export async function getClassesList() {
-    return getCachedClassesList()
-}
 
 // Fetch all unique subject names from the timetable (schedules)
 async function _getTimetableSubjectsInternal() {
@@ -71,21 +62,12 @@ async function _getTimetableSubjectsInternal() {
     return subjects
 }
 
-let _cachedTimetableSubjectsFunc = null;
-function getCachedTimetableSubjects() {
-    if (!_cachedTimetableSubjectsFunc) {
-        _cachedTimetableSubjectsFunc = next_unstable_cache(
-            _getTimetableSubjectsInternal,
-            ['timetable-subjects-list-v2'],
-            { tags: ['schedules'], revalidate: 3600 }
-        );
-    }
-    return _cachedTimetableSubjectsFunc();
-}
+export const getTimetableSubjects = next_unstable_cache(
+    _getTimetableSubjectsInternal,
+    ['timetable-subjects-list-v2'],
+    { tags: ['schedules'], revalidate: 3600 }
+)
 
-export async function getTimetableSubjects() {
-    return getCachedTimetableSubjects()
-}
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 // Internal function for student assignments (Ultra-safe query using Admin Client to bypass RLS)
 async function _getStudentAssignments(studentId, className) {
@@ -204,68 +186,68 @@ async function _getAssignmentInternal(id) {
     return assignment
 }
 
-function getCachedAssignment(id) {
-    if (!global._cachedAssignmentFunc) {
-        global._cachedAssignmentFunc = next_unstable_cache(
-            async (id) => _getAssignmentInternal(id),
-            ['assignment-details-v3-final'],
-            { tags: ['homework-assignments'], revalidate: 3600 }
-        );
-    }
-    return global._cachedAssignmentFunc(id);
-}
+const getCachedAssignment = next_unstable_cache(
+    async (id) => _getAssignmentInternal(id),
+    ['assignment-details-v3-final'],
+    { tags: ['homework-assignments'], revalidate: 3600 }
+)
 
 // Fetch a single assignment details
 export async function getAssignmentDetails(id) {
-    const session = await getStudentSession()
-    if (!session) return { error: 'Unauthorized' }
+    try {
+        const session = await getStudentSession()
+        if (!session) return { error: 'Unauthorized' }
 
-    const supabase = createAdminClient()
+        const supabase = createAdminClient()
 
-    // 1. Get Assignment (Cached)
-    const assignment = await getCachedAssignment(id)
+        // 1. Get Assignment (Cached)
+        const assignment = await getCachedAssignment(id)
 
-    if (!assignment) {
-        console.warn('Assignment not found:', id)
-        return null
-    }
+        if (!assignment) {
+            console.warn('Assignment not found:', id)
+            return null
+        }
 
-    // Check if released (Safe property access)
-    const now = new Date()
-    const releasedAtRaw = assignment.release_date || assignment.released_at || assignment.release_at || assignment.created_at
-    const releasedAt = new Date(releasedAtRaw)
-    
-    if (releasedAt > now) {
-        console.warn('Unauthorized assignment access attempt (not released yet):', session.studentId, id)
-        return null
-    }
+        // Check if released (Safe property access)
+        const now = new Date()
+        const releasedAtRaw = assignment.release_date || assignment.released_at || assignment.release_at || assignment.created_at
+        const releasedAt = new Date(releasedAtRaw)
+        
+        if (releasedAt > now) {
+            console.warn('Unauthorized assignment access attempt (not released yet):', session.studentId, id)
+            return null
+        }
 
-    // Security check: Ensure student belongs to class
-    const assignmentClass = assignment.class_name ? String(assignment.class_name).trim() : ''
-    const sessionClass = session.className ? String(session.className).trim() : ''
+        // Security check: Ensure student belongs to class
+        const assignmentClass = assignment.class_name ? String(assignment.class_name).trim() : ''
+        const sessionClass = session.className ? String(session.className).trim() : ''
 
-    if (assignmentClass !== sessionClass && decodeURIComponent(assignmentClass) !== sessionClass) {
-        console.warn('Unauthorized assignment access attempt (Class mismatch):', {
-            student: session.studentId,
-            studentClass: sessionClass,
-            assignmentClass: assignmentClass
-        })
-        // return null // TODO: Temporarily allow to avoid blocking while fixing
-    }
+        if (assignmentClass !== sessionClass && decodeURIComponent(assignmentClass) !== sessionClass) {
+            console.warn('Unauthorized assignment access attempt (Class mismatch):', {
+                student: session.studentId,
+                studentClass: sessionClass,
+                assignmentClass: assignmentClass
+            })
+        }
 
-    // 2. Get Submission (Uncached - User specific)
-    const { data: submission, error: submissionError } = await supabase
-        .from('homework_submissions')
-        .select('*')
-        .eq('assignment_id', id)
-        .eq('student_id_text', session.studentId)
-        .maybeSingle()
+        // 2. Get Submission (Uncached - User specific)
+        const { data: submission, error: submissionError } = await supabase
+            .from('homework_submissions')
+            .select('*')
+            .eq('assignment_id', id)
+            .eq('student_id_text', session.studentId)
+            .maybeSingle()
 
-    return {
-        ...assignment,
-        submission: submission || null
+        return {
+            ...assignment,
+            submission: submission || null
+        }
+    } catch (e) {
+        console.error('getAssignmentDetails Error:', e)
+        return { error: 'Failed to fetch assignment details' }
     }
 }
+
 
 const DEFAULT_FEEDBACK_OPTIONS = [
     'いいです！',
@@ -761,59 +743,50 @@ async function _getTeacherAssignmentsInternal() {
     return assignments
 }
 
-let _cachedTeacherAssignmentsFunc = null;
-function getCachedTeacherAssignments() {
-    if (!_cachedTeacherAssignmentsFunc) {
-        _cachedTeacherAssignmentsFunc = next_unstable_cache(
-            _getTeacherAssignmentsInternal,
-            ['teacher-assignments-list'],
-            { tags: ['homework-assignments'], revalidate: 3600 }
-        );
+export const getTeacherAssignments = next_unstable_cache(
+    _getTeacherAssignmentsInternal,
+    ['teacher-assignments-list'],
+    { tags: ['homework-assignments'], revalidate: 3600 }
+)
+
+const _getAssignmentsByClassInternal = async (decodedClassName, isArchived) => {
+    const supabase = createAdminClient()
+    let query = supabase
+        .from('homework_assignments')
+        .select(`
+            *,
+            course:courses!course_id(id, title)
+        `)
+        .eq('class_name', decodedClassName)
+        .order('created_at', { ascending: false })
+    
+    if (isArchived) {
+        query = query.eq('is_archived', true)
+    } else {
+        query = query.or('is_archived.is.null,is_archived.is.false')
     }
-    return _cachedTeacherAssignmentsFunc();
+    
+    const { data: assignments, error } = await query
+
+    if (error) {
+        console.error('Fetch assignments by class error:', error)
+        return []
+    }
+
+    return assignments || []
 }
 
-export async function getTeacherAssignments() {
-    return getCachedTeacherAssignments()
-}
+const _cachedAssignmentsByClassFetcher = next_unstable_cache(
+    async (decodedClassName, isArchivedStr) => _getAssignmentsByClassInternal(decodedClassName, isArchivedStr === 'true'),
+    ['class-assignments-v4'],
+    { tags: ['homework-assignments'], revalidate: 3600 }
+)
 
 export async function getAssignmentsByClass(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
-    
-    // We can still use next_unstable_cache directly inside the function if we don't call it at top level,
-    // but for consistency with others, let's use a memoized factory.
-    const fetcher = next_unstable_cache(
-        async () => {
-            const supabase = createAdminClient()
-            let query = supabase
-                .from('homework_assignments')
-                .select(`
-                    *,
-                    course:courses!course_id(id, title)
-                `)
-                .eq('class_name', decodedClassName)
-                .order('created_at', { ascending: false })
-            
-            if (isArchived) {
-                query = query.eq('is_archived', true)
-            } else {
-                query = query.or('is_archived.is.null,is_archived.is.false')
-            }
-            
-            const { data: assignments, error } = await query
-
-            if (error) {
-                console.error('Fetch assignments by class error:', error)
-                return []
-            }
-
-            return assignments
-        },
-        ['class-assignments-v3', decodedClassName, String(isArchived)],
-        { tags: ['homework-assignments'], revalidate: 3600 }
-    )
-    return fetcher()
+    return _cachedAssignmentsByClassFetcher(decodedClassName, String(isArchived))
 }
+
 
 export async function getAssignmentSubmissions(assignmentId) {
     const supabase = createAdminClient()
@@ -1105,7 +1078,7 @@ async function _getClassSubmissionStatsInternal(className) {
         .eq('class_name', className)
         .eq('status', 'active')
 
-    if (!students || students.length === 0) return []
+    if (studentError || !students || students.length === 0) return []
 
     const studentIds = students.map(s => s.student_id_text)
 
@@ -1156,106 +1129,97 @@ export async function getClassSubmissionStats(className) {
     return getCachedClassSubmissionStats(className)
 }
 
+const _getClassSubmissionMatrixInternal = async (decodedClassName, isArchived) => {
+    const supabase = createAdminClient()
+
+    if (isArchived) {
+        // =============== アーカイブモード (過去の課題) ===============
+        const { data: assignments, error: assignmentsError } = await supabase
+            .from('homework_assignments')
+            .select('id, title, deadline, created_at, course_id, subject')
+            .eq('class_name', decodedClassName)
+            .eq('is_archived', true)
+            .order('deadline', { ascending: true })
+
+        if (assignmentsError || !assignments || assignments.length === 0) {
+            return { students: [], assignments: [], submissions: [] }
+        }
+
+        const assignmentIds = assignments.map(a => a.id)
+
+        const { data: submissions, error: subError } = await supabase
+            .from('homework_submissions')
+            .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
+            .in('assignment_id', assignmentIds)
+
+        if (subError || !submissions || submissions.length === 0) {
+            return { students: [], assignments, submissions: [] }
+        }
+
+        const submittedStudentIds = [...new Set(submissions.map(s => s.student_id_text))]
+
+        const { data: students } = await supabase
+            .from('students')
+            .select('student_id_text, full_name')
+            .in('student_id_text', submittedStudentIds)
+            .order('full_name', { ascending: true })
+
+        return {
+            students: students || [], 
+            assignments,
+            submissions
+        }
+
+    } else {
+        // =============== 通常モード (今年の課題) ===============
+        const { data: students, error: studentsError } = await supabase
+            .from('students')
+            .select('student_id_text, full_name')
+            .eq('class_name', decodedClassName)
+            .eq('status', 'active')
+            .order('full_name', { ascending: true })
+
+        if (studentsError || !students || students.length === 0) {
+            return { students: [], assignments: [], submissions: [] }
+        }
+
+        const { data: assignments, error: assignmentsError } = await supabase
+            .from('homework_assignments')
+            .select('id, title, deadline, created_at, course_id, subject')
+            .eq('class_name', decodedClassName)
+            .eq('is_archived', false)
+            .order('deadline', { ascending: true })
+
+        if (assignmentsError || !assignments || assignments.length === 0) {
+            return { students, assignments: [], submissions: [] }
+        }
+
+        const studentIds = students.map(s => s.student_id_text)
+        const assignmentIds = assignments.map(a => a.id)
+
+        const { data: submissions, error: subError } = await supabase
+            .from('homework_submissions')
+            .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
+            .in('student_id_text', studentIds)
+            .in('assignment_id', assignmentIds)
+
+        if (subError) {
+            console.error('Error fetching submissions for matrix:', subError)
+            return { students, assignments, submissions: [] }
+        }
+
+        return { students, assignments, submissions }
+    }
+}
+
+const _cachedMatrixFetcher = next_unstable_cache(
+    async (decodedClassName, isArchivedStr) => _getClassSubmissionMatrixInternal(decodedClassName, isArchivedStr === 'true'),
+    ['class-submission-matrix-v9'],
+    { tags: ['homework-stats', 'homework-assignments'], revalidate: 3600 }
+)
+
 export async function getClassSubmissionMatrix(className, isArchived = false) {
     const decodedClassName = decodeURIComponent(className)
-
-    const fetcher = next_unstable_cache(
-        async () => {
-            const supabase = createAdminClient()
-
-            if (isArchived) {
-                // =============== アーカイブモード (過去の課題) ===============
-                // 過去のクラスのため現在の「students.class_name」で探すと誰もいない可能性がある。
-                // そのため、課題 → 提出物 → 提出した学生 という順番で取得し、過去の提出履歴から名簿を復元する。
-
-                // 1. Get assignments for this class (sorted by deadline)
-                const { data: assignments, error: assignmentsError } = await supabase
-                    .from('homework_assignments')
-                    .select('id, title, deadline, created_at, course_id, subject')
-                    .eq('class_name', decodedClassName)
-                    .eq('is_archived', true)
-                    .order('deadline', { ascending: true })
-
-                if (assignmentsError || !assignments || assignments.length === 0) {
-                    return { students: [], assignments: [], submissions: [] }
-                }
-
-                const assignmentIds = assignments.map(a => a.id)
-
-                // 2. Get all submissions for these assignments (クラス制限なしで全取得)
-                const { data: submissions, error: subError } = await supabase
-                    .from('homework_submissions')
-                    .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
-                    .in('assignment_id', assignmentIds)
-
-                if (subError || !submissions || submissions.length === 0) {
-                    return { students: [], assignments, submissions: [] }
-                }
-
-                // 3. 提出物から過去の学生ID（student_id_text）を抽出
-                const submittedStudentIds = [...new Set(submissions.map(s => s.student_id_text))]
-
-                // 4. その学生たちの現在の名前などを取得
-                const { data: students, error: studentsError } = await supabase
-                    .from('students')
-                    .select('student_id_text, full_name')
-                    .in('student_id_text', submittedStudentIds)
-                    .order('full_name', { ascending: true })
-
-                return {
-                    students: students || [], 
-                    assignments,
-                    submissions
-                }
-
-            } else {
-                // =============== 通常モード (今年の課題) ===============
-                // 現在そのクラスに在籍している学生をベースにマトリクスを作成する（未提出の学生も一覧に並べるため）
-                
-                // 1. Get current students in this class
-                const { data: students, error: studentsError } = await supabase
-                    .from('students')
-                    .select('student_id_text, full_name')
-                    .eq('class_name', decodedClassName)
-                    .eq('status', 'active')
-                    .order('full_name', { ascending: true })
-
-                if (studentsError || !students || students.length === 0) {
-                    return { students: [], assignments: [], submissions: [] }
-                }
-
-                // 2. Get assignments for this class
-                const { data: assignments, error: assignmentsError } = await supabase
-                    .from('homework_assignments')
-                    .select('id, title, deadline, created_at, course_id, subject')
-                    .eq('class_name', decodedClassName)
-                    .eq('is_archived', false)
-                    .order('deadline', { ascending: true })
-
-                if (assignmentsError || !assignments || assignments.length === 0) {
-                    return { students, assignments: [], submissions: [] }
-                }
-
-                const studentIds = students.map(s => s.student_id_text)
-                const assignmentIds = assignments.map(a => a.id)
-
-                // 3. Get all submissions for these students and assignments
-                const { data: submissions, error: subError } = await supabase
-                    .from('homework_submissions')
-                    .select('student_id_text, assignment_id, status, score, submitted_at, updated_at, feedback')
-                    .in('student_id_text', studentIds)
-                    .in('assignment_id', assignmentIds)
-
-                if (subError) {
-                    console.error('Error fetching submissions for matrix:', subError)
-                    return { students, assignments, submissions: [] }
-                }
-
-                return { students, assignments, submissions }
-            }
-        },
-        ['class-submission-matrix-v8', decodedClassName, String(isArchived)],
-        { tags: ['homework-stats', 'homework-assignments'] }
-    )
-    return fetcher()
+    return _cachedMatrixFetcher(decodedClassName, String(isArchived))
 }
+

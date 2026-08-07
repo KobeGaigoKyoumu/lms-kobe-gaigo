@@ -7,12 +7,17 @@ export const dynamic = 'force-dynamic'
 export default async function HomeworkPage({ params }) {
     const { id } = await params
 
-    // Fetch assignment and submission on server side (Secure & Fast)
-    const assignment = await getAssignmentDetails(id)
+    try {
+        // Fetch assignment and submission on server side (Secure & Fast)
+        const assignment = await getAssignmentDetails(id)
 
-    if (!assignment || assignment.error) {
+        if (!assignment || assignment.error) {
+            notFound()
+        }
+
+        return <HomeworkClient assignment={assignment} />
+    } catch (e) {
+        console.error('Error loading homework page:', e)
         notFound()
     }
-
-    return <HomeworkClient assignment={assignment} />
 }
