@@ -1072,7 +1072,7 @@ export async function getAllStudentSubmissionStats() {
 
 async function _getClassSubmissionStatsInternal(className) {
     const supabase = createAdminClient()
-    const { data: students } = await supabase
+    const { data: students, error: studentError } = await supabase
         .from('students')
         .select('student_id_text')
         .eq('class_name', className)

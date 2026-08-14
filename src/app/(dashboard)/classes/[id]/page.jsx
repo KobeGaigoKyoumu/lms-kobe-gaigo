@@ -200,7 +200,7 @@ export default async function ClassDetailPage({ params }) {
                     <section className={styles.section}>
                         <h2>時間割</h2>
                         {(() => {
-                            const processedSchedules = schedules.map(s => {
+                            const processedSchedules = (schedules || []).map(s => {
                                 if (!s.period && s.start_time) {
                                     if (s.start_time.startsWith('09:00') || s.start_time.startsWith('13:10')) s.period = 1;
                                     else if (s.start_time.startsWith('09:50') || s.start_time.startsWith('14:00')) s.period = 2;
