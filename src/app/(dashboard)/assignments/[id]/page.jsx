@@ -13,7 +13,7 @@ export default async function AssignmentPage({ params }) {
     const data = await getAssignmentSubmissions(id)
     const subjects = await getTimetableSubjects()
 
-    if (!data) {
+    if (!data || !data.assignment) {
         return <div className={styles.empty}>課題が見つかりません。</div>
     }
 

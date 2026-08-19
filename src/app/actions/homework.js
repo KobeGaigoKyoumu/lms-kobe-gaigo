@@ -822,7 +822,6 @@ export async function getAssignmentSubmissions(assignmentId) {
     )
 
     if (pendingSubmissions.length > 0) {
-        let updatedAny = false
         for (const s of pendingSubmissions) {
             const feedbackText = s.feedback || getRandomFeedback()
             const { error: autoGradeError } = await supabase
@@ -839,16 +838,9 @@ export async function getAssignmentSubmissions(assignmentId) {
                 s.score = 1
                 s.feedback = feedbackText
                 s.status = 'graded'
-                updatedAny = true
             } else {
                 console.error('Auto grade submission error:', autoGradeError)
             }
-        }
-        if (updatedAny) {
-            revalidateTag('homework-stats', 'max')
-            revalidateTag('homework-assignments', 'max')
-            revalidatePath('/assignments', 'layout')
-            revalidatePath('/dashboard', 'layout')
         }
     }
 
