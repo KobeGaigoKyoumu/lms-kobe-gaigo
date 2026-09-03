@@ -9,6 +9,7 @@ import {
     generateSlots, 
     updateSlot, 
     deleteSlot,
+    deleteSlotsBulk,
     createSlot,
     getTeacherBookingsFiltered,
     getTeacherTemplateNames,
@@ -137,6 +138,17 @@ export default function CareerManagementClient({
         notes: '',
         student_id_text: ''
     })
+
+    // 予約枠一括削除用の状態
+    const [selectedSlotIds, setSelectedSlotIds] = useState([])
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+    const [bulkDeleteType, setBulkDeleteType] = useState('date') // 'date' | 'range' | 'selected'
+    const [bulkDeleteRange, setBulkDeleteRange] = useState({
+        start: new Date().toISOString().split('T')[0],
+        end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    })
+    const [bulkDeleteOnlyAvailable, setBulkDeleteOnlyAvailable] = useState(true)
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
     // 面談スロットで選択された複数学生のIDを保持する状態
     const [selectedStudentIds, setSelectedStudentIds] = useState([])
@@ -990,6 +1002,82 @@ export default function CareerManagementClient({
         }
     }
 
+    const handleDeleteSelectedSlots = async () => {
+        if (selectedSlotIds.length === 0) return
+        if (!confirm(`選択された ${selectedSlotIds.length} 件の予約枠を削除してよろしいですか？`)) return
+
+        setIsBulkDeleting(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+
+        const res = await deleteSlotsBulk({
+            slotIds: selectedSlotIds,
+            onlyAvailable: false
+        })
+
+        setIsBulkDeleting(false)
+        if (res.success) {
+            setInterviewSuccessMsg(`${res.count} 件の予約枠を削除しました。`)
+            setSelectedSlotIds([])
+            loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
+        } else {
+            setInterviewError(`一括削除に失敗しました: ${res.error}`)
+        }
+    }
+
+    const handleExecuteBulkDelete = async () => {
+        let confirmText = ''
+        const params = {
+            onlyAvailable: bulkDeleteOnlyAvailable
+        }
+
+        if (bulkDeleteType === 'date') {
+            params.date = interviewSelectedDate
+            confirmText = `表示中の日付「${interviewSelectedDate}」の${bulkDeleteOnlyAvailable ? '受付中（空き枠）' : 'すべて（予約済み含む）'}の予約枠を一括削除します。\nよろしいですか？`
+        } else if (bulkDeleteType === 'range') {
+            if (!bulkDeleteRange.start || !bulkDeleteRange.end) {
+                alert('開始日と終了日を正しく指定してください。')
+                return
+            }
+            if (bulkDeleteRange.start > bulkDeleteRange.end) {
+                alert('開始日は終了日以前の日付を指定してください。')
+                return
+            }
+            params.startDate = bulkDeleteRange.start
+            params.endDate = bulkDeleteRange.end
+            confirmText = `期間「${bulkDeleteRange.start} 〜 ${bulkDeleteRange.end}」の${bulkDeleteOnlyAvailable ? '受付中（空き枠）' : 'すべて（予約済み含む）'}の予約枠を一括削除します。\nよろしいですか？`
+        } else if (bulkDeleteType === 'selected') {
+            if (selectedSlotIds.length === 0) {
+                alert('枠が選択されていません。')
+                return
+            }
+            params.slotIds = selectedSlotIds
+            confirmText = `選択中の ${selectedSlotIds.length} 件の${bulkDeleteOnlyAvailable ? '受付中（空き枠）' : ''}予約枠を一括削除します。\nよろしいですか？`
+        }
+
+        if (!confirm(confirmText)) return
+
+        setIsBulkDeleting(true)
+        setInterviewSuccessMsg(null)
+        setInterviewError(null)
+
+        const res = await deleteSlotsBulk(params)
+
+        setIsBulkDeleting(false)
+        if (res.success) {
+            setIsBulkDeleteModalOpen(false)
+            setInterviewSuccessMsg(`${res.count} 件の予約枠を削除しました。`)
+            setSelectedSlotIds([])
+            loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
+            loadTeacherFutureAvailableSlots()
+        } else {
+            setInterviewError(`一括削除に失敗しました: ${res.error}`)
+        }
+    }
+
     const handleApproveInterview = async (slotId) => {
         setInterviewLoading(true)
         setInterviewSuccessMsg(null)
@@ -1050,6 +1138,7 @@ export default function CareerManagementClient({
     useEffect(() => {
         if (activeTab === 'interview') {
             loadInterviewSlots()
+            setSelectedSlotIds([])
         }
     }, [interviewSelectedDate])
 
@@ -1658,25 +1747,103 @@ export default function CareerManagementClient({
                                     >
                                         今日に戻る
                                     </button>
-                                    <button 
-                                        onClick={() => {
-                                            setIsCreatingInterviewSlot(true)
-                                            setInterviewCreateForm({
-                                                start_time: '10:00',
-                                                end_time: '10:15',
-                                                status: 'available',
-                                                notes: '',
-                                                student_id_text: ''
-                                            })
-                                        }}
-                                        className={styles.actionButton}
-                                        style={{ margin: '0 0 0 auto', padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-700)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
-                                    >
-                                        ➕ 新規予約枠を作成
-                                    </button>
+                                    <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--spacing-2)' }}>
+                                        <button 
+                                            onClick={() => {
+                                                setBulkDeleteType(selectedSlotIds.length > 0 ? 'selected' : 'date')
+                                                setIsBulkDeleteModalOpen(true)
+                                            }}
+                                            className={styles.actionButton}
+                                            style={{ margin: 0, padding: '8px 16px', background: '#fff', color: 'var(--error-600)', border: '1px solid var(--error-200)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-50)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                        >
+                                            <Trash2 size={16} />
+                                            一括削除
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                setIsCreatingInterviewSlot(true)
+                                                setInterviewCreateForm({
+                                                    start_time: '10:00',
+                                                    end_time: '10:15',
+                                                    status: 'available',
+                                                    notes: '',
+                                                    student_id_text: ''
+                                                })
+                                            }}
+                                            className={styles.actionButton}
+                                            style={{ margin: 0, padding: '8px 16px', background: 'var(--primary-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-700)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
+                                        >
+                                            ➕ 新規予約枠を作成
+                                        </button>
+                                    </div>
                                 </div>
+
+                                {/* テーブル内でスロットが選択されている時の一括操作バー */}
+                                {selectedSlotIds.length > 0 && (
+                                    <div style={{
+                                        padding: '10px 20px',
+                                        background: '#eff6ff',
+                                        borderBottom: '1px solid #bfdbfe',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        flexWrap: 'wrap',
+                                        gap: '12px'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e40af', fontWeight: '600', fontSize: 'var(--font-size-sm)' }}>
+                                            <CheckCircle size={18} style={{ color: '#3b82f6' }} />
+                                            <span>{selectedSlotIds.length} 件の予約枠を選択中</span>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={handleDeleteSelectedSlots}
+                                                disabled={isBulkDeleting}
+                                                className={styles.actionButton}
+                                                style={{
+                                                    margin: 0,
+                                                    padding: '6px 14px',
+                                                    background: 'var(--error-600)',
+                                                    color: '#fff',
+                                                    border: 'none',
+                                                    borderRadius: 'var(--radius-md)',
+                                                    cursor: 'pointer',
+                                                    fontSize: 'var(--font-size-xs)',
+                                                    fontWeight: '700',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px'
+                                                }}
+                                                onMouseEnter={(e) => !isBulkDeleting && (e.currentTarget.style.background = 'var(--error-700)')}
+                                                onMouseLeave={(e) => !isBulkDeleting && (e.currentTarget.style.background = 'var(--error-600)')}
+                                            >
+                                                <Trash2 size={14} />
+                                                {isBulkDeleting ? '削除中...' : `選択した枠を削除 (${selectedSlotIds.length}件)`}
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedSlotIds([])}
+                                                className={styles.actionButton}
+                                                style={{
+                                                    margin: 0,
+                                                    padding: '6px 12px',
+                                                    background: '#fff',
+                                                    color: 'var(--text-secondary)',
+                                                    border: '1px solid var(--border-color)',
+                                                    borderRadius: 'var(--radius-md)',
+                                                    cursor: 'pointer',
+                                                    fontSize: 'var(--font-size-xs)',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                選択解除
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className={styles.tableWrapper} style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                                     {interviewLoading ? (
                                         <div className={styles.loadingSpinner}>
@@ -1691,9 +1858,30 @@ export default function CareerManagementClient({
                                             </p>
                                         </div>
                                     ) : (
-                                        <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                        <table className={styles.table} style={{ width: '100%', borderCollapse: 'collapse', minWidth: '850px' }}>
                                             <thead>
                                                 <tr style={{ background: 'var(--bg-secondary)' }}>
+                                                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'center', width: '48px' }}>
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={(() => {
+                                                                const daySlots = interviewSlots.filter(s => s.slot_date === interviewSelectedDate)
+                                                                return daySlots.length > 0 && daySlots.every(s => selectedSlotIds.includes(s.id))
+                                                            })()}
+                                                            onChange={(e) => {
+                                                                const daySlots = interviewSlots.filter(s => s.slot_date === interviewSelectedDate)
+                                                                if (e.target.checked) {
+                                                                    const dayIds = daySlots.map(s => s.id)
+                                                                    setSelectedSlotIds(prev => Array.from(new Set([...prev, ...dayIds])))
+                                                                } else {
+                                                                    const dayIdSet = new Set(daySlots.map(s => s.id))
+                                                                    setSelectedSlotIds(prev => prev.filter(id => !dayIdSet.has(id)))
+                                                                }
+                                                            }}
+                                                            style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                                            title="表示日すべての枠を選択 / 解除"
+                                                        />
+                                                    </th>
                                                     <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>時間帯 (15分枠)</th>
                                                     <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>ステータス</th>
                                                     <th style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', textAlign: 'left', fontWeight: '700', whiteSpace: 'nowrap' }}>予約学生</th>
@@ -1704,8 +1892,22 @@ export default function CareerManagementClient({
                                             <tbody>
                                                 {interviewSlots
                                                     .filter(s => s.slot_date === interviewSelectedDate)
-                                                    .map(slot => (
-                                                        <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                                    .map(slot => {
+                                                        const isSelected = selectedSlotIds.includes(slot.id)
+                                                        return (
+                                                        <tr key={slot.id} style={{ borderBottom: '1px solid var(--border-color)', background: isSelected ? 'rgba(59, 130, 246, 0.05)' : 'transparent' }}>
+                                                            <td style={{ padding: '16px', textAlign: 'center' }}>
+                                                                <input 
+                                                                    type="checkbox"
+                                                                    checked={isSelected}
+                                                                    onChange={() => {
+                                                                        setSelectedSlotIds(prev => 
+                                                                            prev.includes(slot.id) ? prev.filter(id => id !== slot.id) : [...prev, slot.id]
+                                                                        )
+                                                                    }}
+                                                                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                                                />
+                                                            </td>
                                                             <td data-label="時間帯" style={{ padding: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                                                 {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                                                             </td>
@@ -1784,7 +1986,8 @@ export default function CareerManagementClient({
                                                                 </div>
                                                             </td>
                                                         </tr>
-                                                    ))}
+                                                        )
+                                                    })}
                                             </tbody>
                                         </table>
                                     )}
@@ -4445,6 +4648,167 @@ export default function CareerManagementClient({
                                     {interviewSaving ? '保存中...' : '作成して保存'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* ====================================================
+                面談枠一括削除モーダル
+               ==================================================== */}
+            {isBulkDeleteModalOpen && (
+                <div className={styles.modalOverlay} onClick={() => !isBulkDeleting && setIsBulkDeleteModalOpen(false)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '540px' }}>
+                        <div className={styles.modalHeader}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Trash2 size={20} style={{ color: 'var(--error-600)' }} />
+                                <h2>予約枠の一括削除</h2>
+                            </div>
+                            <button onClick={() => !isBulkDeleting && setIsBulkDeleteModalOpen(false)} className={styles.closeModalBtn}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className={styles.modalBody} style={{ padding: 'var(--spacing-5)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
+                                条件を指定して、登録済みの予約枠をまとめて削除します。
+                            </p>
+
+                            {/* 削除範囲の選択 */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>
+                                    1. 削除する対象範囲
+                                </label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: bulkDeleteType === 'date' ? '700' : '500', color: 'var(--text-primary)' }}>
+                                        <input 
+                                            type="radio" 
+                                            name="bulkDeleteType" 
+                                            value="date" 
+                                            checked={bulkDeleteType === 'date'} 
+                                            onChange={() => setBulkDeleteType('date')} 
+                                            style={{ cursor: 'pointer' }}
+                                        />
+                                        <span>表示中の日付（{interviewSelectedDate}）の枠</span>
+                                    </label>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: bulkDeleteType === 'range' ? '700' : '500', color: 'var(--text-primary)' }}>
+                                            <input 
+                                                type="radio" 
+                                                name="bulkDeleteType" 
+                                                value="range" 
+                                                checked={bulkDeleteType === 'range'} 
+                                                onChange={() => setBulkDeleteType('range')} 
+                                                style={{ cursor: 'pointer' }}
+                                            />
+                                            <span>期間を指定して削除</span>
+                                        </label>
+                                        {bulkDeleteType === 'range' && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '24px', flexWrap: 'wrap' }}>
+                                                <input 
+                                                    type="date" 
+                                                    value={bulkDeleteRange.start} 
+                                                    onChange={(e) => setBulkDeleteRange({ ...bulkDeleteRange, start: e.target.value })}
+                                                    className={styles.searchInput}
+                                                    style={{ padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', width: 'auto' }}
+                                                />
+                                                <span style={{ color: 'var(--text-secondary)' }}>〜</span>
+                                                <input 
+                                                    type="date" 
+                                                    value={bulkDeleteRange.end} 
+                                                    onChange={(e) => setBulkDeleteRange({ ...bulkDeleteRange, end: e.target.value })}
+                                                    className={styles.searchInput}
+                                                    style={{ padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: 'var(--font-size-sm)', width: 'auto' }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {selectedSlotIds.length > 0 && (
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: bulkDeleteType === 'selected' ? '700' : '500', color: 'var(--text-primary)' }}>
+                                            <input 
+                                                type="radio" 
+                                                name="bulkDeleteType" 
+                                                value="selected" 
+                                                checked={bulkDeleteType === 'selected'} 
+                                                onChange={() => setBulkDeleteType('selected')} 
+                                                style={{ cursor: 'pointer' }}
+                                            />
+                                            <span>テーブルで選択中の枠（{selectedSlotIds.length}件）</span>
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 削除対象ステータス */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontWeight: '700', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>
+                                    2. 削除対象のステータス
+                                </label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)' }}>
+                                        <input 
+                                            type="radio" 
+                                            name="bulkDeleteOnlyAvailable" 
+                                            checked={bulkDeleteOnlyAvailable === true} 
+                                            onChange={() => setBulkDeleteOnlyAvailable(true)} 
+                                            style={{ marginTop: '3px', cursor: 'pointer' }}
+                                        />
+                                        <div>
+                                            <span style={{ fontWeight: '700', color: 'var(--success-700)' }}>🟢 受付中（空き枠）のみ削除（推奨）</span>
+                                            <p style={{ margin: '2px 0 0 0', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                                学生の予約が入っていない空き枠のみを削除します。予約済みや承認待ちの枠は保護されます。
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)' }}>
+                                        <input 
+                                            type="radio" 
+                                            name="bulkDeleteOnlyAvailable" 
+                                            checked={bulkDeleteOnlyAvailable === false} 
+                                            onChange={() => setBulkDeleteOnlyAvailable(false)} 
+                                            style={{ marginTop: '3px', cursor: 'pointer' }}
+                                        />
+                                        <div>
+                                            <span style={{ fontWeight: '700', color: 'var(--error-700)' }}>⚠️ すべての枠を削除（予約済み・承認待ち含む）</span>
+                                            <p style={{ margin: '2px 0 0 0', fontSize: 'var(--font-size-xs)', color: 'var(--error-600)', lineHeight: '1.4' }}>
+                                                学生の予約情報も含め完全に削除されます。取り消すことはできません。
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {interviewError && (
+                                <div style={{ color: 'var(--error-600)', background: 'var(--error-50)', padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}>
+                                    ⚠️ {interviewError}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className={styles.modalFooter} style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-2)', padding: 'var(--spacing-4) var(--spacing-5)', borderTop: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+                            <button 
+                                type="button"
+                                onClick={() => setIsBulkDeleteModalOpen(false)} 
+                                disabled={isBulkDeleting}
+                                className={styles.actionButton}
+                                style={{ margin: 0, padding: '8px 16px', background: '#fff', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '600' }}
+                            >
+                                キャンセル
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={handleExecuteBulkDelete} 
+                                disabled={isBulkDeleting}
+                                className={styles.actionButton}
+                                style={{ margin: 0, padding: '8px 20px', background: 'var(--error-600)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--font-size-sm)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                onMouseEnter={(e) => !isBulkDeleting && (e.currentTarget.style.background = 'var(--error-700)')}
+                                onMouseLeave={(e) => !isBulkDeleting && (e.currentTarget.style.background = 'var(--error-600)')}
+                            >
+                                <Trash2 size={16} />
+                                {isBulkDeleting ? '削除実行中...' : '一括削除を実行'}
+                            </button>
                         </div>
                     </div>
                 </div>

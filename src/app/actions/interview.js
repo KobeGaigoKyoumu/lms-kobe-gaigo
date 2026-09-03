@@ -321,6 +321,49 @@ export async function deleteSlot(slotId) {
   }
 }
 
+// 6-2. スロットの一括削除
+export async function deleteSlotsBulk({
+  slotIds = null,
+  date = null,
+  startDate = null,
+  endDate = null,
+  onlyAvailable = true
+} = {}) {
+  try {
+    const session = await getAdminMemberSession()
+    if (!session) throw new Error('Unauthorized')
+
+    const supabase = createAdminClient()
+
+    let query = supabase
+      .from('interview_slots')
+      .delete({ count: 'exact' })
+      .eq('teacher_id', session.memberId)
+
+    if (onlyAvailable) {
+      query = query.eq('status', 'available')
+    }
+
+    if (Array.isArray(slotIds) && slotIds.length > 0) {
+      query = query.in('id', slotIds)
+    } else if (date) {
+      query = query.eq('slot_date', date)
+    } else if (startDate && endDate) {
+      query = query.gte('slot_date', startDate).lte('slot_date', endDate)
+    } else {
+      throw new Error('削除対象（枠ID、日付、または期間）が指定されていません。')
+    }
+
+    const { count, error } = await query
+
+    if (error) throw error
+    return { success: true, count: count ?? 0 }
+  } catch (e) {
+    console.error('deleteSlotsBulk error:', e)
+    return { success: false, error: e.message }
+  }
+}
+
 // 予約枠の個別新規作成
 export async function createSlot(data) {
   try {
