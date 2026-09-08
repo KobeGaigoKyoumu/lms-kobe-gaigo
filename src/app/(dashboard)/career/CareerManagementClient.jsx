@@ -857,11 +857,17 @@ export default function CareerManagementClient({
             })))
 
         const res = await saveTeacherTemplates(activeTemplates, selectedTemplateName)
-        setInterviewSaving(false)
         if (res.success) {
-            setInterviewSuccessMsg(`テンプレート設定「${selectedTemplateName}」を保存しました。`)
+            // 週間テンプレート保存後、スケジュール上の枠も自動生成して即座に反映
+            const genRes = await generateSlots(interviewGenRange.start, interviewGenRange.end, selectedTemplateName)
+            setInterviewSaving(false)
+            setInterviewSuccessMsg(`テンプレート設定「${selectedTemplateName}」を保存し、予約枠（${genRes.count || 0}件）をスケジュールに反映しました！`)
             loadTemplateNamesList()
+            loadInterviewTemplates(selectedTemplateName, true)
+            loadInterviewSlots(true)
+            loadTeacherFutureAvailableSlots()
         } else {
+            setInterviewSaving(false)
             setInterviewError(`保存に失敗しました: ${res.error}`)
         }
     }
@@ -2133,7 +2139,20 @@ export default function CareerManagementClient({
                                                 <button
                                                     onClick={() => {
                                                         const updated = [...interviewTemplates]
-                                                        updated[idx].timeSlots.push({ start_time: '09:00', end_time: '18:00' })
+                                                        const currentSlots = updated[idx].timeSlots
+                                                        let nextStart = '13:00'
+                                                        let nextEnd = '18:00'
+                                                        if (currentSlots.length > 0) {
+                                                            const lastEnd = currentSlots[currentSlots.length - 1].end_time
+                                                            if (lastEnd && lastEnd < '17:00') {
+                                                                const [lh, lm] = lastEnd.split(':').map(Number)
+                                                                const nextStartMin = Math.min(lh * 60 + lm + 15, 17 * 60)
+                                                                const h = Math.floor(nextStartMin / 60).toString().padStart(2, '0')
+                                                                const m = (nextStartMin % 60).toString().padStart(2, '0')
+                                                                nextStart = `${h}:${m}`
+                                                            }
+                                                        }
+                                                        updated[idx].timeSlots.push({ start_time: nextStart, end_time: nextEnd })
                                                         setInterviewTemplates(updated)
                                                     }}
                                                     style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--primary-600)', fontSize: 'var(--font-size-xs)', fontWeight: '700', cursor: 'pointer', padding: '4px 8px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '4px' }}

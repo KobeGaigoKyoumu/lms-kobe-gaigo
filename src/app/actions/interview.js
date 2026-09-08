@@ -79,19 +79,32 @@ export async function saveTeacherTemplates(templates, templateName = 'デフォ�
     if (deleteError) throw deleteError
 
     if (templates && templates.length > 0) {
-      const recordsToInsert = templates.map(t => ({
-        teacher_id: session.memberId,
-        day_of_week: parseInt(t.day_of_week, 10),
-        start_time: t.start_time,
-        end_time: t.end_time,
-        template_name: templateName
-      }))
+      // 同一曜日かつ同一開始時刻の重複を排除してインサート用レコードを生成
+      const seen = new Set()
+      const recordsToInsert = []
 
-      const { error: insertError } = await supabase
-        .from('interview_templates')
-        .insert(recordsToInsert)
+      for (const t of templates) {
+        const dow = parseInt(t.day_of_week, 10)
+        const key = `${dow}_${t.start_time}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          recordsToInsert.push({
+            teacher_id: session.memberId,
+            day_of_week: dow,
+            start_time: t.start_time,
+            end_time: t.end_time,
+            template_name: templateName
+          })
+        }
+      }
 
-      if (insertError) throw insertError
+      if (recordsToInsert.length > 0) {
+        const { error: insertError } = await supabase
+          .from('interview_templates')
+          .insert(recordsToInsert)
+
+        if (insertError) throw insertError
+      }
     }
 
     return { success: true }
@@ -165,6 +178,18 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
 
     if (deleteError) throw deleteError
 
+    // 既存の非available枠（booked, pending, completed, blocked）を取得し、重複による制約違反を完全防止
+    const { data: existingBooked } = await supabase
+      .from('interview_slots')
+      .select('slot_date, start_time')
+      .eq('teacher_id', session.memberId)
+      .gte('slot_date', startDateStr)
+      .lte('slot_date', endDateStr)
+
+    const existingKeySet = new Set(
+      (existingBooked || []).map(s => `${s.slot_date}_${s.start_time.substring(0, 5)}`)
+    )
+
     // テンプレートを曜日(1-5)でマッピング
     const templateMap = {}
     templates.forEach(t => {
@@ -176,7 +201,9 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
 
     const start = new Date(startDateStr)
     const end = new Date(endDateStr)
-    const newSlots = []
+    
+    // 同一日の同一スロットの重複（重なる時間帯など）を排除するMap
+    const slotsMap = new Map()
 
     // 日付範囲を1日ずつループ
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
@@ -190,7 +217,6 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
 
       for (const template of dayTemplates) {
         // 15分刻みスロット生成処理
-        // 例: '09:00:00' -> 分に変換して計算
         const [sh, sm] = template.start_time.split(':').map(Number)
         const [eh, em] = template.end_time.split(':').map(Number)
 
@@ -207,37 +233,54 @@ export async function generateSlots(startDateStr, endDateStr, templateName = '�
             return `${h}:${m}:00`
           }
 
-          newSlots.push({
-            teacher_id: session.memberId,
-            slot_date: dateStr,
-            start_time: formatTime(currentStartMin),
-            end_time: formatTime(currentEndMin),
-            status: 'available'
-          })
+          const startTimeStr = formatTime(currentStartMin)
+          const endTimeStr = formatTime(currentEndMin)
+          const slotKey = `${dateStr}_${startTimeStr}`
+          const shortKey = `${dateStr}_${startTimeStr.substring(0, 5)}`
+
+          // 既存の予約枠（booked/pending等）と被らず、かつ今回のバッチ内で未登録の場合のみ追加
+          if (!existingKeySet.has(shortKey) && !slotsMap.has(slotKey)) {
+            slotsMap.set(slotKey, {
+              teacher_id: session.memberId,
+              slot_date: dateStr,
+              start_time: startTimeStr,
+              end_time: endTimeStr,
+              status: 'available'
+            })
+          }
 
           startMinutes += 15
         }
       }
     }
 
-    if (newSlots.length === 0) {
+    const uniqueSlots = Array.from(slotsMap.values())
+
+    if (uniqueSlots.length === 0) {
       return { success: true, count: 0, message: '生成対象の平日枠がありませんでした。' }
     }
 
-    // 重複を無視(ON CONFLICT DO NOTHING)して一括インサート
-    const { error: insertError } = await supabase
-      .from('interview_slots')
-      .insert(newSlots)
-      .select()
+    // 50件ずつバッチ分割してインサート
+    const chunkSize = 50
+    let insertedCount = 0
 
-    if (insertError) {
-      // 一部重複によるエラー回避用（または個別upsert）
-      if (!insertError.message.includes('duplicate key')) {
-        throw insertError
+    for (let i = 0; i < uniqueSlots.length; i += chunkSize) {
+      const chunk = uniqueSlots.slice(i, i + chunkSize)
+      const { error: insertError } = await supabase
+        .from('interview_slots')
+        .insert(chunk)
+
+      if (insertError) {
+        console.error('generateSlots chunk insert error:', insertError)
+        if (!insertError.message.includes('duplicate key')) {
+          throw insertError
+        }
+      } else {
+        insertedCount += chunk.length
       }
     }
 
-    return { success: true, count: newSlots.length }
+    return { success: true, count: insertedCount }
   } catch (e) {
     console.error('generateSlots error:', e)
     return { success: false, error: e.message }
