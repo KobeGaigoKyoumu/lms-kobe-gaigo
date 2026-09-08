@@ -4,7 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { unstable_cache as next_unstable_cache } from 'next/cache'
+import { unstable_cache as next_unstable_cache, revalidateTag } from 'next/cache'
 
 const COOKIE_NAME = 'kobe_admin_member'
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
@@ -159,8 +159,8 @@ function getCachedMemberNamesInternal() {
                     return []
                 }
             },
-            ['admin-member-names-v2'],
-            { tags: ['admin_members'] }
+            ['admin-member-names-v3'],
+            { tags: ['admin_members'], revalidate: 60 }
         )
     }
     return _cachedMemberNamesFunc();
@@ -173,6 +173,14 @@ export async function getAdminMemberNames() {
     } catch (e) {
         console.error('getAdminMemberNames Wrapper Error:', e)
         return []
+    }
+}
+
+export async function revalidateAdminMembers() {
+    try {
+        revalidateTag('admin_members', 'max')
+    } catch (e) {
+        console.error('revalidateAdminMembers Error:', e)
     }
 }
 
