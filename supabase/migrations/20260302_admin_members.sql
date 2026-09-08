@@ -22,7 +22,8 @@ INSERT INTO admin_members (name, password) VALUES
     ('横田', '5073'),
     ('中田', '6184'),
     ('阿蘇', '7295'),
-    ('単',   '8306')
+    ('単',   '8306'),
+    ('小原', '9417')
 ON CONFLICT (name) DO NOTHING;
 
 -- RLS
