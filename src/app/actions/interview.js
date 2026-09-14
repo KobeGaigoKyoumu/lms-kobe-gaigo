@@ -407,39 +407,104 @@ export async function deleteSlotsBulk({
   }
 }
 
-// 予約枠の個別新規作成
+// 予約枠の個別新規作成 (同一日・同一開始時刻に既存枠がある場合は更新して予約を紐付け)
 export async function createSlot(data) {
   try {
     const session = await getAdminMemberSession()
     if (!session) throw new Error('Unauthorized')
 
     const supabase = createAdminClient()
-    const studentIdTexts = data.student_id_texts || 
+    const rawStudentIds = data.student_id_texts || 
       (data.student_id_text ? [data.student_id_text] : [])
+    const studentIdTexts = Array.from(new Set(rawStudentIds.filter(Boolean)))
 
-    // 1. スロット作成
-    const { data: newSlot, error: slotError } = await supabase
+    const normalizeTime = (t) => {
+      if (!t) return null
+      const parts = String(t).split(':')
+      if (parts.length < 2) return null
+      const h = parts[0].padStart(2, '0')
+      const m = parts[1].padStart(2, '0')
+      const s = (parts[2] || '00').padStart(2, '0')
+      return `${h}:${m}:${s}`
+    }
+
+    const startTime = normalizeTime(data.start_time)
+    const endTime = normalizeTime(data.end_time)
+
+    if (!startTime || !endTime) {
+      throw new Error('開始時刻または終了時刻の形式が不正です。')
+    }
+
+    // 既存スロットが既に同日時で存在するか確認
+    const { data: existingSlot, error: searchError } = await supabase
       .from('interview_slots')
-      .insert({
-        teacher_id: session.memberId,
-        slot_date: data.slot_date,
-        start_time: data.start_time,
-        end_time: data.end_time,
-        status: data.status || 'available',
-        notes: data.notes || '',
-        discussion_content: data.discussion_content || '',
-        instructions: data.instructions || '',
-        student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null
-      })
-      .select()
-      .single()
+      .select('id, status')
+      .eq('teacher_id', session.memberId)
+      .eq('slot_date', data.slot_date)
+      .eq('start_time', startTime)
+      .maybeSingle()
 
-    if (slotError) throw slotError
+    if (searchError) throw searchError
 
-    // 2. 学生の紐付け
-    if (studentIdTexts.length > 0) {
+    let targetSlot = null
+    let isUpdated = false
+
+    const targetStatus = data.status || (studentIdTexts.length > 0 ? 'booked' : 'available')
+
+    if (existingSlot) {
+      // 既存枠が存在する場合は更新して上書き・予約設定
+      const { data: updatedSlot, error: updateError } = await supabase
+        .from('interview_slots')
+        .update({
+          end_time: endTime,
+          status: targetStatus,
+          notes: data.notes || '',
+          discussion_content: data.discussion_content || '',
+          instructions: data.instructions || '',
+          student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingSlot.id)
+        .select()
+        .single()
+
+      if (updateError) throw updateError
+      targetSlot = updatedSlot
+      isUpdated = true
+
+      // 既存の中間テーブル紐付けを削除して再登録
+      const { error: deleteError } = await supabase
+        .from('interview_slot_students')
+        .delete()
+        .eq('slot_id', existingSlot.id)
+
+      if (deleteError) throw deleteError
+    } else {
+      // 新規作成
+      const { data: newSlot, error: slotError } = await supabase
+        .from('interview_slots')
+        .insert({
+          teacher_id: session.memberId,
+          slot_date: data.slot_date,
+          start_time: startTime,
+          end_time: endTime,
+          status: targetStatus,
+          notes: data.notes || '',
+          discussion_content: data.discussion_content || '',
+          instructions: data.instructions || '',
+          student_id_text: studentIdTexts.length > 0 ? studentIdTexts[0] : null
+        })
+        .select()
+        .single()
+
+      if (slotError) throw slotError
+      targetSlot = newSlot
+    }
+
+    // 学生の紐付け
+    if (studentIdTexts.length > 0 && targetSlot) {
       const records = studentIdTexts.map(stId => ({
-        slot_id: newSlot.id,
+        slot_id: targetSlot.id,
         student_id_text: stId
       }))
       const { error: insertError } = await supabase
@@ -449,7 +514,7 @@ export async function createSlot(data) {
       if (insertError) throw insertError
     }
 
-    return { success: true, slot: newSlot }
+    return { success: true, slot: targetSlot, updated: isUpdated }
   } catch (e) {
     console.error('createSlot error:', e)
     return { success: false, error: e.message }

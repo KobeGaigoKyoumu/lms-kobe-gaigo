@@ -961,15 +961,31 @@ export default function CareerManagementClient({
     }
 
     const handleCreateInterviewSlot = async () => {
+        if (!interviewCreateForm.start_time || !interviewCreateForm.end_time) {
+            setInterviewError('開始時刻と終了時刻を入力してください。')
+            return
+        }
+        if (interviewCreateForm.start_time >= interviewCreateForm.end_time) {
+            setInterviewError('終了時刻は開始時刻より後に設定してください。')
+            return
+        }
+
         setInterviewSaving(true)
         setInterviewError(null)
 
         const finalStatus = selectedStudentIds.length > 0 ? 'booked' : interviewCreateForm.status
 
+        const formatTime = (t) => {
+            const parts = String(t).split(':')
+            const h = parts[0].padStart(2, '0')
+            const m = (parts[1] || '00').padStart(2, '0')
+            return `${h}:${m}:00`
+        }
+
         const res = await createSlot({
             slot_date: interviewSelectedDate,
-            start_time: `${interviewCreateForm.start_time}:00`,
-            end_time: `${interviewCreateForm.end_time}:00`,
+            start_time: formatTime(interviewCreateForm.start_time),
+            end_time: formatTime(interviewCreateForm.end_time),
             status: finalStatus,
             notes: interviewCreateForm.notes,
             student_id_texts: selectedStudentIds
@@ -978,7 +994,10 @@ export default function CareerManagementClient({
         setInterviewSaving(false)
         if (res.success) {
             setIsCreatingInterviewSlot(false)
+            setSelectedStudentIds([])
+            setInterviewSuccessMsg(res.updated ? '予約枠を更新して予約を設定しました。' : '新規予約枠を作成しました。')
             loadInterviewSlots()
+            loadFilteredBookings(interviewPeriodFilter)
             loadTeacherFutureAvailableSlots()
         } else {
             setInterviewError(`作成に失敗しました: ${res.error}`)
@@ -1770,6 +1789,8 @@ export default function CareerManagementClient({
                                         <button 
                                             onClick={() => {
                                                 setIsCreatingInterviewSlot(true)
+                                                setSelectedStudentIds([])
+                                                setInterviewError(null)
                                                 setInterviewCreateForm({
                                                     start_time: '10:00',
                                                     end_time: '10:15',
@@ -4532,11 +4553,11 @@ export default function CareerManagementClient({
                 面談スロット新規作成モーダル
                ==================================================== */}
             {isCreatingInterviewSlot && (
-                <div className={styles.modalOverlay} onClick={() => setIsCreatingInterviewSlot(false)}>
+                <div className={styles.modalOverlay} onClick={() => { setIsCreatingInterviewSlot(false); setSelectedStudentIds([]); setInterviewError(null); }}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
                         <div className={styles.modalHeader}>
                             <h2>手動で面談枠を作成</h2>
-                            <button onClick={() => setIsCreatingInterviewSlot(false)} className={styles.closeModalBtn}>
+                            <button onClick={() => { setIsCreatingInterviewSlot(false); setSelectedStudentIds([]); setInterviewError(null); }} className={styles.closeModalBtn}>
                                 <X size={20} />
                             </button>
                         </div>
@@ -4614,9 +4635,14 @@ export default function CareerManagementClient({
                                                             checked={isSelected}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) {
-                                                                    setSelectedStudentIds([...selectedStudentIds, st.student_id_text])
+                                                                    setSelectedStudentIds(prev => prev.includes(st.student_id_text) ? prev : [...prev, st.student_id_text]);
+                                                                    setInterviewCreateForm(prev => ({ ...prev, status: 'booked' }));
                                                                 } else {
-                                                                    setSelectedStudentIds(selectedStudentIds.filter(id => id !== st.student_id_text))
+                                                                    const next = selectedStudentIds.filter(id => id !== st.student_id_text);
+                                                                    setSelectedStudentIds(next);
+                                                                    if (next.length === 0) {
+                                                                        setInterviewCreateForm(prev => ({ ...prev, status: 'available' }));
+                                                                    }
                                                                 }
                                                             }}
                                                         />
@@ -4652,7 +4678,7 @@ export default function CareerManagementClient({
 
                             <div className={styles.modalFooter} style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
                                 <button 
-                                    onClick={() => setIsCreatingInterviewSlot(false)} 
+                                    onClick={() => { setIsCreatingInterviewSlot(false); setSelectedStudentIds([]); setInterviewError(null); }} 
                                     className={styles.actionButton}
                                     style={{ margin: 0, padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
                                 >
