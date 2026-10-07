@@ -159,7 +159,7 @@ function getCachedMemberNamesInternal() {
                     return []
                 }
             },
-            ['admin-member-names-v3'],
+            ['admin-member-names-v4'],
             { tags: ['admin_members'], revalidate: 60 }
         )
     }
